@@ -33,6 +33,7 @@ To sync this fork with the upstream repository, follow these steps:
    -  Add Fork comments above these functions instead
 
 ## Changes Introduced By Fork
+- 10/21/2024: [Android] Fix crash when toggling fullscreen
 - 10/21/2024: [Android] Fix toggling of player controls on TV and Ads
 
 Old changes:

@@ -24,6 +24,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.ViewParent;
 import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -792,9 +793,11 @@ public class ReactExoplayerView extends FrameLayout implements
                 LayoutParams.MATCH_PARENT,
                 LayoutParams.MATCH_PARENT);
         playerControlView.setLayoutParams(layoutParams);
-        int indexOfPC = exoPlayerView.indexOfChild(playerControlView);
-        if (indexOfPC != -1) {
-            exoPlayerView.removeViewAt(indexOfPC);
+
+        // FORK: Replaces and fixes view removal that caused crash when toggling fullscreen
+        ViewParent parent = playerControlView.getParent();
+        if (parent instanceof ViewGroup) {
+            ((ViewGroup) parent).removeView(playerControlView);
         }
         exoPlayerView.addView(playerControlView, layoutParams);
         // FORK: Ensure controls are on top of IMA player
