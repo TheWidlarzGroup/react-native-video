@@ -33,6 +33,7 @@ To sync this fork with the upstream repository, follow these steps:
    -  Add Fork comments above these functions instead
 
 ## Changes Introduced By Fork
+- 10/22/2024: [FireTV] Add overscan padding for TV
 - 10/21/2024: [Android] Fix crash when toggling fullscreen
 - 10/21/2024: [Android] Fix toggling of player controls on TV and Ads
 
@@ -49,7 +50,6 @@ All platforms
 - [Android/iOS] Fix react children not rendering in the native player
 
 Android:
-- [Android] Add overscan (disabled in sync branch)
 - [Android] Add video title to controller overlay (disabled in sync branch) 
 - [Android] remote button focus mapping (left -> seekbar) etc.
     - Display controls when various remote buttons are pressed
