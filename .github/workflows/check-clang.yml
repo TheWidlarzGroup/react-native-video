@@ -6,13 +6,13 @@ on:
       - master
     paths:
       - '.github/workflows/check-clang.yml'
-      - 'ios/**'
+      - './packages/react-native-video/ios/**'
   pull_request:
     branches:
       - master
     paths:
       - '.github/workflows/check-clang.yml'
-      - 'ios/**'
+      - './packages/react-native-video/ios/**'
 
 jobs:
   CLang-Format:
@@ -24,7 +24,7 @@ jobs:
       - name: Check ios clang formatting
         run: |
           find ios -type f \( -name "*.h" -o -name "*.cpp" -o -name "*.m" -o -name "*.mm" \) -print0 | while read -d $'\0' file; do
-            clang-format -style=file:./ios/.clang-format -i "$file"
+            clang-format -style=file:./packages/react-native-video/ios/.clang-format -i "$file"
           done
         shell: bash
       - name: Check for changes

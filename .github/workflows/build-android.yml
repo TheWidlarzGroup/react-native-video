@@ -6,14 +6,14 @@ on:
       - master
     paths:
       - '.github/workflows/build-android.yml'
-      - 'android/**'
+      - './packages/react-native-video/android/**'
       - 'examples/bare/android/**'
       - 'yarn.lock'
       - 'examples/bare/yarn.lock'
   pull_request:
     paths:
       - '.github/workflows/build-android.yml'
-      - 'android/**'
+      - './packages/react-native-video/android/**'
       - 'examples/bare/android/**'
       - 'yarn.lock'
       - 'examples/bare/yarn.lock'

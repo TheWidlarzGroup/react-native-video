@@ -7,71 +7,60 @@ on:
       - master
     paths:
       - '.github/workflows/build-ios.yml'
-      - 'ios/**'
+      - 'packages/react-native-video/ios/**'
       - '*.podspec'
       - 'examples/bare/ios/**'
   pull_request:
     paths:
       - '.github/workflows/build-ios.yml'
-      - 'ios/**'
+      - 'packages/react-native-video/ios/**'
       - '*.podspec'
       - 'examples/bare/ios/**'
 
 jobs:
-  build:
+  build: 
     name: Build iOS Example App
     runs-on: macos-latest
-    defaults:
-      run:
-        working-directory: examples/bare/ios
+    
     steps:
       - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
 
-      - name: Install node_modules at Root
-        uses: ./.github/actions/setup-node
-        with:
-          working-directory: ./
-
-      - name: Build Library
-        working-directory: ./
-        run: yarn build
-
-      - name: Install node_modules at Example
-        uses: ./.github/actions/setup-node
-        with:
-          working-directory: examples/bare
+      - name: Install npm dependencies (with bun)
+        run: bun install
 
       - name: Restore buildcache
         uses: mikehardy/buildcache-action@v2
         continue-on-error: true
 
-      - name: Setup Ruby (bundle)
+      - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.6.10
+          ruby-version: 2.7.2
           bundler-cache: true
-
-      - name: Restore Pods cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            examples/bare/ios/Pods
-            ~/Library/Caches/CocoaPods
-            ~/.cocoapods
-          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pods-
-
-      - name: Generate Native Project
-        run: pod install
-
-      - name: Install Pods
-        run: pod install
+          working-directory: examples/bare/ios
 
       - name: Install xcpretty
         run: gem install xcpretty
 
+      - name: Restore Pods cache
+        uses: actions/cache@v4
+        with:
+          path: examples/bare/ios/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock', '**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
+      - name: Generate Native Project
+        working-directory: examples/bare/ios
+        run: pod install
+
+      - name: Install Pods
+        working-directory: examples/bare/ios
+        run: pod install
+
       - name: Build App
+        working-directory: examples/bare/ios
         run: "set -o pipefail && xcodebuild \
           -derivedDataPath build -UseModernBuildSystem=YES \
           -workspace BareExample.xcworkspace \
@@ -81,62 +70,51 @@ jobs:
           -destination 'platform=iOS Simulator,name=iPhone 14' \
           build \
           CODE_SIGNING_ALLOWED=NO | xcpretty"
-
+  
   build-with-ads:
-    name: Build iOS Example App With Ads
+    name: Build iOS Example App
     runs-on: macos-latest
-    defaults:
-      run:
-        working-directory: examples/bare/ios
+    
     steps:
       - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
 
-      - name: Install node_modules at Root
-        uses: ./.github/actions/setup-node
-        with:
-          working-directory: ./
-
-      - name: Build Library
-        working-directory: ./
-        run: yarn build
-
-      - name: Install node_modules at Example
-        uses: ./.github/actions/setup-node
-        with:
-          working-directory: examples/bare
+      - name: Install npm dependencies (with bun)
+        run: bun install
 
       - name: Restore buildcache
         uses: mikehardy/buildcache-action@v2
         continue-on-error: true
 
-      - name: Setup Ruby (bundle)
+      - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.6.10
+          ruby-version: 2.7.2
           bundler-cache: true
-
-      - name: Restore Pods cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            examples/bare/ios/Pods
-            ~/Library/Caches/CocoaPods
-            ~/.cocoapods
-          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pods-
-
-      - name: Generate Native Project
-        run: export RNV_SAMPLE_ENABLE_ADS=true && pod install
-
-      - name: Install Pods
-        run:  export RNV_SAMPLE_ENABLE_ADS=true && pod install
+          working-directory: examples/bare/ios
 
       - name: Install xcpretty
         run: gem install xcpretty
 
+      - name: Restore Pods cache
+        uses: actions/cache@v4
+        with:
+          path: examples/bare/ios/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock', '**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
+      - name: Generate Native Project
+        working-directory: examples/bare/ios
+        run: export RNV_SAMPLE_ENABLE_ADS=true && pod install
+
+      - name: Install Pods
+        working-directory: examples/bare/ios
+        run: export RNV_SAMPLE_ENABLE_ADS=true && pod install
+
       - name: Build App
-        run: "set -o pipefail && export RNV_SAMPLE_ENABLE_ADS=true && xcodebuild \
+        working-directory: examples/bare/ios
+        run: "set -o pipefail && xcodebuild \
           -derivedDataPath build -UseModernBuildSystem=YES \
           -workspace BareExample.xcworkspace \
           -scheme BareExample \
@@ -145,62 +123,51 @@ jobs:
           -destination 'platform=iOS Simulator,name=iPhone 14' \
           build \
           CODE_SIGNING_ALLOWED=NO | xcpretty"
-
-  build-with-caching:
-    name: Build iOS Example App With Caching
+  
+  build-with-caching: 
+    name: Build iOS Example App
     runs-on: macos-latest
-    defaults:
-      run:
-        working-directory: examples/bare/ios
+    
     steps:
       - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
 
-      - name: Install node_modules at Root
-        uses: ./.github/actions/setup-node
-        with:
-          working-directory: ./
-
-      - name: Build Library
-        working-directory: ./
-        run: yarn build
-
-      - name: Install node_modules at Example
-        uses: ./.github/actions/setup-node
-        with:
-          working-directory: examples/bare
+      - name: Install npm dependencies (with bun)
+        run: bun install
 
       - name: Restore buildcache
         uses: mikehardy/buildcache-action@v2
         continue-on-error: true
 
-      - name: Setup Ruby (bundle)
+      - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.6.10
+          ruby-version: 2.7.2
           bundler-cache: true
-
-      - name: Restore Pods cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            examples/bare/ios/Pods
-            ~/Library/Caches/CocoaPods
-            ~/.cocoapods
-          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pods-
-
-      - name: Generate Native Project
-        run: export RNV_SAMPLE_VIDEO_CACHING=true && pod install
-
-      - name: Install Pods
-        run: export RNV_SAMPLE_VIDEO_CACHING=true && pod install
+          working-directory: examples/bare/ios
 
       - name: Install xcpretty
         run: gem install xcpretty
 
+      - name: Restore Pods cache
+        uses: actions/cache@v4
+        with:
+          path: examples/bare/ios/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock', '**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
+      - name: Generate Native Project
+        working-directory: examples/bare/ios
+        run: export RNV_SAMPLE_VIDEO_CACHING=true && pod install
+
+      - name: Install Pods
+        working-directory: examples/bare/ios
+        run: export RNV_SAMPLE_VIDEO_CACHING=true && pod install
+
       - name: Build App
-        run: "set -o pipefail && export RNV_SAMPLE_VIDEO_CACHING=true && xcodebuild \
+        working-directory: examples/bare/ios
+        run: "set -o pipefail && xcodebuild \
           -derivedDataPath build -UseModernBuildSystem=YES \
           -workspace BareExample.xcworkspace \
           -scheme BareExample \
