@@ -1,5 +1,5 @@
 {
-  "name": "expoexample",
+  "name": "ExpoExample",
   "version": "1.0.0",
   "scripts": {
     "postinstall": "bun run update-src",
