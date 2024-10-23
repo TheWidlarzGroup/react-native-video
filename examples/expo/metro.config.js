@@ -1,8 +1,8 @@
 // Learn more https://docs.expo.io/guides/customizing-metro
 const {getDefaultConfig} = require('expo/metro-config');
 const path = require('path');
-const blacklist = require('metro-config/src/defaults/exclusionList');
 const escape = require('escape-string-regexp');
+const exclusionList = require('metro-config/src/defaults/exclusionList');
 
 const config = getDefaultConfig(__dirname);
 
@@ -21,34 +21,25 @@ if (process.env?.EXPO_TV === '1') {
   config.resolver.sourceExts = tvSourceExts;
 }
 
-const projectRoot = __dirname;
-const repoRoot = path.resolve(projectRoot, '../..');
 const pak = require('../../package.json');
+
+const root = path.resolve(__dirname, '../..');
 const modules = Object.keys({...pak.peerDependencies});
 
 // Watch the
-config.watchFolders = [repoRoot, path.resolve(projectRoot, '../..')];
-
-// Add the root node_modules to the resolver's search path
-config.resolver.nodeModulesPaths = [
-  path.resolve(path.join(__dirname, './node_modules')),
-  path.resolve(path.join(__dirname, '../../node_modules')),
-];
+config.watchFolders = [root];
 
 // We need to make sure that only one version is loaded for peerDependencies
 // So we block them at the root, and alias them to the versions in example's node_modules
+config.resolver.blacklistRE = exclusionList(
+  modules.map(
+    (m) => new RegExp(`^${escape(path.join(root, 'node_modules', m))}\\/.*$`),
+  ),
+);
+
 config.resolver.extraNodeModules = modules.reduce((acc, name) => {
   acc[name] = path.join(__dirname, 'node_modules', name);
   return acc;
 }, {});
-
-// We need to make sure that only one version is loaded for peerDependencies
-// So we block them at the root, and alias them to the versions in example's node_modules
-config.resolver.blacklistRE = blacklist([
-  ...modules.map(
-    (name) =>
-      new RegExp(`^${escape(path.join(repoRoot, 'node_modules', name))}\\/.*$`),
-  ),
-]);
 
 module.exports = config;
