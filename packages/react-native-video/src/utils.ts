@@ -58,7 +58,6 @@ export function getReactTag(
     throw new Error('Video Component is not mounted');
   }
 
-  // @ts-expect-error Not sure how to satisfy Typescript here
   const reactTag = findNodeHandle(ref.current);
 
   if (!reactTag) {
