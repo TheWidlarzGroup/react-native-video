@@ -19,16 +19,17 @@ class CMCDConfig(private val props: CMCDProps) {
             intToCmcdMode(props.mode)
         )
 
-    private fun intToCmcdMode(mode: Int): Int {
-        return when (mode) {
-            0-> CmcdConfiguration.MODE_REQUEST_HEADER
-            1-> CmcdConfiguration.MODE_QUERY_PARAMETER
+    private fun intToCmcdMode(mode: Int): Int =
+        when (mode) {
+            0 -> CmcdConfiguration.MODE_REQUEST_HEADER
+
+            1 -> CmcdConfiguration.MODE_QUERY_PARAMETER
+
             else -> {
                 DebugLog.e("CMCDConfig", "Unsupported mode: $mode, fallback on MODE_REQUEST_HEADER")
                 CmcdConfiguration.MODE_REQUEST_HEADER
             }
         }
-    }
 
     private fun buildCustomData(): ImmutableListMultimap<String, String> =
         ImmutableListMultimap.builder<String, String>().apply {
