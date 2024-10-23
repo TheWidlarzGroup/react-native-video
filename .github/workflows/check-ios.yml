@@ -6,11 +6,11 @@ on:
       - master
     paths:
       - '.github/workflows/check-ios.yml'
-      - 'ios/**'
+      - './packages/react-native-video/ios/**'
   pull_request:
     paths:
       - '.github/workflows/check-ios.yml'
-      - 'ios/**'
+      - './packages/react-native-video/ios/**'
 
 jobs:
   Swift-Lint:
@@ -24,10 +24,10 @@ jobs:
         env:
           WORKING_DIRECTORY: ios
   Swift-Format:
-    runs-on: macos-14 # This allow us to use Xcode 15.0.1 which is a lot faster - TODO change to "macos-latest" once it's out of beta
+    runs-on: macos-latest
     defaults:
       run:
-        working-directory: ./ios
+        working-directory: ./packages/react-native-video/ios
     steps:
       - uses: actions/checkout@v4
 
