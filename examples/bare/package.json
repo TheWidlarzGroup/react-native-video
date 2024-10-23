@@ -5,13 +5,13 @@
   "scripts": {
     "postinstall": "patch-package",
     "android": "react-native run-android",
-    "build:android": "npm run mkdist && react-native bundle --entry-file index.js --platform android --dev true --bundle-output dist/main.android.jsbundle --assets-dest dist/res",
-    "build:ios": "npm run mkdist && react-native bundle --entry-file index.js --platform ios --dev true --bundle-output dist/main.ios.jsbundle --assets-dest dist",
-    "build:visionos": "npm run mkdist && react-native bundle --entry-file index.js --platform ios --dev true --bundle-output dist/main.visionos.jsbundle --assets-dest dist",
-    "build:windows": "npm run mkdist && react-native bundle --entry-file index.js --platform windows --dev true --bundle-output dist/main.windows.bundle --assets-dest dist",
+    "build:android": "bun run mkdist && react-native bundle --entry-file index.js --platform android --dev true --bundle-output dist/main.android.jsbundle --assets-dest dist/res",
+    "build:ios": "bun run mkdist && react-native bundle --entry-file index.js --platform ios --dev true --bundle-output dist/main.ios.jsbundle --assets-dest dist",
+    "build:visionos": "bun run mkdist && react-native bundle --entry-file index.js --platform ios --dev true --bundle-output dist/main.visionos.jsbundle --assets-dest dist",
+    "build:windows": "bun run mkdist && react-native bundle --entry-file index.js --platform windows --dev true --bundle-output dist/main.windows.bundle --assets-dest dist",
     "ios": "react-native run-ios",
     "lint": "eslint .",
-    "mkdist": "node -e \"require('node:fs').mkdirSync('dist', { recursive: true, mode: 0o755 })\"",
+    "mkdist": "bun run mkdir -p -m 755 dist",
     "start": "react-native start",
     "test": "jest",
     "visionos": "react-native run-visionos",
@@ -22,7 +22,7 @@
     "@react-native-picker/picker": "2.8.1",
     "react": "18.2.0",
     "react-native": "0.73.2",
-    "react-native-video": "link:../..",
+    "react-native-video": "workspace:*",
     "react-native-windows": "^0.73.0"
   },
   "devDependencies": {
