@@ -23,7 +23,7 @@ jobs:
         run: sudo apt-get install clang-format
       - name: Check ios clang formatting
         run: |
-          find ios -type f \( -name "*.h" -o -name "*.cpp" -o -name "*.m" -o -name "*.mm" \) -print0 | while read -d $'\0' file; do
+          find ./packages/react-native-video/ios -type f \( -name "*.h" -o -name "*.cpp" -o -name "*.m" -o -name "*.mm" \) -print0 | while read -d $'\0' file; do
             clang-format -style=file:./packages/react-native-video/ios/.clang-format -i "$file"
           done
         shell: bash
