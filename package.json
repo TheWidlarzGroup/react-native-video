@@ -21,11 +21,15 @@
       "docs"
     ],
   "scripts": {
+    "postinstall": "patch-package --patch-dir ./examples/bare/patches",
     "lint": "bun run eslint .",
     "check-ios": "scripts/swift-format.sh && scripts/swift-lint.sh && scripts/clang-format.sh",
     "check-all": "bun run check-android; bun run check-ios; bun run lint",
     "check-android": "scripts/kotlin-lint.sh",
     "clean": "rm -rf packages/**/tsconfig.tsbuildinfo packages/**/node_modules packages/**/lib examples/**/node_modules examples/**/ios/Pods"
+  },
+  "devDependencies": {
+    "patch-package": "^8.0.0"
   },
   "trustedDependencies": [
     "BareExample",
