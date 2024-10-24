@@ -22,7 +22,7 @@ jobs:
         with:
           args: --strict
         env:
-          WORKING_DIRECTORY: ios
+          WORKING_DIRECTORY: ./packages/react-native-video/ios
   Swift-Format:
     runs-on: macos-latest
     defaults:
