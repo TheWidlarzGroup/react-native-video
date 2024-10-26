@@ -1,5 +1,55 @@
 
 
+# [6.8.0-rc.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.6.4...v6.8.0-rc.0) (2024-10-26)
+
+
+### Bug Fixes
+
+* add manifest value checker for prevent crash ([2872689](https://github.com/TheWidlarzGroup/react-native-video/commit/28726891122587be2b13cb0780c9a7e037bf2417))
+* **android:** add hideWithoutPlayer fn into Kotlin ver ([7952275](https://github.com/TheWidlarzGroup/react-native-video/commit/7952275661b6bbca21b2c73a90401829c8fc7862))
+* **android:** fix crash issue when unmounting in PIP mode ([362459d](https://github.com/TheWidlarzGroup/react-native-video/commit/362459d1277af56b7d5fbaed72d9bde68bf76f62))
+* **android:** fix flickering issue when stop picture in picture ([5fbede2](https://github.com/TheWidlarzGroup/react-native-video/commit/5fbede287f57d0bf8bf7a14e263b1a6db9eee0b7))
+* **android:** fix Fragment managed code ([9c9fe4c](https://github.com/TheWidlarzGroup/react-native-video/commit/9c9fe4c7a2356fd0bfee14041c31100721984012))
+* **android:** fix import ([15cd0e8](https://github.com/TheWidlarzGroup/react-native-video/commit/15cd0e856e44cb77eef2c036cc11fe8771958a8e))
+* **android:** fix lint error ([d712690](https://github.com/TheWidlarzGroup/react-native-video/commit/d712690f9361a08762f31ece1d3646921621a12c))
+* **android:** fix lint error ([7e8a0b8](https://github.com/TheWidlarzGroup/react-native-video/commit/7e8a0b81100479697c418558975d8c63854e1431))
+* **android:** fix lint error ([013a69c](https://github.com/TheWidlarzGroup/react-native-video/commit/013a69c6aa32338254528b82d3297220e4c96603))
+* **android:** fix onPictureInPictureStatusChanged ([d0f521a](https://github.com/TheWidlarzGroup/react-native-video/commit/d0f521ac5a1de6ddc7a24b6bc1ac0170060c2a39))
+* **android:** fix picture in picture with fullscreen mode ([dc6a64e](https://github.com/TheWidlarzGroup/react-native-video/commit/dc6a64ede1e49fab03fa05d894552cd1cd09a773))
+* **android:** fix pip ratio to be calculated with correct ratio value ([96126be](https://github.com/TheWidlarzGroup/react-native-video/commit/96126beb65366a460ced0fc5a4594f47d45791a9))
+* **android:** fix syntax ([1cd78b4](https://github.com/TheWidlarzGroup/react-native-video/commit/1cd78b4d780c0f05595b2e6400db2ab51acea0d9))
+* **android:** sideloaded subtitles ([#4232](https://github.com/TheWidlarzGroup/react-native-video/issues/4232)) ([352dfbb](https://github.com/TheWidlarzGroup/react-native-video/commit/352dfbbc9bef158400c59516a50d889d25757c0d))
+* **android:** sync pip controller with external controller state ([bf07348](https://github.com/TheWidlarzGroup/react-native-video/commit/bf073487f9cd0cdc28f571fc32d3f4b4f99f03cf))
+* check multi window mode when host pause ([05e704d](https://github.com/TheWidlarzGroup/react-native-video/commit/05e704df8d79a51312463a4c2cb65acefc6aa54a))
+* ensure aspect ratio from video is handled in a coherent way ([#4219](https://github.com/TheWidlarzGroup/react-native-video/issues/4219)) ([a8d5841](https://github.com/TheWidlarzGroup/react-native-video/commit/a8d5841c7c0f9767ec095ffd8401b1579f32623f))
+* fix FullscreenPlayerView constructor ([cf57475](https://github.com/TheWidlarzGroup/react-native-video/commit/cf5747545a073788813a8d9a77ce2697cdd1490d))
+* fix lint error ([f75489c](https://github.com/TheWidlarzGroup/react-native-video/commit/f75489c823fdce44120fd51891f33173aaa6c208))
+* fix onDetachedFromWindow ([2c99b61](https://github.com/TheWidlarzGroup/react-native-video/commit/2c99b61162c3c1f2eac3f5bbb39dd453ba84e191))
+* handling when onStop is called while in multi-window mode ([d742b96](https://github.com/TheWidlarzGroup/react-native-video/commit/d742b964746fdcecd3604153f464f6cae9cae6ba))
+* **ios:** fix applicationDidEnterBackground for PIP ([6bbfe82](https://github.com/TheWidlarzGroup/react-native-video/commit/6bbfe82b577dc8ee42d31a3b6cfab1455b780369))
+* **ios:** fix enter background handler ([053f84c](https://github.com/TheWidlarzGroup/react-native-video/commit/053f84cd467a1ab74e22ba792b2681e4fc77df40))
+* **ios:** fix lint error ([42b2477](https://github.com/TheWidlarzGroup/react-native-video/commit/42b247781e08b5b385399161e4294d208e54e36a))
+* **ios:** fix lint error ([441fb56](https://github.com/TheWidlarzGroup/react-native-video/commit/441fb56531a1b6c271eecd721f079d18e20bebe3))
+* **ios:** fix pip active fn variable reference ([6313b0e](https://github.com/TheWidlarzGroup/react-native-video/commit/6313b0e135b53132b06ae006b9a04b2cebf02794))
+* **ios:** fix RCTPictureInPicture ([ff25e83](https://github.com/TheWidlarzGroup/react-native-video/commit/ff25e8336d0e1195757732c889841ab8b8c07b23))
+* **ios:** fix syntax error ([edc91d0](https://github.com/TheWidlarzGroup/react-native-video/commit/edc91d09e891f35a9391f6adebd59f5c2a88c772))
+* **iOS:** pause video on end reached & don't remove listeners ([#4218](https://github.com/TheWidlarzGroup/react-native-video/issues/4218)) ([2c19a47](https://github.com/TheWidlarzGroup/react-native-video/commit/2c19a4770df73179436a9e23a5e55ad0699fcfcc))
+* prevent audio play in background without playInBackground prop ([e0795ad](https://github.com/TheWidlarzGroup/react-native-video/commit/e0795adb44f1d7c1f1fb25723dfd288fe05c1c60))
+* remove redundant codes ([6e8307b](https://github.com/TheWidlarzGroup/react-native-video/commit/6e8307b4259114a35808d76085cae10838335af4))
+* rewrite pip action intent code for Android14 ([4938bd0](https://github.com/TheWidlarzGroup/react-native-video/commit/4938bd047c6debb84315c7b2cae04f6ca79eace6))
+* sync controller visibility ([8269546](https://github.com/TheWidlarzGroup/react-native-video/commit/826954670f4dbbc8026f4c2d1e4fb30d5e6d656b))
+
+
+### Features
+
+* add isInPictureInPicture flag for lifecycle handling ([0c06c2f](https://github.com/TheWidlarzGroup/react-native-video/commit/0c06c2f99827c25856d401a7c6b30e43411dae6a))
+* add pipFullscreenPlayerView for makes PIP include video only ([f3066a4](https://github.com/TheWidlarzGroup/react-native-video/commit/f3066a4f18064d89684c55e2cebdd2e0a70614b4))
+* add setSource API function fix ads playback ([#4185](https://github.com/TheWidlarzGroup/react-native-video/issues/4185)) ([9a3fcda](https://github.com/TheWidlarzGroup/react-native-video/commit/9a3fcda3b8ca4689c9131a12a8375fc43d442f80))
+* **android:** add settings button to control video playback speed ([#4211](https://github.com/TheWidlarzGroup/react-native-video/issues/4211)) ([d1883a7](https://github.com/TheWidlarzGroup/react-native-video/commit/d1883a7e008706cac2a2beac934194539c9b5b77))
+* **android:** implement Android PictureInPicture ([b554034](https://github.com/TheWidlarzGroup/react-native-video/commit/b5540347b06a978e6cfa80c6f1b0e15301e21e18))
+* **exoplayerview:** Migrate ExoPlayerView to kotlin ([#4038](https://github.com/TheWidlarzGroup/react-native-video/issues/4038)) ([78f4f04](https://github.com/TheWidlarzGroup/react-native-video/commit/78f4f0480d70d209fea9e0579963e347c965fd6e))
+* **expo:** add android picture in picture config within expo plugin ([a4381e4](https://github.com/TheWidlarzGroup/react-native-video/commit/a4381e4ea71b633bbad073b55ac26ddb6c9ae81d))
+
 * lint ios files (82fd301e)
 * feat(exoplayerview): Migrate ExoPlayerView to kotlin (#4038) (9056054f)
 * fix(ios): fix lint error (441fb565)
