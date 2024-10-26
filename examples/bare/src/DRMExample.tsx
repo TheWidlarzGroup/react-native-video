@@ -20,19 +20,19 @@ const DRMExample = () => {
   const [source, setSource] = React.useState<SourceType>(null);
 
   const [hls, setHls] = React.useState(
-    'https://d5lhbv70lxyop.cloudfront.net/02b91d1c-dcde-4a93-8391-8524f7836a72/assets/5a116d5e-4acb-4461-8bc0-81adf45a8432/videokit-576p-dash-hls-drm/hls/index.m3u8',
+    'https://d2e67eijd6imrw.cloudfront.net/559c7a7e-960d-4cd8-9dba-bc4e59890177/assets/47cfca69-91b5-4311-bf6c-b9b1f297ed9b/videokit-720p-dash-hls-drm/hls/index.m3u8',
   );
   const [fairplayLicense, setFairplayLicense] = React.useState(
-    'https://videokit-demo-7dr2zvpf.la.drm.cloud/acquire-license/fairplay?BrandGuid=02b91d1c-dcde-4a93-8391-8524f7836a72',
+    'https://thewidlarzgroup.la.drm.cloud/acquire-license/fairplay?brandGuid=559c7a7e-960d-4cd8-9dba-bc4e59890177',
   );
   const [fairplayCertificate, setFairplayCertificate] = React.useState(
-    'https://videokit-demo-7dr2zvpf.la.drm.cloud/certificate/fairplay?BrandGuid=02b91d1c-dcde-4a93-8391-8524f7836a72',
+    'https://thewidlarzgroup.la.drm.cloud/certificate/fairplay?brandGuid=559c7a7e-960d-4cd8-9dba-bc4e59890177',
   );
   const [dash, setDash] = React.useState(
-    'https://d5lhbv70lxyop.cloudfront.net/02b91d1c-dcde-4a93-8391-8524f7836a72/assets/5a116d5e-4acb-4461-8bc0-81adf45a8432/videokit-576p-dash-hls-drm/dash/index.mpd',
+    'https://d2e67eijd6imrw.cloudfront.net/559c7a7e-960d-4cd8-9dba-bc4e59890177/assets/47cfca69-91b5-4311-bf6c-b9b1f297ed9b/videokit-720p-dash-hls-drm/dash/index.mpd',
   );
   const [widevineLicense, setWidevineLicense] = React.useState(
-    'https://videokit-demo-7dr2zvpf.la.drm.cloud/acquire-license/widevine?BrandGuid=02b91d1c-dcde-4a93-8391-8524f7836a72',
+    'https://thewidlarzgroup.la.drm.cloud/acquire-license/widevine?brandGuid=559c7a7e-960d-4cd8-9dba-bc4e59890177',
   );
 
   // ------------- DMR Token -------------
