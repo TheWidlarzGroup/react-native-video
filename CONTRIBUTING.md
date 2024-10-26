@@ -24,8 +24,30 @@ For example, a single file JS code change requires 1 review while a 3 files iOS 
 
 * If you have time to help out, look for the [`review requested`](https://github.com/TheWidlarzGroup/react-native-video/labels/review%20requested) label. It will have another numeric label with it (`1`, `2`, or `3` indicating how many more reviews are needed to merge).
 
-## Releases
-
-* Aim for a bi-weekly (every other week) release to flush out whatever was approved and merge. Most people use this with a lock file (and if you don't you are doing it wrong) and should not have any issues with new bugs showing up. This is already a high risk dependency which must be tested well before going into production. Let's take advantage of that and move faster.
-
 Please do not harass people to review your pull request! You can tag those you feel have relevant experience but please don't abuse this as people will unfollow or mute the project if they are called too many times!
+
+### Running the example
+
+To see how to run examples locally, please refer to the [examples guide](https://github.com/TheWidlarzGroup/react-native-video/tree/master/examples)
+
+### Working on documentation
+
+The documentation is located in the `docs` folder. To work on the documentation, you can run the following command to start a local server:
+
+```sh
+cd docs
+bun install
+bun dev
+```
+
+### Publishing a release
+
+We use [release-it](https://github.com/webpro/release-it) to automate our release.
+
+## Reporting issues
+
+You can report issues on our [bug tracker](https://github.com/TheWidlarzGroup/react-native-video/issues). Please follow the issue template when opening an issue.
+
+## License
+
+By contributing to React Native Video, you agree that your contributions will be licensed under its **MIT** license.
