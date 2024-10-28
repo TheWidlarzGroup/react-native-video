@@ -59,8 +59,8 @@ const VideoPlayer = () => {
 };
 ```
 ## Known issues
-- [ ] Android: After passing player to second VideoView, the first VideoView will permanently lose player - We need to think how to handle this case - what should happen when player is passed to another VideoView - should we detach it from the previous one and return to it after detaching from the new one?
-- [ ] Android: VideoView does not show video on New Architecture - For some reason native event `onNitroIdChange` is fired but not received in JS Component
+- [ ] Android: After passing player to second VideoView, the first VideoView will permanently lose player - [#1](https://github.com/TheWidlarzGroup/react-native-video-v7/issues/1)
+- [ ] Android: VideoView does not show video on New Architecture - [#2](https://github.com/TheWidlarzGroup/react-native-video-v7/issues/2)
 
 
 ## Contributing
