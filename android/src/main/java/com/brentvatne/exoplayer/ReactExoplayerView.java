@@ -562,6 +562,13 @@ public class ReactExoplayerView extends FrameLayout implements
 
     private void refreshControlsStyles() {
         if (playerControlView == null || player == null || !controls) return;
+
+        // FORK: Set title
+        Source.Metadata metadata = source.getMetadata();
+        String title = (metadata != null && metadata.getTitle() != null) ? metadata.getTitle() : "";
+        TextView titleText = playerControlView.findViewById(R.id.exo_controller_title);
+        titleText.setText(title);
+
         updateLiveContent();
         updatePlayPauseButtons();
         updateButtonVisibility(controlsConfig.getHideForward(), R.id.exo_ffwd);
