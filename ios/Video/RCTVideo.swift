@@ -269,7 +269,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _wrapperViewController.view.addSubview(_loadingSpinner)
         
         // Configure spinner
-        _loadingSpinner.center = _wrapperViewController.view.center
+        _loadingSpinner.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            _loadingSpinner.centerXAnchor.constraint(equalTo: _wrapperViewController.view.centerXAnchor),
+            _loadingSpinner.centerYAnchor.constraint(equalTo: _wrapperViewController.view.centerYAnchor)
+        ])
         _loadingSpinner.hidesWhenStopped = true
         _loadingSpinner.stopAnimating()
     }

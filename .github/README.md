@@ -33,6 +33,8 @@ To sync this fork with the upstream repository, follow these steps:
    -  Add Fork comments above these functions instead
 
 ## Changes Introduced By Fork
+- 10/29/2024: [iOS] Fix loading spinner centering
+- 10/29/2024: [Android] Add back title to android player controls (source.metadata.title)
 - 10/22/2024: [FireTV] Add overscan padding for TV
 - 10/21/2024: [Android] Fix crash when toggling fullscreen
 - 10/21/2024: [Android] Fix toggling of player controls on TV and Ads
