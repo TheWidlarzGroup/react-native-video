@@ -4,15 +4,13 @@ import PlatformsList from '../../components/PlatformsList/PlatformsList.tsx';
 
 ## DRM Example
 
-We have avaliable example for DRM usage in the [example app](https://github.com/TheWidlarzGroup/react-native-video/blob/master/examples/bare/src/DRMExample.tsx). 
-To get token needed for DRM playback you can go to [our site]() and get it.
+We have available example for DRM usage in the [example app](https://github.com/TheWidlarzGroup/react-native-video/blob/master/examples/bare/src/DRMExample.tsx).
+To get token needed for DRM playback you can go to [our site](https://www.thewidlarzgroup.com/services/free-drm-token-generator-for-video?utm_source=drm&utm_medium=docs) and get it.
 
 ## Provide DRM data (only tested with http/https assets)
 
 You can provide some configuration to allow DRM playback.
 This feature will disable the use of `TextureView` on Android.
-
-```jsx
 
 DRM object allows this members:
 
@@ -49,8 +47,8 @@ your `contentId` + the provided certificate via `objc [loadingRequest streamingC
 contentIdentifier:contentIdData options:nil error:&spcError]; `
 
 Also, you will receive following parameter of getLicense:
-* `contentId` contentId if passed to `drm` object or loadingRequest.request.url?.host 
-* `loadedLicenseUrl` URL defined as `loadingRequest.request.URL.absoluteString`, this url starts with `skd://` or `clearkey://` 
+* `contentId` contentId if passed to `drm` object or loadingRequest.request.url?.host
+* `loadedLicenseUrl` URL defined as `loadingRequest.request.URL.absoluteString`, this url starts with `skd://` or `clearkey://`
 * `licenseServer` prop if prop is passed to `drm` object.
 * `spcString` the SPC used to validate playback with drm server
 
