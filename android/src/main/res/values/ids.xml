@@ -2,4 +2,5 @@
 <resources>
     <item name="exo_duration_live" type="id" />
     <item name="exo_controller_wrapper" type="id" />
+    <item name="exo_controller_title" type="id" />
 </resources>
