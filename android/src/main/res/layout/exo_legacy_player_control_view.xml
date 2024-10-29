@@ -7,6 +7,15 @@
     android:background="@color/midnight_black"
     android:orientation="vertical">
 
+    <TextView android:id="@+id/exo_controller_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/position_duration_text_size"
+        android:textStyle="bold"
+        android:includeFontPadding="false"
+        android:textColor="@color/white"
+        />
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
