@@ -42,9 +42,7 @@ import {
 } from './constants';
 import {Overlay, toast, VideoLoader} from './components';
 
-type Props = NonNullable<unknown>;
-
-const VideoPlayer: FC<Props> = ({}) => {
+const BasicExample = () => {
   const [rate, setRate] = useState(1);
   const [volume, setVolume] = useState(1);
   const [muted, setMuted] = useState(false);
@@ -243,6 +241,10 @@ const VideoPlayer: FC<Props> = ({}) => {
     cacheSizeMB: useCache ? 200 : 0,
   };
 
+  useEffect(() => {
+    videoRef.current?.setSource(currentSrc);
+  }, [currentSrc]);
+
   return (
     <View style={styles.container}>
       <StatusBar animated={true} backgroundColor="black" hidden={false} />
@@ -252,8 +254,7 @@ const VideoPlayer: FC<Props> = ({}) => {
           <Video
             showNotificationControls={showNotificationControls}
             ref={videoRef}
-            source={currentSrc as ReactVideoSource}
-            adTagUrl={additional?.adTagUrl}
+            //            source={currentSrc as ReactVideoSource}
             drm={additional?.drm}
             style={viewStyle}
             rate={rate}
@@ -341,4 +342,4 @@ const VideoPlayer: FC<Props> = ({}) => {
     </View>
   );
 };
-export default VideoPlayer;
+export default BasicExample;
