@@ -33,9 +33,15 @@ class VideoView @JvmOverloads constructor(
 
   var nitroId: Int = -1
     set(value) {
+      // delay event on first render to allow view to initialize
+      if (field == -1) {
+        postDelayed({
+          onNitroIdChange?.let { it(value) }
+        }, 1)
+      }
+
       field = value
       globalViewsMap[value] = WeakReference(this)
-      onNitroIdChange?.let { it(field) }
     }
 
   var onNitroIdChange: ((Int?) -> Unit)? = null
