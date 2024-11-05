@@ -32,6 +32,11 @@ export default {
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap"
         rel="stylesheet"
       />
+      <link
+        rel="icon"
+        type="image/png"
+        href="https://docs.thewidlarzgroup.com/react-native-video/favicon.png"
+      />
     </>
   ),
   logo: (
@@ -39,7 +44,6 @@ export default {
       🎬 <strong>Video component</strong> for React Native
     </span>
   ),
-  faviconGlyph: '🎬',
   project: {
     link: 'https://github.com/TheWidlarzGroup/react-native-video',
   },
@@ -57,7 +61,7 @@ export default {
       <>
         <style>{`
         :is(html[class~=dark]) .extra-container {
-          background-color: #87ccef; 
+          background-color: #87ccef;
         }
         :is(html[class~=dark]) .extra-text {
           color: #171717;
