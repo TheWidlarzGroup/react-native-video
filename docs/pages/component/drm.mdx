@@ -2,7 +2,10 @@ import PlatformsList from '../../components/PlatformsList/PlatformsList.tsx';
 
 # DRM
 
-> **Note:** DRM is not supported on visionOS yet.
+## DRM Example
+
+We have available example for DRM usage in the [example app](https://github.com/TheWidlarzGroup/react-native-video/blob/master/examples/bare/src/DRMExample.tsx).
+To get token needed for DRM playback you can go to [our site](https://www.thewidlarzgroup.com/services/free-drm-token-generator-for-video?utm_source=drm&utm_medium=docs) and get it.
 
 ## Provide DRM data (only tested with http/https assets)
 
@@ -13,7 +16,7 @@ DRM object allows this members:
 
 ### `base64Certificate`
 
-<PlatformsList types={['iOS']} />
+<PlatformsList types={['iOS', 'visionOS']} />
 
 Type: bool\
 Default: false
@@ -22,7 +25,7 @@ Whether or not the certificate url returns it on base64.
 
 ### `certificateUrl`
 
-<PlatformsList types={['iOS']} />
+<PlatformsList types={['iOS', 'visionOS']} />
 
 Type: string\
 Default: undefined
@@ -31,7 +34,7 @@ URL to fetch a valid certificate for FairPlay.
 
 ### `getLicense`
 
-<PlatformsList types={['iOS']} />
+<PlatformsList types={['iOS', 'visionOS']} />
 
 Type: function\
 Default: undefined
@@ -44,8 +47,8 @@ your `contentId` + the provided certificate via `objc [loadingRequest streamingC
 contentIdentifier:contentIdData options:nil error:&spcError]; `
 
 Also, you will receive following parameter of getLicense:
-* `contentId` contentId if passed to `drm` object or loadingRequest.request.url?.host 
-* `loadedLicenseUrl` URL defined as `loadingRequest.request.URL.absoluteString`, this url starts with `skd://` or `clearkey://` 
+* `contentId` contentId if passed to `drm` object or loadingRequest.request.url?.host
+* `loadedLicenseUrl` URL defined as `loadingRequest.request.URL.absoluteString`, this url starts with `skd://` or `clearkey://`
 * `licenseServer` prop if prop is passed to `drm` object.
 * `spcString` the SPC used to validate playback with drm server
 
@@ -79,7 +82,7 @@ getLicense: (spcString, contentId, licenseUrl, loadedLicenseUrl) => {
 
 ### `contentId`
 
-<PlatformsList types={['iOS']} />
+<PlatformsList types={['iOS', 'visionOS']} />
 
 Type: string\
 Default: undefined
@@ -88,7 +91,7 @@ Specify the content id of the stream, otherwise it will take the host value from
 
 ### `headers`
 
-<PlatformsList types={['Android', 'iOS']} />
+<PlatformsList types={['Android', 'iOS', 'visionOS']} />
 
 Type: Object\
 Default: undefined
@@ -112,7 +115,7 @@ drm={{
 
 ### `licenseServer`
 
-<PlatformsList types={['Android', 'iOS']} />
+<PlatformsList types={['Android', 'iOS', 'visionOS']} />
 
 Type: string\
 Default: false
@@ -139,7 +142,7 @@ for iOS: DRMType.FAIRPLAY
 
 ### `localSourceEncryptionKeyScheme`
 
-<PlatformsList types={['iOS']} />
+<PlatformsList types={['iOS', 'visionOS']} />
 
 Set the url scheme for stream encryption key for local assets
 

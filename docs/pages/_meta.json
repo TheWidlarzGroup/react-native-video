@@ -17,5 +17,10 @@
     "type": "separator",
     "title": ""
   },
+  "example_apps": {
+    "title": "Example Apps",
+    "newWindow": true,
+    "href": "https://github.com/TheWidlarzGroup/react-native-video/tree/master/examples"
+  },
   "projects": "Useful projects"
 }
