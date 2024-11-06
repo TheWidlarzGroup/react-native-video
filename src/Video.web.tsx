@@ -6,7 +6,12 @@ import React, {
   useRef,
   type RefObject,
 } from 'react';
-import type {VideoRef, ReactVideoProps, VideoMetadata} from './types';
+import type {
+  VideoRef,
+  ReactVideoProps,
+  VideoMetadata,
+  ReactVideoSource,
+} from './types';
 
 const Video = forwardRef<VideoRef, ReactVideoProps>(
   (
@@ -54,6 +59,13 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       },
       [onSeek],
     );
+
+    const setSource = useCallback((src: ReactVideoSource) => {
+      if (!nativeRef.current) {
+        return;
+      }
+      nativeRef.current.src = src?.uri as string;
+    }, []);
 
     const pause = useCallback(() => {
       if (!nativeRef.current) {
@@ -159,6 +171,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       ref,
       () => ({
         seek,
+        setSource,
         pause,
         resume,
         setVolume,
@@ -172,6 +185,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       }),
       [
         seek,
+        setSource,
         pause,
         resume,
         unsupported,
@@ -236,7 +250,13 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         controls={controls}
         loop={repeat}
         playsInline
-        poster={poster}
+        poster={
+          typeof poster === 'object'
+            ? typeof poster.source === 'object'
+              ? poster.source.uri
+              : undefined
+            : poster
+        }
         onCanPlay={() => onBuffer?.({isBuffering: false})}
         onWaiting={() => onBuffer?.({isBuffering: true})}
         onRateChange={() => {
