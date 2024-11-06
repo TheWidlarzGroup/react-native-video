@@ -37,6 +37,16 @@ export default {
         type="image/png"
         href="https://docs.thewidlarzgroup.com/react-native-video/favicon.png"
       />
+      <script
+        async
+        src="https://www.googletagmanager.com/gtag/js?id=G-PM2TQQQMDN"
+      />
+      <script>
+        {`window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-PM2TQQQMDN');`}
+      </script>
     </>
   ),
   logo: (
