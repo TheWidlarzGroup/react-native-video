@@ -46,7 +46,7 @@ jobs:
           working-directory: examples/bare
 
       - name: Restore Gradle cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
@@ -84,7 +84,7 @@ jobs:
           working-directory: examples/bare
 
       - name: Restore Gradle cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
