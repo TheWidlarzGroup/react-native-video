@@ -308,7 +308,17 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           })
         }
         onSeeking={() => (isSeeking.current = true)}
-        onSeeked={() => (isSeeking.current = false)}
+        onSeeked={() => {
+          // only trigger this if it's from UI seek.
+          // if it was triggered via ref.seek(), onSeek has already been called
+          if (isSeeking.current) {
+            isSeeking.current = false;
+            onSeek?.({
+              seekTime: nativeRef.current!.currentTime,
+              currentTime: nativeRef.current!.currentTime,
+            });
+          }
+        }}
         onVolumeChange={() => {
           if (!nativeRef.current) {
             return;
