@@ -109,7 +109,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       fullscreenAutorotate,
     };
     const setFullScreen = useCallback(
-      (
+      async (
         newVal: boolean,
         orientation?: ReactVideoProps['fullscreenOrientation'],
         autorotate?: boolean,
@@ -117,30 +117,27 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         orientation ??= fsPrefs.current.fullscreenOrientation;
         autorotate ??= fsPrefs.current.fullscreenAutorotate;
 
-        const run = async () => {
-          try {
-            if (newVal) {
-              await nativeRef.current?.requestFullscreen({
-                navigationUI: 'hide',
-              });
-              if (orientation === 'all' || !orientation || autorotate) {
-                screen.orientation.unlock();
-              } else {
-                await screen.orientation.lock(orientation);
-              }
-            } else {
-              if (document.fullscreenElement) {
-                await document.exitFullscreen();
-              }
+        try {
+          if (newVal) {
+            await nativeRef.current?.requestFullscreen({
+              navigationUI: 'hide',
+            });
+            if (orientation === 'all' || !orientation || autorotate) {
               screen.orientation.unlock();
+            } else {
+              await screen.orientation.lock(orientation);
             }
-          } catch (e) {
-            // Changing fullscreen status without a button click is not allowed so it throws.
-            // Some browsers also used to throw when locking screen orientation was not supported.
-            console.error('Could not toggle fullscreen/screen lock status', e);
+          } else {
+            if (document.fullscreenElement) {
+              await document.exitFullscreen();
+            }
+            screen.orientation.unlock();
           }
-        };
-        run();
+        } catch (e) {
+          // Changing fullscreen status without a button click is not allowed so it throws.
+          // Some browsers also used to throw when locking screen orientation was not supported.
+          console.error('Could not toggle fullscreen/screen lock status', e);
+        }
       },
       [],
     );
@@ -206,7 +203,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       }
     }, [paused, pause, resume]);
     useEffect(() => {
-      if (volume === undefined) {
+      if (volume === undefined || isNaN(volume)) {
         return;
       }
       setVolume(volume);
@@ -224,7 +221,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
 
         // Set play state to the player's value (if autoplay is denied)
         // This is useful if our UI is in a play state but autoplay got denied so
-        // the video is actaully in a paused state.
+        // the video is actually in a paused state.
         playbackStateRef.current?.({
           isPlaying: !nativeRef.current.paused,
           isSeeking: isSeeking.current,
