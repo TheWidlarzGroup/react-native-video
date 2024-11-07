@@ -1161,8 +1161,13 @@ public class ReactExoplayerView extends FrameLayout implements
                     throw new IllegalStateException("HLS is not enabled!");
                 }
 
+                DataSource.Factory dataSourceFactory = mediaDataSourceFactory;
+                if (useCache) {
+                    dataSourceFactory = RNVSimpleCache.INSTANCE.getCacheFactory(buildHttpDataSourceFactory(true));
+                }
+
                 mediaSourceFactory = new HlsMediaSource.Factory(
-                        mediaDataSourceFactory
+                        dataSourceFactory
                 ).setAllowChunklessPreparation(source.getTextTracksAllowChunklessPreparation());
                 break;
             case CONTENT_TYPE_OTHER:
