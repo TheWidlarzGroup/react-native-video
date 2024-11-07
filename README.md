@@ -2,7 +2,7 @@
 🎬 `<Video>` component for React Native
 
 ## Documentation
-documentation is available at [thewidlarzgroup.github.io/react-native-video/](https://thewidlarzgroup.github.io/react-native-video/)
+documentation is available at [docs.thewidlarzgroup.com/react-native-video/](https://docs.thewidlarzgroup.com/react-native-video/)
 
 ## Examples
 You can find several examples demonstrating the usage of react-native-video [here](https://github.com/TheWidlarzGroup/react-native-video/tree/master/examples). <br />
