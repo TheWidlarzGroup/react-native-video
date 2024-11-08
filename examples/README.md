@@ -12,7 +12,7 @@ This directory contains examples for `react-native-video` - this is a guide that
 
 Both of applications have mostly the same code (Windows and tvOS have platform-specific code). Other platform are using codebase from `bare` example.
 If you want to update examples content, you should do it in `bare` example. `expo` example is copping (and overwriting!) `src` folder from `bare` on dependency install.
-If you want to sync `expo` example, you can use `yarn update-src` command in `expo` example directory.
+If you want to sync `expo` example, you can use `bun run update-src` command in `expo` example directory.
 
 ## How To Run Examples
 
@@ -60,22 +60,22 @@ cd examples/bare && bun install
 
      ```bash
      # for ios
-     yarn ios --interactive
+     bun run ios --interactive
      # for visionOS
-     yarn visionos --interactive
+     bun run visionos --interactive
      ```
 
    - For Android:
      There is no need to run any additional command. you can just run the App. (Flag `--interactive` is optional, but it is recommended as it allows you to choose the device you want to run the app on)
 
      ```bash
-     yarn android --interactive
+     bun run android --interactive
      ```
 
    - For Windows:
      There is no need to run any additional command. you can just run the App.
      ```bash
-     yarn windows
+     bun run windows
      ```
 
 If Metro Bundler is not running (or it did not start), you can start it by running:
@@ -132,18 +132,18 @@ cd examples/expo && bun install
 
      ```bash
      # for ios
-     yarn ios --device
+     bun run ios --device
      # for tvOS
-     yarn ios:tv --device
+     bun run ios:tv --device
      ```
 
    - For Android / Android TV:
      There is no need to run any additional command. you can just run the App. (Flag `--device` is optional, but it is recommended as it allows you to choose the device you want to run the app on)
      ```bash
      # for android
-     yarn android --device
+     bun run android --device
      # for android tv
-     yarn android:tv --device
+     bun run android:tv --device
      ```
 
 > [!WARNING]  
