@@ -15,9 +15,9 @@
     "update-src": "echo 'Updating src from ../bare/src' && rm -r ./src && cp -r ../bare/src ./src && echo 'Updated src from ../bare/src'"
   },
   "dependencies": {
-    "@react-native-picker/picker": "2.8.1",
-    "expo": "~51.0.31",
-    "expo-splash-screen": "~0.27.5",
+    "@react-native-picker/picker": "2.7.5",
+    "expo": "~51.0.39",
+    "expo-splash-screen": "~0.27.7",
     "expo-status-bar": "~1.12.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
