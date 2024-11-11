@@ -59,8 +59,7 @@ const VideoPlayer = () => {
 };
 ```
 ## Known issues
-- [ ] Android: After passing player to second VideoView, the first VideoView will permanently lose player - [#1](https://github.com/TheWidlarzGroup/react-native-video-v7/issues/1)
-- [ ] Android: VideoView does not show video on New Architecture - [#2](https://github.com/TheWidlarzGroup/react-native-video-v7/issues/2)
+- Android: VideoView does not show video on New Architecture - [#2](https://github.com/TheWidlarzGroup/react-native-video-v7/issues/2)
 
 
 ## Contributing
