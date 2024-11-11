@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Button, Platform, StyleSheet, View } from 'react-native';
+import { Button, Dimensions, Platform, StyleSheet, View } from 'react-native';
 import { VideoView, createPlayer } from 'react-native-video';
 
 const player = createPlayer('https://www.w3schools.com/html/mov_bbb.mp4');
@@ -22,11 +22,13 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <VideoView player={player} style={styles.box} />
-      {/* Two VideoViews with same player are supported not supported on Android */}
-      {Platform.OS === 'ios' && show && (
+      <View style={styles.videoContainer}>
         <VideoView player={player} style={styles.box} />
-      )}
+        {/* Two VideoViews with same player are supported not supported on Android */}
+        {Platform.OS === 'ios' && show && (
+          <VideoView player={player} style={styles.box} />
+        )}
+      </View>
       <Button title="Play" onPress={play} />
       <Button title="Pause" onPress={pause} />
       <Button title="Seek to 3sec" onPress={seek} />
@@ -40,6 +42,10 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'flex-start',
+  },
+  videoContainer: {
+    flexDirection: Dimensions.get('window').width > 700 ? 'row' : 'column',
+    gap: 20,
   },
   box: {
     width: 300,
