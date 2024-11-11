@@ -52,6 +52,18 @@ target_link_libraries(
         NitroVideo
         fbjni::fbjni                              # <-- Facebook C++ JNI helpers
         ReactAndroid::jsi                         # <-- RN: JSI
-        ReactAndroid::react_nativemodule_core     # <-- RN: TurboModules Core
         react-native-nitro-modules::NitroModules  # <-- NitroModules Core :)
 )
+
+# Link react-native (different prefab between RN 0.75 and RN 0.76)
+if(ReactAndroid_VERSION_MINOR GREATER_EQUAL 76)
+    target_link_libraries(
+        NitroVideo
+        ReactAndroid::reactnative                 # <-- RN: Native Modules umbrella prefab
+    )
+else()
+    target_link_libraries(
+        NitroVideo
+        ReactAndroid::react_nativemodule_core     # <-- RN: TurboModules Core
+    )
+endif()

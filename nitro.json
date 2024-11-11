@@ -9,7 +9,7 @@
     "video"
   ],
   "ios": {
-    "iosModulename": "NitroVideo"
+    "iosModuleName": "NitroVideo"
   },
   "autolinking": {
     "VideoPlayerFactory": {

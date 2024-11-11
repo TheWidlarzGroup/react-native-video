@@ -7,12 +7,6 @@
 
 #pragma once
 
-#if __has_include(<NitroModules/NitroDefines.hpp>)
-#include <NitroModules/NitroDefines.hpp>
-#else
-#error NitroModules cannot be found! Are you sure you installed NitroModules properly?
-#endif
-
 // Forward declarations of C++ defined types
 // Forward declaration of `HybridVideoPlayerFactorySpec` to properly resolve imports.
 namespace margelo::nitro::video { class HybridVideoPlayerFactorySpec; }
@@ -62,32 +56,32 @@ namespace margelo::nitro::video::bridge::swift {
    * Specialized version of `std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>`.
    */
   using std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_ = std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>;
-  std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec> create_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_(void* NONNULL swiftUnsafePointer);
-  void* NONNULL get_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_(std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_ cppType);
+  std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec> create_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_(void* _Nonnull swiftUnsafePointer);
+  void* _Nonnull get_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_(std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_ cppType);
   
   // pragma MARK: std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>
   /**
    * Specialized version of `std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>`.
    */
   using std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSpec_ = std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>;
-  std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec> create_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSpec_(void* NONNULL swiftUnsafePointer);
-  void* NONNULL get_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSpec_(std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSpec_ cppType);
+  std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec> create_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSpec_(void* _Nonnull swiftUnsafePointer);
+  void* _Nonnull get_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSpec_(std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSpec_ cppType);
   
   // pragma MARK: std::shared_ptr<margelo::nitro::video::HybridVideoPlayerFactorySpec>
   /**
    * Specialized version of `std::shared_ptr<margelo::nitro::video::HybridVideoPlayerFactorySpec>`.
    */
   using std__shared_ptr_margelo__nitro__video__HybridVideoPlayerFactorySpec_ = std::shared_ptr<margelo::nitro::video::HybridVideoPlayerFactorySpec>;
-  std::shared_ptr<margelo::nitro::video::HybridVideoPlayerFactorySpec> create_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerFactorySpec_(void* NONNULL swiftUnsafePointer);
-  void* NONNULL get_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerFactorySpec_(std__shared_ptr_margelo__nitro__video__HybridVideoPlayerFactorySpec_ cppType);
+  std::shared_ptr<margelo::nitro::video::HybridVideoPlayerFactorySpec> create_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerFactorySpec_(void* _Nonnull swiftUnsafePointer);
+  void* _Nonnull get_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerFactorySpec_(std__shared_ptr_margelo__nitro__video__HybridVideoPlayerFactorySpec_ cppType);
   
   // pragma MARK: std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceFactorySpec>
   /**
    * Specialized version of `std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceFactorySpec>`.
    */
   using std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceFactorySpec_ = std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceFactorySpec>;
-  std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceFactorySpec> create_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceFactorySpec_(void* NONNULL swiftUnsafePointer);
-  void* NONNULL get_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceFactorySpec_(std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceFactorySpec_ cppType);
+  std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceFactorySpec> create_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceFactorySpec_(void* _Nonnull swiftUnsafePointer);
+  void* _Nonnull get_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceFactorySpec_(std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceFactorySpec_ cppType);
   
   // pragma MARK: std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>>
   /**
@@ -103,15 +97,15 @@ namespace margelo::nitro::video::bridge::swift {
    * Specialized version of `std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerSpec>`.
    */
   using std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerSpec_ = std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerSpec>;
-  std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerSpec> create_std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerSpec_(void* NONNULL swiftUnsafePointer);
-  void* NONNULL get_std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerSpec_(std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerSpec_ cppType);
+  std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerSpec> create_std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerSpec_(void* _Nonnull swiftUnsafePointer);
+  void* _Nonnull get_std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerSpec_(std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerSpec_ cppType);
   
   // pragma MARK: std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerFactorySpec>
   /**
    * Specialized version of `std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerFactorySpec>`.
    */
   using std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerFactorySpec_ = std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerFactorySpec>;
-  std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerFactorySpec> create_std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerFactorySpec_(void* NONNULL swiftUnsafePointer);
-  void* NONNULL get_std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerFactorySpec_(std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerFactorySpec_ cppType);
+  std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerFactorySpec> create_std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerFactorySpec_(void* _Nonnull swiftUnsafePointer);
+  void* _Nonnull get_std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerFactorySpec_(std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerFactorySpec_ cppType);
 
 } // namespace margelo::nitro::video::bridge::swift

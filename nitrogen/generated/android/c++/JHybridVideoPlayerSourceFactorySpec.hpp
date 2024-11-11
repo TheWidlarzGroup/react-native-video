@@ -32,6 +32,12 @@ namespace margelo::nitro::video {
       _javaPart(jni::make_global(jThis)) {}
 
   public:
+    virtual ~JHybridVideoPlayerSourceFactorySpec() {
+      // Hermes GC can destroy JS objects on a non-JNI Thread.
+      jni::ThreadScope::WithClassLoader([&] { _javaPart.reset(); });
+    }
+
+  public:
     size_t getExternalMemorySize() noexcept override;
 
   public:

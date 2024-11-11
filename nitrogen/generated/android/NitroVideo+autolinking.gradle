@@ -13,6 +13,8 @@
 /// apply from: '../nitrogen/generated/android/NitroVideo+autolinking.gradle'
 /// ```
 
+logger.warn("[NitroModules] 🔥 NitroVideo is boosted by nitro!")
+
 android {
   sourceSets {
     main {
