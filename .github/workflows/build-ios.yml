@@ -72,7 +72,7 @@ jobs:
           CODE_SIGNING_ALLOWED=NO | xcpretty"
   
   build-with-ads:
-    name: Build iOS Example App
+    name: Build iOS Example App with Ads
     runs-on: macos-latest
     
     steps:
@@ -125,7 +125,7 @@ jobs:
           CODE_SIGNING_ALLOWED=NO | xcpretty"
   
   build-with-caching: 
-    name: Build iOS Example App
+    name: Build iOS Example App with Caching
     runs-on: macos-latest
     
     steps:
