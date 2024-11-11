@@ -23,6 +23,7 @@
     "android",
     "ios",
     "cpp",
+    "nitrogen",
     "*.podspec",
     "!ios/build",
     "!android/build",
@@ -42,8 +43,7 @@
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
     "prepare": "bob build",
-    "release": "release-it",
-    "postinstall": "yarn prepare"
+    "release": "release-it"
   },
   "keywords": [
     "react-native",
@@ -97,7 +97,7 @@
   "workspaces": [
     "example"
   ],
-  "packageManager": "yarn@3.6.1",
+  "packageManager": "bun@1.31.1",
   "jest": {
     "preset": "react-native",
     "modulePathIgnorePatterns": [
