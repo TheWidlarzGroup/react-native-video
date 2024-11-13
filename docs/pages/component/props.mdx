@@ -131,7 +131,7 @@ When playing an HLS live stream with a `EXT-X-PROGRAM-DATE-TIME` tag configured,
 
 ### `controls`
 
-<PlatformsList types={['Android', 'iOS', 'visionOS']} />
+<PlatformsList types={['Android', 'iOS', 'visionOS', 'web']} />
 
 Determines whether to show player controls.
 
@@ -300,7 +300,7 @@ Whether this video view should be focusable with a non-touch input device, eg. r
 
 ### `fullscreen`
 
-<PlatformsList types={['Android', 'iOS', 'visionOS']} />
+<PlatformsList types={['Android', 'iOS', 'visionOS', 'web']} />
 
 Controls whether the player enters fullscreen on play.
 See [presentFullscreenPlayer](#presentfullscreenplayer) for details.
@@ -316,7 +316,7 @@ If a preferred [fullscreenOrientation](#fullscreenorientation) is set, causes th
 
 ### `fullscreenOrientation`
 
-<PlatformsList types={['iOS', 'visionOS']} />
+<PlatformsList types={['iOS', 'visionOS', 'web']} />
 
 - **all (default)** -
 - **landscape**
@@ -709,6 +709,8 @@ The docs for this prop are incomplete and will be updated as each option is inve
 
 > ⚠️ on iOS, you file name must not contain spaces eg. `my video.mp4` will not work, use `my-video.mp4` instead
 
+<PlatformsList types={['Android', 'iOS', 'visionOS', 'Windows UWP']} />
+
 Example:
 
 Pass directly the asset to play (deprecated)
@@ -820,7 +822,7 @@ Example:
 
 #### Start playback at a specific point in time
 
-<PlatformsList types={['Android', 'iOS']} />
+<PlatformsList types={['Android', 'iOS', 'web']} />
 
 Provide an optional `startPosition` for video. Value is in milliseconds. If the `cropStart` prop is applied, it will be applied from that point forward.
 (If it is negative or undefined or null, it is ignored)
@@ -1048,7 +1050,7 @@ textTracks={[
 
 ### `showNotificationControls`
 
-<PlatformsList types={['Android', 'iOS']} />
+<PlatformsList types={['Android', 'iOS', 'web']} />
 
 Controls whether to show media controls in the notification area.
 For Android each Video component will have its own notification controls and for iOS only one notification control will be shown for the last Active Video component.

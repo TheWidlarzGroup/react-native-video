@@ -1,4 +1,4 @@
-import {StyleSheet} from 'react-native';
+import {Platform, StyleSheet} from 'react-native';
 
 const styles = StyleSheet.create({
   container: {
@@ -63,6 +63,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     overflow: 'hidden',
     paddingBottom: 10,
+    paddingTop: Platform.OS === 'web' ? 25 : 0,
   },
   rateControl: {
     flex: 1,
@@ -146,7 +147,7 @@ const styles = StyleSheet.create({
   },
   picker: {
     flex: 1,
-    color: 'white',
+    color: Platform.OS === 'web' ? 'black' : 'white',
     flexDirection: 'row',
     justifyContent: 'center',
     width: 100,
