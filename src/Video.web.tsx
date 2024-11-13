@@ -5,13 +5,25 @@ import React, {
   useImperativeHandle,
   useRef,
   type RefObject,
+  useState,
 } from 'react';
-import type {
-  VideoRef,
-  ReactVideoProps,
-  VideoMetadata,
-  ReactVideoSource,
-} from './types';
+import type {VideoRef, ReactVideoProps, VideoMetadata} from './types';
+
+// stolen from https://stackoverflow.com/a/77278013/21726244
+const isDeepEqual = <T,>(a: T, b: T): boolean => {
+  if (a === b) {
+    return true;
+  }
+
+  const bothAreObjects =
+    a && b && typeof a === 'object' && typeof b === 'object';
+
+  return Boolean(
+    bothAreObjects &&
+      Object.keys(a).length === Object.keys(b).length &&
+      Object.entries(a).every(([k, v]) => isDeepEqual(v, b[k as keyof T])),
+  );
+};
 
 const Video = forwardRef<VideoRef, ReactVideoProps>(
   (
@@ -60,12 +72,15 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       [onSeek],
     );
 
-    const setSource = useCallback((src: ReactVideoSource) => {
-      if (!nativeRef.current) {
+    const [src, setSource] = useState(source);
+    const currentSourceProp = useRef(source);
+    useEffect(() => {
+      if (isDeepEqual(source, currentSourceProp.current)) {
         return;
       }
-      nativeRef.current.src = src?.uri as string;
-    }, []);
+      currentSourceProp.current = source;
+      setSource(source);
+    }, [source]);
 
     const pause = useCallback(() => {
       if (!nativeRef.current) {
@@ -236,12 +251,12 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       nativeRef.current.playbackRate = rate;
     }, [rate]);
 
-    useMediaSession(source?.metadata, nativeRef, showNotificationControls);
+    useMediaSession(src?.metadata, nativeRef, showNotificationControls);
 
     return (
       <video
         ref={nativeRef}
-        src={source?.uri as string | undefined}
+        src={src?.uri as string | undefined}
         muted={muted}
         autoPlay={!paused}
         controls={controls}
@@ -308,8 +323,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           });
         }}
         onLoadedMetadata={() => {
-          if (source?.startPosition) {
-            seek(source.startPosition / 1000);
+          if (src?.startPosition) {
+            seek(src.startPosition / 1000);
           }
         }}
         onPlay={() =>
