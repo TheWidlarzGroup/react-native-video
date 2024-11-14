@@ -1,13 +1,13 @@
-import React, {type FC, useCallback, useRef, useState, useEffect} from 'react';
+import React, {useCallback, useRef, useState, useEffect} from 'react';
 
 import {Platform, TouchableOpacity, View, StatusBar} from 'react-native';
 
 import Video, {
-  VideoRef,
   SelectedVideoTrackType,
   BufferingStrategyType,
   SelectedTrackType,
   ResizeMode,
+  type VideoRef,
   type AudioTrack,
   type OnAudioTracksData,
   type OnLoadData,
@@ -23,19 +23,17 @@ import Video, {
   type OnPlaybackStateChangedData,
   type OnPlaybackRateChangeData,
   type OnVideoTracksData,
-  type ReactVideoSource,
   type VideoTrack,
   type SelectedTrack,
   type SelectedVideoTrack,
   type EnumValues,
-  OnBandwidthUpdateData,
-  ControlsStyles,
+  type OnBandwidthUpdateData,
+  type ControlsStyles,
 } from 'react-native-video';
 import styles from './styles';
 import {type AdditionalSourceInfo} from './types';
 import {
   bufferConfig,
-  isAndroid,
   srcList,
   textTracksSelectionBy,
   audioTracksSelectionBy,
