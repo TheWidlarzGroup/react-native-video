@@ -123,6 +123,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       fullscreenOrientation,
       fullscreenAutorotate,
     };
+
     const setFullScreen = useCallback(
       async (
         newVal: boolean,

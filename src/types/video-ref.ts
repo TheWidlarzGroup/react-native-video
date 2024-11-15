@@ -14,7 +14,7 @@ export interface VideoRef {
   restoreUserInterfaceForPictureInPictureStopCompleted: (
     restore: boolean,
   ) => void;
-  save: (options: object) => Promise<VideoSaveData>;
+  save: (options: object) => Promise<VideoSaveData> | void;
   setVolume: (volume: number) => void;
   getCurrentPosition: () => Promise<number>;
   setFullScreen: (fullScreen: boolean) => void;
