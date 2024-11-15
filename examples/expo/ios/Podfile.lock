@@ -3,7 +3,7 @@ PODS:
   - DoubleConversion (1.1.6)
   - EXConstants (16.0.2):
     - ExpoModulesCore
-  - Expo (51.0.36):
+  - Expo (51.0.39):
     - ExpoModulesCore
   - ExpoAsset (10.0.10):
     - ExpoModulesCore
@@ -13,7 +13,7 @@ PODS:
     - ExpoModulesCore
   - ExpoKeepAwake (13.0.2):
     - ExpoModulesCore
-  - ExpoModulesCore (1.12.25):
+  - ExpoModulesCore (1.12.26):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -36,7 +36,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - EXSplashScreen (0.27.6):
+  - EXSplashScreen (0.27.7):
     - DoubleConversion
     - ExpoModulesCore
     - glog
@@ -974,7 +974,7 @@ PODS:
   - React-Mapbuffer (0.74.5-0):
     - glog
     - React-debug
-  - react-native-video (6.6.4):
+  - react-native-video (6.7.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -988,7 +988,7 @@ PODS:
     - React-featureflags
     - React-graphics
     - React-ImageManager
-    - react-native-video/Video (= 6.6.4)
+    - react-native-video/Video (= 6.7.0)
     - React-NativeModulesApple
     - React-RCTFabric
     - React-rendererdebug
@@ -1018,7 +1018,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-video/Video (6.6.4):
+  - react-native-video/Video (6.7.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1261,7 +1261,7 @@ PODS:
     - React-logger (= 0.74.5-0)
     - React-perflogger (= 0.74.5-0)
     - React-utils (= 0.74.5-0)
-  - RNCPicker (2.8.1):
+  - RNCPicker (2.7.5):
     - React-Core
   - SocketRocket (0.7.0)
   - Yoga (0.0.0)
@@ -1473,13 +1473,13 @@ SPEC CHECKSUMS:
   boost: 88202336c3ba1e7a264a83c0c888784b0f360c28
   DoubleConversion: 00143ab27d470b28035933623e1a3ea37e68889c
   EXConstants: 409690fbfd5afea964e5e9d6c4eb2c2b59222c59
-  Expo: 51c2d7fee7a8c7195ac257c9f9503378800d334e
+  Expo: 8c995afb875c15bf8439af0b20bcb9ed8f90d0bd
   ExpoAsset: 323700f291684f110fb55f0d4022a3362ea9f875
   ExpoFileSystem: 80bfe850b1f9922c16905822ecbf97acd711dc51
   ExpoFont: 00756e6c796d8f7ee8d211e29c8b619e75cbf238
   ExpoKeepAwake: 3b8815d9dd1d419ee474df004021c69fdd316d08
-  ExpoModulesCore: 0e7d4d5c13169bbbd53496721d811adbcc5d600a
-  EXSplashScreen: 17a656c08a0095be15b620c52e61dfdb665863d2
+  ExpoModulesCore: 831ece8311a489418746925820bbffdda587d6f4
+  EXSplashScreen: 3cad09949c2ca6730cbb2801b8c51cb87692425a
   FBLazyVector: a3df5e0e93ad03f65526deee8647cbfd9eea095f
   fmt: 1568fa7b2f242362c45c42d4a15e9dd4b2e621b3
   glog: 5941fa5836fea300e249178dd5a75c96e0207bb9
@@ -1508,7 +1508,7 @@ SPEC CHECKSUMS:
   React-jsitracing: e85fa8f607d38c6a3e169f5785777812289beba4
   React-logger: c0654977aab00b4a39279fa4f9514ac9f7f5fa66
   React-Mapbuffer: 25578953b1a52c45a875fe1a3a4dbd6ad3cbfc37
-  react-native-video: 917795f0e661c6542d1c7e4cb0d30f732b6f6ebf
+  react-native-video: d78e478668d5472aa28a2e612785f5605991da93
   react-native-video-plugin-sample: fea1791a4d65250d1d5f4d1754f811c0ab8298db
   React-nativeconfig: 5d3d749a2fefcdb71a9d2d839078aaeb73a9ed57
   React-NativeModulesApple: 9f6e0609c724b374263553607d5d90fdc177f875
@@ -1532,7 +1532,7 @@ SPEC CHECKSUMS:
   React-runtimescheduler: 8b6df7507ef57e43698e07c17f2f640a551c7744
   React-utils: 0722628556f07211936d98debee53d0df33227c1
   ReactCommon: 1a11abd52b3c972770d105a523cbbbcc2ca678f9
-  RNCPicker: 0b6860a6b208d4046227d2f626ad0722f99a969c
+  RNCPicker: 3e2c37a8328f368ce14da050cdc8231deb5fc9f9
   SocketRocket: abac6f5de4d4d62d24e11868d7a2f427e0ef940d
   Yoga: 8d49e3adb3b24ccac8a56ad6065c21c38b63bb34
 
