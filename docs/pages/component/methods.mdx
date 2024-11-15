@@ -6,7 +6,7 @@ This page shows the list of available methods
 
 ### `dismissFullscreenPlayer`
 
-<PlatformsList types={['Android', 'iOS']} />
+<PlatformsList types={['Android', 'iOS', 'web']} />
 
 `dismissFullscreenPlayer(): Promise<void>`
 
@@ -17,7 +17,7 @@ Take the player out of fullscreen mode.
 
 ### `pause`
 
-<PlatformsList types={['Android', 'iOS']} />
+<PlatformsList types={['Android', 'iOS', 'web']} />
 
 `pause(): Promise<void>`
 
@@ -25,7 +25,7 @@ Pause the video.
 
 ### `presentFullscreenPlayer`
 
-<PlatformsList types={['Android', 'iOS']} />
+<PlatformsList types={['Android', 'iOS', 'web']} />
 
 `presentFullscreenPlayer(): Promise<void>`
 
@@ -40,7 +40,7 @@ On Android, this puts the navigation controls in fullscreen mode. It is not a co
 
 ### `resume`
 
-<PlatformsList types={['Android', 'iOS']} />
+<PlatformsList types={['Android', 'iOS', 'web']} />
 
 `resume(): Promise<void>`
 
@@ -100,7 +100,7 @@ tolerance is the max distance in milliseconds from the seconds position that's a
 
 ### `setVolume`
 
-<PlatformsList types={['Android', 'iOS']} />
+<PlatformsList types={['Android', 'iOS', 'web']} />
 
 `setVolume(value): Promise<void>`
 
@@ -108,7 +108,7 @@ This function will change the volume exactly like [volume](./props#volume) prope
 
 ### `getCurrentPosition`
 
-<PlatformsList types={['Android', 'iOS']} />
+<PlatformsList types={['Android', 'iOS', 'web']} />
 
 `getCurrentPosition(): Promise<number>`
 
@@ -127,7 +127,7 @@ Changing source with this function will overide source provided as props.
 
 ### `setFullScreen`
 
-<PlatformsList types={['Android', 'iOS']} />
+<PlatformsList types={['Android', 'iOS', 'web']} />
 
 `setFullScreen(fullscreen): Promise<void>`
 
@@ -136,6 +136,13 @@ If you set it to `true`, the player enters fullscreen mode. If you set it to `fa
 On iOS, this displays the video in a fullscreen view controller with controls.
 
 On Android, this puts the navigation controls in fullscreen mode. It is not a complete fullscreen implementation, so you will still need to apply a style that makes the width and height match your screen dimensions to get a fullscreen video.
+
+### `nativeHtmlVideoRef`
+
+<PlatformsList types={['web']} />
+
+A ref to the underlying html video element. This can be used if you need to integrate a 3d party, web only video library (like hls.js, shaka, video.js...).
+
 
 ### Example Usage
 
@@ -188,7 +195,7 @@ Possible values are:
 
 ### `isCodecSupported`
 
-<PlatformsList types={['Android']} />
+<PlatformsList types={['Android', 'web']} />
 
 Indicates whether the provided codec is supported level supported by device.
 

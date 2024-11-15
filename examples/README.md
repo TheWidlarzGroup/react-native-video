@@ -6,7 +6,7 @@ This directory contains examples for `react-native-video` - this is a guide that
 
 - **[`bare`](#bare)** - Main example ([react-native-test-app](https://github.com/microsoft/react-native-test-app) - bare react-native app) that you can run on: iOS, Android, Windows, visionOS
 
-- **[`expo`](#expo)** - Expo example that you can run on: iOS, Android, tvOS, web (support coming soon)
+- **[`expo`](#expo)** - Expo example that you can run on: iOS, Android, tvOS, web
 
 ### Updating Examples Content
 
@@ -151,7 +151,9 @@ cd examples/expo && yarn install
 > Setup for android is not complete yet. Please use bare app for android testing.
 
     - For Web:
-      Support for web is coming soon.
+      ```bash
+      yarn web
+      ```
 
 If Metro Bundler is not running (or it did not start), you can start it by running:
 
