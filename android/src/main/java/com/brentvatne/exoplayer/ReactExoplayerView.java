@@ -90,7 +90,6 @@ import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
 import androidx.media3.exoplayer.source.MediaSource;
 import androidx.media3.exoplayer.source.MergingMediaSource;
 import androidx.media3.exoplayer.source.ProgressiveMediaSource;
-import androidx.media3.exoplayer.source.SingleSampleMediaSource;
 import androidx.media3.exoplayer.source.TrackGroupArray;
 import androidx.media3.exoplayer.source.ads.AdsMediaSource;
 import androidx.media3.exoplayer.trackselection.AdaptiveTrackSelection;
@@ -218,7 +217,6 @@ public class ReactExoplayerView extends FrameLayout implements
     private float rate = 1f;
     private AudioOutput audioOutput = AudioOutput.SPEAKER;
     private float audioVolume = 1f;
-    private int minLoadRetryCount = 3;
     private BufferConfig bufferConfig = new BufferConfig();
     private int maxBitRate = 0;
     private boolean hasDrmFailed = false;
@@ -881,23 +879,6 @@ public class ReactExoplayerView extends FrameLayout implements
             mediaSourceFactory.setDataSourceFactory(RNVSimpleCache.INSTANCE.getCacheFactory(buildHttpDataSourceFactory(true)));
         }
 
-        if (BuildConfig.USE_EXOPLAYER_IMA) {
-            AdsProps adProps = source.getAdsProps();
-
-            // Create an AdsLoader.
-            ImaAdsLoader.Builder imaLoaderBuilder = new ImaAdsLoader
-                    .Builder(themedReactContext)
-                    .setAdEventListener(this)
-                    .setAdErrorListener(this);
-
-            if (adProps != null && adProps.getAdLanguage() != null) {
-                ImaSdkSettings imaSdkSettings = ImaSdkFactory.getInstance().createImaSdkSettings();
-                imaSdkSettings.setLanguage(adProps.getAdLanguage());
-                imaLoaderBuilder.setImaSdkSettings(imaSdkSettings);
-            }
-            adsLoader = imaLoaderBuilder.build();
-        }
-
         mediaSourceFactory.setLocalAdInsertionComponents(unusedAdTagUri -> adsLoader, exoPlayerView);
 
         player = new ExoPlayer.Builder(getContext(), renderersFactory)
@@ -912,9 +893,6 @@ public class ReactExoplayerView extends FrameLayout implements
         player.setVolume(muted ? 0.f : audioVolume * 1);
         exoPlayerView.setPlayer(player);
 
-        if (adsLoader != null) {
-            adsLoader.setPlayer(player);
-        }
         audioBecomingNoisyReceiver.setListener(self);
         pictureInPictureReceiver.setListener();
         bandwidthMeter.addEventListener(new Handler(), self);
@@ -928,6 +906,41 @@ public class ReactExoplayerView extends FrameLayout implements
         if(showNotificationControls) {
             setupPlaybackService();
         }
+    }
+
+    private AdsMediaSource initializeAds(MediaSource videoSource, Source runningSource) {
+        AdsProps adProps = runningSource.getAdsProps();
+        Uri uri = runningSource.getUri();
+        if (adProps != null && uri != null) {
+            Uri adTagUrl = adProps.getAdTagUrl();
+            if (adTagUrl != null) {
+                exoPlayerView.showAds();
+                // Create an AdsLoader.
+                ImaAdsLoader.Builder imaLoaderBuilder = new ImaAdsLoader
+                        .Builder(themedReactContext)
+                        .setAdEventListener(this)
+                        .setAdErrorListener(this);
+
+                if (adProps.getAdLanguage() != null) {
+                    ImaSdkSettings imaSdkSettings = ImaSdkFactory.getInstance().createImaSdkSettings();
+                    imaSdkSettings.setLanguage(adProps.getAdLanguage());
+                    imaLoaderBuilder.setImaSdkSettings(imaSdkSettings);
+                }
+                adsLoader = imaLoaderBuilder.build();
+                adsLoader.setPlayer(player);
+                if (adsLoader != null) {
+                    DefaultMediaSourceFactory mediaSourceFactory = new DefaultMediaSourceFactory(mediaDataSourceFactory)
+                            .setLocalAdInsertionComponents(unusedAdTagUri -> adsLoader, exoPlayerView);
+                    DataSpec adTagDataSpec = new DataSpec(adTagUrl);
+                    return new AdsMediaSource(videoSource,
+                            adTagDataSpec,
+                            ImmutableList.of(uri, adTagUrl),
+                            mediaSourceFactory, adsLoader, exoPlayerView);
+                }
+            }
+        }
+        exoPlayerView.hideAds();
+        return null;
     }
 
     private DrmSessionManager initializePlayerDrm() {
@@ -963,32 +976,17 @@ public class ReactExoplayerView extends FrameLayout implements
             return;
         }
         // init source to manage ads and external text tracks
-        MediaSource subtitlesSource = buildTextSource();
-        MediaSource videoSource = buildMediaSource(runningSource.getUri(), runningSource.getExtension(), drmSessionManager, runningSource.getCropStartMs(), runningSource.getCropEndMs());
-        MediaSource mediaSourceWithAds = null;
-        Uri adTagUrl = null;
-        if (source.getAdsProps() != null) {
-            adTagUrl = source.getAdsProps().getAdTagUrl();
-        }
-        if (adTagUrl != null && adsLoader != null) {
-            DefaultMediaSourceFactory mediaSourceFactory = new DefaultMediaSourceFactory(mediaDataSourceFactory)
-                    .setLocalAdInsertionComponents(unusedAdTagUri -> adsLoader, exoPlayerView);
-            DataSpec adTagDataSpec = new DataSpec(adTagUrl);
-            DebugLog.w(TAG, "ads " + adTagUrl);
-            mediaSourceWithAds = new AdsMediaSource(videoSource, adTagDataSpec, ImmutableList.of(runningSource.getUri(), adTagUrl), mediaSourceFactory, adsLoader, exoPlayerView);
-            exoPlayerView.showAds();
-        }
-        MediaSource mediaSource;
-        if (subtitlesSource == null) {
-            mediaSource = Objects.requireNonNullElse(mediaSourceWithAds, videoSource);
-        } else {
-            ArrayList<MediaSource> mediaSourceList = new ArrayList<>();
-            mediaSourceList.add(subtitlesSource);
-            mediaSourceList.add(0, Objects.requireNonNullElse(mediaSourceWithAds, videoSource));
-            MediaSource[] mediaSourceArray = mediaSourceList.toArray(
-                    new MediaSource[mediaSourceList.size()]
-            );
+        MediaSource videoSource = buildMediaSource(runningSource.getUri(),
+                runningSource.getExtension(),
+                drmSessionManager,
+                runningSource.getCropStartMs(),
+                runningSource.getCropEndMs());
+        MediaSource mediaSourceWithAds = initializeAds(videoSource, runningSource);
+        MediaSource mediaSource = Objects.requireNonNullElse(mediaSourceWithAds, videoSource);
 
+        MediaSource subtitlesSource = buildTextSource();
+        if (subtitlesSource != null) {
+            MediaSource[] mediaSourceArray = {mediaSource, subtitlesSource};
             mediaSource = new MergingMediaSource(mediaSourceArray);
         }
 
@@ -1187,6 +1185,7 @@ public class ReactExoplayerView extends FrameLayout implements
             drmProvider = new DefaultDrmSessionManagerProvider();
         }
 
+
         switch (type) {
             case CONTENT_TYPE_SS:
                 if(!BuildConfig.USE_EXOPLAYER_SMOOTH_STREAMING) {
@@ -1216,8 +1215,14 @@ public class ReactExoplayerView extends FrameLayout implements
                     throw new IllegalStateException("HLS is not enabled!");
                 }
 
+                DataSource.Factory dataSourceFactory = mediaDataSourceFactory;
+
+                if (useCache) {
+                    dataSourceFactory = RNVSimpleCache.INSTANCE.getCacheFactory(buildHttpDataSourceFactory(true));
+                }
+
                 mediaSourceFactory = new HlsMediaSource.Factory(
-                        mediaDataSourceFactory
+                        dataSourceFactory
                 ).setAllowChunklessPreparation(source.getTextTracksAllowChunklessPreparation());
                 break;
             case CONTENT_TYPE_OTHER:
@@ -1263,7 +1268,7 @@ public class ReactExoplayerView extends FrameLayout implements
         MediaSource mediaSource = mediaSourceFactory
                 .setDrmSessionManagerProvider(drmProvider)
                 .setLoadErrorHandlingPolicy(
-                        config.buildLoadErrorHandlingPolicy(minLoadRetryCount)
+                        config.buildLoadErrorHandlingPolicy(source.getMinLoadRetryCount())
                 )
                 .createMediaSource(mediaItem);
 
@@ -1961,7 +1966,8 @@ public class ReactExoplayerView extends FrameLayout implements
             }
 
             if (!isSourceEqual) {
-                reloadSource();
+                playerNeedsSource = true;
+                initializePlayer();
             }
         } else {
             clearSrc();
@@ -1986,11 +1992,6 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void setReportBandwidth(boolean reportBandwidth) {
         mReportBandwidth = reportBandwidth;
-    }
-
-    private void reloadSource() {
-        playerNeedsSource = true;
-        initializePlayer();
     }
 
     public void setResizeModeModifier(@ResizeMode.Mode int resizeMode) {
@@ -2431,12 +2432,6 @@ public class ReactExoplayerView extends FrameLayout implements
             trackSelector.setParameters(trackSelector.buildUponParameters()
                     .setMaxVideoBitrate(maxBitRate == 0 ? Integer.MAX_VALUE : maxBitRate));
         }
-    }
-
-    public void setMinLoadRetryCountModifier(int newMinLoadRetryCount) {
-        minLoadRetryCount = newMinLoadRetryCount;
-        releasePlayer();
-        initializePlayer();
     }
 
     public void setPlayInBackground(boolean playInBackground) {

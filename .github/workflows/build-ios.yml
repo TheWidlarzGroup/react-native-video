@@ -9,28 +9,37 @@ on:
       - '.github/workflows/build-ios.yml'
       - 'ios/**'
       - '*.podspec'
-      - 'examples/basic/ios/**'
+      - 'examples/bare/ios/**'
   pull_request:
     paths:
       - '.github/workflows/build-ios.yml'
       - 'ios/**'
       - '*.podspec'
-      - 'examples/basic/ios/**'
+      - 'examples/bare/ios/**'
 
 jobs:
   build:
     name: Build iOS Example App
-    runs-on: macos-14 # This allow us to use Xcode 15.0.1 which is a lot faster - TODO change to "macos-latest" once it's out of beta
+    runs-on: macos-latest
     defaults:
       run:
-        working-directory: examples/basic/ios
+        working-directory: examples/bare/ios
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install node_modules
+      - name: Install node_modules at Root
         uses: ./.github/actions/setup-node
         with:
-          working-directory: examples/basic
+          working-directory: ./
+
+      - name: Build Library
+        working-directory: ./
+        run: yarn build
+
+      - name: Install node_modules at Example
+        uses: ./.github/actions/setup-node
+        with:
+          working-directory: examples/bare
 
       - name: Restore buildcache
         uses: mikehardy/buildcache-action@v2
@@ -43,24 +52,30 @@ jobs:
           bundler-cache: true
 
       - name: Restore Pods cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
-            examples/basic/ios/Pods
+            examples/bare/ios/Pods
             ~/Library/Caches/CocoaPods
             ~/.cocoapods
           key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
           restore-keys: |
             ${{ runner.os }}-pods-
+
+      - name: Generate Native Project
+        run: pod install
+
       - name: Install Pods
         run: pod install
+
       - name: Install xcpretty
         run: gem install xcpretty
+
       - name: Build App
         run: "set -o pipefail && xcodebuild \
           -derivedDataPath build -UseModernBuildSystem=YES \
-          -workspace videoplayer.xcworkspace \
-          -scheme videoplayer \
+          -workspace BareExample.xcworkspace \
+          -scheme BareExample \
           -sdk iphonesimulator \
           -configuration Debug \
           -destination 'platform=iOS Simulator,name=iPhone 14' \
@@ -69,17 +84,26 @@ jobs:
 
   build-with-ads:
     name: Build iOS Example App With Ads
-    runs-on: macos-14 # This allow us to use Xcode 15.0.1 which is a lot faster - TODO change to "macos-latest" once it's out of beta
+    runs-on: macos-latest
     defaults:
       run:
-        working-directory: examples/basic/ios
+        working-directory: examples/bare/ios
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install node_modules
+      - name: Install node_modules at Root
         uses: ./.github/actions/setup-node
         with:
-          working-directory: examples/basic
+          working-directory: ./
+
+      - name: Build Library
+        working-directory: ./
+        run: yarn build
+
+      - name: Install node_modules at Example
+        uses: ./.github/actions/setup-node
+        with:
+          working-directory: examples/bare
 
       - name: Restore buildcache
         uses: mikehardy/buildcache-action@v2
@@ -92,24 +116,30 @@ jobs:
           bundler-cache: true
 
       - name: Restore Pods cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
-            examples/basic/ios/Pods
+            examples/bare/ios/Pods
             ~/Library/Caches/CocoaPods
             ~/.cocoapods
           key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
           restore-keys: |
             ${{ runner.os }}-pods-
+
+      - name: Generate Native Project
+        run: export RNV_SAMPLE_ENABLE_ADS=true && pod install
+
       - name: Install Pods
         run:  export RNV_SAMPLE_ENABLE_ADS=true && pod install
+
       - name: Install xcpretty
         run: gem install xcpretty
+
       - name: Build App
         run: "set -o pipefail && export RNV_SAMPLE_ENABLE_ADS=true && xcodebuild \
           -derivedDataPath build -UseModernBuildSystem=YES \
-          -workspace videoplayer.xcworkspace \
-          -scheme videoplayer \
+          -workspace BareExample.xcworkspace \
+          -scheme BareExample \
           -sdk iphonesimulator \
           -configuration Debug \
           -destination 'platform=iOS Simulator,name=iPhone 14' \
@@ -118,17 +148,26 @@ jobs:
 
   build-with-caching:
     name: Build iOS Example App With Caching
-    runs-on: macos-14 # This allow us to use Xcode 15.0.1 which is a lot faster - TODO change to "macos-latest" once it's out of beta
+    runs-on: macos-latest
     defaults:
       run:
-        working-directory: examples/basic/ios
+        working-directory: examples/bare/ios
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install node_modules
+      - name: Install node_modules at Root
         uses: ./.github/actions/setup-node
         with:
-          working-directory: examples/basic
+          working-directory: ./
+
+      - name: Build Library
+        working-directory: ./
+        run: yarn build
+
+      - name: Install node_modules at Example
+        uses: ./.github/actions/setup-node
+        with:
+          working-directory: examples/bare
 
       - name: Restore buildcache
         uses: mikehardy/buildcache-action@v2
@@ -141,24 +180,30 @@ jobs:
           bundler-cache: true
 
       - name: Restore Pods cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
-            examples/basic/ios/Pods
+            examples/bare/ios/Pods
             ~/Library/Caches/CocoaPods
             ~/.cocoapods
           key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
           restore-keys: |
             ${{ runner.os }}-pods-
+
+      - name: Generate Native Project
+        run: export RNV_SAMPLE_VIDEO_CACHING=true && pod install
+
       - name: Install Pods
         run: export RNV_SAMPLE_VIDEO_CACHING=true && pod install
+
       - name: Install xcpretty
         run: gem install xcpretty
+
       - name: Build App
         run: "set -o pipefail && export RNV_SAMPLE_VIDEO_CACHING=true && xcodebuild \
           -derivedDataPath build -UseModernBuildSystem=YES \
-          -workspace videoplayer.xcworkspace \
-          -scheme videoplayer \
+          -workspace BareExample.xcworkspace \
+          -scheme BareExample \
           -sdk iphonesimulator \
           -configuration Debug \
           -destination 'platform=iOS Simulator,name=iPhone 14' \

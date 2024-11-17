@@ -34,11 +34,17 @@ const withRNVideo: ConfigPlugin<ConfigProps> = (config, props = {}) => {
   }
 
   if (props.enableADSExtension) {
-    config = withAds(config, props.enableADSExtension);
+    config = withAds(config, {
+      enableADSExtension: props.enableADSExtension,
+      testApp: props.reactNativeTestApp,
+    });
   }
 
   if (props.enableCacheExtension) {
-    config = withCaching(config, props.enableCacheExtension);
+    config = withCaching(config, {
+      enableCachingExtension: props.enableCacheExtension,
+      testApp: props.reactNativeTestApp,
+    });
   }
 
   if (props.enableBackgroundAudio) {

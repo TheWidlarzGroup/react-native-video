@@ -3,6 +3,7 @@ package com.brentvatne.exoplayer
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.upstream.CmcdConfiguration
 import com.brentvatne.common.api.CMCDProps
+import com.brentvatne.common.toolbox.DebugLog
 import com.google.common.collect.ImmutableListMultimap
 
 class CMCDConfig(private val props: CMCDProps) {
@@ -15,8 +16,20 @@ class CMCDConfig(private val props: CMCDProps) {
             object : CmcdConfiguration.RequestConfig {
                 override fun getCustomData(): ImmutableListMultimap<String, String> = buildCustomData()
             },
-            props.mode
+            intToCmcdMode(props.mode)
         )
+
+    private fun intToCmcdMode(mode: Int): Int =
+        when (mode) {
+            0 -> CmcdConfiguration.MODE_REQUEST_HEADER
+
+            1 -> CmcdConfiguration.MODE_QUERY_PARAMETER
+
+            else -> {
+                DebugLog.e("CMCDConfig", "Unsupported mode: $mode, fallback on MODE_REQUEST_HEADER")
+                CmcdConfiguration.MODE_REQUEST_HEADER
+            }
+        }
 
     private fun buildCustomData(): ImmutableListMultimap<String, String> =
         ImmutableListMultimap.builder<String, String>().apply {

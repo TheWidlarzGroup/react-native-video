@@ -43,7 +43,6 @@ class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) : View
         private const val PROP_PROGRESS_UPDATE_INTERVAL = "progressUpdateInterval"
         private const val PROP_REPORT_BANDWIDTH = "reportBandwidth"
         private const val PROP_RATE = "rate"
-        private const val PROP_MIN_LOAD_RETRY_COUNT = "minLoadRetryCount"
         private const val PROP_MAXIMUM_BIT_RATE = "maxBitRate"
         private const val PROP_PLAY_IN_BACKGROUND = "playInBackground"
         private const val PROP_DISABLE_FOCUS = "disableFocus"
@@ -192,11 +191,6 @@ class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) : View
     @ReactProp(name = PROP_MAXIMUM_BIT_RATE)
     fun setMaxBitRate(videoView: ReactExoplayerView, maxBitRate: Float) {
         videoView.setMaxBitRateModifier(maxBitRate.toInt())
-    }
-
-    @ReactProp(name = PROP_MIN_LOAD_RETRY_COUNT)
-    fun setMinLoadRetryCount(videoView: ReactExoplayerView, minLoadRetryCount: Int) {
-        videoView.setMinLoadRetryCountModifier(minLoadRetryCount)
     }
 
     @ReactProp(name = PROP_PLAY_IN_BACKGROUND, defaultBoolean = false)
