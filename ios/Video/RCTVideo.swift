@@ -964,7 +964,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     func setSelectedTextTrack(_ selectedTextTrack: SelectedTrackCriteria?) {
         _selectedTextTrackCriteria = selectedTextTrack ?? SelectedTrackCriteria.none()
-        guard let source else { return }
+        guard let source = _source else { return }
         if !source.textTracks.isEmpty { // sideloaded text tracks
             RCTPlayerOperations.setSideloadedText(player: _player, textTracks: source.textTracks, criteria: _selectedTextTrackCriteria)
         } else { // text tracks included in the HLS playlist
