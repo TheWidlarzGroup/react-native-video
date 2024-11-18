@@ -964,12 +964,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     func setSelectedTextTrack(_ selectedTextTrack: SelectedTrackCriteria?) {
         _selectedTextTrackCriteria = selectedTextTrack ?? SelectedTrackCriteria.none()
-        guard let source = _source, let player = _player else { return }
+        guard let source = _source else { return }
         if !source.textTracks.isEmpty { // sideloaded text tracks
-            RCTPlayerOperations.setSideloadedText(player: player, textTracks: source.textTracks, criteria: _selectedTextTrackCriteria)
+            RCTPlayerOperations.setSideloadedText(player: _player, textTracks: source.textTracks, criteria: _selectedTextTrackCriteria)
         } else { // text tracks included in the HLS playlist§
             Task {
-                await RCTPlayerOperations.setMediaSelectionTrackForCharacteristic(player: player, characteristic: AVMediaCharacteristic.legible,
+                await RCTPlayerOperations.setMediaSelectionTrackForCharacteristic(player: _player, characteristic: AVMediaCharacteristic.legible,
                                                                                   criteria: _selectedTextTrackCriteria)
             }
         }
