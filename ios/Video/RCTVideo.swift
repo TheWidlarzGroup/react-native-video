@@ -970,7 +970,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         } else { // text tracks included in the HLS playlist
             Task { [weak self] in
                 guard let self,
-                    let player = self._player else { return }
+                      let player = self._player else { return }
 
                 await RCTPlayerOperations.setMediaSelectionTrackForCharacteristic(
                     player: player,
