@@ -1,6 +1,7 @@
 package com.dice.messaging
 
 import android.annotation.SuppressLint
+import androidx.media3.common.C
 import androidx.media3.common.C.TRACK_TYPE_AUDIO
 import androidx.media3.common.C.TRACK_TYPE_TEXT
 import androidx.media3.common.PlaybackException
@@ -19,6 +20,7 @@ import com.dice.dicemessaging.PlayerSeekInfo
 import com.dice.dicemessaging.PlayerState
 import com.dice.dicemessaging.PlayerTextTracksInfo
 import com.dice.dicemessaging.StreamType
+import com.diceplatform.doris.Constants
 import com.diceplatform.doris.ExoDoris
 import com.diceplatform.doris.custom.utils.LiveEdgeUtils.isOnLiveEdge
 import com.diceplatform.doris.entity.Source
@@ -85,10 +87,19 @@ class DorisMessaging(
 
     private fun seekTo(message: DiceMessage.SetPlayerPositionMessage) {
         val oldPosition = player.currentPosition
-        val newPosition = message.setPositionPayload.position
+        val newPosition = message.getSeekPosition(player.windowStartTime)
         player.seekTo(newPosition)
         sendPlayerSeekedMessage(oldPosition, newPosition)
         sendPlayerProgressMessage(message, newPosition)
+    }
+
+    private fun DiceMessage.SetPlayerPositionMessage.getSeekPosition(windowStartTimeMs: Long): Long {
+        val timestamp = setPositionPayload.timestamp ?: 0
+        if (windowStartTimeMs == C.TIME_UNSET || !Constants.isValidTimeStamp(timestamp)) {
+            return setPositionPayload.position
+        }
+
+        return timestamp - windowStartTimeMs
     }
 
     @SuppressLint("UnsafeOptInUsageError")

@@ -5,9 +5,7 @@ import androidx.media3.common.C.TRACK_TYPE_TEXT
 import androidx.media3.common.Format
 import com.dice.dicemessaging.PlayerAudioTracksInfo
 import com.dice.dicemessaging.PlayerTextTracksInfo
-import com.dice.dicemessaging.SetPlayerAnnotationsInfo
 import com.diceplatform.doris.DorisPlayer
-import com.diceplatform.doris.custom.ui.entity.annotation.Annotation
 import com.diceplatform.doris.entity.Track
 
 
@@ -74,39 +72,3 @@ internal fun Format.toMediaTrack(type: Int, selected: Boolean) = Track(
     language,
     selected,
 )
-
-internal fun SetPlayerAnnotationsInfo.PlayerAnnotation.toDorisAnnotation() = Annotation.Builder()
-    .setType(
-        when (type) {
-            SetPlayerAnnotationsInfo.AnnotationType.TEXT -> Annotation.Type.TEXT
-            SetPlayerAnnotationsInfo.AnnotationType.DRAWABLE -> Annotation.Type.DRAWABLE
-            else -> Annotation.Type.RECTANGLE
-        }
-    )
-    .setVerticalPosition(
-        when (verticalPosition) {
-            SetPlayerAnnotationsInfo.VerticalPosition.BOTTOM -> Annotation.VerticalPosition.BOTTOM
-            SetPlayerAnnotationsInfo.VerticalPosition.CENTER -> Annotation.VerticalPosition.CENTER
-            else -> Annotation.VerticalPosition.TOP
-        }
-    )
-    .setHorizontalPosition(
-        when (horizontalPosition) {
-            SetPlayerAnnotationsInfo.HorizontalPosition.START -> Annotation.HorizontalPosition.START
-            SetPlayerAnnotationsInfo.HorizontalPosition.END -> Annotation.HorizontalPosition.END
-            else -> Annotation.HorizontalPosition.CENTER
-        }
-    )
-    .setPosition(position)
-    .setMarginVerticalDp(marginVerticalDp)
-    .setShowOnFullScreenOnly(showOnFullScreenOnly)
-    .setScrubSticky(scrubSticky)
-    .setClickable(clickable)
-    .setName(name)
-    .setThumbnailUrl(thumbnailUrl)
-    .setDrawableResId(drawableResId)
-    .setDrawableSizeInDp(drawableSizeInDp)
-    .setText(text)
-    .setTextSizeSp(textSizeSp)
-    .setTextColor(textColor)
-    .build()
