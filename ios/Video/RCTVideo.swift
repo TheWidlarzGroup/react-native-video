@@ -967,10 +967,16 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         guard let source = _source else { return }
         if !source.textTracks.isEmpty { // sideloaded text tracks
             RCTPlayerOperations.setSideloadedText(player: _player, textTracks: source.textTracks, criteria: _selectedTextTrackCriteria)
-        } else { // text tracks included in the HLS playlist§
-            Task {
-                await RCTPlayerOperations.setMediaSelectionTrackForCharacteristic(player: _player, characteristic: AVMediaCharacteristic.legible,
-                                                                                  criteria: _selectedTextTrackCriteria)
+        } else { // text tracks included in the HLS playlist
+            Task { [weak self] in
+                guard let self,
+                      let player = self._player else { return }
+
+                await RCTPlayerOperations.setMediaSelectionTrackForCharacteristic(
+                    player: player,
+                    characteristic: .legible,
+                    criteria: self._selectedTextTrackCriteria
+                )
             }
         }
     }
