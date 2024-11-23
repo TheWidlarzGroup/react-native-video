@@ -51,6 +51,7 @@ export type VideoSrc = Readonly<{
   textTracks?: TextTracks;
   ad?: AdsConfig;
   minLoadRetryCount?: Int32; // Android
+  bufferConfig?: BufferConfig; // Android
 }>;
 
 type DRMType = WithDefault<string, 'widevine'>;
@@ -358,7 +359,6 @@ export interface VideoNativeProps extends ViewProps {
   restoreUserInterfaceForPIPStopCompletionHandler?: boolean;
   debug?: DebugConfig;
   showNotificationControls?: WithDefault<boolean, false>; // Android, iOS
-  bufferConfig?: BufferConfig; // Android
   currentPlaybackTime?: Double; // Android
   disableDisconnectError?: boolean; // Android
   focusable?: boolean; // Android
