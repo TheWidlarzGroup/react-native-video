@@ -1894,7 +1894,7 @@ SPEC CHECKSUMS:
   React-Mapbuffer: 726951e68f4bb1c2513d322f2548798b2a3d628d
   React-microtasksnativemodule: bc55596cbf40957f5099bc495f1a06f459d0be88
   react-native-video: 9aec95eecb1c523b67e71a44032935f77f926276
-  react-native-video-plugin-sample: 247a49315432ca623a88192e45a12a003a966861
+  react-native-video-plugin-sample: 1f6b1dda047cdf07f6cd7e730dc92c1349656b1a
   React-nativeconfig: 470fce6d871c02dc5eff250a362d56391b7f52d6
   React-NativeModulesApple: 6297fc3136c1fd42884795c51d7207de6312b606
   React-perflogger: f2c94413cfad44817c96cab33753831e73f0d0dd
@@ -1926,6 +1926,6 @@ SPEC CHECKSUMS:
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: c5b0e913b5b3b4cde588227c1402e747797061f3
 
-PODFILE CHECKSUM: 4e984267033b79c0079e85ac70b826d6540e448b
+PODFILE CHECKSUM: 90d803972b4acfc1d2bb6dbe7b0713677a2ff655
 
 COCOAPODS: 1.15.2
