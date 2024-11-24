@@ -39,7 +39,7 @@ namespace margelo::nitro::video { class HybridVideoViewViewManagerSpec; }
 #include <NitroModules/ArrayBufferHolder.hpp>
 #include <NitroModules/AnyMapHolder.hpp>
 #include <NitroModules/HybridContext.hpp>
-#include <NitroModules/PromiseHolder.hpp>
+#include <NitroModules/RuntimeError.hpp>
 
 // Forward declarations of Swift defined types
 // Forward declaration of `HybridVideoPlayerFactorySpecCxx` to properly resolve imports.

@@ -18,6 +18,7 @@
 #include "JHybridVideoViewViewManagerSpec.hpp"
 #include "JHybridVideoViewViewManagerFactorySpec.hpp"
 #include <NitroModules/JNISharedPtr.hpp>
+#include <NitroModules/DefaultConstructableObject.hpp>
 
 namespace margelo::nitro::video {
 
@@ -39,15 +40,8 @@ int initialize(JavaVM* vm) {
     HybridObjectRegistry::registerHybridObjectConstructor(
       "VideoPlayerFactory",
       []() -> std::shared_ptr<HybridObject> {
-        static auto javaClass = jni::findClassStatic("com/margelo/nitro/video/HybridVideoPlayerFactory");
-        static auto defaultConstructor = javaClass->getConstructor<JHybridVideoPlayerFactorySpec::javaobject()>();
-    
-        auto instance = javaClass->newObject(defaultConstructor);
-    #ifdef NITRO_DEBUG
-        if (instance == nullptr) [[unlikely]] {
-          throw std::runtime_error("Failed to create an instance of \"JHybridVideoPlayerFactorySpec\" - the constructor returned null!");
-        }
-    #endif
+        static DefaultConstructableObject<JHybridVideoPlayerFactorySpec::javaobject> object("com/margelo/nitro/video/HybridVideoPlayerFactory");
+        auto instance = object.create();
         auto globalRef = jni::make_global(instance);
         return JNISharedPtr::make_shared_from_jni<JHybridVideoPlayerFactorySpec>(globalRef);
       }
@@ -55,15 +49,8 @@ int initialize(JavaVM* vm) {
     HybridObjectRegistry::registerHybridObjectConstructor(
       "VideoPlayerSourceFactory",
       []() -> std::shared_ptr<HybridObject> {
-        static auto javaClass = jni::findClassStatic("com/margelo/nitro/video/HybridVideoPlayerSourceFactory");
-        static auto defaultConstructor = javaClass->getConstructor<JHybridVideoPlayerSourceFactorySpec::javaobject()>();
-    
-        auto instance = javaClass->newObject(defaultConstructor);
-    #ifdef NITRO_DEBUG
-        if (instance == nullptr) [[unlikely]] {
-          throw std::runtime_error("Failed to create an instance of \"JHybridVideoPlayerSourceFactorySpec\" - the constructor returned null!");
-        }
-    #endif
+        static DefaultConstructableObject<JHybridVideoPlayerSourceFactorySpec::javaobject> object("com/margelo/nitro/video/HybridVideoPlayerSourceFactory");
+        auto instance = object.create();
         auto globalRef = jni::make_global(instance);
         return JNISharedPtr::make_shared_from_jni<JHybridVideoPlayerSourceFactorySpec>(globalRef);
       }
@@ -71,15 +58,8 @@ int initialize(JavaVM* vm) {
     HybridObjectRegistry::registerHybridObjectConstructor(
       "VideoViewViewManagerFactory",
       []() -> std::shared_ptr<HybridObject> {
-        static auto javaClass = jni::findClassStatic("com/margelo/nitro/video/HybridVideoViewViewManagerFactory");
-        static auto defaultConstructor = javaClass->getConstructor<JHybridVideoViewViewManagerFactorySpec::javaobject()>();
-    
-        auto instance = javaClass->newObject(defaultConstructor);
-    #ifdef NITRO_DEBUG
-        if (instance == nullptr) [[unlikely]] {
-          throw std::runtime_error("Failed to create an instance of \"JHybridVideoViewViewManagerFactorySpec\" - the constructor returned null!");
-        }
-    #endif
+        static DefaultConstructableObject<JHybridVideoViewViewManagerFactorySpec::javaobject> object("com/margelo/nitro/video/HybridVideoViewViewManagerFactory");
+        auto instance = object.create();
         auto globalRef = jni::make_global(instance);
         return JNISharedPtr::make_shared_from_jni<JHybridVideoViewViewManagerFactorySpec>(globalRef);
       }
