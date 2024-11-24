@@ -24,6 +24,7 @@ export type ReactVideoSourceProperties = {
   uri?: string;
   isNetwork?: boolean;
   isAsset?: boolean;
+  isLocalAssetFile?: boolean;
   shouldCache?: boolean;
   type?: string;
   mainVer?: number;

@@ -7,6 +7,8 @@
     "start:tv": "EXPO_TV=1 expo start",
     "android:tv": "EXPO_TV=1 expo run:android",
     "android": "EXPO_TV=0 expo run:android",
+    "release:android": "cd android && EXPO_TV=0 ./gradlew assembleRelease && cd -",
+    "release:android:tv": "cd android && EXPO_TV=1 ./gradlew assembleRelease && cd -",
     "ios:tv": "EXPO_TV=1 expo run:ios",
     "ios": "EXPO_TV=0 expo run:ios",
     "web": "expo start --web",
