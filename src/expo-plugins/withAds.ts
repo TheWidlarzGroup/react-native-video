@@ -8,7 +8,10 @@ import {writeToPodfile} from './writeToPodfile';
 /**
  * Sets whether to enable the IMA SDK to use ADS with `react-native-video`.
  */
-export const withAds: ConfigPlugin<boolean> = (c, enableADSExtension) => {
+export const withAds: ConfigPlugin<{
+  enableADSExtension: boolean;
+  testApp?: boolean;
+}> = (c, {enableADSExtension, testApp = false}) => {
   const android_key = 'RNVideo_useExoplayerIMA';
   const ios_key = 'RNVideoUseGoogleIMA';
 
@@ -38,6 +41,7 @@ export const withAds: ConfigPlugin<boolean> = (c, enableADSExtension) => {
         config.modRequest.projectRoot,
         ios_key,
         enableADSExtension.toString(),
+        testApp,
       );
       return config;
     },

@@ -13,7 +13,7 @@ export default {
       />
       <meta
         name="og:image"
-        content="https://thewidlarzgroup.github.io/react-native-video/thumbnail.jpg"
+        content="https://docs.thewidlarzgroup.com/react-native-video/thumbnail.jpg"
       />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content="React Native Video" />
@@ -23,7 +23,7 @@ export default {
       />
       <meta
         name="twitter:image"
-        content="https://thewidlarzgroup.github.io/react-native-video/thumbnail.jpg"
+        content="https://docs.thewidlarzgroup.com/react-native-video/thumbnail.jpg"
       />
       <meta name="twitter:image:alt" content="React Native Video" />
       <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -32,6 +32,21 @@ export default {
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap"
         rel="stylesheet"
       />
+      <link
+        rel="icon"
+        type="image/png"
+        href="https://docs.thewidlarzgroup.com/react-native-video/favicon.png"
+      />
+      <script
+        async
+        src="https://www.googletagmanager.com/gtag/js?id=G-PM2TQQQMDN"
+      />
+      <script>
+        {`window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-PM2TQQQMDN');`}
+      </script>
     </>
   ),
   logo: (
@@ -39,7 +54,6 @@ export default {
       🎬 <strong>Video component</strong> for React Native
     </span>
   ),
-  faviconGlyph: '🎬',
   project: {
     link: 'https://github.com/TheWidlarzGroup/react-native-video',
   },
@@ -57,7 +71,7 @@ export default {
       <>
         <style>{`
         :is(html[class~=dark]) .extra-container {
-          background-color: #87ccef; 
+          background-color: #87ccef;
         }
         :is(html[class~=dark]) .extra-text {
           color: #171717;
