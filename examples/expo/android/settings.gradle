@@ -8,6 +8,7 @@ pluginManagement {
   if(reactNativeMinor == 74 && reactNativePatch <= 3){
     includeBuild("react-settings-plugin")
   }
+  includeBuild("../node_modules/@react-native/gradle-plugin")
 }
 
 plugins { id("com.facebook.react.settings") }

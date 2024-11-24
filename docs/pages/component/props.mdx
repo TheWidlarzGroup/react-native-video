@@ -52,6 +52,9 @@ A Boolean value that indicates whether the player should automatically delay pla
 
 ### `bufferConfig`
 
+> [!WARNING]
+> Deprecated, use source.bufferConfig instead
+
 <PlatformsList types={['Android']} />
 
 Adjust the buffer settings. This prop takes an object with one or more of the properties listed below.
@@ -906,6 +909,56 @@ source={{
     textTracksAllowChunklessPreparation: false,
   }}
 ```
+
+### `bufferConfig`
+
+<PlatformsList types={['Android']} />
+
+Adjust the buffer settings. This prop takes an object with one or more of the properties listed below.
+
+| Property                          | Type   | Description                                                                                                                                                                                     |
+| --------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| minBufferMs                       | number | The default minimum duration of media that the player will attempt to ensure is buffered at all times, in milliseconds.                                                                         |
+| maxBufferMs                       | number | The default maximum duration of media that the player will attempt to buffer, in milliseconds.                                                                                                  |
+| bufferForPlaybackMs               | number | The default duration of media that must be buffered for playback to start or resume following a user action such as a seek, in milliseconds.                                                    |
+| bufferForPlaybackAfterRebufferMs  | number | The default duration of media that must be buffered for playback to resume after a rebuffer, in milliseconds. A rebuffer is defined to be caused by buffer depletion rather than a user action. |
+| backBufferDurationMs              | number | The number of milliseconds of buffer to keep before the current position. This allows rewinding without rebuffering within that duration.                                                       |
+| maxHeapAllocationPercent          | number | The percentage of available heap that the video can use to buffer, between 0 and 1                                                                                                              |
+| minBackBufferMemoryReservePercent | number | The percentage of available app memory at which during startup the back buffer will be disabled, between 0 and 1                                                                                |
+| minBufferMemoryReservePercent     | number | The percentage of available app memory to keep in reserve that prevents buffer from using it, between 0 and 1                                                                                   |
+| cacheSizeMB                       | number | Cache size in MB, enabling this to prevent new src requests and save bandwidth while repeating videos, or 0 to disable. Android only.                                                           |
+| live                              | object | Object containing another config set for live playback configuration, see next table                                                                                                            |
+
+
+Description of live object:
+
+| Property                          | Type   | Description                                                                                                                                                                                     |
+| --------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| maxPlaybackSpeed                  | number | The maximum playback speed the player can use to catch up when trying to reach the target live offset.                                                                                          |
+| minPlaybackSpeed                  | number | The minimum playback speed the player can use to fall back when trying to reach the target live offset.                                                                                         |
+| maxOffsetMs                       | number | The maximum allowed live offset. Even when adjusting the offset to current network conditions, the player will not attempt to get above this offset during playback.                            |
+| minOffsetMs                       | number | The minimum allowed live offset. Even when adjusting the offset to current network conditions, the player will not attempt to get below this offset during playback.                            |
+| targetOffsetMs                    | number | The target live offset. The player will attempt to get close to this live offset during playback if possible.                                                                                   |
+
+For android, more informations about live configuration can be find [here](https://developer.android.com/media/media3/exoplayer/live-streaming?hl=en)
+
+Example with default values:
+
+```javascript
+bufferConfig={{
+  minBufferMs: 15000,
+  maxBufferMs: 50000,
+  bufferForPlaybackMs: 2500,
+  bufferForPlaybackAfterRebufferMs: 5000,
+  backBufferDurationMs: 120000,
+  cacheSizeMB: 0,
+  live: {
+      targetOffsetMs: 500,
+  },
+}}
+```
+
+Please note that the Android cache is a global cache that is shared among all components; individual components can still opt out of caching behavior by setting cacheSizeMB to 0, but multiple components with a positive cacheSizeMB will be sharing the same one, and the cache size will always be the first value set; it will not change during the app's lifecycle.
 
 #### `minLoadRetryCount`
 

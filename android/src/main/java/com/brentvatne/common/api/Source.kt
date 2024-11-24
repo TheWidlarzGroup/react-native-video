@@ -74,6 +74,11 @@ class Source {
      */
     var adsProps: AdsProps? = null
 
+    /*
+     * buffering configuration
+     */
+    var bufferConfig = BufferConfig()
+
     /**
      * The list of sideLoaded text tracks
      */
@@ -95,7 +100,8 @@ class Source {
                 cmcdProps == other.cmcdProps &&
                 sideLoadedTextTracks == other.sideLoadedTextTracks &&
                 adsProps == other.adsProps &&
-                minLoadRetryCount == other.minLoadRetryCount
+                minLoadRetryCount == other.minLoadRetryCount &&
+                bufferConfig == other.bufferConfig
             )
     }
 
@@ -164,6 +170,7 @@ class Source {
         private const val PROP_SRC_TEXT_TRACKS_ALLOW_CHUNKLESS_PREPARATION = "textTracksAllowChunklessPreparation"
         private const val PROP_SRC_TEXT_TRACKS = "textTracks"
         private const val PROP_SRC_MIN_LOAD_RETRY_COUNT = "minLoadRetryCount"
+        private const val PROP_SRC_BUFFER_CONFIG = "bufferConfig"
 
         @SuppressLint("DiscouragedApi")
         private fun getUriFromAssetId(context: Context, uriString: String): Uri? {
@@ -229,6 +236,8 @@ class Source {
                 source.textTracksAllowChunklessPreparation = safeGetBool(src, PROP_SRC_TEXT_TRACKS_ALLOW_CHUNKLESS_PREPARATION, true)
                 source.sideLoadedTextTracks = SideLoadedTextTrackList.parse(safeGetArray(src, PROP_SRC_TEXT_TRACKS))
                 source.minLoadRetryCount = safeGetInt(src, PROP_SRC_MIN_LOAD_RETRY_COUNT, 3)
+                source.bufferConfig = BufferConfig.parse(safeGetMap(src, PROP_SRC_BUFFER_CONFIG))
+
                 val propSrcHeadersArray = safeGetArray(src, PROP_SRC_HEADERS)
                 if (propSrcHeadersArray != null) {
                     if (propSrcHeadersArray.size() > 0) {
