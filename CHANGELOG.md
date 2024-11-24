@@ -1,5 +1,12 @@
 
 
+## [6.8.1](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.8.0...v6.8.1) (2024-11-24)
+
+
+### Bug Fixes
+
+* **ios:** handle async player access in text track selection ([#4293](https://github.com/TheWidlarzGroup/react-native-video/issues/4293)) ([daaac97](https://github.com/TheWidlarzGroup/react-native-video/commit/daaac9740aed1858b7ababae0ec8b08274130a27))
+
 # [6.8.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.7.0...v6.8.0) (2024-11-17)
 
 
