@@ -23,12 +23,40 @@ class BufferConfig {
 
     var live: Live = Live()
 
+    /** return true if this and src are equals  */
+    override fun equals(other: Any?): Boolean {
+        if (other == null || other !is BufferConfig) return false
+        return (
+            cacheSize == other.cacheSize &&
+                minBufferMs == other.minBufferMs &&
+                maxBufferMs == other.maxBufferMs &&
+                bufferForPlaybackMs == other.bufferForPlaybackMs &&
+                bufferForPlaybackAfterRebufferMs == other.bufferForPlaybackAfterRebufferMs &&
+                backBufferDurationMs == other.backBufferDurationMs &&
+                maxHeapAllocationPercent == other.maxHeapAllocationPercent &&
+                minBackBufferMemoryReservePercent == other.minBackBufferMemoryReservePercent &&
+                minBufferMemoryReservePercent == other.minBufferMemoryReservePercent &&
+                live == other.live
+            )
+    }
+
     class Live {
         var maxPlaybackSpeed: Float = BufferConfigPropUnsetDouble.toFloat()
         var minPlaybackSpeed: Float = BufferConfigPropUnsetDouble.toFloat()
         var maxOffsetMs: Long = BufferConfigPropUnsetInt.toLong()
         var minOffsetMs: Long = BufferConfigPropUnsetInt.toLong()
         var targetOffsetMs: Long = BufferConfigPropUnsetInt.toLong()
+
+        override fun equals(other: Any?): Boolean {
+            if (other == null || other !is Live) return false
+            return (
+                maxPlaybackSpeed == other.maxPlaybackSpeed &&
+                    minPlaybackSpeed == other.minPlaybackSpeed &&
+                    maxOffsetMs == other.maxOffsetMs &&
+                    minOffsetMs == other.minOffsetMs &&
+                    targetOffsetMs == other.targetOffsetMs
+                )
+        }
 
         companion object {
             private const val PROP_BUFFER_CONFIG_LIVE_MAX_PLAYBACK_SPEED = "maxPlaybackSpeed"
