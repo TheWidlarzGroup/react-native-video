@@ -1,5 +1,12 @@
 
 
+## [6.8.2](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.8.1...v6.8.2) (2024-11-25)
+
+
+### Bug Fixes
+
+* playback restart without bufferingConfig ([#4305](https://github.com/TheWidlarzGroup/react-native-video/issues/4305)) ([f37dc9e](https://github.com/TheWidlarzGroup/react-native-video/commit/f37dc9e33ebefd922605c5ae91360379fe91bed6))
+
 ## [6.8.1](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.8.0...v6.8.1) (2024-11-24)
 
 
