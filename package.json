@@ -1,25 +1,24 @@
 {
-    "name": "@react-native-video",
-    "version": "6.8.2",
-    "description": "A <Video /> element for react-native",
-    "packageManager": "bun@1.1.21",
-    "main": "lib/index",
-    "source": "src/index.ts",
-    "react-native": "src/index",
-    "license": "MIT",
-    "author": "Community Contributors",
-    "homepage": "https://docs.thewidlarzgroup.com/react-native-video/",
-    "repository": {
-        "type": "git",
-        "url": "git@github.com:TheWidlarzGroup/react-native-video.git"
-    },
-    "workspaces": [
-      "packages/react-native-video",
-      "packages/react-native-video-plugin-sample",
-      "examples/bare",
-      "examples/expo",
-      "docs"
-    ],
+  "name": "@react-native-video",
+  "description": "A <Video /> element for react-native",
+  "packageManager": "bun@1.1.21",
+  "main": "lib/index",
+  "source": "src/index.ts",
+  "react-native": "src/index",
+  "license": "MIT",
+  "author": "Community Contributors",
+  "homepage": "https://docs.thewidlarzgroup.com/react-native-video/",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:TheWidlarzGroup/react-native-video.git"
+  },
+  "workspaces": [
+    "packages/react-native-video",
+    "packages/react-native-video-plugin-sample",
+    "examples/bare",
+    "examples/expo",
+    "docs"
+  ],
   "scripts": {
     "postinstall": "patch-package --patch-dir ./examples/bare/patches",
     "lint": "bun run eslint .",
