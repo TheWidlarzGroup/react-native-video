@@ -17,7 +17,8 @@ if ENV['RNV_SAMPLE_VIDEO_CACHING']
   $RNVideoUseVideoCaching = true
 end
 
-# Chache dependencies need to have modular headers
+# Cache dependencies (SPTPersistentCache & DVAssetLoaderDelegate) need to have modular headers
 if defined?($RNVideoUseVideoCaching)
-  use_modular_headers!
+  pod 'SPTPersistentCache', :modular_headers => true
+  pod 'DVAssetLoaderDelegate', :modular_headers => true
 end
