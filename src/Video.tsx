@@ -774,7 +774,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       () => ({
         ...StyleSheet.absoluteFillObject,
       }),
-      [showPoster],
+      [],
     );
 
     return (
