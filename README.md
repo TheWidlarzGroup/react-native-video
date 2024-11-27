@@ -58,9 +58,6 @@ const VideoPlayer = () => {
   );
 };
 ```
-## Known issues
-- Android: VideoView does not show video on New Architecture - [#2](https://github.com/TheWidlarzGroup/react-native-video-v7/issues/2)
-
 
 ## Contributing
 
