@@ -434,7 +434,9 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
 
     const onVideoLoad = useCallback(
       (e: NativeSyntheticEvent<OnLoadData>) => {
-        hasPoster && setShowPoster(false);
+        if (Platform.OS === 'windows') {
+          hasPoster && setShowPoster(false);
+        }
         onLoad?.(e.nativeEvent);
       },
       [onLoad, hasPoster, setShowPoster],
@@ -771,7 +773,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     const _style: StyleProp<ViewStyle> = useMemo(
       () => ({
         ...StyleSheet.absoluteFillObject,
-        ...(showPoster ? {display: 'none'} : {}),
+        ...(showPoster ? {zIndex: 1} : {}),
       }),
       [showPoster],
     );
