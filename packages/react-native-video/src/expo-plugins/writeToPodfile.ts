@@ -11,7 +11,14 @@ export const writeToPodfile = (
   const podfilePath = path.join(projectRoot, 'ios', 'Podfile');
   const podfileContent = fs.readFileSync(podfilePath, 'utf8');
 
-  if (podfileContent.includes(`$${key} =`)) {
+  // This is for internal purposes only. We are removing the ENV checks from the Podfile.
+  // If this conflicts with your project's setup, please let report it to us.
+  const regex =
+    /if ENV\['RNV_SAMPLE_ENABLE_ADS'\]\s*\n\s*\$RNVideoUseGoogleIMA\s*=\s*(true|false)\s*\nend\n*|if ENV\['RNV_SAMPLE_VIDEO_CACHING'\]\s*\n\s*\$RNVideoUseVideoCaching\s*=\s*(true|false)\s*\nend\n*/g;
+
+  const podfileContentWithoutEnv = `{${podfileContent}}`.replace(regex, '');
+
+  if (podfileContentWithoutEnv.includes(`$${key} =`)) {
     console.warn(
       `RNV - Podfile already contains a definition for "$${key}". Skipping...`,
     );
@@ -19,8 +26,10 @@ export const writeToPodfile = (
   }
 
   if (testApp) {
+    console.log('RNV - Writing to Test App Podfile');
     mergeTestAppPodfile(podfileContent, podfilePath, key, value);
   } else {
+    console.log('RNV - Writing to Expo Podfile');
     mergeExpoPodfile(podfileContent, podfilePath, key, value);
   }
 };
