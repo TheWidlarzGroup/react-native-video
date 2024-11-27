@@ -14,7 +14,7 @@ class VideoView @JvmOverloads constructor(
   attrs: AttributeSet? = null,
   defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
-  var player: HybridVideoPlayer? = null
+  var hybridPlayer: HybridVideoPlayer? = null
     set(value) {
       // Clear the SurfaceView when player is about to be set to null
       if (value == null && field != null) {
@@ -33,11 +33,10 @@ class VideoView @JvmOverloads constructor(
 
   var nitroId: Int = -1
     set(value) {
-      // delay event on first render to allow view to initialize
       if (field == -1) {
-        postDelayed({
+        post {
           onNitroIdChange?.let { it(value) }
-        }, 1)
+        }
       }
 
       field = value
@@ -57,9 +56,13 @@ class VideoView @JvmOverloads constructor(
 
   // -------- View Lifecycle Methods --------
   override fun onDetachedFromWindow() {
-    player?.player?.clearVideoSurfaceView(surfaceView)
-    player = null
+    hybridPlayer?.player?.clearVideoSurfaceView(surfaceView)
     super.onDetachedFromWindow()
+  }
+
+  override fun onAttachedToWindow() {
+    hybridPlayer?.player?.setVideoSurfaceView(surfaceView)
+    super.onAttachedToWindow()
   }
 
   companion object {

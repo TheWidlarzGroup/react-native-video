@@ -19,7 +19,7 @@ const VideoViewViewManagerFactory =
     'VideoViewViewManagerFactory'
   );
 
-const DEBUG = true;
+const DEBUG = false;
 
 const VideoView = ({ player, ...props }: VideoViewProps) => {
   const nitroId = React.useMemo(() => nitroIdCounter++, []);
@@ -74,7 +74,6 @@ const VideoView = ({ player, ...props }: VideoViewProps) => {
   }, [player]);
 
   return (
-    // TODO: It would be nice to be able to create Hybrid ViewManager before Component is mounted but after native props being set
     <NativeVideoView
       nitroId={nitroId}
       onNitroIdChange={onNitroIdChange}

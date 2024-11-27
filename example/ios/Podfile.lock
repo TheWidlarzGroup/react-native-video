@@ -4,7 +4,7 @@ PODS:
   - FBLazyVector (0.75.3)
   - fmt (9.1.0)
   - glog (0.3.5)
-  - NitroModules (0.13.0):
+  - NitroModules (0.17.0):
     - DoubleConversion
     - glog
     - RCT-Folly (= 2024.01.01.00)
@@ -1495,7 +1495,7 @@ PODS:
     - React-logger (= 0.75.3)
     - React-perflogger (= 0.75.3)
     - React-utils (= 0.75.3)
-  - ReactNativeHost (0.5.0):
+  - ReactNativeHost (0.5.1):
     - DoubleConversion
     - glog
     - RCT-Folly (= 2024.01.01.00)
@@ -1735,7 +1735,7 @@ SPEC CHECKSUMS:
   FBLazyVector: 7b438dceb9f904bd85ca3c31d64cce32a035472b
   fmt: 4c2741a687cc09f0634a2e2c72a838b99f1ff120
   glog: 69ef571f3de08433d766d614c73a9838a06bf7eb
-  NitroModules: 6ab0dd76e53155d177397cb85ac9ac7b9111254a
+  NitroModules: 0c3d743f46231d351a108ecc5b4ed5f3f5be499f
   NitroVideo: 1a93911c012df3f739b68352363ad44582dc3ee8
   RCT-Folly: 4464f4d875961fce86008d45f4ecf6cef6de0740
   RCTDeprecation: 4191f6e64b72d9743f6fe1a8a16e89e868f5e9e7
@@ -1791,7 +1791,7 @@ SPEC CHECKSUMS:
   React-utils: b2baee839fb869f732d617b97dcfa384b4b4fdb3
   ReactCodegen: f177b8fd67788c5c6ff45a39c7482c5f8d77ace6
   ReactCommon: 627bd3192ef01a351e804e9709673d3741d38fec
-  ReactNativeHost: 99c0ffb175cd69de2ac9a70892cd22dac65ea79d
+  ReactNativeHost: 5df788fbfbf70e0d6b1cb7e66c8ff976da20533b
   ReactTestApp-DevSupport: 42abce6b0c88dfb47c86e80aa22831b2abcc3144
   ReactTestApp-Resources: 7db90c026cccdf40cfa495705ad436ccc4d64154
   SocketRocket: abac6f5de4d4d62d24e11868d7a2f427e0ef940d

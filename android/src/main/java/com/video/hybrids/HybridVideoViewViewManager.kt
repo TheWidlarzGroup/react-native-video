@@ -13,11 +13,11 @@ class HybridVideoViewViewManager(nitroId: Int): HybridVideoViewViewManagerSpec()
 
   override var player: HybridVideoPlayerSpec?
     get() {
-      return Threading.runOnMainThreadSync { return@runOnMainThreadSync videoView.get()?.player }
+      return Threading.runOnMainThreadSync { return@runOnMainThreadSync videoView.get()?.hybridPlayer }
     }
     set(value) {
       Threading.runOnMainThread {
-        videoView.get()?.player = value as? HybridVideoPlayer
+        videoView.get()?.hybridPlayer = value as? HybridVideoPlayer
       }
     }
 
