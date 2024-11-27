@@ -434,9 +434,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
 
     const onVideoLoad = useCallback(
       (e: NativeSyntheticEvent<OnLoadData>) => {
-        if (Platform.OS === 'windows') {
-          hasPoster && setShowPoster(false);
-        }
+        hasPoster && setShowPoster(false);
         onLoad?.(e.nativeEvent);
       },
       [onLoad, hasPoster, setShowPoster],
