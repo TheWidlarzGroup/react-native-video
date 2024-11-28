@@ -80,6 +80,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_SRC_DVR_SEEK_BACKWARD_INTERVAL = "dvrSeekBackwardInterval";
     private static final String PROP_SRC_DVR_SEEK_FORWARD_INTERVAL = "dvrSeekForwardInterval";
     private static final String PROP_SRC_PLUGINS = "plugins";
+    private static final String PROP_SRC_LIVE = "live";
 
     // Metadata properties
     private static final String PROP_METADATA = "metadata";
@@ -222,6 +223,9 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     public void setSrc(final ReactTVExoplayerView videoView, @Nullable ReadableMap src) {
         Context context = videoView.getContext().getApplicationContext();
         // MockStreamSource.logRNParam(0, "src", ReadableType.Map, src);
+
+        // Move the PROP_LIVE as PROP_SRC_LIVE
+        videoView.setLive(src.hasKey(PROP_SRC_LIVE) && src.getBoolean(PROP_SRC_LIVE));
 
         String uriString = src.hasKey(PROP_SRC_URI) ? src.getString(PROP_SRC_URI) : null;
         String mimeType = ReadableMapUtils.getString(src, PROP_SRC_CONTENT_TYPE);
@@ -482,7 +486,8 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
 
     @ReactProp(name = PROP_LIVE, defaultBoolean = false)
     public void setLive(final ReactTVExoplayerView videoView, final boolean live) {
-        videoView.setLive(live);
+        // Move the PROP_LIVE as PROP_SRC_LIVE
+        // videoView.setLive(live);
     }
 
     @ReactProp(name = PROP_EPG, defaultBoolean = false)
