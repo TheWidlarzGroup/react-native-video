@@ -108,6 +108,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       onAspectRatio,
       localSourceEncryptionKeyScheme,
       minLoadRetryCount,
+      bufferConfig,
       ...rest
     },
     ref,
@@ -219,6 +220,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
 
         const _minLoadRetryCount =
           _source.minLoadRetryCount || minLoadRetryCount;
+
+        const _bufferConfig = _source.bufferConfig || bufferConfig;
         return {
           uri,
           isNetwork,
@@ -240,6 +243,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           textTracksAllowChunklessPreparation:
             resolvedSource.textTracksAllowChunklessPreparation,
           minLoadRetryCount: _minLoadRetryCount,
+          bufferConfig: _bufferConfig,
         };
       },
       [
@@ -251,6 +255,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         minLoadRetryCount,
         source?.cmcd,
         textTracks,
+        bufferConfig,
       ],
     );
 

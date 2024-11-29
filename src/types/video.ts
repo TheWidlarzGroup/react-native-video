@@ -40,6 +40,7 @@ export type ReactVideoSourceProperties = {
   textTracks?: TextTracks;
   ad?: AdConfig;
   minLoadRetryCount?: number; // Android
+  bufferConfig?: BufferConfig;
 };
 
 export type ReactVideoSource = Readonly<
@@ -289,6 +290,7 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   adLanguage?: ISO639_1;
   audioOutput?: AudioOutput; // Mobile
   automaticallyWaitsToMinimizeStalling?: boolean; // iOS
+  /** @deprecated Use source.bufferConfig */
   bufferConfig?: BufferConfig; // Android
   bufferingStrategy?: BufferingStrategyType;
   chapters?: Chapters[]; // iOS

@@ -240,7 +240,7 @@ const BasicExample = () => {
   };
 
   useEffect(() => {
-    videoRef.current?.setSource(currentSrc);
+    videoRef.current?.setSource({...currentSrc, bufferConfig: _bufferConfig });
   }, [currentSrc]);
 
   return (
@@ -284,7 +284,6 @@ const BasicExample = () => {
             selectedAudioTrack={selectedAudioTrack}
             selectedVideoTrack={selectedVideoTrack}
             playInBackground={false}
-            bufferConfig={_bufferConfig}
             preventsDisplaySleepDuringVideoPlayback={true}
             renderLoader={_renderLoader}
             onPlaybackRateChange={onPlaybackRateChange}
