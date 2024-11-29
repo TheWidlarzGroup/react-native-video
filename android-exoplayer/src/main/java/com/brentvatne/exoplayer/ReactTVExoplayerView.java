@@ -1983,6 +1983,12 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             }
 
             switch (playerEvent.event) {
+                case POSITION_CHANGED:
+                    dorisMessaging.onProgressChanged(
+                            playerEvent.details.currentPosition,
+                            playerEvent.details.duration,
+                            playerEvent.details.windowStartTimeMs
+                    );
                 case TRACK_INFO_CHANGED:
                     if (selectUserPreferredTrack) {
                         selectUserPreferredTrack = false;

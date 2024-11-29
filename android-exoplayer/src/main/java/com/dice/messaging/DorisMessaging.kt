@@ -86,11 +86,17 @@ class DorisMessaging(
     }
 
     private fun seekTo(message: DiceMessage.SetPlayerPositionMessage) {
+        val windowStartTime = player.windowStartTime
         val oldPosition = player.currentPosition
         val newPosition = message.getSeekPosition(player.windowStartTime)
         player.seekTo(newPosition)
         sendPlayerSeekedMessage(oldPosition, newPosition)
-        sendPlayerProgressMessage(message, newPosition)
+        sendPlayerProgressMessage(
+            request = message,
+            currentPosition = newPosition,
+            duration = player.duration,
+            windowStartTime = windowStartTime
+        )
     }
 
     private fun DiceMessage.SetPlayerPositionMessage.getSeekPosition(windowStartTimeMs: Long): Long {
@@ -167,7 +173,16 @@ class DorisMessaging(
         }
     }
 
-    fun onProgressChanged(currentPosition: Long) = sendPlayerProgressMessage(request = null, currentPosition = currentPosition)
+    fun onProgressChanged(
+        currentPosition: Long,
+        duration: Long,
+        windowStartTime: Long
+    ) = sendPlayerProgressMessage(
+        request = null,
+        currentPosition = currentPosition,
+        duration = duration,
+        windowStartTime = windowStartTime,
+    )
 
     override fun onPlaybackStateChanged(playbackState: Int) {
         if (playbackState == Player.STATE_READY) {
@@ -302,8 +317,12 @@ class DorisMessaging(
         )
     )
 
-    private fun sendPlayerProgressMessage(request: DiceMessage?, currentPosition: Long) {
-        val duration = player.duration
+    private fun sendPlayerProgressMessage(
+        request: DiceMessage?,
+        currentPosition: Long,
+        duration: Long,
+        windowStartTime: Long,
+    ) {
         val isOnLiveEdge = if (isLive) isOnLiveEdge(currentPosition, duration) else null
         sendMessage(
             DiceMessage.PlayerProgressMessage(
@@ -312,7 +331,9 @@ class DorisMessaging(
                     type = streamType,
                     isAtLiveEdge = isOnLiveEdge,
                     progress = getProgress(currentPosition),
-                    dateTime = null,
+                    currentPosition = currentPosition,
+                    duration = duration,
+                    windowStartTime = windowStartTime,
                 ),
                 requestMessageId = request?.messageId
             )
