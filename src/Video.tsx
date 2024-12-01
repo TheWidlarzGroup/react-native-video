@@ -779,9 +779,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     const _style: StyleProp<ViewStyle> = useMemo(
       () => ({
         ...StyleSheet.absoluteFillObject,
-        ...(showPoster ? {display: 'none'} : {}),
       }),
-      [showPoster],
+      [],
     );
 
     return (
