@@ -151,6 +151,11 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         if (!_source) {
           return undefined;
         }
+
+        const isLocalAssetFile =
+          typeof _source === 'number' ||
+          ('uri' in _source && typeof _source.uri === 'number');
+
         const resolvedSource = resolveAssetSourceForVideo(_source);
         let uri = resolvedSource.uri || '';
         if (uri && uri.match(/^\//)) {
@@ -226,6 +231,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           uri,
           isNetwork,
           isAsset,
+          isLocalAssetFile,
           shouldCache: resolvedSource.shouldCache || false,
           type: resolvedSource.type || '',
           mainVer: resolvedSource.mainVer || 0,
@@ -811,9 +817,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     const _style: StyleProp<ViewStyle> = useMemo(
       () => ({
         ...StyleSheet.absoluteFillObject,
-        ...(showPoster ? {display: 'none'} : {}),
       }),
-      [showPoster],
+      [],
     );
 
     return (

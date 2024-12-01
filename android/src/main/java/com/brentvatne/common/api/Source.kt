@@ -30,6 +30,12 @@ class Source {
     /** Parsed value of source to playback */
     var uri: Uri? = null
 
+    /** True if source is a local JS asset */
+    var isLocalAssetFile: Boolean = false
+
+    /** True if source is a local file asset://, ... */
+    var isAsset: Boolean = false
+
     /** Start position of playback used to resume playback */
     var startPositionMs: Int = -1
 
@@ -101,6 +107,8 @@ class Source {
                 sideLoadedTextTracks == other.sideLoadedTextTracks &&
                 adsProps == other.adsProps &&
                 minLoadRetryCount == other.minLoadRetryCount &&
+                isLocalAssetFile == other.isLocalAssetFile &&
+                isAsset == other.isAsset &&
                 bufferConfig == other.bufferConfig
             )
     }
@@ -157,6 +165,8 @@ class Source {
     companion object {
         private const val TAG = "Source"
         private const val PROP_SRC_URI = "uri"
+        private const val PROP_SRC_IS_LOCAL_ASSET_FILE = "isLocalAssetFile"
+        private const val PROP_SRC_IS_ASSET = "isAsset"
         private const val PROP_SRC_START_POSITION = "startPosition"
         private const val PROP_SRC_CROP_START = "cropStart"
         private const val PROP_SRC_CROP_END = "cropEnd"
@@ -223,6 +233,8 @@ class Source {
                 }
                 source.uriString = uriString
                 source.uri = uri
+                source.isLocalAssetFile = safeGetBool(src, PROP_SRC_IS_LOCAL_ASSET_FILE, false)
+                source.isAsset = safeGetBool(src, PROP_SRC_IS_ASSET, false)
                 source.startPositionMs = safeGetInt(src, PROP_SRC_START_POSITION, -1)
                 source.cropStartMs = safeGetInt(src, PROP_SRC_CROP_START, -1)
                 source.cropEndMs = safeGetInt(src, PROP_SRC_CROP_END, -1)

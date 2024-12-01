@@ -800,7 +800,7 @@ public class ReactExoplayerView extends FrameLayout implements
                     // Initialize core configuration and listeners
                     initializePlayerCore(self);
                 }
-                if (source.getBufferConfig().getCacheSize() > 0) {
+                if (!source.isLocalAssetFile() && !source.isAsset() && source.getBufferConfig().getCacheSize() > 0) {
                     RNVSimpleCache.INSTANCE.setSimpleCache(
                             this.getContext(),
                             source.getBufferConfig().getCacheSize()
@@ -1240,7 +1240,7 @@ public class ReactExoplayerView extends FrameLayout implements
                         DataSource.Factory assetDataSourceFactory = DataSourceUtil.buildAssetDataSourceFactory(themedReactContext, uri);
                         mediaSourceFactory = new ProgressiveMediaSource.Factory(assetDataSourceFactory);
                     } catch (Exception e) {
-                        throw new IllegalStateException("cannot open input file" + uri);
+                        throw new IllegalStateException("cannot open input file:" + uri);
                     }
                 } else if ("file".equals(uri.getScheme()) ||
                         !useCache) {

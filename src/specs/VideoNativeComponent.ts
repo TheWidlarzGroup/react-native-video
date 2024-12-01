@@ -35,6 +35,7 @@ export type VideoSrc = Readonly<{
   uri?: string;
   isNetwork?: boolean;
   isAsset?: boolean;
+  isLocalAssetFile?: boolean;
   shouldCache?: boolean;
   type?: string;
   mainVer?: Int32;
