@@ -151,6 +151,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_RELATED_VIDEOS_SUBTITLE = "subtitle";
     private static final String PROP_IS_FAVOURITE = "isFavourite";
     private static final String PROP_SKIP_MARKERS = "skipMarkers";
+    private static final String PROP_SUBTITLE_HORIZONTAL_PADDING = "subtitleHorizontalPadding";
 
     private static final int COMMAND_SEEK_TO_NOW = 1;
     private static final int COMMAND_SEEK_TO_TIMESTAMP = 2;
@@ -620,6 +621,11 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     @ReactProp(name = PROP_IS_FAVOURITE)
     public void setIsFavourite(final ReactTVExoplayerView videoView, final boolean isFavourite) {
         videoView.setIsFavourite(isFavourite);
+    }
+
+    @ReactProp(name = PROP_SUBTITLE_HORIZONTAL_PADDING, defaultInt = 0)
+    public void setSubtitleHorizontalPadding(final ReactTVExoplayerView videoView, final int padding) {
+        videoView.setSubtitleHorizontalPadding(padding);
     }
 
     private boolean startsWithValidScheme(String uriString) {

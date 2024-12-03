@@ -1745,6 +1745,12 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     public void setStateProgressBar(final String state) {
     }
 
+    public void setSubtitleHorizontalPadding(int padding) {
+        if (exoDorisPlayerView != null) {
+            exoDorisPlayerView.getSubtitleView().setSubtitleHorizontalPadding(padding);
+        }
+    }
+
     private boolean getEnabledFromState(String stateStr) {
         ControlState state = ControlState.make(stateStr);
         switch (state) {
