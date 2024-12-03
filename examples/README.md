@@ -87,7 +87,7 @@ yarn start
 > [!TIP]
 > Make sure you've already downloaded the simulator on which you want to launch the app.
 
-## [Expo](https://github.com/TheWidlarzGroup/react-native-video/tree/master/examples/bare)
+## [Expo](https://github.com/TheWidlarzGroup/react-native-video/tree/master/examples/expo)
 
 ### Configuration
 
