@@ -193,6 +193,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         dismissFullscreenPlayer,
         setFullScreen,
         save: unsupported,
+        enterPictureInPicture: unsupported,
+        exitPictureInPicture: unsupported,
         restoreUserInterfaceForPictureInPictureStopCompleted: unsupported,
         nativeHtmlVideoRef: nativeRef,
       }),
