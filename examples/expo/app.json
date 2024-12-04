@@ -17,9 +17,9 @@
         }
       ],
       [
-        "../../lib/expo-plugins/withRNVideo.js", 
+        "react-native-video", 
         {
-          "reactNativeTestApp": true,
+          "reactNativeTestApp": false,
           "enableNotificationControls": true,
           "enableBackgroundAudio": true,
           "enableADSExtension": false,

@@ -6,11 +6,11 @@ on:
       - master
     paths:
       - '.github/workflows/check-android.yml'
-      - 'android/**'
+      - './packages/react-native-video/android/**'
   pull_request:
     paths:
       - '.github/workflows/check-android.yml'
-      - 'android/**'
+      - './packages/react-native-video/android/**'
 
 jobs:
   Kotlin-Lint:
@@ -20,15 +20,15 @@ jobs:
       - run: |
           curl -sSLO https://github.com/pinterest/ktlint/releases/download/1.0.1/ktlint && chmod a+x ktlint && sudo mv ktlint /usr/local/bin/
       - name: run ktlint
-        working-directory: ./android/
+        working-directory: ./packages/react-native-video/android/
         run: |
           ktlint --reporter=checkstyle,output=build/ktlint-report.xml --relative --editorconfig=./.editorconfig
         continue-on-error: true
       - uses: yutailang0119/action-ktlint@v3
         with:
-          report-path: ./android/build/*.xml
+          report-path: ./packages/react-native-video/android/build/*.xml
         continue-on-error: false
       - uses: actions/upload-artifact@v3
         with:
           name: ktlint-report
-          path: ./android/build/*.xml
+          path: ./packages/react-native-video/android/build/*.xml
