@@ -46,7 +46,7 @@ class PlayerViewProxy {
                 envKey: config.muxData.envKey,
                 videoTitle: config.muxData.videoTitle,
                 viewerUserId: config.muxData.viewerUserId,
-                playerVersion: nil,
+                playerVersion: config.muxData.playerVersion,
                 videoId: config.muxData.videoId,
                 playerName: config.muxData.playerName,
                 videoStreamType: config.muxData.videoStreamType,

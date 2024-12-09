@@ -106,6 +106,7 @@ extension Source.Config {
         let viewerUserId: String
         let videoId: String
         let playerName: String
+        let playerVersion: String?
         let videoStreamType: String
         let subPropertyId: String
         let videoIsLive: Bool
