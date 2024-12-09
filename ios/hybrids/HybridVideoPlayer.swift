@@ -25,10 +25,14 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
   
   var currentTime: Double {
     set {
-      player.currentItem?.seek(to: CMTime(seconds: newValue, preferredTimescale: 1000))
+      player.seek(
+        to: CMTime(seconds: newValue, preferredTimescale: 1000),
+        toleranceBefore: .zero,
+        toleranceAfter: .zero
+      )
     }
     get {
-      Double(player.currentItem?.currentTime().seconds ?? 0)
+      player.currentTime().seconds
     }
   }
   
