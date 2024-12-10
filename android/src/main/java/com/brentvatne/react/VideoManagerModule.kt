@@ -66,6 +66,20 @@ class VideoManagerModule(reactContext: ReactApplicationContext?) : ReactContextB
     }
 
     @ReactMethod
+    fun enterPictureInPictureCmd(reactTag: Int) {
+        performOnPlayerView(reactTag) {
+            it?.enterPictureInPictureMode()
+        }
+    }
+
+    @ReactMethod
+    fun exitPictureInPictureCmd(reactTag: Int) {
+        performOnPlayerView(reactTag) {
+            it?.exitPictureInPictureMode()
+        }
+    }
+
+    @ReactMethod
     fun setSourceCmd(reactTag: Int, source: ReadableMap?) {
         performOnPlayerView(reactTag) {
             it?.setSrc(Source.parse(source, reactApplicationContext))
