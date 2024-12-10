@@ -1,0 +1,14 @@
+import {orbitron} from '../font';
+
+export default function Nextra({Component, pageProps}) {
+  return (
+    <>
+        <style jsx global>{`
+        :root {
+          --font-orbitron: ${orbitron.style.fontFamily};
+        }
+      `}</style>
+      <Component {...pageProps} />
+    </>
+  );
+}

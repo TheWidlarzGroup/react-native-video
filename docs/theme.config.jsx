@@ -1,4 +1,5 @@
 import React from 'react';
+import {GoogleAnalytics} from '@next/third-parties/google';
 
 export default {
   head: (
@@ -26,27 +27,12 @@ export default {
         content="https://docs.thewidlarzgroup.com/react-native-video/thumbnail.jpg"
       />
       <meta name="twitter:image:alt" content="React Native Video" />
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin />
-      <link
-        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap"
-        rel="stylesheet"
-      />
       <link
         rel="icon"
         type="image/png"
         href="https://docs.thewidlarzgroup.com/react-native-video/favicon.png"
       />
-      <script
-        async
-        src="https://www.googletagmanager.com/gtag/js?id=G-PM2TQQQMDN"
-      />
-      <script>
-        {`window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-PM2TQQQMDN');`}
-      </script>
+      <GoogleAnalytics gaId="G-4YEWQH5ZHS" />
     </>
   ),
   logo: (

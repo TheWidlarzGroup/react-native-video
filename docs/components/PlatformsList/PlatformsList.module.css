@@ -3,6 +3,6 @@
 }
 
 .spanStyle {
-  font-family: 'Orbitron';
+  font-family: var(--font-orbitron);
   font-weight: 800;
 }
