@@ -7,7 +7,7 @@ import React, {
   type RefObject,
   useState,
 } from 'react';
-import type {VideoRef, ReactVideoProps, VideoMetadata} from './types';
+import type {VideoRef, WebReactVideoProps, VideoMetadata} from './types';
 
 // stolen from https://stackoverflow.com/a/77278013/21726244
 const isDeepEqual = <T,>(a: T, b: T): boolean => {
@@ -25,10 +25,11 @@ const isDeepEqual = <T,>(a: T, b: T): boolean => {
   );
 };
 
-const Video = forwardRef<VideoRef, ReactVideoProps>(
+const Video = forwardRef<VideoRef, WebReactVideoProps>(
   (
     {
       source,
+      style = videoStyle,
       paused,
       muted,
       volume,
@@ -127,7 +128,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     const setFullScreen = useCallback(
       async (
         newVal: boolean,
-        orientation?: ReactVideoProps['fullscreenOrientation'],
+        orientation?: WebReactVideoProps['fullscreenOrientation'],
         autorotate?: boolean,
       ) => {
         orientation ??= fsPrefs.current.fullscreenOrientation;
@@ -359,7 +360,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           onVolumeChange?.({volume: nativeRef.current.volume});
         }}
         onEnded={onEnd}
-        style={videoStyle}
+        style={style}
       />
     );
   },
