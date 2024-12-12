@@ -324,6 +324,15 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         }
     };
 
+    private final Choreographer.FrameCallback frameCallback = new Choreographer.FrameCallback() {
+        @Override
+        public void doFrame(long frameTimeNanos) {
+            manuallyLayoutChildren();
+            getViewTreeObserver().dispatchOnGlobalLayout();
+            Choreographer.getInstance().postFrameCallback(this);
+        }
+    };
+
     private boolean playInBackground = false;
 
     //Drm
@@ -406,14 +415,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         setStats(false);
 
         // RN: Android native UI components are not re-layout on dynamically added views. Fix for View.GONE -> View.VISIBLE issue.
-        Choreographer.getInstance().postFrameCallback(new Choreographer.FrameCallback() {
-            @Override
-            public void doFrame(long frameTimeNanos) {
-                manuallyLayoutChildren();
-                getViewTreeObserver().dispatchOnGlobalLayout();
-                Choreographer.getInstance().postFrameCallback(this);
-            }
-        });
+        Choreographer.getInstance().postFrameCallback(frameCallback);
     }
 
     private void manuallyLayoutChildren() {
@@ -496,7 +498,9 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     }
 
     public void cleanUpResources() {
+        Log.d(TAG, "cleanUpResources");
         stopPlayback();
+        Choreographer.getInstance().removeFrameCallback(frameCallback);
     }
 
     protected boolean isInBackground() {
