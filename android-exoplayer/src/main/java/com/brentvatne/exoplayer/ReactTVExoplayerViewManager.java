@@ -152,6 +152,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_IS_FAVOURITE = "isFavourite";
     private static final String PROP_SKIP_MARKERS = "skipMarkers";
     private static final String PROP_SUBTITLE_HORIZONTAL_PADDING = "subtitleHorizontalPadding";
+    private static final String PROP_LOCALE = "locale";
 
     private static final int COMMAND_SEEK_TO_NOW = 1;
     private static final int COMMAND_SEEK_TO_TIMESTAMP = 2;
@@ -626,6 +627,11 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     @ReactProp(name = PROP_SUBTITLE_HORIZONTAL_PADDING, defaultInt = 0)
     public void setSubtitleHorizontalPadding(final ReactTVExoplayerView videoView, final int padding) {
         videoView.setSubtitleHorizontalPadding(padding);
+    }
+
+    @ReactProp(name = PROP_LOCALE)
+    public void setLocale(final ReactTVExoplayerView videoView, final String locale) {
+        videoView.setAppLanguageLocale(locale);
     }
 
     private boolean startsWithValidScheme(String uriString) {
