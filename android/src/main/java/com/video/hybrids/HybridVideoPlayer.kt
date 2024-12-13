@@ -28,6 +28,9 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
     get() = runOnMainThreadSync { return@runOnMainThreadSync player.volume.toDouble() }
     set(value) = runOnMainThread { player.volume = value.toFloat() }
 
+  override val duration: Double
+    get() = runOnMainThreadSync { return@runOnMainThreadSync player.duration.toDouble() }
+
   private fun initializePlayerFromSource(source: HybridVideoPlayerSource) {
     this.source = source
 

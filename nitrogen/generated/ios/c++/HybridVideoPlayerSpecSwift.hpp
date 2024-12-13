@@ -76,6 +76,9 @@ namespace margelo::nitro::video {
     inline void setCurrentTime(double currentTime) noexcept override {
       _swiftPart.setCurrentTime(std::forward<decltype(currentTime)>(currentTime));
     }
+    inline double getDuration() noexcept override {
+      return _swiftPart.getDuration();
+    }
 
   public:
     // Methods

@@ -20,6 +20,7 @@ namespace margelo::nitro::video {
       prototype.registerHybridSetter("volume", &HybridVideoPlayerSpec::setVolume);
       prototype.registerHybridGetter("currentTime", &HybridVideoPlayerSpec::getCurrentTime);
       prototype.registerHybridSetter("currentTime", &HybridVideoPlayerSpec::setCurrentTime);
+      prototype.registerHybridGetter("duration", &HybridVideoPlayerSpec::getDuration);
       prototype.registerHybridMethod("play", &HybridVideoPlayerSpec::play);
       prototype.registerHybridMethod("pause", &HybridVideoPlayerSpec::pause);
     });

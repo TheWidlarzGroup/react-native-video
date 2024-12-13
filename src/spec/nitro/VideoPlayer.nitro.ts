@@ -6,6 +6,7 @@ export interface VideoPlayer
   source: VideoPlayerSource;
   volume: number;
   currentTime: number;
+  readonly duration: number;
 
   play(): void;
   pause(): void;

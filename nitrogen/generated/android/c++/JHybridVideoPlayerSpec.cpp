@@ -60,6 +60,11 @@ namespace margelo::nitro::video {
     static const auto method = _javaPart->getClass()->getMethod<void(double /* currentTime */)>("setCurrentTime");
     method(_javaPart, currentTime);
   }
+  double JHybridVideoPlayerSpec::getDuration() {
+    static const auto method = _javaPart->getClass()->getMethod<double()>("getDuration");
+    auto __result = method(_javaPart);
+    return __result;
+  }
 
   // Methods
   void JHybridVideoPlayerSpec::play() {

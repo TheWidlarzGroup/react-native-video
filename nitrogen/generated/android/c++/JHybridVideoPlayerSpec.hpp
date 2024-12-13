@@ -53,6 +53,7 @@ namespace margelo::nitro::video {
     void setVolume(double volume) override;
     double getCurrentTime() override;
     void setCurrentTime(double currentTime) override;
+    double getDuration() override;
 
   public:
     // Methods

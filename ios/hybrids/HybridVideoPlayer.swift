@@ -36,6 +36,10 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
     }
   }
   
+  var duration: Double {
+    Double(player.currentItem?.duration.seconds ?? Double.nan)
+  }
+  
   init(source: HybridVideoPlayerSourceSpec) throws {
     self.source = source
     

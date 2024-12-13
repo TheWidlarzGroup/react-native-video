@@ -55,6 +55,10 @@ abstract class HybridVideoPlayerSpec: HybridObject() {
   @set:DoNotStrip
   @set:Keep
   abstract var currentTime: Double
+  
+  @get:DoNotStrip
+  @get:Keep
+  abstract val duration: Double
 
   // Methods
   @DoNotStrip

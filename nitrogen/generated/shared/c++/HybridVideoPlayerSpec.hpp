@@ -52,6 +52,7 @@ namespace margelo::nitro::video {
       virtual void setVolume(double volume) = 0;
       virtual double getCurrentTime() = 0;
       virtual void setCurrentTime(double currentTime) = 0;
+      virtual double getDuration() = 0;
 
     public:
       // Methods

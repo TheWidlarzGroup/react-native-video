@@ -135,6 +135,13 @@ public class HybridVideoPlayerSpecCxx {
       self.__implementation.currentTime = newValue
     }
   }
+  
+  public var duration: Double {
+    @inline(__always)
+    get {
+      return self.__implementation.duration
+    }
+  }
 
   // Methods
   @inline(__always)

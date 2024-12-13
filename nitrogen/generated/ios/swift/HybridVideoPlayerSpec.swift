@@ -32,6 +32,7 @@ public protocol HybridVideoPlayerSpec: AnyObject, HybridObjectSpec {
   var source: (any HybridVideoPlayerSourceSpec) { get set }
   var volume: Double { get set }
   var currentTime: Double { get set }
+  var duration: Double { get }
 
   // Methods
   func play() throws -> Void
