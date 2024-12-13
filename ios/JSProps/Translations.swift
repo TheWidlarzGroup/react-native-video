@@ -31,4 +31,5 @@ struct Translations: SuperCodable {
     var tvPlayerEPG: String?
     var skipIntro: String?
     var skipCredits: String?
+    var off: String?
 }

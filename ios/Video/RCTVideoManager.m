@@ -32,6 +32,7 @@ RCT_EXPORT_VIEW_PROPERTY(overlayConfig, NSDictionary);
 RCT_EXPORT_VIEW_PROPERTY(nowPlaying, NSDictionary);
 RCT_EXPORT_VIEW_PROPERTY(hideAdUiElements, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(isWhyThisAdIconEnabled, BOOL);
+RCT_EXPORT_VIEW_PROPERTY(locale, NSString);
 
 /* Should support: onLoadStart, onLoad, and onError to stay consistent with Image */
 RCT_EXPORT_VIEW_PROPERTY(onVideoLoadStart, RCTBubblingEventBlock);

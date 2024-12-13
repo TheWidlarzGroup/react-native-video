@@ -117,6 +117,12 @@ class NewPlayerView: UIView, JSInputProtocol {
             jsProps.isWhyThisAdIconEnabled.value = isWhyThisAdIconEnabled
         }
     }
+  
+    @objc var locale: String? {
+        didSet {
+            jsProps.locale.value = locale
+        }
+    }
     
     //FIXME: review unused variables
     @objc var selectedTextTrack: NSDictionary?

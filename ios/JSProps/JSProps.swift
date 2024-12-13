@@ -23,6 +23,7 @@ class JSProps {
     var nowPlaying: Dynamic<JSNowPlaying?> = Dynamic(nil)
     var hideAdUiElements: Dynamic<Bool> = Dynamic(false)
     var isWhyThisAdIconEnabled: Dynamic<Bool> = Dynamic(false)
+    var locale: Dynamic<String?> = Dynamic(nil)
 }
 
 class Dynamic<T> {

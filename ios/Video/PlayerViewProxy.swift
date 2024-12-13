@@ -104,6 +104,7 @@ class PlayerViewProxy {
             dorisTranslationsViewModel.skipCredits = translationsValue.skipCredits
             dorisTranslationsViewModel.rewind = translationsValue.rewind
             dorisTranslationsViewModel.fastForward = translationsValue.fastForward
+            dorisTranslationsViewModel.off = translationsValue.off
             jsTranslations = JSTranslations(beaconTranslations: nil, dorisTranslations: dorisTranslationsViewModel)
         }
         return jsTranslations
@@ -206,6 +207,7 @@ class PlayerViewProxy {
         rndvJsProps.isMinimised.value = false
         rndvJsProps.highlightUrl.value = nil
         rndvJsProps.isFavourite.value = jsProps.isFavourite.value
+        rndvJsProps.locale.value = jsProps.locale.value
 
         var rndvJSSource: RNDReactNativeDiceVideo.JSSource?
         if let sourceValue = jsProps.source.value {
