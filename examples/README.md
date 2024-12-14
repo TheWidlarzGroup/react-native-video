@@ -192,3 +192,19 @@ That's it! Now you can commit changes and create a PR.
 #### Expo
 
 To update `expo` example you should follow this [guide](https://docs.expo.dev/workflow/upgrading-expo-sdk-walkthrough).
+After re-building the native project you should ensure that top of `android/settings.gradle` file looks like this:
+
+```gradle
+pluginManagement {
+    includeBuild(new File(["node", "--print", "require.resolve('@react-native/gradle-plugin/package.json', { paths: [require.resolve('react-native/package.json')] })"].execute(null, rootDir).text.trim()).getParentFile().toString())
+}
+```
+
+Otherwise, you will get an error like this:
+
+```bash
+FAILURE: Build failed with an exception.
+
+What went wrong:
+  Included build (...)/react-native-video/examples/expo/node_modules/react-native/node_modules/@react-native/gradle-plugin has build path :gradle-plugin which is the same as included build (...)/react-native-video/node_modules/@react-native/gradle-plugin
+```
