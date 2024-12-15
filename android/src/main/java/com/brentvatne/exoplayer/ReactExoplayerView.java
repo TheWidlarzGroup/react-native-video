@@ -1296,6 +1296,7 @@ public class ReactExoplayerView extends FrameLayout implements
             updateResumePosition();
             player.release();
             player.removeListener(this);
+            PictureInPictureUtil.applyAutoEnterEnabled(themedReactContext, pictureInPictureParamsBuilder, false);
             if (pipListenerUnsubscribe != null) {
                 new Handler().post(pipListenerUnsubscribe);
             }
