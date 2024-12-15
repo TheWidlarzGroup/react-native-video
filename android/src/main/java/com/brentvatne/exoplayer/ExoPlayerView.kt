@@ -30,7 +30,8 @@ class ExoPlayerView(private val context: Context) :
     FrameLayout(context, null, 0),
     AdViewProvider {
 
-    private var surfaceView: View? = null
+    var surfaceView: View? = null
+        private set
     private var shutterView: View
     private var subtitleLayout: SubtitleView
     private var layout: AspectRatioFrameLayout

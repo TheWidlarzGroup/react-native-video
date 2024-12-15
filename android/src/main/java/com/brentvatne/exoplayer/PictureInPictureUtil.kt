@@ -4,36 +4,84 @@ import android.annotation.SuppressLint
 import android.app.AppOpsManager
 import android.app.PictureInPictureParams
 import android.app.RemoteAction
+import android.content.Context
+import android.content.ContextWrapper
 import android.content.pm.PackageManager
+import android.graphics.Rect
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.Process
 import android.util.Rational
+import androidx.activity.ComponentActivity
 import androidx.annotation.ChecksSdkIntAtLeast
 import androidx.annotation.RequiresApi
 import androidx.core.app.AppOpsManagerCompat
+import androidx.core.app.PictureInPictureModeChangedInfo
+import androidx.lifecycle.Lifecycle
 import androidx.media3.exoplayer.ExoPlayer
 import com.brentvatne.common.toolbox.DebugLog
 import com.brentvatne.receiver.PictureInPictureReceiver
 import com.facebook.react.uimanager.ThemedReactContext
+
+internal fun Context.findActivity(): ComponentActivity {
+    var context = this
+    while (context is ContextWrapper) {
+        if (context is ComponentActivity) return context
+        context = context.baseContext
+    }
+    throw IllegalStateException("Picture in picture should be called in the context of an Activity")
+}
 
 object PictureInPictureUtil {
     private const val FLAG_SUPPORTS_PICTURE_IN_PICTURE = 0x400000
     private const val TAG = "PictureInPictureUtil"
 
     @JvmStatic
+    fun addLifecycleEventListener(context: ThemedReactContext, view: ReactExoplayerView): Runnable {
+        val activity = context.findActivity()
+
+        val onPictureInPictureModeChanged: (info: PictureInPictureModeChangedInfo) -> Unit = { info: PictureInPictureModeChangedInfo ->
+            view.setIsInPictureInPicture(info.isInPictureInPictureMode)
+            if (!info.isInPictureInPictureMode && context.findActivity().lifecycle.currentState == Lifecycle.State.CREATED) {
+                // when user click close button of PIP
+                if (!view.playInBackground) view.setPausedModifier(true)
+            }
+        }
+
+        val onUserLeaveHintCallback = {
+            if (view.enterPictureInPictureOnLeave) {
+                view.enterPictureInPictureMode()
+            }
+        }
+
+        activity.addOnPictureInPictureModeChangedListener(onPictureInPictureModeChanged)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            activity.addOnUserLeaveHintListener(onUserLeaveHintCallback)
+        }
+
+        // @TODO convert to lambda when ReactExoplayerView migrated
+        return object: Runnable {
+            override fun run() {
+                context.findActivity().removeOnPictureInPictureModeChangedListener(onPictureInPictureModeChanged)
+                context.findActivity().removeOnUserLeaveHintListener(onUserLeaveHintCallback)
+            }
+        }
+    }
+
+    @JvmStatic
     fun enterPictureInPictureMode(context: ThemedReactContext, pictureInPictureParams: PictureInPictureParams?) {
         if (!isSupportPictureInPicture(context)) return
         if (isSupportPictureInPictureAction() && pictureInPictureParams != null) {
             try {
-                context.currentActivity?.enterPictureInPictureMode(pictureInPictureParams)
+                context.findActivity().enterPictureInPictureMode(pictureInPictureParams)
             } catch (e: IllegalStateException) {
                 DebugLog.e(TAG, e.toString())
             }
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             try {
                 @Suppress("DEPRECATION")
-                context.currentActivity?.enterPictureInPictureMode()
+                context.findActivity().enterPictureInPictureMode()
             } catch (e: IllegalStateException) {
                 DebugLog.e(TAG, e.toString())
             }
@@ -41,11 +89,32 @@ object PictureInPictureUtil {
     }
 
     @JvmStatic
-    fun updatePictureInPictureActions(context: ThemedReactContext, pictureInPictureParams: PictureInPictureParams) {
+    fun applyPlayingStatus(context: ThemedReactContext, pipParamsBuilder: PictureInPictureParams.Builder, receiver: PictureInPictureReceiver, isPaused: Boolean) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
+        val actions = getPictureInPictureActions(context, isPaused, receiver)
+        pipParamsBuilder.setActions(actions)
+        updatePictureInPictureActions(context, pipParamsBuilder.build())
+    }
+
+    @JvmStatic
+    fun applyAutoEnterEnabled(context: ThemedReactContext, pipParamsBuilder: PictureInPictureParams.Builder, autoEnterEnabled: Boolean) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return;
+        pipParamsBuilder.setAutoEnterEnabled(autoEnterEnabled)
+        updatePictureInPictureActions(context, pipParamsBuilder.build())
+    }
+
+    @JvmStatic
+    fun applySourceRectHint(context: ThemedReactContext, pipParamsBuilder: PictureInPictureParams.Builder, playerView: ExoPlayerView) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
+        pipParamsBuilder.setSourceRectHint(calcRectHint(playerView))
+        updatePictureInPictureActions(context, pipParamsBuilder.build())
+    }
+
+    private fun updatePictureInPictureActions(context: ThemedReactContext, pipParams: PictureInPictureParams) {
         if (!isSupportPictureInPictureAction()) return
         if (!isSupportPictureInPicture(context)) return
         try {
-            context.currentActivity?.setPictureInPictureParams(pictureInPictureParams)
+            context.findActivity().setPictureInPictureParams(pipParams)
         } catch (e: IllegalStateException) {
             DebugLog.e(TAG, e.toString())
         }
@@ -60,6 +129,20 @@ object PictureInPictureUtil {
         val icon = Icon.createWithResource(context, resource)
         val title = if (isPaused) "play" else "pause"
         return arrayListOf(RemoteAction(icon, title, title, intent))
+    }
+
+    @JvmStatic
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun calcRectHint(playerView: ExoPlayerView): Rect {
+        val hint = Rect()
+        playerView.surfaceView?.getGlobalVisibleRect(hint)
+        val location = IntArray(2)
+        playerView.surfaceView?.getLocationOnScreen(location)
+
+        val height = hint.bottom - hint.top
+        hint.top = location[1]
+        hint.bottom = hint.top + height
+        return hint
     }
 
     @JvmStatic
@@ -88,7 +171,7 @@ object PictureInPictureUtil {
 
     @RequiresApi(Build.VERSION_CODES.N)
     private fun checkIsSystemSupportPIP(context: ThemedReactContext): Boolean {
-        val activity = context.currentActivity ?: return false
+        val activity = context.findActivity() ?: return false
 
         val activityInfo = activity.packageManager.getActivityInfo(activity.componentName, PackageManager.GET_META_DATA)
         // detect current activity's android:supportsPictureInPicture value defined within AndroidManifest.xml
