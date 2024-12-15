@@ -61,7 +61,7 @@ object PictureInPictureUtil {
         }
 
         // @TODO convert to lambda when ReactExoplayerView migrated
-        return object: Runnable {
+        return object : Runnable {
             override fun run() {
                 context.findActivity().removeOnPictureInPictureModeChangedListener(onPictureInPictureModeChanged)
                 context.findActivity().removeOnUserLeaveHintListener(onUserLeaveHintCallback)
@@ -89,8 +89,13 @@ object PictureInPictureUtil {
     }
 
     @JvmStatic
-    fun applyPlayingStatus(context: ThemedReactContext, pipParamsBuilder: PictureInPictureParams.Builder, receiver: PictureInPictureReceiver, isPaused: Boolean) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
+    fun applyPlayingStatus(
+        context: ThemedReactContext,
+        pipParamsBuilder: PictureInPictureParams.Builder,
+        receiver: PictureInPictureReceiver,
+        isPaused: Boolean
+    ) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         val actions = getPictureInPictureActions(context, isPaused, receiver)
         pipParamsBuilder.setActions(actions)
         updatePictureInPictureActions(context, pipParamsBuilder.build())
@@ -98,14 +103,14 @@ object PictureInPictureUtil {
 
     @JvmStatic
     fun applyAutoEnterEnabled(context: ThemedReactContext, pipParamsBuilder: PictureInPictureParams.Builder, autoEnterEnabled: Boolean) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return;
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
         pipParamsBuilder.setAutoEnterEnabled(autoEnterEnabled)
         updatePictureInPictureActions(context, pipParamsBuilder.build())
     }
 
     @JvmStatic
     fun applySourceRectHint(context: ThemedReactContext, pipParamsBuilder: PictureInPictureParams.Builder, playerView: ExoPlayerView) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         pipParamsBuilder.setSourceRectHint(calcRectHint(playerView))
         updatePictureInPictureActions(context, pipParamsBuilder.build())
     }
