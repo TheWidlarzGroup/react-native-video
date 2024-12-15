@@ -42,7 +42,7 @@ object PictureInPictureUtil {
 
         val onPictureInPictureModeChanged: (info: PictureInPictureModeChangedInfo) -> Unit = { info: PictureInPictureModeChangedInfo ->
             view.setIsInPictureInPicture(info.isInPictureInPictureMode)
-            if (!info.isInPictureInPictureMode && context.findActivity().lifecycle.currentState == Lifecycle.State.CREATED) {
+            if (!info.isInPictureInPictureMode && activity.lifecycle.currentState == Lifecycle.State.CREATED) {
                 // when user click close button of PIP
                 if (!view.playInBackground) view.setPausedModifier(true)
             }
