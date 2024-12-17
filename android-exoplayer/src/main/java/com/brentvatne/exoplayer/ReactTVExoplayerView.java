@@ -53,7 +53,6 @@ import com.brentvatne.entity.ApsSource;
 import com.brentvatne.entity.RNImaDaiSource;
 import com.brentvatne.entity.RNMetadata;
 import com.brentvatne.entity.RNSource;
-import com.brentvatne.entity.RNTranslations;
 import com.brentvatne.entity.RelatedVideo;
 import com.brentvatne.entity.Watermark;
 import com.brentvatne.react.R;
@@ -89,8 +88,7 @@ import com.diceplatform.doris.ui.ExoDorisPlayerTvControlView;
 import com.diceplatform.doris.ui.ExoDorisPlayerView;
 import com.diceplatform.doris.ui.ExoDorisPlayerViewListener;
 import com.diceplatform.doris.ui.ExoDorisTvPlayerView;
-import com.diceplatform.doris.ui.entity.Labels;
-import com.diceplatform.doris.ui.entity.LabelsBuilder;
+import com.diceplatform.doris.ui.entity.LabelsTranslation;
 import com.diceplatform.doris.ui.entity.VideoTile;
 import com.diceplatform.doris.ui.skipmarker.SkipMarker;
 import com.diceplatform.doris.util.DorisExceptionUtil;
@@ -162,6 +160,12 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private static final String KEY_START_DATE = "startDate";
     private static final String KEY_END_DATE = "endDate";
 
+    private static final String KEY_LABELS_LEARN_MORE = "learnMore";
+    private static final String KEY_LABELS_COUNT_DOWN_AD = "adsCountdownAd";
+    private static final String KEY_LABELS_COUNT_DOWN_OF = "adsCountdownOf";
+    private static final String KEY_LABELS_SKIP_IN = "skipAdIn";
+    private static final String KEY_LABELS_SKIP = "skipAd";
+
     private static final int MAX_LOAD_BUFFER_MS = 30_000;
 
     static {
@@ -199,7 +203,6 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     // Props from React
     private RNSource src;
     private RNMetadata metadata;
-    private RNTranslations translations;
     private boolean repeat;
     private boolean disableFocus;
     private boolean isLive = false;
@@ -524,12 +527,13 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             AdViewProvider adViewProvider = adType == AdType.IMA_CSAI_LIVE
                     ? secondaryPlayerView
                     : exoDorisPlayerView;
+            LabelsTranslation translations = exoDorisPlayerView.getLabelsTranslation();
             AdLabels adLabels = translations == null ? null : new AdLabels(
-                    translations.getLearnMoreLabel(),
-                    translations.getAdsCountdownAdLabel(),
-                    translations.getAdsCountdownOfLabel(),
-                    translations.getSkipCountdownLabel(),
-                    translations.getSkipLabel()
+                    translations.get(KEY_LABELS_LEARN_MORE),
+                    translations.get(KEY_LABELS_COUNT_DOWN_AD),
+                    translations.get(KEY_LABELS_COUNT_DOWN_OF),
+                    translations.get(KEY_LABELS_SKIP_IN),
+                    translations.get(KEY_LABELS_SKIP)
             );
             AdGlobalSettings adGlobalSettings = new AdGlobalSettings(hideAdUiElements, isWhyThisAdIconEnabled, adLabels);
 
@@ -1852,43 +1856,15 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         controlsAutoHideTimeout = hideTimeout;
     }
 
-    public void applyTranslations(Map<String, Object> translations) {
-        this.translations = new RNTranslations(translations);
-        setLabelsOnPLayerUi();
+    public void setTranslations(Map<String, String> map) {
+        if (exoDorisPlayerView != null) {
+            exoDorisPlayerView.setTranslation(map);
+        }
     }
 
     public void applyPrimaryColor(@ColorInt int primaryColor) {
         if (exoDorisPlayerView != null) {
             exoDorisPlayerView.setPrimaryColor(primaryColor);
-        }
-    }
-
-    private void setLabelsOnPLayerUi() {
-        if (exoDorisPlayerView != null && translations != null) {
-            Labels labels = new LabelsBuilder()
-                    .setEpgLabel(translations.getEpgLabel())
-                    .setStatsLabel(translations.getStatsLabel())
-                    .setPlayLabel(translations.getPlayLabel())
-                    .setPauseLabel(translations.getPauseLabel())
-                    .setLiveLabel(translations.getLiveLabel())
-                    .setFavoriteLabel(translations.getFavoriteLabel())
-                    .setWatchlistLabel(translations.getWatchlistLabel())
-                    .setMoreVideosLabel(translations.getMoreVideosLabel())
-                    .setSubtitlesLabel(translations.getCaptionsLabel())
-                    .setRewindLabel(translations.getRewindLabel())
-                    .setFastForwardLabel(translations.getFastForwardLabel())
-                    .setAudioLanguagesLabel(translations.getAudioTracksLabel())
-                    .setInfoLabel(translations.getInfoLabel())
-                    .setAnnotationsLabel(translations.getAnnotationsLabel())
-                    .setAdsCountdownAdLabel(translations.getAdsCountdownAdLabel())
-                    .setAdsCountdownOfLabel(translations.getAdsCountdownOfLabel())
-                    .setPlayingLiveLabel(translations.getPlayingLiveLabel())
-                    .setNowPlayingLabel(translations.getNowPlayingLabel())
-                    .setAudioAndSubtitlesLabel(translations.getAudioAndSubtitlesLabel())
-                    .setSkipCreditsLabel(translations.getSkipCreditsLabel())
-                    .setSkipIntroLabel(translations.getSkipIntroLabel())
-                    .build();
-            exoDorisPlayerView.setLabels(labels);
         }
     }
 

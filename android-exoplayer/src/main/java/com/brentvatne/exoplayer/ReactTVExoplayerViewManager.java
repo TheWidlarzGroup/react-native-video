@@ -37,7 +37,6 @@ import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.google.gson.Gson;
-import com.imggaming.translations.DiceLocalizedStrings;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -577,8 +576,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
 
     @ReactProp(name = PROP_TRANSLATIONS)
     public void setTranslations(final ReactTVExoplayerView videoView, @Nullable ReadableMap translations) {
-        DiceLocalizedStrings.getInstance().updateTranslations(toStringMap(translations));
-        videoView.applyTranslations(translations != null ? translations.toHashMap() : null);
+        videoView.setTranslations(toStringMap(translations));
     }
 
     @ReactProp(name = PROP_RELATED_VIDEOS)
