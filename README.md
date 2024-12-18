@@ -2,7 +2,11 @@
 🎬 `<Video>` component for React Native
 
 ## Documentation
-documentation is available at [thewidlarzgroup.github.io/react-native-video/](https://thewidlarzgroup.github.io/react-native-video/)
+documentation is available at [docs.thewidlarzgroup.com/react-native-video/](https://docs.thewidlarzgroup.com/react-native-video/)
+
+## Examples
+You can find several examples demonstrating the usage of react-native-video [here](https://github.com/TheWidlarzGroup/react-native-video/tree/master/examples). <br />
+These include a [basic](https://github.com/TheWidlarzGroup/react-native-video/blob/master/examples/bare/src/BasicExample.tsx) usage and [DRM example](https://github.com/TheWidlarzGroup/react-native-video/blob/master/examples/bare/src/DRMExample.tsx) (with a [free DRM stream](https://www.thewidlarzgroup.com/services/free-drm-token-generator-for-video?utm_source=drm&utm_medium=code)).
 
 ## Usage
 

@@ -31,11 +31,11 @@ class BufferConfig {
         var targetOffsetMs: Long = BufferConfigPropUnsetInt.toLong()
 
         companion object {
-            private val PROP_BUFFER_CONFIG_LIVE_MAX_PLAYBACK_SPEED = "maxPlaybackSpeed"
-            private val PROP_BUFFER_CONFIG_LIVE_MIN_PLAYBACK_SPEED = "minPlaybackSpeed"
-            private val PROP_BUFFER_CONFIG_LIVE_MAX_OFFSET_MS = "maxOffsetMs"
-            private val PROP_BUFFER_CONFIG_LIVE_MIN_OFFSET_MS = "minOffsetMs"
-            private val PROP_BUFFER_CONFIG_LIVE_TARGET_OFFSET_MS = "targetOffsetMs"
+            private const val PROP_BUFFER_CONFIG_LIVE_MAX_PLAYBACK_SPEED = "maxPlaybackSpeed"
+            private const val PROP_BUFFER_CONFIG_LIVE_MIN_PLAYBACK_SPEED = "minPlaybackSpeed"
+            private const val PROP_BUFFER_CONFIG_LIVE_MAX_OFFSET_MS = "maxOffsetMs"
+            private const val PROP_BUFFER_CONFIG_LIVE_MIN_OFFSET_MS = "minOffsetMs"
+            private const val PROP_BUFFER_CONFIG_LIVE_TARGET_OFFSET_MS = "targetOffsetMs"
 
             @JvmStatic
             fun parse(src: ReadableMap?): Live {
@@ -54,16 +54,16 @@ class BufferConfig {
         val BufferConfigPropUnsetInt = -1
         val BufferConfigPropUnsetDouble = -1.0
 
-        private val PROP_BUFFER_CONFIG_CACHE_SIZE = "cacheSizeMB"
-        private val PROP_BUFFER_CONFIG_MIN_BUFFER_MS = "minBufferMs"
-        private val PROP_BUFFER_CONFIG_MAX_BUFFER_MS = "maxBufferMs"
-        private val PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_MS = "bufferForPlaybackMs"
-        private val PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS = "bufferForPlaybackAfterRebufferMs"
-        private val PROP_BUFFER_CONFIG_MAX_HEAP_ALLOCATION_PERCENT = "maxHeapAllocationPercent"
-        private val PROP_BUFFER_CONFIG_MIN_BACK_BUFFER_MEMORY_RESERVE_PERCENT = "minBackBufferMemoryReservePercent"
-        private val PROP_BUFFER_CONFIG_MIN_BUFFER_MEMORY_RESERVE_PERCENT = "minBufferMemoryReservePercent"
-        private val PROP_BUFFER_CONFIG_BACK_BUFFER_DURATION_MS = "backBufferDurationMs"
-        private val PROP_BUFFER_CONFIG_LIVE = "live"
+        private const val PROP_BUFFER_CONFIG_CACHE_SIZE = "cacheSizeMB"
+        private const val PROP_BUFFER_CONFIG_MIN_BUFFER_MS = "minBufferMs"
+        private const val PROP_BUFFER_CONFIG_MAX_BUFFER_MS = "maxBufferMs"
+        private const val PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_MS = "bufferForPlaybackMs"
+        private const val PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS = "bufferForPlaybackAfterRebufferMs"
+        private const val PROP_BUFFER_CONFIG_MAX_HEAP_ALLOCATION_PERCENT = "maxHeapAllocationPercent"
+        private const val PROP_BUFFER_CONFIG_MIN_BACK_BUFFER_MEMORY_RESERVE_PERCENT = "minBackBufferMemoryReservePercent"
+        private const val PROP_BUFFER_CONFIG_MIN_BUFFER_MEMORY_RESERVE_PERCENT = "minBufferMemoryReservePercent"
+        private const val PROP_BUFFER_CONFIG_BACK_BUFFER_DURATION_MS = "backBufferDurationMs"
+        private const val PROP_BUFFER_CONFIG_LIVE = "live"
 
         @JvmStatic
         fun parse(src: ReadableMap?): BufferConfig {

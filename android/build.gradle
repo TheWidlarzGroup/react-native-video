@@ -91,9 +91,10 @@ def configStringPath = ExoplayerDependencies
         .concat("buildFromSource:$media3_buildFromSource")
         .md5()
 
-if (isNewArchitectureEnabled()) {
-    apply plugin: "com.facebook.react"
-}
+// commented as new architecture not yet fully supported
+// if (isNewArchitectureEnabled()) {
+//     apply plugin: "com.facebook.react"
+// }
 
 android {
     if (supportsNamespace()) {

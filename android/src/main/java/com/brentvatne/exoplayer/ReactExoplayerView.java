@@ -216,7 +216,6 @@ public class ReactExoplayerView extends FrameLayout implements
     private float rate = 1f;
     private AudioOutput audioOutput = AudioOutput.SPEAKER;
     private float audioVolume = 1f;
-    private BufferConfig bufferConfig = new BufferConfig();
     private int maxBitRate = 0;
     private boolean hasDrmFailed = false;
     private boolean isUsingContentResolution = false;
@@ -924,7 +923,7 @@ public class ReactExoplayerView extends FrameLayout implements
             runtime = Runtime.getRuntime();
             ActivityManager activityManager = (ActivityManager) themedReactContext.getSystemService(ThemedReactContext.ACTIVITY_SERVICE);
             double maxHeap = config.getMaxHeapAllocationPercent() != BufferConfig.Companion.getBufferConfigPropUnsetDouble()
-                    ? bufferConfig.getMaxHeapAllocationPercent()
+                    ? config.getMaxHeapAllocationPercent()
                     : DEFAULT_MAX_HEAP_ALLOCATION_PERCENT;
             availableHeapInBytes = (int) Math.floor(activityManager.getMemoryClass() * maxHeap * 1024 * 1024);
         }
@@ -943,8 +942,8 @@ public class ReactExoplayerView extends FrameLayout implements
                 }
                 long usedMemory = runtime.totalMemory() - runtime.freeMemory();
                 long freeMemory = runtime.maxMemory() - usedMemory;
-                double minBufferMemoryReservePercent = bufferConfig.getMinBufferMemoryReservePercent() != BufferConfig.Companion.getBufferConfigPropUnsetDouble()
-                        ? bufferConfig.getMinBufferMemoryReservePercent()
+                double minBufferMemoryReservePercent = source.getBufferConfig().getMinBufferMemoryReservePercent() != BufferConfig.Companion.getBufferConfigPropUnsetDouble()
+                        ? source.getBufferConfig().getMinBufferMemoryReservePercent()
                         : ReactExoplayerView.DEFAULT_MIN_BUFFER_MEMORY_RESERVE;
                 long reserveMemory = (long) minBufferMemoryReservePercent * runtime.maxMemory();
                 long bufferedMs = bufferedDurationUs / (long) 1000;
@@ -976,9 +975,19 @@ public class ReactExoplayerView extends FrameLayout implements
                 if (runningSource.getUri() == null) {
                     return;
                 }
+
                 if (player == null) {
                     // Initialize core configuration and listeners
                     initializePlayerCore(self);
+                }
+                if (source.getBufferConfig().getCacheSize() > 0) {
+                    RNVSimpleCache.INSTANCE.setSimpleCache(
+                            this.getContext(),
+                            source.getBufferConfig().getCacheSize()
+                    );
+                    useCache = true;
+                } else {
+                    useCache = false;
                 }
                 if (playerNeedsSource) {
                     // Will force display of shutter view if needed
@@ -1048,7 +1057,7 @@ public class ReactExoplayerView extends FrameLayout implements
         DefaultAllocator allocator = new DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE);
         RNVLoadControl loadControl = new RNVLoadControl(
                 allocator,
-                bufferConfig
+                source.getBufferConfig()
         );
         DefaultRenderersFactory renderersFactory =
                 new DefaultRenderersFactory(getContext())
@@ -1354,7 +1363,7 @@ public class ReactExoplayerView extends FrameLayout implements
             }
         }
 
-        MediaItem.LiveConfiguration.Builder liveConfiguration = ConfigurationUtils.getLiveConfiguration(bufferConfig);
+        MediaItem.LiveConfiguration.Builder liveConfiguration = ConfigurationUtils.getLiveConfiguration(source.getBufferConfig());
         mediaItemBuilder.setLiveConfiguration(liveConfiguration.build());
 
         MediaSource.Factory mediaSourceFactory;
@@ -1396,8 +1405,14 @@ public class ReactExoplayerView extends FrameLayout implements
                     throw new IllegalStateException("HLS is not enabled!");
                 }
 
+                DataSource.Factory dataSourceFactory = mediaDataSourceFactory;
+
+                if (useCache) {
+                    dataSourceFactory = RNVSimpleCache.INSTANCE.getCacheFactory(buildHttpDataSourceFactory(true));
+                }
+
                 mediaSourceFactory = new HlsMediaSource.Factory(
-                        mediaDataSourceFactory
+                        dataSourceFactory
                 ).setAllowChunklessPreparation(source.getTextTracksAllowChunklessPreparation());
                 break;
             case CONTENT_TYPE_OTHER:
@@ -2595,21 +2610,6 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void setHideShutterView(boolean hideShutterView) {
         exoPlayerView.setHideShutterView(hideShutterView);
-    }
-
-    public void setBufferConfig(BufferConfig config) {
-        bufferConfig = config;
-        if (bufferConfig.getCacheSize() > 0) {
-            RNVSimpleCache.INSTANCE.setSimpleCache(
-                    this.getContext(),
-                    bufferConfig.getCacheSize()
-            );
-            useCache = true;
-        } else {
-            useCache = false;
-        }
-        releasePlayer();
-        initializePlayer();
     }
 
     @Override

@@ -45,8 +45,7 @@ import {
   resolveAssetSourceForVideo,
 } from './utils';
 import NativeVideoManager from './specs/NativeVideoManager';
-import type {VideoSaveData} from './specs/NativeVideoManager';
-import {CmcdMode, ViewType} from './types';
+import {ViewType, CmcdMode, VideoRef} from './types';
 import type {
   OnLoadData,
   OnTextTracksData,
@@ -55,22 +54,6 @@ import type {
   CmcdData,
   ReactVideoSource,
 } from './types';
-
-export interface VideoRef {
-  seek: (time: number, tolerance?: number) => void;
-  resume: () => void;
-  pause: () => void;
-  presentFullscreenPlayer: () => void;
-  dismissFullscreenPlayer: () => void;
-  restoreUserInterfaceForPictureInPictureStopCompleted: (
-    restore: boolean,
-  ) => void;
-  setVolume: (volume: number) => void;
-  setFullScreen: (fullScreen: boolean) => void;
-  setSource: (source?: ReactVideoSource) => void;
-  save: (options: object) => Promise<VideoSaveData> | void;
-  getCurrentPosition: () => Promise<number>;
-}
 
 const Video = forwardRef<VideoRef, ReactVideoProps>(
   (
@@ -126,6 +109,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       children,
       localSourceEncryptionKeyScheme,
       minLoadRetryCount,
+      bufferConfig,
       ...rest
     },
     ref,
@@ -237,6 +221,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
 
         const _minLoadRetryCount =
           _source.minLoadRetryCount || minLoadRetryCount;
+
+        const _bufferConfig = _source.bufferConfig || bufferConfig;
         return {
           uri,
           isNetwork,
@@ -258,6 +244,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           textTracksAllowChunklessPreparation:
             resolvedSource.textTracksAllowChunklessPreparation,
           minLoadRetryCount: _minLoadRetryCount,
+          bufferConfig: _bufferConfig,
         };
       },
       [
@@ -269,6 +256,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         minLoadRetryCount,
         source?.cmcd,
         textTracks,
+        bufferConfig,
       ],
     );
 

@@ -51,6 +51,7 @@ export type VideoSrc = Readonly<{
   textTracks?: TextTracks;
   ad?: AdsConfig;
   minLoadRetryCount?: Int32; // Android
+  bufferConfig?: BufferConfig; // Android
 }>;
 
 type DRMType = WithDefault<string, 'widevine'>;
@@ -285,12 +286,12 @@ type OnReceiveAdEventData = Readonly<{
 
 export type OnVideoErrorData = Readonly<{
   error: Readonly<{
-    errorString?: string; // android
+    errorString?: string; // android | web
     errorException?: string; // android
     errorStackTrace?: string; // android
     errorCode?: string; // android
     error?: string; // ios
-    code?: Int32; // ios
+    code?: Int32; // ios | web
     localizedDescription?: string; // ios
     localizedFailureReason?: string; // ios
     localizedRecoverySuggestion?: string; // ios
@@ -358,7 +359,6 @@ export interface VideoNativeProps extends ViewProps {
   restoreUserInterfaceForPIPStopCompletionHandler?: boolean;
   debug?: DebugConfig;
   showNotificationControls?: WithDefault<boolean, false>; // Android, iOS
-  bufferConfig?: BufferConfig; // Android
   currentPlaybackTime?: Double; // Android
   disableDisconnectError?: boolean; // Android
   focusable?: boolean; // Android
