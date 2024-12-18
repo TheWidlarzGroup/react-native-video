@@ -22,5 +22,14 @@
     "newWindow": true,
     "href": "https://github.com/TheWidlarzGroup/react-native-video/tree/master/examples"
   },
-  "projects": "Useful projects"
+  "projects": "Useful projects",
+  "separator_enterprise": {
+    "type": "separator",
+    "title": ""
+  },
+  "enterprise_support": {
+    "title": "Enterprise Support",
+    "newWindow": true,
+    "href": "https://www.thewidlarzgroup.com/?utm_source=rnv&utm_medium=docs#Contact"
+  }
 }
