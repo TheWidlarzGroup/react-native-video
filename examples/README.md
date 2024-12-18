@@ -89,6 +89,10 @@ yarn start
 
 ## [Expo](https://github.com/TheWidlarzGroup/react-native-video/tree/master/examples/expo)
 
+> [!NOTE] 
+> Additionally, there is a great example of a TV app available in the [AmazonAppDev/react-native-multi-tv-app-sample](https://github.com/AmazonAppDev/react-native-multi-tv-app-sample) repository.
+It provides a sample application for Android TV, Fire TV, tvOS, and the web. The app includes customizable drawer navigation, a content grid, a hero header, and an integrated video player. Built with Expo, it serves as a great starting point for cross-platform TV app development.
+
 ### Configuration
 
 #### Expo Plugin
