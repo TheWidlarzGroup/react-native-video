@@ -23,8 +23,15 @@ buildscript {
 }
 
 ext {
-   // For CI builds
-  useExoplayerIMA = System.getenv("RNV_SAMPLE_ENABLE_ADS") ?: false
+    // For CI builds
+    // check System.getenv("RNV_SAMPLE_ENABLE_ADS")
+    // check gradle.properties "RNVideo_useExoplayerIMA"
+    // else default to false
+    if (System.getenv("RNV_SAMPLE_ENABLE_ADS") == "true" || project.hasProperty("RNVideo_useExoplayerIMA")) {
+      useExoplayerIMA = true
+    } else {
+      useExoplayerIMA = false
+    }
 }
 
 allprojects {
