@@ -1,7 +1,6 @@
 package com.brentvatne.react
 
 import com.brentvatne.common.toolbox.DebugLog
-import com.brentvatne.exoplayer.ReactExoplayerViewManager
 
 /**
  * ReactNativeVideoManager is a singleton class which allows to manipulate / the global state of the app
@@ -23,13 +22,13 @@ class ReactNativeVideoManager : RNVPlugin {
             }
     }
 
-    private var instanceList: ArrayList<ReactExoplayerViewManager> = ArrayList()
+    private var instanceList: ArrayList<Any> = ArrayList()
     private var pluginList: ArrayList<RNVPlugin> = ArrayList()
 
     /**
      * register a new ReactExoplayerViewManager in the managed list
      */
-    fun registerView(newInstance: ReactExoplayerViewManager) {
+    fun registerView(newInstance: Any) {
         if (instanceList.size > 2) {
             DebugLog.d(TAG, "multiple Video displayed ?")
         }
@@ -39,7 +38,7 @@ class ReactNativeVideoManager : RNVPlugin {
     /**
      * unregister existing ReactExoplayerViewManager in the managed list
      */
-    fun unregisterView(newInstance: ReactExoplayerViewManager) {
+    fun unregisterView(newInstance: Any) {
         instanceList.remove(newInstance)
     }
 
