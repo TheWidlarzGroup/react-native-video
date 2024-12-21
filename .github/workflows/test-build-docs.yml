@@ -14,10 +14,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup
-        uses: ./.github/actions/setup-bun
-        with:
-          working-directory: ./docs
+      - uses: oven-sh/setup-bun@v2
+      - name: Install npm dependencies (with bun)
+        run: bun install
 
       - name: Cache build
         uses: actions/cache@v4
