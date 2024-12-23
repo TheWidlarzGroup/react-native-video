@@ -3,7 +3,7 @@
     "rootDir": "./src",
     "outDir": "lib",
     "paths": {
-      "react-native-video": ["./src/index"]
+      "react": ["./node_modules/@types/react"]
     },
     "composite": true,
     "declaration": true,

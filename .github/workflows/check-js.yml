@@ -6,7 +6,7 @@ on:
       - master
     paths:
       - '.github/workflows/check-js.yml'
-      - 'src/**'
+      - './packages/react-native-video/src/**'
       - '*.json'
       - '*.js'
       - '*.jsx'
@@ -16,7 +16,7 @@ on:
   pull_request:
     paths:
       - '.github/workflows/check-js.yml'
-      - 'src/**'
+      - './packages/react-native-video/src/**'
       - '*.json'
       - '*.js'
       - '*.jsx'
@@ -31,15 +31,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install node_modules
-        uses: ./.github/actions/setup-node
+      - uses: oven-sh/setup-bun@v2
+      - name: Install npm dependencies (with bun)
+        run: bun install
 
       - name: Install reviewdog
         uses: reviewdog/action-setup@v1
 
       - name: Check TypeScript
         run: |
-          yarn tsc | reviewdog -name="tsc" -efm="%f(%l,%c): error TS%n: %m" -reporter="github-pr-review" -filter-mode="nofilter" -fail-on-error -tee
+          bun tsc | reviewdog -name="tsc" -efm="%f(%l,%c): error TS%n: %m" -reporter="github-pr-review" -filter-mode="nofilter" -fail-on-error -tee
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -49,14 +50,15 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Install node_modules
-      uses: ./.github/actions/setup-node
+    - uses: oven-sh/setup-bun@v2
+    - name: Install npm dependencies (with bun)
+      run: bun install
 
     - name: Run ESLint
-      run: yarn lint -f @jamesacarr/github-actions
+      run: bun lint -f @jamesacarr/github-actions
 
     - name: Run ESLint with auto-fix
-      run: yarn lint --fix
+      run: bun lint --fix
 
     - name: Verify no files have changed after auto-fix
       run: git diff --exit-code HEAD

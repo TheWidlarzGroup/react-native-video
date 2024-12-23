@@ -17,9 +17,9 @@
         }
       ],
       [
-        "../../lib/expo-plugins/withRNVideo.js", 
+        "react-native-video",
         {
-          "reactNativeTestApp": true,
+          "reactNativeTestApp": false,
           "enableNotificationControls": true,
           "enableBackgroundAudio": true,
           "enableADSExtension": false,
@@ -33,13 +33,24 @@
         }
       ]
     ],
-    "name": "ExpoExample",
-    "slug": "ExpoExample",
     "android": {
-      "package": "com.anonymous.ExpoExample"
+      "splash": {
+        "image": "./assets/images/icon-1920x720.png"
+      },
+      "package": "com.anonymous.ExpoExample",
+      "permissions": [
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+      ]
     },
     "ios": {
+      "splash": {
+        "image": "./assets/images/icon-1920x720.png"
+      },
       "bundleIdentifier": "com.anonymous.ExpoExample"
-    }
+    },
+    "newArchEnabled": false,
+    "name": "ExpoExample",
+    "slug": "ExpoExample"
   }
 }

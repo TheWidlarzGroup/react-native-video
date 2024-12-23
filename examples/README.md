@@ -12,7 +12,7 @@ This directory contains examples for `react-native-video` - this is a guide that
 
 Both of applications have mostly the same code (Windows and tvOS have platform-specific code). Other platform are using codebase from `bare` example.
 If you want to update examples content, you should do it in `bare` example. `expo` example is copping (and overwriting!) `src` folder from `bare` on dependency install.
-If you want to sync `expo` example, you can use `yarn update-src` command in `expo` example directory.
+If you want to sync `expo` example, you can use `bun run update-src` command in `expo` example directory.
 
 ## How To Run Examples
 
@@ -33,13 +33,13 @@ You can configure the example by changing the settings of expo-plugin `app.json`
 1. Install dependency in repository root directory
 
 ```bash
-yarn install
+bun install
 ```
 
 2. Install dependency in `bare` example directory
 
 ```bash
-cd examples/bare && yarn install
+cd examples/bare && bun install
 ```
 
 3. Now you will need to generate native project for platform you want to run the example on.
@@ -60,28 +60,28 @@ cd examples/bare && yarn install
 
      ```bash
      # for ios
-     yarn ios --interactive
+     bun run ios --interactive
      # for visionOS
-     yarn visionos --interactive
+     bun run visionos --interactive
      ```
 
    - For Android:
      There is no need to run any additional command. you can just run the App. (Flag `--interactive` is optional, but it is recommended as it allows you to choose the device you want to run the app on)
 
      ```bash
-     yarn android --interactive
+     bun run android --interactive
      ```
 
    - For Windows:
      There is no need to run any additional command. you can just run the App.
      ```bash
-     yarn windows
+     bun run windows
      ```
 
 If Metro Bundler is not running (or it did not start), you can start it by running:
 
 ```bash
-yarn start
+bun start
 ```
 
 > [!TIP]
@@ -103,24 +103,23 @@ You can configure the example by changing the settings of expo-plugin `app.json`
 > You can find more information about the expo-plugin configuration [here](https://docs.thewidlarzgroup.com/react-native-video/other/expo).
 
 > [!CAUTION]
-> You will need to regenerate the native project after changing the `app.json` file - you can do it by running `yarn prebuild` command in `expo` example directory.
+> You will need to regenerate the native project after changing the `app.json` file - you can do it by running `bun prebuild` command in `expo` example directory.
 
 #### Switching between Mobile and TV
-
-If you want to switch between mobile and TV version of the app you will need to regenerate the native project. You can do it by running `yarn prebuild:tv` command in `expo` example directory.
+If you want to switch between mobile and TV version of the app you will need to regenerate the native project. You can do it by running `bun prebuild:tv` command in `expo` example directory.
 
 ### Building
 
 1. Install dependency in repository root directory
 
 ```bash
-yarn install
+bun install
 ```
 
 2. Install dependency in `expo` example directory
 
 ```bash
-cd examples/expo && yarn install
+cd examples/expo && bun install
 ```
 
 3. Now you will need to generate native project for platform you want to run the example on.
@@ -137,18 +136,18 @@ cd examples/expo && yarn install
 
      ```bash
      # for ios
-     yarn ios --device
+     bun run ios --device
      # for tvOS
-     yarn ios:tv --device
+     bun run ios:tv --device
      ```
 
    - For Android / Android TV:
      There is no need to run any additional command. you can just run the App. (Flag `--device` is optional, but it is recommended as it allows you to choose the device you want to run the app on)
      ```bash
      # for android
-     yarn android --device
+     bun run android --device
      # for android tv
-     yarn android:tv --device
+     bun run android:tv --device
      ```
 
 > [!WARNING]  
@@ -162,7 +161,7 @@ cd examples/expo && yarn install
 If Metro Bundler is not running (or it did not start), you can start it by running:
 
 ```bash
-yarn start
+bun start
 ```
 
 ## For Maintainers
@@ -197,4 +196,19 @@ That's it! Now you can commit changes and create a PR.
 #### Expo
 
 To update `expo` example you should follow this [guide](https://docs.expo.dev/workflow/upgrading-expo-sdk-walkthrough).
-After updating `expo` example you will need to use prebuild (yarn expo prebuild) - if it fails you will need to add `--clean` flag to the command - this will remove manual link of `react-native-video` package so you will need to link it again.
+After re-building the native project you should ensure that top of `android/settings.gradle` file looks like this:
+
+```gradle
+pluginManagement {
+    includeBuild(new File(["node", "--print", "require.resolve('@react-native/gradle-plugin/package.json', { paths: [require.resolve('react-native/package.json')] })"].execute(null, rootDir).text.trim()).getParentFile().toString())
+}
+```
+
+Otherwise, you will get an error like this:
+
+```bash
+FAILURE: Build failed with an exception.
+
+What went wrong:
+  Included build (...)/react-native-video/examples/expo/node_modules/react-native/node_modules/@react-native/gradle-plugin has build path :gradle-plugin which is the same as included build (...)/react-native-video/node_modules/@react-native/gradle-plugin
+```

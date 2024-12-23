@@ -6,14 +6,14 @@ on:
       - master
     paths:
       - '.github/workflows/build-android.yml'
-      - 'android/**'
+      - './packages/react-native-video/android/**'
       - 'examples/bare/android/**'
       - 'yarn.lock'
       - 'examples/bare/yarn.lock'
   pull_request:
     paths:
       - '.github/workflows/build-android.yml'
-      - 'android/**'
+      - './packages/react-native-video/android/**'
       - 'examples/bare/android/**'
       - 'yarn.lock'
       - 'examples/bare/yarn.lock'
@@ -32,18 +32,9 @@ jobs:
           java-version: 17
           java-package: jdk
 
-      - name: Install node_modules at Root
-        uses: ./.github/actions/setup-node
-        with:
-          working-directory: ./
-
-      - name: Build Library
-        run: yarn build
-
-      - name: Install node_modules at Example
-        uses: ./.github/actions/setup-node
-        with:
-          working-directory: examples/bare
+      - uses: oven-sh/setup-bun@v2
+      - name: Install npm dependencies (with bun)
+        run: bun install
 
       - name: Restore Gradle cache
         uses: actions/cache@v4
@@ -70,18 +61,9 @@ jobs:
           java-version: 17
           java-package: jdk
 
-      - name: Install node_modules at Root
-        uses: ./.github/actions/setup-node
-        with:
-          working-directory: ./
-  
-      - name: Build Library
-        run: yarn build
-  
-      - name: Install node_modules at Example
-        uses: ./.github/actions/setup-node
-        with:
-          working-directory: examples/bare
+      - uses: oven-sh/setup-bun@v2
+      - name: Install npm dependencies (with bun)
+        run: bun install
 
       - name: Restore Gradle cache
         uses: actions/cache@v4
