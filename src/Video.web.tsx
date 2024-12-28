@@ -254,21 +254,22 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     }, [rate]);
 
     useEffect(() => {
-      if (!src?.uri || !nativeRef.current || !Hls.isSupported()) {
+      if (!nativeRef.current || typeof src?.uri !== 'string') {
         return;
       }
 
-      const isHlsStream =
-        typeof src.uri === 'string' &&
-        (src.uri.includes('m3u8') || src.type === 'm3u8');
+      const isHlsUrl = src.uri.endsWith('.m3u8') || src.type === 'm3u8';
 
-      if (!isHlsStream) {
+      if (!isHlsUrl) {
         return;
       }
 
       const hls = new Hls();
-      hls.loadSource(src.uri);
-      hls.attachMedia(nativeRef.current);
+
+      if (Hls.isSupported()) {
+        hls.loadSource(src.uri);
+        hls.attachMedia(nativeRef.current);
+      }
 
       return () => {
         hls.destroy();
