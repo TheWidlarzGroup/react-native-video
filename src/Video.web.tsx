@@ -1,3 +1,4 @@
+import Hls from 'hls.js';
 import React, {
   forwardRef,
   useCallback,
@@ -251,6 +252,28 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       }
       nativeRef.current.playbackRate = rate;
     }, [rate]);
+
+    useEffect(() => {
+      if (!src?.uri || !nativeRef.current || !Hls.isSupported()) {
+        return;
+      }
+
+      const isHlsStream =
+        typeof src.uri === 'string' &&
+        (src.uri.includes('m3u8') || src.type === 'm3u8');
+
+      if (!isHlsStream) {
+        return;
+      }
+
+      const hls = new Hls();
+      hls.loadSource(src.uri);
+      hls.attachMedia(nativeRef.current);
+
+      return () => {
+        hls.destroy();
+      };
+    }, [src]);
 
     useMediaSession(src?.metadata, nativeRef, showNotificationControls);
 
