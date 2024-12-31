@@ -17,9 +17,9 @@ public class ReactNativeVideoManager: RNVPlugin {
     private var pluginList: [RNVPlugin] = Array()
 
     /**
-      * register a new view
+     * register a new view
      */
-    func registerView(newInstance: RCTVideo) {
+    func registerView(newInstance _: RCTVideo) {
         if instanceCount > expectedMaxVideoCount {
             DebugLog("multiple Video displayed ?")
         }
@@ -29,7 +29,7 @@ public class ReactNativeVideoManager: RNVPlugin {
     /**
      * unregister existing view
      */
-    func unregisterView(newInstance: RCTVideo) {
+    func unregisterView(newInstance _: RCTVideo) {
         instanceCount -= 1
     }
 
