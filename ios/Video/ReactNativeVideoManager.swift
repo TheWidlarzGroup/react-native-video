@@ -6,33 +6,31 @@
 import Foundation
 
 public class ReactNativeVideoManager: RNVPlugin {
-    private let expectedMaxVideoCount = 10
+    private let expectedMaxVideoCount = 2
 
     // create a private initializer
     private init() {}
 
     public static let shared: ReactNativeVideoManager = .init()
 
-    var instanceList: [RCTVideo] = Array()
-    var pluginList: [RNVPlugin] = Array()
+    private var instanceCount = 0
+    private var pluginList: [RNVPlugin] = Array()
 
     /**
-      * register a new ReactExoplayerViewManager in the managed list
+     * register a new view
      */
-    func registerView(newInstance: RCTVideo) {
-        if instanceList.count > expectedMaxVideoCount {
+    func registerView(newInstance _: RCTVideo) {
+        if instanceCount > expectedMaxVideoCount {
             DebugLog("multiple Video displayed ?")
         }
-        instanceList.append(newInstance)
+        instanceCount += 1
     }
 
     /**
-     * unregister existing ReactExoplayerViewManager in the managed list
+     * unregister existing view
      */
-    func unregisterView(newInstance: RCTVideo) {
-        if let i = instanceList.firstIndex(of: newInstance) {
-            instanceList.remove(at: i)
-        }
+    func unregisterView(newInstance _: RCTVideo) {
+        instanceCount -= 1
     }
 
     /**
