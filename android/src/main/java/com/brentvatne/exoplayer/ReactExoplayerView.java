@@ -1926,8 +1926,6 @@ public class ReactExoplayerView extends FrameLayout implements
         }
     }
 
-    // ReactExoplayerViewManager public api
-
     public void setSrc(Source source) {
         if (source.getUri() != null) {
             clearResumePosition();
