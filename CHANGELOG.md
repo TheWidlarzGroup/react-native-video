@@ -1,5 +1,21 @@
 
 
+# [6.9.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.8.2...v6.9.0) (2025-01-04)
+
+
+### Bug Fixes
+
+* **android:** disable caching on local asset files ([#4304](https://github.com/TheWidlarzGroup/react-native-video/issues/4304)) ([63c592f](https://github.com/TheWidlarzGroup/react-native-video/commit/63c592f7cd897caf918fd3bd5f129c72432d2b55))
+* **docs:** bump `next.js` version & fix meta warnings ([#4327](https://github.com/TheWidlarzGroup/react-native-video/issues/4327)) ([7b4bd9a](https://github.com/TheWidlarzGroup/react-native-video/commit/7b4bd9a0169fc2ea6f277dd7ed904bada98bc63a))
+* hiding poster ([#4308](https://github.com/TheWidlarzGroup/react-native-video/issues/4308)) ([621a802](https://github.com/TheWidlarzGroup/react-native-video/commit/621a80299c690c07846f3fcd8a6c73b7ecde39bf))
+* **ios:** `_paused` is updated when video playback pause ([#4320](https://github.com/TheWidlarzGroup/react-native-video/issues/4320)) ([3da4f1c](https://github.com/TheWidlarzGroup/react-native-video/commit/3da4f1ca979058b387b1be2c2141f6b93fd084a7))
+* **ios:** disables subtitles for `none` and `empty` track types ([#4319](https://github.com/TheWidlarzGroup/react-native-video/issues/4319)) ([1033c9d](https://github.com/TheWidlarzGroup/react-native-video/commit/1033c9d4f3db7042a96e7108a7fe9f1567d69ded))
+
+
+### Features
+
+* implement enterPictureInPictureOnLeave prop for both platform (Android, iOS) ([#3385](https://github.com/TheWidlarzGroup/react-native-video/issues/3385)) ([69a7bc2](https://github.com/TheWidlarzGroup/react-native-video/commit/69a7bc2d265f2cf4985f8d81054c46f47ee3bae2))
+
 ## [6.8.2](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.8.1...v6.8.2) (2024-11-25)
 
 
