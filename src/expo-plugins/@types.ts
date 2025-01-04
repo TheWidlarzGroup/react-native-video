@@ -6,6 +6,11 @@ export type ConfigProps = {
    */
   enableNotificationControls?: boolean;
   /**
+   * Apply configs to be able to use Picture-in-picture on Android.
+   * @default false
+   */
+  enableAndroidPictureInPicture?: boolean;
+  /**
    * Whether to enable background audio feature.
    * @default false
    */

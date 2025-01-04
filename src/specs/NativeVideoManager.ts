@@ -23,6 +23,8 @@ export interface VideoManagerType {
   setFullScreenCmd: (reactTag: Int32, fullScreen: boolean) => Promise<void>;
   setSourceCmd: (reactTag: Int32, source?: UnsafeObject) => Promise<void>;
   setVolumeCmd: (reactTag: Int32, volume: number) => Promise<void>;
+  enterPictureInPictureCmd: (reactTag: number) => Promise<void>;
+  exitPictureInPictureCmd: (reactTag: number) => Promise<void>;
   save: (reactTag: Int32, option: UnsafeObject) => Promise<VideoSaveData>;
   getCurrentPosition: (reactTag: Int32) => Promise<Int32>;
 }
