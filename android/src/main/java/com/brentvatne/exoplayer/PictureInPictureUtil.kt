@@ -91,26 +91,26 @@ object PictureInPictureUtil {
     @JvmStatic
     fun applyPlayingStatus(
         context: ThemedReactContext,
-        pipParamsBuilder: PictureInPictureParams.Builder,
+        pipParamsBuilder: PictureInPictureParams.Builder?,
         receiver: PictureInPictureReceiver,
         isPaused: Boolean
     ) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        if (pipParamsBuilder == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         val actions = getPictureInPictureActions(context, isPaused, receiver)
         pipParamsBuilder.setActions(actions)
         updatePictureInPictureActions(context, pipParamsBuilder.build())
     }
 
     @JvmStatic
-    fun applyAutoEnterEnabled(context: ThemedReactContext, pipParamsBuilder: PictureInPictureParams.Builder, autoEnterEnabled: Boolean) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
+    fun applyAutoEnterEnabled(context: ThemedReactContext, pipParamsBuilder: PictureInPictureParams.Builder?, autoEnterEnabled: Boolean) {
+        if (pipParamsBuilder == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
         pipParamsBuilder.setAutoEnterEnabled(autoEnterEnabled)
         updatePictureInPictureActions(context, pipParamsBuilder.build())
     }
 
     @JvmStatic
-    fun applySourceRectHint(context: ThemedReactContext, pipParamsBuilder: PictureInPictureParams.Builder, playerView: ExoPlayerView) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+    fun applySourceRectHint(context: ThemedReactContext, pipParamsBuilder: PictureInPictureParams.Builder?, playerView: ExoPlayerView) {
+        if (pipParamsBuilder == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         pipParamsBuilder.setSourceRectHint(calcRectHint(playerView))
         updatePictureInPictureActions(context, pipParamsBuilder.build())
     }
