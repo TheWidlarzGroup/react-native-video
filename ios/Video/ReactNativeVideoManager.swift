@@ -39,7 +39,7 @@ public class ReactNativeVideoManager: RNVPlugin {
      */
     public func registerPlugin(plugin: RNVPlugin) {
         pluginList.append(plugin)
-        
+
         // Check if plugin provides DRM manager
         if let drmManager = plugin.getDRMManager() {
             if customDRMManager != nil {
@@ -57,11 +57,11 @@ public class ReactNativeVideoManager: RNVPlugin {
     public func onInstanceRemoved(id: String, player: Any) {
         pluginList.forEach { it in it.onInstanceRemoved(id: id, player: player) }
     }
-    
+
     public func getDRMManager() -> DRMManagerSpec.Type? {
         return nil
     }
-    
+
     /**
      * Creates a DRM manager instance
      * If a custom DRM manager is registered through a plugin, it will be used

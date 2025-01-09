@@ -15,4 +15,4 @@ interface DRMManagerSpec {
      */
     @Throws(UnsupportedDrmException::class)
     fun buildDrmSessionManager(uuid: UUID, drmProps: DRMProps): DrmSessionManager?
-} 
+}

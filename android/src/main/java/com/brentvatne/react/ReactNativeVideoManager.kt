@@ -49,7 +49,7 @@ class ReactNativeVideoManager : RNVPlugin {
      */
     fun registerPlugin(plugin: RNVPlugin) {
         pluginList.add(plugin)
-        
+
         // Check if plugin provides DRM manager
         plugin.getDRMManager()?.let { drmManager ->
             if (customDRMManager != null) {
@@ -65,7 +65,7 @@ class ReactNativeVideoManager : RNVPlugin {
      */
     fun unregisterPlugin(plugin: RNVPlugin) {
         pluginList.remove(plugin)
-        
+
         // If this plugin provided the DRM manager, remove it
         if (plugin.getDRMManager() === customDRMManager) {
             customDRMManager = null
@@ -80,7 +80,5 @@ class ReactNativeVideoManager : RNVPlugin {
         pluginList.forEach { it.onInstanceRemoved(id, player) }
     }
 
-    override fun getDRMManager(): DRMManagerSpec? {
-        return customDRMManager
-    }
+    override fun getDRMManager(): DRMManagerSpec? = customDRMManager
 }
