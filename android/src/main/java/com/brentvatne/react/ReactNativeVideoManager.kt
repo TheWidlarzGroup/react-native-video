@@ -1,10 +1,11 @@
 package com.brentvatne.react
 
 import com.brentvatne.common.toolbox.DebugLog
+import com.brentvatne.exoplayer.DRMManagerSpec
 
 /**
  * ReactNativeVideoManager is a singleton class which allows to manipulate / the global state of the app
- * It handles the list of <Video view instanced and registration of plugins
+ * It handles the list of <Video/> view instanced and registration of plugins
  */
 class ReactNativeVideoManager : RNVPlugin {
     companion object {
@@ -22,8 +23,9 @@ class ReactNativeVideoManager : RNVPlugin {
             }
     }
 
+    private val pluginList = ArrayList<RNVPlugin>()
+    private var customDRMManager: DRMManagerSpec? = null
     private var instanceList: ArrayList<Any> = ArrayList()
-    private var pluginList: ArrayList<RNVPlugin> = ArrayList()
 
     /**
      * register a new ReactExoplayerViewManager in the managed list
@@ -47,7 +49,15 @@ class ReactNativeVideoManager : RNVPlugin {
      */
     fun registerPlugin(plugin: RNVPlugin) {
         pluginList.add(plugin)
-        return
+        
+        // Check if plugin provides DRM manager
+        plugin.getDRMManager()?.let { drmManager ->
+            if (customDRMManager != null) {
+                DebugLog.w("ReactNativeVideoManager", "Multiple DRM managers registered. This is not supported. Using first registered manager.")
+                return@let
+            }
+            customDRMManager = drmManager
+        }
     }
 
     /**
@@ -55,7 +65,11 @@ class ReactNativeVideoManager : RNVPlugin {
      */
     fun unregisterPlugin(plugin: RNVPlugin) {
         pluginList.remove(plugin)
-        return
+        
+        // If this plugin provided the DRM manager, remove it
+        if (plugin.getDRMManager() === customDRMManager) {
+            customDRMManager = null
+        }
     }
 
     override fun onInstanceCreated(id: String, player: Any) {
@@ -64,5 +78,9 @@ class ReactNativeVideoManager : RNVPlugin {
 
     override fun onInstanceRemoved(id: String, player: Any) {
         pluginList.forEach { it.onInstanceRemoved(id, player) }
+    }
+
+    override fun getDRMManager(): DRMManagerSpec? {
+        return customDRMManager
     }
 }

@@ -920,25 +920,32 @@ public class ReactExoplayerView extends FrameLayout implements
         return null;
     }
 
-    private DrmSessionManager initializePlayerDrm() {
-        DrmSessionManager drmSessionManager = null;
-        DRMProps drmProps = source.getDrmProps();
-        // need to realign UUID in DRM Props from source
-        if (drmProps != null && drmProps.getDrmType() != null) {
-            UUID uuid = Util.getDrmUuid(drmProps.getDrmType());
-            if (uuid != null) {
-                try {
-                    DebugLog.w(TAG, "drm buildDrmSessionManager");
-                    drmSessionManager = buildDrmSessionManager(uuid, drmProps);
-                } catch (UnsupportedDrmException e) {
-                    int errorStringId = Util.SDK_INT < 18 ? R.string.error_drm_not_supported
-                            : (e.reason == UnsupportedDrmException.REASON_UNSUPPORTED_SCHEME
-                            ? R.string.error_drm_unsupported_scheme : R.string.error_drm_unknown);
-                    eventEmitter.onVideoError.invoke(getResources().getString(errorStringId), e, "3003");
-                        }
-            }
+    private DrmSessionManager buildDrmSessionManager(UUID uuid, DRMProps drmProps) throws UnsupportedDrmException {
+        if (Util.SDK_INT < 18) {
+            return null;
         }
-        return drmSessionManager;
+
+        try {
+            // First check if there's a custom DRM manager registered through the plugin system
+            DRMManagerSpec drmManager = ReactNativeVideoManager.Companion.getInstance().getDRMManager();
+            if (drmManager == null) {
+                // If no custom manager is registered, use the default implementation
+                drmManager = new DRMManager(buildHttpDataSourceFactory(false));
+            }
+
+            DrmSessionManager drmSessionManager = drmManager.buildDrmSessionManager(uuid, drmProps);
+            if (drmSessionManager == null) {
+                eventEmitter.onVideoError.invoke("Failed to build DRM session manager", new Exception("DRM session manager is null"), "3007");
+            }
+            return drmSessionManager;
+        } catch (UnsupportedDrmException ex) {
+            // Unsupported DRM exceptions are handled by the calling method
+            throw ex;
+        } catch (Exception ex) {
+            // Handle any other exception and emit to JS
+            eventEmitter.onVideoError.invoke(ex.toString(), ex, "3006");
+            return null;
+        }
     }
 
     private void initializePlayerSource(Source runningSource) {
@@ -995,6 +1002,27 @@ public class ReactExoplayerView extends FrameLayout implements
         loadVideoStarted = true;
 
         finishPlayerInitialization();
+    }
+
+    private DrmSessionManager initializePlayerDrm() {
+        DrmSessionManager drmSessionManager = null;
+        DRMProps drmProps = source.getDrmProps();
+        // need to realign UUID in DRM Props from source
+        if (drmProps != null && drmProps.getDrmType() != null) {
+            UUID uuid = Util.getDrmUuid(drmProps.getDrmType());
+            if (uuid != null) {
+                try {
+                    DebugLog.w(TAG, "drm buildDrmSessionManager");
+                    drmSessionManager = buildDrmSessionManager(uuid, drmProps);
+                } catch (UnsupportedDrmException e) {
+                    int errorStringId = Util.SDK_INT < 18 ? R.string.error_drm_not_supported
+                            : (e.reason == UnsupportedDrmException.REASON_UNSUPPORTED_SCHEME
+                            ? R.string.error_drm_unsupported_scheme : R.string.error_drm_unknown);
+                    eventEmitter.onVideoError.invoke(getResources().getString(errorStringId), e, "3003");
+                }
+            }
+        }
+        return drmSessionManager;
     }
 
     private void finishPlayerInitialization() {
@@ -1077,46 +1105,6 @@ public class ReactExoplayerView extends FrameLayout implements
             }
         } catch(Exception e) {
             DebugLog.w(TAG, "Cloud not cleanup playback service");
-        }
-    }
-
-    private DrmSessionManager buildDrmSessionManager(UUID uuid, DRMProps drmProps) throws UnsupportedDrmException {
-        return buildDrmSessionManager(uuid, drmProps, 0);
-    }
-
-    private DrmSessionManager buildDrmSessionManager(UUID uuid, DRMProps drmProps, int retryCount) throws UnsupportedDrmException {
-        if (Util.SDK_INT < 18) {
-            return null;
-        }
-        try {
-            HttpMediaDrmCallback drmCallback = new HttpMediaDrmCallback(drmProps.getDrmLicenseServer(),
-                    buildHttpDataSourceFactory(false));
-
-            String[] keyRequestPropertiesArray = drmProps.getDrmLicenseHeader();
-            for (int i = 0; i < keyRequestPropertiesArray.length - 1; i += 2) {
-                drmCallback.setKeyRequestProperty(keyRequestPropertiesArray[i], keyRequestPropertiesArray[i + 1]);
-            }
-            FrameworkMediaDrm mediaDrm = FrameworkMediaDrm.newInstance(uuid);
-            if (hasDrmFailed) {
-                // When DRM fails using L1 we want to switch to L3
-                mediaDrm.setPropertyString("securityLevel", "L3");
-            }
-            return new DefaultDrmSessionManager.Builder()
-                    .setUuidAndExoMediaDrmProvider(uuid, (_uuid) -> mediaDrm)
-                    .setKeyRequestParameters(null)
-                    .setMultiSession(drmProps.getMultiDrm())
-                    .build(drmCallback);
-        } catch (UnsupportedDrmException ex) {
-            // Unsupported DRM exceptions are handled by the calling method
-            throw ex;
-        } catch (Exception ex) {
-            if (retryCount < 3) {
-                // Attempt retry 3 times in case where the OS Media DRM Framework fails for whatever reason
-                return buildDrmSessionManager(uuid, drmProps, ++retryCount);
-            }
-            // Handle the unknow exception and emit to JS
-            eventEmitter.onVideoError.invoke(ex.toString(), ex, "3006");
-            return null;
         }
     }
 
