@@ -1,5 +1,7 @@
 package com.brentvatne.react
 
+import com.brentvatne.exoplayer.DRMManagerSpec
+
 /**
  * Plugin interface definition
  */
@@ -19,4 +21,13 @@ interface RNVPlugin {
      * @param player: the player to release
      */
     fun onInstanceRemoved(id: String, player: Any)
+
+    /**
+     * Optional function that allows plugin to provide custom DRM manager
+     * Only one plugin can provide DRM manager at a time
+     * @return DRMManagerSpec implementation if plugin wants to handle DRM, null otherwise
+     */
+    fun getDRMManager(): DRMManagerSpec? {
+        return null
+    }
 }
