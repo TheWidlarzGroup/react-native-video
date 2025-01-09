@@ -14,9 +14,7 @@ class DRMManager(private val dataSourceFactory: HttpDataSource.Factory) : DRMMan
     private var hasDrmFailed = false
 
     @Throws(UnsupportedDrmException::class)
-    override fun buildDrmSessionManager(uuid: UUID, drmProps: DRMProps): DrmSessionManager? {
-        return buildDrmSessionManager(uuid, drmProps, 0)
-    }
+    override fun buildDrmSessionManager(uuid: UUID, drmProps: DRMProps): DrmSessionManager? = buildDrmSessionManager(uuid, drmProps, 0)
 
     @Throws(UnsupportedDrmException::class)
     private fun buildDrmSessionManager(uuid: UUID, drmProps: DRMProps, retryCount: Int = 0): DrmSessionManager? {
@@ -56,4 +54,4 @@ class DRMManager(private val dataSourceFactory: HttpDataSource.Factory) : DRMMan
             throw UnsupportedDrmException(UnsupportedDrmException.REASON_UNSUPPORTED_SCHEME, ex)
         }
     }
-} 
+}

@@ -8,10 +8,10 @@ public protocol DRMManagerSpec: NSObject, AVContentKeySessionDelegate {
         onVideoError: RCTDirectEventBlock?,
         onGetLicense: RCTDirectEventBlock?
     )
-    
+
     func handleContentKeyRequest(keyRequest: AVContentKeyRequest)
     func finishProcessingContentKeyRequest(keyRequest: AVContentKeyRequest, license: Data) throws
     func handleError(_ error: Error, for keyRequest: AVContentKeyRequest)
     func setJSLicenseResult(license: String, licenseUrl: String)
     func setJSLicenseError(error: String, licenseUrl: String)
-} 
+}

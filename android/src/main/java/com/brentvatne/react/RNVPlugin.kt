@@ -27,7 +27,5 @@ interface RNVPlugin {
      * Only one plugin can provide DRM manager at a time
      * @return DRMManagerSpec implementation if plugin wants to handle DRM, null otherwise
      */
-    fun getDRMManager(): DRMManagerSpec? {
-        return null
-    }
+    fun getDRMManager(): DRMManagerSpec? = null
 }

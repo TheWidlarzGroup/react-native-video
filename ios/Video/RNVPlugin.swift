@@ -20,7 +20,7 @@ public protocol RNVPlugin {
      * @param player: the player to release
      */
     func onInstanceRemoved(id: String, player: Any)
-    
+
     /**
      * Optional function that allows plugin to provide custom DRM manager
      * Only one plugin can provide DRM manager at a time
