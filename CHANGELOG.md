@@ -1,5 +1,13 @@
 
 
+## [6.9.1](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.9.0...v6.9.1) (2025-01-10)
+
+
+### Bug Fixes
+
+* avoid memory leak on iOS ([#4355](https://github.com/TheWidlarzGroup/react-native-video/issues/4355)) ([424f4ee](https://github.com/TheWidlarzGroup/react-native-video/commit/424f4eeddea989392e25c52f45a9a0281ead6fe1))
+* NPE in setEnterPictureInPictureOnLeave for unsupported Android versions ([#4362](https://github.com/TheWidlarzGroup/react-native-video/issues/4362)) ([3924b5e](https://github.com/TheWidlarzGroup/react-native-video/commit/3924b5e295ed64c97284f4665bc294066a83574a))
+
 # [6.9.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.8.2...v6.9.0) (2025-01-04)
 
 
