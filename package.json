@@ -8,6 +8,7 @@
   "types": "./lib/typescript/module/src/index.d.ts",
   "react-native": "src/index",
   "exports": {
+   "./package.json": "./package.json",
     ".": {
       "import": {
         "types": "./lib/typescript/module/src/index.d.ts",
