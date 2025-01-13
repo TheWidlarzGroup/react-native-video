@@ -90,4 +90,14 @@ import React
             }
         }
     }
+#else
+    class RCTPictureInPicture: NSObject {
+        public let _pipController: NSObject? = nil
+
+        func setRestoreUserInterfaceForPIPStopCompletionHandler(_ restore: Bool) {}
+        func setupPipController(_ playerLayer: AVPlayerLayer?) {}
+        func deinitPipController() {}
+        func enterPictureInPicture() {}
+        func exitPictureInPicture() {}
+    }
 #endif
