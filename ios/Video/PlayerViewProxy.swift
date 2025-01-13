@@ -105,6 +105,7 @@ class PlayerViewProxy {
             dorisTranslationsViewModel.rewind = translationsValue.rewind
             dorisTranslationsViewModel.fastForward = translationsValue.fastForward
             dorisTranslationsViewModel.off = translationsValue.off
+            dorisTranslationsViewModel.audioOnlyBadge = translationsValue.audioOnlyBadge
             jsTranslations = JSTranslations(beaconTranslations: nil, dorisTranslations: dorisTranslationsViewModel)
         }
         return jsTranslations
