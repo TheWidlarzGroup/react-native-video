@@ -95,7 +95,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _didRequestAds = false
     private var _adPlaying = false
 
-    private lazy var _drmManager: DRMManager? = DRMManager()
+    private lazy var _drmManager: DRMManagerSpec? = ReactNativeVideoManager.shared.createDRMManager()
     private var _playerObserver: RCTPlayerObserver = .init()
 
     #if USE_VIDEO_CACHING
@@ -489,7 +489,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         if source.drm.json != nil {
             if _drmManager == nil {
-                _drmManager = DRMManager()
+                _drmManager = ReactNativeVideoManager.shared.createDRMManager()
             }
 
             _drmManager?.createContentKeyRequest(
