@@ -38,10 +38,10 @@ dependencies {
     implementation project(":AmazonFireTVAdsSDK-release")
 
     // ExoDoris
-    api ("com.endeavorstreaming.doris:doris-ui:$dorisAndroidVersion"){
+    api ("com.endeavorstreaming.doris:doris-ui:$dorisAndroidVersion") {
         exclude group: "androidx.media3"
     }
-    api ("com.endeavorstreaming.doris:doris-custom-ui:$dorisAndroidVersion"){
+    api ("com.endeavorstreaming.doris:doris-custom-ui:$dorisAndroidVersion") {
         exclude group: "androidx.media3"
     }
 
