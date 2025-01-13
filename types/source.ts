@@ -84,4 +84,5 @@ export interface IVideoPlayerSource {
   dvrSeekBackwardInterval?: number;
   plugins?: IPlugins;
   live?: boolean;
+  isAudioOnly?: boolean;
 }

@@ -51,7 +51,6 @@ import com.amazon.device.ads.aftv.AmazonFireTVAdResponse;
 import com.amazon.device.ads.aftv.AmazonFireTVAdsKeyValuePair;
 import com.brentvatne.entity.ApsSource;
 import com.brentvatne.entity.RNImaDaiSource;
-import com.brentvatne.entity.RNMetadata;
 import com.brentvatne.entity.RNSource;
 import com.brentvatne.entity.RelatedVideo;
 import com.brentvatne.entity.Watermark;
@@ -84,6 +83,7 @@ import com.diceplatform.doris.entity.TracksPolicy;
 import com.diceplatform.doris.entity.YoSsaiProperties;
 import com.diceplatform.doris.ext.imacsailive.ExoDorisImaCsaiLivePlayer;
 import com.diceplatform.doris.internal.ResumePositionHandler;
+import com.diceplatform.doris.sourceresolver.ContentMetadata;
 import com.diceplatform.doris.ui.ExoDorisPlayerTvControlView;
 import com.diceplatform.doris.ui.ExoDorisPlayerView;
 import com.diceplatform.doris.ui.ExoDorisPlayerViewListener;
@@ -140,6 +140,9 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
     private static final int SECONDS_IN_30_MINUTES = 1800;
     private static final int SECONDS_IN_60_MINUTES = 3600;
+    private static final int MAX_LOAD_BUFFER_MS = 30_000;
+    private static final int SHOW_JS_PROGRESS = 1;
+    private static final int SHOW_NATIVE_PROGRESS = 2;
 
     // APS
     private static final String APS_APP_ID = "1a0f83d069f04b8abc59bdf5176e6103";
@@ -150,23 +153,17 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private static final String APS_VOD_CHANNEL_NAME = "PrendeTV";
     private static final String APS_VIDEO_CONTENT_ROOT_ELEMENT = "content";
 
-    private static final CookieManager DEFAULT_COOKIE_MANAGER;
-    private static final int SHOW_JS_PROGRESS = 1;
-    private static final int SHOW_NATIVE_PROGRESS = 2;
-
     private static final String KEY_FIRST_CATEGORY = "first_category=";
     private static final String KEY_RATING = "rating=";
     private static final String KEY_AD_TAG_PARAMETERS = "adTagParameters";
     private static final String KEY_START_DATE = "startDate";
     private static final String KEY_END_DATE = "endDate";
+    private static final String KEY_METADATA_DESCRIPTION = "description";
+    private static final String KEY_METADATA_THUMBNAIL_URL = "thumbnailUrl";
+    private static final String KEY_METADATA_TYPE = "type";
+    private static final String KEY_METADATA_EPISODE_INFO = "episodeInfo";
 
-    private static final String KEY_LABELS_LEARN_MORE = "learnMore";
-    private static final String KEY_LABELS_COUNT_DOWN_AD = "adsCountdownAd";
-    private static final String KEY_LABELS_COUNT_DOWN_OF = "adsCountdownOf";
-    private static final String KEY_LABELS_SKIP_IN = "skipAdIn";
-    private static final String KEY_LABELS_SKIP = "skipAd";
-
-    private static final int MAX_LOAD_BUFFER_MS = 30_000;
+    private static final CookieManager DEFAULT_COOKIE_MANAGER;
 
     static {
         DEFAULT_COOKIE_MANAGER = new CookieManager();
@@ -181,7 +178,6 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private ExoDoris player;
     private ExoDorisTrackSelector trackSelector;
     private Source source;
-    private LocalizationService localizationService;
     private boolean playerNeedsSource;
     private long resumePosition; // unit: millisecond
     private boolean loadVideoStarted;
@@ -202,7 +198,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
     // Props from React
     private RNSource src;
-    private RNMetadata metadata;
+    private ContentMetadata metadata;
     private boolean repeat;
     private boolean disableFocus;
     private boolean isLive = false;
@@ -365,7 +361,6 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
         mediaSession = new MediaSessionCompat(getContext(), getContext().getPackageName());
         mediaSessionConnector = new MediaSessionConnector(mediaSession);
-        localizationService = new LocalizationService(Locale.getDefault());
 
         boolean isRTL = I18nUtil.getInstance().isRTL(getContext());
         ExoDorisPlayerTvControlView controller = exoDorisPlayerView.findViewById(R.id.exo_controller);
@@ -373,7 +368,6 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         View playList = controller.findViewById(R.id.playlistView);
         playList.setLayoutDirection(isRTL ? View.LAYOUT_DIRECTION_RTL : View.LAYOUT_DIRECTION_LTR);
     }
-
 
     @Override
     public void setId(int id) {
@@ -527,15 +521,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             AdViewProvider adViewProvider = adType == AdType.IMA_CSAI_LIVE
                     ? secondaryPlayerView
                     : exoDorisPlayerView;
-            LabelsTranslation translations = exoDorisPlayerView.getLabelsTranslation();
-            AdLabels adLabels = translations == null ? null : new AdLabels(
-                    translations.get(KEY_LABELS_LEARN_MORE),
-                    translations.get(KEY_LABELS_COUNT_DOWN_AD),
-                    translations.get(KEY_LABELS_COUNT_DOWN_OF),
-                    translations.get(KEY_LABELS_SKIP_IN),
-                    translations.get(KEY_LABELS_SKIP)
-            );
-            AdGlobalSettings adGlobalSettings = new AdGlobalSettings(hideAdUiElements, isWhyThisAdIconEnabled, adLabels);
+            AdGlobalSettings adGlobalSettings = getAdGlobalSettings();
 
             long dvrSeekBackwardInterval = src.getDvrSeekBackwardInterval();
             long dvrSeekForwardInterval = src.getDvrSeekForwardInterval();
@@ -643,6 +629,19 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             dorisMessaging = new DorisMessaging(player, source);
             dorisMessaging.setLive(isLive);
         }
+    }
+
+    @NonNull
+    private AdGlobalSettings getAdGlobalSettings() {
+        LabelsTranslation translations = exoDorisPlayerView.getLabelsTranslation();
+        AdLabels adLabels = translations == null ? null : new AdLabels(
+                translations.getAdLearnMore(),
+                translations.getAdCountDown(),
+                translations.getAdSCountDownOf(),
+                translations.getAdSkipCountDown(),
+                translations.getAdSkip()
+        );
+        return new AdGlobalSettings(hideAdUiElements, isWhyThisAdIconEnabled, adLabels);
     }
 
     private List<String> getPreferredSubtitleLang() {
@@ -1292,8 +1291,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
     private void reloadCurrentSource() {
         if (src != null && metadata != null) {
-            Log.i(TAG, "Reload current source, id " + src.getId() + ", type " + metadata.getType());
-            eventEmitter.reloadCurrentSource(src.getId(), metadata.getType());
+            Log.i(TAG, "Reload current source, id " + src.getId() + ", type " + metadata.type);
+            eventEmitter.reloadCurrentSource(src.getId(), metadata.type);
             return;
         }
         Log.i(TAG, "Reload current source, ignored for src or metadata is null");
@@ -1408,12 +1407,16 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         }
     }
 
-    public void setMetadata(RNMetadata metadata) {
-        this.metadata = metadata;
+    public void setMetadata(Map<String, String> map) {
+        this.metadata = new ContentMetadata.Builder()
+                .setThumbnailUrl(map.get(KEY_METADATA_THUMBNAIL_URL))
+                .setEpisodeTitle(map.get(KEY_METADATA_EPISODE_INFO))
+                .setDescription(map.get(KEY_METADATA_DESCRIPTION))
+                .setType(map.get(KEY_METADATA_TYPE))
+                .build();
 
         if (exoDorisPlayerView != null) {
-            exoDorisPlayerView.setEpisodeTitle(metadata.getEpisodeTitle());
-            exoDorisPlayerView.setDescription(metadata.getDescription());
+            exoDorisPlayerView.setMetadata(metadata);
         }
     }
 
@@ -1460,6 +1463,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         }
     }
 
+    @SuppressLint("WrongConstant")
     public void setResizeModeModifier(@ResizeMode.Mode int resizeMode) {
         exoDorisPlayerView.setResizeMode(resizeMode);
     }
@@ -1762,6 +1766,12 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     public void setAppLanguageLocale(String locale) {
         if (exoDorisPlayerView != null) {
             exoDorisPlayerView.setAppLanguageLocale(locale);
+        }
+    }
+
+    public void setAudioOnly(boolean audioOnly) {
+        if (exoDorisPlayerView != null) {
+            exoDorisPlayerView.setAudioOnly(audioOnly);
         }
     }
 
