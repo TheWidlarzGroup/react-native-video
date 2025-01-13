@@ -102,9 +102,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         private let _videoCache: RCTVideoCachingHandler = .init()
     #endif
 
-    #if os(iOS)
-        private var _pip: RCTPictureInPicture?
-    #endif
+    private var _pip: RCTPictureInPicture?
 
     // Events
     @objc var onVideoLoadStart: RCTDirectEventBlock?
