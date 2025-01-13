@@ -50,6 +50,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       onVolumeChange,
       onEnd,
       onPlaybackStateChanged,
+      onPictureInPictureStatusChanged,
     },
     ref,
   ) => {
@@ -180,6 +181,31 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       [setFullScreen],
     );
 
+    const enterPictureInPicture = useCallback(() => {
+      try {
+        if (!nativeRef.current) {
+          console.error('Video Component is not mounted');
+        } else {
+          nativeRef.current.requestPictureInPicture();
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }, []);
+
+    const exitPictureInPicture = useCallback(() => {
+      if (
+        nativeRef.current &&
+        nativeRef.current === document.pictureInPictureElement
+      ) {
+        try {
+          document.exitPictureInPicture();
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }, []);
+
     useImperativeHandle(
       ref,
       () => ({
@@ -193,8 +219,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         dismissFullscreenPlayer,
         setFullScreen,
         save: unsupported,
-        enterPictureInPicture: unsupported,
-        exitPictureInPicture: unsupported,
+        enterPictureInPicture,
+        exitPictureInPicture,
         restoreUserInterfaceForPictureInPictureStopCompleted: unsupported,
         nativeHtmlVideoRef: nativeRef,
       }),
@@ -210,6 +236,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         presentFullscreenPlayer,
         dismissFullscreenPlayer,
         setFullScreen,
+        enterPictureInPicture,
+        exitPictureInPicture,
       ],
     );
 
@@ -253,6 +281,27 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       }
       nativeRef.current.playbackRate = rate;
     }, [rate]);
+
+    useEffect(() => {
+      if (
+        typeof onPictureInPictureStatusChanged !== 'function' ||
+        !nativeRef.current
+      ) {
+        return;
+      }
+      const onEnterPip = () =>
+        onPictureInPictureStatusChanged({isActive: true});
+      const onLeavePip = () =>
+        onPictureInPictureStatusChanged({isActive: false});
+
+      const video = nativeRef.current;
+      video.addEventListener('enterpictureinpicture', onEnterPip);
+      video.addEventListener('leavepictureinpicture', onLeavePip);
+      return () => {
+        video.removeEventListener('enterpictureinpicture', onEnterPip);
+        video.removeEventListener('leavepictureinpicture', onLeavePip);
+      };
+    }, [onPictureInPictureStatusChanged]);
 
     useMediaSession(src?.metadata, nativeRef, showNotificationControls);
 
