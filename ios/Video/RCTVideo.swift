@@ -135,7 +135,42 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc var onTextTracks: RCTDirectEventBlock?
     @objc var onAudioTracks: RCTDirectEventBlock?
     @objc var onTextTrackDataChanged: RCTDirectEventBlock?
+    @objc var onSkipIntro: RCTDirectEventBlock?
+    @objc var onNextEpisode: RCTDirectEventBlock?
+    
+    // Contextual Actions
+    public var playerViewControllerForContextualActions: AVPlayerViewController? {
+        return _playerViewController
+    }
+    public var playerForContextualActions: AVPlayer? {
+        return _player
+    }
+    
+    public var currentContextualState: ContextualButtonState = .none
+    public var timeObserverToken: Any?
+    
+    var contextualActionData: [ContextualActionData] = []
+    
+    private func parseContextualActions() {
+        contextualActionData = contextualActions.compactMap { actionDict in
+            guard let action = actionDict["action"] as? String,
+                  let startAt = actionDict["startAt"] as? Double else {
+                return nil
+            }
 
+            let endAt = actionDict["endAt"] as? Double
+            return ContextualActionData(action: action, startAt: startAt, endAt: endAt)
+        }
+    }
+    
+    @objc var contextualActions: [[String: Any]] = [] {
+        didSet {
+            parseContextualActions()
+        }
+    }
+       
+    
+    
     @objc
     func _onPictureInPictureEnter() {
         onPictureInPictureStatusChanged?(["isActive": NSNumber(value: true)])
@@ -289,6 +324,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             _pip = nil
         #endif
         ReactNativeVideoManager.shared.unregisterView(newInstance: self)
+        
+        #if os(tvOS)
+            if #available(tvOS 15.0, *) {
+                removeContextualActionsTimeObserver()
+            }
+        #endif
     }
 
     // MARK: - App lifecycle handlers
@@ -1104,11 +1145,17 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         if _controls {
             let viewController: UIViewController! = self.reactViewController()
             viewController?.addChild(_playerViewController)
+            
             self.addSubview(_playerViewController.view)
         }
-
+        
         _playerObserver.playerViewController = _playerViewController
+        
+        if #available(tvOS 15.0, *) {
+            configureContextualActions()
+        }
     }
+    
 
     func createPlayerViewController(player: AVPlayer, withPlayerItem _: AVPlayerItem) -> RCTVideoPlayerViewController {
         let viewController = RCTVideoPlayerViewController()
@@ -1717,21 +1764,24 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
     }
 
+    @available(tvOS 14.0, *)
     @objc
     func enterPictureInPicture() {
+        #if os(iOS)
         if _pip?._pipController == nil {
             initPictureinPicture()
             _playerViewController?.allowsPictureInPicturePlayback = true
         }
         _pip?.enterPictureInPicture()
+        #endif
     }
 
     @objc
     func exitPictureInPicture() {
         guard isPictureInPictureActive() else { return }
 
-        _pip?.exitPictureInPicture()
         #if os(iOS)
+            _pip?.exitPictureInPicture()
             if _enterPictureInPictureOnLeave {
                 initPictureinPicture()
                 _playerViewController?.allowsPictureInPicturePlayback = true
