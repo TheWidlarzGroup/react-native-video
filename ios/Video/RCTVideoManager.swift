@@ -72,6 +72,7 @@ class RCTVideoManager: RCTViewManager {
         })
     }
 
+    @available(tvOS 14.0, *)
     @objc(enterPictureInPictureCmd:)
     func enterPictureInPictureCmd(_ reactTag: NSNumber) {
         performOnVideoView(withReactTag: reactTag, callback: { videoView in

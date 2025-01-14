@@ -87,4 +87,8 @@ RCT_EXTERN_METHOD(getCurrentPosition
                   : (RCTPromiseResolveBlock)resolve reject
                   : (RCTPromiseRejectBlock)reject)
 
+// Should support contextual actions
+RCT_EXPORT_VIEW_PROPERTY(contextualActions, NSArray);
+RCT_EXPORT_VIEW_PROPERTY(onSkipIntro, RCTDirectEventBlock); 
+RCT_EXPORT_VIEW_PROPERTY(onNextEpisode, RCTDirectEventBlock);
 @end

@@ -267,4 +267,6 @@ export interface ReactVideoEvents {
   onTextTrackDataChanged?: (e: OnTextTrackDataChangedData) => void; // iOS
   onVideoTracks?: (e: OnVideoTracksData) => void; //Android
   onAspectRatio?: (e: OnVideoAspectRatioData) => void;
+  onSkipIntro?: () => void; // The logic for skipping the intro is in the Swift file no need to pass seek or onSeek
+  onNextEpisode?: () => void;
 }

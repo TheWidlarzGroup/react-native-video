@@ -274,6 +274,16 @@ export type ControlsStyles = {
   liveLabel?: string;
 };
 
+export declare enum ContextualAction {
+  SKIP_INTRO = 'SkipIntro',
+  NEXT_EPISODE = 'NextEpisode',
+}
+export type ContextualActions = {
+  action: ContextualAction;
+  startAt?: number;
+  endAt?: number;
+}
+
 export interface ReactVideoRenderLoaderProps {
   source?: ReactVideoSource;
   style?: StyleProp<ImageStyle>;
@@ -349,4 +359,5 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   debug?: DebugConfig;
   allowsExternalPlayback?: boolean; // iOS
   controlsStyles?: ControlsStyles; // Android
+  contextualActions?: ContextualActions[];
 }
