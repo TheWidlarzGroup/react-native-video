@@ -1,7 +1,7 @@
 import type { VideoPlayer } from "../spec/nitro/VideoPlayer.nitro";
 import { useReleasingHybridObject } from "./useReleasingHybridObject";
 import { createPlayer } from "./factory";
-import type { VideoSource } from "../types/VideoConfig";
+import type { VideoConfig, VideoSource } from "../types/VideoConfig";
 
 /**
  * A hook that creates and manages a video player.
@@ -11,8 +11,8 @@ import type { VideoSource } from "../types/VideoConfig";
  * @returns VideoPlayer (see {@link VideoPlayer})
  */
 export const useVideoPlayer = (
-    source: VideoSource,
-    setup: (player: VideoPlayer) => void | undefined
+    source: VideoConfig | VideoSource,
+    setup?: (player: VideoPlayer) => void
 ) => {
     return useReleasingHybridObject(
         () => {

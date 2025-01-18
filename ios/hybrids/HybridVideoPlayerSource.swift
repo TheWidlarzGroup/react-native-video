@@ -7,27 +7,57 @@
 
 import Foundation
 import AVFoundation
+import NitroModules
 
 class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec {
-  var uri: String {
-    didSet {
-      guard let url = URL(string: uri) else {
-        return
+  public var asset: AVURLAsset?
+  var uri: String
+  
+  let url: URL
+  
+  init(uri: String) throws {
+    self.uri = uri
+    
+    guard let url = URL(string: uri) else {
+      throw RuntimeError.error(withMessage: "Invalid URL: \(uri)")
+    }
+    
+    self.url = url
+  }
+  
+  func getAssetInformationAsync() throws -> Promise<VideoInformation> {
+    return Promise.async(.utility) { [weak self] in
+      guard let self else {
+        throw RuntimeError.error(withMessage: "HybridVideoPlayerSource has been deallocated")
       }
-      playerItem = AVPlayerItem(url: url)
+      
+      if self.url.isFileURL {
+        try checkReadFilePermission(for: self.url)
+      }
+      
+      try initializeAsset()
+      
+      guard let asset = self.asset else {
+        throw RuntimeError.error(withMessage: "Failed to initialize asset")
+      }
+      
+      return try await AVAssetUtils.getAssetInformation(for: asset)
     }
   }
-  var playerItem: AVPlayerItem?
   
-  init(uri: String) {
-    self.uri = uri
+  public func initializeAsset() throws {
+    guard asset == nil else {
+      return
+    }
+    
+    // TODO: Pass headers here
+    asset = AVURLAsset(url: url)
   }
   
-  // Initialize HybridContext
-  var hybridContext = margelo.nitro.HybridContext()
-  
-  // Return size of the instance to inform JS GC about memory pressure
-  var memorySize: Int {
-    return getSizeOf(self)
+  private func checkReadFilePermission(for path: URL) throws {
+    let fileManager = FileManager.default
+    if !fileManager.isReadableFile(atPath: path.path) {
+      throw RuntimeError.error(withMessage: "Cannot read file at path: \(path.path), is path \(path.path) correct? Does app have permission to read file?")
+    }
   }
 }

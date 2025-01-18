@@ -1,8 +1,22 @@
 import type { HybridObject } from 'react-native-nitro-modules';
+import type { VideoInformation } from '../../types/VideoInformation';
 
+/**
+ * A source for a {@link VideoPlayer}.
+ * Source cannot be changed after it is created. If you need to update the source, you need to create a new one.
+ * It provides functions to get information about the asset.
+ */
 export interface VideoPlayerSource
   extends HybridObject<{ ios: 'swift'; android: 'kotlin' }> {
-  uri: string;
+  /**
+   * The URI of the asset.
+   */
+  readonly uri: string;
+
+  /**
+   * Get the information about the asset.
+   */
+  getAssetInformationAsync(): Promise<VideoInformation>;
 }
 
 export interface VideoPlayerSourceFactory
