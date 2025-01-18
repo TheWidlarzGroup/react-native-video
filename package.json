@@ -69,10 +69,5 @@
         "!**/*.tsbuildinfo",
         "!docs",
         "!examples"
-    ],
-    "husky": {
-        "hooks": {
-            "pre-push": "echo prepush && yarn lint"
-        }
-    }
+    ]
 }
