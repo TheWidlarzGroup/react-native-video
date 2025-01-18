@@ -1,38 +1,41 @@
 import * as React from 'react';
 import { Button, Dimensions, Platform, StyleSheet, View } from 'react-native';
-import { VideoView, createPlayer } from 'react-native-video';
-
-const player = createPlayer('https://www.w3schools.com/html/mov_bbb.mp4');
+import { VideoView, createSource, useVideoPlayer } from 'react-native-video';
 
 export default function App() {
-  const [show, setShow] = React.useState(true);
+  const [show, setShow] = React.useState(false);
 
-  // You can easily access player!
-  const play = React.useCallback(() => {
-    player.play();
-  }, []);
-
-  const pause = React.useCallback(() => {
-    player.pause();
-  }, []);
-
-  const seek = React.useCallback(() => {
-    player.currentTime = 3;
-  }, []);
+  const player = useVideoPlayer('https://www.w3schools.com/html/mov_bbb.mp4');
 
   return (
     <View style={styles.container}>
       <View style={styles.videoContainer}>
-        <VideoView player={player} style={styles.box} />
+        {/* <VideoView player={player} style={styles.box} /> */}
         {/* Two VideoViews with same player are supported not supported on Android */}
-        {Platform.OS === 'ios' && show && (
+        {show && (
           <VideoView player={player} style={styles.box} />
         )}
       </View>
-      <Button title="Play" onPress={play} />
-      <Button title="Pause" onPress={pause} />
-      <Button title="Seek to 3sec" onPress={seek} />
+      <Button title="Play" onPress={() => player.play()} />
+      <Button title="Pause" onPress={() => player.pause()} />
+      <Button title="Seek to 3sec" onPress={() => player.currentTime = 3} />
       <Button title="Toggle" onPress={() => setShow((prev) => !prev)} />
+      <Button title="Preload player" onPress={() => {
+        player.preload().then(() => {
+          // setShow(true);
+        }).catch((error) => {
+          console.error(error);
+        });
+      }} />
+      <Button title="Replace source" onPress={() => {
+        const newSource = createSource("https://www.w3schools.com/html/mov_bbb.mp4")
+        
+        newSource.getAssetInformationAsync().then((assetInfo) => {
+          console.log(assetInfo);
+        })
+
+        player.replaceSourceAsync(newSource);
+      }} />
     </View>
   );
 }
