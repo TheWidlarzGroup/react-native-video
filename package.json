@@ -72,7 +72,7 @@
     ],
     "husky": {
         "hooks": {
-            "pre-push": "yarn lint"
+            "pre-push": "echo prepush && yarn lint"
         }
     }
 }
