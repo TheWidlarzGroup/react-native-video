@@ -24,7 +24,6 @@
         "@types/react": "~18.0.0",
         "@types/react-native": "0.72.3",
         "@typescript-eslint/eslint-plugin": "^6.7.4",
-        "cross-env": "^7.0.3",
         "eslint": "^8.19.0",
         "eslint-plugin-jest": "^27.4.2",
         "husky": "^9.1.7",

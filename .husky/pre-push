@@ -1,3 +1,2 @@
-yarn lint
 echo "precommit"
-bun test
+yarn check-all
