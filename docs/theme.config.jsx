@@ -1,5 +1,4 @@
 import React from 'react';
-import {GoogleAnalytics} from '@next/third-parties/google';
 import TWGBadge from './components/TWGBadge/TWGBadge';
 
 export default {
@@ -33,7 +32,18 @@ export default {
         type="image/png"
         href="https://docs.thewidlarzgroup.com/react-native-video/favicon.png"
       />
-      <GoogleAnalytics gaId="G-4YEWQH5ZHS" />
+      <script
+        async
+        src="https://www.googletagmanager.com/gtag/js?id=G-4YEWQH5ZHS"
+      />
+      <script>
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-4YEWQH5ZHS');
+        `}
+      </script>
     </>
   ),
   logo: (
