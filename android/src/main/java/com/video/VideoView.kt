@@ -18,7 +18,7 @@ class VideoView @JvmOverloads constructor(
     set(value) {
       // Clear the SurfaceView when player is about to be set to null
       if (value == null && field != null) {
-        val player = field?.player
+        val player = field?.playerPointer
         player?.clearVideoSurfaceView(surfaceView)
         player?.setVideoSurfaceView(null)
       }
@@ -27,7 +27,7 @@ class VideoView @JvmOverloads constructor(
 
       // Set the SurfaceView to the player when it's available
       surfaceView?.let {
-        field?.player?.setVideoSurfaceView(it)
+        field?.playerPointer?.setVideoSurfaceView(it)
       }
     }
 
@@ -56,12 +56,12 @@ class VideoView @JvmOverloads constructor(
 
   // -------- View Lifecycle Methods --------
   override fun onDetachedFromWindow() {
-    hybridPlayer?.player?.clearVideoSurfaceView(surfaceView)
+    hybridPlayer?.playerPointer?.clearVideoSurfaceView(surfaceView)
     super.onDetachedFromWindow()
   }
 
   override fun onAttachedToWindow() {
-    hybridPlayer?.player?.setVideoSurfaceView(surfaceView)
+    hybridPlayer?.playerPointer?.setVideoSurfaceView(surfaceView)
     super.onAttachedToWindow()
   }
 

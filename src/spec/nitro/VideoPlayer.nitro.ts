@@ -8,7 +8,13 @@ export interface VideoPlayer
    * Changing the source will reload player.
    * see {@link VideoPlayerSource}
    */
-  source: VideoPlayerSource;
+  readonly source: VideoPlayerSource;
+
+  /**
+   * The current time of the video in seconds (1.0 = 1 sec).
+   * Returns NaN if the current time is not available.
+   */
+  readonly duration: number;
 
   /**
    * The volume of the video (0.0 = 0%, 1.0 = 100%).
@@ -22,10 +28,11 @@ export interface VideoPlayer
   currentTime: number;
 
   /**
-   * The current time of the video in seconds (1.0 = 1 sec).
-   * Returns NaN if the current time is not available.
+   * Preload the video.
+   * This is useful to avoid delay when the user plays the video.
+   * Preloading too many videos can lead to memory issues or performance issues.
    */
-  readonly duration: number;
+  preload(): Promise<void>;
 
   /**
    * Start playback of player.
@@ -36,6 +43,13 @@ export interface VideoPlayer
    * Pause playback of player.
    */
   pause(): void;
+
+  /**
+   * Replace the current source of the player.
+   * @param source - The new source of the video.
+   * see {@link VideoPlayerSource}
+   */
+  replaceSourceAsync(source: VideoPlayerSource): Promise<void>;
 }
 
 export interface VideoPlayerFactory

@@ -10,59 +10,142 @@ import NitroModules
 import AVFoundation
 
 class HybridVideoPlayer: HybridVideoPlayerSpec {
-  var player: AVPlayer
+  /**
+    * This in general should not be used directly, use `playerPointer` instead. This should be set only from within the playerQueue.
+    */
+  private var _player: AVPlayer?
+  
+  /**
+   * The player queue is used to synchronize player initialization.
+   */
+  private let playerQueue = DispatchQueue(label: "com.nitro.hybridplayer")
+  
+  /**
+   * This is the actual player that should be used for playback. It is initialized lazily when `playerPointer` is accessed.
+   */
+  var playerPointer: AVPlayer {
+    get {
+      // Synchronize access to player initialization
+      playerQueue.sync {
+        // If player is already initialized and playerItem is set, return it
+        // If playerItem is not set, it means that player was not loaded with any source
+        if _player != nil && playerItem != nil {
+          return _player!
+        }
+        
+        do {
+          let item = try initializePlayerItem()
+          _player?.replaceCurrentItem(with: item)
+          playerItem = item
+          _player = AVPlayer(playerItem: playerItem)
+        } catch {
+          playerItem = nil
+          _player = AVPlayer()
+        }
+        
+        return _player!
+      }
+    }
+    set {
+      playerQueue.sync {
+        _player = newValue
+      }
+    }
+  }
+  
+  var playerItem: AVPlayerItem?
   
   var source: any HybridVideoPlayerSourceSpec
   
   var volume: Double {
     set {
-      player.volume = Float(newValue)
+      playerPointer.volume = Float(newValue)
     }
     get {
-      return Double(player.volume)
+      return Double(playerPointer.volume)
     }
   }
   
   var currentTime: Double {
     set {
-      player.seek(
+      playerPointer.seek(
         to: CMTime(seconds: newValue, preferredTimescale: 1000),
         toleranceBefore: .zero,
         toleranceAfter: .zero
       )
     }
     get {
-      player.currentTime().seconds
+      playerPointer.currentTime().seconds
     }
   }
   
   var duration: Double {
-    Double(player.currentItem?.duration.seconds ?? Double.nan)
+    Double(playerPointer.currentItem?.duration.seconds ?? Double.nan)
   }
   
-  init(source: HybridVideoPlayerSourceSpec) throws {
+  init(source: (any HybridVideoPlayerSourceSpec)) throws {
     self.source = source
-    
-    guard let url = URL(string: source.uri) else {
-      throw RuntimeError.error(withMessage: "Invalid URL: \(source.uri)")
+    super.init()
+  }
+  
+  func preload() throws -> NitroModules.Promise<Void> {
+    return Promise.parallel { [weak self] in
+      guard let self else {
+        throw RuntimeError.error(withMessage: "HybridVideoPlayer has been deallocated")
+      }
+      
+      try self.playerQueue.sync {
+        self.playerItem = try self.initializePlayerItem()
+        self._player = AVPlayer(playerItem: self.playerItem)
+      }
     }
-    
-    player = AVPlayer(url: url)
   }
   
   func play() throws {
-    player.play()
+    playerPointer.play()
   }
   
   func pause() throws {
-    player.pause()
+    playerPointer.pause()
   }
   
-  // Initialize HybridContext
-  var hybridContext = margelo.nitro.HybridContext()
+  func replaceSourceAsync(source: (any HybridVideoPlayerSourceSpec)) throws -> Promise<Void> {
+    return Promise.parallel { [weak self] in
+      guard let self else {
+        throw RuntimeError.error(withMessage: "HybridVideoPlayer has been deallocated")
+      }
+      
+      try playerQueue.sync {
+        self.source = source
+        
+        do {
+          self.playerItem = try self.initializePlayerItem()
+          
+          guard let player = self._player else {
+            throw RuntimeError.error(withMessage: "Player not initialized")
+          }
+          
+          player.replaceCurrentItem(with: self.playerItem)
+        } catch {
+          self.playerItem = nil
+          self._player = AVPlayer()
+          throw error
+        }
+      }
+    }
+  }
   
-  // Return size of the instance to inform JS GC about memory pressure
-  var memorySize: Int {
-    return getSizeOf(self)
+  private func initializePlayerItem() throws -> AVPlayerItem {
+    guard let _source = source as? HybridVideoPlayerSource else {
+      throw RuntimeError.error(withMessage: "Invalid source")
+    }
+    
+    try _source.initializeAsset()
+    
+    guard let asset = _source.asset else {
+      throw RuntimeError.error(withMessage: "Failed to initialize asset")
+    }
+    
+    return AVPlayerItem(asset: asset)
   }
 }

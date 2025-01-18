@@ -13,16 +13,14 @@ import AVFoundation
   public var player: HybridVideoPlayerSpec? = nil {
     didSet {
       guard let player = player as? HybridVideoPlayer else { return }
-      configureAVPlayerLayer(with: player.player)
+      configureAVPlayerLayer(with: player.playerPointer)
     }
   }
   private var playerView: UIView? = nil
-  private var avPlayer: AVPlayer?
   private var avPlayerLayer: AVPlayerLayer?
   
   @objc public var nitroId: NSNumber = -1 {
     didSet {
-      let test = nitroId
       VideoComponentView.globalViewsMap.setObject(self, forKey: nitroId)
     }
   }

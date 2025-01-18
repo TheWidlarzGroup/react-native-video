@@ -35,12 +35,4 @@ class HybridVideoViewViewManager: HybridVideoViewViewManagerSpec {
     
     self.view = view 
   }
-  
-  // Initialize HybridContext
-  var hybridContext = margelo.nitro.HybridContext()
-  
-  // Return size of the instance to inform JS GC about memory pressure
-  var memorySize: Int {
-    return getSizeOf(self)
-  }
 }

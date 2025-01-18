@@ -6,7 +6,6 @@ import com.facebook.proguard.annotations.DoNotStrip
 
 @DoNotStrip
 class HybridVideoPlayerFactory(): HybridVideoPlayerFactorySpec() {
-
   @OptIn(UnstableApi::class)
   override fun createPlayer(source: HybridVideoPlayerSourceSpec): HybridVideoPlayerSpec {
     return HybridVideoPlayer(source as HybridVideoPlayerSource)

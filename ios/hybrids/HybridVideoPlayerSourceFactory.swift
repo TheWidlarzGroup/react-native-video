@@ -8,16 +8,7 @@
 import Foundation
 
 class HybridVideoPlayerSourceFactory: HybridVideoPlayerSourceFactorySpec {
-  func fromUri(uri: String) -> HybridVideoPlayerSourceSpec {
-    return HybridVideoPlayerSource(uri: uri)
-  }
-  
-  
-  // Initialize HybridContext
-  var hybridContext = margelo.nitro.HybridContext()
-  
-  // Return size of the instance to inform JS GC about memory pressure
-  var memorySize: Int {
-    return getSizeOf(self)
+  func fromUri(uri: String) throws -> HybridVideoPlayerSourceSpec {
+    return try HybridVideoPlayerSource(uri: uri)
   }
 }

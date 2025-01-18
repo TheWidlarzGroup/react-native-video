@@ -9,74 +9,128 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.upstream.DefaultAllocator
 import com.facebook.proguard.annotations.DoNotStrip
 import com.margelo.nitro.NitroModules
+import com.margelo.nitro.core.Promise
 import com.video.utils.Threading.Companion.runOnMainThreadSync
 import com.video.utils.Threading.Companion.runOnMainThread
 
 @UnstableApi
 @DoNotStrip
 class HybridVideoPlayer() : HybridVideoPlayerSpec() {
-  lateinit var player: Player
-  private lateinit var allocator: DefaultAllocator
   override lateinit var source: HybridVideoPlayerSourceSpec
+  private var allocator: DefaultAllocator? = null
+
+  private var player: Player? = null
+
+  var playerPointer: Player
+    get() {
+      if (player == null) {
+        runOnMainThreadSync {
+          initializePlayer()
+
+          if (player == null) {
+            throw Exception("Could not initialize player!")
+          }
+
+          if (player!!.playbackState == Player.STATE_IDLE) {
+            player!!.prepare()
+          }
+        }
+      }
+
+      return player!!
+    }
+    private set(value) {
+      player = value
+    }
 
   // Player Properties
   override var currentTime: Double
-    get() = runOnMainThreadSync { return@runOnMainThreadSync player.currentPosition.toDouble() }
-    set(value) = runOnMainThread { player.seekTo(value.toLong()) }
+    get() = runOnMainThreadSync { return@runOnMainThreadSync playerPointer.currentPosition.toDouble() / 1000.0 }
+    set(value) = runOnMainThread { playerPointer.seekTo((value * 1000).toLong()) }
 
   override var volume: Double
-    get() = runOnMainThreadSync { return@runOnMainThreadSync player.volume.toDouble() }
-    set(value) = runOnMainThread { player.volume = value.toFloat() }
+    get() = runOnMainThreadSync { return@runOnMainThreadSync playerPointer.volume.toDouble() }
+    set(value) = runOnMainThread { playerPointer.volume = value.toFloat() }
 
   override val duration: Double
-    get() = runOnMainThreadSync { return@runOnMainThreadSync player.duration.toDouble() }
+    get() {
+      val duration = runOnMainThreadSync { return@runOnMainThreadSync playerPointer.duration }
+      return if (duration == C.TIME_UNSET) Double.NaN else duration.toDouble() / 1000.0
+    }
 
-  private fun initializePlayerFromSource(source: HybridVideoPlayerSource) {
-    this.source = source
-
+  private fun initializePlayer() {
     if (NitroModules.applicationContext == null) {
       throw Exception("HybridVideoPlayer: Application Context is null!")
     }
+
+    val hybridSource = source as? HybridVideoPlayerSource ?: throw Exception("Invalid source type")
 
     // Initialize the allocator
     allocator = DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE)
 
     // Create a LoadControl with the allocator
     val loadControl = DefaultLoadControl.Builder()
-      .setAllocator(allocator)
+      .setAllocator(allocator!!)
       .build()
 
     // Build the player with the LoadControl
-    player = ExoPlayer.Builder(NitroModules.applicationContext!!)
+    playerPointer = ExoPlayer.Builder(NitroModules.applicationContext!!)
       .setLoadControl(loadControl)
       .setLooper(Looper.getMainLooper())
       .build()
 
-    player.setMediaItem(source.mediaItem)
-
-    // TODO: Move this to single method to allow more control
-    player.prepare()
+    playerPointer.setMediaItem(hybridSource.mediaItem)
   }
 
   constructor(source: HybridVideoPlayerSource) : this() {
-    runOnMainThreadSync {
-      initializePlayerFromSource(source)
-    }
+    this.source = source
   }
 
   override fun play() {
     runOnMainThread {
-      player.play()
+      playerPointer.play()
     }
   }
 
   override fun pause() {
     runOnMainThread {
-      player.pause()
+      playerPointer.pause()
+    }
+  }
+
+  override fun replaceSourceAsync(source: HybridVideoPlayerSourceSpec): Promise<Unit> {
+    return Promise.async {
+      val hybridSource = source as? HybridVideoPlayerSource ?: throw Exception("Invalid source type")
+
+      runOnMainThreadSync {
+        // Update source
+        this.source = source
+        playerPointer.setMediaItem(hybridSource.mediaItem)
+
+        // Prepare player
+        playerPointer.prepare()
+      }
+    }
+  }
+
+  override fun preload(): Promise<Unit> {
+    return Promise.async {
+      runOnMainThreadSync {
+        if (playerPointer.playbackState != Player.STATE_IDLE) {
+          return@runOnMainThreadSync
+        }
+
+        if (player == null) {
+          initializePlayer()
+        }
+
+        player?.prepare()
+      }
     }
   }
 
   // Updated memorySize property
   override val memorySize: Long
-    get() = allocator.totalBytesAllocated.toLong()
+    // If player is null, allocator is not ready yet
+    get() = if (allocator == null) 0 else allocator!!.totalBytesAllocated.toLong()
 }
