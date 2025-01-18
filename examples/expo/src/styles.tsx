@@ -86,6 +86,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: 'white',
     padding: 10,
+    paddingTop: 50,
     lineHeight: 12,
   },
   controlOption: {
