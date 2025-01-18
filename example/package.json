@@ -17,19 +17,19 @@
     "windows": "react-native run-windows --sln windows/VideoExample.sln"
   },
   "dependencies": {
-    "@callstack/react-native-visionos": "^0.75.0",
+    "@callstack/react-native-visionos": "^0.76.0",
     "react": "18.3.1",
-    "react-native": "0.75.3",
-    "react-native-windows": "^0.75.0",
+    "react-native": "^0.76.0",
+    "react-native-windows": "^0.76.0",
     "react-native-nitro-modules": ">=0.21.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
     "@babel/preset-env": "^7.20.0",
     "@babel/runtime": "^7.20.0",
-    "@react-native/babel-preset": "0.75.3",
+    "@react-native/babel-preset": "^0.76.0",
     "@react-native/eslint-config": "0.75.3",
-    "@react-native/metro-config": "0.75.3",
+    "@react-native/metro-config": "^0.76.0",
     "react-native-builder-bob": "^0.30.2",
     "@react-native/typescript-config": "0.75.3",
     "@rnx-kit/metro-config": "^2.0.0",
@@ -37,9 +37,9 @@
     "@types/react-test-renderer": "^18.0.0",
     "babel-jest": "^29.6.3",
     "eslint": "^8.19.0",
-    "jest": "^29.6.3",
+    "jest": "^29.2.1",
     "prettier": "2.8.8",
-    "react-native-test-app": "^3.10.22",
+    "react-native-test-app": "^3.10.18",
     "react-test-renderer": "18.3.1",
     "typescript": "5.0.4"
   },
