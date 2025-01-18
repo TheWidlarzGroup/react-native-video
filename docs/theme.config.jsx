@@ -32,7 +32,10 @@ export default {
         type="image/png"
         href="https://docs.thewidlarzgroup.com/react-native-video/favicon.png"
       />
-      <script async src="https://www.googletagmanager.com/gtag/js?id=G-4YEWQH5ZHS"></script>
+      <script
+        async
+        src="https://www.googletagmanager.com/gtag/js?id=G-4YEWQH5ZHS"
+      />
       <script>
         {`
           window.dataLayer = window.dataLayer || [];
