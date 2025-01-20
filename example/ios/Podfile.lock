@@ -30,28 +30,6 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - NitroVideo (7.0.0-dev):
-    - DoubleConversion
-    - glog
-    - hermes-engine
-    - NitroModules
-    - RCT-Folly (= 2024.01.01.00)
-    - RCTRequired
-    - RCTTypeSafety
-    - React-Core
-    - React-debug
-    - React-Fabric
-    - React-featureflags
-    - React-graphics
-    - React-ImageManager
-    - React-NativeModulesApple
-    - React-RCTFabric
-    - React-rendererdebug
-    - React-utils
-    - ReactCodegen
-    - ReactCommon/turbomodule/bridging
-    - ReactCommon/turbomodule/core
-    - Yoga
   - RCT-Folly (2024.01.01.00):
     - boost
     - DoubleConversion
@@ -1577,6 +1555,28 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
+  - ReactNativeVideo (7.0.0-dev):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - NitroModules
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - ReactTestApp-DevSupport (3.10.22):
     - React-Core
     - React-jsi
@@ -1592,7 +1592,6 @@ DEPENDENCIES:
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
   - NitroModules (from `../../node_modules/react-native-nitro-modules`)
-  - NitroVideo (from `../..`)
   - RCT-Folly (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCT-Folly/Fabric (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCTDeprecation (from `../node_modules/react-native/ReactApple/Libraries/RCTFoundation/RCTDeprecation`)
@@ -1652,6 +1651,7 @@ DEPENDENCIES:
   - ReactCodegen (from `build/generated/ios`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - "ReactNativeHost (from `../../node_modules/@rnx-kit/react-native-host`)"
+  - ReactNativeVideo (from `../..`)
   - ReactTestApp-DevSupport (from `../../node_modules/react-native-test-app`)
   - ReactTestApp-Resources (from `..`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
@@ -1676,8 +1676,6 @@ EXTERNAL SOURCES:
     :tag: hermes-2024-11-12-RNv0.76.2-5b4aa20c719830dcf5684832b89a6edb95ac3d64
   NitroModules:
     :path: "../../node_modules/react-native-nitro-modules"
-  NitroVideo:
-    :path: "../.."
   RCT-Folly:
     :podspec: "../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec"
   RCTDeprecation:
@@ -1792,6 +1790,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   ReactNativeHost:
     :path: "../../node_modules/@rnx-kit/react-native-host"
+  ReactNativeVideo:
+    :path: "../.."
   ReactTestApp-DevSupport:
     :path: "../../node_modules/react-native-test-app"
   ReactTestApp-Resources:
@@ -1807,7 +1807,6 @@ SPEC CHECKSUMS:
   glog: 08b301085f15bcbb6ff8632a8ebaf239aae04e6a
   hermes-engine: 1949ca944b195a8bde7cbf6316b9068e19cf53c6
   NitroModules: 3a58d9bc70815a0d5de4476ed6a36eff05a6a0ae
-  NitroVideo: 7ad45fe4464ceb2f095c239f91cb72a6dfc2bf00
   RCT-Folly: 84578c8756030547307e4572ab1947de1685c599
   RCTDeprecation: 063fc281b30b7dc944c98fe53a7e266dab1a8706
   RCTRequired: 8eda2a5a745f6081157a4f34baac40b65fe02b31
@@ -1865,6 +1864,7 @@ SPEC CHECKSUMS:
   ReactCodegen: 0a0eef9c8cd84c932ae1868832086c6441811e84
   ReactCommon: 3c1c8c6d777103c0e60e37c6c5f08e828e2a77c9
   ReactNativeHost: cb1087cdb3d3ff0aaf3be12e68b64d92ef1ad3ed
+  ReactNativeVideo: 2f7300db7f35ffc9cca57cbe3b36cc86f3cdee34
   ReactTestApp-DevSupport: 52ac76197e5accf579592aa3b9aa07fd0766f211
   ReactTestApp-Resources: ef64fb77d09031eba0ada7240f39d4579fa02361
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748

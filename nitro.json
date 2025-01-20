@@ -1,6 +1,6 @@
 {
   "android": {
-    "androidCxxLibName": "NitroVideo",
+    "androidCxxLibName": "ReactNativeVideo",
     "androidNamespace": [
       "video"
     ]
@@ -9,7 +9,7 @@
     "video"
   ],
   "ios": {
-    "iosModuleName": "NitroVideo"
+    "iosModuleName": "ReactNativeVideo"
   },
   "autolinking": {
     "VideoPlayerFactory": {

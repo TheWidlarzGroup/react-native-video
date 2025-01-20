@@ -20,7 +20,7 @@ class VideoPackage : ReactPackage {
 
   companion object {
     init {
-        System.loadLibrary("NitroVideo")
+        System.loadLibrary("ReactNativeVideo")
     }
   }
 }

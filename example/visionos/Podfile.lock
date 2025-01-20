@@ -25,7 +25,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - NitroVideo (7.0.0-dev):
+  - ReactNativeVideo (7.0.0-dev):
     - DoubleConversion
     - glog
     - NitroModules
@@ -1585,7 +1585,7 @@ DEPENDENCIES:
   - "fmt (from `../../node_modules/@callstack/react-native-visionos/third-party-podspecs/fmt.podspec`)"
   - "glog (from `../../node_modules/@callstack/react-native-visionos/third-party-podspecs/glog.podspec`)"
   - NitroModules (from `../../node_modules/react-native-nitro-modules`)
-  - NitroVideo (from `../..`)
+  - ReactNativeVideo (from `../..`)
   - "RCT-Folly (from `../../node_modules/@callstack/react-native-visionos/third-party-podspecs/RCT-Folly.podspec`)"
   - "RCT-Folly/Fabric (from `../../node_modules/@callstack/react-native-visionos/third-party-podspecs/RCT-Folly.podspec`)"
   - "RCTDeprecation (from `../../node_modules/@callstack/react-native-visionos/ReactApple/Libraries/RCTFoundation/RCTDeprecation`)"
@@ -1664,7 +1664,7 @@ EXTERNAL SOURCES:
     :podspec: "../../node_modules/@callstack/react-native-visionos/third-party-podspecs/glog.podspec"
   NitroModules:
     :path: "../../node_modules/react-native-nitro-modules"
-  NitroVideo:
+  ReactNativeVideo:
     :path: "../.."
   RCT-Folly:
     :podspec: "../../node_modules/@callstack/react-native-visionos/third-party-podspecs/RCT-Folly.podspec"
@@ -1798,7 +1798,7 @@ SPEC CHECKSUMS:
   fmt: 5d9ffa7ccba126c08b730252123601d514652320
   glog: 66d66eda971f41dc8c173bd5b6e1913ba1ff33cc
   NitroModules: 7d06bb1624cf6ca6cf7611be32e7e9ba836d5991
-  NitroVideo: 1b8458f3c42f8d9bff100c26680b81e40fa3adc2
+  ReactNativeVideo: 1b8458f3c42f8d9bff100c26680b81e40fa3adc2
   RCT-Folly: e75371281be586c821f9614489de0d370146e4a2
   RCTDeprecation: 516bfbbc30ebf569baa71e2df87db5f6cbfbf935
   RCTRequired: 64663e9bf83805acc2756c75c7c4072c35b74649

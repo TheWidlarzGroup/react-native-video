@@ -1,12 +1,12 @@
 //
 //  VideoComponent.m
-//  NitroVideo
+//  ReactNativeVideo
 //
 //  Created by Krzysztof Moch on 25/10/2024.
 //
 
 #import "VideoComponentViewUtils.h"
-#import "NitroVideo-Swift.h"
+#import "ReactNativeVideo-Swift.h"
 
 @implementation VideoComponentViewUtils
 

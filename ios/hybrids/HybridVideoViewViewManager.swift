@@ -1,6 +1,6 @@
 //
 //  HybridVideoViewViewManager.swift
-//  NitroVideo
+//  ReactNativeVideo
 //
 //  Created by Krzysztof Moch on 23/09/2024.
 //

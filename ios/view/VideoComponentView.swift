@@ -1,6 +1,6 @@
 //
 //  VideoComponent.swift
-//  NitroVideo
+//  ReactNativeVideo
 //
 //  Created by Krzysztof Moch on 30/09/2024.
 //

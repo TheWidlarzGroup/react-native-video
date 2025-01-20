@@ -25,7 +25,7 @@ def isNewArchitectureEnabled() {
 
 apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
-apply from: '../nitrogen/generated/android/NitroVideo+autolinking.gradle'
+apply from: '../nitrogen/generated/android/ReactNativeVideo+autolinking.gradle'
 
 if (isNewArchitectureEnabled()) {
   apply plugin: "com.facebook.react"

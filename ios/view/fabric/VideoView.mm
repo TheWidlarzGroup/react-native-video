@@ -7,7 +7,7 @@
 
 #import "RCTFabricComponentsPlugins.h"
 
-// TODO: update code once solved NitroVideo-Swift.h import issues is fixed
+// TODO: update code once solved ReactNativeVideo-Swift.h import issues is fixed
 #import "VideoComponentViewUtils.h"
 
 using namespace facebook::react;

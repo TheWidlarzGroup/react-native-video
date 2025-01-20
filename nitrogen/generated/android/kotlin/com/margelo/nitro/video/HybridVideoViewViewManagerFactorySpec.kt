@@ -55,11 +55,11 @@ abstract class HybridVideoViewViewManagerFactorySpec: HybridObject() {
     private const val TAG = "HybridVideoViewViewManagerFactorySpec"
     init {
       try {
-        Log.i(TAG, "Loading NitroVideo C++ library...")
-        System.loadLibrary("NitroVideo")
-        Log.i(TAG, "Successfully loaded NitroVideo C++ library!")
+        Log.i(TAG, "Loading ReactNativeVideo C++ library...")
+        System.loadLibrary("ReactNativeVideo")
+        Log.i(TAG, "Successfully loaded ReactNativeVideo C++ library!")
       } catch (e: Error) {
-        Log.e(TAG, "Failed to load NitroVideo C++ library! Is it properly installed and linked? " +
+        Log.e(TAG, "Failed to load ReactNativeVideo C++ library! Is it properly installed and linked? " +
                     "Is the name correct? (see `CMakeLists.txt`, at `add_library(...)`)", e)
         throw e
       }

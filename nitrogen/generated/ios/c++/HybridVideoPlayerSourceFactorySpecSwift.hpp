@@ -10,7 +10,7 @@
 #include "HybridVideoPlayerSourceFactorySpec.hpp"
 
 // Forward declaration of `HybridVideoPlayerSourceFactorySpec_cxx` to properly resolve imports.
-namespace NitroVideo { class HybridVideoPlayerSourceFactorySpec_cxx; }
+namespace ReactNativeVideo { class HybridVideoPlayerSourceFactorySpec_cxx; }
 
 // Forward declaration of `HybridVideoPlayerSourceSpec` to properly resolve imports.
 namespace margelo::nitro::video { class HybridVideoPlayerSourceSpec; }
@@ -19,7 +19,7 @@ namespace margelo::nitro::video { class HybridVideoPlayerSourceSpec; }
 #include "HybridVideoPlayerSourceSpec.hpp"
 #include <string>
 
-#include "NitroVideo-Swift-Cxx-Umbrella.hpp"
+#include "ReactNativeVideo-Swift-Cxx-Umbrella.hpp"
 
 namespace margelo::nitro::video {
 
@@ -36,13 +36,13 @@ namespace margelo::nitro::video {
   class HybridVideoPlayerSourceFactorySpecSwift: public virtual HybridVideoPlayerSourceFactorySpec {
   public:
     // Constructor from a Swift instance
-    explicit HybridVideoPlayerSourceFactorySpecSwift(const NitroVideo::HybridVideoPlayerSourceFactorySpec_cxx& swiftPart):
+    explicit HybridVideoPlayerSourceFactorySpecSwift(const ReactNativeVideo::HybridVideoPlayerSourceFactorySpec_cxx& swiftPart):
       HybridObject(HybridVideoPlayerSourceFactorySpec::TAG),
       _swiftPart(swiftPart) { }
 
   public:
     // Get the Swift part
-    inline NitroVideo::HybridVideoPlayerSourceFactorySpec_cxx getSwiftPart() noexcept { return _swiftPart; }
+    inline ReactNativeVideo::HybridVideoPlayerSourceFactorySpec_cxx getSwiftPart() noexcept { return _swiftPart; }
 
   public:
     // Get memory pressure
@@ -66,7 +66,7 @@ namespace margelo::nitro::video {
     }
 
   private:
-    NitroVideo::HybridVideoPlayerSourceFactorySpec_cxx _swiftPart;
+    ReactNativeVideo::HybridVideoPlayerSourceFactorySpec_cxx _swiftPart;
   };
 
 } // namespace margelo::nitro::video
