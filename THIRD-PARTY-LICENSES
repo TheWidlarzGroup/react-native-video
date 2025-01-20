@@ -28,7 +28,7 @@ SOFTWARE.
       
 ---
 
-### @evilmartians/lefthook (1.7.18)
+### @evilmartians/lefthook (1.10.8)
 - **License**: MIT
 - **Version**: ^1.5.0
 
@@ -113,7 +113,7 @@ SOFTWARE.
       
 ---
 
-### @types/jest (29.5.13)
+### @types/jest (29.5.14)
 - **License**: MIT
 - **Version**: ^29.5.5
 
@@ -142,7 +142,7 @@ SOFTWARE.
       
 ---
 
-### @types/react (18.3.11)
+### @types/react (18.3.18)
 - **License**: MIT
 - **Version**: ^18.2.44
 
@@ -273,7 +273,7 @@ THE SOFTWARE.
       
 ---
 
-### eslint-plugin-prettier (5.2.1)
+### eslint-plugin-prettier (5.2.2)
 - **License**: MIT
 - **Version**: ^5.0.1
 
@@ -305,38 +305,9 @@ OTHER DEALINGS IN THE SOFTWARE.
       
 ---
 
-### jest (29.7.0)
+### nitro-codegen (0.21.0)
 - **License**: MIT
-- **Version**: ^29.7.0
-
-MIT License
-
-Copyright (c) Meta Platforms, Inc. and affiliates.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-      
----
-
-### nitro-codegen (0.13.0)
-- **License**: MIT
-- **Version**: ^0.13.0
+- **Version**: >=0.15.0
 
 MIT License
 
@@ -361,7 +332,7 @@ SOFTWARE.
       
 ---
 
-### prettier (3.3.3)
+### prettier (3.4.2)
 - **License**: MIT
 - **Version**: ^3.0.3
 
@@ -384,7 +355,7 @@ MIT, ISC, BSD-2-Clause, BSD-3-Clause, Apache-2.0
 
 ## Bundled dependencies
 
-### @angular/compiler@v18.1.0
+### @angular/compiler@v19.0.1
 
 > Angular - the compiler library
 
@@ -392,9 +363,31 @@ License: MIT
 Repository: <https://github.com/angular/angular.git>
 Author: angular
 
+> The MIT License
+>
+> Copyright (c) 2010-2024 Google LLC. https://angular.dev/license
+>
+> Permission is hereby granted, free of charge, to any person obtaining a copy
+> of this software and associated documentation files (the "Software"), to deal
+> in the Software without restriction, including without limitation the rights
+> to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+> copies of the Software, and to permit persons to whom the Software is
+> furnished to do so, subject to the following conditions:
+>
+> The above copyright notice and this permission notice shall be included in
+> all copies or substantial portions of the Software.
+>
+> THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+> IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+> FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+> AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+> LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+> OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+> THE SOFTWARE.
+
 ----------------------------------------
 
-### @babel/code-frame@v7.24.7
+### @babel/code-frame@v7.26.2
 
 > Generate errors that contain a code frame that point to source locations.
 
@@ -428,7 +421,7 @@ Author: The Babel Team (https://babel.dev/team)
 
 ----------------------------------------
 
-### @babel/helper-validator-identifier@v7.24.7
+### @babel/helper-validator-identifier@v7.25.9
 
 > Validate identifier/keywords name
 
@@ -461,41 +454,7 @@ Author: The Babel Team (https://babel.dev/team)
 
 ----------------------------------------
 
-### @babel/highlight@v7.24.7
-
-> Syntax highlight JavaScript strings for output in terminals.
-
-License: MIT
-Homepage: <https://babel.dev/docs/en/next/babel-highlight>
-Repository: <https://github.com/babel/babel.git>
-Author: The Babel Team (https://babel.dev/team)
-
-> MIT License
->
-> Copyright (c) 2014-present Sebastian McKenzie and other contributors
->
-> Permission is hereby granted, free of charge, to any person obtaining
-> a copy of this software and associated documentation files (the
-> "Software"), to deal in the Software without restriction, including
-> without limitation the rights to use, copy, modify, merge, publish,
-> distribute, sublicense, and/or sell copies of the Software, and to
-> permit persons to whom the Software is furnished to do so, subject to
-> the following conditions:
->
-> The above copyright notice and this permission notice shall be
-> included in all copies or substantial portions of the Software.
->
-> THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-> EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-> MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-> NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-> LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-> OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-> WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-----------------------------------------
-
-### @babel/parser@v7.24.8
+### @babel/parser@v7.26.2
 
 > A JavaScript parser
 
@@ -554,7 +513,7 @@ License: MIT
 
 ----------------------------------------
 
-### @glimmer/syntax@v0.92.0
+### @glimmer/syntax@v0.93.1
 
 License: MIT
 
@@ -580,7 +539,7 @@ License: MIT
 
 ----------------------------------------
 
-### @glimmer/util@v0.92.0
+### @glimmer/util@v0.93.1
 
 > Common utilities used in Glimmer
 
@@ -608,7 +567,7 @@ License: MIT
 
 ----------------------------------------
 
-### @glimmer/wire-format@v0.92.0
+### @glimmer/wire-format@v0.93.1
 
 License: MIT
 
@@ -641,31 +600,6 @@ License: MIT
 License: ISC
 Homepage: <https://github.com/handlebars-lang/handlebars-parser#readme>
 Repository: <git+https://github.com/handlebars-lang/handlebars-parser.git>
-
-----------------------------------------
-
-### @iarna/toml@v2.2.5
-
-> Better TOML parsing and stringifying all in that familiar JSON interface.
-
-License: ISC
-Homepage: <https://github.com/iarna/iarna-toml#readme>
-Repository: <git+https://github.com/iarna/iarna-toml.git>
-Author: Rebecca Turner <me@re-becca.org> (http://re-becca.org/)
-
-> Copyright (c) 2016, Rebecca Turner <me@re-becca.org>
->
-> Permission to use, copy, modify, and/or distribute this software for any
-> purpose with or without fee is hereby granted, provided that the above
-> copyright notice and this permission notice appear in all copies.
->
-> THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-> WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-> MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
-> ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-> WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
-> ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
-> OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ----------------------------------------
 
@@ -823,7 +757,7 @@ Author: Alex Bell <alex@bellandwhistle.net>
 
 ----------------------------------------
 
-### @typescript-eslint/types@v8.0.0-alpha.41
+### @typescript-eslint/types@v8.16.0
 
 > Types for the TypeScript-ESTree AST spec
 
@@ -855,7 +789,7 @@ Repository: <https://github.com/typescript-eslint/typescript-eslint.git>
 
 ----------------------------------------
 
-### @typescript-eslint/typescript-estree@v8.0.0-alpha.41
+### @typescript-eslint/typescript-estree@v8.16.0
 
 > A parser that converts TypeScript source code into an ESTree compatible form
 
@@ -863,6 +797,8 @@ License: BSD-2-Clause
 Homepage: <https://typescript-eslint.io/packages/typescript-estree>
 Repository: <https://github.com/typescript-eslint/typescript-eslint.git>
 
+> BSD 2-Clause License
+>
 > TypeScript ESTree
 >
 > Originally extracted from:
@@ -892,7 +828,7 @@ Repository: <https://github.com/typescript-eslint/typescript-eslint.git>
 
 ----------------------------------------
 
-### acorn@v8.12.1
+### acorn@v8.14.0
 
 > ECMAScript parser
 
@@ -954,7 +890,7 @@ Repository: <https://github.com/acornjs/acorn-jsx>
 
 ----------------------------------------
 
-### angular-estree-parser@v10.0.3
+### angular-estree-parser@v10.2.0
 
 > A parser that converts Angular source code into an ESTree-compatible form
 
@@ -986,7 +922,7 @@ Author: Ika <ikatyang@gmail.com> (https://github.com/ikatyang)
 
 ----------------------------------------
 
-### angular-html-parser@v6.0.2
+### angular-html-parser@v8.0.1
 
 > A HTML parser extracted from Angular with some modifications
 
@@ -1018,7 +954,7 @@ Author: Ika <ikatyang@gmail.com> (https://github.com/ikatyang)
 
 ----------------------------------------
 
-### ansi-regex@v6.0.1
+### ansi-regex@v6.1.0
 
 > Regular expression for matching ANSI escape codes
 
@@ -1282,13 +1218,15 @@ Contributors:
 
 ----------------------------------------
 
-### ci-info@v4.0.0
+### ci-info@v4.1.0
 
 > Get details about the current Continuous Integration environment
 
 License: MIT
 Homepage: <https://github.com/watson/ci-info>
 Author: Thomas Watson Steen <w@tson.dk> (https://twitter.com/wa7son)
+Contributors:
+ - Sibiraj (https://github.com/sibiraj-s)
 
 > The MIT License (MIT)
 >
@@ -1410,7 +1348,7 @@ Contributors:
 
 ----------------------------------------
 
-### diff@v5.2.0
+### diff@v7.0.0
 
 > A JavaScript text diff implementation.
 
@@ -1483,7 +1421,7 @@ Contributors:
 
 ----------------------------------------
 
-### emoji-regex@v10.3.0
+### emoji-regex@v10.4.0
 
 > A regular expression to match all Emoji-only symbols as per the Unicode Standard.
 
@@ -1534,12 +1472,12 @@ Author: Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com)
 
 ----------------------------------------
 
-### espree@v10.1.0
+### espree@v10.3.0
 
 > An Esprima-compatible JavaScript parser built on Acorn
 
 License: BSD-2-Clause
-Homepage: <https://github.com/eslint/espree>
+Homepage: <https://github.com/eslint/js/blob/main/packages/espree/README.md>
 Author: Nicholas C. Zakas <nicholas+npm@nczconsulting.com>
 
 > BSD 2-Clause License
@@ -1694,7 +1632,7 @@ Author: Matteo Collina <hello@matteocollina.com>
 
 ----------------------------------------
 
-### file-entry-cache@v9.0.0
+### file-entry-cache@v9.1.0
 
 > Super simple cache for file metadata, useful for process that work o a given series of files and that only need to repeat the job on the changed ones since the previous run of the process
 
@@ -1833,7 +1771,7 @@ Author: Jared Wray (https://jaredwray.com)
 
 ----------------------------------------
 
-### flatted@v3.3.1
+### flatted@v3.3.2
 
 > A super light and fast circular JSON parser.
 
@@ -1895,7 +1833,7 @@ Contributors:
 
 ----------------------------------------
 
-### flow-parser@v0.237.2
+### flow-parser@v0.255.0
 
 > JavaScript parser written in OCaml. Produces ESTree AST
 
@@ -1906,7 +1844,7 @@ Author: Flow Team <flow@fb.com>
 
 ----------------------------------------
 
-### get-east-asian-width@v1.2.0
+### get-east-asian-width@v1.3.0
 
 > Determine the East Asian Width of a Unicode character
 
@@ -2004,7 +1942,7 @@ Repository: <https://github.com/graphql/graphql-js.git>
 
 ----------------------------------------
 
-### ignore@v5.3.1
+### ignore@v6.0.2
 
 > Ignore is a manager and filter for .gitignore rules, the one used by eslint, gitbook and many others.
 
@@ -2590,7 +2528,7 @@ Author: fisker Cheung <lionkay@gmail.com> (https://www.fiskercheung.com/)
 
 ----------------------------------------
 
-### jest-docblock@v30.0.0-alpha.5
+### jest-docblock@v30.0.0-alpha.6
 
 License: MIT
 Repository: <https://github.com/jestjs/jest.git>
@@ -2932,13 +2870,13 @@ Repository: <git@github.com:teambition/merge2.git>
 
 ----------------------------------------
 
-### meriyah@v4.5.0
+### meriyah@v6.0.3
 
 > A 100% compliant, self-hosted javascript parser with high focus on both performance and stability
 
 License: ISC
 Homepage: <https://github.com/meriyah/meriyah>
-Repository: <https://github.com/meriyah/meriyah>
+Repository: <git+https://github.com/meriyah/meriyah.git>
 Author: Kenny F. (https://github.com/KFlash)
 Contributors:
  - Chunpeng Huo (https://github.com/3cp)
@@ -2953,7 +2891,7 @@ Contributors:
 
 ----------------------------------------
 
-### micromatch@v4.0.7
+### micromatch@v4.0.8
 
 > Glob matching for javascript/node.js. A replacement and faster alternative to minimatch and multimatch.
 
@@ -3202,7 +3140,7 @@ Author: Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com)
 
 ----------------------------------------
 
-### picocolors@v1.0.1
+### picocolors@v1.1.1
 
 > The tiniest and the fastest library for terminal output formatting with ANSI colors
 
@@ -3211,7 +3149,7 @@ Author: Alexey Raspopov
 
 > ISC License
 >
-> Copyright (c) 2021 Alexey Raspopov, Kostiantyn Denysov, Anton Verinov
+> Copyright (c) 2021-2024 Oleksii Raspopov, Kostiantyn Denysov, Anton Verinov
 >
 > Permission to use, copy, modify, and/or distribute this software for any
 > purpose with or without fee is hereby granted, provided that the above
@@ -3311,7 +3249,7 @@ Author: typicode
 
 ----------------------------------------
 
-### postcss@v8.4.39
+### postcss@v8.4.49
 
 > Tool for transforming styles with JS plugins
 
@@ -3724,7 +3662,7 @@ Author: Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com)
 
 ----------------------------------------
 
-### semver@v7.6.2
+### semver@v7.6.3
 
 > The semantic version parser used by npm.
 
@@ -3832,6 +3770,40 @@ Repository: <https://github.com/tildeio/simple-html-tokenizer.git>
 > LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 > OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 > SOFTWARE.
+
+----------------------------------------
+
+### smol-toml@v1.3.1
+
+> A small, fast, and correct TOML parser/serializer
+
+License: BSD-3-Clause
+Author: Cynthia <cyyynthia@borkenware.com>
+
+> Copyright (c) Squirrel Chat et al., All rights reserved.
+>
+> Redistribution and use in source and binary forms, with or without
+> modification, are permitted provided that the following conditions are met:
+>
+> 1. Redistributions of source code must retain the above copyright notice, this
+>    list of conditions and the following disclaimer.
+> 2. Redistributions in binary form must reproduce the above copyright notice,
+>    this list of conditions and the following disclaimer in the
+>    documentation and/or other materials provided with the distribution.
+> 3. Neither the name of the copyright holder nor the names of its contributors
+>    may be used to endorse or promote products derived from this software without
+>    specific prior written permission.
+>
+> THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+> ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+> WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+> DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+> FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+> DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+> SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+> CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+> OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+> OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------
 
@@ -4022,7 +3994,7 @@ Contributors:
 
 ----------------------------------------
 
-### ts-api-utils@v1.3.0
+### ts-api-utils@v1.4.2
 
 > Utility functions for working with TypeScript's API. Successor to the wonderful tsutils. 🛠️️
 
@@ -4053,13 +4025,13 @@ Author: JoshuaKGoldberg <npm@joshuakgoldberg.com>
 
 ----------------------------------------
 
-### typescript@v5.5.3
+### typescript@v5.7.2
 
 > TypeScript is a language for application scale JavaScript development
 
 License: Apache-2.0
 Homepage: <https://www.typescriptlang.org/>
-Repository: <https://github.com/Microsoft/TypeScript.git>
+Repository: <https://github.com/microsoft/TypeScript.git>
 Author: Microsoft Corp.
 
 > Apache License
@@ -4398,7 +4370,7 @@ Contributors:
 
 ----------------------------------------
 
-### url-or-path@v2.3.0
+### url-or-path@v2.3.2
 
 > Convert between file URL and path.
 
@@ -4569,7 +4541,7 @@ Author: Ika <ikatyang@gmail.com> (https://github.com/ikatyang)
 
 ----------------------------------------
 
-### wcwidth.js@v1.1.2
+### wcwidth.js@v2.0.0
 
 > a javascript porting of C's wcwidth()
 
@@ -4777,9 +4749,9 @@ SOFTWARE.
       
 ---
 
-### react-native (0.75.4)
+### react-native (0.76.6)
 - **License**: MIT
-- **Version**: 0.75.4
+- **Version**: ^0.76.0
 
 MIT License
 
@@ -4806,7 +4778,7 @@ SOFTWARE.
       
 ---
 
-### react-native-builder-bob (0.30.2)
+### react-native-builder-bob (0.30.3)
 - **License**: MIT
 - **Version**: ^0.30.2
 
@@ -4835,9 +4807,9 @@ SOFTWARE.
       
 ---
 
-### react-native-nitro-modules (0.13.0)
+### react-native-nitro-modules (0.21.0)
 - **License**: MIT
-- **Version**: ^0.13.0
+- **Version**: >=0.15.0
 
 MIT License
 
@@ -5271,7 +5243,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
       
 ---
 
-### typescript (5.6.3)
+### typescript (5.7.3)
 - **License**: Apache-2.0
 - **Version**: ^5.2.2
 
