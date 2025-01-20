@@ -7,7 +7,7 @@
 import AVFoundation
 
 public final class AVAssetUtils {
-  public static func getAssetInformation(for asset: AVAsset) async throws -> VideoInformation {
+  public static func getAssetInformation(for asset: AVURLAsset) async throws -> VideoInformation {
     // Initialize with default values
     var videoInformation = VideoInformation(
       bitrate: Double.nan,
@@ -20,7 +20,7 @@ public final class AVAssetUtils {
       orientation: .unknown
     )
     
-    videoInformation.fileSize = try await getFileSize(for: <#T##URL#>)
+    videoInformation.fileSize = try await getFileSize(for: asset.url)
     
     // Check if asset is live stream
     if asset.duration.flags.contains(.indefinite) {

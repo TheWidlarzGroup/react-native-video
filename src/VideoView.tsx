@@ -1,12 +1,12 @@
 import * as React from 'react';
+import type { ViewStyle } from 'react-native';
+import { NitroModules } from 'react-native-nitro-modules';
 import type { VideoPlayer } from './spec/nitro/VideoPlayer.nitro';
 import { NativeVideoView } from './NativeVideoView';
-import { NitroModules } from 'react-native-nitro-modules';
 import type {
   VideoViewViewManager,
   VideoViewViewManagerFactory,
 } from './spec/nitro/VideoViewViewManager.nitro';
-import type { ViewStyle } from 'react-native';
 
 interface VideoViewProps {
   player: VideoPlayer;
@@ -19,8 +19,6 @@ const VideoViewViewManagerFactory =
     'VideoViewViewManagerFactory'
   );
 
-const DEBUG = false;
-
 const VideoView = ({ player, ...props }: VideoViewProps) => {
   const nitroId = React.useMemo(() => nitroIdCounter++, []);
   const nitroViewManager = React.useRef<VideoViewViewManager | null>(null);
@@ -28,11 +26,9 @@ const VideoView = ({ player, ...props }: VideoViewProps) => {
   const setupViewManager = React.useCallback(
     (id: number) => {
       if (nitroViewManager.current !== null) {
-        DEBUG && console.warn('View Manager already setup');
         return;
       }
 
-      DEBUG && console.log('Setup View Manager');
       nitroViewManager.current =
         VideoViewViewManagerFactory.createViewManager(id);
 
@@ -50,26 +46,16 @@ const VideoView = ({ player, ...props }: VideoViewProps) => {
 
   const onNitroIdChange = React.useCallback(
     (event: { nativeEvent: { nitroId: number } }) => {
-      DEBUG && console.log('NitroId Change', event.nativeEvent.nitroId);
       setupViewManager(event.nativeEvent.nitroId);
     },
     [setupViewManager]
   );
 
   React.useEffect(() => {
-    DEBUG && console.log('VideoView Mounted');
-
-    return () => {
-      DEBUG && console.log('VideoView Unmounted');
-    };
-  }, []);
-
-  React.useEffect(() => {
     if (!nitroViewManager.current) {
       return;
     }
 
-    DEBUG && console.log('Update View Manager Props');
     nitroViewManager.current.player = player;
   }, [player]);
 
