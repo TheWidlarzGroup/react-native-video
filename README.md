@@ -1,6 +1,6 @@
 # react-native-video
 
-This is (PoC) v7 version of the react-native-video library.
+This is v7 version of the react-native-video library.
 It's experimental and not recommended for production use.
 
 It's working both on New and Old Architecture.
@@ -31,15 +31,11 @@ yarn install react-native-video
 
 ```js
 import * as React from 'react';
-import { VideoView, createPlayer } from "react-native-video";
+import { VideoView, useVideoPlayer } from "react-native-video";
 
 const VideoPlayer = () => {
 
-  // Remember to create a player instance outside of the render method to avoid creating a new instance on each render
-  // You can also use useMemo to memoize the player instance
-  const player = React.useMemo(() => createPlayer('https://www.w3schools.com/html/mov_bbb.mp4'), []);
-
-  // Usage of player
+  const player = useVideoPlayer('https://www.w3schools.com/html/mov_bbb.mp4');
 
   // Methods
   player.play();
