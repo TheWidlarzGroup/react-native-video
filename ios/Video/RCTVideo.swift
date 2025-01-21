@@ -1168,7 +1168,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                         playerView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
                         playerView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
                         playerView.topAnchor.constraint(equalTo: self.topAnchor),
-                        playerView.bottomAnchor.constraint(equalTo: self.bottomAnchor)
+                        playerView.bottomAnchor.constraint(equalTo: self.bottomAnchor),
                     ])
                 } else {
                     print("Error: _playerViewController or its view is nil")
