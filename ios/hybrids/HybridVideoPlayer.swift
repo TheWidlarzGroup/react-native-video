@@ -13,7 +13,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
   /**
     * This in general should not be used directly, use `playerPointer` instead. This should be set only from within the playerQueue.
     */
-  private var _player: AVPlayer?
+  private var player: AVPlayer?
   
   /**
    * The player queue is used to synchronize player initialization.
@@ -29,26 +29,26 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
       playerQueue.sync {
         // If player is already initialized and playerItem is set, return it
         // If playerItem is not set, it means that player was not loaded with any source
-        if _player != nil && playerItem != nil {
-          return _player!
+        if player != nil && playerItem != nil {
+          return player!
         }
         
         do {
           let item = try initializePlayerItem()
-          _player?.replaceCurrentItem(with: item)
+          player?.replaceCurrentItem(with: item)
           playerItem = item
-          _player = AVPlayer(playerItem: playerItem)
+          player = AVPlayer(playerItem: playerItem)
         } catch {
           playerItem = nil
-          _player = AVPlayer()
+          player = AVPlayer()
         }
         
-        return _player!
+        return player!
       }
     }
     set {
       playerQueue.sync {
-        _player = newValue
+        player = newValue
       }
     }
   }
@@ -96,7 +96,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
       
       try self.playerQueue.sync {
         self.playerItem = try self.initializePlayerItem()
-        self._player = AVPlayer(playerItem: self.playerItem)
+        self.player = AVPlayer(playerItem: self.playerItem)
       }
     }
   }
@@ -121,14 +121,14 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
         do {
           self.playerItem = try self.initializePlayerItem()
           
-          guard let player = self._player else {
+          guard let player = self.player else {
             throw RuntimeError.error(withMessage: "Player not initialized")
           }
           
           player.replaceCurrentItem(with: self.playerItem)
         } catch {
           self.playerItem = nil
-          self._player = AVPlayer()
+          self.player = AVPlayer()
           throw error
         }
       }
