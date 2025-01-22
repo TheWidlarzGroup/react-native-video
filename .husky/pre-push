@@ -1,0 +1,2 @@
+echo "precommit"
+yarn check-all
