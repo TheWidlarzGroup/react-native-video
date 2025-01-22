@@ -24,8 +24,10 @@ class SideLoadedTextTrackList {
             }
             val sideLoadedTextTrackList = SideLoadedTextTrackList()
             for (i in 0 until src.size()) {
-                val textTrack: ReadableMap = src.getMap(i)
-                sideLoadedTextTrackList.tracks.add(SideLoadedTextTrack.parse(textTrack))
+                val textTrack: ReadableMap? = src.getMap(i)
+                textTrack?.let {
+                    sideLoadedTextTrackList.tracks.add(SideLoadedTextTrack.parse(it))
+                }
             }
             return sideLoadedTextTrackList
         }
