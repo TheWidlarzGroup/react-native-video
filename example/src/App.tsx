@@ -1,8 +1,15 @@
 import * as React from 'react';
-import { Button, Dimensions, StyleSheet, View } from 'react-native';
+import {
+  Button,
+  Dimensions,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { VideoView, createSource, useVideoPlayer } from 'react-native-video';
 
-export default function App() {
+const VideoDemo = () => {
   const [show, setShow] = React.useState(false);
 
   const player = useVideoPlayer('https://www.w3schools.com/html/mov_bbb.mp4');
@@ -10,23 +17,27 @@ export default function App() {
   return (
     <View style={styles.container}>
       <View style={styles.videoContainer}>
-        {show && <VideoView player={player} style={styles.box} />}
+        {show ? (
+          <VideoView player={player} style={styles.box} />
+        ) : (
+          <View style={styles.hiddenVideo}>
+            <Text style={styles.hiddenVideoText}>VideoView is hidden!</Text>
+          </View>
+        )}
       </View>
       <Button title="Play" onPress={() => player.play()} />
       <Button title="Pause" onPress={() => player.pause()} />
       <Button title="Seek to 3sec" onPress={() => (player.currentTime = 3)} />
-      <Button title="Toggle" onPress={() => setShow((prev) => !prev)} />
+      <Button
+        title={show ? 'Hide VideoView' : 'Show VideoView'}
+        onPress={() => setShow((prev) => !prev)}
+      />
       <Button
         title="Preload player"
         onPress={() => {
-          player
-            .preload()
-            .then(() => {
-              // setShow(true);
-            })
-            .catch((error) => {
-              console.error(error);
-            });
+          player.preload().catch((error) => {
+            console.error(error);
+          });
         }}
       />
       <Button
@@ -45,6 +56,19 @@ export default function App() {
       />
     </View>
   );
+};
+
+export default function App() {
+  const [mounted, setMounted] = React.useState(true);
+  return (
+    <SafeAreaView style={styles.container}>
+      {mounted && <VideoDemo />}
+      <Button
+        title={mounted ? 'Unmount' : 'Mount'}
+        onPress={() => setMounted((prev) => !prev)}
+      />
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -61,5 +85,18 @@ const styles = StyleSheet.create({
     width: 300,
     height: 300,
     marginVertical: 20,
+  },
+  hiddenVideo: {
+    width: 300,
+    height: 300,
+    marginVertical: 20,
+    backgroundColor: 'gray',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  hiddenVideoText: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: 'bold',
   },
 });

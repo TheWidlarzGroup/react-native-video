@@ -1,8 +1,11 @@
 {
-  "extends": "@react-native/typescript-config/tsconfig.json",
+  "extends": [
+    "@react-native/typescript-config/tsconfig.json",
+    "../config/tsconfig.json"
+  ],
+  "include": ["src", "index.js", "app.json"],
   "compilerOptions": {
-    "paths": {
-      "react-native-video": ["../"]
-    }
+    "jsx": "react",
+    "types": ["react-native"]
   }
 }

@@ -1,111 +1,42 @@
 {
-  "name": "react-native-video",
-  "version": "7.0.0-dev",
-  "description": "<Video /> Component for React Native",
-  "source": "./src/index.tsx",
-  "main": "./lib/commonjs/index.js",
-  "module": "./lib/module/index.js",
-  "types": "./lib/typescript/module/src/index.d.ts",
-  "react-native": "src/index",
-  "exports": {
-   "./package.json": "./package.json",
-    ".": {
-      "import": {
-        "types": "./lib/typescript/module/src/index.d.ts",
-        "default": "./lib/module/index.js"
-      },
-      "require": {
-        "types": "./lib/typescript/commonjs/src/index.d.ts",
-        "default": "./lib/commonjs/index.js"
-      }
-    }
-  },
-  "files": [
-    "src",
-    "lib",
-    "android",
-    "ios",
-    "cpp",
-    "nitrogen",
-    "*.podspec",
-    "!ios/build",
-    "!android/build",
-    "!android/gradle",
-    "!android/gradlew",
-    "!android/gradlew.bat",
-    "!android/local.properties",
-    "!**/__tests__",
-    "!**/__fixtures__",
-    "!**/__mocks__",
-    "!**/.*"
+  "name": "@react-native-video",
+  "packageManager": "bun@1.1.42",
+  "private": true,
+  "repository": "https://github.com/TheWidlarzGroup/react-native-video-v7",
+  "author": "TheWidlarzGroup <hi@thewidlarzgroup.com> (https://github.com/TheWidlarzGroup)",
+  "workspaces": [
+    "packages/react-native-video",
+    "example"
   ],
   "scripts": {
-    "example": "yarn workspace react-native-video-example",
-    "test": "jest",
-    "typecheck": "tsc",
-    "lint": "eslint \"**/*.{js,ts,tsx}\"",
-    "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
-    "prepare": "bob build",
-    "release": "release-it"
-  },
-  "keywords": [
-    "react-native",
-    "ios",
-    "android"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/KrzysztofMoch/react-native-video.git"
-  },
-  "author": "Krzysztof Moch <krzysmoch.programs@gmail.com> (https://github.com/KrzysztofMoch)",
-  "license": "Custom",
-  "bugs": {
-    "url": "https://github.com/TheWidlarzGroup/react-native-video-v7/issues"
-  },
-  "homepage": "https://github.com/TheWidlarzGroup/react-native-video-v7#readme",
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
+    "build": "bun react-native-video build",
+    "lint": "bun --filter=\"**\" lint",
+    "typecheck": "bun --filter=\"**\" typecheck",
+    "clean": "git clean -xdf",
+    "react-native-video": "bun run --cwd packages/react-native-video",
+    "example": "bun run --cwd example",
+    "generate-license": "bun run ./scripts/generate-third-party-licenses.js"
   },
   "devDependencies": {
+    "@eslint/js": "^9.10.0",
+    "@react-native/eslint-config": "0.76.6",
     "@commitlint/config-conventional": "^17.0.2",
     "@evilmartians/lefthook": "^1.5.0",
-    "@react-native/eslint-config": "^0.73.1",
-    "@release-it/conventional-changelog": "^5.0.0",
-    "@types/jest": "^29.5.5",
-    "@types/react": "^18.2.44",
     "commitlint": "^17.0.2",
-    "del-cli": "^5.1.0",
+    "@release-it-plugins/workspaces": "^4.2.0",
+    "@release-it/bumper": "^6.0.1",
+    "@release-it/conventional-changelog": "^8.0.2",
+    "@tsconfig/react-native": "^2.0.2",
+    "@types/eslint__js": "^8.42.3",
+    "@types/react": "^18.2.44",
     "eslint": "^8.51.0",
-    "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.1",
-    "nitro-codegen": ">=0.15.0",
     "prettier": "^3.0.3",
     "react": "18.3.1",
     "react-native": "^0.76.0",
-    "react-native-builder-bob": "^0.30.2",
-    "react-native-nitro-modules": ">=0.15.0",
-    "release-it": "^15.0.0",
-    "turbo": "^1.10.7",
-    "typescript": "^5.2.2"
-  },
-  "resolutions": {
-    "@types/react": "^18.2.44"
-  },
-  "peerDependencies": {
-    "react": "*",
-    "react-native": "*",
-    "react-native-nitro-modules": ">=0.21.0"
-  },
-  "workspaces": [
-    "example"
-  ],
-  "packageManager": "bun@1.31.1",
-  "jest": {
-    "preset": "react-native",
-    "modulePathIgnorePatterns": [
-      "<rootDir>/example/node_modules",
-      "<rootDir>/lib/"
-    ]
+    "release-it": "^17.10.0",
+    "typescript": "^5.2.2",
+    "typescript-eslint": "^8.13.0"
   },
   "commitlint": {
     "extends": [
@@ -113,89 +44,56 @@
     ]
   },
   "release-it": {
+    "npm": {
+      "publish": false
+    },
     "git": {
       "commitMessage": "chore: release ${version}",
-      "tagName": "v${version}"
-    },
-    "npm": {
-      "publish": true
+      "tagName": "v${version}",
+      "requireCleanWorkingDir": false
     },
     "github": {
       "release": true
     },
+    "hooks": {
+      "before:release": "bun run --cwd packages/react-native-video build"
+    },
     "plugins": {
+      "@release-it/bumper": {
+        "out": [
+          {
+            "file": "packages/react-native-video/package.json",
+            "path": "version"
+          },
+          {
+            "file": "example/package.json",
+            "path": "version"
+          }
+        ]
+      },
       "@release-it/conventional-changelog": {
-        "preset": "angular"
+        "preset": {
+          "name": "conventionalcommits",
+          "types": [
+            {
+              "type": "feat",
+              "section": "Features ✨"
+            },
+            {
+              "type": "fix",
+              "section": "Bug Fixes 🐛"
+            },
+            {
+              "type": "chore(deps)",
+              "section": "Dependency Upgrades 📦"
+            },
+            {
+              "type": "docs",
+              "section": "Documentation 📚"
+            }
+          ]
+        }
       }
     }
-  },
-  "eslintConfig": {
-    "root": true,
-    "extends": [
-      "@react-native",
-      "prettier"
-    ],
-    "rules": {
-      "react/react-in-jsx-scope": "off",
-      "prettier/prettier": [
-        "error",
-        {
-          "quoteProps": "consistent",
-          "singleQuote": true,
-          "tabWidth": 2,
-          "trailingComma": "es5",
-          "useTabs": false
-        }
-      ]
-    }
-  },
-  "eslintIgnore": [
-    "node_modules/",
-    "lib/"
-  ],
-  "prettier": {
-    "quoteProps": "consistent",
-    "singleQuote": true,
-    "tabWidth": 2,
-    "trailingComma": "es5",
-    "useTabs": false
-  },
-  "react-native-builder-bob": {
-    "source": "src",
-    "output": "lib",
-    "targets": [
-      [
-        "commonjs",
-        {
-          "esm": true
-        }
-      ],
-      [
-        "module",
-        {
-          "esm": true
-        }
-      ],
-      [
-        "typescript",
-        {
-          "project": "tsconfig.build.json",
-          "esm": true
-        }
-      ]
-    ]
-  },
-  "codegenConfig": {
-    "name": "RNVideoViewSpec",
-    "type": "all",
-    "jsSrcsDir": "src/spec/fabric",
-    "android": {
-      "javaPackageName": "com.video"
-    }
-  },
-  "create-react-native-library": {
-    "type": "view-legacy",
-    "languages": "kotlin-swift",
-    "version": "0.41.2"
   }
 }

@@ -3,12 +3,12 @@ pre-commit:
   commands:
     lint:
       glob: "*.{js,ts,jsx,tsx}"
-      run: npx eslint {staged_files}
+      run: bun lint
     types:
       glob: "*.{js,ts, jsx, tsx}"
-      run: npx tsc
+      run: bun typecheck
 commit-msg:
   parallel: true
   commands:
     commitlint:
-      run: npx commitlint --edit
+      run: bunx commitlint --edit
