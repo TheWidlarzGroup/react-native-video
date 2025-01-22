@@ -69,7 +69,16 @@ void ReactVideoViewManager::UpdateProperties(
           auto const &uri = srcMap.at("uri");
           reactVideoView.Set_UriString(to_hstring(uri.AsString()));
         } else if (propertyName == "resizeMode") {
-          reactVideoView.Stretch(static_cast<Stretch>(std::stoul(propertyValue.AsString())));
+          auto resizeModeString = propertyValue.AsString();
+          Stretch resizeMode = Stretch::None;
+          if (resizeModeString == "contain") {
+              resizeMode = Stretch::Uniform;
+          } else if (resizeModeString == "stretch") {
+              resizeMode = Stretch::Fill;
+          } else if (resizeModeString == "cover") {
+            resizeMode = Stretch::UniformToFill;
+          }
+          reactVideoView.Stretch(resizeMode);
         } else if (propertyName == "repeat") {
           reactVideoView.Set_IsLoopingEnabled(propertyValue.AsBoolean());
         } else if (propertyName == "paused") {
