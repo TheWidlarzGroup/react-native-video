@@ -1538,7 +1538,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         guard _isPlaying != isPlaying else { return }
         _isPlaying = isPlaying
-        _paused = !isPlaying
+        if _controls {
+            _paused = !isPlaying
+        }
         onVideoPlaybackStateChanged?(["isPlaying": isPlaying, "isSeeking": self._pendingSeek == true, "target": reactTag as Any])
     }
 
