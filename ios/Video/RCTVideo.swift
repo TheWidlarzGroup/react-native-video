@@ -1109,7 +1109,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 _playerViewController.view.trailingAnchor.constraint(equalTo: self.trailingAnchor),
                 _playerViewController.view.topAnchor.constraint(equalTo: self.topAnchor),
                 _playerViewController.view.bottomAnchor.constraint(equalTo: self.bottomAnchor),
-           ])
+            ])
         }
 
         _playerObserver.playerViewController = _playerViewController
