@@ -102,6 +102,12 @@ namespace margelo::nitro::video {
       auto __value = std::move(__result.value());
       return __value;
     }
+    inline void clean() override {
+      auto __result = _swiftPart.clean();
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+    }
 
   private:
     ReactNativeVideo::HybridVideoPlayerSpec_cxx _swiftPart;

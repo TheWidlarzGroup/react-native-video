@@ -60,6 +60,7 @@ namespace margelo::nitro::video {
     void play() override;
     void pause() override;
     std::shared_ptr<Promise<void>> replaceSourceAsync(const std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>& source) override;
+    void clean() override;
 
   private:
     friend HybridBase;

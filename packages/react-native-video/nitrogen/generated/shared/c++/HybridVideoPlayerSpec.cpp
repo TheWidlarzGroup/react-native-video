@@ -24,7 +24,11 @@ namespace margelo::nitro::video {
       prototype.registerHybridMethod("play", &HybridVideoPlayerSpec::play);
       prototype.registerHybridMethod("pause", &HybridVideoPlayerSpec::pause);
       prototype.registerHybridMethod("replaceSourceAsync", &HybridVideoPlayerSpec::replaceSourceAsync);
+      prototype.registerHybridMethod("clean", &HybridVideoPlayerSpec::clean);
     });
   }
 
+  void HybridVideoPlayerSpec::dispose() {
+    clean();
+  }
 } // namespace margelo::nitro::video

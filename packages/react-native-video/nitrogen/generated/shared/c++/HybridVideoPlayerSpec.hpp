@@ -60,10 +60,12 @@ namespace margelo::nitro::video {
       virtual void play() = 0;
       virtual void pause() = 0;
       virtual std::shared_ptr<Promise<void>> replaceSourceAsync(const std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>& source) = 0;
+      virtual void clean() = 0;
 
     protected:
       // Hybrid Setup
       void loadHybridMethods() override;
+      void dispose() override;
 
     protected:
       // Tag for logging

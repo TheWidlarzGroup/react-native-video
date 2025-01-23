@@ -21,6 +21,7 @@ public protocol HybridVideoPlayerSpec_protocol: AnyObject {
   func play() throws -> Void
   func pause() throws -> Void
   func replaceSourceAsync(source: (any HybridVideoPlayerSourceSpec)) throws -> Promise<Void>
+  func clean() throws -> Void
 }
 
 /// See ``HybridVideoPlayerSpec``

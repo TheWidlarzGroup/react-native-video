@@ -103,5 +103,9 @@ namespace margelo::nitro::video {
       return __promise;
     }();
   }
+  void JHybridVideoPlayerSpec::clean() {
+    static const auto method = _javaPart->getClass()->getMethod<void()>("clean");
+    method(_javaPart);
+  }
 
 } // namespace margelo::nitro::video

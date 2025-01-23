@@ -50,6 +50,11 @@ export interface VideoPlayer
    * see {@link VideoPlayerSource}
    */
   replaceSourceAsync(source: VideoPlayerSource): Promise<void>;
+
+  /**
+   * Release the player resources.
+   */
+  clean(): void;
 }
 
 export interface VideoPlayerFactory

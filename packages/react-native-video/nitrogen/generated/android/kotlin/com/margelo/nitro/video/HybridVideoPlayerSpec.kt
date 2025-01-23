@@ -78,6 +78,10 @@ abstract class HybridVideoPlayerSpec: HybridObject() {
   @DoNotStrip
   @Keep
   abstract fun replaceSourceAsync(source: HybridVideoPlayerSourceSpec): Promise<Unit>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun clean(): Unit
 
   private external fun initHybrid(): HybridData
 
