@@ -1,4 +1,4 @@
-package com.video
+package com.video.view
 
 import android.content.Context
 import android.util.AttributeSet

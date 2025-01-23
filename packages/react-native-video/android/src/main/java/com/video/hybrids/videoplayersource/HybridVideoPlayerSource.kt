@@ -3,7 +3,7 @@ package com.margelo.nitro.video
 import androidx.media3.common.MediaItem
 import com.facebook.proguard.annotations.DoNotStrip
 import com.margelo.nitro.core.Promise
-import com.video.utils.AssetUtils
+import com.video.core.utils.VideoInformationUtils
 
 @DoNotStrip
 class HybridVideoPlayerSource(): HybridVideoPlayerSourceSpec() {
@@ -18,7 +18,7 @@ class HybridVideoPlayerSource(): HybridVideoPlayerSourceSpec() {
 
   override fun getAssetInformationAsync(): Promise<VideoInformation> {
     return Promise.async {
-      return@async AssetUtils.getAssetInformation(uri)
+      return@async VideoInformationUtils.fromUri(uri)
     }
   }
 

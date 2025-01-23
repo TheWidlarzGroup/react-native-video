@@ -3,8 +3,8 @@ package com.margelo.nitro.video
 import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
 import com.facebook.proguard.annotations.DoNotStrip
-import com.video.VideoView
-import com.video.utils.Threading
+import com.video.view.VideoView
+import com.video.core.utils.Threading
 
 @DoNotStrip
 @OptIn(UnstableApi::class)

@@ -10,12 +10,12 @@ import androidx.media3.exoplayer.upstream.DefaultAllocator
 import com.facebook.proguard.annotations.DoNotStrip
 import com.margelo.nitro.NitroModules
 import com.margelo.nitro.core.Promise
-import com.video.utils.Threading.Companion.runOnMainThreadSync
-import com.video.utils.Threading.Companion.runOnMainThread
+import com.video.core.utils.Threading.runOnMainThread
+import com.video.core.utils.Threading.runOnMainThreadSync
 
 @UnstableApi
 @DoNotStrip
-class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
+class HybridVideoPlayer() : HybridVideoPlayerSpec() {
   override lateinit var source: HybridVideoPlayerSourceSpec
   private var allocator: DefaultAllocator? = null
 
@@ -129,13 +129,13 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
     }
   }
 
-  fun release() {
+  private fun release() {
     runOnMainThread {
       playerPointer.release()
     }
   }
 
-  override fun close() {
+  override fun clean() {
     release()
   }
 

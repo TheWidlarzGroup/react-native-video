@@ -1,4 +1,4 @@
-package com.video
+package com.video.react
 
 import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
@@ -20,7 +20,7 @@ class VideoPackage : ReactPackage {
 
   companion object {
     init {
-        System.loadLibrary("ReactNativeVideo")
+      System.loadLibrary("ReactNativeVideo")
     }
   }
 }

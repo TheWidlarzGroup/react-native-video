@@ -1,4 +1,4 @@
-package com.video
+package com.video.react
 
 import androidx.media3.common.util.UnstableApi
 import com.facebook.react.bridge.Arguments
@@ -13,6 +13,7 @@ import com.facebook.react.uimanager.annotations.ReactProp
 import com.facebook.react.uimanager.events.Event
 import com.facebook.react.viewmanagers.VideoViewManagerDelegate
 import com.facebook.react.viewmanagers.VideoViewManagerInterface
+import com.video.view.VideoView
 
 internal class NitroIdChange(
   surfaceId: Int,
