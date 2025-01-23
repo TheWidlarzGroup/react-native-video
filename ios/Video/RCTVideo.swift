@@ -1103,6 +1103,13 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             let viewController: UIViewController! = self.reactViewController()
             viewController?.addChild(_playerViewController)
             self.addSubview(_playerViewController.view)
+
+            NSLayoutConstraint.activate([
+                _playerViewController.view.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+                _playerViewController.view.trailingAnchor.constraint(equalTo: self.trailingAnchor),
+                _playerViewController.view.topAnchor.constraint(equalTo: self.topAnchor),
+                _playerViewController.view.bottomAnchor.constraint(equalTo: self.bottomAnchor),
+           ])
         }
 
         _playerObserver.playerViewController = _playerViewController
@@ -1158,21 +1165,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             if _controls {
                 self.removePlayerLayer()
                 self.usePlayerViewController()
-
-                // Safely unwrap _playerViewController before applying constraints
-                if let playerViewController = _playerViewController, let playerView = playerViewController.view {
-                    playerView.translatesAutoresizingMaskIntoConstraints = false
-                    self.addSubview(playerView) // Ensure it's added to the hierarchy
-
-                    NSLayoutConstraint.activate([
-                        playerView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
-                        playerView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
-                        playerView.topAnchor.constraint(equalTo: self.topAnchor),
-                        playerView.bottomAnchor.constraint(equalTo: self.bottomAnchor),
-                    ])
-                } else {
-                    print("Error: _playerViewController or its view is nil")
-                }
             } else {
                 _playerViewController?.view.removeFromSuperview()
                 _playerViewController?.removeFromParent()
