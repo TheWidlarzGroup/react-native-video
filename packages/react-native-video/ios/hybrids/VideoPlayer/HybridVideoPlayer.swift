@@ -11,8 +11,8 @@ import AVFoundation
 
 class HybridVideoPlayer: HybridVideoPlayerSpec {
   /**
-    * This in general should not be used directly, use `playerPointer` instead. This should be set only from within the playerQueue.
-    */
+   * This in general should not be used directly, use `playerPointer` instead. This should be set only from within the playerQueue.
+   */
   private var player: AVPlayer?
   
   /**
@@ -91,13 +91,21 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
   deinit {
     release()
   }
-
+  
+  func clean() throws {
+    release()
+  }
+  
   func release() {
     playerQueue.sync { [weak self] in
       guard let self = self else { return }
       self.player?.replaceCurrentItem(with: nil)
       self.player = nil
       self.playerItem = nil
+      
+      if let source = self.source as? HybridVideoPlayerSource {
+        source.releaseAsset()
+      }
     }
   }
   
@@ -160,5 +168,14 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
     }
     
     return AVPlayerItem(asset: asset)
+  }
+  
+  override var memorySize: Int {
+    var size = 0
+    
+    size += source.memorySize
+    size += playerItem?.asset.estimatedMemoryUsage ?? 0
+    
+    return size
   }
 }

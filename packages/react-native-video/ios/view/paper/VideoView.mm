@@ -1,15 +1,17 @@
 #import "VideoView.h"
-#import "VideoComponentViewUtils.h"
+
+#import "ReactNativeVideo-Swift-Cxx-Umbrella.hpp"
+#import "ReactNativeVideo-Swift.h"
 
 @implementation VideoView {
-  UIView* _view;
+  VideoComponentView* _view;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame {
   self = [super initWithFrame:frame];
   if (self) {
     // Initialize VideoComponentView with the given frame
-    _view = [VideoComponentViewUtils createVideoComponentWithFrame:frame];
+    _view = [[VideoComponentView alloc] initWithFrame:frame];
     _view.translatesAutoresizingMaskIntoConstraints = NO;
     [self addSubview:_view];
     
@@ -26,7 +28,7 @@
 
 - (void)setNitroId:(NSNumber *)nitroId {
   _nitroId = nitroId;
-  [VideoComponentViewUtils setNitroId:nitroId forVideoComponent:_view];
+  [_view setNitroId:nitroId];
 
   // Emit the onNitroIdChange event when nitroId is updated
   if (self.onNitroIdChange) {

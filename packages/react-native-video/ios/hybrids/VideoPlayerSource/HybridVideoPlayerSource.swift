@@ -25,6 +25,10 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec {
     self.url = url
   }
   
+  deinit {
+    releaseAsset()
+  }
+  
   func getAssetInformationAsync() throws -> Promise<VideoInformation> {
     return Promise.async(.utility) { [weak self] in
       guard let self else {
@@ -32,7 +36,7 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec {
       }
       
       if self.url.isFileURL {
-        try checkReadFilePermission(for: self.url)
+        try VideoFileHelper.validateReadPermission(for: self.url)
       }
       
       try initializeAsset()
@@ -41,7 +45,7 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec {
         throw RuntimeError.error(withMessage: "Failed to initialize asset")
       }
       
-      return try await AVAssetUtils.getAssetInformation(for: asset)
+      return try await asset.getAssetInformation()
     }
   }
   
@@ -54,10 +58,15 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec {
     asset = AVURLAsset(url: url)
   }
   
-  private func checkReadFilePermission(for path: URL) throws {
-    let fileManager = FileManager.default
-    if !fileManager.isReadableFile(atPath: path.path) {
-      throw RuntimeError.error(withMessage: "Cannot read file at path: \(path.path), is path \(path.path) correct? Does app have permission to read file?")
-    }
+  public func releaseAsset() {
+    asset = nil
+  }
+  
+  override var memorySize: Int {
+    var size = 0
+    
+    size += asset?.estimatedMemoryUsage ?? 0
+    
+    return size
   }
 }

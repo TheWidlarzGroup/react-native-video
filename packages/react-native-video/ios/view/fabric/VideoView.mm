@@ -7,8 +7,8 @@
 
 #import "RCTFabricComponentsPlugins.h"
 
-// TODO: update code once solved ReactNativeVideo-Swift.h import issues is fixed
-#import "VideoComponentViewUtils.h"
+#import "ReactNativeVideo-Swift-Cxx-Umbrella.hpp"
+#import "ReactNativeVideo-Swift.h"
 
 using namespace facebook::react;
 
@@ -16,7 +16,7 @@ using namespace facebook::react;
 @end
 
 @implementation VideoView {
-  UIView * _view;
+  VideoComponentView * _view;
   int _nitroId;
 }
 
@@ -26,7 +26,7 @@ using namespace facebook::react;
     static const auto defaultProps = std::make_shared<const VideoViewProps>();
     _props = defaultProps;
     
-    _view = [VideoComponentViewUtils createVideoComponentWithFrame:frame];
+    _view = [[VideoComponentView alloc] initWithFrame:frame];
     
     self.contentView = _view;
   }
@@ -39,14 +39,17 @@ using namespace facebook::react;
   const auto &oldViewProps = *std::static_pointer_cast<VideoViewProps const>(_props);
   const auto &newViewProps = *std::static_pointer_cast<VideoViewProps const>(props);
   
-  [VideoComponentViewUtils setNitroId:[NSNumber numberWithInt:newViewProps.nitroId] forVideoComponent:_view];
-  _nitroId = newViewProps.nitroId;
-  
   if (oldViewProps.nitroId != newViewProps.nitroId) {
-    [self onNitroIdChange:_nitroId];
+    [self setNitroId:newViewProps.nitroId];
   }
   
   [super updateProps:props oldProps:oldProps];
+}
+
+- (void)setNitroId:(int)nitroId {
+  _nitroId = nitroId;
+  [_view setNitroId:[NSNumber numberWithInt:nitroId]];
+  [self onNitroIdChange:nitroId];
 }
 
 // Event emitter convenience method

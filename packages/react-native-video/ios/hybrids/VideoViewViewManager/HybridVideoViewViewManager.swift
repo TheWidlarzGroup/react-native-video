@@ -11,7 +11,7 @@ import NitroModules
 class HybridVideoViewViewManager: HybridVideoViewViewManagerSpec {
   weak var view: VideoComponentView?
   
-  var player: (any HybridVideoPlayerSpec)? {
+  weak var player: (any HybridVideoPlayerSpec)? {
     get {
       guard let view = view else {
         print("RN Video: VideoComponentView is no longer available. It is likely that the view was deallocated.")

@@ -18,9 +18,9 @@ Pod::Spec.new do |s|
 
   s.source_files = [
     "ios/*.{h,m,mm,swift}",
-    "ios/core/**/*.{h,m,mm,swift}", # Core library files
-    "ios/hybrids/**/*.{h,m,mm,swift}", # Nitro Hybrid files
-    "ios/view/**/*.{h,m,mm,swift}"  # Video View files
+    "ios/Core/**/*.{h,m,mm,swift}", # Core library files
+    "ios/Hybrids/**/*.{h,m,mm,swift}", # Nitro Hybrid files
+    "ios/View/**/*.{h,m,mm,swift}"  # Video View files
   ]
 
   if fabric_enabled

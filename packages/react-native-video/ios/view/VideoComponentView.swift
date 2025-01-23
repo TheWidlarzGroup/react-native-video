@@ -10,7 +10,7 @@ import UIKit
 import AVFoundation
 
 @objc public class VideoComponentView: UIView {
-  public var player: HybridVideoPlayerSpec? = nil {
+  public weak var player: HybridVideoPlayerSpec? = nil {
     didSet {
       guard let player = player as? HybridVideoPlayer else { return }
       configureAVPlayerLayer(with: player.playerPointer)
