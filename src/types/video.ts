@@ -39,6 +39,7 @@ export type ReactVideoSourceProperties = {
   cmcd?: Cmcd; // android
   textTracksAllowChunklessPreparation?: boolean;
   textTracks?: TextTracks;
+  audioTracks?: AudioTracks; // android
   ad?: AdConfig;
   minLoadRetryCount?: number; // Android
   bufferConfig?: BufferConfig;
@@ -208,6 +209,14 @@ export type SelectedTextTrack = Readonly<{
   type: TextTrackSelectionType;
   value?: string | number;
 }>;
+
+export type AudioTracks = {
+  url: string;
+  title?: string;
+  language?: string;
+  sampleMimeType?: string;
+}[];
+
 
 export type AudioTrackSelectionType =
   | 'system'

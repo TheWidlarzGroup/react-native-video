@@ -90,6 +90,8 @@ class Source {
      */
     var sideLoadedTextTracks: SideLoadedTextTrackList? = null
 
+    var sideLoadedAudioTracks: SideLoadedAudioTrackList? = null
+
     override fun hashCode(): Int = Objects.hash(uriString, uri, startPositionMs, cropStartMs, cropEndMs, extension, metadata, headers)
 
     /** return true if this and src are equals  */
@@ -105,6 +107,7 @@ class Source {
                 contentStartTime == other.contentStartTime &&
                 cmcdProps == other.cmcdProps &&
                 sideLoadedTextTracks == other.sideLoadedTextTracks &&
+                sideLoadedAudioTracks == other.sideLoadedAudioTracks &&
                 adsProps == other.adsProps &&
                 minLoadRetryCount == other.minLoadRetryCount &&
                 isLocalAssetFile == other.isLocalAssetFile &&
@@ -179,6 +182,7 @@ class Source {
         private const val PROP_SRC_ADS = "ad"
         private const val PROP_SRC_TEXT_TRACKS_ALLOW_CHUNKLESS_PREPARATION = "textTracksAllowChunklessPreparation"
         private const val PROP_SRC_TEXT_TRACKS = "textTracks"
+        private const val PROP_SRC_AUDIO_TRACKS = "audioTracks"
         private const val PROP_SRC_MIN_LOAD_RETRY_COUNT = "minLoadRetryCount"
         private const val PROP_SRC_BUFFER_CONFIG = "bufferConfig"
 
@@ -247,6 +251,7 @@ class Source {
                 }
                 source.textTracksAllowChunklessPreparation = safeGetBool(src, PROP_SRC_TEXT_TRACKS_ALLOW_CHUNKLESS_PREPARATION, true)
                 source.sideLoadedTextTracks = SideLoadedTextTrackList.parse(safeGetArray(src, PROP_SRC_TEXT_TRACKS))
+                source.sideLoadedAudioTracks = SideLoadedAudioTrackList.parse(safeGetArray(src, PROP_SRC_AUDIO_TRACKS))
                 source.minLoadRetryCount = safeGetInt(src, PROP_SRC_MIN_LOAD_RETRY_COUNT, 3)
                 source.bufferConfig = BufferConfig.parse(safeGetMap(src, PROP_SRC_BUFFER_CONFIG))
 

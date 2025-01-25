@@ -112,6 +112,7 @@ import com.brentvatne.common.api.ControlsConfig;
 import com.brentvatne.common.api.DRMProps;
 import com.brentvatne.common.api.ResizeMode;
 import com.brentvatne.common.api.SideLoadedTextTrack;
+import com.brentvatne.common.api.SideLoadedAudioTrack;
 import com.brentvatne.common.api.Source;
 import com.brentvatne.common.api.SubtitleStyle;
 import com.brentvatne.common.api.TimedMetadata;
@@ -962,10 +963,22 @@ public class ReactExoplayerView extends FrameLayout implements
         MediaSource mediaSource = Objects.requireNonNullElse(mediaSourceWithAds, videoSource);
 
         MediaSource subtitlesSource = buildTextSource();
+        List<MediaSource> mediaSourceList = new ArrayList<>();
+        mediaSourceList.add(mediaSource);
+
         if (subtitlesSource != null) {
-            MediaSource[] mediaSourceArray = {mediaSource, subtitlesSource};
-            mediaSource = new MergingMediaSource(mediaSourceArray);
+           mediaSourceList.add(subtitlesSource);
         }
+
+        // Add additional audio sources
+        List<MediaSource> audioSources = buildAudioSource();
+        if (audioSources != null) {
+           mediaSourceList.addAll(audioSources);
+        }
+
+        // Combine all sources
+        MediaSource[] mediaSourcesArray = mediaSourceList.toArray(new MediaSource[0]);
+        mediaSource = new MergingMediaSource(mediaSourcesArray);
 
         // wait for player to be set
         while (player == null) {
@@ -1285,6 +1298,28 @@ public class ReactExoplayerView extends FrameLayout implements
 
         return new DefaultMediaSourceFactory(mediaDataSourceFactory).createMediaSource(subtitlesMediaItem);
     }
+
+        @Nullable
+        private List<MediaSource> buildAudioSource() {
+            if (source.getSideLoadedAudioTracks() == null || source.getSideLoadedAudioTracks().getTracks().isEmpty()) {
+                return null;
+            }
+
+            List<MediaSource> audioSources = new ArrayList<>();
+            for (SideLoadedAudioTrack track : source.getSideLoadedAudioTracks().getTracks()) {
+            MediaItem audioItem = new MediaItem.Builder()
+                            .setUri(track.getUrl())
+                            .setMimeType(track.getSampleMimeType())
+                            .build();
+                MediaSource audioMediaSource = new DefaultMediaSourceFactory(mediaDataSourceFactory)
+                            .createMediaSource(audioItem);
+                audioSources.add(audioMediaSource);
+            }
+
+            return audioSources;
+        }
+
+
 
     private void releasePlayer() {
         if (player != null) {

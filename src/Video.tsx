@@ -246,6 +246,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           ad: _ad,
           cmcd: _cmcd,
           textTracks: _textTracks,
+          audioTracks: resolvedSource.audioTracks,
           textTracksAllowChunklessPreparation:
             resolvedSource.textTracksAllowChunklessPreparation,
           minLoadRetryCount: _minLoadRetryCount,

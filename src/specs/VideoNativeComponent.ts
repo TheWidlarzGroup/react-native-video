@@ -50,6 +50,7 @@ export type VideoSrc = Readonly<{
   cmcd?: NativeCmcdConfiguration; // android
   textTracksAllowChunklessPreparation?: boolean; // android
   textTracks?: TextTracks;
+  audioTracks?: AudioTracks; // android
   ad?: AdsConfig;
   minLoadRetryCount?: Int32; // Android
   bufferConfig?: BufferConfig; // Android
@@ -89,6 +90,15 @@ type TextTracks = ReadonlyArray<
     language: string;
     type: string;
     uri: string;
+  }>
+>;
+
+type AudioTracks = ReadonlyArray<
+  Readonly<{
+    url: string;
+    title?: string;
+    language?: string;
+    sampleMimeType?: string;
   }>
 >;
 
