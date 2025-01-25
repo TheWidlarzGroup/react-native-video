@@ -23,8 +23,10 @@ class SideLoadedAudioTrackList {
             }
             val sideLoadedAudioTrackList = SideLoadedAudioTrackList()
             for (i in 0 until src.size()) {
-                val audioTrack: ReadableMap = src.getMap(i)
-                sideLoadedAudioTrackList.tracks.add(SideLoadedAudioTrack.parse(audioTrack))
+                val audioTrack: ReadableMap? = src.getMap(i)
+                audioTrack?.let {
+                    sideLoadedAudioTrackList.tracks.add(SideLoadedAudioTrack.parse(it))
+                }
             }
             return sideLoadedAudioTrackList
         }
