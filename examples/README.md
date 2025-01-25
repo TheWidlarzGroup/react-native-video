@@ -8,12 +8,6 @@ This directory contains examples for `react-native-video` - this is a guide that
 
 - **[`expo`](#expo)** - Expo example that you can run on: iOS, Android, tvOS, web
 
-### Updating Examples Content
-
-Both of applications have mostly the same code (Windows and tvOS have platform-specific code). Other platform are using codebase from `bare` example.
-If you want to update examples content, you should do it in `bare` example. `expo` example is copping (and overwriting!) `src` folder from `bare` on dependency install.
-If you want to sync `expo` example, you can use `yarn update-src` command in `expo` example directory.
-
 ## How To Run Examples
 
 ## [Bare](https://github.com/TheWidlarzGroup/react-native-video/tree/master/examples/bare)

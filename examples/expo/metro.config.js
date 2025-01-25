@@ -27,7 +27,7 @@ const pak = require('../../package.json');
 const modules = Object.keys({...pak.peerDependencies});
 
 // Watch the
-config.watchFolders = [repoRoot, path.resolve(projectRoot, '../..')];
+config.watchFolders = [repoRoot, path.resolve(projectRoot, '../..'), path.resolve(projectRoot, '../common')];
 
 // Add the root node_modules to the resolver's search path
 config.resolver.nodeModulesPaths = [
@@ -41,6 +41,8 @@ config.resolver.extraNodeModules = modules.reduce((acc, name) => {
   acc[name] = path.join(__dirname, 'node_modules', name);
   return acc;
 }, {});
+
+config.resolver.extraNodeModules = {...config.resolver.extraNodeModules, 'common': path.resolve(projectRoot, '../common')}
 
 // We need to make sure that only one version is loaded for peerDependencies
 // So we block them at the root, and alias them to the versions in example's node_modules
