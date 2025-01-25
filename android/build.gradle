@@ -7,6 +7,9 @@ buildscript {
     def kotlin_version = rootProject.ext.has('kotlinVersion') ? rootProject.ext.get('kotlinVersion') : project.properties['RNVideo_kotlinVersion']
     def requiredKotlinVersion = project.properties['RNVideo_kotlinVersion']
 
+    def androidx_version = rootProject.ext.has('androidxActivityVersion') ? rootProject.ext.get('androidxActivityVersion') : project.properties['RNVideo_androidxActivityVersion']
+    def requiredAndroidxVersion = project.properties['RNVideo_androidxActivityVersion']
+
     def isVersionAtLeast = { version, requiredVersion ->
         def (v1, v2) = [version, requiredVersion].collect { it.tokenize('.')*.toInteger() }
         for (int i = 0; i < Math.max(v1.size(), v2.size()); i++) {
@@ -34,6 +37,11 @@ buildscript {
             throw new GradleException("Kotlin version mismatch: Project is using Kotlin version $kotlin_version, but it must be at least $requiredKotlinVersion. Please update the Kotlin version.")
         } else {
             println("Kotlin version is correct: $kotlin_version")
+        }
+        if (!isVersionAtLeast(androidx_version, requiredAndroidxVersion)) {
+            throw new GradleException("AndroidX version mismatch: Project is using Kotlin version $requiredAndroidxVersion, but it must be at least $requiredAndroidxVersion. Please update the Kotlin version.")
+        } else {
+            println("AndroidX version is correct: $androidx_version")
         }
     }
 }
