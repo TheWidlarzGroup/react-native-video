@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layoutDirection="ltr"
-    android:background="@color/midnight_black"
+    android:background="@color/player_overlay_color"
     android:orientation="vertical">
 
     <LinearLayout
