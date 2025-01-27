@@ -288,7 +288,9 @@ class ExoPlayerView(private val context: Context) :
             if (group.type == C.TRACK_TYPE_VIDEO && group.length > 0) {
                 // get the first track of the group to identify aspect ratio
                 val format = group.getTrackFormat(0)
-                layout.updateAspectRatio(format)
+                if (format.width > 0 || format.height > 0) {
+                    layout.updateAspectRatio(format)
+                }
                 return
             }
         }
