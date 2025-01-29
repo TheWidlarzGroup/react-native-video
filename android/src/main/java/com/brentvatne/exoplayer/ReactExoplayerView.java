@@ -18,6 +18,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.media.AudioManager;
+import android.media.MediaCodecList;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
@@ -2200,15 +2201,20 @@ public class ReactExoplayerView extends FrameLayout implements
             return C.INDEX_UNSET;
         }
 
-        int groupIndex = 0; // default if no match
+        int groupIndex = C.INDEX_UNSET; // default if no match
         String locale2 = Locale.getDefault().getLanguage(); // 2 letter code
         String locale3 = Locale.getDefault().getISO3Language(); // 3 letter code
         for (int i = 0; i < groups.length; ++i) {
             Format format = groups.get(i).getFormat(0);
             String language = format.language;
-            if (language != null && (language.equals(locale2) || language.equals(locale3))) {
-                groupIndex = i;
-                break;
+            Boolean isSupported = isCodecSupported(format.sampleMimeType);
+            if (isSupported) {
+                if (language != null && (language.equals(locale2) || language.equals(locale3))) {
+                    groupIndex = i;
+                    break;
+                } else {
+                    groupIndex = i;
+                }
             }
         }
         return groupIndex;
@@ -2561,5 +2567,20 @@ public class ReactExoplayerView extends FrameLayout implements
     public void setControlsStyles(ControlsConfig controlsStyles) {
         controlsConfig = controlsStyles;
         refreshControlsStyles();
+    }
+
+    public boolean isCodecSupported(String format) {
+        List<String> codecList = new ArrayList<>();
+        int codecCount = MediaCodecList.getCodecCount();
+        for (int i = 0; i < codecCount; i++) {
+            android.media.MediaCodecInfo codecInfo = MediaCodecList.getCodecInfoAt(i);
+            for (String type : codecInfo.getSupportedTypes()) {
+                codecList.add(type);
+            }
+        }
+        if (codecList.size() > 0) {
+            return codecList.contains(format);
+        }
+        return false;
     }
 }
