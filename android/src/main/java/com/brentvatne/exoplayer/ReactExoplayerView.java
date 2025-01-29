@@ -2202,19 +2202,21 @@ public class ReactExoplayerView extends FrameLayout implements
         }
 
         int groupIndex = C.INDEX_UNSET; // default if no match
-        String locale2 = Locale.getDefault().getLanguage(); // 2 letter code
-        String locale3 = Locale.getDefault().getISO3Language(); // 3 letter code
+        Locale defaultLocale = Locale.getDefault();
+        String locale2 = defaultLocale.getLanguage();  // 2-letter code
+        String locale3 = defaultLocale.getISO3Language(); // 3-letter code
         for (int i = 0; i < groups.length; ++i) {
             Format format = groups.get(i).getFormat(0);
+
+            // Skip if codec is not supported
+            if (!isCodecSupported(format.sampleMimeType)) {
+                continue;
+            }
+
             String language = format.language;
-            Boolean isSupported = isCodecSupported(format.sampleMimeType);
-            if (isSupported) {
-                if (language != null && (language.equals(locale2) || language.equals(locale3))) {
-                    groupIndex = i;
-                    break;
-                } else {
-                    groupIndex = i;
-                }
+            groupIndex = i;
+            if((language != null && (language.equalsIgnoreCase(locale2) || language.equalsIgnoreCase(locale3)))){
+                break;
             }
         }
         return groupIndex;
@@ -2570,17 +2572,15 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     public boolean isCodecSupported(String format) {
-        List<String> codecList = new ArrayList<>();
         int codecCount = MediaCodecList.getCodecCount();
         for (int i = 0; i < codecCount; i++) {
             android.media.MediaCodecInfo codecInfo = MediaCodecList.getCodecInfoAt(i);
             for (String type : codecInfo.getSupportedTypes()) {
-                codecList.add(type);
+                if (type.equalsIgnoreCase(format)) {
+                    return true; // Early return when a match is found
+                }
             }
         }
-        if (codecList.size() > 0) {
-            return codecList.contains(format);
-        }
-        return false;
+        return false; // No match found
     }
 }
