@@ -256,6 +256,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             name: AVAudioSession.routeChangeNotification,
             object: nil
         )
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleDeviceOrientationChange),
+            name: UIDevice.orientationDidChangeNotification,
+            object: nil
+        )
+
         _playerObserver._handlers = self
         #if USE_VIDEO_CACHING
             _videoCache.playerItemPrepareText = playerItemPrepareText
@@ -298,6 +306,13 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             let isExternalPlaybackActive = _player?.isExternalPlaybackActive ?? false
         #endif
         return isExternalPlaybackActive
+    }
+
+    @objc
+    func handleDeviceOrientationChange() {
+        DispatchQueue.main.async {
+            self.layoutSubviews() // Ensure the view resizes properly
+        }
     }
 
     @objc
@@ -1165,21 +1180,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             if _controls {
                 self.removePlayerLayer()
                 self.usePlayerViewController()
-
-                // Safely unwrap _playerViewController before applying constraints
-                if let playerViewController = _playerViewController, let playerView = playerViewController.view {
-                    playerView.translatesAutoresizingMaskIntoConstraints = false
-                    self.addSubview(playerView) // Ensure it's added to the hierarchy
-
-                    NSLayoutConstraint.activate([
-                        playerView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
-                        playerView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
-                        playerView.topAnchor.constraint(equalTo: self.topAnchor),
-                        playerView.bottomAnchor.constraint(equalTo: self.bottomAnchor),
-                    ])
-                } else {
-                    print("Error: _playerViewController or its view is nil")
-                }
             } else {
                 _playerViewController?.view.removeFromSuperview()
                 _playerViewController?.removeFromParent()
@@ -1313,7 +1313,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         super.layoutSubviews()
         if _controls, let _playerViewController {
             _playerViewController.view.frame = bounds
+            _playerViewController.view.setNeedsLayout()
+            _playerViewController.view.layoutIfNeeded()
 
+            _playerViewController.contentOverlayView?.frame = bounds
             // also adjust all subviews of contentOverlayView
             for subview in _playerViewController.contentOverlayView?.subviews ?? [] {
                 subview.frame = bounds
