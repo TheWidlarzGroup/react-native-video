@@ -1,13 +1,13 @@
 import * as React from 'react';
 import type { ViewStyle } from 'react-native';
 import { NitroModules } from 'react-native-nitro-modules';
-import type { VideoPlayer } from './spec/nitro/VideoPlayer.nitro';
+import { tryParseNativeVideoError, VideoError } from './core/types/VideoError';
+import type { VideoPlayer } from './core/VideoPlayer';
 import { NativeVideoView } from './NativeVideoView';
 import type {
   VideoViewViewManager,
   VideoViewViewManagerFactory,
 } from './spec/nitro/VideoViewViewManager.nitro';
-
 interface VideoViewProps {
   player: VideoPlayer;
   style: ViewStyle;
@@ -25,21 +25,27 @@ const VideoView = ({ player, ...props }: VideoViewProps) => {
 
   const setupViewManager = React.useCallback(
     (id: number) => {
-      if (nitroViewManager.current !== null) {
-        return;
+      try {
+        if (nitroViewManager.current !== null) {
+          return;
+        }
+
+        nitroViewManager.current =
+          VideoViewViewManagerFactory.createViewManager(id);
+
+        // Should never happen
+        if (!nitroViewManager.current) {
+          throw new VideoError(
+            'view/not-found',
+            'Failed to create View Manager'
+          );
+        }
+
+        // Updates props to native view
+        nitroViewManager.current.player = player.__getNativePlayer();
+      } catch (error) {
+        throw tryParseNativeVideoError(error);
       }
-
-      nitroViewManager.current =
-        VideoViewViewManagerFactory.createViewManager(id);
-
-      // Should never happen
-      if (!nitroViewManager.current) {
-        console.error('Failed to create View Manager');
-        return;
-      }
-
-      // Updates props to native view
-      nitroViewManager.current.player = player;
     },
     [player]
   );
@@ -56,7 +62,7 @@ const VideoView = ({ player, ...props }: VideoViewProps) => {
       return;
     }
 
-    nitroViewManager.current.player = player;
+    nitroViewManager.current.player = player.__getNativePlayer();
   }, [player]);
 
   return (

@@ -3,13 +3,15 @@ package com.margelo.nitro.video
 import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
 import com.facebook.proguard.annotations.DoNotStrip
+import com.video.core.VideoViewError
 import com.video.view.VideoView
 import com.video.core.utils.Threading
 
 @DoNotStrip
 @OptIn(UnstableApi::class)
 class HybridVideoViewViewManager(nitroId: Int): HybridVideoViewViewManagerSpec() {
-  private var videoView = VideoView.getVideoViewWeakReferenceByNitroId(nitroId) ?: throw Exception("VideoView with passed nitroId does not exists")
+  private var videoView =
+    VideoView.getVideoViewWeakReferenceByNitroId(nitroId) ?: throw VideoViewError.ViewNotFound(nitroId)
 
   override var player: HybridVideoPlayerSpec?
     get() {

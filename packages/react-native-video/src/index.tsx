@@ -1,6 +1,5 @@
+export { useVideoPlayer } from './core/hooks/useVideoPlayer';
+export type { VideoSource } from './core/types/VideoConfig';
+export { createSource } from './core/utils/sourceFactory';
+export { VideoPlayer } from './core/VideoPlayer';
 export { default as VideoView } from './VideoView';
-export { useVideoPlayer } from './utils/useVideoPlayer';
-export { createPlayer, createSource } from './utils/factory';
-
-export type { VideoPlayer } from './spec/nitro/VideoPlayer.nitro';
-export type { VideoSource } from './types/VideoConfig';

@@ -112,7 +112,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
   func preload() throws -> NitroModules.Promise<Void> {
     return Promise.parallel { [weak self] in
       guard let self else {
-        throw RuntimeError.error(withMessage: "HybridVideoPlayer has been deallocated")
+        throw LibraryError.deallocated(objectName: "HybridVideoPlayer").error()
       }
       
       try self.playerQueue.sync {
@@ -133,7 +133,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
   func replaceSourceAsync(source: (any HybridVideoPlayerSourceSpec)) throws -> Promise<Void> {
     return Promise.parallel { [weak self] in
       guard let self else {
-        throw RuntimeError.error(withMessage: "HybridVideoPlayer has been deallocated")
+        throw LibraryError.deallocated(objectName: "HybridVideoPlayer").error()
       }
       
       try playerQueue.sync {
@@ -143,7 +143,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
           self.playerItem = try self.initializePlayerItem()
           
           guard let player = self.player else {
-            throw RuntimeError.error(withMessage: "Player not initialized")
+            throw PlayerError.notIntilaized.error()
           }
           
           player.replaceCurrentItem(with: self.playerItem)
@@ -158,13 +158,13 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
   
   private func initializePlayerItem() throws -> AVPlayerItem {
     guard let _source = source as? HybridVideoPlayerSource else {
-      throw RuntimeError.error(withMessage: "Invalid source")
+      throw PlayerError.invalidSource.error()
     }
     
     try _source.initializeAsset()
     
     guard let asset = _source.asset else {
-      throw RuntimeError.error(withMessage: "Failed to initialize asset")
+      throw SourceError.failedToInitializeAsset.error()
     }
     
     return AVPlayerItem(asset: asset)

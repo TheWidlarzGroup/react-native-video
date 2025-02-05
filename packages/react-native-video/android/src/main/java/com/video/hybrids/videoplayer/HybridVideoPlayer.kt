@@ -10,6 +10,9 @@ import androidx.media3.exoplayer.upstream.DefaultAllocator
 import com.facebook.proguard.annotations.DoNotStrip
 import com.margelo.nitro.NitroModules
 import com.margelo.nitro.core.Promise
+import com.video.core.LibraryError
+import com.video.core.PlayerError
+import com.video.core.SourceError
 import com.video.core.utils.Threading.runOnMainThread
 import com.video.core.utils.Threading.runOnMainThreadSync
 
@@ -28,7 +31,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
           initializePlayer()
 
           if (player == null) {
-            throw Exception("Could not initialize player!")
+            throw PlayerError.NotInitialized
           }
 
           if (player!!.playbackState == Player.STATE_IDLE) {
@@ -60,10 +63,10 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
 
   private fun initializePlayer() {
     if (NitroModules.applicationContext == null) {
-      throw Exception("HybridVideoPlayer: Application Context is null!")
+      throw LibraryError.ApplicationContextNotFound
     }
 
-    val hybridSource = source as? HybridVideoPlayerSource ?: throw Exception("Invalid source type")
+    val hybridSource = source as? HybridVideoPlayerSource ?: throw PlayerError.InvalidSource
 
     // Initialize the allocator
     allocator = DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE)
@@ -100,7 +103,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
 
   override fun replaceSourceAsync(source: HybridVideoPlayerSourceSpec): Promise<Unit> {
     return Promise.async {
-      val hybridSource = source as? HybridVideoPlayerSource ?: throw Exception("Invalid source type")
+      val hybridSource = source as? HybridVideoPlayerSource ?: throw PlayerError.InvalidSource
 
       runOnMainThreadSync {
         // Update source

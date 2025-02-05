@@ -1,5 +1,5 @@
 import type { HybridObject } from 'react-native-nitro-modules';
-import type { VideoInformation } from '../../types/VideoInformation';
+import type { VideoPlayerSourceBase } from '../../core/types/VideoPlayerSourceBase';
 
 /**
  * A source for a {@link VideoPlayer}.
@@ -7,17 +7,8 @@ import type { VideoInformation } from '../../types/VideoInformation';
  * It provides functions to get information about the asset.
  */
 export interface VideoPlayerSource
-  extends HybridObject<{ ios: 'swift'; android: 'kotlin' }> {
-  /**
-   * The URI of the asset.
-   */
-  readonly uri: string;
-
-  /**
-   * Get the information about the asset.
-   */
-  getAssetInformationAsync(): Promise<VideoInformation>;
-}
+  extends HybridObject<{ ios: 'swift'; android: 'kotlin' }>,
+    VideoPlayerSourceBase {}
 
 export interface VideoPlayerSourceFactory
   extends HybridObject<{ ios: 'swift'; android: 'kotlin' }> {

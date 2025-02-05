@@ -3,6 +3,7 @@ package com.video.core.utils
 import android.os.Handler
 import android.os.Looper
 import com.margelo.nitro.NitroModules
+import com.video.core.LibraryError
 import java.util.concurrent.Callable
 import java.util.concurrent.FutureTask
 
@@ -17,7 +18,7 @@ object Threading {
 
     // If application context is null, throw an error
     if (NitroModules.applicationContext == null) {
-      throw IllegalStateException("Application context is null")
+      throw LibraryError.ApplicationContextNotFound
     }
 
     // Post the action to the main thread

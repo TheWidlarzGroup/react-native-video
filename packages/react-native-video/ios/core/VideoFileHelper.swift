@@ -1,6 +1,11 @@
-import Foundation
+//
+//  VideoFileHelper.swift
+//  ReactNativeVideo
+//
+//  Created by Krzysztof Moch on 23/01/2025.
+//
 
-//TODO: Move errors to enums, then remove this import
+import Foundation
 import NitroModules
 
 enum VideoFileHelper {
@@ -17,7 +22,7 @@ enum VideoFileHelper {
     guard url.isFileURL else { return }
     
     if !fileManager.isReadableFile(atPath: url.path) {
-      throw RuntimeError.error(withMessage: "Cannot read file at path: \(url.path), is path \(url.path) correct? Does app have permission to read file?")
+      throw SourceError.missingReadFilePermission(uri: url.path).error()
     }
   }
   
@@ -35,9 +40,9 @@ enum VideoFileHelper {
     guard let httpResponse = response as? HTTPURLResponse,
           let contentLength = httpResponse.allHeaderFields["Content-Length"] as? String,
           let size = Int64(contentLength) else {
-      throw RuntimeError.error(withMessage: "Invalid content length for URL: \(url)")
+      return -1
     }
     
     return size
   }
-} 
+}

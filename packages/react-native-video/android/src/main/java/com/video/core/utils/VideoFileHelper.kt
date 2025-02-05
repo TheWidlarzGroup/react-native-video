@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.webkit.URLUtil
 import com.margelo.nitro.NitroModules
+import com.video.core.SourceError
 import java.io.File
 import java.net.URL
 import java.net.URLConnection
@@ -17,15 +18,15 @@ object VideoFileHelper {
   }
 
   fun validateReadPermission(uri: String) {
-    if (!hasReadPermission()) throw Error("App does not have permission to read file at path: $uri")
+    if (!hasReadPermission()) throw SourceError.MissingReadFilePermission(uri)
 
-    val file = File(Uri.parse(uri).path ?: return)
+    val file = File(Uri.parse(uri).path ?: throw SourceError.InvalidUri(uri))
 
     // Check if file exists and is readable
-    if (!file.exists()) throw Error("File does not exist at path: $uri")
+    if (!file.exists()) throw SourceError.FileDoesNotExist(uri)
 
     // Check if file is readable
-    if (!file.canRead()) throw Error("File is not readable at path: $uri")
+    if (!file.canRead()) throw SourceError.MissingReadFilePermission(uri)
   }
 
   fun getFileSizeFromUri(uri: String): Long {

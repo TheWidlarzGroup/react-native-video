@@ -19,7 +19,7 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec {
     self.uri = uri
     
     guard let url = URL(string: uri) else {
-      throw RuntimeError.error(withMessage: "Invalid URL: \(uri)")
+      throw SourceError.invalidUri(uri: uri).error()
     }
     
     self.url = url
@@ -32,7 +32,7 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec {
   func getAssetInformationAsync() throws -> Promise<VideoInformation> {
     return Promise.async(.utility) { [weak self] in
       guard let self else {
-        throw RuntimeError.error(withMessage: "HybridVideoPlayerSource has been deallocated")
+        throw LibraryError.deallocated(objectName: "HybridVideoPlayerSource").error()
       }
       
       if self.url.isFileURL {
@@ -42,7 +42,7 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec {
       try initializeAsset()
       
       guard let asset = self.asset else {
-        throw RuntimeError.error(withMessage: "Failed to initialize asset")
+        throw PlayerError.assetNotInitialized.error()
       }
       
       return try await asset.getAssetInformation()
