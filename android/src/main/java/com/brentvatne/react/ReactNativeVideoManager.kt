@@ -7,7 +7,9 @@ import com.brentvatne.exoplayer.DRMManagerSpec
  * ReactNativeVideoManager is a singleton class which allows to manipulate / the global state of the app
  * It handles the list of <Video/> view instanced and registration of plugins
  */
-class ReactNativeVideoManager : RNVPlugin, RNVExoplayerPlugin {
+class ReactNativeVideoManager :
+    RNVPlugin,
+    RNVExoplayerPlugin {
     companion object {
         private const val TAG = "ReactNativeVideoManager"
 
