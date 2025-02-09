@@ -7,7 +7,7 @@ import com.brentvatne.exoplayer.DRMManagerSpec
  * ReactNativeVideoManager is a singleton class which allows to manipulate / the global state of the app
  * It handles the list of <Video/> view instanced and registration of plugins
  */
-class ReactNativeVideoManager : RNVPlugin {
+class ReactNativeVideoManager : RNVPlugin, RNVExoplayerPlugin {
     companion object {
         private const val TAG = "ReactNativeVideoManager"
 
@@ -50,6 +50,13 @@ class ReactNativeVideoManager : RNVPlugin {
     fun registerPlugin(plugin: RNVPlugin) {
         pluginList.add(plugin)
 
+        // Generic plugin registration logic
+
+        // Exoplayer plugin specific logic
+        if (plugin !is RNVExoplayerPlugin) {
+            return
+        }
+
         // Check if plugin provides DRM manager
         plugin.getDRMManager()?.let { drmManager ->
             if (customDRMManager != null) {
@@ -66,12 +73,18 @@ class ReactNativeVideoManager : RNVPlugin {
     fun unregisterPlugin(plugin: RNVPlugin) {
         pluginList.remove(plugin)
 
+        // Exoplayer plugin specific logic
+        if (plugin !is RNVExoplayerPlugin) {
+            return
+        }
+
         // If this plugin provided the DRM manager, remove it
         if (plugin.getDRMManager() === customDRMManager) {
             customDRMManager = null
         }
     }
 
+    // ----------------------- Generic RNV plugin methods -----------------------
     override fun onInstanceCreated(id: String, player: Any) {
         pluginList.forEach { it.onInstanceCreated(id, player) }
     }
@@ -80,5 +93,6 @@ class ReactNativeVideoManager : RNVPlugin {
         pluginList.forEach { it.onInstanceRemoved(id, player) }
     }
 
+    // ----------------------- RNV Exoplayer plugin specific methods -----------------------
     override fun getDRMManager(): DRMManagerSpec? = customDRMManager
 }
