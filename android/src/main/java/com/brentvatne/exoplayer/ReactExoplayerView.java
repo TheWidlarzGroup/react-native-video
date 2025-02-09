@@ -1012,7 +1012,7 @@ public class ReactExoplayerView extends FrameLayout implements
             UUID uuid = Util.getDrmUuid(drmProps.getDrmType());
             if (uuid != null) {
                 try {
-                    DebugLog.w(TAG, "drm buildDrmSessionManager");
+                    DebugLog.d(TAG, "drm buildDrmSessionManager");
                     drmSessionManager = buildDrmSessionManager(uuid, drmProps);
                 } catch (UnsupportedDrmException e) {
                     int errorStringId = Util.SDK_INT < 18 ? R.string.error_drm_not_supported
