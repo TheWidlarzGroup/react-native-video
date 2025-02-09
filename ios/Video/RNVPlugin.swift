@@ -5,6 +5,12 @@
 
 import Foundation
 
+/**
+ * Protocol for RNV plugins that does not have dependencies or logic specific to any player
+ * It is the base interface for all RNV plugins
+ *
+ * If you need to have dependencies or logic specific to a player, use the RNVAVPlayerPlugin
+ */
 public protocol RNVPlugin {
     /**
      * Function called when a new player is created
