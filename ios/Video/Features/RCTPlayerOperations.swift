@@ -27,7 +27,7 @@ enum RCTPlayerOperations {
 
         var selectedTrackIndex: Int = RCTVideoUnset
 
-        if (type == "disabled") || (type == "none") || (type == "") {
+        if type == "disabled" {
             // Select the last text index which is the disabled text track
             selectedTrackIndex = trackCount - firstTextIndex
         } else if type == "language" {
@@ -92,7 +92,7 @@ enum RCTPlayerOperations {
             return
         }
 
-        if (type == "disabled") || (type == "none") || (type == "") {
+        if type == "disabled" {
             // Do nothing. We want to ensure option is nil
         } else if (type == "language") || (type == "title") {
             let value = criteria?.value as? String
