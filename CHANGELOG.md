@@ -1,5 +1,18 @@
 
 
+## [6.10.1](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.10.0...v6.10.1) (2025-02-15)
+
+
+### Bug Fixes
+
+* **android:** check androidX version at early build process before really launching build ([#4388](https://github.com/TheWidlarzGroup/react-native-video/issues/4388)) ([638f454](https://github.com/TheWidlarzGroup/react-native-video/commit/638f454a2118873de23a14f673848f14eeb10122))
+* **android:** check for valid width and height on video format data ([#4394](https://github.com/TheWidlarzGroup/react-native-video/issues/4394)) ([ad52668](https://github.com/TheWidlarzGroup/react-native-video/commit/ad52668d0541a2d29b1ee8087f9d25cc6a5e8ab2))
+* **android:** remove transparent black overlay on android default controls ([#4392](https://github.com/TheWidlarzGroup/react-native-video/issues/4392)) ([74b1d5b](https://github.com/TheWidlarzGroup/react-native-video/commit/74b1d5b540a062371689f619f1843807ab7ca0e5))
+* **infra:** kotlin linter github action ([#4408](https://github.com/TheWidlarzGroup/react-native-video/issues/4408)) ([2905b61](https://github.com/TheWidlarzGroup/react-native-video/commit/2905b61a0d993715cdf94d9f85f949c9e64d098b))
+* **ios:** fix constraints when controls are enabled and video is inside a ScrollView ([#4383](https://github.com/TheWidlarzGroup/react-native-video/issues/4383)) ([a8ca97f](https://github.com/TheWidlarzGroup/react-native-video/commit/a8ca97f05fd52ec331fd8fe0e7c2375956a76c2c))
+* **ios:** the video has no audio by default ([#4409](https://github.com/TheWidlarzGroup/react-native-video/issues/4409)) ([c8b800a](https://github.com/TheWidlarzGroup/react-native-video/commit/c8b800a508f51a4488b7b260a6bf573b5b6d44d9)), closes [#4400](https://github.com/TheWidlarzGroup/react-native-video/issues/4400)
+* **sample:** remove duplicate code in sample ([#4391](https://github.com/TheWidlarzGroup/react-native-video/issues/4391)) ([faac5ad](https://github.com/TheWidlarzGroup/react-native-video/commit/faac5ad45689a605045dae57061d6648244c7dad))
+
 # [6.10.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.9.1...v6.10.0) (2025-01-22)
 
 
