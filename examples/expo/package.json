@@ -2,7 +2,6 @@
   "name": "expoexample",
   "version": "1.0.0",
   "scripts": {
-    "postinstall": "yarn update-src",
     "start": "expo start",
     "start:tv": "EXPO_TV=1 expo start",
     "android:tv": "EXPO_TV=1 expo run:android",
@@ -14,7 +13,6 @@
     "web": "expo start --web",
     "prebuild:tv": "EXPO_TV=1 expo prebuild",
     "prebuild": "EXPO_TV=0 expo prebuild",
-    "update-src": "echo 'Updating src from ../bare/src' && rm -r ./src && cp -r ../bare/src ./src && echo 'Updated src from ../bare/src'",
     "clean": "rm -rf node_modules && rm -rf android/build/ && rm -rf android/app/build && rm -rf ./lib @@ rm -rf ./android/.gradle && rm -rf ./android/.idea && rm -rf ./.expo"
   },
   "dependencies": {

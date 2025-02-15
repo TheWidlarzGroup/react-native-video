@@ -852,12 +852,12 @@ PODS:
   - React-Mapbuffer (0.73.2):
     - glog
     - React-debug
-  - react-native-video (6.6.4):
+  - react-native-video (6.10.0):
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
-    - react-native-video/Video (= 6.6.4)
-  - react-native-video/Video (6.6.4):
+    - react-native-video/Video (= 6.10.0)
+  - react-native-video/Video (6.10.0):
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
@@ -1030,11 +1030,11 @@ PODS:
     - React-Core
     - React-cxxreact
     - ReactCommon/turbomodule/core
-  - ReactTestApp-DevSupport (3.10.14):
+  - ReactTestApp-DevSupport (3.10.18):
     - React-Core
     - React-jsi
   - ReactTestApp-Resources (1.0.0-dev)
-  - RNCPicker (2.7.5):
+  - RNCPicker (2.8.1):
     - React-Core
   - SocketRocket (0.6.1)
   - Yoga (1.14.0)
@@ -1234,7 +1234,7 @@ SPEC CHECKSUMS:
   React-jsinspector: 03644c063fc3621c9a4e8bf263a8150909129618
   React-logger: 66b168e2b2bee57bd8ce9e69f739d805732a5570
   React-Mapbuffer: 9ee041e1d7be96da6d76a251f92e72b711c651d6
-  react-native-video: 60dcbdb52c8291b0a01256d00ac25fde0c18e602
+  react-native-video: ff568aadb2beaec754c61b76bd7dd784883c71ea
   React-nativeconfig: d753fbbc8cecc8ae413d615599ac378bbf6999bb
   React-NativeModulesApple: 22c25a1baa4b0d0d4845dad2578fc017b0805589
   React-perflogger: 29efe63b7ef5fbaaa50ef6eaa92482f98a24b97e
@@ -1256,9 +1256,9 @@ SPEC CHECKSUMS:
   React-utils: f5bc61e7ea3325c0732ae2d755f4441940163b85
   ReactCommon: a42e89b49d88c3890dfb6fd98a33ac80d555be19
   ReactNativeHost: 1e71e0d4c176f03f4b9073a35197d576ec40cce3
-  ReactTestApp-DevSupport: ed439cce949caf074af3ae05051b4bd157ed4019
+  ReactTestApp-DevSupport: 1e39530b4a8602e7138a5b9dfafe41d3a78382ff
   ReactTestApp-Resources: 857244f3a23f2b3157b364fa06cf3e8866deff9c
-  RNCPicker: 3e2c37a8328f368ce14da050cdc8231deb5fc9f9
+  RNCPicker: d2ac37457765e0066fe17c93f536eae024b6e53a
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   Yoga: e64aa65de36c0832d04e8c7bd614396c77a80047
 
