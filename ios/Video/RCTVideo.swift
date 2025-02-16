@@ -257,12 +257,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             object: nil
         )
 
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleRotation),
-            name: UIDevice.orientationDidChangeNotification,
-            object: nil
-        )
+        #if os(iOS)
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(handleRotation),
+                name: UIDevice.orientationDidChangeNotification,
+                object: nil
+            )
+        #endif
 
         _playerObserver._handlers = self
         #if USE_VIDEO_CACHING
