@@ -7,7 +7,6 @@ It's useful when you are using `expo` managed workflow (expo prebuild) as it wil
 ```json
 // app.json
 {
-  {
   "name": "my app",
   "plugins": [
     [
@@ -19,13 +18,12 @@ It's useful when you are using `expo` managed workflow (expo prebuild) as it wil
           "useExoplayerRtsp": false,
           "useExoplayerSmoothStreaming": false,
           "useExoplayerHls": false,
-          "useExoplayerDash": false,
+          "useExoplayerDash": false
         }
         // ...
       }
     ]
   ]
-}
 }
 ```
 
