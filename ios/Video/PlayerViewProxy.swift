@@ -81,36 +81,38 @@ class PlayerViewProxy {
     }
     
     private static func convertRNVideoTranslationsToRNDV(translations: Translations?) -> JSTranslations? {
-        var jsTranslations: JSTranslations?
-        if let translationsValue = translations {
-            var dorisTranslationsViewModel = DorisTranslationsViewModel()
-            dorisTranslationsViewModel.play = translationsValue.playerPlayButton
-            dorisTranslationsViewModel.pause = translationsValue.playerPauseButton
-            dorisTranslationsViewModel.stats = translationsValue.playerStatsButton
-            dorisTranslationsViewModel.audioAndSubtitles = translationsValue.playerAudioAndSubtitlesButton
-            dorisTranslationsViewModel.live = translationsValue.goLive
-            dorisTranslationsViewModel.favourites = translationsValue.favourite
-            dorisTranslationsViewModel.addToWatchlist = translationsValue.addToWatchlist
-            dorisTranslationsViewModel.moreVideos = translationsValue.moreVideos
-            dorisTranslationsViewModel.audio = translationsValue.audioTracks
-            dorisTranslationsViewModel.info = translationsValue.info
-            dorisTranslationsViewModel.adsCountdownAd = translationsValue.adsCountdownAd
-            dorisTranslationsViewModel.adsCountdownOf = translationsValue.adsCountdownOf
-            dorisTranslationsViewModel.annotations = translationsValue.annotations
-            dorisTranslationsViewModel.playingLive = translationsValue.playingLive
-            dorisTranslationsViewModel.nowPlaying = translationsValue.nowPlaying
-            dorisTranslationsViewModel.subtitles = translationsValue.captions
-            dorisTranslationsViewModel.skipIntro = translationsValue.skipIntro
-            dorisTranslationsViewModel.skipCredits = translationsValue.skipCredits
-            dorisTranslationsViewModel.rewind = translationsValue.rewind
-            dorisTranslationsViewModel.fastForward = translationsValue.fastForward
-            dorisTranslationsViewModel.off = translationsValue.off
-            dorisTranslationsViewModel.audioOnlyBadge = translationsValue.audioOnlyBadge
-            jsTranslations = JSTranslations(beaconTranslations: nil, dorisTranslations: dorisTranslationsViewModel)
-        }
-        return jsTranslations
+        guard let translations else { return nil }
+        let dorisTranslationsViewModel = convertRNVideoTranslationsToDorisTranslations(translations: translations)
+        return JSTranslations(beaconTranslations: nil, dorisTranslations: dorisTranslationsViewModel)
     }
-    
+
+    static func convertRNVideoTranslationsToDorisTranslations(translations: Translations) -> DorisTranslationsViewModel {
+        var dorisTranslationsViewModel = DorisTranslationsViewModel()
+        dorisTranslationsViewModel.play = translations.playerPlayButton
+        dorisTranslationsViewModel.pause = translations.playerPauseButton
+        dorisTranslationsViewModel.stats = translations.playerStatsButton
+        dorisTranslationsViewModel.audioAndSubtitles = translations.playerAudioAndSubtitlesButton
+        dorisTranslationsViewModel.live = translations.goLive
+        dorisTranslationsViewModel.favourites = translations.favourite
+        dorisTranslationsViewModel.addToWatchlist = translations.addToWatchlist
+        dorisTranslationsViewModel.moreVideos = translations.moreVideos
+        dorisTranslationsViewModel.audio = translations.audioTracks
+        dorisTranslationsViewModel.info = translations.info
+        dorisTranslationsViewModel.adsCountdownAd = translations.adsCountdownAd
+        dorisTranslationsViewModel.adsCountdownOf = translations.adsCountdownOf
+        dorisTranslationsViewModel.annotations = translations.annotations
+        dorisTranslationsViewModel.playingLive = translations.playingLive
+        dorisTranslationsViewModel.nowPlaying = translations.nowPlaying
+        dorisTranslationsViewModel.subtitles = translations.captions
+        dorisTranslationsViewModel.skipIntro = translations.skipIntro
+        dorisTranslationsViewModel.skipCredits = translations.skipCredits
+        dorisTranslationsViewModel.rewind = translations.rewind
+        dorisTranslationsViewModel.fastForward = translations.fastForward
+        dorisTranslationsViewModel.off = translations.off
+        dorisTranslationsViewModel.audioOnlyBadge = translations.audioOnlyBadge
+        return dorisTranslationsViewModel
+    }
+
     private static func convertRNVideoButtonsToRNDV(buttons: Buttons?) -> JSButtons? {
         var jsButtons: JSButtons?
         if let buttonsValue = buttons {

@@ -64,7 +64,15 @@ class NewPlayerView: UIView, JSInputProtocol {
     @objc var partialVideoInformation: NSDictionary? {
         didSet { jsProps.partialVideoInformation.value = try? PartialVideoInformation(dict: partialVideoInformation) } }
     @objc var translations: NSDictionary? {
-        didSet { jsProps.translations.value = try? Translations(dict: translations) } }
+        didSet {
+            let translationsModel = try? Translations(dict: translations)
+            jsProps.translations.value = translationsModel
+            if let translationsModel, jsPlayerView?.dorisGlue != nil, translations != oldValue {
+                let dorisTranslations = PlayerViewProxy.convertRNVideoTranslationsToDorisTranslations(translations: translationsModel)
+                jsPlayerView?.dorisGlue?.doris?.viewModel.rendering.translationsViewModel = dorisTranslations
+            }
+        }
+    }
     @objc var buttons: NSDictionary? {
         didSet { jsProps.buttons.value = try? Buttons(dict: buttons) } }
     @objc var theme: NSDictionary? {
