@@ -17,7 +17,7 @@ This directory contains examples for `react-native-video` - this is a guide that
 You can configure the example by changing the settings of expo-plugin `app.json` file in the `bare` directory.
 
 > [!TIP]
-> You can find more information about the expo-plugin configuration [here](https://docs.thewidlarzgroup.com/react-native-video/other/expo).
+> You can find more information about the expo-plugin configuration [here](https://docs.thewidlarzgroup.com/react-native-video/other/expo/?utm_source=rnv&utm_medium=readme&utm_campaign=example&utm_id=expo-plugins-bare).
 
 > [!CAUTION]
 > You will need to regenerate the native project after changing the `app.json` file. eg. on Apple platforms you will need to install pods twice. (one for applying expo-plugin changes and second for applying react-native-video changes)
@@ -94,7 +94,7 @@ It provides a sample application for Android TV, Fire TV, tvOS, and the web. The
 You can configure the example by changing the settings of expo-plugin `app.json` file in the `expo` directory.
 
 > [!TIP]
-> You can find more information about the expo-plugin configuration [here](https://docs.thewidlarzgroup.com/react-native-video/other/expo).
+> You can find more information about the expo-plugin configuration [here](https://docs.thewidlarzgroup.com/react-native-video/other/expo/?utm_source=rnv&utm_medium=readme&utm_campaign=example&utm_id=expo-plugins).
 
 > [!CAUTION]
 > You will need to regenerate the native project after changing the `app.json` file - you can do it by running `yarn prebuild` command in `expo` example directory.
