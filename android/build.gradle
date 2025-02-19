@@ -39,7 +39,7 @@ buildscript {
             println("Kotlin version is correct: $kotlin_version")
         }
         if (!isVersionAtLeast(androidx_version, requiredAndroidxVersion)) {
-            throw new GradleException("AndroidX version mismatch: Project is using Kotlin version $requiredAndroidxVersion, but it must be at least $requiredAndroidxVersion. Please update the Kotlin version.")
+            throw new GradleException("AndroidX version mismatch: Project is using AndroidX version $androidx_version, but it must be at least $requiredAndroidxVersion. Please update the AndroidX version.")
         } else {
             println("AndroidX version is correct: $androidx_version")
         }
