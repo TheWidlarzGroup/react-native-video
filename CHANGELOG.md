@@ -1,5 +1,13 @@
 
 
+## [6.10.2](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.10.1...v6.10.2) (2025-02-22)
+
+
+### Bug Fixes
+
+* **android:** fix gradle exception text related to AndroidX version ([#4420](https://github.com/TheWidlarzGroup/react-native-video/issues/4420)) ([6697cbf](https://github.com/TheWidlarzGroup/react-native-video/commit/6697cbf5d07ce5cc882637acc1249192f6189e53))
+* **tvOS:** fix tvos compile error for rotation handler ([#4417](https://github.com/TheWidlarzGroup/react-native-video/issues/4417)) ([04eec42](https://github.com/TheWidlarzGroup/react-native-video/commit/04eec42f1e0f8b8f25dc1c50e1e57e62ca8c3356))
+
 ## [6.10.1](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.10.0...v6.10.1) (2025-02-15)
 
 
