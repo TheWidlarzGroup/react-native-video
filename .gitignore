@@ -20,8 +20,10 @@ DerivedData
 *.hmap
 *.ipa
 *.xcuserstate
+**/.xcode.env.local
 project.xcworkspace
 Pods
+**/Pods/
 
 # Android/IJ
 #
@@ -41,6 +43,12 @@ node_modules/
 
 # yarn
 yarn.lock
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
 
 # editor workspace settings
 .vscode
