@@ -7,29 +7,34 @@
     "type": "separator",
     "title": ""
   },
-  "updating": "Updating",
-  "changelog": {
-    "title": "Changelog",
-    "newWindow": true,
-    "href": "https://github.com/TheWidlarzGroup/react-native-video/blob/master/CHANGELOG.md"
-  },
-  "separator_community": {
-    "type": "separator",
-    "title": ""
-  },
   "example_apps": {
     "title": "Example Apps",
     "newWindow": true,
     "href": "https://github.com/TheWidlarzGroup/react-native-video/tree/master/examples"
   },
   "projects": "Useful projects",
-  "separator_enterprise": {
+  "separator_community": {
     "type": "separator",
     "title": ""
+  },
+  "video_offline_sdk": {
+    "title": "Video Offline SDK",
+    "newWindow": true,
+    "href": "https://thewidlarzgroup.com/video-offline-sdk"
   },
   "enterprise_support": {
     "title": "Enterprise Support",
     "newWindow": true,
-    "href": "https://www.thewidlarzgroup.com/?utm_source=rnv&utm_medium=docs&utm_campaign=navbar&utm_id=enterprise#Contact"
+    "href": "https://www.thewidlarzgroup.com/?utm_source=rnv&utm_medium=docs#Contact"
+  },
+  "separator_enterprise": {
+    "type": "separator",
+    "title": ""
+  },
+  "updating": "Updating",
+  "changelog": {
+    "title": "Changelog",
+    "newWindow": true,
+    "href": "https://github.com/TheWidlarzGroup/react-native-video/blob/master/CHANGELOG.md"
   }
 }

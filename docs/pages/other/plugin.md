@@ -3,6 +3,9 @@
 Since Version 6.4.0, it is possible to create plugins for analytics management and maybe much more.
 A sample plugin is available in the repository in: example/react-native-video-plugin-sample. (important FIXME, put sample link)
 
+## Official plugins
+We at the Widlarz Group have created a set of plugins to cover offline video in total. If you are interested in this feature, please checkout [Video Offline SDK](https://thewidlarzgroup.com/video-offline-sdk). If you want some other plugins (analytics, processing, etc) let us know. 
+
 ## Concept
 
 Most of the analytics system which tracks player information (bitrate, errors, ...) can be integrated directly with Exoplayer or AVPlayer handles.

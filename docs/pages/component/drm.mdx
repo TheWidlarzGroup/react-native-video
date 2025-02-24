@@ -4,8 +4,13 @@ import PlatformsList from '../../components/PlatformsList/PlatformsList.tsx';
 
 ## DRM Example
 
-We have available example for DRM usage in the [example app](https://github.com/TheWidlarzGroup/react-native-video/blob/master/examples/bare/src/DRMExample.tsx).
-To get token needed for DRM playback you can go to [our site](https://www.thewidlarzgroup.com/services/free-drm-token-generator-for-video?utm_source=rnv&utm_medium=docs&utm_campaign=drm&utm_id=text) and get it.
+We provide a sample implementation in the [example app](https://github.com/TheWidlarzGroup/react-native-video/blob/master/examples/bare/src/DRMExample.tsx) demonstrating how to use DRM with `react-native-video`. You’ll need a valid token —visit [our site](https://www.thewidlarzgroup.com/services/free-drm-token-generator-for-video?utm_source=drm&utm_medium=docs) to obtain a **free 24-hour token**.
+
+## DRM Offline
+
+In some cases you'll need DRM-protected video content to be available offline. We've built the Offline Video SDK that allows for downloading, storing and managing HLS/DASH streams with and without DRM. It covers the case cases that you'll painfully discover months or years from now. To learn more please check out [Video Offline SDK](https://thewidlarzgroup.com/video-offline-sdk). Prerequisite: use v6 or v7. If you're still on v5 or lower contact us.
+
+When you use or recommend our software kits you support the maintaince of this open source project, thank you! 
 
 ## Provide DRM data (only tested with http/https assets)
 
@@ -47,10 +52,11 @@ your `contentId` + the provided certificate via `objc [loadingRequest streamingC
 contentIdentifier:contentIdData options:nil error:&spcError]; `
 
 Also, you will receive following parameter of getLicense:
-* `contentId` contentId if passed to `drm` object or loadingRequest.request.url?.host
-* `loadedLicenseUrl` URL defined as `loadingRequest.request.URL.absoluteString`, this url starts with `skd://` or `clearkey://`
-* `licenseServer` prop if prop is passed to `drm` object.
-* `spcString` the SPC used to validate playback with drm server
+
+- `contentId` contentId if passed to `drm` object or loadingRequest.request.url?.host
+- `loadedLicenseUrl` URL defined as `loadingRequest.request.URL.absoluteString`, this url starts with `skd://` or `clearkey://`
+- `licenseServer` prop if prop is passed to `drm` object.
+- `spcString` the SPC used to validate playback with drm server
 
 You should return on this method a `CKC` in Base64, either by just returning it or returning a `Promise` that resolves with the `CKC`.
 
@@ -123,9 +129,9 @@ Default: false
 The URL pointing to the licenseServer that will provide the authorization to play the protected stream.
 
 ### `multiDrm`
+
 <PlatformsList types={['Android']} />
-Type: boolean\
-Default: false
+Type: boolean\ Default: false
 
 Indicates that drm system shall support key rotation, see: https://developer.android.google.cn/media/media3/exoplayer/drm?hl=en#key-rotation
 
