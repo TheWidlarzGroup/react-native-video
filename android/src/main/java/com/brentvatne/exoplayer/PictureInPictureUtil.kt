@@ -74,6 +74,15 @@ object PictureInPictureUtil {
         if (!isSupportPictureInPicture(context)) return
         if (isSupportPictureInPictureAction() && pictureInPictureParams != null) {
             try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    pictureInPictureParams.aspectRatio?.let {
+                        val ratio = it.toFloat()
+                        if (ratio < 0.418410 || ratio > 2.39) {
+                            DebugLog.e(TAG, "Aspect ratio out of range: $ratio. Skipping PiP mode.")
+                            return
+                        }
+                    }
+                }
                 context.findActivity().enterPictureInPictureMode(pictureInPictureParams)
             } catch (e: IllegalStateException) {
                 DebugLog.e(TAG, e.toString())
