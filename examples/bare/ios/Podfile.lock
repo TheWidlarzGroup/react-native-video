@@ -852,12 +852,12 @@ PODS:
   - React-Mapbuffer (0.73.2):
     - glog
     - React-debug
-  - react-native-video (6.10.0):
+  - react-native-video (6.10.2):
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
-    - react-native-video/Video (= 6.10.0)
-  - react-native-video/Video (6.10.0):
+    - react-native-video/Video (= 6.10.2)
+  - react-native-video/Video (6.10.2):
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
@@ -1234,7 +1234,7 @@ SPEC CHECKSUMS:
   React-jsinspector: 03644c063fc3621c9a4e8bf263a8150909129618
   React-logger: 66b168e2b2bee57bd8ce9e69f739d805732a5570
   React-Mapbuffer: 9ee041e1d7be96da6d76a251f92e72b711c651d6
-  react-native-video: ff568aadb2beaec754c61b76bd7dd784883c71ea
+  react-native-video: 6e6a4c453879c646d8a2e5c16ff0903af33daadd
   React-nativeconfig: d753fbbc8cecc8ae413d615599ac378bbf6999bb
   React-NativeModulesApple: 22c25a1baa4b0d0d4845dad2578fc017b0805589
   React-perflogger: 29efe63b7ef5fbaaa50ef6eaa92482f98a24b97e
