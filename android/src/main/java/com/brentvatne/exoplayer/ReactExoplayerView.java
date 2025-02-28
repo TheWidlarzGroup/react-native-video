@@ -2290,15 +2290,30 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     public void enterPictureInPictureMode() {
-        PictureInPictureParams _pipParams = null;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            ArrayList<RemoteAction> actions = PictureInPictureUtil.getPictureInPictureActions(themedReactContext, isPaused, pictureInPictureReceiver);
-            pictureInPictureParamsBuilder.setActions(actions);
-            _pipParams = pictureInPictureParamsBuilder
-                    .setAspectRatio(PictureInPictureUtil.calcPictureInPictureAspectRatio(player))
-                    .build();
+        if (!isSupportPictureInPicture(context)) return
+        if (isSupportPictureInPictureAction() && pictureInPictureParams != null) {
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    pictureInPictureParams.aspectRatio?.let {
+                        val ratio = it.toFloat()
+                        if (ratio < 0.418410 || ratio > 2.39) {
+                            DebugLog.e(TAG, "Aspect ratio out of range: $ratio. Skipping PiP mode.")
+                            return
+                        }
+                    }
+                }
+                context.findActivity().enterPictureInPictureMode(pictureInPictureParams)
+            } catch (e: IllegalStateException) {
+                DebugLog.e(TAG, e.toString())
+            }
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            try {
+                @Suppress("DEPRECATION")
+                context.findActivity().enterPictureInPictureMode()
+            } catch (e: IllegalStateException) {
+                DebugLog.e(TAG, e.toString())
+            }
         }
-        PictureInPictureUtil.enterPictureInPictureMode(themedReactContext, _pipParams);
     }
 
     public void exitPictureInPictureMode() {
