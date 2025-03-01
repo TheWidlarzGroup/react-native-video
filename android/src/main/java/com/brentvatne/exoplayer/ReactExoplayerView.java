@@ -2291,24 +2291,20 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     public void setEnterPictureInPictureOnLeave(boolean enterPictureInPictureOnLeave) {
-        this.enterPictureInPictureOnLeave = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
-                && enterPictureInPictureOnLeave;
-        PictureInPictureUtil.applyAutoEnterEnabled(themedReactContext, pictureInPictureParamsBuilder,
-                this.enterPictureInPictureOnLeave);
+        this.enterPictureInPictureOnLeave = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && enterPictureInPictureOnLeave;
+        PictureInPictureUtil.applyAutoEnterEnabled(themedReactContext, pictureInPictureParamsBuilder, this.enterPictureInPictureOnLeave);
     }
 
     protected void setIsInPictureInPicture(boolean isInPictureInPicture) {
         eventEmitter.onPictureInPictureStatusChanged.invoke(isInPictureInPicture);
 
         if (fullScreenPlayerView != null && fullScreenPlayerView.isShowing()) {
-            if (isInPictureInPicture)
-                fullScreenPlayerView.hideWithoutPlayer();
+            if (isInPictureInPicture) fullScreenPlayerView.hideWithoutPlayer();
             return;
         }
 
         Activity currentActivity = themedReactContext.getCurrentActivity();
-        if (currentActivity == null)
-            return;
+        if (currentActivity == null) return;
 
         View decorView = currentActivity.getWindow().getDecorView();
         ViewGroup rootView = decorView.findViewById(android.R.id.content);
@@ -2317,8 +2313,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 LayoutParams.MATCH_PARENT,
                 LayoutParams.MATCH_PARENT);
 
-        if (exoPlayerView == null)
-            return; // Prevent NullPointerException
+        if (exoPlayerView == null) return; // Prevent NullPointerException
 
         if (isInPictureInPicture) {
             ViewGroup parent = (ViewGroup) exoPlayerView.getParent();
@@ -2351,8 +2346,7 @@ public class ReactExoplayerView extends FrameLayout implements
             // Restore visibility safely
             int restoreCount = Math.min(visibilityCopy.size(), rootView.getChildCount());
             for (int i = 0; i < restoreCount; i++) {
-                if (i >= rootView.getChildCount())
-                    break; // Prevent IndexOutOfBoundsException
+                if (i >= rootView.getChildCount()) break; // Prevent IndexOutOfBoundsException
                 rootView.getChildAt(i).setVisibility(visibilityCopy.get(i));
             }
 
@@ -2373,8 +2367,7 @@ public class ReactExoplayerView extends FrameLayout implements
         }
         PictureInPictureParams _pipParams = null;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            ArrayList<RemoteAction> actions = PictureInPictureUtil.getPictureInPictureActions(themedReactContext,
-                    isPaused, pictureInPictureReceiver);
+            ArrayList<RemoteAction> actions = PictureInPictureUtil.getPictureInPictureActions(themedReactContext, isPaused, pictureInPictureReceiver);
             pictureInPictureParamsBuilder.setActions(actions);
             _pipParams = pictureInPictureParamsBuilder
                     .setAspectRatio(PictureInPictureUtil.calcPictureInPictureAspectRatio(player))
@@ -2387,8 +2380,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void exitPictureInPictureMode() {
         Activity currentActivity = themedReactContext.getCurrentActivity();
-        if (currentActivity == null)
-            return;
+        if (currentActivity == null) return;
 
         View decorView = currentActivity.getWindow().getDecorView();
         ViewGroup rootView = decorView.findViewById(android.R.id.content);
@@ -2405,8 +2397,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
             int restoreCount = Math.min(visibilityCopy.size(), rootView.getChildCount());
             for (int i = 0; i < restoreCount; i++) {
-                if (i >= rootView.getChildCount())
-                    break; // Prevent IndexOutOfBoundsException
+                if (i >= rootView.getChildCount()) break; // Prevent IndexOutOfBoundsException
                 rootView.getChildAt(i).setVisibility(visibilityCopy.get(i));
             }
         }

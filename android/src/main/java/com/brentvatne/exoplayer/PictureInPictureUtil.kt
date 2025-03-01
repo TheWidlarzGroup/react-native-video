@@ -60,7 +60,6 @@ object PictureInPictureUtil {
             activity.addOnUserLeaveHintListener(onUserLeaveHintCallback)
         }
 
-        // @TODO convert to lambda when ReactExoplayerView migrated
         return Runnable {
             context.findActivity()?.let {
                 it.removeOnPictureInPictureModeChangedListener(onPictureInPictureModeChanged)
