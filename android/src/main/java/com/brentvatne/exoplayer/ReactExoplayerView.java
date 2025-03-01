@@ -332,7 +332,6 @@ public class ReactExoplayerView extends FrameLayout implements
 
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         themedReactContext.addLifecycleEventListener(this);
-        pipListenerUnsubscribe = PictureInPictureUtil.addLifecycleEventListener(context, this);
         audioBecomingNoisyReceiver = new AudioBecomingNoisyReceiver(themedReactContext);
         audioFocusChangeListener = new OnAudioFocusChangedListener(this, themedReactContext);
         pictureInPictureReceiver = new PictureInPictureReceiver(this, themedReactContext);
@@ -767,6 +766,8 @@ public class ReactExoplayerView extends FrameLayout implements
                 if (player == null) {
                     // Initialize core configuration and listeners
                     initializePlayerCore(self);
+                    pipListenerUnsubscribe = PictureInPictureUtil.addLifecycleEventListener(themedReactContext, this);
+                    PictureInPictureUtil.applyAutoEnterEnabled(themedReactContext, pictureInPictureParamsBuilder, this.enterPictureInPictureOnLeave);
                 }
                 if (!source.isLocalAssetFile() && !source.isAsset() && source.getBufferConfig().getCacheSize() > 0) {
                     RNVSimpleCache.INSTANCE.setSimpleCache(
@@ -2245,7 +2246,9 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void setEnterPictureInPictureOnLeave(boolean enterPictureInPictureOnLeave) {
         this.enterPictureInPictureOnLeave = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && enterPictureInPictureOnLeave;
-        PictureInPictureUtil.applyAutoEnterEnabled(themedReactContext, pictureInPictureParamsBuilder, this.enterPictureInPictureOnLeave);
+        if (player != null) {
+            PictureInPictureUtil.applyAutoEnterEnabled(themedReactContext, pictureInPictureParamsBuilder, this.enterPictureInPictureOnLeave);
+        }
     }
 
     protected void setIsInPictureInPicture(boolean isInPictureInPicture) {
