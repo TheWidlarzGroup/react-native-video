@@ -224,9 +224,9 @@ public class ReactExoplayerView extends FrameLayout implements
     private ArrayList<Integer> rootViewChildrenOriginalVisibility = new ArrayList<Integer>();
 
     /*
-    * When user is seeking first called is on onPositionDiscontinuity -> DISCONTINUITY_REASON_SEEK
-    * Then we set if to false when playback is back in onIsPlayingChanged -> true
-    */
+     * When user is seeking first called is on onPositionDiscontinuity -> DISCONTINUITY_REASON_SEEK
+     * Then we set if to false when playback is back in onIsPlayingChanged -> true
+     */
     private boolean isSeeking = false;
     private long seekPosition = -1;
 
@@ -936,7 +936,7 @@ public class ReactExoplayerView extends FrameLayout implements
                             : (e.reason == UnsupportedDrmException.REASON_UNSUPPORTED_SCHEME
                             ? R.string.error_drm_unsupported_scheme : R.string.error_drm_unknown);
                     eventEmitter.onVideoError.invoke(getResources().getString(errorStringId), e, "3003");
-                        }
+                }
             }
         }
         return drmSessionManager;
@@ -1271,12 +1271,12 @@ public class ReactExoplayerView extends FrameLayout implements
 
         for (SideLoadedTextTrack track : source.getSideLoadedTextTracks().getTracks()) {
             MediaItem.SubtitleConfiguration subtitleConfiguration = new MediaItem.SubtitleConfiguration.Builder(track.getUri())
-                .setMimeType(track.getType())
-                .setLanguage(track.getLanguage())
-                .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
-                .setRoleFlags(C.ROLE_FLAG_SUBTITLE)
-                .setLabel(track.getTitle())
-                .build();
+                    .setMimeType(track.getType())
+                    .setLanguage(track.getLanguage())
+                    .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
+                    .setRoleFlags(C.ROLE_FLAG_SUBTITLE)
+                    .setLabel(track.getTitle())
+                    .build();
             subtitleConfigurations.add(subtitleConfiguration);
         }
 
