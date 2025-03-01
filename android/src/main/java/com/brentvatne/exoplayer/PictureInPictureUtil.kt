@@ -17,6 +17,7 @@ import androidx.annotation.ChecksSdkIntAtLeast
 import androidx.annotation.RequiresApi
 import androidx.core.app.AppOpsManagerCompat
 import androidx.core.app.PictureInPictureModeChangedInfo
+import androidx.core.util.Consumer
 import androidx.lifecycle.Lifecycle
 import androidx.media3.exoplayer.ExoPlayer
 import com.brentvatne.common.toolbox.DebugLog
@@ -40,7 +41,7 @@ object PictureInPictureUtil {
     fun addLifecycleEventListener(context: ThemedReactContext, view: ReactExoplayerView): Runnable {
         val activity = context.findActivity()
 
-        val onPictureInPictureModeChanged: (info: PictureInPictureModeChangedInfo) -> Unit = { info: PictureInPictureModeChangedInfo ->
+        val onPictureInPictureModeChanged = Consumer<PictureInPictureModeChangedInfo> { info ->
             view.setIsInPictureInPicture(info.isInPictureInPictureMode)
             if (!info.isInPictureInPictureMode && activity.lifecycle.currentState == Lifecycle.State.CREATED) {
                 // when user click close button of PIP
@@ -48,7 +49,7 @@ object PictureInPictureUtil {
             }
         }
 
-        val onUserLeaveHintCallback = {
+        val onUserLeaveHintCallback = Runnable {
             if (view.enterPictureInPictureOnLeave) {
                 view.enterPictureInPictureMode()
             }
@@ -61,10 +62,10 @@ object PictureInPictureUtil {
         }
 
         // @TODO convert to lambda when ReactExoplayerView migrated
-        return object : Runnable {
-            override fun run() {
-                context.findActivity().removeOnPictureInPictureModeChangedListener(onPictureInPictureModeChanged)
-                context.findActivity().removeOnUserLeaveHintListener(onUserLeaveHintCallback)
+        return Runnable {
+            with(activity) {
+                removeOnPictureInPictureModeChangedListener(onPictureInPictureModeChanged)
+                removeOnUserLeaveHintListener(onUserLeaveHintCallback)
             }
         }
     }
