@@ -23,13 +23,13 @@ import com.brentvatne.common.toolbox.DebugLog
 import com.brentvatne.receiver.PictureInPictureReceiver
 import com.facebook.react.uimanager.ThemedReactContext
 
-internal fun Context.findActivity(): ComponentActivity {
+internal fun Context.findActivity(): ComponentActivity? {
     var context = this
     while (context is ContextWrapper) {
         if (context is ComponentActivity) return context
         context = context.baseContext
     }
-    throw IllegalStateException("Picture in picture should be called in the context of an Activity")
+    return null
 }
 
 object PictureInPictureUtil {
@@ -38,7 +38,7 @@ object PictureInPictureUtil {
 
     @JvmStatic
     fun addLifecycleEventListener(context: ThemedReactContext, view: ReactExoplayerView): Runnable {
-        val activity = context.findActivity()
+        val activity = context.findActivity() ?: return Runnable {}
 
         val onPictureInPictureModeChanged: (info: PictureInPictureModeChangedInfo) -> Unit = { info: PictureInPictureModeChangedInfo ->
             view.setIsInPictureInPicture(info.isInPictureInPictureMode)
@@ -61,10 +61,12 @@ object PictureInPictureUtil {
         }
 
         // @TODO convert to lambda when ReactExoplayerView migrated
-        return object : Runnable {
-            override fun run() {
-                context.findActivity().removeOnPictureInPictureModeChangedListener(onPictureInPictureModeChanged)
-                context.findActivity().removeOnUserLeaveHintListener(onUserLeaveHintCallback)
+        return Runnable {
+            context.findActivity()?.let {
+                it.removeOnPictureInPictureModeChangedListener(onPictureInPictureModeChanged)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    it.removeOnUserLeaveHintListener(onUserLeaveHintCallback)
+                }
             }
         }
     }
@@ -77,20 +79,22 @@ object PictureInPictureUtil {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     pictureInPictureParams.aspectRatio?.let {
                         val ratio = it.toFloat()
-                        if (ratio < 0.418410 || ratio > 2.39) {
+                        val minRatio = 1f / 2.39f
+                        val maxRatio = 2.39f
+                        if (ratio < minRatio || ratio > maxRatio) {
                             DebugLog.e(TAG, "Aspect ratio out of range: $ratio. Skipping PiP mode.")
                             return
                         }
                     }
                 }
-                context.findActivity().enterPictureInPictureMode(pictureInPictureParams)
+                context.findActivity()?.enterPictureInPictureMode(pictureInPictureParams)
             } catch (e: IllegalStateException) {
                 DebugLog.e(TAG, e.toString())
             }
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             try {
                 @Suppress("DEPRECATION")
-                context.findActivity().enterPictureInPictureMode()
+                context.findActivity()?.enterPictureInPictureMode()
             } catch (e: IllegalStateException) {
                 DebugLog.e(TAG, e.toString())
             }
@@ -125,10 +129,10 @@ object PictureInPictureUtil {
     }
 
     private fun updatePictureInPictureActions(context: ThemedReactContext, pipParams: PictureInPictureParams) {
-        if (!isSupportPictureInPictureAction()) return
-        if (!isSupportPictureInPicture(context)) return
+        if (!isSupportPictureInPictureAction() || !isSupportPictureInPicture(context)) return
+        val activity = context.findActivity() ?: return
         try {
-            context.findActivity().setPictureInPictureParams(pipParams)
+            activity.setPictureInPictureParams(pipParams)
         } catch (e: IllegalStateException) {
             DebugLog.e(TAG, e.toString())
         }
@@ -149,13 +153,13 @@ object PictureInPictureUtil {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun calcRectHint(playerView: ExoPlayerView): Rect {
         val hint = Rect()
-        playerView.surfaceView?.getGlobalVisibleRect(hint)
-        val location = IntArray(2)
-        playerView.surfaceView?.getLocationOnScreen(location)
-
-        val height = hint.bottom - hint.top
-        hint.top = location[1]
-        hint.bottom = hint.top + height
+        playerView.surfaceView?.let {
+            it.getGlobalVisibleRect(hint)
+            val location = IntArray(2)
+            it.getLocationOnScreen(location)
+            hint.top = location[1]
+            hint.bottom = hint.top + (hint.bottom - hint.top)
+        }
         return hint
     }
 
