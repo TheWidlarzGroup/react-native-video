@@ -1,6 +1,6 @@
 # Downloading
 
-Our Offline Video SDK lets you download and store video content for offline playback. It works with react-native-video, handling both HLS and DASH streams. You can pick specific bitrates or tracks (including audio and subtitles), and the SDK takes care of all the background tasks—queuing, resuming, and notifying about progress or errors. By simplifying how downloads are managed and stored, it ensures a reliable, user-friendly offline experience without forcing you to alter your existing video workflows.
+Our [Offline Video SDK](https://www.thewidlarzgroup.com/offline-video-sdk/?utm_source=rnv&utm_medium=docs&utm_campaign=downloading&utm_id=offline-video-sdk-link) lets you download and store video content for offline playback. It works with react-native-video, handling both HLS and DASH streams. You can pick specific bitrates or tracks (including audio and subtitles), and the SDK takes care of all the background tasks—queuing, resuming, and notifying about progress or errors. By simplifying how downloads are managed and stored, it ensures a reliable, user-friendly offline experience without forcing you to alter your existing video workflows.
 
 ### 1. **Does Offline Video SDK support multiple audio tracks?**
 **Answer:** Yes! The same applies to subtitles.
