@@ -2294,9 +2294,10 @@ public class ReactExoplayerView extends FrameLayout implements
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             ArrayList<RemoteAction> actions = PictureInPictureUtil.getPictureInPictureActions(themedReactContext, isPaused, pictureInPictureReceiver);
             pictureInPictureParamsBuilder.setActions(actions);
-            _pipParams = pictureInPictureParamsBuilder
-                    .setAspectRatio(PictureInPictureUtil.calcPictureInPictureAspectRatio(player))
-                    .build();
+            if (player.getPlaybackState() == Player.STATE_READY) {
+                pictureInPictureParamsBuilder.setAspectRatio(PictureInPictureUtil.calcPictureInPictureAspectRatio(player));
+            }
+            _pipParams = pictureInPictureParamsBuilder.build();
         }
         PictureInPictureUtil.enterPictureInPictureMode(themedReactContext, _pipParams);
     }
