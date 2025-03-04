@@ -13,7 +13,7 @@ public class ReactNativeVideoManager: RNVPlugin {
 
     private var instanceCount = 0
     private var pluginList: Set<RNVPlugin> = Set()
-    private var customDRMManager: (RNVPlugin, DRMManagerSpec)? = nil
+    private var customDRMManager: (RNVPlugin, DRMManagerSpec)?
 
     /**
      * register a new view
@@ -49,11 +49,11 @@ public class ReactNativeVideoManager: RNVPlugin {
 
     // MARK: - RNVPlugin methods
 
-    public override func onInstanceCreated(id: String, player: Any) {
+    override public func onInstanceCreated(id: String, player: Any) {
         pluginList.forEach { it in it.onInstanceCreated(id: id, player: player) }
     }
 
-    public override func onInstanceRemoved(id: String, player: Any) {
+    override public func onInstanceRemoved(id: String, player: Any) {
         pluginList.forEach { it in it.onInstanceRemoved(id: id, player: player) }
     }
 
@@ -68,19 +68,20 @@ public class ReactNativeVideoManager: RNVPlugin {
     }
 
     // MARK: - Helper methods
+
     func maybeRegisterAVPlayerPlugin(plugin: RNVPlugin) {
         guard let avpPlugin = plugin as? RNVAVPlayerPlugin else {
             return
         }
-        
+
         if let drmManager = avpPlugin.getDRMManager() {
-            if(customDRMManager != nil) {
+            if customDRMManager != nil {
                 DebugLog(
                     "Multiple DRM managers registered. This is not supported. Using first registered manager."
                 )
                 return
             }
-            
+
             customDRMManager = (plugin, drmManager)
         }
     }

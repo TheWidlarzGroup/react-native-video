@@ -17,8 +17,8 @@ open class RNVPlugin: NSObject {
      * @param id: a random string identifying the player
      * @param player: the instantiated player reference
      */
-    open func onInstanceCreated(id: String, player: Any) { /* no-op */ }
-    
+    open func onInstanceCreated(id _: String, player _: Any) { /* no-op */ }
+
     /**
      * Function called when a player should be destroyed
      * when this callback is called, the plugin shall free all
@@ -26,5 +26,5 @@ open class RNVPlugin: NSObject {
      * @param id: a random string identifying the player
      * @param player: the player to release
      */
-    open func onInstanceRemoved(id: String, player: Any) { /* no-op */ }
+    open func onInstanceRemoved(id _: String, player _: Any) { /* no-op */ }
 }
