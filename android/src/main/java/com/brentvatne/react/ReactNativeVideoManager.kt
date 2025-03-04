@@ -52,9 +52,32 @@ class ReactNativeVideoManager :
     fun registerPlugin(plugin: RNVPlugin) {
         pluginList.add(plugin)
 
-        // Generic plugin registration logic
+        maybeRegisterExoplayerPlugin(plugin)
+    }
 
-        // Exoplayer plugin specific logic
+    /**
+     * unregister a plugin from the managed list
+     */
+    fun unregisterPlugin(plugin: RNVPlugin) {
+        pluginList.remove(plugin)
+
+        maybeUnregisterExoplayerPlugin(plugin)
+    }
+
+    // ----------------------- Generic RNV plugin methods -----------------------
+    override fun onInstanceCreated(id: String, player: Any) {
+        pluginList.forEach { it.onInstanceCreated(id, player) }
+    }
+
+    override fun onInstanceRemoved(id: String, player: Any) {
+        pluginList.forEach { it.onInstanceRemoved(id, player) }
+    }
+
+    // ----------------------- RNV Exoplayer plugin specific methods -----------------------
+    override fun getDRMManager(): DRMManagerSpec? = customDRMManager
+
+    // ----------------------- Custom Plugins Helpers -----------------------
+    private fun maybeRegisterExoplayerPlugin(plugin: RNVPlugin) {
         if (plugin !is RNVExoplayerPlugin) {
             return
         }
@@ -69,13 +92,7 @@ class ReactNativeVideoManager :
         }
     }
 
-    /**
-     * unregister a plugin from the managed list
-     */
-    fun unregisterPlugin(plugin: RNVPlugin) {
-        pluginList.remove(plugin)
-
-        // Exoplayer plugin specific logic
+    private fun maybeUnregisterExoplayerPlugin(plugin: RNVPlugin) {
         if (plugin !is RNVExoplayerPlugin) {
             return
         }
@@ -85,16 +102,4 @@ class ReactNativeVideoManager :
             customDRMManager = null
         }
     }
-
-    // ----------------------- Generic RNV plugin methods -----------------------
-    override fun onInstanceCreated(id: String, player: Any) {
-        pluginList.forEach { it.onInstanceCreated(id, player) }
-    }
-
-    override fun onInstanceRemoved(id: String, player: Any) {
-        pluginList.forEach { it.onInstanceRemoved(id, player) }
-    }
-
-    // ----------------------- RNV Exoplayer plugin specific methods -----------------------
-    override fun getDRMManager(): DRMManagerSpec? = customDRMManager
 }
