@@ -97,6 +97,9 @@ const DRMExample = () => {
         newSource.drm = {
           type: DRMType.WIDEVINE,
           licenseServer: widevineLicense,
+          headers: {
+            'x-drm-userToken': token,
+          },
         };
         newSource.uri = dash;
       } else {

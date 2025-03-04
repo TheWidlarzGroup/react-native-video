@@ -5,14 +5,14 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.util.EventLogger
 import com.brentvatne.common.toolbox.DebugLog
-import com.brentvatne.react.RNVPlugin
+import com.brentvatne.exoplayer.RNVExoplayerPlugin
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 
 class VideoPluginSampleModule(reactContext: ReactApplicationContext) :
-  ReactContextBaseJavaModule(reactContext), RNVPlugin, Player.Listener {
+  ReactContextBaseJavaModule(reactContext), RNVExoplayerPlugin, Player.Listener {
 
   private val debugEventLogger = EventLogger("RNVPluginSample")
 
@@ -35,16 +35,12 @@ class VideoPluginSampleModule(reactContext: ReactApplicationContext) :
   }
 
 
-  override fun onInstanceCreated(id: String, player: Any) {
-    if (player is ExoPlayer) {
-      player.addAnalyticsListener(debugEventLogger)
-      player.addListener(this)
-    }
+  override fun onInstanceCreated(id: String, player: ExoPlayer) {
+    player.addAnalyticsListener(debugEventLogger)
+    player.addListener(this)
   }
 
-  override fun onInstanceRemoved(id: String, player: Any) {
-    if (player is ExoPlayer) {
-      player.removeAnalyticsListener(debugEventLogger)
-    }
+  override fun onInstanceRemoved(id: String, player: ExoPlayer) {
+    player.removeAnalyticsListener(debugEventLogger)
   }
 }

@@ -7,7 +7,7 @@
 
 import AVFoundation
 
-class DRMManager: NSObject {
+class DRMManager: NSObject, DRMManagerSpec {
     static let queue = DispatchQueue(label: "RNVideoContentKeyDelegateQueue")
     let contentKeySession: AVContentKeySession?
 
