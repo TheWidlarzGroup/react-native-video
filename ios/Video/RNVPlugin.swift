@@ -6,18 +6,19 @@
 import Foundation
 
 /**
- * Protocol for RNV plugins that does not have dependencies or logic specific to any player
+ * class for RNV plugins that does not have dependencies or logic specific to any player
  * It is the base interface for all RNV plugins
  *
  * If you need to have dependencies or logic specific to a player, use the RNVAVPlayerPlugin
  */
-public protocol RNVPlugin {
+open class RNVPlugin: NSObject {
     /**
      * Function called when a new player is created
      * @param id: a random string identifying the player
      * @param player: the instantiated player reference
      */
-    func onInstanceCreated(id: String, player: Any)
+    open func onInstanceCreated(id: String, player: Any) { /* no-op */ }
+    
     /**
      * Function called when a player should be destroyed
      * when this callback is called, the plugin shall free all
@@ -25,5 +26,5 @@ public protocol RNVPlugin {
      * @param id: a random string identifying the player
      * @param player: the player to release
      */
-    func onInstanceRemoved(id: String, player: Any)
+    open func onInstanceRemoved(id: String, player: Any) { /* no-op */ }
 }

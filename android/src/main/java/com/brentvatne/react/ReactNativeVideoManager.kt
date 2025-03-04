@@ -1,15 +1,16 @@
 package com.brentvatne.react
 
+import androidx.media3.exoplayer.ExoPlayer
 import com.brentvatne.common.toolbox.DebugLog
 import com.brentvatne.exoplayer.DRMManagerSpec
+import com.brentvatne.exoplayer.RNVExoplayerPlugin
 
 /**
  * ReactNativeVideoManager is a singleton class which allows to manipulate / the global state of the app
  * It handles the list of <Video/> view instanced and registration of plugins
  */
 class ReactNativeVideoManager :
-    RNVPlugin,
-    RNVExoplayerPlugin {
+    RNVPlugin {
     companion object {
         private const val TAG = "ReactNativeVideoManager"
 
@@ -74,7 +75,7 @@ class ReactNativeVideoManager :
     }
 
     // ----------------------- RNV Exoplayer plugin specific methods -----------------------
-    override fun getDRMManager(): DRMManagerSpec? = customDRMManager
+    fun getDRMManager(): DRMManagerSpec? = customDRMManager
 
     // ----------------------- Custom Plugins Helpers -----------------------
     private fun maybeRegisterExoplayerPlugin(plugin: RNVPlugin) {
