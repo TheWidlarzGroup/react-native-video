@@ -37,7 +37,7 @@ const DRMExample = () => {
 
   // ------------- DMR Token -------------
   // This token is used to authenticate the user and get the license
-  // To run example please go to https://www.thewidlarzgroup.com/services/free-drm-token-generator-for-video?utm_source=drm&utm_medium=code and complete the form to receive the token
+  // To run example please go to https://www.thewidlarzgroup.com/services/free-drm-token-generator-for-video?utm_source=rnv&utm_medium=code&utm_campaign=drm&utm_id=commented and complete the form to receive the token
   // After you receive the token, please paste it here
   const [token, setToken] = React.useState('<USER_TOKEN>');
 

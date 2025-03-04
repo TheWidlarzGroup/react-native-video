@@ -15,7 +15,7 @@ const TWGBadge = ({visibleOnLarge}: TWGBadgeProps) => {
       <span className={styles.extraText}>We are TheWidlarzGroup</span>
       <a
         target="_blank"
-        href="https://www.thewidlarzgroup.com/?utm_source=rnv&utm_medium=docs#Contact"
+        href="https://www.thewidlarzgroup.com/?utm_source=rnv&utm_medium=docs&utm_campaign=badge&utm_id=enterprise#Contact"
         className={styles.extraButton}
         rel="noreferrer">
         Premium support →
