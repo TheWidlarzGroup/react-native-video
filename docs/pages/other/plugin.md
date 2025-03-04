@@ -65,6 +65,8 @@ fun onInstanceRemoved(id: String, player: Any)
 
 To register the plugin within the main `react-native-video` package, call:
 
+To register your plugin with the main react native video package, call the following function:
+
 ```kotlin
 ReactNativeVideoManager.getInstance().registerPlugin(plugin)
 ```
@@ -155,14 +157,20 @@ class CustomDRMManager : DRMManagerSpec {
 Implement `getDRMManager()` in your plugin to provide the custom DRM manager:
 
 ```kotlin
-class CustomVideoPlugin : RNVPlugin {
+class CustomVideoPlugin : RNVExoplayerPlugin {
     private val drmManager = CustomDRMManager()
     
     override fun getDRMManager(): DRMManagerSpec? {
         return drmManager
     }
     
-    // ... other RNVPlugin methods ...
+    override fun onInstanceCreated(id: String, player: ExoPlayer) {
+        // Handle player creation
+    }
+    
+    override fun onInstanceRemoved(id: String, player: ExoPlayer) {
+        // Handle player removal
+    }
 }
 ```
 
@@ -211,12 +219,18 @@ class CustomDRMManager: NSObject, DRMManagerSpec {
 Implement `getDRMManager()` in your plugin to provide the custom DRM manager:
 
 ```swift
-class CustomVideoPlugin: RNVPlugin {
-    func getDRMManager() -> DRMManagerSpec.Type? {
+class CustomVideoPlugin: RNVAVPlayerPlugin {
+    override func getDRMManager() -> DRMManagerSpec? {
         return CustomDRMManager.self
     }
     
-    // ... other RNVPlugin methods ...
+    override func onInstanceCreated(id: String, player: AVPlayer) {
+        // Handle player creation
+    }
+    
+    override func onInstanceRemoved(id: String, player: AVPlayer) {
+        // Handle player removal
+    }
 }
 ```
 
