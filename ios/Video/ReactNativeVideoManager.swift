@@ -8,14 +8,12 @@ import Foundation
 public class ReactNativeVideoManager: RNVPlugin {
     private let expectedMaxVideoCount = 2
 
-    // create a private initializer
-    private init() {}
-
     public static let shared: ReactNativeVideoManager = .init()
+    public var pluginName: String = "ReactNativeVideoManager"
 
     private var instanceCount = 0
-    private var pluginList: [RNVPlugin] = Array()
-    private var customDRMManager: DRMManagerSpec.Type?
+    private var pluginList: Set<RNVPlugin> = Set()
+    private var customDRMManager: (RNVPlugin, DRMManagerSpec)? = nil
 
     /**
      * register a new view
@@ -38,60 +36,52 @@ public class ReactNativeVideoManager: RNVPlugin {
      * register a new plugin in the managed list
      */
     public func registerPlugin(plugin: RNVPlugin) {
-        pluginList.append(plugin)
+        pluginList.insert(plugin)
 
-        maybeRegisterAVPlayerPlugin(plugin)
+        maybeRegisterAVPlayerPlugin(plugin: plugin)
     }
 
     public func unregisterPlugin(plugin: RNVPlugin) {
         pluginList.remove(plugin)
 
-        maybeUnregisterAVPlayerPlugin(plugin)
+        maybeUnregisterAVPlayerPlugin(plugin: plugin)
     }
 
     // MARK: - RNVPlugin methods
 
-    public func onInstanceCreated(id: String, player: Any) {
+    public override func onInstanceCreated(id: String, player: Any) {
         pluginList.forEach { it in it.onInstanceCreated(id: id, player: player) }
     }
 
-    public func onInstanceRemoved(id: String, player: Any) {
+    public override func onInstanceRemoved(id: String, player: Any) {
         pluginList.forEach { it in it.onInstanceRemoved(id: id, player: player) }
     }
 
     // MARK: - RNV AVPlayer plugin specific methods
 
-    public func getDRMManager() -> DRMManagerSpec.Type? {
-        return nil
-    }
-
-    // MARK: - Helper methods
-
     /**
-     * Creates a DRM manager instance
      * If a custom DRM manager is registered through a plugin, it will be used
      * Otherwise, the default DRMManager will be used
      */
-    func createDRMManager() -> DRMManagerSpec {
-        if let customManager = customDRMManager {
-            return customManager.init()
-        }
-        return DRMManager()
+    public func getDRMManager() -> DRMManagerSpec? {
+        return customDRMManager?.1 ?? DRMManager()
     }
 
+    // MARK: - Helper methods
     func maybeRegisterAVPlayerPlugin(plugin: RNVPlugin) {
         guard let avpPlugin = plugin as? RNVAVPlayerPlugin else {
             return
         }
-
-        avpPlugin.getDRMManager()?.let {
-            drmManager -> if customDRMManager != nil {
+        
+        if let drmManager = avpPlugin.getDRMManager() {
+            if(customDRMManager != nil) {
                 DebugLog(
                     "Multiple DRM managers registered. This is not supported. Using first registered manager."
                 )
                 return
             }
-            customDRMManager = drmManager
+            
+            customDRMManager = (plugin, drmManager)
         }
     }
 
@@ -100,10 +90,8 @@ public class ReactNativeVideoManager: RNVPlugin {
             return
         }
 
-        avpPlugin.getDRMManager()?.let {
-            drmManager -> if customDRMManager == drmManager {
-                customDRMManager = nil
-            }
+        if customDRMManager?.0 == plugin {
+            customDRMManager = nil
         }
     }
 }
