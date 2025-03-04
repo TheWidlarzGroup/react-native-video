@@ -65,16 +65,18 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _lastBitrate = -2.0
     private var _enterPictureInPictureOnLeave = false {
         didSet {
-            #if os(iOS)
-                if isPictureInPictureActive() { return }
-                if _enterPictureInPictureOnLeave {
-                    initPictureinPicture()
+            if isPictureInPictureActive() { return }
+            if _enterPictureInPictureOnLeave {
+                initPictureinPicture()
+                if #available(iOS 9.0, tvOS 14.0, *) {
                     _playerViewController?.allowsPictureInPicturePlayback = true
-                } else {
-                    _pip?.deinitPipController()
+                }
+            } else {
+                _pip?.deinitPipController()
+                if #available(iOS 9.0, tvOS 14.0, *) {
                     _playerViewController?.allowsPictureInPicturePlayback = false
                 }
-            #endif
+            }
         }
     }
 
@@ -1177,12 +1179,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         viewController.view.frame = self.bounds
         viewController.player = player
-        if #available(tvOS 14.0, *) {
+        if #available(iOS 9.0, tvOS 14.0, *) {
             viewController.allowsPictureInPicturePlayback = _enterPictureInPictureOnLeave
         }
-        #if os(iOS)
-            viewController.allowsPictureInPicturePlayback = _enterPictureInPictureOnLeave
-        #endif
         return viewController
     }
 
@@ -1789,7 +1788,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     func enterPictureInPicture() {
         if _pip?._pipController == nil {
             initPictureinPicture()
-            _playerViewController?.allowsPictureInPicturePlayback = true
+            if #available(iOS 9.0, tvOS 14.0, *) {
+                _playerViewController?.allowsPictureInPicturePlayback = true
+            }
         }
         _pip?.enterPictureInPicture()
     }
@@ -1799,15 +1800,17 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         guard isPictureInPictureActive() else { return }
 
         _pip?.exitPictureInPicture()
-        #if os(iOS)
-            if _enterPictureInPictureOnLeave {
-                initPictureinPicture()
+        if _enterPictureInPictureOnLeave {
+            initPictureinPicture()
+            if #available(iOS 9.0, tvOS 14.0, *) {
                 _playerViewController?.allowsPictureInPicturePlayback = true
-            } else {
-                _pip?.deinitPipController()
+            }
+        } else {
+            _pip?.deinitPipController()
+            if #available(iOS 9.0, tvOS 14.0, *) {
                 _playerViewController?.allowsPictureInPicturePlayback = false
             }
-        #endif
+        }
     }
 
     // Workaround for #3418 - https://github.com/TheWidlarzGroup/react-native-video/issues/3418#issuecomment-2043508862
