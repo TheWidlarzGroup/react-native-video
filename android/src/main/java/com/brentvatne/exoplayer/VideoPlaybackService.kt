@@ -63,7 +63,9 @@ class VideoPlaybackService : MediaSessionService() {
 
         mediaSessionsList[player] = mediaSession
         addSession(mediaSession)
-        startForeground(mediaSession.player.hashCode(), buildNotification(mediaSession))
+
+        val notificationId = player.hashCode()
+        startForeground(notificationId, buildNotification(mediaSession))
     }
 
     fun unregisterPlayer(player: ExoPlayer) {
@@ -224,7 +226,32 @@ class VideoPlaybackService : MediaSessionService() {
         mediaSessionsList.clear()
     }
 
+    private fun createPlaceholderNotification(): Notification {
+        // Create a notification channel if needed
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            notificationManager.createNotificationChannel(
+                NotificationChannel(
+                    NOTIFICATION_CHANEL_ID,
+                    NOTIFICATION_CHANEL_ID,
+                    NotificationManager.IMPORTANCE_LOW
+                )
+            )
+        }
+
+        // Return a minimal notification
+        return NotificationCompat.Builder(this, NOTIFICATION_CHANEL_ID)
+            .setSmallIcon(androidx.media3.session.R.drawable.media3_icon_circular_play)
+            .setContentTitle("Media playback")
+            .setContentText("Preparing playback...")
+            .build()
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForeground(PLACEHOLDER_NOTIFICATION_ID, createPlaceholderNotification())
+        }
+
         intent?.let {
             val playerId = it.getIntExtra("PLAYER_ID", -1)
             val actionCommand = it.getStringExtra("ACTION")
@@ -249,6 +276,7 @@ class VideoPlaybackService : MediaSessionService() {
     companion object {
         private const val SEEK_INTERVAL_MS = 10000L
         private const val TAG = "VideoPlaybackService"
+        private const val PLACEHOLDER_NOTIFICATION_ID = 9999
 
         const val NOTIFICATION_CHANEL_ID = "RNVIDEO_SESSION_NOTIFICATION"
 
