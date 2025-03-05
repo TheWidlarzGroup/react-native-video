@@ -18,7 +18,7 @@ The [Offline Video SDK](https://www.thewidlarzgroup.com/offline-video-sdk/?utm_s
   Supports downloading various audio and subtitle tracks, including optional subtitle exclusion or inclusion.
 
 - **Selective Downloads**  
-  Only the selected track (resolution, language, etc.) is downloaded by default to optimize storage usage.
+  Only the selected tracks (resolution, language, etc.) is downloaded by default to optimize storage usage.
 
 - **DRM License Optimization**  
   If your DRM provider issues persistent tokens, they can be stored and updated only upon expiration, reducing licensing costs.
