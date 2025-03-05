@@ -110,6 +110,7 @@ class PlayerViewProxy {
         dorisTranslationsViewModel.fastForward = translations.fastForward
         dorisTranslationsViewModel.off = translations.off
         dorisTranslationsViewModel.audioOnlyBadge = translations.audioOnlyBadge
+        dorisTranslationsViewModel.schedule = translations.tvPlayerEPG
         return dorisTranslationsViewModel
     }
 
