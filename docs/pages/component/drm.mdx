@@ -4,65 +4,59 @@ import PlatformsList from '../../components/PlatformsList/PlatformsList.tsx';
 
 ## DRM Example
 
-We provide a sample implementation in the [example app](https://github.com/TheWidlarzGroup/react-native-video/blob/master/examples/bare/src/DRMExample.tsx) demonstrating how to use DRM with `react-native-video`. You’ll need a valid token —visit [our site](https://www.thewidlarzgroup.com/services/free-drm-token-generator-for-video?utm_source=drm&utm_medium=docs) to obtain a **free 24-hour token**.
+We provide a sample implementation in the [example app](https://github.com/TheWidlarzGroup/react-native-video/blob/master/examples/bare/src/DRMExample.tsx) demonstrating how to use DRM with `react-native-video`. You’ll need a valid token—visit [our site](https://www.thewidlarzgroup.com/services/free-drm-token-generator-for-video?utm_source=drm&utm_medium=docs) to obtain a **free 24-hour token**.
 
 ## DRM Offline
 
-If you require DRM-protected video content to be available offline, our [Offline Video SDK](https://www.thewidlarzgroup.com/offline-video-sdk/?utm_source=rnv&utm_medium=docs&utm_campaign=drm&utm_id=offline-video-sdk-link) enables downloading, storing, and managing streams with and without DRM. It covers many edge cases you might encounter over months or years.
-To learn more, check out the [Offline Video SDK](https://www.thewidlarzgroup.com/offline-video-sdk/?utm_source=rnv&utm_medium=docs&utm_campaign=drm&utm_id=offline-video-sdk-link).
-Prerequisite: Use v6 or v7. If you're still on v5 or lower, [contact us](https://www.thewidlarzgroup.com/?utm_source=rnv&utm_medium=docs&utm_campaign=drm&utm_id=contact#Contact) for assistance.
+If you need DRM-protected content available offline, our [Offline Video SDK](https://www.thewidlarzgroup.com/offline-video-sdk/?utm_source=rnv&utm_medium=docs&utm_campaign=drm&utm_id=offline-video-sdk-link) enables downloading, storing, and managing streams with and without DRM. It also handles many edge cases you may encounter over time.
 
-> When you use or recommend our software kits you support the maintaince of this open source project, Thank you! 
+### Prerequisites:
+- Use `react-native-video` v6 or v7. If you're still on v5 or lower, [contact us](https://www.thewidlarzgroup.com/?utm_source=rnv&utm_medium=docs&utm_campaign=drm&utm_id=contact#Contact) for assistance.
 
-## Provide DRM data (only tested with http/https assets)
+> Supporting our software kits helps maintain this open-source project. Thank you!
 
-You can provide some configuration to allow DRM playback.
-This feature will disable the use of `TextureView` on Android.
+## Providing DRM Data (Tested with HTTP/HTTPS Assets)
 
-DRM object allows this members:
+You can configure DRM playback by providing a DRM object with the following properties. This feature disables the use of `TextureView` on Android.
+
+### DRM Properties
 
 ### `base64Certificate`
 
 <PlatformsList types={['iOS', 'visionOS']} />
 
-Type: bool\
-Default: false
+**Type:** boolean
+**Default:** `false`
 
-Whether or not the certificate url returns it on base64.
+Indicates whether the certificate URL returns data in Base64 format.
 
 ### `certificateUrl`
 
 <PlatformsList types={['iOS', 'visionOS']} />
 
-Type: string\
-Default: undefined
+**Type:** string
+**Default:** `undefined`
 
-URL to fetch a valid certificate for FairPlay.
+The URL used to fetch a valid certificate for FairPlay.
 
 ### `getLicense`
 
 <PlatformsList types={['iOS', 'visionOS']} />
 
-Type: function\
-Default: undefined
+**Type:** function
+**Default:** `undefined`
 
-Rather than setting the `licenseServer` url to get the license, you can manually get the license on the JS part, and send the result to the native part to configure FairplayDRM for the stream
+Instead of setting `licenseServer`, you can manually acquire the license in JavaScript and send the result to the native module for FairPlay DRM configuration.
 
-`licenseServer` and `headers` will be ignored. You will obtain as argument the `SPC`
-(as ASCII string, you will probably need to convert it to base 64) obtained from
-your `contentId` + the provided certificate via `objc [loadingRequest streamingContentKeyRequestDataForApp:certificateData
-contentIdentifier:contentIdData options:nil error:&spcError]; `
+The following parameters are available in `getLicense`:
+- `contentId`: The content ID from the DRM object or `loadingRequest.request.url?.host`
+- `loadedLicenseUrl`: The URL retrieved from `loadingRequest.request.URL.absoluteString`, starting with `skd://` or `clearkey://`
+- `licenseServer`: The URL passed in the DRM object
+- `spcString`: The SPC used for DRM validation
 
-Also, you will receive following parameter of getLicense:
+You should return a Base64-encoded CKC response, either directly or as a `Promise`.
 
-- `contentId` contentId if passed to `drm` object or loadingRequest.request.url?.host
-- `loadedLicenseUrl` URL defined as `loadingRequest.request.URL.absoluteString`, this url starts with `skd://` or `clearkey://`
-- `licenseServer` prop if prop is passed to `drm` object.
-- `spcString` the SPC used to validate playback with drm server
-
-You should return on this method a `CKC` in Base64, either by just returning it or returning a `Promise` that resolves with the `CKC`.
-
-With this prop you can override the license acquisition flow, as an example:
+#### Example:
 
 ```js
 getLicense: (spcString, contentId, licenseUrl, loadedLicenseUrl) => {
@@ -72,19 +66,14 @@ getLicense: (spcString, contentId, licenseUrl, loadedLicenseUrl) => {
   return fetch(`https://license.pallycon.com/ri/licenseManager.do`, {
     method: 'POST',
     headers: {
-      'pallycon-customdata-v2':
-        'd2VpcmRiYXNlNjRzdHJpbmcgOlAgRGFuaWVsIE1hcmnxbyB3YXMgaGVyZQ==',
+      'pallycon-customdata-v2': 'your-custom-header',
       'Content-Type': 'application/x-www-form-urlencoded',
     },
     body: formData,
   })
     .then((response) => response.text())
-    .then((response) => {
-      return response;
-    })
-    .catch((error) => {
-      console.error('Error', error);
-    });
+    .then((response) => response)
+    .catch((error) => console.error('Error', error));
 };
 ```
 
@@ -92,123 +81,123 @@ getLicense: (spcString, contentId, licenseUrl, loadedLicenseUrl) => {
 
 <PlatformsList types={['iOS', 'visionOS']} />
 
-Type: string\
-Default: undefined
+**Type:** string
+**Default:** `undefined`
 
-Specify the content id of the stream, otherwise it will take the host value from `loadingRequest.request.URL.host` (f.e: `skd://testAsset` -> will take `testAsset`)
+Sets the content ID for the stream. If not specified, the system uses the host value from `loadingRequest.request.URL.host`.
 
 ### `headers`
 
 <PlatformsList types={['Android', 'iOS', 'visionOS']} />
 
-Type: Object\
-Default: undefined
+**Type:** Object
+**Default:** `undefined`
 
-You can customize headers send to the licenseServer.
+Custom headers for the license server request.
 
-Example:
+#### Example:
 
 ```js
-source={{
-    uri: 'https://media.axprod.net/TestVectors/v7-MultiDRM-SingleKey/Manifest_1080p.mpd',
-}}
-drm={{
-      type: DRMType.WIDEVINE,
-      licenseServer: 'https://drm-widevine-licensing.axtest.net/AcquireLicense',
-      headers: {
-          'X-AxDRM-Message': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5X2lkIjoiYjMzNjRlYjUtNTFmNi00YWUzLThjOTgtMzNjZWQ1ZTMxYzc4IiwibWVzc2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsImZpcnN0X3BsYXlfZXhwaXJhdGlvbiI6NjAsInBsYXlyZWFkeSI6eyJyZWFsX3RpbWVfZXhwaXJhdGlvbiI6dHJ1ZX0sImtleXMiOlt7ImlkIjoiOWViNDA1MGQtZTQ0Yi00ODAyLTkzMmUtMjdkNzUwODNlMjY2IiwiZW5jcnlwdGVkX2tleSI6ImxLM09qSExZVzI0Y3Iya3RSNzRmbnc9PSJ9XX19.FAbIiPxX8BHi9RwfzD7Yn-wugU19ghrkBFKsaCPrZmU'
-      },
-}}
+drm: {
+  type: DRMType.WIDEVINE,
+  licenseServer: 'https://drm-widevine-licensing.axtest.net/AcquireLicense',
+  headers: {
+    'X-AxDRM-Message': 'your-drm-header',
+  },
+}
 ```
 
 ### `licenseServer`
 
 <PlatformsList types={['Android', 'iOS', 'visionOS']} />
 
-Type: string\
-Default: false
+**Type:** string
+**Default:** `undefined`
 
-The URL pointing to the licenseServer that will provide the authorization to play the protected stream.
+The license server URL that authorizes protected content playback.
 
 ### `multiDrm`
 
 <PlatformsList types={['Android']} />
-Type: boolean\ Default: false
 
-Indicates that drm system shall support key rotation, see: https://developer.android.google.cn/media/media3/exoplayer/drm?hl=en#key-rotation
+**Type:** boolean
+**Default:** `false`
+
+Indicates whether the DRM system should support key rotation. See [Android Developer Docs](https://developer.android.google.cn/media/media3/exoplayer/drm?hl=en#key-rotation) for more details.
 
 ### `type`
 
 <PlatformsList types={['Android', 'iOS']} />
 
-Type: DRMType\
-Default: undefined
+**Type:** DRMType
+**Default:** `undefined`
 
-You can specify the DRM type, either by string or using the exported DRMType enum.
-Valid values are, for Android: DRMType.WIDEVINE / DRMType.PLAYREADY / DRMType.CLEARKEY.
-for iOS: DRMType.FAIRPLAY
+Defines the DRM type:
+- **Android:** `DRMType.WIDEVINE`, `DRMType.PLAYREADY`, `DRMType.CLEARKEY`
+- **iOS:** `DRMType.FAIRPLAY`
 
 ### `localSourceEncryptionKeyScheme`
 
 <PlatformsList types={['iOS', 'visionOS']} />
 
-Set the url scheme for stream encryption key for local assets
+**Type:** string
 
-Type: String
+Sets the URL scheme for stream encryption keys used in local assets.
 
-Example:
+#### Example:
 
-```
+```js
 localSourceEncryptionKeyScheme="my-offline-key"
 ```
 
 ## Common Usage Scenarios
 
-### Send cookies to license server
+### Sending Cookies to the License Server
 
-You can send Cookies to the license server via `headers` prop. Example:
+You can send cookies using the `headers` prop.
+
+#### Example:
 
 ```js
 drm: {
-    type: DRMType.WIDEVINE
-    licenseServer: 'https://drm-widevine-licensing.axtest.net/AcquireLicense',
-    headers: {
-        'Cookie': 'PHPSESSID=etcetc; csrftoken=mytoken; _gat=1; foo=bar'
-    },
+  type: DRMType.WIDEVINE,
+  licenseServer: 'https://drm-widevine-licensing.axtest.net/AcquireLicense',
+  headers: {
+    'Cookie': 'PHPSESSID=your-session-id; csrftoken=mytoken; _gat=1; foo=bar'
+  },
 }
 ```
 
-### Custom License Acquisition (only iOS for now)
+### Custom License Acquisition (iOS Only)
+
+#### Example:
 
 ```js
 drm: {
-    type: DRMType.FAIRPLAY,
-    getLicense: (spcString) => {
-        const base64spc = Base64.encode(spcString);
-        return fetch('YOUR LICENSE SERVER HERE', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Accept: 'application/json',
-            },
-            body: JSON.stringify({
-                getFairplayLicense: {
-                    foo: 'bar',
-                    spcMessage: base64spc,
-                }
-            })
-        })
-            .then(response => response.json())
-            .then((response) => {
-                if (response && response.getFairplayLicenseResponse
-                    && response.getFairplayLicenseResponse.ckcResponse) {
-                    return response.getFairplayLicenseResponse.ckcResponse;
-                }
-                throw new Error('No correct response');
-            })
-            .catch((error) => {
-                console.error('CKC error', error);
-            });
-    }
+  type: DRMType.FAIRPLAY,
+  getLicense: (spcString) => {
+    const base64spc = Base64.encode(spcString);
+    return fetch('YOUR_LICENSE_SERVER_URL', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({
+        getFairplayLicense: {
+          foo: 'bar',
+          spcMessage: base64spc,
+        }
+      })
+    })
+      .then(response => response.json())
+      .then((response) => {
+        if (response?.getFairplayLicenseResponse?.ckcResponse) {
+          return response.getFairplayLicenseResponse.ckcResponse;
+        }
+        throw new Error('No valid response');
+      })
+      .catch((error) => console.error('CKC error', error));
+  }
 }
 ```

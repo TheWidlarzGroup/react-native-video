@@ -2,7 +2,7 @@ import PlatformsList from '../../components/PlatformsList/PlatformsList.tsx';
 
 # Events
 
-This page shows the list of available callbacks to handle player notifications
+This page lists all available callbacks for handling player notifications.
 
 ## Details
 
@@ -10,233 +10,240 @@ This page shows the list of available callbacks to handle player notifications
 
 <PlatformsList types={['Android', 'iOS']} />
 
-Callback function that is called when the audio is about to become 'noisy' due to
-a change in audio outputs. Typically this is called when audio output is being switched
-from an external source like headphones back to the internal speaker. It's a good
-idea to pause the media when this happens so the speaker doesn't start blasting sound.
+Triggered when audio output changes (e.g., switching from headphones to speakers). It's recommended to pause the media when this event occurs.
 
-Payload: none
+**Payload:** _none_
+
+---
 
 ### `onAudioFocusChanged`
 
 <PlatformsList types={['Android']} />
 
-Callback function that is called when the audio focus changes. This is called when the audio focus is gained or lost. This is useful for determining if the media should be paused or not.
+Called when audio focus is gained or lost.
 
-Payload:
-Property | Type | Description
---- | --- | ---
-hasAudioFocus | boolean | Boolean indicating whether the media has audio focus
+**Payload:**
+| Property       | Type    | Description                                  |
+|---------------|--------|----------------------------------------------|
+| hasAudioFocus | boolean | `true` if media has audio focus, `false` otherwise |
 
-Example:
-
+**Example:**
 ```javascript
 {
-  hasAudioFocus: true;
+  hasAudioFocus: true
 }
 ```
+
+---
 
 ### `onAudioTracks`
 
 <PlatformsList types={['Android', 'iOS']} />
 
-Callback function that is called when audio tracks change
+Triggered when available audio tracks change.
 
-Payload:
+**Payload:** _Array of objects with track details_
 
-An **array** of
-| Property | Type    | Description                                                                                                |
-| -------- | ------- | ---------------------------------------------------------------------------------------------------------- |
-| index    | number  | Internal track ID                                                                                          |
-| title    | string  | Descriptive name for the track                                                                             |
-| language | string  | 2 letter [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) representing the language |
-| bitrate  | number  | bitrate of track                                                                                           |
-| type     | string  | Mime type of track                                                                                         |
-| selected | boolean | true if track is playing                                                                                   |
+| Property | Type    | Description                                                                 |
+|----------|--------|-----------------------------------------------------------------------------|
+| index    | number  | Internal track ID                                                          |
+| title    | string  | Descriptive track name                                                     |
+| language | string  | [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) language code |
+| bitrate  | number  | Track bitrate                                                              |
+| type     | string  | Track MIME type                                                            |
+| selected | boolean | `true` if track is currently playing                                       |
 
-Example:
-
+**Example:**
 ```javascript
 {
   audioTracks: [
     { language: 'es', title: 'Spanish', type: 'audio/mpeg', index: 0, selected: true },
     { language: 'en', title: 'English', type: 'audio/mpeg', index: 1 }
-  ];
+  ]
 }
 ```
+
+---
 
 ### `onBandwidthUpdate`
 
 <PlatformsList types={['Android', 'iOS']} />
 
-Callback function that is called when the available bandwidth changes.
+Called when available bandwidth changes.
 
-Payload:
+**Payload:**
+| Property | Type   | Description                                   |
+|----------|--------|-----------------------------------------------|
+| bitrate  | number | Estimated bitrate in bits/sec                |
+| width    | number | Video width (Android only)                   |
+| height   | number | Video height (Android only)                  |
+| trackId  | string | Video track ID (Android only)                |
 
-| Property | Type   | Description                                    |
-| -------- | ------ | ---------------------------------------------- |
-| bitrate  | number | The estimated bitrate in bits/sec              |
-| width    | number | The width of the video (android only)          |
-| height   | number | The height of the video (android only)         |
-| trackId  | string | The track ID of the video track (android only) |
-
-Example on iOS:
-
+**Example (iOS):**
 ```javascript
 {
-  bitrate: 1000000;
+  bitrate: 1000000
 }
 ```
 
-Example on Android:
-
+**Example (Android):**
 ```javascript
 {
-  bitrate: 1000000;
-  width: 1920;
-  height: 1080;
-  trackId: 'some-track-id';
+  bitrate: 1000000,
+  width: 1920,
+  height: 1080,
+  trackId: 'some-track-id'
 }
 ```
 
-Note: On Android, you must set the [reportBandwidth](#reportbandwidth) prop to enable this event. This is due to the high volume of events generated.
+> **Note:** On Android, set the [`reportBandwidth`](#reportbandwidth) prop to enable this event.
+
+---
 
 ### `onBuffer`
 
 <PlatformsList types={['Android', 'iOS', 'web']} />
 
-Callback function that is called when the player buffers.
+Triggered when buffering starts or stops.
 
-Payload:
+**Payload:**
+| Property    | Type    | Description                     |
+|------------|--------|---------------------------------|
+| isBuffering | boolean | `true` if buffering is active  |
 
-| Property    | Type    | Description                                    |
-| ----------- | ------- | ---------------------------------------------- |
-| isBuffering | boolean | Boolean indicating whether buffering is active |
-
-Example:
-
+**Example:**
 ```javascript
 {
-  isBuffering: true;
+  isBuffering: true
 }
 ```
+
+---
 
 ### `onControlsVisibilityChange`
 
 <PlatformsList types={['Android']} />
 
-Callback function that is called when the controls are hidden or shown. Not possible on iOS.
+Triggered when the video player controls become visible or hidden.
 
-Payload:
+**Payload:**
+| Property  | Type    | Description                         |
+|----------|--------|-------------------------------------|
+| isVisible | boolean | `true` if controls are visible |
 
-| Property    | Type    | Description                                    |
-| ----------- | ------- | ---------------------------------------------- |
-| isVisible | boolean | Boolean indicating whether controls are visible |
-
-Example:
-
+**Example:**
 ```javascript
 {
-  isVisible: true;
+  isVisible: true
 }
 ```
+
+---
 
 ### `onEnd`
 
 <PlatformsList types={['All']} />
 
-Callback function that is called when the player reaches the end of the media.
+Triggered when the media reaches the end.
 
-Payload: none
+**Payload:** _none_
+
+---
 
 ### `onError`
 
 <PlatformsList types={['All']} />
 
-Callback function that is called when the player experiences a playback error.
+Called when a playback error occurs.
 
-Payload:
+**Payload:**
+| Property | Type   | Description               |
+|---------|--------|---------------------------|
+| error   | object | Error details              |
 
-| Property | Type   | Description                                                   |
-| -------- | ------ | ------------------------------------------------------------- |
-| error    | object | Object containing properties with information about the error |
+---
 
 ### `onExternalPlaybackChange`
 
 <PlatformsList types={['iOS']} />
 
-Callback function that is called when external playback mode for current playing video has changed. Mostly useful when connecting/disconnecting to Apple TV – it's called on connection/disconnection.
+Called when external playback mode changes (e.g., Apple TV connection/disconnection).
 
-Payload:
+**Payload:**
+| Property                 | Type    | Description                                |
+|-------------------------|--------|--------------------------------------------|
+| isExternalPlaybackActive | boolean | `true` if external playback is active |
 
-| Property                 | Type    | Description                                                 |
-| ------------------------ | ------- | ----------------------------------------------------------- |
-| isExternalPlaybackActive | boolean | Boolean indicating whether external playback mode is active |
-
-Example:
-
+**Example:**
 ```javascript
 {
-  isExternalPlaybackActive: true;
+  isExternalPlaybackActive: true
 }
 ```
+
+---
 
 ### `onFullscreenPlayerWillPresent`
 
 <PlatformsList types={['Android', 'iOS', 'visionOS']} />
 
-Callback function that is called when the player is about to enter fullscreen mode.
+Called before entering fullscreen mode.
 
-Payload: none
+**Payload:** _none_
+
+---
 
 ### `onFullscreenPlayerDidPresent`
 
 <PlatformsList types={['Android', 'iOS', 'visionOS']} />
 
-Callback function that is called when the player has entered fullscreen mode.
+Called when fullscreen mode is active.
 
-Payload: none
+**Payload:** _none_
+
+---
 
 ### `onFullscreenPlayerWillDismiss`
 
 <PlatformsList types={['Android', 'iOS', 'visionOS']} />
 
-Callback function that is called when the player is about to exit fullscreen mode.
+Called before exiting fullscreen mode.
 
-Payload: none
+**Payload:** _none_
+
+---
 
 ### `onFullscreenPlayerDidDismiss`
 
 <PlatformsList types={['Android', 'iOS', 'visionOS']} />
 
-Callback function that is called when the player has exited fullscreen mode.
+Called when fullscreen mode is exited.
 
-Payload: none
+**Payload:** _none_
+
+---
 
 ### `onLoad`
 
 <PlatformsList types={['All']} />
 
-Callback function that is called when the media is loaded and ready to play.
+Triggered when the media is loaded and ready to play.
 
-
-NOTE: tracks (`audioTracks`, `textTracks` & `videoTracks`) are not available on the web.
-
-Payload:
+### Payload:
 
 | Property    | Type   | Description                                                                                                                                                                                                                                                                                                                                                        |
 |-------------|--------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | currentTime | number | Time in seconds where the media will start                                                                                                                                                                                                                                                                                                                         |
 | duration    | number | Length of the media in seconds                                                                                                                                                                                                                                                                                                                                     |
-| naturalSize | object | Properties:<br/> _ width - Width in pixels that the video was encoded at<br/> _ height - Height in pixels that the video was encoded at<br/> \* orientation - "portrait", "landscape" or "square"                                                                                                                                                                  |
-| audioTracks | array  | An array of audio track info objects with the following properties:<br/> _ index - Index number<br/> _ title - Description of the track<br/> _ language - 2 letter [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) or 3 letter [ISO639-2](https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes) language code<br/> _ type - Mime type of track |
-| textTracks  | array  | An array of text track info objects with the following properties:<br/> _ index - Index number<br/> _ title - Description of the track<br/> _ language - 2 letter [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) or 3 letter [ISO 639-2](https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes) language code<br/> _ type - Mime type of track |
-| videoTracks | array  | An array of video track info objects with the following properties:<br/> _ trackId - ID for the track<br/> _ bitrate - Bit rate in bits per second<br/> _ codecs - Comma separated list of codecs<br/> _ height - Height of the video<br/> \* width - Width of the video                                                                                           |
+| naturalSize | object | Properties:<br/> &ensp; width - Width in pixels that the video was encoded at<br/> &ensp; height - Height in pixels that the video was encoded at<br/> &ensp; orientation - "portrait", "landscape" or "square"                                                                                                                                                                  |
+| audioTracks | array  | An array of audio track info objects with the following properties:<br/> &ensp; index - Index number<br/> &ensp; title - Description of the track<br/> &ensp; language - 2 letter [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) or 3 letter [ISO639-2](https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes) language code<br/> &ensp; type - Mime type of track |
+| textTracks  | array  | An array of text track info objects with the following properties:<br/> &ensp; index - Index number<br/> &ensp; title - Description of the track<br/> &ensp; language - 2 letter [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) or 3 letter [ISO 639-2](https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes) language code<br/> &ensp; type - Mime type of track |
+| videoTracks | array  | An array of video track info objects with the following properties:<br/> &ensp; trackId - ID for the track<br/> &ensp; bitrate - Bit rate in bits per second<br/> &ensp; codecs - Comma separated list of codecs<br/> &ensp; height - Height of the video<br/> &ensp; width - Width of the video                                                                                           |
 | trackId     | string | Provide key information about the video track, typically including: `Resolution`, `Bitrate`.                                                                                                                                                                                                                                                                                                                                                |
 
-Example:
+**Example:**
 
-```javascript
+```js
 {
   canPlaySlowForward: true,
   canPlayReverse: false,
@@ -265,49 +272,51 @@ Example:
     { index: 1, bitrate: 7981888, codecs: "avc1.640028", height: 1080, trackId: "f2-v1-x3", width: 1920 },
     { index: 2, bitrate: 1994979, codecs: "avc1.4d401f", height: 480, trackId: "f3-v1-x3", width: 848 }
   ],
-  trackId: "720p 2400kbps"
+  trackId: "720p 2400kbps",
 }
 ```
+
+> **Note:** `audioTracks`, `textTracks`, and `videoTracks` are not available on the web.
+
+---
 
 ### `onLoadStart`
 
 <PlatformsList types={['All']} />
 
-Callback function that is called when the media starts loading.
+Triggered when media starts loading.
 
-Payload:
+**Payload:**
+| Property  | Type    | Description                           |
+|----------|--------|-------------------------------------|
+| isNetwork | boolean | `true` if media is loaded from a network |
+| type      | string  | Media type (not available on Windows) |
+| uri       | string  | Media source URI (not available on Windows) |
 
-| Property  | Type        | Description                                                      |
-| --------- | ----------- | ---------------------------------------------------------------- |
-| isNetwork | boolean     | Boolean indicating if the media is being loaded from the network |
-| type      | string      | Type of the media. Not available on Windows                      |
-| uri       | string      | URI for the media source. Not available on Windows               |
-
-Example:
-
+**Example:**
 ```javascript
 {
   isNetwork: true,
   type: '',
-  uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8'
+  uri: 'https://example.com/video.mp4'
 }
 ```
+
+---
 
 ### `onPlaybackStateChanged`
 
 <PlatformsList types={['Android', 'iOS', 'visionOS', 'web']} />
 
-Callback function that is called when the playback state changes.
+Triggered when playback state changes.
 
-Payload:
+**Payload:**
+| Property  | Type    | Description                         |
+|----------|--------|-------------------------------------|
+| isPlaying | boolean | `true` if media is playing        |
+| isSeeking | boolean | `true` if seeking is in progress |
 
-| Property  | Type        | Description                                        |
-| --------- | ----------- | -------------------------------------------------- |
-| isPlaying | boolean     | Boolean indicating if the media is playing or not  |
-| isSeeking | boolean     | Boolean indicating if the player is seeking or not |
-
-Example:
-
+**Example:**
 ```javascript
 {
   isPlaying: true,
@@ -315,56 +324,62 @@ Example:
 }
 ```
 
+---
+
 ### `onPictureInPictureStatusChanged`
 
 <PlatformsList types={['iOS', 'Android', 'web']} />
 
-Callback function that is called when picture in picture becomes active or inactive.
+Triggered when Picture-in-Picture (PiP) mode is activated or deactivated.
 
-| Property | Type    | Description                                             |
-| -------- | ------- | ------------------------------------------------------- |
-| isActive | boolean | Boolean indicating whether picture in picture is active |
+**Payload:**
+| Property  | Type    | Description                        |
+|----------|--------|----------------------------------|
+| isActive | boolean | `true` if PiP mode is active |
 
-Example:
-
+**Example:**
 ```javascript
 {
-  isActive: true;
+  isActive: true
 }
 ```
+
+---
 
 ### `onPlaybackRateChange`
 
 <PlatformsList types={['All']} />
 
-Callback function that is called when the rate of playback changes - either paused or starts/resumes.
+Triggered when playback speed changes.
 
-| Property     | Type   | Description                                                                                                     |
-| ------------ | ------ | --------------------------------------------------------------------------------------------------------------- |
-| playbackRate | number | 0 when playback is paused, 1 when playing at normal speed. Other values when playback is slowed down or sped up |
+**Payload:**
+| Property     | Type   | Description                     |
+|-------------|--------|---------------------------------|
+| playbackRate | number | `0` (paused), `1` (normal speed), other values indicate speed changes |
 
-Example:
-
+**Example:**
 ```javascript
 {
-  playbackRate: 0, // indicates paused
+  playbackRate: 0  // indicates paused
 }
 ```
+
+---
 
 ### `onProgress`
 
 <PlatformsList types={['All']} />
 
-Callback function that is called every progressUpdateInterval milliseconds with info about which position the media is currently playing.
+Triggered every `progressUpdateInterval` milliseconds, providing information about the current playback position.
 
-| Property         | Type   | Description                                                                                       |
-| ---------------- | ------ | ------------------------------------------------------------------------------------------------- |
-| currentTime      | number | Current position in seconds                                                                       |
-| playableDuration | number | Position to where the media can be played to using just the buffer in seconds                     |
-| seekableDuration | number | Position to where the media can be seeked to in seconds. Typically, the total length of the media |
+**Payload:**
+| Property         | Type   | Description                                                             |
+|----------------|--------|-------------------------------------------------------------------------|
+| currentTime      | number | Current playback position (seconds)                                   |
+| playableDuration | number | Duration that can be played using only the buffer (seconds)          |
+| seekableDuration | number | Duration that can be seeked to (usually the total length of the media) |
 
-Example:
-
+**Example:**
 ```javascript
 {
   currentTime: 5.2,
@@ -373,80 +388,82 @@ Example:
 }
 ```
 
+---
+
 ### `onReadyForDisplay`
 
 <PlatformsList types={['Android', 'iOS', 'Web']} />
 
-Callback function that is called when the first video frame is ready for display. This is when the poster is removed.
+Triggered when the first video frame is ready to be displayed. This is when the poster is removed.
 
-Payload: none
+**Payload:** _none_
 
-- iOS: [readyForDisplay](https://developer.apple.com/documentation/avkit/avplayerviewcontroller/1615830-readyfordisplay?language=objc)
-- Android [STATE_READY](https://exoplayer.dev/doc/reference/com/google/android/exoplayer2/Player.html#STATE_READY)
+- iOS: [`readyForDisplay`](https://developer.apple.com/documentation/avkit/avplayerviewcontroller/1615830-readyfordisplay?language=objc)
+- Android: [`STATE_READY`](https://exoplayer.dev/doc/reference/com/google/android/exoplayer2/Player.html#STATE_READY)
+
+---
 
 ### `onReceiveAdEvent`
 
 <PlatformsList types={['Android', 'iOS']} />
 
-Callback function that is called when an AdEvent is received from the IMA's SDK.
+Triggered when an AdEvent is received from the IMA SDK.
 
 Enum `AdEvent` possible values for [Android](https://developers.google.com/interactive-media-ads/docs/sdks/html5/client-side/reference/js/google.ima.AdEvent) and [iOS](https://developers.google.com/interactive-media-ads/docs/sdks/ios/client-side/reference/Enums/IMAAdEventType):
 
 <details>
-<summary>Events</summary>
+  <summary>AdEvent</summary>
 
-| Event                      | Platform     | Description                                                                                                                                                                                                 |
-| -------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `AD_BREAK_ENDED`           | iOS          | Fired the first time each ad break ends. Applications must reenable seeking when this occurs (only used for dynamic ad insertion).                                                                          |
-| `AD_BREAK_READY`           | Android, iOS | Fires when an ad rule or a VMAP ad break would have played if autoPlayAdBreaks is false.                                                                                                                    |
-| `AD_BREAK_STARTED`         | iOS          | Fired first time each ad break begins playback. If an ad break is watched subsequent times this will not be fired. Applications must disable seeking when this occurs (only used for dynamic ad insertion). |
-| `AD_BUFFERING`             | Android      | Fires when the ad has stalled playback to buffer.                                                                                                                                                           |
-| `AD_CAN_PLAY`              | Android      | Fires when the ad is ready to play without buffering, either at the beginning of the ad or after buffering completes.                                                                                       |
-| `AD_METADATA`              | Android      | Fires when an ads list is loaded.                                                                                                                                                                           |
-| `AD_PERIOD_ENDED`          | iOS          | Fired every time the stream switches from advertising or slate to content. This will be fired even when an ad is played a second time or when seeking into an ad (only used for dynamic ad insertion).      |
-| `AD_PERIOD_STARTED`        | iOS          | Fired every time the stream switches from content to advertising or slate. This will be fired even when an ad is played a second time or when seeking into an ad (only used for dynamic ad insertion).      |
-| `AD_PROGRESS`              | Android      | Fires when the ad's current time value changes. The event `data` will be populated with an AdProgressData object.                                                                                           |
-| `ALL_ADS_COMPLETED`        | Android, iOS | Fires when the ads manager is done playing all the valid ads in the ads response, or when the response doesn't return any valid ads.                                                                        |
-| `CLICK`                    | Android, iOS | Fires when the ad is clicked.                                                                                                                                                                               |
-| `COMPLETED`                | Android, iOS | Fires when the ad completes playing.                                                                                                                                                                        |
-| `CONTENT_PAUSE_REQUESTED`  | Android      | Fires when content should be paused. This usually happens right before an ad is about to cover the content.                                                                                                 |
-| `CONTENT_RESUME_REQUESTED` | Android      | Fires when content should be resumed. This usually happens when an ad finishes or collapses.                                                                                                                |
-| `CUEPOINTS_CHANGED`        | iOS          | Cuepoints changed for VOD stream (only used for dynamic ad insertion).                                                                                                                                      |
-| `DURATION_CHANGE`          | Android      | Fires when the ad's duration changes.                                                                                                                                                                       |
-| `ERROR`                    | Android, iOS | Fires when an error occurred while loading the ad and prevent it from playing.                                                                                                                              |
-| `FIRST_QUARTILE`           | Android, iOS | Fires when the ad playhead crosses first quartile.                                                                                                                                                          |
-| `IMPRESSION`               | Android      | Fires when the impression URL has been pinged.                                                                                                                                                              |
-| `INTERACTION`              | Android      | Fires when an ad triggers the interaction callback. Ad interactions contain an interaction ID string in the ad data.                                                                                        |
-| `LINEAR_CHANGED`           | Android      | Fires when the displayed ad changes from linear to nonlinear, or the reverse.                                                                                                                               |
-| `LOADED`                   | Android, iOS | Fires when ad data is available.                                                                                                                                                                            |
-| `LOG`                      | Android, iOS | Fires when a non-fatal error is encountered. The user need not take any action since the SDK will continue with the same or next ad playback depending on the error situation.                              |
-| `MIDPOINT`                 | Android, iOS | Fires when the ad playhead crosses midpoint.                                                                                                                                                                |
-| `PAUSED`                   | Android, iOS | Fires when the ad is paused.                                                                                                                                                                                |
-| `RESUMED`                  | Android, iOS | Fires when the ad is resumed.                                                                                                                                                                               |
-| `SKIPPABLE_STATE_CHANGED`  | Android      | Fires when the displayed ads skippable state is changed.                                                                                                                                                    |
-| `SKIPPED`                  | Android, iOS | Fires when the ad is skipped by the user.                                                                                                                                                                   |
-| `STARTED`                  | Android, iOS | Fires when the ad starts playing.                                                                                                                                                                           |
-| `STREAM_LOADED`            | iOS          | Stream request has loaded (only used for dynamic ad insertion).                                                                                                                                             |
-| `TAPPED`                   | iOS          | Fires when the ad is tapped.                                                                                                                                                                                |
-| `THIRD_QUARTILE`           | Android, iOS | Fires when the ad playhead crosses third quartile.                                                                                                                                                          |
-| `UNKNOWN`                  | iOS          | An unknown event has fired                                                                                                                                                                                  |
-| `USER_CLOSE`               | Android      | Fires when the ad is closed by the user.                                                                                                                                                                    |
-| `VIDEO_CLICKED`            | Android      | Fires when the non-clickthrough portion of a video ad is clicked.                                                                                                                                           |
-| `VIDEO_ICON_CLICKED`       | Android      | Fires when a user clicks a video icon.                                                                                                                                                                      |
-| `VOLUME_CHANGED`           | Android      | Fires when the ad volume has changed.                                                                                                                                                                       |
-| `VOLUME_MUTED`             | Android      | Fires when the ad volume has been muted.                                                                                                                                                                    |
+  | Event                      | Platform     | Description                                                                                                                                                                                                 |
+  | -------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+  | `AD_BREAK_ENDED`           | iOS          | Fired the first time each ad break ends. Applications must reenable seeking when this occurs (only used for dynamic ad insertion).                                                                          |
+  | `AD_BREAK_READY`           | Android, iOS | Fires when an ad rule or a VMAP ad break would have played if autoPlayAdBreaks is false.                                                                                                                    |
+  | `AD_BREAK_STARTED`         | iOS          | Fired first time each ad break begins playback. If an ad break is watched subsequent times this will not be fired. Applications must disable seeking when this occurs (only used for dynamic ad insertion). |
+  | `AD_BUFFERING`             | Android      | Fires when the ad has stalled playback to buffer.                                                                                                                                                           |
+  | `AD_CAN_PLAY`              | Android      | Fires when the ad is ready to play without buffering, either at the beginning of the ad or after buffering completes.                                                                                       |
+  | `AD_METADATA`              | Android      | Fires when an ads list is loaded.                                                                                                                                                                           |
+  | `AD_PERIOD_ENDED`          | iOS          | Fired every time the stream switches from advertising or slate to content. This will be fired even when an ad is played a second time or when seeking into an ad (only used for dynamic ad insertion).      |
+  | `AD_PERIOD_STARTED`        | iOS          | Fired every time the stream switches from content to advertising or slate. This will be fired even when an ad is played a second time or when seeking into an ad (only used for dynamic ad insertion).      |
+  | `AD_PROGRESS`              | Android      | Fires when the ad's current time value changes. The event `data` will be populated with an AdProgressData object.                                                                                           |
+  | `ALL_ADS_COMPLETED`        | Android, iOS | Fires when the ads manager is done playing all the valid ads in the ads response, or when the response doesn't return any valid ads.                                                                        |
+  | `CLICK`                    | Android, iOS | Fires when the ad is clicked.                                                                                                                                                                               |
+  | `COMPLETED`                | Android, iOS | Fires when the ad completes playing.                                                                                                                                                                        |
+  | `CONTENT_PAUSE_REQUESTED`  | Android      | Fires when content should be paused. This usually happens right before an ad is about to cover the content.                                                                                                 |
+  | `CONTENT_RESUME_REQUESTED` | Android      | Fires when content should be resumed. This usually happens when an ad finishes or collapses.                                                                                                                |
+  | `CUEPOINTS_CHANGED`        | iOS          | Cuepoints changed for VOD stream (only used for dynamic ad insertion).                                                                                                                                      |
+  | `DURATION_CHANGE`          | Android      | Fires when the ad's duration changes.                                                                                                                                                                       |
+  | `ERROR`                    | Android, iOS | Fires when an error occurred while loading the ad and prevent it from playing.                                                                                                                              |
+  | `FIRST_QUARTILE`           | Android, iOS | Fires when the ad playhead crosses first quartile.                                                                                                                                                          |
+  | `IMPRESSION`               | Android      | Fires when the impression URL has been pinged.                                                                                                                                                              |
+  | `INTERACTION`              | Android      | Fires when an ad triggers the interaction callback. Ad interactions contain an interaction ID string in the ad data.                                                                                        |
+  | `LINEAR_CHANGED`           | Android      | Fires when the displayed ad changes from linear to nonlinear, or the reverse.                                                                                                                               |
+  | `LOADED`                   | Android, iOS | Fires when ad data is available.                                                                                                                                                                            |
+  | `LOG`                      | Android, iOS | Fires when a non-fatal error is encountered. The user need not take any action since the SDK will continue with the same or next ad playback depending on the error situation.                              |
+  | `MIDPOINT`                 | Android, iOS | Fires when the ad playhead crosses midpoint.                                                                                                                                                                |
+  | `PAUSED`                   | Android, iOS | Fires when the ad is paused.                                                                                                                                                                                |
+  | `RESUMED`                  | Android, iOS | Fires when the ad is resumed.                                                                                                                                                                               |
+  | `SKIPPABLE_STATE_CHANGED`  | Android      | Fires when the displayed ads skippable state is changed.                                                                                                                                                    |
+  | `SKIPPED`                  | Android, iOS | Fires when the ad is skipped by the user.                                                                                                                                                                   |
+  | `STARTED`                  | Android, iOS | Fires when the ad starts playing.                                                                                                                                                                           |
+  | `STREAM_LOADED`            | iOS          | Stream request has loaded (only used for dynamic ad insertion).                                                                                                                                             |
+  | `TAPPED`                   | iOS          | Fires when the ad is tapped.                                                                                                                                                                                |
+  | `THIRD_QUARTILE`           | Android, iOS | Fires when the ad playhead crosses third quartile.                                                                                                                                                          |
+  | `UNKNOWN`                  | iOS          | An unknown event has fired                                                                                                                                                                                  |
+  | `USER_CLOSE`               | Android      | Fires when the ad is closed by the user.                                                                                                                                                                    |
+  | `VIDEO_CLICKED`            | Android      | Fires when the non-clickthrough portion of a video ad is clicked.                                                                                                                                           |
+  | `VIDEO_ICON_CLICKED`       | Android      | Fires when a user clicks a video icon.                                                                                                                                                                      |
+  | `VOLUME_CHANGED`           | Android      | Fires when the ad volume has changed.                                                                                                                                                                       |
+  | `VOLUME_MUTED`             | Android      | Fires when the ad volume has been muted.                                                                                                                                                                    |
 
 </details>
 
-Payload:
-
+**Payload:**
 | Property | Type                                      | Description           |
-| -------- | ----------------------------------------- | --------------------- |
+|----------|-----------------------------------------|---------------------|
 | event    | AdEvent                                   | The ad event received |
-| data     | Record&lt;string, string&gt; \| undefined | The ad event data     |
+| data     | Record&lt;string, string&gt; \| undefined | Additional ad event data |
 
-Example:
-
+**Example:**
 ```json
 {
   "data": {
@@ -456,173 +473,172 @@ Example:
 }
 ```
 
+---
+
 ### `onRestoreUserInterfaceForPictureInPictureStop`
 
 <PlatformsList types={['iOS', 'visionOS']} />
 
-Callback function that corresponds to Apple's [`restoreUserInterfaceForPictureInPictureStopWithCompletionHandler`](https://developer.apple.com/documentation/avkit/avpictureinpicturecontrollerdelegate/1614703-pictureinpicturecontroller?language=objc). Call `restoreUserInterfaceForPictureInPictureStopCompleted` inside of this function when done restoring the user interface.
+Corresponds to Apple's [`restoreUserInterfaceForPictureInPictureStopWithCompletionHandler`](https://developer.apple.com/documentation/avkit/avpictureinpicturecontrollerdelegate/1614703-pictureinpicturecontroller?language=objc).
+Call `restoreUserInterfaceForPictureInPictureStopCompleted` inside this function when the UI is restored.
 
-Payload: none
+**Payload:** _none_
+
+---
 
 ### `onSeek`
 
 <PlatformsList types={['Android', 'iOS', 'Windows UWP', 'web']} />
 
-Callback function that is called when a seek completes.
+Triggered when a seek operation completes.
 
-Payload:
-
+**Payload:**
 | Property    | Type   | Description                     |
-| ----------- | ------ | ------------------------------- |
-| currentTime | number | The current time after the seek |
-| seekTime    | number | The requested time              |
+|------------|--------|---------------------------------|
+| currentTime | number | Current time after seeking     |
+| seekTime    | number | Requested seek time            |
 
-Example:
-
+**Example:**
 ```javascript
 {
-  currentTime: 100.5;
-  seekTime: 100;
+  currentTime: 100.5,
+  seekTime: 100
 }
 ```
 
-Both the currentTime & seekTime are reported because the video player may not seek to the exact requested position in order to improve seek performance.
+> **Note:** On iOS, this callback is not reported when native controls are enabled.
 
-Note: on iOS, when controls are enable, this callback is not reported. This is a known limitation.
+---
 
 ### `onTimedMetadata`
 
 <PlatformsList types={['Android', 'iOS', 'visionOS']} />
 
-Callback function that is called when timed metadata becomes available
+Triggered when timed metadata is available.
 
-Payload:
-
+**Payload:**
 | Property | Type  | Description               |
-| -------- | ----- | ------------------------- |
+|----------|------|--------------------------|
 | metadata | array | Array of metadata objects |
 
-Example:
-
+**Example:**
 ```javascript
 {
   metadata: [
-    {value: 'Streaming Encoder', identifier: 'TRSN'},
-    {value: 'Internet Stream', identifier: 'TRSO'},
-    {value: 'Any Time You Like', identifier: 'TIT2'},
-  ];
+    { value: 'Streaming Encoder', identifier: 'TRSN' },
+    { value: 'Internet Stream', identifier: 'TRSO' },
+    { value: 'Any Time You Like', identifier: 'TIT2' }
+  ]
 }
 ```
+
+---
 
 ### `onTextTrackDataChanged`
 
 <PlatformsList types={['Android', 'iOS']} />
 
-Callback function that is called when new subtitle data is available. It provides the actual subtitle content for the current selected text track, if available (mainly WebVTT).
+Triggered when new subtitle data becomes available.
 
-Payload:
+**Payload:**
+| Property         | Type     | Description                                       |
+|----------------|--------|--------------------------------------------------|
+| subtitleTracks | string  | The subtitle text content in a compatible format |
 
-| Property         | Type     | Description                                        |
-| ---------------- | -------- | -------------------------------------------------- |
-| `subtitleTracks` | `string` | The subtitles text content in a compatible format. |
-
-Example:
-
+**Example:**
 ```javascript
 {
-  subtitleTracks: "This blade has a dark past.",
+  subtitleTracks: "This blade has a dark past."
 }
 ```
 
-For details on how to control the visibility of subtitles, see the [subtitleStyle](./props.mdx#subtitleStyle) section.
+---
 
 ### `onTextTracks`
 
 <PlatformsList types={['Android', 'iOS']} />
 
-Callback function that is called when text tracks change
+Triggered when available text (subtitle) tracks change.
 
-Payload:
+**Payload:**
+| Property | Type    | Description                                                                                                  |
+|----------|--------|--------------------------------------------------------------------------------------------------------------|
+| index    | number  | Internal track ID                                                                                           |
+| title    | string  | Track name                                                                                                  |
+| language | string  | 2 letter [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) language code                           |
+| type     | string  | Track MIME type (_VTT_, _SRT_, _TTML_)                                                                      |
+| selected | boolean | `true` if the track is currently playing                                                                   |
 
-| Property | Type    | Description                                                                                                                                                                                          |
-| -------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| index    | number  | Internal track ID                                                                                                                                                                                    |
-| title    | string  | Descriptive name for the track                                                                                                                                                                       |
-| language | string  | 2 letter [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) representing the language                                                                                           |
-| type     | string  | Mime type of the track<br/> _ TextTrackType.SRT - SubRip (.srt)<br/> _ TextTrackType.TTML - TTML (.ttml)<br/> \* TextTrackType.VTT - WebVTT (.vtt)<br/>iOS only supports VTT, Android supports all 3 |
-| selected | boolean | true if track is playing                                                                                                                                                                             |
-
-Example:
-
+**Example:**
 ```javascript
 {
   textTracks: [
     {
       index: 0,
-      title: 'Any Time You Like',
-      type: 'srt',
-      selected: true,
-    },
-  ];
+      title: 'English Subtitles',
+      type: 'vtt',
+      selected: true
+    }
+  ]
 }
 ```
+
+---
 
 ### `onVideoTracks`
 
 <PlatformsList types={['Android']} />
 
-Callback function that is called when video tracks change
+Triggered when video tracks change.
 
-Payload:
+**Payload:**
+| Property | Type    | Description                       |
+|----------|---------|-----------------------------------|
+| index    | number  | Track index                       |
+| trackId  | string  | Internal track ID                 |
+| codecs   | string  | Codec type                        |
+| width    | number  | Video width                       |
+| height   | number  | Video height                      |
+| bitrate  | number  | Track bitrate (bps)               |
+| selected | boolean | `true` if the track is playing    |
+| rotation | number  | Rotation angle (0, 90, 180, 270)  |
 
-| Property | Type    | Description                                                     |
-| -------- | ------- | --------------------------------------------------------------- |
-| index    | number  | index of the track                                              |
-| trackId  | string  | Internal track ID                                               |
-| codecs   | string  | MimeType of codec used for this track                           |
-| width    | number  | Track width                                                     |
-| height   | number  | Track height                                                    |
-| bitrate  | number  | Bitrate in bps                                                  |
-| selected | boolean | true if track is selected for playing                           |
-| rotation | number  | 0, 90, 180 or 270 rotation to apply to the track (android only) |
-
-Example:
-
+**Example:**
 ```javascript
 {
   videoTracks: [
     {
-      index: O,
-      trackId: "0",
-      codecs: 'video/mp4',
+      index: 0,
+      trackId: "1",
+      codecs: "video/mp4",
       width: 1920,
       height: 1080,
-      bitrate: 10000,
+      bitrate: 5000000,
       selected: true,
-      rotation: 0,
-    },
-  ];
+      rotation: 0
+    }
+  ]
 }
 ```
+
+---
 
 ### `onVolumeChange`
 
 <PlatformsList types={['Android', 'iOS', 'visionOS', 'web']} />
 
-Callback function that is called when the volume of player changes.
+Triggered when the player volume changes.
 
-> Note: This event applies to the volume of the player, not the volume of the device.
+> **Note:** This event applies to the player's volume, not the device's system volume.
 
-Payload:
+**Payload:**
+| Property | Type   | Description                       |
+|----------|--------|---------------------------------|
+| volume   | number | Volume level (0 to 1)          |
 
-| Property | Type   | Description                                |
-| -------- | ------ | ------------------------------------------ |
-| volume   | number | The volume of the player (between 0 and 1) |
-
-Example:
-
+**Example:**
 ```javascript
 {
-  volume: 0.5;
+  volume: 0.5
 }
 ```
