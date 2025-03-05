@@ -1,57 +1,38 @@
-# Downloading
+# Offline Video SDK
 
-Our [Offline Video SDK](https://www.thewidlarzgroup.com/offline-video-sdk/?utm_source=rnv&utm_medium=docs&utm_campaign=downloading&utm_id=offline-video-sdk-link) lets you download and store video content for offline playback. It works with react-native-video, handling both HLS and DASH streams. You can pick specific bitrates or tracks (including audio and subtitles), and the SDK takes care of all the background tasks—queuing, resuming, and notifying about progress or errors. By simplifying how downloads are managed and stored, it ensures a reliable, user-friendly offline experience without forcing you to alter your existing video workflows.
+## What is the Offline Video SDK?
+[Offline Video SDK](https://www.thewidlarzgroup.com/offline-video-sdk/?utm_source=rnv&utm_medium=docs&utm_campaign=downloading&utm_id=offline-video-sdk-link) extends `react-native-video` (v6 or v7) with the ability to download and store video content for playback when users are offline. It also supports DRM protected cotnent. The SDK manages all background tasks-like queuing, pausing, resuming, and notifying about progress or errors-without requiring a major rework of your existing setup.
 
-### 1. **Does Offline Video SDK support multiple audio tracks?**
-**Answer:** Yes! The same applies to subtitles.
+Offline Video SDK has two key features:
 
----
+- **Stream Downloading**
+The SDK allows you to download streams and store them for later offline playback. It also comes with an asset manager that can be used to manage assets downloaded on the device.
 
-### 2. **I have subtitles from a different platform. Will they work?**
-**Answer:** As long as it’s a supported format for that platform.
+- **Offline DRM**
+This feature enables secure playback of DRM-protected video content offline.  It ensures that even when users are offline, content owners' rights are respected and content is protected against unauthorized access.
 
----
+### Key Points
 
-### 3. **Does HLS work on Android?**
-**Answer:** Yes, HLS videos work on Android and can be downloaded. However, if you’re using DRM on Android, only DASH is supported—which our SDK provides.
+- **Multiple Audio Tracks & Subtitles**  
+  The SDK supports downloading various audio and subtitle tracks. You can also include or exclude subtitles from different sources, provided they’re in a supported format.
 
----
+- **Selective Downloads**  
+  By default, only the chosen or default track is downloaded (resolution, language, etc.). This helps conserve device storage and avoids unnecessary files.
 
-### 4. **I use the XYZ DRM provider. Will it work in my case?**
-**Answer:** To check if your provider supports offline playback, you need to verify whether it allows downloading Persistent Tokens.
+- **DRM License Optimization**  
+  If your DRM provider issues persistent tokens, you can store and update them only when they expire-rather than each time content is played. This can reduce licensing costs.
 
----
+- **Implementation**  
+  You can integrate the SDK yourself, or our team can help you implement it. We also offer commercial cooperation if your team needs support or if your current project has stalled. [Reach out to us](mailto:hi@thewidlarzgroup.com)
 
-### 5. **Offline playback still doesn't work when I add react-native-video contentID with a persistent key.**
-**Answer:** For offline playback, you also need to download the streams. Providing only a contentID with a persistent key won’t do the trick.
+- **Pluggable Architecture**  
+  This solution focuses on offline capabilities. It doesn’t restrict you from adding more features to your video player. Future versions of `react-native-video` (v7+) will make it even simpler to include additional plugins without forking the library.
 
----
+- **Basic Requirements**  
+  1. `react-native-video` version **6** or **7**  
+  2. Actual stream download is needed for offline playback. Providing only a contentID or persistent key is not sufficient.  
 
-### 6. **Can this SDK help reduce my DRM provider costs?**
-**Answer:** Yes! One of our plugins, **DRM-license downloader**, stores persistent tokens and updates them only when they expire, rather than every time a video is played. This can help optimize costs.
+### Licensing & Inquiries
 
----
+For details about licensing, trials, or further assistance, please [reach out to us](mailto:hi@thewidlarzgroup.com). We’ll be happy to discuss your specific needs and walk you through any questions.  
 
-### 7. **Who will implement this SDK? Our team abandoned the project after encountering the first bug in react-native-video.**
-**Answer:** Our team can handle the SDK implementation as part of a commercial cooperation. We are also available to assist or support your team during the implementation process, or you can integrate it yourself if you prefer.
-
----
-
-### 8. **Will Offline Video SDK download all the content specified in an m3u8/mpd file?**
-**Answer:** Fortunately, it doesn’t. The SDK allows you to select specific resolutions or tracks. If no selection is made, the default track will be downloaded. This helps prevent unnecessary memory usage when downloading videos. Developers can, for example, select which audio track to download based on the user’s location, but downloading multiple tracks is also supported.
-
----
-
-### 9. **Can I add more features to the app?**
-**Answer:** This solution targets a specific case and doesn’t prevent you from adding more to your video implementation. In fact, the upcoming `react-native-video` version 7 will promote a pluggable architecture, making it even easier to add features without forking the library. You won’t need to rely entirely on a proprietary player—only for the parts you need, such as offline capabilities.
-
----
-
-### 10. **How does the licensing model work? Is there a free trial?**
-**Answer:** Reach out to us!
-
-
-
-### Restrictions
-
-You need to already use react-native-video version 6 or 7. 

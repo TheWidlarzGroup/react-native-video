@@ -1,20 +1,18 @@
-# Plugin (experimental)
+# Plugin
 
 Since Version 6.4.0, it is possible to create plugins for analytics management and maybe much more.
-A sample plugin is available in the repository in: example/react-native-video-plugin-sample. (important FIXME, put sample link)
+A sample plugin is available in the repository in: [example/react-native-video-plugin-sample](https://github.com/TheWidlarzGroup/react-native-video/tree/master/examples/react-native-video-plugin-sample)
 
-## Official plugins
+## Commercial plugins
 We at the Widlarz Group have created a set of plugins to cover offline video in total. If you are interested in this feature, please checkout [Video Offline SDK](https://thewidlarzgroup.com/video-offline-sdk). If you want some other plugins (analytics, processing, etc) let us know. 
 
-## Concept
+> When you use or recommend our commercial software you help support the maintenance of this open-source project. Thank you!
 
-Most of the analytics system which tracks player information (bitrate, errors, ...) can be integrated directly with Exoplayer or AVPlayer handles.
-
-This plugin system allows none intrusive integration of analytics in the react-native-package. It shall be done in native language (kotlin/swift).
-
-The idea behind this system is to be able to plug an analytics package to react native video without doing any code change (ideally).
-
-Following documentation will show on how to create a new plugin for react native video
+## Plugins for analytics
+Most analytics systems that track player information (e.g., bitrate, errors) can be integrated directly with ExoPlayer or AVPlayer.
+This plugin system allows non-intrusive analytics integration into the react-native-video package. It should be implemented in native languages (Kotlin/Swift).
+The goal is to enable seamless integration of analytics packages into react-native-video without requiring code modifications (ideally).
+The following documentation explains how to create a new plugin for react-native-video.
 
 ## Warning and consideration
 This is an experiental API, it is subject to change. The api with player is very simple but should be flexible enough to implement analytics system. If you need some metadata, you should implement setter in the new package you are creating.
@@ -35,7 +33,7 @@ Your `react-native-video-custom-analytics` shall implement this interface and re
 There is no special requierement for gradle file.
 You need two mandatory action to be able to receive player handle
 
-### 1/ Create the plugin
+### 1. Create the plugin
 
 First you should instanciate a class which extends `RNVPlugin`.
 
@@ -60,7 +58,7 @@ The `RNVPlugin` interface only defines 2 functions, see description here under.
     fun onInstanceRemoved(id: String, player: Any)
  ````
 
-### 2/ register the plugin
+### 2. Register the plugin
 
 To register this allocated class in the main react native video package you should call following function:
 
@@ -73,7 +71,7 @@ Your native module can now track Player updates directly from Player reference a
 
 ## ios
 
-### 1/ podspec integration
+### 1. podspec integration
 
 Your new module shall be able to access to react-native-video package, then we must declare it as a dependency of the new module you are creating.
 
@@ -81,7 +79,7 @@ Your new module shall be able to access to react-native-video package, then we m
   s.dependency "react-native-video"
 ````
 
-### 2/ Create the plugin
+### 2. Create the plugin
 
 First you should instanciate a class which extends `RNVPlugin`.
 
@@ -104,7 +102,7 @@ The `RNVPlugin` interface only defines 2 functions, see description here under.
     func onInstanceRemoved(player: Any)
 ```
 
-### 3/ Register the plugin
+### 3. Register the plugin
 
 To register this allocated class in the main react native video package you should register it by calling this function:
 
