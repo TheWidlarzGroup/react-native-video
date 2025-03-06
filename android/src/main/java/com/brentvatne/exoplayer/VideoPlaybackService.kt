@@ -227,7 +227,6 @@ class VideoPlaybackService : MediaSessionService() {
     }
 
     private fun createPlaceholderNotification(): Notification {
-        // Create a notification channel if needed
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             notificationManager.createNotificationChannel(
@@ -239,11 +238,10 @@ class VideoPlaybackService : MediaSessionService() {
             )
         }
 
-        // Return a minimal notification
         return NotificationCompat.Builder(this, NOTIFICATION_CHANEL_ID)
             .setSmallIcon(androidx.media3.session.R.drawable.media3_icon_circular_play)
-            .setContentTitle("Media playback")
-            .setContentText("Preparing playback...")
+            .setContentTitle(R.string.media_playback_notification_title)
+            .setContentText(R.string.media_playback_notification_text)
             .build()
     }
 
