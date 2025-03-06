@@ -77,14 +77,9 @@ RCT_EXTERN_METHOD(enterPictureInPictureCmd : (nonnull NSNumber*)reactTag)
 RCT_EXTERN_METHOD(exitPictureInPictureCmd : (nonnull NSNumber*)reactTag)
 RCT_EXTERN_METHOD(setSourceCmd : (nonnull NSNumber*)reactTag source : (NSDictionary*)source)
 
-RCT_EXTERN_METHOD(save
-                  : (nonnull NSNumber*)reactTag options
-                  : (NSDictionary*)options resolve
-                  : (RCTPromiseResolveBlock)resolve reject
-                  : (RCTPromiseRejectBlock)reject)
-RCT_EXTERN_METHOD(getCurrentPosition
-                  : (nonnull NSNumber*)reactTag resolve
-                  : (RCTPromiseResolveBlock)resolve reject
-                  : (RCTPromiseRejectBlock)reject)
+RCT_EXTERN_METHOD(save : (nonnull NSNumber*)reactTag options : (NSDictionary*)options resolve : (RCTPromiseResolveBlock)
+                      resolve reject : (RCTPromiseRejectBlock)reject)
+RCT_EXTERN_METHOD(getCurrentPosition : (nonnull NSNumber*)reactTag resolve : (RCTPromiseResolveBlock)
+                      resolve reject : (RCTPromiseRejectBlock)reject)
 
 @end
