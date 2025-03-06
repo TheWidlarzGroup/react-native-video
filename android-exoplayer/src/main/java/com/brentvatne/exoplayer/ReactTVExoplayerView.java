@@ -641,7 +641,11 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                 translations.getAdSkipCountDown(),
                 translations.getAdSkip()
         );
-        return new AdGlobalSettings(hideAdUiElements, isWhyThisAdIconEnabled, adLabels);
+        return new AdGlobalSettings.Builder()
+                .setHideAdUiElements(hideAdUiElements)
+                .setWhyThisAdIconEnabled(isWhyThisAdIconEnabled)
+                .setAdLabels(adLabels)
+                .build();
     }
 
     private List<String> getPreferredSubtitleLang() {
