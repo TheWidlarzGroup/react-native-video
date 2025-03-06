@@ -241,8 +241,8 @@ class VideoPlaybackService : MediaSessionService() {
 
         return NotificationCompat.Builder(this, NOTIFICATION_CHANEL_ID)
             .setSmallIcon(androidx.media3.session.R.drawable.media3_icon_circular_play)
-            .setContentTitle(R.string.media_playback_notification_title)
-            .setContentText(R.string.media_playback_notification_text)
+            .setContentTitle(getString(R.string.media_playback_notification_title))
+            .setContentText(getString(R.string.media_playback_notification_text))
             .build()
     }
 
