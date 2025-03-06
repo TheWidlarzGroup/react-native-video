@@ -20,7 +20,7 @@ import androidx.media3.session.MediaSessionService
 import androidx.media3.session.MediaStyleNotificationHelper
 import androidx.media3.session.SessionCommand
 import com.brentvatne.common.toolbox.DebugLog
-import com.brentvatne.react.R;
+import com.brentvatne.react.R
 import okhttp3.internal.immutableListOf
 
 class PlaybackServiceBinder(val service: VideoPlaybackService) : Binder()
