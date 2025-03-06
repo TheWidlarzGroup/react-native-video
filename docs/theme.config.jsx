@@ -68,7 +68,8 @@ export default {
   footer: {
     text: (
       <span>
-        Built with ❤️ by <strong>React Native Community</strong>
+        Built with ❤️ by <strong>TheWidlarzGroup</strong> &{' '}
+        <strong>React Native Community</strong>
       </span>
     ),
   },

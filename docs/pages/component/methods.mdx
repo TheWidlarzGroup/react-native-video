@@ -2,284 +2,336 @@ import PlatformsList from '../../components/PlatformsList/PlatformsList.tsx';
 
 # Methods
 
-This page shows the list of available methods
+This page shows the list of available methods.
+
+## Details
 
 ### `dismissFullscreenPlayer`
 
 <PlatformsList types={['Android', 'iOS', 'web']} />
 
-`dismissFullscreenPlayer(): Promise<void>`
+```tsx
+dismissFullscreenPlayer(): Promise<void>
+```
 
-Take the player out of fullscreen mode.
+Exits fullscreen mode.
 
-> [!WARNING]
-> deprecated, use setFullScreen method instead
+> **Deprecated:** Use `setFullScreen(false)` instead.
+
+---
 
 ### `pause`
 
 <PlatformsList types={['Android', 'iOS', 'web']} />
 
-`pause(): Promise<void>`
+```tsx
+pause(): Promise<void>
+```
 
-Pause the video.
+Pauses the video.
+
+---
 
 ### `presentFullscreenPlayer`
 
 <PlatformsList types={['Android', 'iOS', 'web']} />
 
-`presentFullscreenPlayer(): Promise<void>`
+```tsx
+presentFullscreenPlayer(): Promise<void>
+```
 
-Put the player in fullscreen mode.
+Enters fullscreen mode.
 
-On iOS, this displays the video in a fullscreen view controller with controls.
+- On **iOS**, this opens a fullscreen view controller with controls.
+- On **Android**, this makes the player fullscreen but requires styling to match screen dimensions.
 
-On Android, this puts the navigation controls in fullscreen mode. It is not a complete fullscreen implementation, so you will still need to apply a style that makes the width and height match your screen dimensions to get a fullscreen video.
+> **Deprecated:** Use `setFullScreen(true)` instead.
 
-> [!WARNING]
-> deprecated, use setFullScreen method instead
+---
 
 ### `resume`
 
 <PlatformsList types={['Android', 'iOS', 'web']} />
 
-`resume(): Promise<void>`
+```tsx
+resume(): Promise<void>
+```
 
-Resume the video.
+Resumes video playback.
+
+---
 
 ### `restoreUserInterfaceForPictureInPictureStopCompleted`
 
 <PlatformsList types={['iOS']} />
 
-`restoreUserInterfaceForPictureInPictureStopCompleted(restored)`
+```tsx
+restoreUserInterfaceForPictureInPictureStopCompleted(restored)
+```
 
-This function corresponds to the completion handler in Apple's [restoreUserInterfaceForPictureInPictureStop](https://developer.apple.com/documentation/avkit/avpictureinpicturecontrollerdelegate/1614703-pictureinpicturecontroller?language=objc). IMPORTANT: This function must be called after `onRestoreUserInterfaceForPictureInPictureStop` is called.
+Must be called after `onRestoreUserInterfaceForPictureInPictureStop`.
+Corresponds to Apple's [`restoreUserInterfaceForPictureInPictureStop`](https://developer.apple.com/documentation/avkit/avpictureinpicturecontrollerdelegate/1614703-pictureinpicturecontroller?language=objc).
+
+---
 
 ### `save`
 
 <PlatformsList types={['iOS']} />
 
-`save(): Promise<{ uri: string }>`
+```tsx
+save(): Promise<{ uri: string }>
+```
 
-Save video to your Photos with current filter prop. Returns promise.
+Saves the video to the user's **Photos app** with the current filter.
 
-Notes:
+#### Notes:
+- Supports **MP4** export only.
+- Exports to the **cache directory** with a generated UUID filename.
+- Requires **internet connection** if the video is not already buffered.
+- Video remains in the **Photos app** until manually deleted.
+- Works with **cached videos**.
 
-- Currently only supports highest quality export
-- Currently only supports MP4 export
-- Currently only supports exporting to user's cache directory with a generated UUID filename.
-- User will need to remove the saved video through their Photos app
-- Works with cached videos as well. (Checkout video-caching example)
-- If the video is has not began buffering (e.g. there is no internet connection) then the save function will throw an error.
-- If the video is buffering then the save function promise will return after the video has finished buffering and processing.
+#### Future improvements:
+- Support for **multiple quality options**.
+- Support for **more formats**.
+- Support for **custom directory and filename**.
 
-Future:
-
-- Will support multiple qualities through options
-- Will support more formats in the future through options
-- Will support custom directory and file name through options
+---
 
 ### `enterPictureInPicture`
 
 <PlatformsList types={['Android', 'iOS', 'web']} />
 
-`enterPictureInPicture()`
-
-To use this feature on Android with Expo, you must set 'enableAndroidPictureInPicture' true within expo plugin config (app.json)
-
-```json
-  "plugins": [
-    [
-      "react-native-video",
-      {
-        "enableAndroidPictureInPicture": true,
-      }
-    ]
-  ]
+```tsx
+enterPictureInPicture()
 ```
 
-To use this feature on Android with Bare React Native, you must:
+Activates Picture-in-Picture (PiP) mode.
 
-- [Declare PiP support](https://developer.android.com/develop/ui/views/picture-in-picture#declaring) in your AndroidManifest.xml
-- setting `android:supportsPictureInPicture` to `true`
+#### Android setup:
+For **Expo**, enable PiP in `app.json`:
+
+```json
+"plugins": [
+  [
+    "react-native-video",
+    {
+      "enableAndroidPictureInPicture": true
+    }
+  ]
+]
+```
+
+For **Bare React Native**, update `AndroidManifest.xml`:
 
 ```xml
 <activity
   android:name=".MainActivity"
-  ...
   android:supportsPictureInPicture="true">
+</activity>
 ```
 
-NOTE: Foreground picture in picture is not supported on Android due to limitations of react native (Single Activity App). So, If you call `enterPictureInPicture`, application will switch to background on Android.
-NOTE: Video ads cannot start when you are using the PIP on iOS (more info available at [Google IMA SDK Docs](https://developers.google.com/interactive-media-ads/docs/sdks/ios/client-side/picture_in_picture?hl=en#starting_ads)). If you are using custom controls, you must hide your PIP button when you receive the `STARTED` event from `onReceiveAdEvent` and show it again when you receive the `ALL_ADS_COMPLETED` event.
+> **Note:**
+> - On **Android**, entering PiP moves the app to the **background**.
+> - On **iOS**, **video ads cannot start** in PiP mode ([Google IMA SDK](https://developers.google.com/interactive-media-ads/docs/sdks/ios/client-side/picture_in_picture?hl=en#starting_ads)).
+
+---
 
 ### `exitPictureInPicture`
 
 <PlatformsList types={['Android', 'iOS', 'web']} />
 
-`exitPictureInPicture()`
+```tsx
+exitPictureInPicture()
+```
 
-Exits the active picture in picture; if it is not active, the function call is ignored.
+Exits Picture-in-Picture (PiP) mode.
 
-### `restoreUserInterfaceForPictureInPictureStopCompleted`
-
-<PlatformsList types={['iOS']} />
-
-`restoreUserInterfaceForPictureInPictureStopCompleted(restored)`
-
-This function corresponds to the completion handler in Apple's [restoreUserInterfaceForPictureInPictureStop](https://developer.apple.com/documentation/avkit/avpictureinpicturecontrollerdelegate/1614703-pictureinpicturecontroller?language=objc). IMPORTANT: This function must be called after `onRestoreUserInterfaceForPictureInPictureStop` is called.
+---
 
 ### `seek`
 
 <PlatformsList types={['All']} />
 
-`seek(seconds)`
+```tsx
+seek(seconds: number)
+```
 
-Seek to the specified position represented by seconds. seconds is a float value.
+Seeks to the specified position (**in seconds**).
 
-`seek()` can only be called after the `onLoad` event has fired. Once completed, the [onSeek](./events#onseek) event will be called.
+#### Notes:
+- **Must be called after** `onLoad`.
+- Triggers the [`onSeek`](./events#onseek) event.
 
-#### Exact seek
+#### **iOS Exact Seek:**
+```tsx
+seek(seconds, tolerance: number)
+```
+- Default **tolerance**: ±100ms.
+- Set `tolerance = 0` for **precise seeking**.
 
-<PlatformsList types={['iOS']} />
-
-By default iOS seeks within 100 milliseconds of the target position. If you need more accuracy, you can use the seek with tolerance method:
-
-`seek(seconds, tolerance)`
-
-tolerance is the max distance in milliseconds from the seconds position that's allowed. Using a more exact tolerance can cause seeks to take longer. If you want to seek exactly, set tolerance to 0.
+---
 
 ### `setVolume`
 
 <PlatformsList types={['Android', 'iOS', 'web']} />
 
-`setVolume(value): Promise<void>`
+```tsx
+setVolume(value: number): Promise<void>
+```
 
-This function will change the volume exactly like [volume](./props#volume) property. default value and range are the same then.
+Changes the **volume** level. Same behavior as the [`volume`](./props#volume) prop.
+
+---
 
 ### `getCurrentPosition`
 
 <PlatformsList types={['Android', 'iOS', 'web']} />
 
-`getCurrentPosition(): Promise<number>`
+```tsx
+getCurrentPosition(): Promise<number>
+```
 
-This function retrieves and returns the precise current position of the video playback, measured in seconds.
-This function will throw an error if player is not initialized.
+Returns the **current playback position** in seconds.
 
+> **Throws an error** if the player is not initialized.
+
+---
 
 ### `setSource`
 
 <PlatformsList types={['Android', 'iOS']} />
 
-`setSource(source: ReactVideoSource): Promise<void>`
+```tsx
+setSource(source: ReactVideoSource): Promise<void>
+```
 
-This function will change the source exactly like [source](./props#source) property.
-Changing source with this function will overide source provided as props. 
+Updates the media source **dynamically**.
+
+> **Note:** This **overrides** the `source` prop.
+
+---
 
 ### `setFullScreen`
 
 <PlatformsList types={['Android', 'iOS', 'web']} />
 
-`setFullScreen(fullscreen): Promise<void>`
+```tsx
+setFullScreen(fullscreen: boolean): Promise<void>
+```
 
-If you set it to `true`, the player enters fullscreen mode. If you set it to `false`, the player exits fullscreen mode.
+Toggles fullscreen mode.
 
-On iOS, this displays the video in a fullscreen view controller with controls.
+- `true` → Enters fullscreen.
+- `false` → Exits fullscreen.
 
-On Android, this puts the navigation controls in fullscreen mode. It is not a complete fullscreen implementation, so you will still need to apply a style that makes the width and height match your screen dimensions to get a fullscreen video.
+---
 
 ### `nativeHtmlVideoRef`
 
 <PlatformsList types={['web']} />
 
-A ref to the underlying html video element. This can be used if you need to integrate a 3d party, web only video library (like hls.js, shaka, video.js...).
+A **reference to the native HTML `<video>` element**.
+Useful for integrating **third-party** video libraries like **hls.js, shaka, video.js, etc.**.
 
+---
 
-### Example Usage
+### **Example Usage**
 
 ```tsx
 const videoRef = useRef<VideoRef>(null);
 
-const someCoolFunctions = async () => {
-  if (!videoRef.current) {
-    return;
-  }
+const handleVideoControls = async () => {
+  if (!videoRef.current) return;
 
-  // present or dismiss fullscreen player
+  // Fullscreen controls
   videoRef.current.presentFullscreenPlayer();
   videoRef.current.dismissFullscreenPlayer();
 
-  // pause or resume the video
+  // Playback controls
   videoRef.current.pause();
   videoRef.current.resume();
 
-  // save video to your Photos with current filter prop
+  // Save video
   const response = await videoRef.current.save();
-  const path = response.uri;
+  console.log('Saved video path:', response.uri);
 
-  // seek to the specified position represented by seconds
+  // Seek to 200s (or with tolerance on iOS)
   videoRef.current.seek(200);
-  // or on iOS you can seek with tolerance
   videoRef.current.seek(200, 10);
 };
 
 return (
   <Video
     ref={videoRef}
-    source={{uri: 'https://www.w3schools.com/html/mov_bbb.mp4'}}
+    source={{ uri: 'https://www.w3schools.com/html/mov_bbb.mp4' }}
   />
 );
 ```
 
-## Static methods
+## Static Methods
 
 ### `getWidevineLevel`
 
 <PlatformsList types={['Android']} />
 
-Indicates whether the widevine level supported by device.
+```tsx
+getWidevineLevel(): Promise<number>
+```
 
-Possible values are:
+Returns the **Widevine DRM level**:
 
-- 0 - unable to determine widevine support (typically not supported)
-- 1, 2, 3 - Widevine level supported
+- **0** → Unknown / Not supported.
+- **1, 2, 3** → Supported Widevine levels.
+
+---
 
 ### `isCodecSupported`
 
 <PlatformsList types={['Android', 'web']} />
 
-Indicates whether the provided codec is supported level supported by device.
+```tsx
+isCodecSupported(mimetype: string, width: number, height: number): Promise<'hardware' | 'software' | 'unsupported'>
+```
 
-parameters:
+Checks if the given **video codec** is supported.
 
-- `mimetype`: mime type of codec to query
-- `width`, `height`: resolution to query
+| Result      | Meaning                                |
+|------------|--------------------------------------|
+| `hardware`  | Hardware decoding supported         |
+| `software`  | Only software decoding available    |
+| `unsupported` | Codec **not supported**            |
 
-Possible results:
-
-- `hardware` - codec is supported by hardware
-- `software` - codec is supported by software only
-- `unsupported` - codec is not supported
+---
 
 ### `isHEVCSupported`
 
 <PlatformsList types={['Android']} />
 
-Helper which Indicates whether the provided HEVC/1920\*1080 is supported level supported by device. It uses isCodecSupported internally.
+```tsx
+isHEVCSupported(): Promise<boolean>
+```
 
-### Example Usage
+Checks if **HEVC (H.265)** is supported at **1920×1080 resolution**.
+
+> Uses `isCodecSupported` internally.
+
+---
+
+### Static Methods Example Usage
 
 ```tsx
 import { VideoDecoderProperties } from 'react-native-video';
 
 VideoDecoderProperties.getWidevineLevel().then((level) => {
-  ...
+  console.log('Widevine Level:', level);
 });
 
 VideoDecoderProperties.isCodecSupported('video/hevc', 1920, 1080).then((support) => {
-  ...
+  console.log('HEVC Support:', support);
 });
 
 VideoDecoderProperties.isHEVCSupported().then((support) => {
-  ...
+  console.log('HEVC 1080p Support:', support);
 });
 ```
