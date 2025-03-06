@@ -27,6 +27,11 @@
     "newWindow": true,
     "href": "https://www.thewidlarzgroup.com/?utm_source=rnv&utm_medium=docs#Contact"
   },
+  "issue_boost": {
+    "title": "Boost Your Issue",
+    "newWindow": true,
+    "href": "https://www.thewidlarzgroup.com/issue-boost/?utm_source=rnv&utm_medium=docs&utm_campaign=sidebar&utm_id=issue-boost-button"
+  },
   "separator_enterprise": {
     "type": "separator",
     "title": ""
