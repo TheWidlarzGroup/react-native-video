@@ -224,9 +224,9 @@ public class ReactExoplayerView extends FrameLayout implements
     private ArrayList<Integer> rootViewChildrenOriginalVisibility = new ArrayList<Integer>();
 
     /*
-    * When user is seeking first called is on onPositionDiscontinuity -> DISCONTINUITY_REASON_SEEK
-    * Then we set if to false when playback is back in onIsPlayingChanged -> true
-    */
+     * When user is seeking first called is on onPositionDiscontinuity -> DISCONTINUITY_REASON_SEEK
+     * Then we set if to false when playback is back in onIsPlayingChanged -> true
+     */
     private boolean isSeeking = false;
     private long seekPosition = -1;
 
@@ -332,7 +332,6 @@ public class ReactExoplayerView extends FrameLayout implements
 
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         themedReactContext.addLifecycleEventListener(this);
-        pipListenerUnsubscribe = PictureInPictureUtil.addLifecycleEventListener(context, this);
         audioBecomingNoisyReceiver = new AudioBecomingNoisyReceiver(themedReactContext);
         audioFocusChangeListener = new OnAudioFocusChangedListener(this, themedReactContext);
         pictureInPictureReceiver = new PictureInPictureReceiver(this, themedReactContext);
@@ -767,6 +766,8 @@ public class ReactExoplayerView extends FrameLayout implements
                 if (player == null) {
                     // Initialize core configuration and listeners
                     initializePlayerCore(self);
+                    pipListenerUnsubscribe = PictureInPictureUtil.addLifecycleEventListener(themedReactContext, this);
+                    PictureInPictureUtil.applyAutoEnterEnabled(themedReactContext, pictureInPictureParamsBuilder, this.enterPictureInPictureOnLeave);
                 }
                 if (!source.isLocalAssetFile() && !source.isAsset() && source.getBufferConfig().getCacheSize() > 0) {
                     RNVSimpleCache.INSTANCE.setSimpleCache(
@@ -935,7 +936,7 @@ public class ReactExoplayerView extends FrameLayout implements
                             : (e.reason == UnsupportedDrmException.REASON_UNSUPPORTED_SCHEME
                             ? R.string.error_drm_unsupported_scheme : R.string.error_drm_unknown);
                     eventEmitter.onVideoError.invoke(getResources().getString(errorStringId), e, "3003");
-                        }
+                }
             }
         }
         return drmSessionManager;
@@ -1270,12 +1271,12 @@ public class ReactExoplayerView extends FrameLayout implements
 
         for (SideLoadedTextTrack track : source.getSideLoadedTextTracks().getTracks()) {
             MediaItem.SubtitleConfiguration subtitleConfiguration = new MediaItem.SubtitleConfiguration.Builder(track.getUri())
-                .setMimeType(track.getType())
-                .setLanguage(track.getLanguage())
-                .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
-                .setRoleFlags(C.ROLE_FLAG_SUBTITLE)
-                .setLabel(track.getTitle())
-                .build();
+                    .setMimeType(track.getType())
+                    .setLanguage(track.getLanguage())
+                    .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
+                    .setRoleFlags(C.ROLE_FLAG_SUBTITLE)
+                    .setLabel(track.getTitle())
+                    .build();
             subtitleConfigurations.add(subtitleConfiguration);
         }
 
@@ -1298,7 +1299,7 @@ public class ReactExoplayerView extends FrameLayout implements
             player.removeListener(this);
             PictureInPictureUtil.applyAutoEnterEnabled(themedReactContext, pictureInPictureParamsBuilder, false);
             if (pipListenerUnsubscribe != null) {
-                new Handler().post(pipListenerUnsubscribe);
+                pipListenerUnsubscribe.run();
             }
             trackSelector = null;
 
@@ -2245,7 +2246,9 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void setEnterPictureInPictureOnLeave(boolean enterPictureInPictureOnLeave) {
         this.enterPictureInPictureOnLeave = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && enterPictureInPictureOnLeave;
-        PictureInPictureUtil.applyAutoEnterEnabled(themedReactContext, pictureInPictureParamsBuilder, this.enterPictureInPictureOnLeave);
+        if (player != null) {
+            PictureInPictureUtil.applyAutoEnterEnabled(themedReactContext, pictureInPictureParamsBuilder, this.enterPictureInPictureOnLeave);
+        }
     }
 
     protected void setIsInPictureInPicture(boolean isInPictureInPicture) {
