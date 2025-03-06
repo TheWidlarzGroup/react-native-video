@@ -29,6 +29,7 @@ struct ReactVideoView : ReactVideoViewT<ReactVideoView> {
   bool m_fullScreen = false;
   double m_volume = 0;
   double m_position = 0;
+  double m_mediaPlayerPosition = 0;
   Windows::UI::Xaml::DispatcherTimer m_timer;
   Windows::Media::Playback::MediaPlayer m_player = nullptr;
   Windows::UI::Core::CoreDispatcher m_uiDispatcher = nullptr;
@@ -40,6 +41,7 @@ struct ReactVideoView : ReactVideoViewT<ReactVideoView> {
   Windows::Media::Playback::MediaPlaybackSession::BufferingStarted_revoker m_bufferingStartedToken{};
   Windows::Media::Playback::MediaPlaybackSession::BufferingEnded_revoker m_bufferingEndedToken{};
   Windows::Media::Playback::MediaPlaybackSession::SeekCompleted_revoker m_seekCompletedToken{};
+  Windows::Media::Playback::MediaPlaybackSession::PositionChanged_revoker m_positionChangedToken{};
 
   bool IsPlaying(Windows::Media::Playback::MediaPlaybackState currentState);
   void OnMediaOpened(IInspectable const &sender, IInspectable const &args);
