@@ -22,4 +22,8 @@
   <string name="playback_speed">Playback Speed</string>
 
   <string name="select_playback_speed">Select Playback Speed</string>
+
+  <string name="media_playback_notification_title">Media playback</string>
+
+  <string name="media_playback_notification_text">Preparing playback</string>
 </resources>
