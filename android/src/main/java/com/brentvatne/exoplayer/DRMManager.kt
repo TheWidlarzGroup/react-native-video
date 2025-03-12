@@ -32,6 +32,8 @@ class DRMManager(private val dataSourceFactory: HttpDataSource.Factory) : DRMMan
             }
 
             val mediaDrm = FrameworkMediaDrm.newInstance(uuid)
+
+            // TODO: This isn't very secure, should be fixed
             if (hasDrmFailed) {
                 // When DRM fails using L1 we want to switch to L3
                 mediaDrm.setPropertyString("securityLevel", "L3")
