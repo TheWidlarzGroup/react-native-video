@@ -34,29 +34,67 @@ npx create-react-native-library@latest react-native-video-custom-analytics
 Both Android and iOS implementations expose an `RNVPlugin` interface.
 Your `react-native-video-custom-analytics` package should implement this interface and register itself as a plugin for `react-native-video`.
 
+## Plugin Types
+
+There are two types of plugins you can implement:
+
+1. **Base Plugin (`RNVPlugin`)**: For general-purpose plugins that don't need specific player implementation details.
+2. **Player-Specific Plugins**:
+   - `RNVAVPlayerPlugin` for iOS: Provides type-safe access to AVPlayer instances
+   - `RNVExoplayerPlugin` for Android: Provides type-safe access to ExoPlayer instances
+
+Choose the appropriate plugin type based on your needs. If you need direct access to player-specific APIs, use the player-specific plugin classes.
+
 ## Android Implementation
 
 ### 1. Create the Plugin
 
-First, instantiate a class that extends `RNVPlugin`.
+You can implement either the base `RNVPlugin` interface or the player-specific `RNVExoplayerPlugin` interface.
 
-The recommended approach is to implement `RNVPlugin` inside the Module file (`VideoPluginSampleModule`).
+#### Base Plugin
+
+```kotlin
+class MyAnalyticsPlugin : RNVPlugin {
+    override fun onInstanceCreated(id: String, player: Any) {
+        // Handle player creation
+    }
+
+    override fun onInstanceRemoved(id: String, player: Any) {
+        // Handle player removal
+    }
+}
+```
+
+#### ExoPlayer-Specific Plugin
+
+```kotlin
+class MyExoPlayerAnalyticsPlugin : RNVExoplayerPlugin {
+    override fun onInstanceCreated(id: String, player: ExoPlayer) {
+        // Handle ExoPlayer creation with type-safe access
+    }
+
+    override fun onInstanceRemoved(id: String, player: ExoPlayer) {
+        // Handle ExoPlayer removal with type-safe access
+    }
+}
+```
 
 The `RNVPlugin` interface defines two functions:
 
 ```kotlin
 /**
- * Called when a new player instance is created.
- * @param id: A unique identifier for the player instance.
- * @param player: The instantiated player reference.
+ * Function called when a new player is created
+ * @param id: a random string identifying the player
+ * @param player: the instantiated player reference
  */
 fun onInstanceCreated(id: String, player: Any)
 
 /**
- * Called when a player instance should be destroyed.
- * The plugin should free resources and release all references to the player object.
- * @param id: A unique identifier for the player instance.
- * @param player: The player to release.
+ * Function called when a player should be destroyed
+ * when this callback is called, the plugin shall free all
+ * resources and release all reference to Player object
+ * @param id: a random string identifying the player
+ * @param player: the player to release
  */
 fun onInstanceRemoved(id: String, player: Any)
 ```
@@ -64,8 +102,6 @@ fun onInstanceRemoved(id: String, player: Any)
 ### 2. Register the Plugin
 
 To register the plugin within the main `react-native-video` package, call:
-
-To register your plugin with the main react native video package, call the following function:
 
 ```kotlin
 ReactNativeVideoManager.getInstance().registerPlugin(plugin)
@@ -87,25 +123,54 @@ s.dependency "react-native-video"
 
 ### 2. Create the Plugin
 
-Instantiate a class that extends `RNVPlugin`.
+You can implement either the base `RNVPlugin` class or the player-specific `RNVAVPlayerPlugin` class.
 
-The recommended approach is to implement `RNVPlugin` inside the entry point module file (`VideoPluginSample`).
+#### Base Plugin
 
-The `RNVPlugin` interface defines two functions:
+```swift
+class MyAnalyticsPlugin: RNVPlugin {
+    override func onInstanceCreated(id: String, player: Any) {
+        // Handle player creation
+    }
+
+    override func onInstanceRemoved(id: String, player: Any) {
+        // Handle player removal
+    }
+}
+```
+
+#### AVPlayer-Specific Plugin
+
+```swift
+class MyAVPlayerAnalyticsPlugin: RNVAVPlayerPlugin {
+    override func onInstanceCreated(id: String, player: AVPlayer) {
+        // Handle AVPlayer creation with type-safe access
+    }
+
+    override func onInstanceRemoved(id: String, player: AVPlayer) {
+        // Handle AVPlayer removal with type-safe access
+    }
+}
+```
+
+The `RNVPlugin` class defines two methods:
 
 ```swift
 /**
- * Called when a new player instance is created.
- * @param player: The instantiated player reference.
+ * Function called when a new player is created
+ * @param id: a random string identifying the player
+ * @param player: the instantiated player reference
  */
-func onInstanceCreated(player: Any)
+open func onInstanceCreated(id: String, player: Any) { /* no-op */ }
 
 /**
- * Called when a player instance should be destroyed.
- * The plugin should free resources and release all references to the player object.
- * @param player: The player to release.
+ * Function called when a player should be destroyed
+ * when this callback is called, the plugin shall free all
+ * resources and release all reference to Player object
+ * @param id: a random string identifying the player
+ * @param player: the player to release
  */
-func onInstanceRemoved(player: Any)
+open func onInstanceRemoved(id: String, player: Any) { /* no-op */ }
 ```
 
 ### 3. Register the Plugin
@@ -154,7 +219,7 @@ class CustomDRMManager : DRMManagerSpec {
 
 #### 2/ Register DRM manager in your plugin
 
-Implement `getDRMManager()` in your plugin to provide the custom DRM manager:
+Implement `getDRMManager()` in your ExoPlayer plugin to provide the custom DRM manager:
 
 ```kotlin
 class CustomVideoPlugin : RNVExoplayerPlugin {
@@ -216,12 +281,12 @@ class CustomDRMManager: NSObject, DRMManagerSpec {
 
 #### 2/ Register DRM manager in your plugin
 
-Implement `getDRMManager()` in your plugin to provide the custom DRM manager:
+Implement `getDRMManager()` in your AVPlayer plugin to provide the custom DRM manager:
 
 ```swift
 class CustomVideoPlugin: RNVAVPlayerPlugin {
     override func getDRMManager() -> DRMManagerSpec? {
-        return CustomDRMManager.self
+        return CustomDRMManager()
     }
     
     override func onInstanceCreated(id: String, player: AVPlayer) {
