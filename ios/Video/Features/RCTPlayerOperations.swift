@@ -128,9 +128,14 @@ enum RCTPlayerOperations {
         await player?.currentItem?.select(mediaOption, in: group)
     }
 
-    static func seek(player: AVPlayer, playerItem: AVPlayerItem, paused: Bool, seekTime: Float, seekTolerance: Float, completion: @escaping (Bool) -> Void) {
+    static func seek(
+        player: AVPlayer, playerItem: AVPlayerItem, paused: Bool, seekTime: Float,
+        seekTolerance: Float, completion: @escaping (Bool) -> Void
+    ) {
         let timeScale = 1000
-        let cmSeekTime: CMTime = CMTimeMakeWithSeconds(Float64(seekTime), preferredTimescale: Int32(timeScale))
+        let cmSeekTime: CMTime = CMTimeMakeWithSeconds(
+            Float64(seekTime), preferredTimescale: Int32(timeScale)
+        )
         let current: CMTime = playerItem.currentTime()
         let tolerance: CMTime = CMTimeMake(value: Int64(seekTolerance), timescale: Int32(timeScale))
 
@@ -141,63 +146,11 @@ enum RCTPlayerOperations {
 
         if !paused { player.pause() }
 
-        player.seek(to: cmSeekTime, toleranceBefore: tolerance, toleranceAfter: tolerance, completionHandler: { (finished: Bool) in
-            completion(finished)
-        })
-    }
-
-    static func configureAudio(ignoreSilentSwitch: String, mixWithOthers: String, audioOutput: String) {
-        let audioSession: AVAudioSession! = AVAudioSession.sharedInstance()
-        var category: AVAudioSession.Category?
-        var options: AVAudioSession.CategoryOptions?
-
-        if ignoreSilentSwitch == "ignore" {
-            category = audioOutput == "earpiece" ? AVAudioSession.Category.playAndRecord : AVAudioSession.Category.playback
-        } else if ignoreSilentSwitch == "obey" {
-            category = AVAudioSession.Category.ambient
-        }
-
-        if mixWithOthers == "mix" {
-            options = .mixWithOthers
-        } else if mixWithOthers == "duck" {
-            options = .duckOthers
-        }
-
-        if let category, let options {
-            do {
-                try audioSession.setCategory(category, options: options)
-            } catch {
-                debugPrint("[RCTPlayerOperations] Problem setting up AVAudioSession category and options. Error: \(error).")
-                #if !os(tvOS)
-                    // Handle specific set category and option combination error
-                    // setCategory:AVAudioSessionCategoryPlayback withOptions:mixWithOthers || duckOthers
-                    // Failed to set category, error: 'what' Error Domain=NSOSStatusErrorDomain
-                    // https://developer.apple.com/forums/thread/714598
-                    if #available(iOS 16.0, *) {
-                        do {
-                            debugPrint("[RCTPlayerOperations] Reseting AVAudioSession category to playAndRecord with defaultToSpeaker options.")
-                            try audioSession.setCategory(
-                                audioOutput == "earpiece" ? AVAudioSession.Category.playAndRecord : AVAudioSession.Category.playback,
-                                options: AVAudioSession.CategoryOptions.defaultToSpeaker
-                            )
-                        } catch {
-                            debugPrint("[RCTPlayerOperations] Reseting AVAudioSession category and options problem. Error: \(error).")
-                        }
-                    }
-                #endif
+        player.seek(
+            to: cmSeekTime, toleranceBefore: tolerance, toleranceAfter: tolerance,
+            completionHandler: { (finished: Bool) in
+                completion(finished)
             }
-        } else if let category, options == nil {
-            do {
-                try audioSession.setCategory(category)
-            } catch {
-                debugPrint("[RCTPlayerOperations] Problem setting up AVAudioSession category. Error: \(error).")
-            }
-        } else if category == nil, let options {
-            do {
-                try audioSession.setCategory(audioSession.category, options: options)
-            } catch {
-                debugPrint("[RCTPlayerOperations] Problem setting up AVAudioSession options. Error: \(error).")
-            }
-        }
+        )
     }
 }
