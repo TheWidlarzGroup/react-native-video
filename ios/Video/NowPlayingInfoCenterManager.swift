@@ -22,14 +22,14 @@ class NowPlayingInfoCenterManager {
 
     private let remoteCommandCenter = MPRemoteCommandCenter.shared()
 
-    private var receivingRemoveControlEvents = false {
+    var receivingRemoveControlEvents = false {
         didSet {
             if receivingRemoveControlEvents {
-                try? AVAudioSession.sharedInstance().setCategory(.playback)
-                try? AVAudioSession.sharedInstance().setActive(true)
+                AudioSessionManager.shared.setRemoteControlEventsActive(true)
                 UIApplication.shared.beginReceivingRemoteControlEvents()
             } else {
                 UIApplication.shared.endReceivingRemoteControlEvents()
+                AudioSessionManager.shared.setRemoteControlEventsActive(false)
             }
         }
     }
