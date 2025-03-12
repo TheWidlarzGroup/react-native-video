@@ -1,7 +1,8 @@
 package com.brentvatne.react
 
 /**
- * Plugin interface definition
+ * Plugin interface definition for RNV plugins that does not have dependencies nor logic specific to any player
+ * It is the base interface for all RNV plugins
  */
 interface RNVPlugin {
     /**
