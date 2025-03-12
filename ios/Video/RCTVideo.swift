@@ -500,15 +500,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             throw NSError(domain: "", code: 0, userInfo: nil)
         }
 
-        guard let assetResult = RCTVideoUtils.prepareAsset(source: source),
-              let asset = assetResult.asset,
-              let assetOptions = assetResult.assetOptions else {
-            DebugLog("Could not find video URL in source '\(String(describing: _source))'")
-            isSetSourceOngoing = false
-            applyNextSource()
-            throw NSError(domain: "", code: 0, userInfo: nil)
-        }
-
         if let startPosition = _source?.startPosition {
             _startPosition = startPosition / 1000
         }
