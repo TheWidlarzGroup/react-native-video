@@ -1,4 +1,4 @@
-struct DRMParams {
+public struct DRMParams {
     let type: String?
     let licenseServer: String?
     let headers: [String: Any]?

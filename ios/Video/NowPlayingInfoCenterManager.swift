@@ -22,14 +22,14 @@ class NowPlayingInfoCenterManager {
 
     private let remoteCommandCenter = MPRemoteCommandCenter.shared()
 
-    private var receivingRemoveControlEvents = false {
+    var receivingRemoveControlEvents = false {
         didSet {
             if receivingRemoveControlEvents {
-                try? AVAudioSession.sharedInstance().setCategory(.playback)
-                try? AVAudioSession.sharedInstance().setActive(true)
+                AudioSessionManager.shared.setRemoteControlEventsActive(true)
                 UIApplication.shared.beginReceivingRemoteControlEvents()
             } else {
                 UIApplication.shared.endReceivingRemoteControlEvents()
+                AudioSessionManager.shared.setRemoteControlEventsActive(false)
             }
         }
     }
@@ -208,10 +208,25 @@ class NowPlayingInfoCenterManager {
 
         // commonMetadata is metadata from asset, externalMetadata is custom metadata set by user
         // externalMetadata should override commonMetadata to allow override metadata from source
-        let metadata = {
-            let common = Dictionary(uniqueKeysWithValues: currentItem.asset.commonMetadata.map { ($0.identifier, $0) })
-            let external = Dictionary(uniqueKeysWithValues: currentItem.externalMetadata.map { ($0.identifier, $0) })
-            return Array((common.merging(external) { _, new in new }).values)
+        // When the metadata has the tag "iTunSMPB" or "iTunNORM" then the metadata is not converted correctly and comes [nil, nil, ...]
+        // This leads to a crash of the app
+        let metadata: [AVMetadataItem] = {
+            func processMetadataItems(_ items: [AVMetadataItem]) -> [String: AVMetadataItem] {
+                var result = [String: AVMetadataItem]()
+
+                for item in items {
+                    if let id = item.identifier?.rawValue, !id.isEmpty, result[id] == nil {
+                        result[id] = item
+                    }
+                }
+
+                return result
+            }
+
+            let common = processMetadataItems(currentItem.asset.commonMetadata)
+            let external = processMetadataItems(currentItem.externalMetadata)
+
+            return Array(common.merging(external) { _, new in new }.values)
         }()
 
         let titleItem = AVMetadataItem.metadataItems(from: metadata, filteredByIdentifier: .commonIdentifierTitle).first?.stringValue ?? ""

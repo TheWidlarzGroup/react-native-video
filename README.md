@@ -50,6 +50,9 @@ var styles = StyleSheet.create({
 });
 ```
 
+## Roadmap
+You can follow our work on the library at [Roadmap](https://github.com/orgs/TheWidlarzGroup/projects/6).
+
 ## Community support
 We have an discord server where you can ask questions and get help. [Join the discord server](https://discord.gg/WXuM4Tgb9X)
 
