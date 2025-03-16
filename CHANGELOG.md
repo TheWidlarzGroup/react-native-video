@@ -1,5 +1,23 @@
 
 
+# [6.11.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.10.2...v6.11.0) (2025-03-16)
+
+
+### Bug Fixes
+
+* **android:** call `startForeground()` immediately to prevent `ForegroundServiceDidNotStartInTimeException` ([#4453](https://github.com/TheWidlarzGroup/react-native-video/issues/4453)) ([b510374](https://github.com/TheWidlarzGroup/react-native-video/commit/b5103743e87a6ef24c69a07a8368415ff0fc7886))
+* **android:** fix bugs related Android PIP listeners ([#4441](https://github.com/TheWidlarzGroup/react-native-video/issues/4441)) ([82f5f3d](https://github.com/TheWidlarzGroup/react-native-video/commit/82f5f3d21c2f29282c024bfa3a8f9562a4ed8e0f))
+* **android:** prevent ratio calculations before loading video ([#4442](https://github.com/TheWidlarzGroup/react-native-video/issues/4442)) ([235c281](https://github.com/TheWidlarzGroup/react-native-video/commit/235c28121903e20f58d4d830fea5929d2e6e0b56))
+* **ios:** invalid metadata handling ([#4422](https://github.com/TheWidlarzGroup/react-native-video/issues/4422)) ([bc533e5](https://github.com/TheWidlarzGroup/react-native-video/commit/bc533e53b0b4c6906f6e72eac7e3f228da3e4bbd))
+* **tvOS:** handle allowsPictureInPicturePlayback for tvOS ([#4448](https://github.com/TheWidlarzGroup/react-native-video/issues/4448)) ([057c287](https://github.com/TheWidlarzGroup/react-native-video/commit/057c287f127b9f796e592ae538478386f42a447c))
+* **windows:** event name not matches with SPEC ([#4455](https://github.com/TheWidlarzGroup/react-native-video/issues/4455)) ([fa20223](https://github.com/TheWidlarzGroup/react-native-video/commit/fa20223c4498e72bd13b87b05c0297b544c4724b))
+
+
+### Features
+
+* enhance react-native-video plugins [Plugins API Breaking] ([#4366](https://github.com/TheWidlarzGroup/react-native-video/issues/4366)) ([6e6f915](https://github.com/TheWidlarzGroup/react-native-video/commit/6e6f91517c492cdc7d2140ae8564712e9a98450a))
+* **windows:** add topSeek parms mentioned in docs ([#4456](https://github.com/TheWidlarzGroup/react-native-video/issues/4456)) ([d902c1b](https://github.com/TheWidlarzGroup/react-native-video/commit/d902c1bf4390a5503eb0ff924ec7cafb2b08a428))
+
 ## [6.10.2](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.10.1...v6.10.2) (2025-02-22)
 
 
