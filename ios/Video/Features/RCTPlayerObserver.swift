@@ -321,9 +321,9 @@ class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVPla
 
         _restoreUserInterfaceForPIPStopCompletionHandler = completionHandler
     }
-    
+
     func playerViewController(
-        _ playerViewController: AVPlayerViewController,
+        _: AVPlayerViewController,
         willEndFullScreenPresentationWithAnimationCoordinator coordinator: UIViewControllerTransitionCoordinator
     ) {
         // iOS automatically pauses videos after exiting fullscreen,
@@ -331,11 +331,10 @@ class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVPla
         let wasPlaying = player?.timeControlStatus == .playing
 
         coordinator.animate(alongsideTransition: nil) { [weak self] context in
-            guard let self = self, !context.isCancelled, wasPlaying else { return }
+            guard let self, !context.isCancelled, wasPlaying else { return }
             self.player?.play()
         }
     }
-
 
     func setRestoreUserInterfaceForPIPStopCompletionHandler(_ restore: Bool) {
         guard let _restoreUserInterfaceForPIPStopCompletionHandler else { return }
