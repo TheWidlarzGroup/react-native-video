@@ -74,7 +74,20 @@ class NewPlayerView: UIView, JSInputProtocol {
         }
     }
     @objc var buttons: NSDictionary? {
-        didSet { jsProps.buttons.value = try? Buttons(dict: buttons) } }
+        didSet {
+            let buttonsModel = try? Buttons(dict: buttons)
+            jsProps.buttons.value = buttonsModel
+            if let buttonsModel, buttons != oldValue, let toggles = jsPlayerView?.dorisGlue?.doris?.viewModel.toggles {
+                toggles.isFavouriteButtonHidden = !buttonsModel.favourite
+                toggles.isSettingsButtonHidden = !(buttonsModel.settings ?? true)
+                toggles.isStatsButtonHidden = !buttonsModel.stats
+                toggles.isFullScreenButtonHidden = !(buttonsModel.fullscreen ?? true)
+                toggles.isWatchlistButtonHidden = !(buttonsModel.watchlist ?? false)
+                toggles.isAnnotationsButtonHidden = !(buttonsModel.annotations ?? false)
+                toggles.isScheduleButtonHidden = !(buttonsModel.epg ?? false)
+            }
+        }
+    }
     @objc var theme: NSDictionary? {
         didSet { jsProps.theme.value = try? Theme(dict: theme) } }
     @objc var relatedVideos: NSDictionary? {
