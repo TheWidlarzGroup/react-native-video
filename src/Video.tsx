@@ -570,7 +570,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     );
 
     const _onReadyForDisplay = useCallback(() => {
-      hasPoster && setShowPoster(false);
+      hasPoster && setShowPoster(!!hasPoster);
       onReadyForDisplay?.();
     }, [setShowPoster, hasPoster, onReadyForDisplay]);
 
