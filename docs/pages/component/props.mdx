@@ -462,6 +462,21 @@ maxBitRate={2000000} // 2 megabits
 ```
 
 ---
+### `initialBitrate`
+
+<PlatformsList types={['Android']} />
+
+Sets the initial preferred bitrate (in bits per second) for network bandwidth consumption when multiple video streams are available in an adaptive playlist. This helps control the quality of the initial stream selection before Adaptive Bitrate Streaming (ABR) takes over.
+
+**Default:** The player uses Adaptive Bitrate Streaming (ABR) to dynamically select the best stream based on available bandwidth.
+
+**Example:**
+
+```javascript
+initialBitrate={5000000} // 5 megabits
+```
+
+---
 
 ### `mixWithOthers`
 
