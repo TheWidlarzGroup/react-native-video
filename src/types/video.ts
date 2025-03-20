@@ -312,6 +312,7 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   /** @deprecated Use source.minLoadRetryCount */
   minLoadRetryCount?: number; // Android
   maxBitRate?: number;
+  initialBitrate?: number; // Android
   mixWithOthers?: EnumValues<MixWithOthersType>; // iOS
   muted?: boolean;
   paused?: boolean;
