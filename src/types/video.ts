@@ -309,10 +309,10 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   fullscreenOrientation?: EnumValues<FullscreenOrientationType>; // iOS
   hideShutterView?: boolean; //	Android
   ignoreSilentSwitch?: EnumValues<IgnoreSilentSwitchType>; // iOS
+  initialBitrate?: number; // Android
   /** @deprecated Use source.minLoadRetryCount */
   minLoadRetryCount?: number; // Android
   maxBitRate?: number;
-  initialBitrate?: number; // Android
   mixWithOthers?: EnumValues<MixWithOthersType>; // iOS
   muted?: boolean;
   paused?: boolean;
