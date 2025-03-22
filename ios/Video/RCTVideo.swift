@@ -1667,8 +1667,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 }
             }
 
-            self.reactViewController().view.frame = bounds
-            self.reactViewController().view.setNeedsLayout()
+            if let reactVC = self.reactViewController() {
+                reactVC.view.frame = bounds
+                reactVC.view.setNeedsLayout()
+            }
         }
     }
 
