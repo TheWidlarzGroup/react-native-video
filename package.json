@@ -1,7 +1,7 @@
 {
-    "name": "react-native-video",
+    "name": "react-native-video-ios",
     "version": "6.2.0",
-    "description": "A <Video /> element for react-native",
+    "description": "iOS-only fork of react-native-video",
     "main": "lib/index",
     "source": "src/index",
     "react-native": "src/index",
