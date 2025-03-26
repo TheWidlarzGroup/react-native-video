@@ -1225,7 +1225,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             NowPlayingInfoCenterManager.shared.removePlayer(player: player)
         }
     }
-    
+
     @objc
     func setDisableAudioSessionManagement(_ disableAudioSessionManagement: Bool) {
         _disableAudioSessionManagement = disableAudioSessionManagement

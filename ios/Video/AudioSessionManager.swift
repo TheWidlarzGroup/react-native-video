@@ -7,7 +7,7 @@ class AudioSessionManager {
     private var videoViews = NSHashTable<RCTVideo>.weakObjects()
     private var isAudioSessionActive = false
     private var remoteControlEventsActive = false
-    
+
     private var isAudioSessionManagementDisabled: Bool {
         return videoViews.allObjects.contains { view in
             return view._disableAudioSessionManagement == true
@@ -79,7 +79,7 @@ class AudioSessionManager {
             // AUDIO SESSION MANAGEMENT DISABLED BY USER
             return
         }
-        
+
         remoteControlEventsActive = active
 
         if active {
@@ -140,7 +140,7 @@ class AudioSessionManager {
         }
 
         let canAllowMixing = !anyPlayerShowNotificationControls && !anyPlayerNeedsBackgroundPlayback
-        
+
         if isAudioSessionManagementDisabled {
             // AUDIO SESSION MANAGEMENT DISABLED BY USER
             return
