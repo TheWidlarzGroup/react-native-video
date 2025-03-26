@@ -75,7 +75,7 @@ ReactVideoView::ReactVideoView(winrt::Microsoft::ReactNative::IReactContext cons
           auto currentTimeInSeconds = mediaPlayer.PlaybackSession().Position().count() / 10000000;
           self->m_reactContext.DispatchEvent(
               *self,
-              L"topProgress",
+              L"topVideoProgress",
               [&](winrt::Microsoft::ReactNative::IJSValueWriter const &eventDataWriter) noexcept {
                 eventDataWriter.WriteObjectBegin();
                 {
@@ -88,6 +88,14 @@ ReactVideoView::ReactVideoView(winrt::Microsoft::ReactNative::IReactContext cons
       }
     }
   });
+
+  m_positionChangedToken = m_player.PlaybackSession().PositionChanged(
+      winrt::auto_revoke, [ref = get_weak()](auto const& sender, auto const& args) {
+        if (auto self = ref.get()) {
+          auto newPosition = sender.Position().count();
+          self->m_mediaPlayerPosition = newPosition;
+        }
+      });
 }
 
 void ReactVideoView::OnMediaOpened(IInspectable const &, IInspectable const &) {
@@ -102,7 +110,7 @@ void ReactVideoView::OnMediaOpened(IInspectable const &, IInspectable const &) {
 
         strong_this->m_reactContext.DispatchEvent(
             *strong_this,
-            L"topLoad",
+            L"topVideoLoad",
             [&](winrt::Microsoft::ReactNative::IJSValueWriter const &eventDataWriter) noexcept {
               eventDataWriter.WriteObjectBegin();
               {
@@ -135,7 +143,7 @@ void ReactVideoView::OnMediaOpened(IInspectable const &, IInspectable const &) {
 void ReactVideoView::OnMediaFailed(IInspectable const &, IInspectable const &) {
   runOnQueue([weak_this{get_weak()}]() {
     if (auto strong_this{weak_this.get()}) {
-      strong_this->m_reactContext.DispatchEvent(*strong_this, L"topError", nullptr);
+      strong_this->m_reactContext.DispatchEvent(*strong_this, L"topVideoError", nullptr);
     }
   });
 }
@@ -143,7 +151,7 @@ void ReactVideoView::OnMediaFailed(IInspectable const &, IInspectable const &) {
 void ReactVideoView::OnMediaEnded(IInspectable const &, IInspectable const &) {
   runOnQueue([weak_this{get_weak()}]() {
     if (auto strong_this{weak_this.get()}) {
-      strong_this->m_reactContext.DispatchEvent(*strong_this, L"topEnd", nullptr);
+      strong_this->m_reactContext.DispatchEvent(*strong_this, L"topVideoEnd", nullptr);
     }
   });
 }
@@ -155,7 +163,22 @@ void ReactVideoView::OnBufferingEnded(IInspectable const &, IInspectable const &
 void ReactVideoView::OnSeekCompleted(IInspectable const &, IInspectable const &) {
   runOnQueue([weak_this{get_weak()}]() {
     if (auto strong_this{weak_this.get()}) {
-      strong_this->m_reactContext.DispatchEvent(*strong_this, L"topSeek", nullptr);
+      if (auto mediaPlayer = strong_this->m_player) {
+        auto currentTimeInSeconds = mediaPlayer.PlaybackSession().Position().count() / 10000000;
+        auto seekTimeInSeconds = strong_this->m_mediaPlayerPosition / 10000000;
+
+        strong_this->m_reactContext.DispatchEvent(
+          *strong_this,
+          L"topVideoSeek",
+          [&](winrt::Microsoft::ReactNative::IJSValueWriter const &eventDataWriter) noexcept {
+            eventDataWriter.WriteObjectBegin();
+            {
+              WriteProperty(eventDataWriter, L"currentTime", currentTimeInSeconds);
+              WriteProperty(eventDataWriter, L"seekTime", seekTimeInSeconds);
+            }
+            eventDataWriter.WriteObjectEnd();
+          });
+      }
     }
   });
 }

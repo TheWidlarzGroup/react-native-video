@@ -1,6 +1,6 @@
 package com.brentvatne.react
 
-import com.brentvatne.common.toolbox.ReactBridgeUtils
+import com.brentvatne.common.api.Source
 import com.brentvatne.exoplayer.ReactExoplayerView
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
@@ -37,28 +37,52 @@ class VideoManagerModule(reactContext: ReactApplicationContext?) : ReactContextB
     }
 
     @ReactMethod
-    fun setPlayerPauseState(paused: Boolean?, reactTag: Int) {
+    fun setPlayerPauseStateCmd(reactTag: Int, paused: Boolean?) {
         performOnPlayerView(reactTag) {
             it?.setPausedModifier(paused!!)
         }
     }
 
     @ReactMethod
-    fun seek(info: ReadableMap, reactTag: Int) {
-        if (!info.hasKey("time")) {
-            return
-        }
-
-        val time = ReactBridgeUtils.safeGetInt(info, "time")
+    @Suppress("UNUSED_PARAMETER") // codegen compatibility
+    fun seekCmd(reactTag: Int, time: Float, tolerance: Float) {
         performOnPlayerView(reactTag) {
             it?.seekTo((time * 1000f).roundToInt().toLong())
         }
     }
 
     @ReactMethod
-    fun setVolume(volume: Float, reactTag: Int) {
+    fun setVolumeCmd(reactTag: Int, volume: Float) {
         performOnPlayerView(reactTag) {
             it?.setVolumeModifier(volume)
+        }
+    }
+
+    @ReactMethod
+    fun setFullScreenCmd(reactTag: Int, fullScreen: Boolean) {
+        performOnPlayerView(reactTag) {
+            it?.setFullscreen(fullScreen)
+        }
+    }
+
+    @ReactMethod
+    fun enterPictureInPictureCmd(reactTag: Int) {
+        performOnPlayerView(reactTag) {
+            it?.enterPictureInPictureMode()
+        }
+    }
+
+    @ReactMethod
+    fun exitPictureInPictureCmd(reactTag: Int) {
+        performOnPlayerView(reactTag) {
+            it?.exitPictureInPictureMode()
+        }
+    }
+
+    @ReactMethod
+    fun setSourceCmd(reactTag: Int, source: ReadableMap?) {
+        performOnPlayerView(reactTag) {
+            it?.setSrc(Source.parse(source, reactApplicationContext))
         }
     }
 

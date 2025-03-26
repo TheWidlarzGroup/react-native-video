@@ -9,7 +9,15 @@ enum RCTVideoAssetsUtils {
         for mediaCharacteristic: AVMediaCharacteristic
     ) async -> AVMediaSelectionGroup? {
         if #available(iOS 15, tvOS 15, visionOS 1.0, *) {
-            return try? await asset?.loadMediaSelectionGroup(for: mediaCharacteristic)
+            do {
+                guard let asset else {
+                    return nil
+                }
+
+                return try await asset.loadMediaSelectionGroup(for: mediaCharacteristic)
+            } catch {
+                return nil
+            }
         } else {
             #if !os(visionOS)
                 return asset?.mediaSelectionGroup(forMediaCharacteristic: mediaCharacteristic)
@@ -73,22 +81,25 @@ enum RCTVideoUtils {
         return 0
     }
 
-    static func urlFilePath(filepath: NSString!, searchPath: FileManager.SearchPathDirectory) -> NSURL! {
-        if filepath.contains("file://") {
-            return NSURL(string: filepath as String)
+    static func urlFilePath(filepath: NSString?, searchPath: FileManager.SearchPathDirectory) -> NSURL! {
+        guard let _filepath = filepath else { return nil }
+
+        if _filepath.contains("file://") {
+            return NSURL(string: _filepath as String)
         }
 
         // if no file found, check if the file exists in the Document directory
-        let paths: [String]! = NSSearchPathForDirectoriesInDomains(searchPath, .userDomainMask, true)
-        var relativeFilePath: String! = filepath.lastPathComponent
+        let paths: [String] = NSSearchPathForDirectoriesInDomains(searchPath, .userDomainMask, true)
+        var relativeFilePath: String = _filepath.lastPathComponent
         // the file may be multiple levels below the documents directory
-        let directoryString: String! = searchPath == .cachesDirectory ? "Library/Caches/" : "Documents"
-        let fileComponents: [String]! = filepath.components(separatedBy: directoryString)
+        let directoryString: String = searchPath == .cachesDirectory ? "Library/Caches/" : "Documents"
+        let fileComponents: [String] = _filepath.components(separatedBy: directoryString)
         if fileComponents.count > 1 {
             relativeFilePath = fileComponents[1]
         }
 
-        let path: String! = (paths.first! as NSString).appendingPathComponent(relativeFilePath)
+        guard let _pathFirst = paths.first else { return nil }
+        let path: String = (_pathFirst as NSString).appendingPathComponent(relativeFilePath)
         if FileManager.default.fileExists(atPath: path) {
             return NSURL.fileURL(withPath: path) as NSURL
         }
@@ -127,7 +138,7 @@ enum RCTVideoUtils {
             return []
         }
 
-        let audioTracks: NSMutableArray! = NSMutableArray()
+        let audioTracks = NSMutableArray()
 
         let group = await RCTVideoAssetsUtils.getMediaSelectionGroup(asset: asset, for: .audible)
 
@@ -138,14 +149,14 @@ enum RCTVideoUtils {
             if (values?.count ?? 0) > 0, let value = values?[0] {
                 title = value as! String
             }
-            let language: String! = currentOption?.extendedLanguageTag ?? ""
+            let language: String = currentOption?.extendedLanguageTag ?? ""
 
             let selectedOption: AVMediaSelectionOption? = player.currentItem?.currentMediaSelection.selectedMediaOption(in: group!)
 
             let audioTrack = [
                 "index": NSNumber(value: i),
                 "title": title,
-                "language": language ?? "",
+                "language": language,
                 "selected": currentOption?.displayName == selectedOption?.displayName,
             ] as [String: Any]
             audioTracks.add(audioTrack)
@@ -170,13 +181,12 @@ enum RCTVideoUtils {
             if (values?.count ?? 0) > 0, let value = values?[0] {
                 title = value as! String
             }
-            let language: String! = currentOption?.extendedLanguageTag ?? ""
-            let selectedOpt = player.currentItem?.currentMediaSelection
+            let language: String = currentOption?.extendedLanguageTag ?? ""
             let selectedOption: AVMediaSelectionOption? = player.currentItem?.currentMediaSelection.selectedMediaOption(in: group!)
             let textTrack = TextTrack([
                 "index": NSNumber(value: i),
                 "title": title,
-                "language": language,
+                "language": language as Any,
                 "selected": currentOption?.displayName == selectedOption?.displayName,
             ])
             textTracks.append(textTrack)
@@ -356,10 +366,11 @@ enum RCTVideoUtils {
     static func prepareAsset(source: VideoSource) -> (asset: AVURLAsset?, assetOptions: NSMutableDictionary?)? {
         guard let sourceUri = source.uri, sourceUri != "" else { return nil }
         var asset: AVURLAsset!
-        let bundlePath = Bundle.main.path(forResource: source.uri, ofType: source.type) ?? ""
-        let url = source.isNetwork || source.isAsset
-            ? URL(string: source.uri ?? "")
-            : URL(fileURLWithPath: bundlePath)
+        let bundlePath = Bundle.main.path(forResource: sourceUri, ofType: source.type) ?? ""
+        guard let url = source.isNetwork || source.isAsset
+            ? URL(string: sourceUri)
+            : URL(fileURLWithPath: bundlePath) else { return nil }
+
         let assetOptions: NSMutableDictionary! = NSMutableDictionary()
 
         if source.isNetwork {
@@ -367,10 +378,10 @@ enum RCTVideoUtils {
                 assetOptions.setObject(headers, forKey: "AVURLAssetHTTPHeaderFieldsKey" as NSCopying)
             }
             let cookies: [AnyObject]! = HTTPCookieStorage.shared.cookies
-            assetOptions.setObject(cookies, forKey: AVURLAssetHTTPCookiesKey as NSCopying)
-            asset = AVURLAsset(url: url!, options: assetOptions as! [String: Any])
+            assetOptions.setObject(cookies as Any, forKey: AVURLAssetHTTPCookiesKey as NSCopying)
+            asset = AVURLAsset(url: url, options: assetOptions as? [String: Any])
         } else {
-            asset = AVURLAsset(url: url!)
+            asset = AVURLAsset(url: url)
         }
         return (asset, assetOptions)
     }
@@ -423,14 +434,10 @@ enum RCTVideoUtils {
             return try? await AVVideoComposition.videoComposition(
                 with: asset,
                 applyingCIFiltersWithHandler: { (request: AVAsynchronousCIImageFilteringRequest) in
-                    if filter == nil {
-                        request.finish(with: request.sourceImage, context: nil)
-                    } else {
-                        let image: CIImage! = request.sourceImage.clampedToExtent()
-                        filter.setValue(image, forKey: kCIInputImageKey)
-                        let output: CIImage! = filter.outputImage?.cropped(to: request.sourceImage.extent)
-                        request.finish(with: output, context: nil)
-                    }
+                    let image: CIImage! = request.sourceImage.clampedToExtent()
+                    filter.setValue(image, forKey: kCIInputImageKey)
+                    let output: CIImage! = filter.outputImage?.cropped(to: request.sourceImage.extent)
+                    request.finish(with: output, context: nil)
                 }
             )
         } else {
@@ -438,14 +445,10 @@ enum RCTVideoUtils {
                 return AVVideoComposition(
                     asset: asset,
                     applyingCIFiltersWithHandler: { (request: AVAsynchronousCIImageFilteringRequest) in
-                        if filter == nil {
-                            request.finish(with: request.sourceImage, context: nil)
-                        } else {
-                            let image: CIImage! = request.sourceImage.clampedToExtent()
-                            filter.setValue(image, forKey: kCIInputImageKey)
-                            let output: CIImage! = filter.outputImage?.cropped(to: request.sourceImage.extent)
-                            request.finish(with: output, context: nil)
-                        }
+                        let image: CIImage! = request.sourceImage.clampedToExtent()
+                        filter.setValue(image, forKey: kCIInputImageKey)
+                        let output: CIImage! = filter.outputImage?.cropped(to: request.sourceImage.extent)
+                        request.finish(with: output, context: nil)
                     }
                 )
             #endif

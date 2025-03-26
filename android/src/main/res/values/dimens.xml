@@ -3,6 +3,7 @@
 <!--    margin & padding-->
     <dimen name="controller_wrapper_padding_top">4dp</dimen>
     <dimen name="seekBar_wrapper_margin_top">4dp</dimen>
+    <dimen name="live_wrapper_margin_top">12dp</dimen>
     <dimen name="position_duration_horizontal_padding">4dp</dimen>
     <dimen name="full_screen_margin">4dp</dimen>
 

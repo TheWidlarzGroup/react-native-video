@@ -1,0 +1,56 @@
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "TheWidlarzGroup Docs",
+  "url": "https://docs.thewidlarzgroup.com/react-native-video/",
+  "publisher": {
+    "@type": "Organization",
+    "name": "TheWidlarzGroup",
+    "url": "https://thewidlarzgroup.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://docs.thewidlarzgroup.com/react-native-video/favicon.ico"
+    }
+  },
+  "mainEntity": {
+    "@type": "TechArticle",
+    "headline": "React Native Video Documentation",
+    "description": "Official documentation for React Native Video component by TheWidlarzGroup",
+    "hasPart": [
+      {
+        "@type": "TechArticle",
+        "headline": "Installation Guide",
+        "description": "Installation instructions for your platform to link react-native-video into your project.",
+        "url": "https://docs.thewidlarzgroup.com/react-native-video/installation"
+      },
+      {
+        "@type": "TechArticle",
+        "headline": "Properties",
+        "description": "This page shows the list of available properties to configure the player.",
+        "url": "https://docs.thewidlarzgroup.com/react-native-video/component/props"
+      },
+      {
+        "@type": "TechArticle",
+        "headline": "DRM Implementation",
+        "description": "We provide a sample implementation in the example app demonstrating how to use DRM with react-native-video.",
+        "url": "https://docs.thewidlarzgroup.com/react-native-video/component/drm"
+      },
+      {
+        "@type": "TechArticle",
+        "headline": "Downloading",
+        "description": "The Offline Video SDK extends react-native-video (v6 or v7) with the ability to download and store video content for offline playback.",
+        "url": "https://docs.thewidlarzgroup.com/react-native-video/other/downloading"
+      }
+    ]
+  },
+  "offers": {
+    "@type": "Offer",
+    "name": "Enterprise Support",
+    "description": "Expert support to extend or implement React Native Video capabilities",
+    "url": "https://www.thewidlarzgroup.com/?utm_source=rnv&utm_medium=google#Contact",
+    "seller": {
+      "@type": "Organization",
+      "name": "TheWidlarzGroup"
+    }
+  }
+}

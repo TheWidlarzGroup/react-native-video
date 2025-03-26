@@ -4,6 +4,7 @@ import type {
   OnAudioTracksData,
   OnBandwidthUpdateData,
   OnBufferData,
+  OnControlsVisibilityChange,
   OnExternalPlaybackChangeData,
   OnLoadStartData,
   OnPictureInPictureStatusChangedData,
@@ -18,6 +19,8 @@ import type {
   OnVideoTracksData,
   OnVolumeChangeData,
 } from '../specs/VideoNativeComponent';
+
+export type * from '../specs/VideoNativeComponent';
 
 export type AudioTrack = OnAudioTracksData['audioTracks'][number];
 export type TextTrack = OnTextTracksData['textTracks'][number];
@@ -237,6 +240,7 @@ export interface ReactVideoEvents {
   onIdle?: () => void; // Android
   onBandwidthUpdate?: (e: OnBandwidthUpdateData) => void; //Android
   onBuffer?: (e: OnBufferData) => void; //Android, iOS
+  onControlsVisibilityChange?: (e: OnControlsVisibilityChange) => void; // Android, iOS
   onEnd?: () => void; //All
   onError?: (e: OnVideoErrorData) => void; //Android, iOS
   onExternalPlaybackChange?: (e: OnExternalPlaybackChangeData) => void; //iOS
@@ -248,7 +252,7 @@ export interface ReactVideoEvents {
   onLoadStart?: (e: OnLoadStartData) => void; //All
   onPictureInPictureStatusChanged?: (
     e: OnPictureInPictureStatusChangedData,
-  ) => void; //iOS
+  ) => void; //Android, iOS
   onPlaybackRateChange?: (e: OnPlaybackRateChangeData) => void; //All
   onVolumeChange?: (e: OnVolumeChangeData) => void; //Android, iOS
   onProgress?: (e: OnProgressData) => void; //All

@@ -1,12 +1,18 @@
 # New Architecture
 
 ## Fabric
-Library currently does not support Fabric. We are working on it. In the meantime, you can use Interop Layer.
+
+The library currently does not support Fabric. We are working on adding support. In the meantime, you can use the Interop Layer.
 
 ## Interop Layer
-You can use this library on New Architecture by using Interop Layer. <br/> To use Interop Layer you need to have `react-native` >= `0.72.0` & `react-native-video` >= `6.0.0-beta.5`.
 
-For `react-native` < `0.74` you need to add config in `react-native.config.js` file.
+You can use this library with the New Architecture by enabling the Interop Layer.
+
+### Requirements:
+- `react-native` **>= 0.72.0**
+- `react-native-video` **>= 6.0.0-beta.5**
+
+For `react-native` versions **< 0.74**, you need to add the following configuration in the `react-native.config.js` file:
 
 ```javascript
 module.exports = {
@@ -22,4 +28,5 @@ module.exports = {
 ```
 
 ## Bridgeless Mode
-Library currently does not support Bridgeless Mode. We are working on it.
+
+The library currently does not support Bridgeless Mode. We are working on adding support.

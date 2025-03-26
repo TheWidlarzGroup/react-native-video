@@ -2,54 +2,60 @@
 
 ## iOS App Transport Security
 
-- By default, iOS will only load encrypted (https) urls. If you want to load content from an unencrypted (http) source, you will need to modify your Info.plist file and add the following entry:
+By default, iOS only allows loading encrypted (`https`) URLs. If you need to load content from an unencrypted (`http`) source, you must modify your `Info.plist` file and add the following entry:
 
 ![App Transport Security](../../assets/AppTransportSecuritySetting.png)
 
-For more detailed info check this [article](https://cocoacasts.com/how-to-add-app-transport-security-exception-domains)
-</details>
+For more details, check this [article](https://cocoacasts.com/how-to-add-app-transport-security-exception-domains).
 
 ## Audio Mixing
 
-At some point in the future, react-native-video will include an Audio Manager for configuring how videos mix with other apps playing sounds on the device.
+In future versions, `react-native-video` will include an Audio Manager for configuring how videos mix with other audio-playing apps.
 
-On iOS, if you would like to allow other apps to play music over your video component, make the following change:
+On iOS, if you want to allow background music from other apps to continue playing over your video component, update your `AppDelegate.m` file:
 
-**AppDelegate.m**
+### **AppDelegate.m**
 
 ```objective-c
-#import <AVFoundation/AVFoundation.h>  // import
+#import <AVFoundation/AVFoundation.h>  // Import the AVFoundation framework
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
   ...
-  [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryAmbient error:nil];  // allow
+  [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryAmbient error:nil];  // Allow background audio
   ...
 }
 ```
 
-You can also use the [ignoreSilentSwitch](#ignoresilentswitch) prop.
-</details>
+You can also use the [`ignoreSilentSwitch`](#ignoresilentswitch) prop.
 
 ## Android Expansion File Usage
-Expansions files allow you to ship assets that exceed the 100MB apk size limit and don't need to be updated each time you push an app update.
 
-This only supports mp4 files and they must not be compressed. Example command line for preventing compression:
+Expansion files allow you to include assets exceeding the 100MB APK size limit without requiring an update every time you push a new version.
+
+- Only supports `.mp4` files, and they **must not be compressed**.
+- Example command to prevent compression:
+
 ```bash
 zip -r -n .mp4 *.mp4 player.video.example.com
 ```
 
+### Example Usage in Code:
+
 ```javascript
-// Within your render function, assuming you have a file called
-// "background.mp4" in your expansion file. Just add your main and (if applicable) patch version
-<Video source={{uri: "background", mainVer: 1, patchVer: 0}} // Looks for .mp4 file (background.mp4) in the given expansion version.
-       resizeMode="cover"           // Fill the whole screen at aspect ratio.
-       style={styles.backgroundVideo} />
+// Assuming "background.mp4" is included in your expansion file.
+<Video 
+  source={{uri: "background", mainVer: 1, patchVer: 0}} // Looks for "background.mp4" in the specified expansion version.
+  resizeMode="cover"           // Fill the whole screen while maintaining aspect ratio.
+  style={styles.backgroundVideo} 
+/>
 ```
 
-## Load files with the RN Asset System
+## Load Files with the React Native Asset System
 
-The asset system [introduced in RN `0.14`](http://www.reactnative.com/react-native-v0-14-0-released/) allows loading image resources shared across iOS and Android without touching native code. As of RN `0.31` [the same is true](https://github.com/facebook/react-native/commit/91ff6868a554c4930fd5fda6ba8044dbd56c8374) of mp4 video assets for Android. As of [RN `0.33`](https://github.com/facebook/react-native/releases/tag/v0.33.0) iOS is also supported. Requires `react-native-video@0.9.0`.
+The asset system introduced in RN `0.14` allows loading shared image resources across iOS and Android without modifying native code. As of RN `0.31`, the same applies to `.mp4` video assets on Android. From RN `0.33`, iOS support was added. Requires `react-native-video@0.9.0` or later.
+
+### Example:
 
 ```javascript
 <Video
@@ -57,6 +63,8 @@ The asset system [introduced in RN `0.14`](http://www.reactnative.com/react-nati
 />
 ```
 
-## Play in background on iOS
+## Play in Background on iOS
 
-To enable audio to play in background on iOS the audio session needs to be set to `AVAudioSessionCategoryPlayback`. See [Apple documentation][3] for additional details. (NOTE: there is now a ticket to [expose this as a prop]( https://github.com/react-native-community/react-native-video/issues/310) )
+To allow audio playback in the background on iOS, set the audio session to `AVAudioSessionCategoryPlayback`. See the [Apple documentation](https://developer.apple.com/documentation/avfoundation/avaudiosession) for more details.
+
+_(Note: There is an open ticket to [expose this as a prop](https://github.com/react-native-community/react-native-video/issues/310).)_

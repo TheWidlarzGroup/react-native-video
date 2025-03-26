@@ -7,16 +7,16 @@ on:
     paths:
       - '.github/workflows/build-android.yml'
       - 'android/**'
-      - 'examples/basic/android/**'
+      - 'examples/bare/android/**'
       - 'yarn.lock'
-      - 'examples/basic/yarn.lock'
+      - 'examples/bare/yarn.lock'
   pull_request:
     paths:
       - '.github/workflows/build-android.yml'
       - 'android/**'
-      - 'examples/basic/android/**'
+      - 'examples/bare/android/**'
       - 'yarn.lock'
-      - 'examples/basic/yarn.lock'
+      - 'examples/bare/yarn.lock'
 
 jobs:
   build:
@@ -32,13 +32,21 @@ jobs:
           java-version: 17
           java-package: jdk
 
-      - name: Install node_modules
+      - name: Install node_modules at Root
         uses: ./.github/actions/setup-node
         with:
-          working-directory: examples/basic
+          working-directory: ./
+
+      - name: Build Library
+        run: yarn build
+
+      - name: Install node_modules at Example
+        uses: ./.github/actions/setup-node
+        with:
+          working-directory: examples/bare
 
       - name: Restore Gradle cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
@@ -46,11 +54,11 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
-      - name: Run Gradle Build for basic example
-        run: cd examples/basic/android && ./gradlew assembleDebug --build-cache && cd ../../..
+      - name: Run Gradle Build for bare example
+        run: cd examples/bare/android && ./gradlew assembleDebug --build-cache && cd ../../..
 
-  build-without-ads:
-    name: Build Android Example App Without Ads
+  build-with-ads:
+    name: Build Android Example App With Ads
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -62,13 +70,21 @@ jobs:
           java-version: 17
           java-package: jdk
 
-      - name: Install node_modules
+      - name: Install node_modules at Root
         uses: ./.github/actions/setup-node
         with:
-          working-directory: examples/basic
+          working-directory: ./
+  
+      - name: Build Library
+        run: yarn build
+  
+      - name: Install node_modules at Example
+        uses: ./.github/actions/setup-node
+        with:
+          working-directory: examples/bare
 
       - name: Restore Gradle cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
@@ -76,5 +92,5 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
-      - name: Run Gradle Build for basic example
-        run: cd examples/basic/android && export RNV_SAMPLE_ENABLE_ADS=false && ./gradlew assembleDebug --build-cache && cd ../../..
+      - name: Run Gradle Build for bare example
+        run: cd examples/bare/android && export RNV_SAMPLE_ENABLE_ADS=true && ./gradlew assembleDebug --build-cache && cd ../../..

@@ -1,20 +1,38 @@
 # Debugging
 
-This page describe usefull tips for debugging and investigating issue in the package or in your application.
+This page provides useful tips for debugging and troubleshooting issues in the package or your application.
 
-## Using the sample app
-This repository contains multiple a sample implementation in example folder.
-It is always preferable to test behavior on a sample app than in a full app implementation.
-The basic sample allow to test a lot of feature.
-To use the sample you will need to do steps:
-- Clone this repository:  ``` git clone git@github.com:TheWidlarzGroup/react-native-video.git```
-- Go to root folder and build it. It will generate a transpiled version of the package in lib folder: ```cd react-native-video && yarn && yarn build```
-- Go to the sample and install it: ```cd example/basic && yarn install```
-- Build it ! for android ```yarn android``` for ios ```cd ios && pod install && cd .. && yarn ios``` 
+## Using the Sample App
 
+This repository contains multiple sample implementations in the `example` folder. It is always preferable to test behavior in a sample app rather than in a full application. The basic sample allows testing of many features.
 
-## HTTP playback doesn't work or  Black Screen on Release build (Android)
-If your video work on Debug mode, but on Release you see only black screen, please, check the link to your video. If you use 'http' protocol there, you will need to add next string to your AndroidManifest.xml file. [Details here](https://developer.android.com/guide/topics/manifest/application-element#usesCleartextTraffic)
+To use the sample app, follow these steps:
+
+- Clone this repository:
+  ```shell
+  git clone git@github.com:TheWidlarzGroup/react-native-video.git
+  ```
+- Navigate to the root folder and build the package. This generates a transpiled version in the `lib` folder:
+  ```shell
+  cd react-native-video && yarn && yarn build
+  ```
+- Navigate to the sample app and install dependencies:
+  ```shell
+  cd example/basic && yarn install
+  ```
+- Build and run the app:
+    - For Android:
+      ```shell
+      yarn android
+      ```
+    - For iOS:
+      ```shell
+      cd ios && pod install && cd .. && yarn ios
+      ```
+
+## HTTP Playback Doesn't Work or Black Screen on Release Build (Android)
+
+If your video works in Debug mode but shows only a black screen in Release mode, check the URL of your video. If you are using the `http` protocol, you need to add the following line to your `AndroidManifest.xml` file. [More details here](https://developer.android.com/guide/topics/manifest/application-element#usesCleartextTraffic):
 
 ```xml
 <application
@@ -25,37 +43,68 @@ If your video work on Debug mode, but on Release you see only black screen, plea
 
 ## Decoder Issue (Android)
 
-Devices have a maximum of simultaneous possible playback. It means you have reach this limit. Exoplayer returns: 'Unable to instantiate decoder'
+Some devices have a maximum number of simultaneous video playbacks. If this limit is reached, ExoPlayer returns an error: `Unable to instantiate decoder`.
 
-**known issue**: This issue happen really often in debug mode.
+**Known issue:** This happens frequently in Debug mode.
 
-## You cannot play clean content (all OS)
+## Unable to Play Clear Content (All OS)
 
-Here are the steps to consider before opening a ticket in issue tracker
+Before opening a ticket, follow these steps:
 
-## Check you can access to remote file
+### Check Remote File Access
 
-Ensure you can download to manifest / content file with a browser for example
+Ensure you can download the manifest/content file using a browser.
 
-## Check another player can read the content
+### Check If Another Player Can Play the Content
 
-Usually clear playback can be read with all Video player. Then you should ensure content can be played without any issue with another player ([VideoLan/VLC](https://www.videolan.org/vlc/) is a good reference implementation)
+Clear playback should work with any video player. Test the content with another player, such as [VLC](https://www.videolan.org/vlc/), to confirm it plays without issues.
 
-## You cannot play protected content (all OS)
+## Unable to Play Protected Content (All OS)
 
-## Protected content gives error (token error / access forbidden) 
+### Protected Content Gives an Error (Token Error / Access Forbidden)
 
-If content is protected with an access token or any other http header, ensure you can access to you data with a wget call or a rest client app. You need to provide all needed access token / authentication parameters.
+If the content requires an access token or HTTP headers, ensure you can access the data using `wget` or a REST client. Provide all necessary authentication parameters.
 
-## I need to debug network calls but I don't see them in react native debugging tools
+## Debugging Network Calls Not Visible in React Native Debugging Tools
 
-This is a react native limitation. React native tools can only see network calls done in JS.
-To achieve that, you need to record network trace to ensure communications with server is correct.
-[Charles proxy](https://www.charlesproxy.com/) or [Fiddler](https://www.telerik.com/fiddler) are a simple and useful tool to sniff all http/https calls.
-With these tool you should be able to analyze what is going on with network. You will see all access to content and DRM, audio / video chunks, ...
+This is a React Native limitation—React Native debugging tools only capture network calls made in JavaScript.
 
-Then try to compare exchanges with previous tests you made.
+To debug network calls, use tools like:
+- [Charles Proxy](https://www.charlesproxy.com/)
+- [Fiddler](https://www.telerik.com/fiddler)
 
-## It's still not working
+These tools allow you to sniff all HTTP/HTTPS calls, including access to content, DRM, and audio/video chunks. Compare the request/response patterns with previous tests to diagnose issues.
 
-You can try to open a ticket now !
+## Debugging Media3: Build from Media3 Source
+
+If you need to use a specific ExoPlayer version or modify default behavior, you may need to build from the Media3 source code.
+
+### Configure Player Path
+
+Add the following lines to `settings.gradle` to configure your Media3 source path:
+
+```gradle
+gradle.ext.androidxMediaModulePrefix = 'media-'
+apply from: file("../../../../media3/core_settings.gradle")
+```
+
+Replace this with the actual Media3 source path. Ensure that you use the same version (or a compatible API version) supported by the package.
+
+### Enable Building from Source
+
+In your `build.gradle` file, add the following setting:
+
+```gradle
+buildscript {
+    ext {
+        ...
+        buildFromMedia3Source = true
+        ...
+    }
+}
+```
+
+## Still Not Working?
+
+You can open a ticket or contact us for [premium support](https://www.thewidlarzgroup.com/?utm_source=rnv&utm_medium=docs#Contact).
+

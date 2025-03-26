@@ -6,12 +6,14 @@ import React
 
 #if os(iOS)
     class RCTPictureInPicture: NSObject, AVPictureInPictureControllerDelegate {
+        public private(set) var _pipController: AVPictureInPictureController?
         private var _onPictureInPictureEnter: (() -> Void)?
         private var _onPictureInPictureExit: (() -> Void)?
         private var _onRestoreUserInterfaceForPictureInPictureStop: (() -> Void)?
         private var _restoreUserInterfaceForPIPStopCompletionHandler: ((Bool) -> Void)?
-        private var _pipController: AVPictureInPictureController?
-        private var _isActive = false
+        private var _isPictureInPictureActive: Bool {
+            return _pipController?.isPictureInPictureActive ?? false
+        }
 
         init(
             _ onPictureInPictureEnter: (() -> Void)? = nil,
@@ -67,23 +69,35 @@ import React
             _pipController = nil
         }
 
-        func setPictureInPicture(_ isActive: Bool) {
-            if _isActive == isActive {
-                return
-            }
-            _isActive = isActive
-
+        func enterPictureInPicture() {
             guard let _pipController else { return }
+            if !_isPictureInPictureActive {
+                _pipController.startPictureInPicture()
+            }
+        }
 
-            if _isActive && !_pipController.isPictureInPictureActive {
-                DispatchQueue.main.async {
-                    _pipController.startPictureInPicture()
-                }
-            } else if !_isActive && _pipController.isPictureInPictureActive {
-                DispatchQueue.main.async {
+        func exitPictureInPicture() {
+            guard let _pipController else { return }
+            if _isPictureInPictureActive {
+                let state = UIApplication.shared.applicationState
+                if state == .background || state == .inactive {
+                    deinitPipController()
+                    _onPictureInPictureExit?()
+                    _onRestoreUserInterfaceForPictureInPictureStop?()
+                } else {
                     _pipController.stopPictureInPicture()
                 }
             }
         }
+    }
+#else
+    class RCTPictureInPicture: NSObject {
+        public let _pipController: NSObject? = nil
+
+        func setRestoreUserInterfaceForPIPStopCompletionHandler(_: Bool) {}
+        func setupPipController(_: AVPlayerLayer?) {}
+        func deinitPipController() {}
+        func enterPictureInPicture() {}
+        func exitPictureInPicture() {}
     }
 #endif

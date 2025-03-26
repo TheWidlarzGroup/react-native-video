@@ -1,10 +1,11 @@
-struct DRMParams {
+public struct DRMParams {
     let type: String?
     let licenseServer: String?
     let headers: [String: Any]?
     let contentId: String?
     let certificateUrl: String?
     let base64Certificate: Bool?
+    let localSourceEncryptionKeyScheme: String?
 
     let json: NSDictionary?
 
@@ -17,6 +18,7 @@ struct DRMParams {
             self.certificateUrl = nil
             self.base64Certificate = nil
             self.headers = nil
+            self.localSourceEncryptionKeyScheme = nil
             return
         }
         self.json = json
@@ -36,5 +38,6 @@ struct DRMParams {
         } else {
             self.headers = nil
         }
+        localSourceEncryptionKeyScheme = json["localSourceEncryptionKeyScheme"] as? String
     }
 }
