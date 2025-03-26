@@ -462,21 +462,6 @@ maxBitRate={2000000} // 2 megabits
 ```
 
 ---
-### `initialBitrate`
-
-<PlatformsList types={['Android']} />
-
-Sets the initial preferred bitrate (in bits per second) for network bandwidth consumption when multiple video streams are available in an adaptive playlist. This helps control the quality of the initial stream selection before Adaptive Bitrate Streaming (ABR) takes over.
-
-**Default:** The player uses Adaptive Bitrate Streaming (ABR) to dynamically select the best stream based on available bandwidth.
-
-**Example:**
-
-```javascript
-initialBitrate={5000000} // 5 megabits
-```
-
----
 
 ### `mixWithOthers`
 
@@ -1000,18 +985,19 @@ source={{
 
 Adjust the buffer settings. This prop takes an object with one or more of the properties listed below.
 
-| Property                          | Type   | Description                                                                                                               |
-|-----------------------------------|--------|---------------------------------------------------------------------------------------------------------------------------|
-| minBufferMs                       | number | Minimum duration of media that the player will attempt to buffer at all times, in milliseconds.                           |
-| maxBufferMs                       | number | Maximum duration of media that the player will attempt to buffer, in milliseconds.                                        |
-| bufferForPlaybackMs               | number | Duration of media that must be buffered for playback to start or resume following a user action, in milliseconds.         |
-| bufferForPlaybackAfterRebufferMs  | number | Duration of media that must be buffered for playback to resume after a rebuffer, in milliseconds.                         |
-| backBufferDurationMs              | number | Duration of buffer to keep before the current position, allowing rewinding without rebuffering.                          |
-| maxHeapAllocationPercent          | number | Percentage of available heap that the video can use to buffer, between 0 and 1.                                           |
-| minBackBufferMemoryReservePercent | number | Percentage of available app memory at which during startup the back buffer will be disabled, between 0 and 1.            |
-| minBufferMemoryReservePercent     | number | Percentage of available app memory to keep in reserve, preventing buffer usage, between 0 and 1.                         |
-| cacheSizeMB                       | number | Cache size in MB, preventing new src requests and saving bandwidth while repeating videos, or 0 to disable. Android only. |
-| live                              | object | Object containing another config set for live playback configuration.                                                     |
+| Property                         | Type   | Description                                                                                                                                    |
+|----------------------------------|--------|------------------------------------------------------------------------------------------------------------------------------------------------|
+| minBufferMs                      | number | Minimum duration of media that the player will attempt to buffer at all times, in milliseconds.                                                |
+| maxBufferMs                      | number | Maximum duration of media that the player will attempt to buffer, in milliseconds.                                                             |
+| bufferForPlaybackMs              | number | Duration of media that must be buffered for playback to start or resume following a user action, in milliseconds.                              |
+| bufferForPlaybackAfterRebufferMs | number | Duration of media that must be buffered for playback to resume after a rebuffer, in milliseconds.                                              |
+| backBufferDurationMs             | number | Duration of buffer to keep before the current position, allowing rewinding without rebuffering.                                                |
+| maxHeapAllocationPercent         | number | Percentage of available heap that the video can use to buffer, between 0 and 1.                                                                |
+| minBackBufferMemoryReservePercent| number | Percentage of available app memory at which during startup the back buffer will be disabled, between 0 and 1.                                  |
+| minBufferMemoryReservePercent    | number | Percentage of available app memory to keep in reserve, preventing buffer usage, between 0 and 1.                                               |
+| initialBitrate                   | number | Initial bitrate in bits per second (Android only). Defaults to 1_000_000. Used only at start, then ABR (Adaptive Bitrate Streaming) takes over.|
+| cacheSizeMB                      | number | Cache size in MB, preventing new src requests and saving bandwidth while repeating videos, or 0 to disable. Android only.                      |
+| live                             | object | Object containing another config set for live playback configuration.                                                                          |
 
 #### `minLoadRetryCount`
 
