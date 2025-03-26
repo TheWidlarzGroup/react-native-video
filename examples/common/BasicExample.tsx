@@ -221,11 +221,6 @@ const BasicExample = () => {
     console.log('onVideoBandwidthUpdate', data);
   };
 
-  const onFullScreenExit = () => {
-    // iOS pauses video on exit from full screen
-    Platform.OS === 'ios' && setPaused(true);
-  };
-
   const _renderLoader = showPoster ? () => <VideoLoader /> : undefined;
 
   const _subtitleStyle = {subtitlesFollowVideo: true};
@@ -240,7 +235,7 @@ const BasicExample = () => {
   };
 
   useEffect(() => {
-    videoRef.current?.setSource({...currentSrc, bufferConfig: _bufferConfig });
+    videoRef.current?.setSource({...currentSrc, bufferConfig: _bufferConfig});
   }, [currentSrc]);
 
   return (
@@ -261,7 +256,6 @@ const BasicExample = () => {
             muted={muted}
             controls={controls}
             resizeMode={resizeMode}
-            onFullscreenPlayerWillDismiss={onFullScreenExit}
             onLoad={onLoad}
             onAudioTracks={onAudioTracks}
             onTextTracks={onTextTracks}
