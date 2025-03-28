@@ -1,5 +1,8 @@
 package com.brentvatne.react
 
+import androidx.media3.common.MediaItem
+import androidx.media3.datasource.DataSource
+import com.brentvatne.common.api.Source
 import com.brentvatne.common.toolbox.DebugLog
 import com.brentvatne.exoplayer.DRMManagerSpec
 import com.brentvatne.exoplayer.RNVExoplayerPlugin
@@ -74,6 +77,35 @@ class ReactNativeVideoManager : RNVPlugin {
 
     // ----------------------- RNV Exoplayer plugin specific methods -----------------------
     fun getDRMManager(): DRMManagerSpec? = customDRMManager
+
+    fun overrideMediaDataSourceFactory(source: Source, mediaDataSourceFactory: DataSource.Factory): DataSource.Factory? {
+        for (plugin in pluginList) {
+            if (plugin !is RNVExoplayerPlugin) continue
+
+            val factory = plugin.overrideMediaDataSourceFactory(source, mediaDataSourceFactory)
+            if (factory != null) return factory
+        }
+        return null
+    }
+
+    fun overrideMediaItemBuilder(source: Source, mediaItemBuilder: MediaItem.Builder): MediaItem.Builder? {
+        for (plugin in pluginList) {
+            if (plugin !is RNVExoplayerPlugin) continue
+
+            val builder = plugin.overrideMediaItemBuilder(source, mediaItemBuilder)
+            if (builder != null) return builder
+        }
+        return null
+    }
+
+    fun shouldDisableCache(source: Source): Boolean {
+        for (plugin in pluginList) {
+            if (plugin is RNVExoplayerPlugin && plugin.shouldDisableCache(source)) {
+                return true
+            }
+        }
+        return false
+    }
 
     // ----------------------- Custom Plugins Helpers -----------------------
     private fun maybeRegisterExoplayerPlugin(plugin: RNVPlugin) {

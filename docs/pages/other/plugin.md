@@ -111,6 +111,65 @@ In the sample implementation, the plugin is registered in the `createNativeModul
 
 Once registered, your module can track player updates and report analytics data.
 
+### Extending Core Functionality via Plugins
+
+In addition to analytics, plugins can also be used to modify or override core behavior of `react-native-video`.
+
+This allows native modules to deeply integrate with the playback system - for example:
+- replacing the media source factory,
+- modifying the media item before playback starts (e.g., injecting stream keys),
+- disabling caching dynamically per source.
+
+These capabilities are available through the advanced Android plugin interface: `RNVExoplayerPlugin`.
+
+> ⚠️ These extension points are optional — if no plugin provides them, the player behaves exactly as it did before.
+
+---
+
+#### Plugin Extension Points (Android)
+
+If your plugin implements `RNVExoplayerPlugin`, you can override the following methods:
+
+##### 1. `overrideMediaItemBuilder`
+
+Allows you to modify the `MediaItem.Builder` before it’s used. You can inject stream keys, cache keys, or override URIs.
+
+```kotlin
+override fun overrideMediaItemBuilder(
+    source: Source,
+    mediaItemBuilder: MediaItem.Builder
+): MediaItem.Builder? {
+    // Return modified builder or null to use default
+}
+```
+
+##### 2. `overrideMediaDataSourceFactory`
+
+Lets you replace the data source used by ExoPlayer. Useful for implementing read-only cache or request interception.
+
+```kotlin
+override fun overrideMediaDataSourceFactory(
+    source: Source,
+    mediaDataSourceFactory: DataSource.Factory
+): DataSource.Factory? {
+    // Return your custom factory or null to use default
+}
+```
+
+##### 3. `shouldDisableCache`
+
+Enables dynamic disabling of the caching system per source.
+
+```kotlin
+override fun shouldDisableCache(source: Source): Boolean {
+    return true // your own logic
+}
+```
+
+---
+
+Once implemented, `react-native-video` will automatically invoke these methods for each `<Video />` instance.
+
 ## iOS Implementation
 
 ### 1. Podspec Integration

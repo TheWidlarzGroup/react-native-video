@@ -1,6 +1,9 @@
 package com.brentvatne.exoplayer
 
+import androidx.media3.common.MediaItem
+import androidx.media3.datasource.DataSource
 import androidx.media3.exoplayer.ExoPlayer
+import com.brentvatne.common.api.Source
 import com.brentvatne.react.RNVPlugin
 
 /**
@@ -14,6 +17,32 @@ interface RNVExoplayerPlugin : RNVPlugin {
      * @return DRMManagerSpec implementation if plugin wants to handle DRM, null otherwise
      */
     fun getDRMManager(): DRMManagerSpec? = null
+
+    /**
+     * Optional function that allows the plugin to override the media data source factory,
+     * which is responsible for loading media data.
+     * @param source The media source being initialized.
+     * @param mediaDataSourceFactory The current default data source factory.
+     * @return A custom [DataSource.Factory] if override is needed, or null to use default.
+     */
+    fun overrideMediaDataSourceFactory(source: Source, mediaDataSourceFactory: DataSource.Factory): DataSource.Factory? = null
+
+    /**
+     * Optional function that allows the plugin to modify the [MediaItem.Builder]
+     * before the final [MediaItem] is created.
+     * @param source The source from which the media item is being built.
+     * @param mediaItemBuilder The default [MediaItem.Builder] instance.
+     * @return A modified builder instance if override is needed, or null to use original.
+     */
+    fun overrideMediaItemBuilder(source: Source, mediaItemBuilder: MediaItem.Builder): MediaItem.Builder? = null
+
+    /**
+     * Optional function that allows the plugin to control whether caching should be disabled
+     * for a given video source.
+     * @param source The video source being loaded.
+     * @return true to disable caching, false to keep it enabled.
+     */
+    fun shouldDisableCache(source: Source): Boolean = false
 
     /**
      * Function called when a new player is created
