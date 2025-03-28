@@ -220,6 +220,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private Runnable mainRunnable;
     private Runnable pipListenerUnsubscribe;
     private boolean useCache = false;
+    private boolean disableCache = false;
     private ControlsConfig controlsConfig = new ControlsConfig();
     private ArrayList<Integer> rootViewChildrenOriginalVisibility = new ArrayList<Integer>();
 
@@ -750,6 +751,8 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     private void initializePlayer() {
+        disableCache = ReactNativeVideoManager.Companion.getInstance().shouldDisableCache(source);
+
         ReactExoplayerView self = this;
         Activity activity = themedReactContext.getCurrentActivity();
         // This ensures all props have been settled, to avoid async racing conditions.
@@ -853,7 +856,7 @@ public class ReactExoplayerView extends FrameLayout implements
                         .forceEnableMediaCodecAsynchronousQueueing();
 
         DefaultMediaSourceFactory mediaSourceFactory = new DefaultMediaSourceFactory(mediaDataSourceFactory);
-        if (useCache) {
+        if (useCache && !disableCache) {
             mediaSourceFactory.setDataSourceFactory(RNVSimpleCache.INSTANCE.getCacheFactory(buildHttpDataSourceFactory(true)));
         }
 
@@ -1183,7 +1186,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
                 DataSource.Factory dataSourceFactory = mediaDataSourceFactory;
 
-                if (useCache) {
+                if (useCache && !disableCache) {
                     dataSourceFactory = RNVSimpleCache.INSTANCE.getCacheFactory(buildHttpDataSourceFactory(true));
                 }
 
@@ -1230,7 +1233,15 @@ public class ReactExoplayerView extends FrameLayout implements
             );
         }
 
-        MediaItem mediaItem = mediaItemBuilder.setStreamKeys(streamKeys).build();
+        mediaItemBuilder.setStreamKeys(streamKeys);
+
+        @Nullable
+        final MediaItem.Builder overridenMediaItemBuilder = ReactNativeVideoManager.Companion.getInstance().overrideMediaItemBuilder(source, mediaItemBuilder);
+
+        MediaItem mediaItem = overridenMediaItemBuilder != null
+                ? overridenMediaItemBuilder.build()
+                : mediaItemBuilder.build();
+
         MediaSource mediaSource = mediaSourceFactory
                 .setDrmSessionManagerProvider(drmProvider)
                 .setLoadErrorHandlingPolicy(
@@ -1921,9 +1932,14 @@ public class ReactExoplayerView extends FrameLayout implements
             boolean isSourceEqual = source.isEquals(this.source);
             hasDrmFailed = false;
             this.source = source;
-            this.mediaDataSourceFactory =
+            final DataSource.Factory tmpMediaDataSourceFactory =
                     DataSourceUtil.getDefaultDataSourceFactory(this.themedReactContext, bandwidthMeter,
                             source.getHeaders());
+
+            @Nullable
+            final DataSource.Factory overriddenMediaDataSourceFactory = ReactNativeVideoManager.Companion.getInstance().overrideMediaDataSourceFactory(source, tmpMediaDataSourceFactory);
+
+            this.mediaDataSourceFactory = Objects.requireNonNullElse(overriddenMediaDataSourceFactory, tmpMediaDataSourceFactory);
 
             if (source.getCmcdProps() != null) {
                 CMCDConfig cmcdConfig = new CMCDConfig(source.getCmcdProps());

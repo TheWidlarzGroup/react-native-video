@@ -1,5 +1,8 @@
 package com.brentvatne.react
 
+import androidx.media3.common.MediaItem
+import androidx.media3.datasource.DataSource
+import com.brentvatne.common.api.Source
 import com.brentvatne.common.toolbox.DebugLog
 import com.brentvatne.exoplayer.DRMManagerSpec
 import com.brentvatne.exoplayer.RNVExoplayerPlugin
@@ -74,6 +77,48 @@ class ReactNativeVideoManager : RNVPlugin {
 
     // ----------------------- RNV Exoplayer plugin specific methods -----------------------
     fun getDRMManager(): DRMManagerSpec? = customDRMManager
+
+    fun overrideMediaDataSourceFactory(source: Source, mediaDataSourceFactory: DataSource.Factory): DataSource.Factory? {
+        pluginList.forEach { plugin ->
+            if (plugin !is RNVExoplayerPlugin) {
+                return null
+            }
+
+            val factory = plugin.overrideMediaDataSourceFactory()?.invoke(source, mediaDataSourceFactory)
+            if (factory != null) {
+                return factory
+            }
+        }
+        return null
+    }
+
+    fun overrideMediaItemBuilder(source: Source, mediaItemBuilder: MediaItem.Builder): MediaItem.Builder? {
+        pluginList.forEach { plugin ->
+            if (plugin !is RNVExoplayerPlugin) {
+                return null
+            }
+
+            val builder = plugin.overrideMediaItemBuilder()?.invoke(source, mediaItemBuilder)
+            if (builder != null) {
+                return builder
+            }
+        }
+        return null
+    }
+
+    fun shouldDisableCache(source: Source): Boolean {
+        pluginList.forEach { plugin ->
+            if (plugin !is RNVExoplayerPlugin) {
+                return false
+            }
+
+            val shouldDisable = plugin.shouldDisableCache()?.invoke(source)
+            if (shouldDisable != null) {
+                return shouldDisable
+            }
+        }
+        return false
+    }
 
     // ----------------------- Custom Plugins Helpers -----------------------
     private fun maybeRegisterExoplayerPlugin(plugin: RNVPlugin) {
