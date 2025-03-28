@@ -8,6 +8,12 @@ class AudioSessionManager {
     private var isAudioSessionActive = false
     private var remoteControlEventsActive = false
 
+    private var isAudioSessionManagementDisabled: Bool {
+        return videoViews.allObjects.contains { view in
+            return view._disableAudioSessionManagement == true
+        }
+    }
+
     private init() {
         // Subscribe to audio interruption notifications
         NotificationCenter.default.addObserver(
@@ -69,6 +75,11 @@ class AudioSessionManager {
 
     // Handle remote control events from NowPlayingInfoCenterManager
     func setRemoteControlEventsActive(_ active: Bool) {
+        if isAudioSessionManagementDisabled {
+            // AUDIO SESSION MANAGEMENT DISABLED BY USER
+            return
+        }
+
         remoteControlEventsActive = active
 
         if active {
@@ -129,6 +140,11 @@ class AudioSessionManager {
         }
 
         let canAllowMixing = !anyPlayerShowNotificationControls && !anyPlayerNeedsBackgroundPlayback
+
+        if isAudioSessionManagementDisabled {
+            // AUDIO SESSION MANAGEMENT DISABLED BY USER
+            return
+        }
 
         if canAllowMixing {
             let shouldEnableMixing = videoViews.allObjects.contains { view in
