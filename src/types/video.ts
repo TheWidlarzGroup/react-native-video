@@ -145,6 +145,7 @@ export type BufferConfig = {
   maxHeapAllocationPercent?: number;
   minBackBufferMemoryReservePercent?: number;
   minBufferMemoryReservePercent?: number;
+  initialBitrate?: number; // Android
   cacheSizeMB?: number;
   live?: BufferConfigLive;
 };

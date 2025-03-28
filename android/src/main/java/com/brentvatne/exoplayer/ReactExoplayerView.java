@@ -177,7 +177,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
     protected final VideoEventEmitter eventEmitter;
     private final ReactExoplayerConfig config;
-    private final DefaultBandwidthMeter bandwidthMeter;
+    private DefaultBandwidthMeter bandwidthMeter;
     private LegacyPlayerControlView playerControlView;
     private View playPauseControlContainer;
     private Player.Listener eventListener;
@@ -849,6 +849,13 @@ public class ReactExoplayerView extends FrameLayout implements
                 allocator,
                 source.getBufferConfig()
         );
+
+        long initialBitrate = source.getBufferConfig().getInitialBitrate();
+        if (initialBitrate > 0) {
+            config.setInitialBitrate(initialBitrate);
+            this.bandwidthMeter = config.getBandwidthMeter();
+        }
+
         DefaultRenderersFactory renderersFactory =
                 new DefaultRenderersFactory(getContext())
                         .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF)
