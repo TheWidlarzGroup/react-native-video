@@ -20,27 +20,29 @@ interface RNVExoplayerPlugin : RNVPlugin {
 
     /**
      * Optional function that allows the plugin to override the media data source factory,
-     * which is responsible for loading the video data.
-     * @return A lambda that takes a [Source] and the current [DataSource.Factory],
-     *         and returns a custom [DataSource.Factory], or null to use the default one.
+     * which is responsible for loading media data.
+     * @param source The media source being initialized.
+     * @param mediaDataSourceFactory The current default data source factory.
+     * @return A custom [DataSource.Factory] if override is needed, or null to use default.
      */
-    fun overrideMediaDataSourceFactory(): ((Source, DataSource.Factory) -> DataSource.Factory?)? = null
+    fun overrideMediaDataSourceFactory(source: Source, mediaDataSourceFactory: DataSource.Factory): DataSource.Factory? = null
 
     /**
-     * Optional function that allows plugin to override the MediaItem builder
-     * before the MediaItem is created.
-     * @return A lambda that takes a [Source] and the current [MediaItem.Builder],
-     *         and returns a modified [MediaItem.Builder], or null if no override is needed.
+     * Optional function that allows the plugin to modify the [MediaItem.Builder]
+     * before the final [MediaItem] is created.
+     * @param source The source from which the media item is being built.
+     * @param mediaItemBuilder The default [MediaItem.Builder] instance.
+     * @return A modified builder instance if override is needed, or null to use original.
      */
-    fun overrideMediaItemBuilder(): ((Source, MediaItem.Builder) -> MediaItem.Builder?)? = null
+    fun overrideMediaItemBuilder(source: Source, mediaItemBuilder: MediaItem.Builder): MediaItem.Builder? = null
 
     /**
      * Optional function that allows the plugin to control whether caching should be disabled
      * for a given video source.
-     * @return A lambda that takes a [Source] and returns true if caching should be disabled,
-     *         or false to allow caching. Returns null to use the default behavior.
+     * @param source The video source being loaded.
+     * @return true to disable caching, false to keep it enabled.
      */
-    fun shouldDisableCache(): ((source: Source) -> Boolean)? = null
+    fun shouldDisableCache(source: Source): Boolean = false
 
     /**
      * Function called when a new player is created

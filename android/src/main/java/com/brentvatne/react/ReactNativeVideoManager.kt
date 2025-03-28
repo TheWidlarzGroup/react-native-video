@@ -80,40 +80,27 @@ class ReactNativeVideoManager : RNVPlugin {
 
     fun overrideMediaDataSourceFactory(source: Source, mediaDataSourceFactory: DataSource.Factory): DataSource.Factory? {
         for (plugin in pluginList) {
-            if (plugin !is RNVExoplayerPlugin) {
-                continue
-            }
+            if (plugin !is RNVExoplayerPlugin) continue
 
-            val factory = plugin.overrideMediaDataSourceFactory()?.invoke(source, mediaDataSourceFactory)
-            if (factory != null) {
-                return factory
-            }
+            val factory = plugin.overrideMediaDataSourceFactory(source, mediaDataSourceFactory)
+            if (factory != null) return factory
         }
         return null
     }
 
     fun overrideMediaItemBuilder(source: Source, mediaItemBuilder: MediaItem.Builder): MediaItem.Builder? {
         for (plugin in pluginList) {
-            if (plugin !is RNVExoplayerPlugin) {
-                continue
-            }
+            if (plugin !is RNVExoplayerPlugin) continue
 
-            val builder = plugin.overrideMediaItemBuilder()?.invoke(source, mediaItemBuilder)
-            if (builder != null) {
-                return builder
-            }
+            val builder = plugin.overrideMediaItemBuilder(source, mediaItemBuilder)
+            if (builder != null) return builder
         }
         return null
     }
 
     fun shouldDisableCache(source: Source): Boolean {
         for (plugin in pluginList) {
-            if (plugin !is RNVExoplayerPlugin) {
-                continue
-            }
-
-            val shouldDisable = plugin.shouldDisableCache()?.invoke(source)
-            if (shouldDisable == true) {
+            if (plugin is RNVExoplayerPlugin && plugin.shouldDisableCache(source)) {
                 return true
             }
         }
