@@ -79,9 +79,9 @@ class ReactNativeVideoManager : RNVPlugin {
     fun getDRMManager(): DRMManagerSpec? = customDRMManager
 
     fun overrideMediaDataSourceFactory(source: Source, mediaDataSourceFactory: DataSource.Factory): DataSource.Factory? {
-        pluginList.forEach { plugin ->
+        for (plugin in pluginList) {
             if (plugin !is RNVExoplayerPlugin) {
-                return null
+                continue
             }
 
             val factory = plugin.overrideMediaDataSourceFactory()?.invoke(source, mediaDataSourceFactory)
@@ -93,9 +93,9 @@ class ReactNativeVideoManager : RNVPlugin {
     }
 
     fun overrideMediaItemBuilder(source: Source, mediaItemBuilder: MediaItem.Builder): MediaItem.Builder? {
-        pluginList.forEach { plugin ->
+        for (plugin in pluginList) {
             if (plugin !is RNVExoplayerPlugin) {
-                return null
+                continue
             }
 
             val builder = plugin.overrideMediaItemBuilder()?.invoke(source, mediaItemBuilder)
@@ -107,14 +107,14 @@ class ReactNativeVideoManager : RNVPlugin {
     }
 
     fun shouldDisableCache(source: Source): Boolean {
-        pluginList.forEach { plugin ->
+        for (plugin in pluginList) {
             if (plugin !is RNVExoplayerPlugin) {
-                return false
+                continue
             }
 
             val shouldDisable = plugin.shouldDisableCache()?.invoke(source)
-            if (shouldDisable != null) {
-                return shouldDisable
+            if (shouldDisable == true) {
+                return true
             }
         }
         return false
