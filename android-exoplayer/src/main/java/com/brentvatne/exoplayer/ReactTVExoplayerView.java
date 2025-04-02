@@ -1411,7 +1411,10 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         }
     }
 
-    public void setMetadata(Map<String, String> map) {
+    public void setMetadata(@Nullable Map<String, String> map) {
+        if (map == null) {
+            return;
+        }
         this.metadata = new ContentMetadata.Builder()
                 .setThumbnailUrl(map.get(KEY_METADATA_THUMBNAIL_URL))
                 .setEpisodeTitle(map.get(KEY_METADATA_EPISODE_INFO))
