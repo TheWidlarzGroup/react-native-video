@@ -4,10 +4,10 @@ import React, {
   useEffect,
   useImperativeHandle,
   useRef,
-  type RefObject,
   useState,
+  type RefObject,
 } from 'react';
-import type {VideoRef, ReactVideoProps, VideoMetadata} from './types';
+import type {ReactVideoProps, VideoMetadata, VideoRef} from './types';
 
 // stolen from https://stackoverflow.com/a/77278013/21726244
 const isDeepEqual = <T,>(a: T, b: T): boolean => {
@@ -54,7 +54,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     },
     ref,
   ) => {
-    const nativeRef = useRef<HTMLVideoElement>(null);
+    const nativeRef = useRef<HTMLVideoElement | null>(null);
 
     const isSeeking = useRef(false);
     const seek = useCallback(
@@ -426,10 +426,10 @@ const videoStyle = {
 
 const useMediaSession = (
   metadata: VideoMetadata | undefined,
-  nativeRef: RefObject<HTMLVideoElement>,
+  nativeRef: RefObject<HTMLVideoElement | null>,
   showNotification: boolean,
 ) => {
-  const isPlaying = !nativeRef.current?.paused ?? false;
+  const isPlaying = nativeRef.current ? nativeRef.current.paused : false;
   const progress = nativeRef.current?.currentTime ?? 0;
   const duration = Number.isFinite(nativeRef.current?.duration)
     ? nativeRef.current?.duration
