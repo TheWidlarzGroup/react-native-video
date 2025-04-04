@@ -154,7 +154,12 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
 
         const isLocalAssetFile =
           typeof _source === 'number' ||
-          ('uri' in _source && typeof _source.uri === 'number');
+          ('uri' in _source && typeof _source.uri === 'number') ||
+          ('uri' in _source &&
+            typeof _source.uri === 'string' &&
+            (_source.uri.startsWith('file://') ||
+              _source.uri.startsWith('content://') ||
+              _source.uri.startsWith('./')));
 
         const resolvedSource = resolveAssetSourceForVideo(_source);
         let uri = resolvedSource.uri || '';
