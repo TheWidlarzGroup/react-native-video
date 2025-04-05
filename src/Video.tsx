@@ -154,7 +154,12 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
 
         const isLocalAssetFile =
           typeof _source === 'number' ||
-          ('uri' in _source && typeof _source.uri === 'number');
+          ('uri' in _source && typeof _source.uri === 'number') ||
+          ('uri' in _source &&
+            typeof _source.uri === 'string' &&
+            (_source.uri.startsWith('file://') ||
+              _source.uri.startsWith('content://') ||
+              _source.uri.startsWith('.')));
 
         const resolvedSource = resolveAssetSourceForVideo(_source);
         let uri = resolvedSource.uri || '';
@@ -168,7 +173,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         const isAsset = !!(
           uri &&
           uri.match(
-            /^(assets-library|ipod-library|file|content|ms-appx|ms-appdata):/,
+            /^(assets-library|ipod-library|file|content|ms-appx|ms-appdata|asset):/,
           )
         );
 
