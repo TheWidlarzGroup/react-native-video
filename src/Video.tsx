@@ -159,7 +159,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
             typeof _source.uri === 'string' &&
             (_source.uri.startsWith('file://') ||
               _source.uri.startsWith('content://') ||
-              _source.uri.startsWith('./')));
+              _source.uri.startsWith('.')));
 
         const resolvedSource = resolveAssetSourceForVideo(_source);
         let uri = resolvedSource.uri || '';
