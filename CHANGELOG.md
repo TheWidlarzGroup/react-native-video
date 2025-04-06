@@ -1,5 +1,21 @@
 
 
+# [6.12.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.11.0...v6.12.0) (2025-04-06)
+
+
+### Bug Fixes
+
+* add extra checks to determine if a file is local ([#4503](https://github.com/TheWidlarzGroup/react-native-video/issues/4503)) ([a849cc1](https://github.com/TheWidlarzGroup/react-native-video/commit/a849cc19e8dafe0cc8147aeb8a226fc1373bb84d))
+* **ios:** don't try to modify react view after unmount ([#4474](https://github.com/TheWidlarzGroup/react-native-video/issues/4474)) ([229a576](https://github.com/TheWidlarzGroup/react-native-video/commit/229a5764ea45ea74e5d469aaac30057c201bd228))
+
+
+### Features
+
+* **android:** add asset management functions to plugin ([#4494](https://github.com/TheWidlarzGroup/react-native-video/issues/4494)) ([697afd5](https://github.com/TheWidlarzGroup/react-native-video/commit/697afd52f60cbd52660843b8d29228a2ff7d0060))
+* **android:** initial bitrate ([#4480](https://github.com/TheWidlarzGroup/react-native-video/issues/4480)) ([41ddc5c](https://github.com/TheWidlarzGroup/react-native-video/commit/41ddc5c27a9c180a6d0364b3f3286211f7a10e68))
+* **ios:** allow to disable audio sessions management ([#4492](https://github.com/TheWidlarzGroup/react-native-video/issues/4492)) ([8836362](https://github.com/TheWidlarzGroup/react-native-video/commit/8836362609d226f795b01e1c65a70b9c4ecde1e5))
+* **ios:** set playback speed controls to initial playback rate ([#4495](https://github.com/TheWidlarzGroup/react-native-video/issues/4495)) ([d2e5d9c](https://github.com/TheWidlarzGroup/react-native-video/commit/d2e5d9c64eeb80143c39ca39fcdc8ba65f40a400))
+
 # [6.11.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.10.2...v6.11.0) (2025-03-16)
 
 
