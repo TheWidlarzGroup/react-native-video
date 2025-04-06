@@ -20,6 +20,7 @@ class BufferConfig {
     var maxHeapAllocationPercent = BufferConfigPropUnsetDouble
     var minBackBufferMemoryReservePercent = BufferConfigPropUnsetDouble
     var minBufferMemoryReservePercent = BufferConfigPropUnsetDouble
+    var initialBitrate = BufferConfigPropUnsetInt
 
     var live: Live = Live()
 
@@ -36,6 +37,7 @@ class BufferConfig {
                 maxHeapAllocationPercent == other.maxHeapAllocationPercent &&
                 minBackBufferMemoryReservePercent == other.minBackBufferMemoryReservePercent &&
                 minBufferMemoryReservePercent == other.minBufferMemoryReservePercent &&
+                initialBitrate == other.initialBitrate &&
                 live == other.live
             )
     }
@@ -91,6 +93,7 @@ class BufferConfig {
         private const val PROP_BUFFER_CONFIG_MIN_BACK_BUFFER_MEMORY_RESERVE_PERCENT = "minBackBufferMemoryReservePercent"
         private const val PROP_BUFFER_CONFIG_MIN_BUFFER_MEMORY_RESERVE_PERCENT = "minBufferMemoryReservePercent"
         private const val PROP_BUFFER_CONFIG_BACK_BUFFER_DURATION_MS = "backBufferDurationMs"
+        private const val PROP_BUFFER_CONFIG_INITIAL_BITRATE = "initialBitrate"
         private const val PROP_BUFFER_CONFIG_LIVE = "live"
 
         @JvmStatic
@@ -118,6 +121,7 @@ class BufferConfig {
                         BufferConfigPropUnsetDouble
                     )
                 bufferConfig.backBufferDurationMs = safeGetInt(src, PROP_BUFFER_CONFIG_BACK_BUFFER_DURATION_MS, BufferConfigPropUnsetInt)
+                bufferConfig.initialBitrate = safeGetInt(src, PROP_BUFFER_CONFIG_INITIAL_BITRATE, BufferConfigPropUnsetInt)
                 bufferConfig.live = Live.parse(src.getMap(PROP_BUFFER_CONFIG_LIVE))
             }
             return bufferConfig

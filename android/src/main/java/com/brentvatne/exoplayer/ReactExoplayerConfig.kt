@@ -7,4 +7,6 @@ interface ReactExoplayerConfig {
     fun buildLoadErrorHandlingPolicy(minLoadRetryCount: Int): LoadErrorHandlingPolicy
     var disableDisconnectError: Boolean
     val bandwidthMeter: DefaultBandwidthMeter
+    var initialBitrate: Long?
+    fun setInitialBitrate(bitrate: Long)
 }
