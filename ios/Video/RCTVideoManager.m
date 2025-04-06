@@ -37,6 +37,7 @@ RCT_EXPORT_VIEW_PROPERTY(restoreUserInterfaceForPIPStopCompletionHandler, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(localSourceEncryptionKeyScheme, NSString);
 RCT_EXPORT_VIEW_PROPERTY(subtitleStyle, NSDictionary);
 RCT_EXPORT_VIEW_PROPERTY(showNotificationControls, BOOL);
+RCT_EXPORT_VIEW_PROPERTY(disableAudioSessionManagement, BOOL);
 /* Should support: onLoadStart, onLoad, and onError to stay consistent with Image */
 RCT_EXPORT_VIEW_PROPERTY(onVideoLoadStart, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoLoad, RCTDirectEventBlock);

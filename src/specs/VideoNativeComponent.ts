@@ -369,6 +369,7 @@ export interface VideoNativeProps extends ViewProps {
   viewType?: Int32; // Android
   bufferingStrategy?: BufferingStrategyType; // Android
   controlsStyles?: ControlsStyles; // Android
+  disableAudioSessionManagement?: boolean; // iOS
   onControlsVisibilityChange?: DirectEventHandler<OnControlsVisibilityChange>;
   onVideoLoad?: DirectEventHandler<OnLoadData>;
   onVideoLoadStart?: DirectEventHandler<OnLoadStartData>;
