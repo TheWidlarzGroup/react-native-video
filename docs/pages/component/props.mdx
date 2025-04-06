@@ -271,6 +271,20 @@ Determines if the player should throw an error when the network connection is lo
 
 ---
 
+### `disableAudioSessionManagement`
+
+<PlatformsList types={['iOS']} />
+
+Disable audio session management in library (for all views).
+
+- **true** - Disable audio session management in the library.
+- **false (default)** - Enable audio session management in the library.
+
+> ⚠️ This prop disables audio session management in the library. You only should use this prop if you are managing the audio session yourself.
+> You can encounter issues with other features, like background audio, if you don't properly manage the audio session.
+
+---
+
 ### `drm`
 
 > [!WARNING]
@@ -1180,20 +1194,6 @@ To customize the notification controls, you can use the `metadata` property in t
     </application>
 </manifest>
 ```
-
----
-
-### `disableAudioSessionManagement`
-
-<PlatformsList types={['iOS']} />
-
-Disable audio session management in library (for all views).
-
-- **true** - Disable audio session management in the library.
-- **false (default)** - Enable audio session management in the library.
-
-> ⚠️ This prop disables audio session management in the library. You only should use this prop if you are managing the audio session yourself.
-> You can encounter issues with other features, like background audio, if you don't properly manage the audio session.
 
 ---
 
