@@ -21,5 +21,5 @@ export interface VideoRef {
   setSource: (source?: ReactVideoSource) => void;
   enterPictureInPicture: () => void;
   exitPictureInPicture: () => void;
-  nativeHtmlVideoRef?: RefObject<HTMLVideoElement>; // web only
+  nativeHtmlVideoRef?: RefObject<HTMLVideoElement | null>; // web only
 }
