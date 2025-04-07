@@ -43,7 +43,7 @@ namespace margelo::nitro::video {
       explicit HybridVideoViewViewManagerSpec(): HybridObject(TAG) { }
 
       // Destructor
-      virtual ~HybridVideoViewViewManagerSpec() { }
+      ~HybridVideoViewViewManagerSpec() override = default;
 
     public:
       // Properties

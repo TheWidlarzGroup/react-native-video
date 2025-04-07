@@ -28,7 +28,7 @@ namespace margelo::nitro::video {
   }
 
   size_t JHybridVideoViewViewManagerFactorySpec::getExternalMemorySize() noexcept {
-    static const auto method = _javaPart->getClass()->getMethod<jlong()>("getMemorySize");
+    static const auto method = javaClassStatic()->getMethod<jlong()>("getMemorySize");
     return method(_javaPart);
   }
 
@@ -37,7 +37,7 @@ namespace margelo::nitro::video {
 
   // Methods
   std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerSpec> JHybridVideoViewViewManagerFactorySpec::createViewManager(double nitroId) {
-    static const auto method = _javaPart->getClass()->getMethod<jni::local_ref<JHybridVideoViewViewManagerSpec::javaobject>(double /* nitroId */)>("createViewManager");
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JHybridVideoViewViewManagerSpec::javaobject>(double /* nitroId */)>("createViewManager");
     auto __result = method(_javaPart, nitroId);
     return JNISharedPtr::make_shared_from_jni<JHybridVideoViewViewManagerSpec>(jni::make_global(__result));
   }

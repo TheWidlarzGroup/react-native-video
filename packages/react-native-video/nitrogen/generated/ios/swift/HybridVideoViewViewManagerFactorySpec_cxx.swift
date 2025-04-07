@@ -101,7 +101,7 @@ public class HybridVideoViewViewManagerFactorySpec_cxx {
 
   // Methods
   @inline(__always)
-  public func createViewManager(nitroId: Double) -> bridge.Result_std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerSpec__ {
+  public final func createViewManager(nitroId: Double) -> bridge.Result_std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerSpec__ {
     do {
       let __result = try self.__implementation.createViewManager(nitroId: nitroId)
       let __resultCpp = { () -> bridge.std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerSpec_ in

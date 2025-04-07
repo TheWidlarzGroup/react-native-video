@@ -72,13 +72,13 @@
     "eslint": "^8.51.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.1",
-    "nitro-codegen": ">=0.21.0",
+    "nitro-codegen": ">=0.25.0",
     "prettier": "^3.0.3",
     "react": "18.3.1",
     "react-native": "^0.76.0",
     "@react-native/eslint-config": "0.76.6",
     "react-native-builder-bob": "^0.30.2",
-    "react-native-nitro-modules": ">=0.21.0",
+    "react-native-nitro-modules": ">=0.25.0",
     "typescript": "^5.2.2"
   },
   "resolutions": {
@@ -87,7 +87,7 @@
   "peerDependencies": {
     "react": "*",
     "react-native": "*",
-    "react-native-nitro-modules": ">=0.21.0"
+    "react-native-nitro-modules": ">=0.25.0"
   },
   "release-it": {
     "npm": {

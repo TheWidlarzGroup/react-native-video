@@ -97,7 +97,7 @@ public class HybridVideoViewViewManagerSpec_cxx {
   }
 
   // Properties
-  public var player: bridge.std__optional_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSpec__ {
+  public final var player: bridge.std__optional_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSpec__ {
     @inline(__always)
     get {
       return { () -> bridge.std__optional_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSpec__ in

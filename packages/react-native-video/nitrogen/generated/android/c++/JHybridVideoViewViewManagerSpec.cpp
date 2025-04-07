@@ -29,18 +29,18 @@ namespace margelo::nitro::video {
   }
 
   size_t JHybridVideoViewViewManagerSpec::getExternalMemorySize() noexcept {
-    static const auto method = _javaPart->getClass()->getMethod<jlong()>("getMemorySize");
+    static const auto method = javaClassStatic()->getMethod<jlong()>("getMemorySize");
     return method(_javaPart);
   }
 
   // Properties
   std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>> JHybridVideoViewViewManagerSpec::getPlayer() {
-    static const auto method = _javaPart->getClass()->getMethod<jni::local_ref<JHybridVideoPlayerSpec::javaobject>()>("getPlayer");
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JHybridVideoPlayerSpec::javaobject>()>("getPlayer");
     auto __result = method(_javaPart);
     return __result != nullptr ? std::make_optional(JNISharedPtr::make_shared_from_jni<JHybridVideoPlayerSpec>(jni::make_global(__result))) : std::nullopt;
   }
   void JHybridVideoViewViewManagerSpec::setPlayer(const std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>>& player) {
-    static const auto method = _javaPart->getClass()->getMethod<void(jni::alias_ref<JHybridVideoPlayerSpec::javaobject> /* player */)>("setPlayer");
+    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JHybridVideoPlayerSpec::javaobject> /* player */)>("setPlayer");
     method(_javaPart, player.has_value() ? std::dynamic_pointer_cast<JHybridVideoPlayerSpec>(player.value())->getJavaPart() : nullptr);
   }
 

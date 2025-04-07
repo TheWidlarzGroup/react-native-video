@@ -9,7 +9,7 @@ import Foundation
 import NitroModules
 
 /// See ``HybridVideoPlayerFactorySpec``
-public protocol HybridVideoPlayerFactorySpec_protocol: AnyObject {
+public protocol HybridVideoPlayerFactorySpec_protocol: HybridObject {
   // Properties
   
 
@@ -18,7 +18,7 @@ public protocol HybridVideoPlayerFactorySpec_protocol: AnyObject {
 }
 
 /// See ``HybridVideoPlayerFactorySpec``
-public class HybridVideoPlayerFactorySpec_base: HybridObjectSpec {
+public class HybridVideoPlayerFactorySpec_base {
   private weak var cxxWrapper: HybridVideoPlayerFactorySpec_cxx? = nil
   public func getCxxWrapper() -> HybridVideoPlayerFactorySpec_cxx {
   #if DEBUG
@@ -34,7 +34,6 @@ public class HybridVideoPlayerFactorySpec_base: HybridObjectSpec {
       return cxxWrapper
     }
   }
-  public var memorySize: Int { return 0 }
 }
 
 /**

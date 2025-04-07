@@ -9,7 +9,7 @@ import Foundation
 import NitroModules
 
 /// See ``HybridVideoPlayerSpec``
-public protocol HybridVideoPlayerSpec_protocol: AnyObject {
+public protocol HybridVideoPlayerSpec_protocol: HybridObject {
   // Properties
   var source: (any HybridVideoPlayerSourceSpec) { get }
   var duration: Double { get }
@@ -17,15 +17,15 @@ public protocol HybridVideoPlayerSpec_protocol: AnyObject {
   var currentTime: Double { get set }
 
   // Methods
+  func replaceSourceAsync(source: (any HybridVideoPlayerSourceSpec)) throws -> Promise<Void>
+  func clean() throws -> Void
   func preload() throws -> Promise<Void>
   func play() throws -> Void
   func pause() throws -> Void
-  func replaceSourceAsync(source: (any HybridVideoPlayerSourceSpec)) throws -> Promise<Void>
-  func clean() throws -> Void
 }
 
 /// See ``HybridVideoPlayerSpec``
-public class HybridVideoPlayerSpec_base: HybridObjectSpec {
+public class HybridVideoPlayerSpec_base {
   private weak var cxxWrapper: HybridVideoPlayerSpec_cxx? = nil
   public func getCxxWrapper() -> HybridVideoPlayerSpec_cxx {
   #if DEBUG
@@ -41,7 +41,6 @@ public class HybridVideoPlayerSpec_base: HybridObjectSpec {
       return cxxWrapper
     }
   }
-  public var memorySize: Int { return 0 }
 }
 
 /**

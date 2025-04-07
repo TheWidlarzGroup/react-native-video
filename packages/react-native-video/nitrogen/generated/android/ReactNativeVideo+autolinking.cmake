@@ -45,6 +45,22 @@ target_sources(
 # Define a flag to check if we are building properly
 add_definitions(-DBUILDING_REACTNATIVEVIDEO_WITH_GENERATED_CMAKE_PROJECT)
 
+# From node_modules/react-native/ReactAndroid/cmake-utils/folly-flags.cmake
+# Used in node_modules/react-native/ReactAndroid/cmake-utils/ReactNative-application.cmake
+ target_compile_definitions(
+  ReactNativeVideo PRIVATE
+  -DFOLLY_NO_CONFIG=1
+  -DFOLLY_HAVE_CLOCK_GETTIME=1
+  -DFOLLY_USE_LIBCPP=1
+  -DFOLLY_CFG_NO_COROUTINES=1
+  -DFOLLY_MOBILE=1
+  -DFOLLY_HAVE_RECVMMSG=1
+  -DFOLLY_HAVE_PTHREAD=1
+  # Once we target android-23 above, we can comment
+  # the following line. NDK uses GNU style stderror_r() after API 23.
+  -DFOLLY_HAVE_XSI_STRERROR_R=1
+)
+
 # Add all libraries required by the generated specs
 find_package(fbjni REQUIRED) # <-- Used for communication between Java <-> C++
 find_package(ReactAndroid REQUIRED) # <-- Used to set up React Native bindings (e.g. CallInvoker/TurboModule)

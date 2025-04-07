@@ -32,7 +32,7 @@ namespace margelo::nitro::video {
   }
 
   size_t JHybridVideoPlayerFactorySpec::getExternalMemorySize() noexcept {
-    static const auto method = _javaPart->getClass()->getMethod<jlong()>("getMemorySize");
+    static const auto method = javaClassStatic()->getMethod<jlong()>("getMemorySize");
     return method(_javaPart);
   }
 
@@ -41,7 +41,7 @@ namespace margelo::nitro::video {
 
   // Methods
   std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec> JHybridVideoPlayerFactorySpec::createPlayer(const std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>& source) {
-    static const auto method = _javaPart->getClass()->getMethod<jni::local_ref<JHybridVideoPlayerSpec::javaobject>(jni::alias_ref<JHybridVideoPlayerSourceSpec::javaobject> /* source */)>("createPlayer");
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JHybridVideoPlayerSpec::javaobject>(jni::alias_ref<JHybridVideoPlayerSourceSpec::javaobject> /* source */)>("createPlayer");
     auto __result = method(_javaPart, std::dynamic_pointer_cast<JHybridVideoPlayerSourceSpec>(source)->getJavaPart());
     return JNISharedPtr::make_shared_from_jni<JHybridVideoPlayerSpec>(jni::make_global(__result));
   }

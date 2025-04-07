@@ -42,7 +42,9 @@ namespace margelo::nitro::video {
 
   public:
     // Get the Swift part
-    inline ReactNativeVideo::HybridVideoPlayerSpec_cxx getSwiftPart() noexcept { return _swiftPart; }
+    inline ReactNativeVideo::HybridVideoPlayerSpec_cxx& getSwiftPart() noexcept {
+      return _swiftPart;
+    }
 
   public:
     // Get memory pressure
@@ -74,6 +76,20 @@ namespace margelo::nitro::video {
 
   public:
     // Methods
+    inline std::shared_ptr<Promise<void>> replaceSourceAsync(const std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>& source) override {
+      auto __result = _swiftPart.replaceSourceAsync(source);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline void clean() override {
+      auto __result = _swiftPart.clean();
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+    }
     inline std::shared_ptr<Promise<void>> preload() override {
       auto __result = _swiftPart.preload();
       if (__result.hasError()) [[unlikely]] {
@@ -90,20 +106,6 @@ namespace margelo::nitro::video {
     }
     inline void pause() override {
       auto __result = _swiftPart.pause();
-      if (__result.hasError()) [[unlikely]] {
-        std::rethrow_exception(__result.error());
-      }
-    }
-    inline std::shared_ptr<Promise<void>> replaceSourceAsync(const std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>& source) override {
-      auto __result = _swiftPart.replaceSourceAsync(source);
-      if (__result.hasError()) [[unlikely]] {
-        std::rethrow_exception(__result.error());
-      }
-      auto __value = std::move(__result.value());
-      return __value;
-    }
-    inline void clean() override {
-      auto __result = _swiftPart.clean();
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

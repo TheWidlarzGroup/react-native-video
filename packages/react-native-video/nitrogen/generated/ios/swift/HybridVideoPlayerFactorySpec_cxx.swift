@@ -101,7 +101,7 @@ public class HybridVideoPlayerFactorySpec_cxx {
 
   // Methods
   @inline(__always)
-  public func createPlayer(source: bridge.std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_) -> bridge.Result_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSpec__ {
+  public final func createPlayer(source: bridge.std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_) -> bridge.Result_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSpec__ {
     do {
       let __result = try self.__implementation.createPlayer(source: { () -> HybridVideoPlayerSourceSpec in
         let __unsafePointer = bridge.get_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_(source)

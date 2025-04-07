@@ -32,7 +32,7 @@ namespace margelo::nitro::video {
       _javaPart(jni::make_global(jThis)) {}
 
   public:
-    virtual ~JHybridVideoPlayerSpec() {
+    ~JHybridVideoPlayerSpec() override {
       // Hermes GC can destroy JS objects on a non-JNI Thread.
       jni::ThreadScope::WithClassLoader([&] { _javaPart.reset(); });
     }
@@ -56,11 +56,11 @@ namespace margelo::nitro::video {
 
   public:
     // Methods
+    std::shared_ptr<Promise<void>> replaceSourceAsync(const std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>& source) override;
+    void clean() override;
     std::shared_ptr<Promise<void>> preload() override;
     void play() override;
     void pause() override;
-    std::shared_ptr<Promise<void>> replaceSourceAsync(const std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>& source) override;
-    void clean() override;
 
   private:
     friend HybridBase;

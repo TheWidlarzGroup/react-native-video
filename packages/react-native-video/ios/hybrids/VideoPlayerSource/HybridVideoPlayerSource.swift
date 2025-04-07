@@ -62,7 +62,7 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec {
     asset = nil
   }
   
-  override var memorySize: Int {
+  var memorySize: Int {
     var size = 0
     
     size += asset?.estimatedMemoryUsage ?? 0

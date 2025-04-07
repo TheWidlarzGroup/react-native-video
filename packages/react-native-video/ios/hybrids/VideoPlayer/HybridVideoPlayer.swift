@@ -170,7 +170,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
     return AVPlayerItem(asset: asset)
   }
   
-  override var memorySize: Int {
+  var memorySize: Int {
     var size = 0
     
     size += source.memorySize

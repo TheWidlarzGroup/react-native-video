@@ -20,11 +20,11 @@ namespace margelo::nitro::video {
       prototype.registerHybridSetter("volume", &HybridVideoPlayerSpec::setVolume);
       prototype.registerHybridGetter("currentTime", &HybridVideoPlayerSpec::getCurrentTime);
       prototype.registerHybridSetter("currentTime", &HybridVideoPlayerSpec::setCurrentTime);
+      prototype.registerHybridMethod("replaceSourceAsync", &HybridVideoPlayerSpec::replaceSourceAsync);
+      prototype.registerHybridMethod("clean", &HybridVideoPlayerSpec::clean);
       prototype.registerHybridMethod("preload", &HybridVideoPlayerSpec::preload);
       prototype.registerHybridMethod("play", &HybridVideoPlayerSpec::play);
       prototype.registerHybridMethod("pause", &HybridVideoPlayerSpec::pause);
-      prototype.registerHybridMethod("replaceSourceAsync", &HybridVideoPlayerSpec::replaceSourceAsync);
-      prototype.registerHybridMethod("clean", &HybridVideoPlayerSpec::clean);
     });
   }
 

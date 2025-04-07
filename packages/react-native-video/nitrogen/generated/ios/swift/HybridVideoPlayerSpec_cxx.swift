@@ -97,7 +97,7 @@ public class HybridVideoPlayerSpec_cxx {
   }
 
   // Properties
-  public var source: bridge.std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_ {
+  public final var source: bridge.std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_ {
     @inline(__always)
     get {
       return { () -> bridge.std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_ in
@@ -107,14 +107,14 @@ public class HybridVideoPlayerSpec_cxx {
     }
   }
   
-  public var duration: Double {
+  public final var duration: Double {
     @inline(__always)
     get {
       return self.__implementation.duration
     }
   }
   
-  public var volume: Double {
+  public final var volume: Double {
     @inline(__always)
     get {
       return self.__implementation.volume
@@ -125,7 +125,7 @@ public class HybridVideoPlayerSpec_cxx {
     }
   }
   
-  public var currentTime: Double {
+  public final var currentTime: Double {
     @inline(__always)
     get {
       return self.__implementation.currentTime
@@ -138,48 +138,7 @@ public class HybridVideoPlayerSpec_cxx {
 
   // Methods
   @inline(__always)
-  public func preload() -> bridge.Result_std__shared_ptr_Promise_void___ {
-    do {
-      let __result = try self.__implementation.preload()
-      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
-        let __promise = bridge.create_std__shared_ptr_Promise_void__()
-        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
-        __result
-          .then({ __result in __promiseHolder.resolve() })
-          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
-        return __promise
-      }()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
-    } catch (let __error) {
-      let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
-    }
-  }
-  
-  @inline(__always)
-  public func play() -> bridge.Result_void_ {
-    do {
-      try self.__implementation.play()
-      return bridge.create_Result_void_()
-    } catch (let __error) {
-      let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_void_(__exceptionPtr)
-    }
-  }
-  
-  @inline(__always)
-  public func pause() -> bridge.Result_void_ {
-    do {
-      try self.__implementation.pause()
-      return bridge.create_Result_void_()
-    } catch (let __error) {
-      let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_void_(__exceptionPtr)
-    }
-  }
-  
-  @inline(__always)
-  public func replaceSourceAsync(source: bridge.std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_) -> bridge.Result_std__shared_ptr_Promise_void___ {
+  public final func replaceSourceAsync(source: bridge.std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_) -> bridge.Result_std__shared_ptr_Promise_void___ {
     do {
       let __result = try self.__implementation.replaceSourceAsync(source: { () -> HybridVideoPlayerSourceSpec in
         let __unsafePointer = bridge.get_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_(source)
@@ -202,9 +161,50 @@ public class HybridVideoPlayerSpec_cxx {
   }
   
   @inline(__always)
-  public func clean() -> bridge.Result_void_ {
+  public final func clean() -> bridge.Result_void_ {
     do {
       try self.__implementation.clean()
+      return bridge.create_Result_void_()
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_void_(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func preload() -> bridge.Result_std__shared_ptr_Promise_void___ {
+    do {
+      let __result = try self.__implementation.preload()
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_void__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve() })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func play() -> bridge.Result_void_ {
+    do {
+      try self.__implementation.play()
+      return bridge.create_Result_void_()
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_void_(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func pause() -> bridge.Result_void_ {
+    do {
+      try self.__implementation.pause()
       return bridge.create_Result_void_()
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()

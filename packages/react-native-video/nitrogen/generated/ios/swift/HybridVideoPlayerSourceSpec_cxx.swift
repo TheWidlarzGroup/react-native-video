@@ -97,7 +97,7 @@ public class HybridVideoPlayerSourceSpec_cxx {
   }
 
   // Properties
-  public var uri: std.string {
+  public final var uri: std.string {
     @inline(__always)
     get {
       return std.string(self.__implementation.uri)
@@ -106,7 +106,7 @@ public class HybridVideoPlayerSourceSpec_cxx {
 
   // Methods
   @inline(__always)
-  public func getAssetInformationAsync() -> bridge.Result_std__shared_ptr_Promise_VideoInformation___ {
+  public final func getAssetInformationAsync() -> bridge.Result_std__shared_ptr_Promise_VideoInformation___ {
     do {
       let __result = try self.__implementation.getAssetInformationAsync()
       let __resultCpp = { () -> bridge.std__shared_ptr_Promise_VideoInformation__ in

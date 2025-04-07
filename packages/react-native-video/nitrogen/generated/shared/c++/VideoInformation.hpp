@@ -40,6 +40,7 @@ namespace margelo::nitro::video {
     VideoOrientation orientation     SWIFT_PRIVATE;
 
   public:
+    VideoInformation() = default;
     explicit VideoInformation(double bitrate, double width, double height, int64_t duration, int64_t fileSize, bool isHDR, bool isLive, VideoOrientation orientation): bitrate(bitrate), width(width), height(height), duration(duration), fileSize(fileSize), isHDR(isHDR), isLive(isLive), orientation(orientation) {}
   };
 
@@ -51,7 +52,7 @@ namespace margelo::nitro {
 
   // C++ VideoInformation <> JS VideoInformation (object)
   template <>
-  struct JSIConverter<VideoInformation> {
+  struct JSIConverter<VideoInformation> final {
     static inline VideoInformation fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
       return VideoInformation(

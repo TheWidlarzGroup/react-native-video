@@ -45,7 +45,7 @@ namespace margelo::nitro {
 
   // C++ VideoOrientation <> JS VideoOrientation (union)
   template <>
-  struct JSIConverter<VideoOrientation> {
+  struct JSIConverter<VideoOrientation> final {
     static inline VideoOrientation fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       std::string unionValue = JSIConverter<std::string>::fromJSI(runtime, arg);
       switch (hashString(unionValue.c_str(), unionValue.size())) {

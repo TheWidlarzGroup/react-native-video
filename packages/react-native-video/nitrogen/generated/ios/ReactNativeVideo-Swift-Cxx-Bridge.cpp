@@ -30,7 +30,7 @@ namespace margelo::nitro::video::bridge::swift {
       throw std::runtime_error("Class \"HybridVideoPlayerSourceSpec\" is not implemented in Swift!");
     }
   #endif
-    ReactNativeVideo::HybridVideoPlayerSourceSpec_cxx swiftPart = swiftWrapper->getSwiftPart();
+    ReactNativeVideo::HybridVideoPlayerSourceSpec_cxx& swiftPart = swiftWrapper->getSwiftPart();
     return swiftPart.toUnsafe();
   }
   
@@ -62,7 +62,7 @@ namespace margelo::nitro::video::bridge::swift {
       throw std::runtime_error("Class \"HybridVideoPlayerSpec\" is not implemented in Swift!");
     }
   #endif
-    ReactNativeVideo::HybridVideoPlayerSpec_cxx swiftPart = swiftWrapper->getSwiftPart();
+    ReactNativeVideo::HybridVideoPlayerSpec_cxx& swiftPart = swiftWrapper->getSwiftPart();
     return swiftPart.toUnsafe();
   }
   
@@ -78,7 +78,7 @@ namespace margelo::nitro::video::bridge::swift {
       throw std::runtime_error("Class \"HybridVideoPlayerFactorySpec\" is not implemented in Swift!");
     }
   #endif
-    ReactNativeVideo::HybridVideoPlayerFactorySpec_cxx swiftPart = swiftWrapper->getSwiftPart();
+    ReactNativeVideo::HybridVideoPlayerFactorySpec_cxx& swiftPart = swiftWrapper->getSwiftPart();
     return swiftPart.toUnsafe();
   }
   
@@ -102,7 +102,7 @@ namespace margelo::nitro::video::bridge::swift {
       throw std::runtime_error("Class \"HybridVideoPlayerSourceFactorySpec\" is not implemented in Swift!");
     }
   #endif
-    ReactNativeVideo::HybridVideoPlayerSourceFactorySpec_cxx swiftPart = swiftWrapper->getSwiftPart();
+    ReactNativeVideo::HybridVideoPlayerSourceFactorySpec_cxx& swiftPart = swiftWrapper->getSwiftPart();
     return swiftPart.toUnsafe();
   }
   
@@ -118,7 +118,7 @@ namespace margelo::nitro::video::bridge::swift {
       throw std::runtime_error("Class \"HybridVideoViewViewManagerSpec\" is not implemented in Swift!");
     }
   #endif
-    ReactNativeVideo::HybridVideoViewViewManagerSpec_cxx swiftPart = swiftWrapper->getSwiftPart();
+    ReactNativeVideo::HybridVideoViewViewManagerSpec_cxx& swiftPart = swiftWrapper->getSwiftPart();
     return swiftPart.toUnsafe();
   }
   
@@ -134,7 +134,7 @@ namespace margelo::nitro::video::bridge::swift {
       throw std::runtime_error("Class \"HybridVideoViewViewManagerFactorySpec\" is not implemented in Swift!");
     }
   #endif
-    ReactNativeVideo::HybridVideoViewViewManagerFactorySpec_cxx swiftPart = swiftWrapper->getSwiftPart();
+    ReactNativeVideo::HybridVideoViewViewManagerFactorySpec_cxx& swiftPart = swiftWrapper->getSwiftPart();
     return swiftPart.toUnsafe();
   }
 

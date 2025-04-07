@@ -12,7 +12,7 @@
   "dependencies": {
     "react": "18.3.1",
     "react-native": "^0.76.0",
-    "react-native-nitro-modules": "^0.21.0",
+    "react-native-nitro-modules": "^0.25.0",
     "react-native-video": "*"
   },
   "devDependencies": {

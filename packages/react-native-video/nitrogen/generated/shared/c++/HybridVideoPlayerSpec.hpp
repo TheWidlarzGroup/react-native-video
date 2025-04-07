@@ -43,7 +43,7 @@ namespace margelo::nitro::video {
       explicit HybridVideoPlayerSpec(): HybridObject(TAG) { }
 
       // Destructor
-      virtual ~HybridVideoPlayerSpec() { }
+      ~HybridVideoPlayerSpec() override = default;
 
     public:
       // Properties
@@ -56,11 +56,11 @@ namespace margelo::nitro::video {
 
     public:
       // Methods
+      virtual std::shared_ptr<Promise<void>> replaceSourceAsync(const std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>& source) = 0;
+      virtual void clean() = 0;
       virtual std::shared_ptr<Promise<void>> preload() = 0;
       virtual void play() = 0;
       virtual void pause() = 0;
-      virtual std::shared_ptr<Promise<void>> replaceSourceAsync(const std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>& source) = 0;
-      virtual void clean() = 0;
 
     protected:
       // Hybrid Setup

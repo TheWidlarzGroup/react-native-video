@@ -9,7 +9,7 @@ import Foundation
 import NitroModules
 
 /// See ``HybridVideoViewViewManagerFactorySpec``
-public protocol HybridVideoViewViewManagerFactorySpec_protocol: AnyObject {
+public protocol HybridVideoViewViewManagerFactorySpec_protocol: HybridObject {
   // Properties
   
 
@@ -18,7 +18,7 @@ public protocol HybridVideoViewViewManagerFactorySpec_protocol: AnyObject {
 }
 
 /// See ``HybridVideoViewViewManagerFactorySpec``
-public class HybridVideoViewViewManagerFactorySpec_base: HybridObjectSpec {
+public class HybridVideoViewViewManagerFactorySpec_base {
   private weak var cxxWrapper: HybridVideoViewViewManagerFactorySpec_cxx? = nil
   public func getCxxWrapper() -> HybridVideoViewViewManagerFactorySpec_cxx {
   #if DEBUG
@@ -34,7 +34,6 @@ public class HybridVideoViewViewManagerFactorySpec_base: HybridObjectSpec {
       return cxxWrapper
     }
   }
-  public var memorySize: Int { return 0 }
 }
 
 /**

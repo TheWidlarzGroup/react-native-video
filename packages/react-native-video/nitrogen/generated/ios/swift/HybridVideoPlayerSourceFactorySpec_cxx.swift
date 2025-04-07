@@ -101,7 +101,7 @@ public class HybridVideoPlayerSourceFactorySpec_cxx {
 
   // Methods
   @inline(__always)
-  public func fromUri(uri: std.string) -> bridge.Result_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec__ {
+  public final func fromUri(uri: std.string) -> bridge.Result_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec__ {
     do {
       let __result = try self.__implementation.fromUri(uri: String(uri))
       let __resultCpp = { () -> bridge.std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_ in

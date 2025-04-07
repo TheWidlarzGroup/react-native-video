@@ -42,7 +42,9 @@ namespace margelo::nitro::video {
 
   public:
     // Get the Swift part
-    inline ReactNativeVideo::HybridVideoPlayerSourceFactorySpec_cxx getSwiftPart() noexcept { return _swiftPart; }
+    inline ReactNativeVideo::HybridVideoPlayerSourceFactorySpec_cxx& getSwiftPart() noexcept {
+      return _swiftPart;
+    }
 
   public:
     // Get memory pressure

@@ -45,7 +45,7 @@ namespace margelo::nitro::video {
       explicit HybridVideoPlayerFactorySpec(): HybridObject(TAG) { }
 
       // Destructor
-      virtual ~HybridVideoPlayerFactorySpec() { }
+      ~HybridVideoPlayerFactorySpec() override = default;
 
     public:
       // Properties
