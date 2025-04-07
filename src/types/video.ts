@@ -9,7 +9,7 @@ import type {
   ImageURISource,
   ImageStyle,
 } from 'react-native';
-import type {ReactNode} from 'react';
+import type {CSSProperties, ReactNode} from 'react';
 import type VideoResizeMode from './ResizeMode';
 import type FilterType from './FilterType';
 import type ViewType from './ViewType';
@@ -352,3 +352,9 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   controlsStyles?: ControlsStyles; // Android
   disableAudioSessionManagement?: boolean; // iOS
 }
+
+export interface WebStyleProp {
+  style?: CSSProperties;
+}
+
+export type WebReactVideoProps = Omit<ReactVideoProps, 'style'> & WebStyleProp;
