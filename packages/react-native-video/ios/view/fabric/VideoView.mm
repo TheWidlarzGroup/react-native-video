@@ -31,6 +31,9 @@ using namespace facebook::react;
     self.contentView = _view;
   }
   
+  // -1 means that nitroId wasn't set yet
+  _nitroId = -1;
+  
   return self;
 }
 
@@ -56,9 +59,10 @@ using namespace facebook::react;
 - (void)onNitroIdChange:(int)nitroId
 {
   auto eventEmitter = std::dynamic_pointer_cast<const VideoViewEventEmitter>(_eventEmitter);
-  if (!eventEmitter) {
+  if (!eventEmitter || nitroId == -1) {
     return;
   }
+  
   eventEmitter->onNitroIdChange({ .nitroId = nitroId });
 }
 

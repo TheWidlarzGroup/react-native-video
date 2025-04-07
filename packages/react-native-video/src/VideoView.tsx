@@ -13,7 +13,7 @@ interface VideoViewProps {
   style: ViewStyle;
 }
 
-let nitroIdCounter = 0;
+let nitroIdCounter = 1;
 const VideoViewViewManagerFactory =
   NitroModules.createHybridObject<VideoViewViewManagerFactory>(
     'VideoViewViewManagerFactory'

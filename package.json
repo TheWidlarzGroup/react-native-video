@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.10.0",
-    "@react-native/eslint-config": "0.76.6",
+    "@react-native/eslint-config": "^0.77.0",
     "@commitlint/config-conventional": "^17.0.2",
     "@evilmartians/lefthook": "^1.5.0",
     "commitlint": "^17.0.2",
@@ -33,7 +33,7 @@
     "eslint-plugin-prettier": "^5.0.1",
     "prettier": "^3.0.3",
     "react": "18.3.1",
-    "react-native": "^0.76.0",
+    "react-native": "^0.77.0",
     "release-it": "^17.10.0",
     "typescript": "^5.2.2",
     "typescript-eslint": "^8.13.0"
