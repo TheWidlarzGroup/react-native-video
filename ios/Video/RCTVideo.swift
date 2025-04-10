@@ -1667,23 +1667,23 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             }
         }
     }
-   
+
     func handleWillEnterFullScreen() {
         self.onVideoFullscreenPlayerWillPresent?(["target": self.reactTag as Any])
     }
-     
+
     func handleDidEnterFullScreen() {
         self.onVideoFullscreenPlayerDidPresent?(["target": self.reactTag as Any])
     }
-     
+
     func handleWillExitFullScreen() {
         self.onVideoFullscreenPlayerWillDismiss?(["target": self.reactTag as Any])
     }
-     
+
     func handleDidExitFullScreen() {
         self.onVideoFullscreenPlayerDidDismiss?(["target": self.reactTag as Any])
     }
-    
+
     @objc
     func handleDidFailToFinishPlaying(notification: NSNotification!) {
         guard onVideoError != nil else { return }

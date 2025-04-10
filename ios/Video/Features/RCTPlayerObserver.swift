@@ -327,36 +327,32 @@ class RCTPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVPla
     }
 
     func playerViewController(
-       _: AVPlayerViewController,
-       willBeginFullScreenPresentationWithAnimationCoordinator coordinator: UIViewControllerTransitionCoordinator
-     ) {
-       self._handlers?.handleWillEnterFullScreen()
-       
-       coordinator.animate(alongsideTransition: nil) { [weak self] context in
-         guard let self, !context.isCancelled else { return }
-         self._handlers?.handleDidEnterFullScreen()
-       }
-     }
+        _: AVPlayerViewController,
+        willBeginFullScreenPresentationWithAnimationCoordinator coordinator: UIViewControllerTransitionCoordinator
+    ) {
+        self._handlers?.handleWillEnterFullScreen()
+        coordinator.animate(alongsideTransition: nil) { [weak self] context in
+            guard let self, !context.isCancelled else { return }
+            self._handlers?.handleDidEnterFullScreen()
+        }
+    }
 
     func playerViewController(
-       _: AVPlayerViewController,
-       willEndFullScreenPresentationWithAnimationCoordinator coordinator: UIViewControllerTransitionCoordinator
-     ) {
-       self._handlers?.handleWillExitFullScreen()
-       
-       // iOS automatically pauses videos after exiting fullscreen,
-       // but it's better if we resume playback
-       let wasPlaying = player?.timeControlStatus == .playing
-       
-       coordinator.animate(alongsideTransition: nil) { [weak self] context in
-         guard let self, !context.isCancelled else { return }
-         self._handlers?.handleDidExitFullScreen()
- 
-         if (wasPlaying) {
-           self.player?.play()
-         } 
-       }
-     }
+        _: AVPlayerViewController,
+        willEndFullScreenPresentationWithAnimationCoordinator coordinator: UIViewControllerTransitionCoordinator
+    ) {
+        self._handlers?.handleWillExitFullScreen()
+        // iOS automatically pauses videos after exiting fullscreen,
+        // but it's better if we resume playback
+        let wasPlaying = player?.timeControlStatus == .playing
+        coordinator.animate(alongsideTransition: nil) { [weak self] context in
+            guard let self, !context.isCancelled else { return }
+            self._handlers?.handleDidExitFullScreen()
+            if wasPlaying == true {
+                self.player?.play()
+            }
+        }
+    }
 
     func setRestoreUserInterfaceForPIPStopCompletionHandler(_ restore: Bool) {
         guard let _restoreUserInterfaceForPIPStopCompletionHandler else { return }
