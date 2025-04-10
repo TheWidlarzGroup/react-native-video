@@ -1167,7 +1167,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         viewController.player = player
 
         // Set the initial playback speed in controls to match playback rate
-        if #available(iOS 16.0, *) {
+        if #available(iOS 16.0, tvOS 16.0, *) {
             if let initialSpeed = viewController.speeds.first(where: { $0.rate == _rate }) {
                 viewController.selectSpeed(initialSpeed)
             }
