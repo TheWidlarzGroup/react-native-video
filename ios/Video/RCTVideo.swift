@@ -561,7 +561,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             }
         } else {
             #if !os(tvOS) && !os(visionOS)
-                if #available(iOS 16.0, *) {
+                if #available(iOS 16.0, macCatalyst 18.0, *) {
                     // This feature caused crashes, if the app was put in bg, before the source change
                     // https://github.com/TheWidlarzGroup/react-native-video/issues/3900
                     self._playerViewController?.allowsVideoFrameAnalysis = false
@@ -569,7 +569,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             #endif
             _player?.replaceCurrentItem(with: playerItem)
             #if !os(tvOS) && !os(visionOS)
-                if #available(iOS 16.0, *) {
+                if #available(iOS 16.0, macCatalyst 18.0, *) {
                     self._playerViewController?.allowsVideoFrameAnalysis = true
                 }
             #endif
