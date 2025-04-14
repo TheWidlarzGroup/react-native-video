@@ -30,6 +30,9 @@ const BOT_LABELS = [
 
 const SKIP_LABEL = 'No Validation';
 
+const ISSUE_BOOST_INFO = `
+Need faster resolution? Consider [Issue Boost](https://www.thewidlarzgroup.com/issue-boost/?utm_source=rnv&utm_medium=bot&utm_campaign=bot&utm_id=bot-message) – it allows us to dedicate time specifically to your issue and fix it faster. 🚀`;
+
 const MESSAGE = {
   FEATURE_REQUEST: `Thanks for the feature request! 🚀
     You can check out our [public roadmap](https://github.com/orgs/TheWidlarzGroup/projects/6) to see what we're currently working on. All requests are automatically added there, so you can track progress anytime.
@@ -41,22 +44,19 @@ const MESSAGE = {
     Thanks for your patience and support! 🚀`,
   MISSING_INFO: (missingFields) => {
     return `Hey! 👋  
-      Thanks for the bug report. To help us resolve your issue effectively, we still need some key information:\n\n${missingFields
-        .map((field) => `- ${field.replace('missing-', '')}`)
-        .join('\n')}
-    
-      Please edit your issue and fill in the missing details.  
-      > Issues with incomplete info are treated with lower priority, so this helps speed things up.
-      
-      Need faster resolution? Consider [Issue Boost](https://www.thewidlarzgroup.com/issue-boost/?utm_source=rnv&utm_medium=missing-info&utm_campaign=bot&utm_id=bot-message) to prioritize your issue. 🚀`;
+Thanks for the bug report. To help us resolve your issue effectively, we still need some key information:\n\n${missingFields
+      .map((field) => `- ${field.replace('missing-', '')}`)
+      .join('\n')}
+
+Please edit your issue and fill in the missing details.  
+> Issues with incomplete info are treated with lower priority, so this helps speed things up.`;
   },
   OUTDATED_VERSION: (issueVersion, latestVersion) => {
     return (
       `Heads up! ⚠️ You're using version **${issueVersion}**, but the latest stable version is **${latestVersion}**. ` +
       `Please update to the newest version and check if the issue still occurs.\n\n` +
       `> Keeping your dependencies up-to-date often resolves many common problems.` +
-      `\n\nStill having the issue after upgrading? Update the report with the new version details so we can investigate.` +
-      `\n\nNeed this resolved faster? [Issue Boost](https://www.thewidlarzgroup.com/issue-boost/?utm_source=rnv&utm_medium=outdated&utm_campaign=bot&utm_id=bot-message) lets us prioritize and fix your issue sooner. 🚀`
+      `\n\nStill having the issue after upgrading? Update the report with the new version details so we can investigate.`
     );
   },
 };
@@ -221,6 +221,8 @@ const handleMissingInformation = async ({github, context, labels}) => {
         latestVersion,
       )}`;
     }
+
+    comment += `\n\n${ISSUE_BOOST_INFO}`;
 
     await hidePreviousComments({github, context});
     await createComment({github, context, body: comment});
