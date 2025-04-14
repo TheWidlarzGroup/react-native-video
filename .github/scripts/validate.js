@@ -31,22 +31,32 @@ const BOT_LABELS = [
 const SKIP_LABEL = 'No Validation';
 
 const MESSAGE = {
-  FEATURE_REQUEST: `Thanks for the feature request! Check out our roadmap [here](https://github.com/TheWidlarzGroup/react-native-video/discussions/3351). If your request is already there – great! If not, give us some time, and we'll get back to you with information on when TheWidlarzGroup can address it as part of our free open-source support. Alternatively, [contact us](https://www.thewidlarzgroup.com/?utm_source=rnv&utm_medium=feature-request&utm_campaign=bot&utm_id=bot-message#Contact) to discuss ways to speed up the process.`,
-  BUG_REPORT: `Thank you for your bug report. We will review it and get back to you if we need more information.`,
+  FEATURE_REQUEST: `Thanks for the feature request! 🚀
+    You can check out our [public roadmap](https://github.com/orgs/TheWidlarzGroup/projects/6) to see what we're currently working on. All requests are automatically added there, so you can track progress anytime.
+    We review and implement new features when time allows, but this can take a while. If you’d like to speed things up and make this a priority, consider [Issue Boost](https://www.thewidlarzgroup.com/issue-boost/?utm_source=rnv&utm_medium=feature-request&utm_campaign=bot&utm_id=bot-message), our commercial option that lets us dedicate time specifically to your request.
+    Thanks for your input and patience! 🙌`,
+  BUG_REPORT: `Hey! 👋  
+    Thanks for reporting this issue. We try to fix bugs as quickly as possible, but since our time is limited, we prioritize sponsored issues first, then focus on critical problems affecting many users, and finally, we handle other reports when we can. Some issues might take a while to be resolved.  
+    If you want to speed up this process, check out [Issue Boost](https://www.thewidlarzgroup.com/issue-boost/?utm_source=rnv&utm_medium=bug-report&utm_campaign=bot&utm_id=bot-message) – it allows us to dedicate time specifically to your issue and fix it faster.  
+    Thanks for your patience and support! 🚀`,
   MISSING_INFO: (missingFields) => {
-    return `Thank you for your issue report. Please note that the following information is missing or incomplete:\n\n${missingFields
-      .map((field) => `- ${field.replace('missing-', '')}`)
-      .join(
-        '\n',
-      )}\n\nPlease update your issue with this information to help us address it more effectively. 
-      \n > Note: issues without complete information have a lower priority`;
+    return `Hey! 👋  
+      Thanks for the bug report. To help us resolve your issue effectively, we still need some key information:\n\n${missingFields
+        .map((field) => `- ${field.replace('missing-', '')}`)
+        .join('\n')}
+    
+      Please edit your issue and fill in the missing details.  
+      > Issues with incomplete info are treated with lower priority, so this helps speed things up.
+      
+      Need faster resolution? Consider [Issue Boost](https://www.thewidlarzgroup.com/issue-boost/?utm_source=rnv&utm_medium=missing-info&utm_campaign=bot&utm_id=bot-message) to prioritize your issue. 🚀`;
   },
   OUTDATED_VERSION: (issueVersion, latestVersion) => {
     return (
-      `There is a newer version of the library available. ` +
-      `You are using version ${issueVersion}, while the latest stable version is ${latestVersion}. ` +
-      `Please update to the latest version and check if the issue still exists.` +
-      `\n > Note: If the issue still exists, please update the issue report with the latest information.`
+      `Heads up! ⚠️ You're using version **${issueVersion}**, but the latest stable version is **${latestVersion}**. ` +
+      `Please update to the newest version and check if the issue still occurs.\n\n` +
+      `> Keeping your dependencies up-to-date often resolves many common problems.` +
+      `\n\nStill having the issue after upgrading? Update the report with the new version details so we can investigate.` +
+      `\n\nNeed this resolved faster? [Issue Boost](https://www.thewidlarzgroup.com/issue-boost/?utm_source=rnv&utm_medium=outdated&utm_campaign=bot&utm_id=bot-message) lets us prioritize and fix your issue sooner. 🚀`
     );
   },
 };
