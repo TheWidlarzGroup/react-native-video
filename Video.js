@@ -16,6 +16,22 @@ const styles = StyleSheet.create({
 
 export { TextTrackType, FilterType, DRMType };
 
+const VERSION_DEPRECATION_WARNING_MESSAGE =
+  'react-native-video version 5.x is deprecated and not maintained anymore.' +
+  'Please migrate to version 6.x. see https://docs.thewidlarzgroup.com/react-native-video/updating for more information. \n' +
+  'If you have trouble updating, you can reach out to us at https://www.thewidlarzgroup.com/#Contact';
+
+var DID_WARN = false;
+
+function warnOnce() {
+  if (!DID_WARN) {
+    console.warn(VERSION_DEPRECATION_WARNING_MESSAGE);
+    DID_WARN = true;
+  }
+}
+
+warnOnce();
+
 export default class Video extends Component {
 
   constructor(props) {
