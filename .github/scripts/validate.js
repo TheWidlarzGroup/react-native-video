@@ -189,6 +189,7 @@ const handleFeatureRequest = async ({github, context, body, labels}) => {
   validateFeatureRequest(body, labels);
 
   const comment = MESSAGE.FEATURE_REQUEST;
+  await hidePreviousComments({github, context});
   await createComment({github, context, body: comment});
 };
 
