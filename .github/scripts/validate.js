@@ -31,7 +31,7 @@ const BOT_LABELS = [
 const SKIP_LABEL = 'No Validation';
 
 const ISSUE_BOOST_INFO = `
-Need faster resolution? Consider [Issue Boost](https://www.thewidlarzgroup.com/issue-boost/?utm_source=rnv&utm_medium=bug-report&utm_campaign=bot&utm_id=bot-message) – it allows us to dedicate time specifically to your issue and fix it faster. 🚀`;
+Need faster resolution? Consider [Issue Boost](https://www.thewidlarzgroup.com/issue-boost/?utm_source=rnv&utm_medium=bug-report&utm_campaign=bot&utm_id=bot-message) – it allows us to dedicate time specifically to your issue and fix it faster 🚀`;
 
 const MESSAGE = {
   FEATURE_REQUEST: `Thanks for the feature request! 🚀
@@ -40,16 +40,16 @@ const MESSAGE = {
     Thanks for your input and patience! 🙌`,
   BUG_REPORT: `Hey! 👋  
     Thanks for reporting this issue. We try to fix bugs as quickly as possible, but since our time is limited, we prioritize sponsored issues first, then focus on critical problems affecting many users, and finally, we handle other reports when we can. Some issues might take a while to be resolved.  
-    \nIf you want to speed up this process, check out [Issue Boost](https://www.thewidlarzgroup.com/issue-boost/?utm_source=rnv&utm_medium=bug-report-valid&utm_campaign=bot&utm_id=bot-message) – it allows us to dedicate time specifically to your issue and fix it faster.  
+    \nIf you want to speed up this process, check out [Issue Boost](https://www.thewidlarzgroup.com/issue-boost/?utm_source=rnv&utm_medium=bug-report&utm_campaign=bot&utm_id=bot-message-valid) – it allows us to dedicate time specifically to your issue and fix it faster.  
     \nThanks for your patience and support! 🚀`,
   MISSING_INFO: (missingFields) => {
     return `Hey! 👋  
-Thanks for the bug report. To help us resolve your issue effectively, we still need some key information:\n\n${missingFields
+    Thanks for the bug report. To help us resolve your issue effectively, we still need some key information:\n\n${missingFields
       .map((field) => `- ${field.replace('missing-', '')}`)
       .join('\n')}
 
-Please edit your issue and fill in the missing details.  
-> Issues with incomplete info are treated with lower priority, so this helps speed things up.`;
+    Please edit your issue and fill in the missing details.  
+    > Issues with incomplete info are treated with lower priority, so this helps speed things up.`;
   },
   OUTDATED_VERSION: (issueVersion, latestVersion) => {
     return (
