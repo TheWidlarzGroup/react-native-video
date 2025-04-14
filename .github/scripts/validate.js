@@ -35,9 +35,9 @@ Need faster resolution? Consider [Issue Boost](https://www.thewidlarzgroup.com/i
 
 const MESSAGE = {
   FEATURE_REQUEST: `Thanks for the feature request! 🚀
-    You can check out our [public roadmap](https://github.com/orgs/TheWidlarzGroup/projects/6) to see what we're currently working on. All requests are automatically added there, so you can track progress anytime.
-    We review and implement new features when time allows, but this can take a while. If you’d like to speed things up and make this a priority, consider [Issue Boost](https://www.thewidlarzgroup.com/issue-boost/?utm_source=rnv&utm_medium=feature-request&utm_campaign=bot&utm_id=bot-message), our commercial option that lets us dedicate time specifically to your request.
-    Thanks for your input and patience! 🙌`,
+    \nYou can check out our [public roadmap](https://github.com/orgs/TheWidlarzGroup/projects/6) to see what we're currently working on. All requests are automatically added there, so you can track progress anytime.
+    \nWe review and implement new features when time allows, but this can take a while. If you’d like to speed things up and make this a priority, consider [Issue Boost](https://www.thewidlarzgroup.com/issue-boost/?utm_source=rnv&utm_medium=feature-request&utm_campaign=bot&utm_id=bot-message), our commercial option that lets us dedicate time specifically to your request.
+    \nThanks for your input and patience! 🙌`,
   BUG_REPORT: `Hey! 👋  
     Thanks for reporting this issue. We try to fix bugs as quickly as possible, but since our time is limited, we prioritize sponsored issues first, then focus on critical problems affecting many users, and finally, we handle other reports when we can. Some issues might take a while to be resolved.  
     \nIf you want to speed up this process, check out [Issue Boost](https://www.thewidlarzgroup.com/issue-boost/?utm_source=rnv&utm_medium=bug-report&utm_campaign=bot&utm_id=bot-message-valid) – it allows us to dedicate time specifically to your issue and fix it faster.  
