@@ -9,6 +9,7 @@ apply plugin: 'kotlin-android'
 def packageJsonFile = file('../package.json')
 def packageJson = new JsonSlurper().parseText(packageJsonFile.text)
 def dorisAndroidVersion = packageJson.dorisAndroidVersion
+def messagingAndroidVersion = packageJson.messagingAndroidVersion
 
 def safeExtGet(prop, fallback) {
     rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
@@ -32,7 +33,7 @@ android {
 
 dependencies {
     implementation 'com.facebook.react:react-native:+'
-    implementation(project(":dice-messaging-android"))
+    implementation("com.endeavorstreaming.messaging:messaging-android:$messagingAndroidVersion")
 
     // Amazon Publishing Services
     implementation project(":AmazonFireTVAdsSDK-release")
