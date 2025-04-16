@@ -9,11 +9,15 @@ import Foundation
 import NitroModules
 import AVFoundation
 
-class HybridVideoPlayer: HybridVideoPlayerSpec {
+class HybridVideoPlayer: HybridVideoPlayerSpec, VideoPlayerObserverDelegate {
   /**
    * This in general should not be used directly, use `playerPointer` instead. This should be set only from within the playerQueue.
    */
-  private var player: AVPlayer?
+  var player: AVPlayer? {
+    didSet {
+      playerObserver?.updatePlayerObservers()
+    }
+  }
   
   /**
    * The player queue is used to synchronize player initialization.
@@ -35,9 +39,12 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
         
         do {
           let item = try initializePlayerItem()
-          player?.replaceCurrentItem(with: item)
           playerItem = item
-          player = AVPlayer(playerItem: playerItem)
+          
+          // We need to intialize empty player first so player observers are set
+          // before we set the player item
+          player = AVPlayer()
+          player?.replaceCurrentItem(with: item)
         } catch {
           playerItem = nil
           player = AVPlayer()
@@ -54,6 +61,20 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
   }
   
   var playerItem: AVPlayerItem?
+  var playerObserver: VideoPlayerObserver?
+  
+  init(source: (any HybridVideoPlayerSourceSpec)) throws {
+    self.source = source
+    
+    super.init()
+    self.playerObserver = VideoPlayerObserver(delegate: self)
+  }
+  
+  deinit {
+    release()
+  }
+  
+  // MARK: - Hybrid Impl
   
   var source: any HybridVideoPlayerSourceSpec
   
@@ -63,6 +84,15 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
     }
     get {
       return Double(playerPointer.volume)
+    }
+  }
+  
+  var muted: Bool {
+    set {
+      playerPointer.isMuted = newValue
+    }
+    get {
+      return playerPointer.isMuted
     }
   }
   
@@ -83,14 +113,20 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
     Double(playerPointer.currentItem?.duration.seconds ?? Double.nan)
   }
   
-  init(source: (any HybridVideoPlayerSourceSpec)) throws {
-    self.source = source
-    super.init()
+  var rate: Double {
+    set {
+      if #available(iOS 16.0, tvOS 16.0, *) {
+        playerPointer.defaultRate = Float(newValue)
+      }
+      
+      playerPointer.rate = Float(newValue)
+    }
+    get {
+      return Double(playerPointer.rate)
+    }
   }
   
-  deinit {
-    release()
-  }
+  var loop: Bool = false
   
   func clean() throws {
     release()
@@ -106,6 +142,9 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
       if let source = self.source as? HybridVideoPlayerSource {
         source.releaseAsset()
       }
+      
+      // Clear player observer
+      self.playerObserver = nil
     }
   }
   
@@ -128,6 +167,26 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
   
   func pause() throws {
     playerPointer.pause()
+  }
+  
+  func seekBy(time: Double) throws {
+    guard let currentItem = playerPointer.currentItem else {
+      throw PlayerError.notIntilaized.error()
+    }
+    
+    let currentItemTime = currentItem.currentTime()
+    
+    // Duration is NaN for live streams
+    let fixedDurration = duration.isNaN ? Double.infinity : duration
+    
+    // Clap by <0, duration>
+    let newTime = max(0, min(currentItemTime.seconds + time, fixedDurration))
+    
+    currentTime = newTime
+  }
+  
+  func seekTo(time: Double) {
+    currentTime = time
   }
   
   func replaceSourceAsync(source: (any HybridVideoPlayerSourceSpec)) throws -> Promise<Void> {
@@ -156,6 +215,8 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
     }
   }
   
+  // MARK: - Internal Methods
+  
   private func initializePlayerItem() throws -> AVPlayerItem {
     guard let _source = source as? HybridVideoPlayerSource else {
       throw PlayerError.invalidSource.error()
@@ -169,6 +230,19 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
     
     return AVPlayerItem(asset: asset)
   }
+  
+  // MARK: - VideoPlayerObserverDelegate
+  
+  func onPlayedToEnd(player: AVPlayer) {
+    // TODO: Notify listeners once we implement callbacks
+    
+    if loop {
+      currentTime = 0
+      try? play()
+    }
+  }
+  
+  // MARK: - Memory Management
   
   var memorySize: Int {
     var size = 0

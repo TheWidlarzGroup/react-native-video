@@ -16,6 +16,7 @@ export interface VideoPlayerBase {
 
   /**
    * The volume of the video (0.0 = 0%, 1.0 = 100%).
+   * @note If the player is {@link muted}, the volume will be 0.0.
    */
   volume: number;
 
@@ -24,6 +25,22 @@ export interface VideoPlayerBase {
    * Returns NaN if the duration is not available.
    */
   currentTime: number;
+
+  /**
+   * Whether the player is muted.
+   */
+  muted: boolean;
+
+  /**
+   * Whether the player is looped.
+   */
+  loop: boolean;
+
+  /**
+   * Controls the speed at which the player should play.
+   * @note if rate is = 0, it will pause video.
+   */
+  rate: number;
 
   /**
    * Preload the video.
@@ -41,6 +58,22 @@ export interface VideoPlayerBase {
    * Pause playback of player.
    */
   pause(): void;
+
+  /**
+   * Seek by given time.
+   * If the time is negative, it will seek backward.
+   * time will be clamped if it is out of range (0 ~ {@link duration}).
+   * @param time - The time to seek from current time in seconds.
+   */
+  seekBy(time: number): void;
+
+  /**
+   * Seek to a specific time in the video.
+   * @param time - The time to seek to in seconds.
+   * @note This have same effect as {@link currentTime} setter.
+   * @note time will be clamped if it is out of range (0 ~ {@link duration}).
+   */
+  seekTo(time: number): void;
 
   /**
    * Replace the current source of the player.

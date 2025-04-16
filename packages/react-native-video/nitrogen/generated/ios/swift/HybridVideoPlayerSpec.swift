@@ -15,6 +15,9 @@ public protocol HybridVideoPlayerSpec_protocol: HybridObject {
   var duration: Double { get }
   var volume: Double { get set }
   var currentTime: Double { get set }
+  var muted: Bool { get set }
+  var loop: Bool { get set }
+  var rate: Double { get set }
 
   // Methods
   func replaceSourceAsync(source: (any HybridVideoPlayerSourceSpec)) throws -> Promise<Void>
@@ -22,6 +25,8 @@ public protocol HybridVideoPlayerSpec_protocol: HybridObject {
   func preload() throws -> Promise<Void>
   func play() throws -> Void
   func pause() throws -> Void
+  func seekBy(time: Double) throws -> Void
+  func seekTo(time: Double) throws -> Void
 }
 
 /// See ``HybridVideoPlayerSpec``

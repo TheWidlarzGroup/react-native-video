@@ -56,6 +56,24 @@ abstract class HybridVideoPlayerSpec: HybridObject() {
   @set:DoNotStrip
   @set:Keep
   abstract var currentTime: Double
+  
+  @get:DoNotStrip
+  @get:Keep
+  @set:DoNotStrip
+  @set:Keep
+  abstract var muted: Boolean
+  
+  @get:DoNotStrip
+  @get:Keep
+  @set:DoNotStrip
+  @set:Keep
+  abstract var loop: Boolean
+  
+  @get:DoNotStrip
+  @get:Keep
+  @set:DoNotStrip
+  @set:Keep
+  abstract var rate: Double
 
   // Methods
   @DoNotStrip
@@ -77,6 +95,14 @@ abstract class HybridVideoPlayerSpec: HybridObject() {
   @DoNotStrip
   @Keep
   abstract fun pause(): Unit
+  
+  @DoNotStrip
+  @Keep
+  abstract fun seekBy(time: Double): Unit
+  
+  @DoNotStrip
+  @Keep
+  abstract fun seekTo(time: Double): Unit
 
   private external fun initHybrid(): HybridData
 

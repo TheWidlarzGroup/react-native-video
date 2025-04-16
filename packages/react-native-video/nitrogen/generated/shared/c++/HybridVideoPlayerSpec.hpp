@@ -53,6 +53,12 @@ namespace margelo::nitro::video {
       virtual void setVolume(double volume) = 0;
       virtual double getCurrentTime() = 0;
       virtual void setCurrentTime(double currentTime) = 0;
+      virtual bool getMuted() = 0;
+      virtual void setMuted(bool muted) = 0;
+      virtual bool getLoop() = 0;
+      virtual void setLoop(bool loop) = 0;
+      virtual double getRate() = 0;
+      virtual void setRate(double rate) = 0;
 
     public:
       // Methods
@@ -61,6 +67,8 @@ namespace margelo::nitro::video {
       virtual std::shared_ptr<Promise<void>> preload() = 0;
       virtual void play() = 0;
       virtual void pause() = 0;
+      virtual void seekBy(double time) = 0;
+      virtual void seekTo(double time) = 0;
 
     protected:
       // Hybrid Setup

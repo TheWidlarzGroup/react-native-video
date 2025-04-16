@@ -135,6 +135,39 @@ public class HybridVideoPlayerSpec_cxx {
       self.__implementation.currentTime = newValue
     }
   }
+  
+  public final var muted: Bool {
+    @inline(__always)
+    get {
+      return self.__implementation.muted
+    }
+    @inline(__always)
+    set {
+      self.__implementation.muted = newValue
+    }
+  }
+  
+  public final var loop: Bool {
+    @inline(__always)
+    get {
+      return self.__implementation.loop
+    }
+    @inline(__always)
+    set {
+      self.__implementation.loop = newValue
+    }
+  }
+  
+  public final var rate: Double {
+    @inline(__always)
+    get {
+      return self.__implementation.rate
+    }
+    @inline(__always)
+    set {
+      self.__implementation.rate = newValue
+    }
+  }
 
   // Methods
   @inline(__always)
@@ -205,6 +238,28 @@ public class HybridVideoPlayerSpec_cxx {
   public final func pause() -> bridge.Result_void_ {
     do {
       try self.__implementation.pause()
+      return bridge.create_Result_void_()
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_void_(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func seekBy(time: Double) -> bridge.Result_void_ {
+    do {
+      try self.__implementation.seekBy(time: time)
+      return bridge.create_Result_void_()
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_void_(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func seekTo(time: Double) -> bridge.Result_void_ {
+    do {
+      try self.__implementation.seekTo(time: time)
       return bridge.create_Result_void_()
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()

@@ -1,3 +1,4 @@
+import { NitroModules } from 'react-native-nitro-modules';
 import { type VideoPlayer as VideoPlayerImpl } from '../spec/nitro/VideoPlayer.nitro';
 import type { VideoPlayerSource } from '../spec/nitro/VideoPlayerSource.nitro';
 import type { VideoConfig, VideoSource } from './types/VideoConfig';
@@ -61,18 +62,23 @@ class VideoPlayer implements VideoPlayerBase {
    */
   private wrapPromise<T>(promise: Promise<T>) {
     return new Promise<T>((resolve, reject) => {
-      promise.then(resolve).catch(reject);
+      promise.then(resolve).catch((error) => {
+        reject(this.throwError(error));
+      });
     });
   }
 
+  // Source
   get source(): VideoPlayerSource {
     return this.player.source;
   }
 
+  // Duration
   get duration(): number {
     return this.player.duration;
   }
 
+  // Volume
   get volume(): number {
     return this.player.volume;
   }
@@ -81,6 +87,7 @@ class VideoPlayer implements VideoPlayerBase {
     this.player.volume = value;
   }
 
+  // Current Time
   get currentTime(): number {
     return this.player.currentTime;
   }
@@ -89,8 +96,37 @@ class VideoPlayer implements VideoPlayerBase {
     this.player.currentTime = value;
   }
 
-  preload(): Promise<void> {
-    return this.wrapPromise(this.player.preload());
+  // Muted
+  get muted(): boolean {
+    return this.player.muted;
+  }
+
+  set muted(value: boolean) {
+    this.player.muted = value;
+  }
+
+  // Loop
+  get loop(): boolean {
+    return this.player.loop;
+  }
+
+  set loop(value: boolean) {
+    this.player.loop = value;
+  }
+
+  // Rate
+  get rate(): number {
+    return this.player.rate;
+  }
+
+  set rate(value: number) {
+    this.player.rate = value;
+  }
+
+  async preload(): Promise<void> {
+    await this.wrapPromise(this.player.preload());
+
+    NitroModules.updateMemorySize(this.player);
   }
 
   play(): void {
@@ -109,12 +145,30 @@ class VideoPlayer implements VideoPlayerBase {
     }
   }
 
-  replaceSourceAsync(
+  seekBy(time: number): void {
+    try {
+      this.player.seekBy(time);
+    } catch (error) {
+      this.throwError(error);
+    }
+  }
+
+  seekTo(time: number): void {
+    try {
+      this.player.seekTo(time);
+    } catch (error) {
+      this.throwError(error);
+    }
+  }
+
+  async replaceSourceAsync(
     source: VideoSource | VideoConfig | VideoPlayerSource
   ): Promise<void> {
-    return this.wrapPromise(
+    await this.wrapPromise(
       this.player.replaceSourceAsync(createSource(source))
     );
+
+    NitroModules.updateMemorySize(this.player);
   }
 }
 

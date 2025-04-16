@@ -73,6 +73,24 @@ namespace margelo::nitro::video {
     inline void setCurrentTime(double currentTime) noexcept override {
       _swiftPart.setCurrentTime(std::forward<decltype(currentTime)>(currentTime));
     }
+    inline bool getMuted() noexcept override {
+      return _swiftPart.getMuted();
+    }
+    inline void setMuted(bool muted) noexcept override {
+      _swiftPart.setMuted(std::forward<decltype(muted)>(muted));
+    }
+    inline bool getLoop() noexcept override {
+      return _swiftPart.getLoop();
+    }
+    inline void setLoop(bool loop) noexcept override {
+      _swiftPart.setLoop(std::forward<decltype(loop)>(loop));
+    }
+    inline double getRate() noexcept override {
+      return _swiftPart.getRate();
+    }
+    inline void setRate(double rate) noexcept override {
+      _swiftPart.setRate(std::forward<decltype(rate)>(rate));
+    }
 
   public:
     // Methods
@@ -106,6 +124,18 @@ namespace margelo::nitro::video {
     }
     inline void pause() override {
       auto __result = _swiftPart.pause();
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+    }
+    inline void seekBy(double time) override {
+      auto __result = _swiftPart.seekBy(std::forward<decltype(time)>(time));
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+    }
+    inline void seekTo(double time) override {
+      auto __result = _swiftPart.seekTo(std::forward<decltype(time)>(time));
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

@@ -53,6 +53,12 @@ namespace margelo::nitro::video {
     void setVolume(double volume) override;
     double getCurrentTime() override;
     void setCurrentTime(double currentTime) override;
+    bool getMuted() override;
+    void setMuted(bool muted) override;
+    bool getLoop() override;
+    void setLoop(bool loop) override;
+    double getRate() override;
+    void setRate(double rate) override;
 
   public:
     // Methods
@@ -61,6 +67,8 @@ namespace margelo::nitro::video {
     std::shared_ptr<Promise<void>> preload() override;
     void play() override;
     void pause() override;
+    void seekBy(double time) override;
+    void seekTo(double time) override;
 
   private:
     friend HybridBase;

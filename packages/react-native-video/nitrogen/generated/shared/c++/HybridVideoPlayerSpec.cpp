@@ -20,15 +20,24 @@ namespace margelo::nitro::video {
       prototype.registerHybridSetter("volume", &HybridVideoPlayerSpec::setVolume);
       prototype.registerHybridGetter("currentTime", &HybridVideoPlayerSpec::getCurrentTime);
       prototype.registerHybridSetter("currentTime", &HybridVideoPlayerSpec::setCurrentTime);
+      prototype.registerHybridGetter("muted", &HybridVideoPlayerSpec::getMuted);
+      prototype.registerHybridSetter("muted", &HybridVideoPlayerSpec::setMuted);
+      prototype.registerHybridGetter("loop", &HybridVideoPlayerSpec::getLoop);
+      prototype.registerHybridSetter("loop", &HybridVideoPlayerSpec::setLoop);
+      prototype.registerHybridGetter("rate", &HybridVideoPlayerSpec::getRate);
+      prototype.registerHybridSetter("rate", &HybridVideoPlayerSpec::setRate);
       prototype.registerHybridMethod("replaceSourceAsync", &HybridVideoPlayerSpec::replaceSourceAsync);
       prototype.registerHybridMethod("clean", &HybridVideoPlayerSpec::clean);
       prototype.registerHybridMethod("preload", &HybridVideoPlayerSpec::preload);
       prototype.registerHybridMethod("play", &HybridVideoPlayerSpec::play);
       prototype.registerHybridMethod("pause", &HybridVideoPlayerSpec::pause);
+      prototype.registerHybridMethod("seekBy", &HybridVideoPlayerSpec::seekBy);
+      prototype.registerHybridMethod("seekTo", &HybridVideoPlayerSpec::seekTo);
     });
   }
 
   void HybridVideoPlayerSpec::dispose() {
     clean();
+    HybridObject::dispose();
   }
 } // namespace margelo::nitro::video

@@ -12,7 +12,12 @@ import { VideoView, createSource, useVideoPlayer } from 'react-native-video';
 const VideoDemo = () => {
   const [show, setShow] = React.useState(false);
 
-  const player = useVideoPlayer('https://www.w3schools.com/html/mov_bbb.mp4');
+  const player = useVideoPlayer(
+    'https://www.w3schools.com/html/mov_bbb.mp4',
+    (_player) => {
+      _player.loop = true;
+    }
+  );
 
   return (
     <View style={styles.container}>
@@ -27,7 +32,8 @@ const VideoDemo = () => {
       </View>
       <Button title="Play" onPress={() => player.play()} />
       <Button title="Pause" onPress={() => player.pause()} />
-      <Button title="Seek to 3sec" onPress={() => (player.currentTime = 3)} />
+      <Button title="Seek to 0sec" onPress={() => player.seekTo(0)} />
+      <Button title="Seek by 1sec" onPress={() => player.seekBy(1)} />
       <Button
         title={show ? 'Hide VideoView' : 'Show VideoView'}
         onPress={() => setShow((prev) => !prev)}

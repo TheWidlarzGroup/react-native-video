@@ -63,6 +63,33 @@ namespace margelo::nitro::video {
     static const auto method = javaClassStatic()->getMethod<void(double /* currentTime */)>("setCurrentTime");
     method(_javaPart, currentTime);
   }
+  bool JHybridVideoPlayerSpec::getMuted() {
+    static const auto method = javaClassStatic()->getMethod<jboolean()>("getMuted");
+    auto __result = method(_javaPart);
+    return static_cast<bool>(__result);
+  }
+  void JHybridVideoPlayerSpec::setMuted(bool muted) {
+    static const auto method = javaClassStatic()->getMethod<void(jboolean /* muted */)>("setMuted");
+    method(_javaPart, muted);
+  }
+  bool JHybridVideoPlayerSpec::getLoop() {
+    static const auto method = javaClassStatic()->getMethod<jboolean()>("getLoop");
+    auto __result = method(_javaPart);
+    return static_cast<bool>(__result);
+  }
+  void JHybridVideoPlayerSpec::setLoop(bool loop) {
+    static const auto method = javaClassStatic()->getMethod<void(jboolean /* loop */)>("setLoop");
+    method(_javaPart, loop);
+  }
+  double JHybridVideoPlayerSpec::getRate() {
+    static const auto method = javaClassStatic()->getMethod<double()>("getRate");
+    auto __result = method(_javaPart);
+    return __result;
+  }
+  void JHybridVideoPlayerSpec::setRate(double rate) {
+    static const auto method = javaClassStatic()->getMethod<void(double /* rate */)>("setRate");
+    method(_javaPart, rate);
+  }
 
   // Methods
   std::shared_ptr<Promise<void>> JHybridVideoPlayerSpec::replaceSourceAsync(const std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>& source) {
@@ -106,6 +133,14 @@ namespace margelo::nitro::video {
   void JHybridVideoPlayerSpec::pause() {
     static const auto method = javaClassStatic()->getMethod<void()>("pause");
     method(_javaPart);
+  }
+  void JHybridVideoPlayerSpec::seekBy(double time) {
+    static const auto method = javaClassStatic()->getMethod<void(double /* time */)>("seekBy");
+    method(_javaPart, time);
+  }
+  void JHybridVideoPlayerSpec::seekTo(double time) {
+    static const auto method = javaClassStatic()->getMethod<void(double /* time */)>("seekTo");
+    method(_javaPart, time);
   }
 
 } // namespace margelo::nitro::video

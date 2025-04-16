@@ -12,9 +12,10 @@ import com.margelo.nitro.NitroModules
 import com.margelo.nitro.core.Promise
 import com.video.core.LibraryError
 import com.video.core.PlayerError
-import com.video.core.SourceError
 import com.video.core.utils.Threading.runOnMainThread
 import com.video.core.utils.Threading.runOnMainThreadSync
+import kotlin.math.max
+import kotlin.math.min
 
 @UnstableApi
 @DoNotStrip
@@ -51,14 +52,50 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
     get() = runOnMainThreadSync { return@runOnMainThreadSync playerPointer.currentPosition.toDouble() / 1000.0 }
     set(value) = runOnMainThread { playerPointer.seekTo((value * 1000).toLong()) }
 
+  // volume defined by user
+  var userVolume: Double = 1.0
+
   override var volume: Double
     get() = runOnMainThreadSync { return@runOnMainThreadSync playerPointer.volume.toDouble() }
-    set(value) = runOnMainThread { playerPointer.volume = value.toFloat() }
+    set(value) = runOnMainThread {
+      userVolume = value
+      playerPointer.volume = value.toFloat()
+    }
 
   override val duration: Double
     get() {
       val duration = runOnMainThreadSync { return@runOnMainThreadSync playerPointer.duration }
       return if (duration == C.TIME_UNSET) Double.NaN else duration.toDouble() / 1000.0
+    }
+
+  override var loop: Boolean
+    get() {
+      val repeatMode = runOnMainThreadSync { return@runOnMainThreadSync playerPointer.repeatMode }
+      return repeatMode == Player.REPEAT_MODE_ONE
+    }
+    set(value) = runOnMainThread {
+      playerPointer.repeatMode = if (value) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
+    }
+
+  override var muted: Boolean
+    get() = runOnMainThreadSync {
+      val playerVolume = playerPointer.volume.toDouble()
+      val isMuted = playerVolume == 0.0
+      return@runOnMainThreadSync isMuted
+    }
+    set(value) = runOnMainThread {
+      if (value) {
+        userVolume = volume
+        playerPointer.volume = 0f
+      } else {
+        playerPointer.volume = userVolume.toFloat()
+      }
+    }
+
+  override var rate: Double
+    get() = runOnMainThreadSync { return@runOnMainThreadSync playerPointer.playbackParameters.speed.toDouble() }
+    set(value) = runOnMainThread {
+      playerPointer.playbackParameters = playerPointer.playbackParameters.withSpeed(value.toFloat())
     }
 
   private fun initializePlayer() {
@@ -99,6 +136,14 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
     runOnMainThread {
       playerPointer.pause()
     }
+  }
+
+  override fun seekBy(time: Double) {
+    currentTime = (currentTime + time).coerceIn(0.0, duration)
+  }
+
+  override fun seekTo(time: Double) {
+    currentTime = time.coerceIn(0.0, duration)
   }
 
   override fun replaceSourceAsync(source: HybridVideoPlayerSourceSpec): Promise<Unit> {
