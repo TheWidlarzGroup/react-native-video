@@ -1,6 +1,26 @@
 buildscript {
   // Buildscript is evaluated before everything else so we can't use getExtOrDefault
-  def kotlin_version = rootProject.ext.has("kotlinVersion") ? rootProject.ext.get("kotlinVersion") : project.properties["Video_kotlinVersion"]
+  def kotlin_version = rootProject.ext.has("kotlinVersion") ? rootProject.ext.get("kotlinVersion") : project.properties["RNVideo_kotlinVersion"]
+  def minKotlin_version = project.properties["RNVideo_minKotlinVersion"]
+
+  def androidx_version = rootProject.ext.has('androidxActivityVersion') ? rootProject.ext.get('androidxActivityVersion') : project.properties['RNVideo_androidxActivityVersion']
+  def minAndroidx_version = project.properties["RNVideo_androidxActivityVersion"]
+
+  def isVersionAtLeast = { version, minVersion ->
+    def (major, minor, patch) = version.tokenize('.')
+    def (minMajor, minMinor, minPatch) = minVersion.tokenize('.')
+
+    // major version is greater
+    if (major.toInteger() > minMajor.toInteger()) return true
+
+    // major version is equal, minor version is greater
+    if (major.toInteger() == minMajor.toInteger() && minor.toInteger() > minMinor.toInteger()) return true
+
+    // major version is equal, minor version is equal, patch version is greater
+    if (major.toInteger() == minMajor.toInteger() && minor.toInteger() == minMinor.toInteger() && patch.toInteger() >= minPatch.toInteger()) return true
+
+    return false
+  }
 
   repositories {
     google()
@@ -11,6 +31,16 @@ buildscript {
     classpath "com.android.tools.build:gradle:7.2.1"
     // noinspection DifferentKotlinGradleVersion
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+  }
+
+  ext {
+    if (!isVersionAtLeast(kotlin_version, minKotlin_version)) {
+      throw new GradleException("Kotlin version must be at least $minKotlin_version (current: $kotlin_version)")
+    }
+
+    if (!isVersionAtLeast(androidx_version, minAndroidx_version)) {
+      throw new GradleException("AndroidX version must be at least $minAndroidx_version (current: $androidx_version)")
+    }
   }
 }
 
@@ -32,11 +62,11 @@ if (isNewArchitectureEnabled()) {
 }
 
 def getExtOrDefault(name) {
-  return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties["Video_" + name]
+  return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties["RNVideo_" + name]
 }
 
 def getExtOrIntegerDefault(name) {
-  return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties["Video_" + name]).toInteger()
+  return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties["RNVideo_" + name]).toInteger()
 }
 
 def supportsNamespace() {
@@ -46,6 +76,22 @@ def supportsNamespace() {
 
   // Namespace support was added in 7.3.0
   return (major == 7 && minor >= 3) || major >= 8
+}
+
+def ExoplayerDependenciesList = [
+  "useExoplayerDash",
+  "useExoplayerHls",
+]
+
+def ExoplayerDependencies = ExoplayerDependenciesList.collectEntries { property ->
+  [(property): getExtOrDefault(property)?.toBoolean() ?: false]
+}
+
+// Print Configuration
+println "[ReactNativeVideo] Exoplayer Dependencies Configuration:"
+ExoplayerDependenciesList.each { propertyName ->
+  def propertyValue = ExoplayerDependencies[propertyName]
+  println "$propertyName: $propertyValue"
 }
 
 android {
@@ -65,7 +111,10 @@ android {
   defaultConfig {
     minSdkVersion getExtOrIntegerDefault("minSdkVersion")
     targetSdkVersion getExtOrIntegerDefault("targetSdkVersion")
+
     buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString()
+    buildConfigField "boolean", "USE_EXOPLAYER_DASH", ExoplayerDependencies.useExoplayerDash.toString()
+    buildConfigField "boolean", "USE_EXOPLAYER_HLS", ExoplayerDependencies.useExoplayerHls.toString()
 
     externalNativeBuild {
       cmake {
@@ -127,6 +176,18 @@ android {
       if (!isNewArchitectureEnabled()) {
         java.srcDirs += ["src/paper/java"]
       }
+
+      java.srcDirs += ["src/androidx"]
+
+      java {
+        if (ExoplayerDependencies.useExoplayerDash == true) {
+          exclude "src/androidx/media3/exoplayer/dash"
+        }
+
+        if (ExoplayerDependencies.useExoplayerHls == true) {
+          exclude "src/androidx/media3/exoplayer/hls"
+        }
+      }
     }
   }
 }
@@ -137,6 +198,9 @@ repositories {
 }
 
 def kotlin_version = getExtOrDefault("kotlinVersion")
+def media3_version = getExtOrDefault("media3Version")
+def androidxCore_version = getExtOrDefault("androidxCoreVersion")
+def androidxActivity_version = getExtOrDefault("androidxActivityVersion")
 
 dependencies {
   // For < 0.71, this will be from the local maven repo
@@ -148,20 +212,31 @@ dependencies {
   // Add a dependency on NitroModules
   implementation project(":react-native-nitro-modules")
 
-  implementation "androidx.core:core-ktx:1.13.1"
-  implementation "androidx.activity:activity-ktx:1.8.2"
+  implementation "androidx.core:core-ktx:$androidxCore_version"
+  implementation "androidx.activity:activity-ktx:$androidxActivity_version"
 
   // For media playback using ExoPlayer
-  implementation "androidx.media3:media3-exoplayer:1.4.1"
+  implementation "androidx.media3:media3-exoplayer:$media3_version"
 
   // Common functionality used across multiple media libraries
-  implementation "androidx.media3:media3-common:1.4.1"
-
-  // Hls
-  implementation("androidx.media3:media3-exoplayer-hls:1.4.1")
+  implementation "androidx.media3:media3-common:$media3_version"
 
   // For building media playback UIs
-  implementation "androidx.media3:media3-ui:1.4.1"
+  implementation "androidx.media3:media3-ui:$media3_version"
+
+  // Common functionality for loading data
+  implementation "androidx.media3:media3-datasource:$media3_version"
+
+  // For loading data using the OkHttp network stack
+  implementation "androidx.media3:media3-datasource-okhttp:$media3_version"
+
+  if (ExoplayerDependencies.useExoplayerDash) {
+    implementation "androidx.media3:media3-exoplayer-dash:$media3_version"
+  }
+
+  if (ExoplayerDependencies.useExoplayerHls) {
+    implementation "androidx.media3:media3-exoplayer-hls:$media3_version"
+  }
 }
 
 if (isNewArchitectureEnabled()) {

@@ -58,6 +58,11 @@ sealed class SourceError(code: String, message: String) : VideoError(code, messa
         "source/failed-to-initialize-asset",
         "Failed to initialize asset"
     )
+
+    class UnsupportedContentType(val uri: String) : SourceError(
+        "source/unsupported-content-type",
+        "type of content (${uri}) is not supported"
+    )
 }
 
 // View related errors

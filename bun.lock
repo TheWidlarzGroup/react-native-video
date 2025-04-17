@@ -29,6 +29,7 @@
       "name": "react-native-video-example",
       "version": "7.0.0-dev",
       "dependencies": {
+        "@react-native-community/slider": "^4.5.6",
         "react": "18.3.1",
         "react-native": "^0.77.0",
         "react-native-nitro-modules": "^0.25.0",
@@ -486,6 +487,8 @@
     "@react-native-community/cli-tools": ["@react-native-community/cli-tools@15.0.1", "", { "dependencies": { "appdirsjs": "^1.2.4", "chalk": "^4.1.2", "execa": "^5.0.0", "find-up": "^5.0.0", "mime": "^2.4.1", "open": "^6.2.0", "ora": "^5.4.1", "prompts": "^2.4.2", "semver": "^7.5.2", "shell-quote": "^1.7.3", "sudo-prompt": "^9.0.0" } }, "sha512-N79A+u/94roanfmNohVcNGu6Xg+0idh63JHZFLC9OJJuZwTifGMLDfSTHZATpR1J7rebozQ5ClcSUePavErnSg=="],
 
     "@react-native-community/cli-types": ["@react-native-community/cli-types@15.0.1", "", { "dependencies": { "joi": "^17.2.1" } }, "sha512-sWiJ62kkGu2mgYni2dsPxOMBzpwTjNsDH1ubY4mqcNEI9Zmzs0vRwwDUEhYqwNGys9+KpBKoZRrT2PAlhO84xA=="],
+
+    "@react-native-community/slider": ["@react-native-community/slider@4.5.6", "", {}, "sha512-UhLPFeqx0YfPLrEz8ffT3uqAyXWu6iqFjohNsbp4cOU7hnJwg2RXtDnYHoHMr7MOkZDVdlLMdrSrAuzY6KGqrg=="],
 
     "@react-native/assets-registry": ["@react-native/assets-registry@0.77.2", "", {}, "sha512-AcEhFjndzBWVVhaHaASk36vhA83iDVkQbFYb0D0vATzjuJ67vhhHVLae0+JtHl5jhghotUFDg4Vj/1QbZNDyyQ=="],
 

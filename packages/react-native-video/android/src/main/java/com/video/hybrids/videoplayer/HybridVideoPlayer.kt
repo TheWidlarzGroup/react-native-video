@@ -23,9 +23,9 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
   override lateinit var source: HybridVideoPlayerSourceSpec
   private var allocator: DefaultAllocator? = null
 
-  private var player: Player? = null
+  private var player: ExoPlayer? = null
 
-  var playerPointer: Player
+  var playerPointer: ExoPlayer
     get() {
       if (player == null) {
         runOnMainThreadSync {
@@ -111,6 +111,13 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
     // Create a LoadControl with the allocator
     val loadControl = DefaultLoadControl.Builder()
       .setAllocator(allocator!!)
+      //TODO: Add buffer config to source
+      .setBufferDurationsMs(
+        5000,  // minBufferMs
+        10000, // maxBufferMs
+        1000,  // bufferForPlaybackMs
+        2000   // bufferForPlaybackAfterRebufferMs
+      )
       .build()
 
     // Build the player with the LoadControl
@@ -119,7 +126,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
       .setLooper(Looper.getMainLooper())
       .build()
 
-    playerPointer.setMediaItem(hybridSource.mediaItem)
+    playerPointer.setMediaSource(hybridSource.mediaSource)
   }
 
   constructor(source: HybridVideoPlayerSource) : this() {
@@ -153,7 +160,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
       runOnMainThreadSync {
         // Update source
         this.source = source
-        playerPointer.setMediaItem(hybridSource.mediaItem)
+        playerPointer.setMediaSource(hybridSource.mediaSource)
 
         // Prepare player
         playerPointer.prepare()
@@ -188,5 +195,5 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
   }
 
   override val memorySize: Long
-    get() = if (allocator == null) 0 else allocator!!.totalBytesAllocated.toLong()
+    get() = (if (allocator == null) 0 else allocator!!.totalBytesAllocated).toLong()
 }
