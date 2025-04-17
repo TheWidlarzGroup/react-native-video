@@ -548,7 +548,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 case 3:
                     speed = 2.0f;
                 default:
-                    speed = 2.0f;;
+                    speed = 1.0f;;
             };
             setRateModifier(speed);
         });
