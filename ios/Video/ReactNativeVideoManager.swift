@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import AVFoundation
 
 public class ReactNativeVideoManager: RNVPlugin {
     private let expectedMaxVideoCount = 2
@@ -65,6 +66,17 @@ public class ReactNativeVideoManager: RNVPlugin {
      */
     public func getDRMManager() -> DRMManagerSpec? {
         return customDRMManager?.1 ?? DRMManager()
+    }
+
+    public func overridePlayerAsset(source: VideoSource, asset: AVAsset) -> OverridePlayerAssetResult? {
+        for plugin in pluginList {
+            if let avpPlugin = plugin as? RNVAVPlayerPlugin,
+               let overridePlayerAsset = avpPlugin.overridePlayerAsset(source: source, asset: asset) {
+                return overridePlayerAsset
+            }
+        }
+
+        return nil
     }
 
     // MARK: - Helper methods

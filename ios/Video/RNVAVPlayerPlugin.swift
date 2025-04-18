@@ -36,6 +36,11 @@ open class RNVAVPlayerPlugin: RNVPlugin {
      */
     open func onInstanceRemoved(id _: String, player _: AVPlayer) { /* no-op */ }
 
+    /**
+     * Function called when a AVPlayer instance is being removed
+     */
+    open func overridePlayerAsset(source: VideoSource, asset: AVAsset) -> OverridePlayerAssetResult? { nil }
+
     // MARK: - RNVPlugin methods
 
     override public func onInstanceCreated(id: String, player: Any) {

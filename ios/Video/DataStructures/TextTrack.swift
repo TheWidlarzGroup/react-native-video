@@ -1,4 +1,4 @@
-struct TextTrack {
+public struct TextTrack {
     let type: String
     let language: String
     let title: String
