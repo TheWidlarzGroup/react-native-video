@@ -539,11 +539,16 @@ public class ReactExoplayerView extends FrameLayout implements
 
         builder.setSingleChoiceItems(speedOptions, selectedSpeedIndex, (dialog, which) -> {
             selectedSpeedIndex = which;
-            float speed = switch (which) {
-                case 0 -> 0.5f;
-                case 2 -> 1.5f;
-                case 3 -> 2.0f;
-                default -> 1.0f;
+            float speed = 1.0f;
+            switch (which) {
+                case 0:
+                    speed = 0.5f;
+                case 2:
+                    speed = 1.5f;
+                case 3:
+                    speed = 2.0f;
+                default:
+                    speed = 1.0f;;
             };
             setRateModifier(speed);
         });
