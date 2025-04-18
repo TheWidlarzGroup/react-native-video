@@ -209,28 +209,79 @@ class MyAVPlayerAnalyticsPlugin: RNVAVPlayerPlugin {
     override func onInstanceRemoved(id: String, player: AVPlayer) {
         // Handle AVPlayer removal with type-safe access
     }
+
+    /// Optionally override the asset used by the player before playback starts
+    override func overridePlayerAsset(source: VideoSource, asset: AVAsset) async -> OverridePlayerAssetResult? {
+        // Return a modified asset or nil to use the default
+        return nil
+    }
 }
 ```
 
-The `RNVPlugin` class defines two methods:
+The `RNVAVPlayerPlugin` class defines several extension points:
 
 ```swift
 /**
- * Function called when a new player is created
+ * Function called when a new AVPlayer instance is created
  * @param id: a random string identifying the player
- * @param player: the instantiated player reference
+ * @param player: the instantiated AVPlayer
  */
-open func onInstanceCreated(id: String, player: Any) { /* no-op */ }
+open func onInstanceCreated(id: String, player: AVPlayer) { /* no-op */ }
 
 /**
- * Function called when a player should be destroyed
- * when this callback is called, the plugin shall free all
- * resources and release all reference to Player object
+ * Function called when an AVPlayer instance is being removed
  * @param id: a random string identifying the player
- * @param player: the player to release
+ * @param player: the AVPlayer to release
  */
-open func onInstanceRemoved(id: String, player: Any) { /* no-op */ }
+open func onInstanceRemoved(id: String, player: AVPlayer) { /* no-op */ }
+
+/**
+ * Optionally override the asset used by the player before playback starts.
+ * Allows you to modify or replace the AVAsset before it is used to create the AVPlayerItem.
+ * Return nil to use the default asset.
+ *
+ * @param source: The VideoSource describing the video (uri, type, headers, etc.)
+ * @param asset: The AVAsset prepared by the player
+ * @return: OverridePlayerAssetResult if you want to override, or nil to use the default
+ */
+open func overridePlayerAsset(source: VideoSource, asset: AVAsset) async -> OverridePlayerAssetResult? { nil }
 ```
+
+##### `OverridePlayerAssetResult` and `OverridePlayerAssetType`
+
+To override the asset, return an `OverridePlayerAssetResult`:
+
+```swift
+public struct OverridePlayerAssetResult {
+  public let type: OverridePlayerAssetType
+  public let asset: AVAsset
+
+  public init(type: OverridePlayerAssetType, asset: AVAsset) {
+    self.type = type
+    self.asset = asset
+  }
+}
+
+public enum OverridePlayerAssetType {
+  case partial // Return a partially modified asset; will go through the default prepare process
+  case full    // Return a fully modified asset; will skip the default prepare process
+}
+```
+
+- Use `.partial` if you want the asset to continue through the player's normal preparation (e.g., for text tracks or metadata injection).
+- Use `.full` if you want to provide a fully prepared asset that will be used as-is for playback.
+
+**Example:**
+
+```swift
+override func overridePlayerAsset(source: VideoSource, asset: AVAsset) async -> OverridePlayerAssetResult? {
+    // Example: Replace the asset URL
+    let newAsset = AVAsset(url: URL(string: "https://example.com/override.mp4")!)
+    return Result(type: .full, asset: newAsset)
+}
+```
+
+> Only one plugin can override the player asset at a time. If multiple plugins implement this, only the first will be used.
 
 ### 3. Register the Plugin
 

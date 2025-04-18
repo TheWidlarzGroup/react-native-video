@@ -1,4 +1,4 @@
-struct AdParams {
+public struct AdParams {
     let adTagUrl: String?
     let adLanguage: String?
 

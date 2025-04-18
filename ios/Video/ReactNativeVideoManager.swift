@@ -3,6 +3,7 @@
 //  react-native-video
 //
 
+import AVFoundation
 import Foundation
 
 public class ReactNativeVideoManager: RNVPlugin {
@@ -65,6 +66,17 @@ public class ReactNativeVideoManager: RNVPlugin {
      */
     public func getDRMManager() -> DRMManagerSpec? {
         return customDRMManager?.1 ?? DRMManager()
+    }
+
+    public func overridePlayerAsset(source: VideoSource, asset: AVAsset) async -> OverridePlayerAssetResult? {
+        for plugin in pluginList {
+            if let avpPlugin = plugin as? RNVAVPlayerPlugin,
+               let overridePlayerAsset = await avpPlugin.overridePlayerAsset(source: source, asset: asset) {
+                return overridePlayerAsset
+            }
+        }
+
+        return nil
     }
 
     // MARK: - Helper methods

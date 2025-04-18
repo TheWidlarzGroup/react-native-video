@@ -36,6 +36,14 @@ open class RNVAVPlayerPlugin: RNVPlugin {
      */
     open func onInstanceRemoved(id _: String, player _: AVPlayer) { /* no-op */ }
 
+    /**
+     * Function called when creating a new AVPlayerItem
+     * @param source: The VideoSource describing the video (uri, type, headers, etc.)
+     * @param asset: The AVAsset prepared by the player
+     * @return: OverridePlayerAssetResult if you want to override, or nil if you don't
+     */
+    open func overridePlayerAsset(source _: VideoSource, asset _: AVAsset) async -> OverridePlayerAssetResult? { nil }
+
     // MARK: - RNVPlugin methods
 
     override public func onInstanceCreated(id: String, player: Any) {

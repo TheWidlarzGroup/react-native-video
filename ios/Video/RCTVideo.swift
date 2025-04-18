@@ -493,7 +493,19 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         ])
 
         if let uri = source.uri, uri.starts(with: "ph://") {
-            let photoAsset = await RCTVideoUtils.preparePHAsset(uri: uri)
+            guard let photoAsset = await RCTVideoUtils.preparePHAsset(uri: uri) else {
+                DebugLog("Could not load asset '\(String(describing: _source))'")
+                throw NSError(domain: "", code: 0, userInfo: nil)
+            }
+
+            if let overridePlayerAsset = await ReactNativeVideoManager.shared.overridePlayerAsset(source: source, asset: photoAsset) {
+                if overridePlayerAsset.type == .full {
+                    return AVPlayerItem(asset: overridePlayerAsset.asset)
+                }
+
+                return await playerItemPrepareText(source: source, asset: overridePlayerAsset.asset, assetOptions: nil, uri: source.uri ?? "")
+            }
+
             return await playerItemPrepareText(source: source, asset: photoAsset, assetOptions: nil, uri: source.uri ?? "")
         }
 
@@ -528,6 +540,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 onVideoError: onVideoError,
                 onGetLicense: onGetLicense
             )
+        }
+
+        if let overridePlayerAsset = await ReactNativeVideoManager.shared.overridePlayerAsset(source: source, asset: asset) {
+            if overridePlayerAsset.type == .full {
+                return AVPlayerItem(asset: overridePlayerAsset.asset)
+            }
+
+            return await playerItemPrepareText(source: source, asset: overridePlayerAsset.asset, assetOptions: assetOptions, uri: source.uri ?? "")
         }
 
         return await playerItemPrepareText(source: source, asset: asset, assetOptions: assetOptions, uri: source.uri ?? "")

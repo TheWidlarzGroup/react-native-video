@@ -1,4 +1,4 @@
-struct VideoSource {
+public struct VideoSource {
     let type: String?
     let uri: String?
     let isNetwork: Bool
