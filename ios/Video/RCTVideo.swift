@@ -498,7 +498,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 throw NSError(domain: "", code: 0, userInfo: nil)
             }
 
-            if let overridePlayerAsset = ReactNativeVideoManager.shared.overridePlayerAsset(source: source, asset: photoAsset) {
+            if let overridePlayerAsset = await ReactNativeVideoManager.shared.overridePlayerAsset(source: source, asset: photoAsset) {
                 if overridePlayerAsset.type == .full {
                     return AVPlayerItem(asset: overridePlayerAsset.asset)
                 }
@@ -542,7 +542,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             )
         }
 
-        if let overridePlayerAsset = ReactNativeVideoManager.shared.overridePlayerAsset(source: source, asset: asset) {
+        if let overridePlayerAsset = await ReactNativeVideoManager.shared.overridePlayerAsset(source: source, asset: asset) {
             if overridePlayerAsset.type == .full {
                 return AVPlayerItem(asset: overridePlayerAsset.asset)
             }

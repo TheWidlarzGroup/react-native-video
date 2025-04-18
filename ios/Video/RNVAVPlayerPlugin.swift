@@ -39,7 +39,7 @@ open class RNVAVPlayerPlugin: RNVPlugin {
     /**
      * Function called when a AVPlayer instance is being removed
      */
-    open func overridePlayerAsset(source: VideoSource, asset: AVAsset) -> OverridePlayerAssetResult? { nil }
+    open func overridePlayerAsset(source _: VideoSource, asset _: AVAsset) async -> OverridePlayerAssetResult? { nil }
 
     // MARK: - RNVPlugin methods
 
