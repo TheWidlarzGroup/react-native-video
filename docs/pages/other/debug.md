@@ -106,5 +106,5 @@ buildscript {
 
 ## Still Not Working?
 
-You can open a ticket or contact us for [premium support](https://www.thewidlarzgroup.com/?utm_source=rnv&utm_medium=docs#Contact).
+You can open a ticket or contact us for [premium support](https://www.thewidlarzgroup.com/?utm_source=rnv&utm_medium=docs&utm_campaign=debugging&utm_id=enterprise#Contact).
 
