@@ -30,17 +30,17 @@ const BOT_LABELS = [
 
 const SKIP_LABEL = 'No Validation';
 
-const ISSUE_BOOST_INFO = `
-Need faster resolution? Consider [Issue Boost](https://www.thewidlarzgroup.com/issue-boost/?utm_source=rnv&utm_medium=bug-report&utm_campaign=bot&utm_id=bot-message) – it allows us to dedicate time specifically to your issue and fix it faster 🚀`;
+const ISSUE_BOOST_INFO = (issueNumber) => `
+Need faster resolution? Consider [Issue Boost](https://www.thewidlarzgroup.com/issue-boost/?utm_source=rnv&utm_medium=bug-report&utm_campaign=bot-message&utm_id=${issueNumber}) – it allows us to dedicate time specifically to your issue and fix it faster 🚀`;
 
 const MESSAGE = {
-  FEATURE_REQUEST: `Thanks for the feature request! 🚀
+  FEATURE_REQUEST: (issueNumber) => `Thanks for the feature request! 🚀
     \nYou can check out our [public roadmap](https://github.com/orgs/TheWidlarzGroup/projects/6) to see what we're currently working on. All requests are automatically added there, so you can track progress anytime.
-    \nWe review and implement new features when time allows, but this can take a while. If you’d like to speed things up and make this a priority, consider [Issue Boost](https://www.thewidlarzgroup.com/issue-boost/?utm_source=rnv&utm_medium=feature-request&utm_campaign=bot&utm_id=bot-message), our commercial option that lets us dedicate time specifically to your request.
+    \nWe review and implement new features when time allows, but this can take a while. If you'd like to speed things up and make this a priority, consider [Issue Boost](https://www.thewidlarzgroup.com/issue-boost/?utm_source=rnv&utm_medium=feature-request&utm_campaign=bot-message&utm_id=${issueNumber}), our commercial option that lets us dedicate time specifically to your request.
     \nThanks for your input and patience! 🙌`,
-  BUG_REPORT: `Hey! 👋  
+  BUG_REPORT: (issueNumber) => `Hey! 👋  
     Thanks for reporting this issue. We try to fix bugs as quickly as possible, but since our time is limited, we prioritize sponsored issues first, then focus on critical problems affecting many users, and finally, we handle other reports when we can. Some issues might take a while to be resolved.  
-    \nIf you want to speed up this process, check out [Issue Boost](https://www.thewidlarzgroup.com/issue-boost/?utm_source=rnv&utm_medium=bug-report&utm_campaign=bot&utm_id=bot-message-valid) – it allows us to dedicate time specifically to your issue and fix it faster.  
+    \nIf you want to speed up this process, check out [Issue Boost](https://www.thewidlarzgroup.com/issue-boost/?utm_source=rnv&utm_medium=bug-report&utm_campaign=bot-message-valid&utm_id=${issueNumber}) – it allows us to dedicate time specifically to your issue and fix it faster.  
     \nThanks for your patience and support! 🚀`,
   MISSING_INFO: (missingFields) => {
     return `Hey! 👋  
@@ -188,7 +188,7 @@ const handleIssue = async ({github, context}) => {
 const handleFeatureRequest = async ({github, context, body, labels}) => {
   validateFeatureRequest(body, labels);
 
-  const comment = MESSAGE.FEATURE_REQUEST;
+  const comment = MESSAGE.FEATURE_REQUEST(context.payload.issue.number);
   await hidePreviousComments({github, context});
   await createComment({github, context, body: comment});
 };
@@ -223,7 +223,7 @@ const handleMissingInformation = async ({github, context, labels}) => {
       )}`;
     }
 
-    comment += `\n\n${ISSUE_BOOST_INFO}`;
+    comment += `\n\n${ISSUE_BOOST_INFO(context.payload.issue.number)}`;
 
     await hidePreviousComments({github, context});
     await createComment({github, context, body: comment});
@@ -233,7 +233,7 @@ const handleMissingInformation = async ({github, context, labels}) => {
 };
 
 const handleValidReport = async ({github, context, labels}) => {
-  let comment = MESSAGE.BUG_REPORT;
+  let comment = MESSAGE.BUG_REPORT(context.payload.issue.number);
 
   const outdatedVersionLabel = Array.from(labels).find((label) =>
     label.startsWith('outdated-version'),
