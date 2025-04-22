@@ -1,6 +1,6 @@
 {
   "name": "react-native-video",
-  "version": "7.0.0-dev",
+  "version": "7.0.0-dev.0",
   "description": "<Video /> Component for React Native",
   "source": "./src/index.tsx",
   "main": "./lib/commonjs/index.js",
@@ -28,6 +28,7 @@
     "cpp",
     "nitrogen",
     "*.podspec",
+    "react-native.config.js",
     "!ios/build",
     "!android/build",
     "!android/gradle",
@@ -91,7 +92,7 @@
   },
   "release-it": {
     "npm": {
-      "publish": true
+      "publish": false
     },
     "git": false,
     "github": {
@@ -133,7 +134,7 @@
     "type": "all",
     "jsSrcsDir": "src/spec/fabric",
     "android": {
-      "javaPackageName": "com.video"
+      "javaPackageName": "com.video.react"
     }
   },
   "create-react-native-library": {
