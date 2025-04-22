@@ -48,7 +48,8 @@
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
     "prepare": "bun run build",
-    "build": "nitro-codegen && bob build",
+    "build": "bob build",
+    "nitrogen": "nitro-codegen",
     "release": "release-it"
   },
   "keywords": [
@@ -58,7 +59,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/TheWidlarzGroup/react-native-video.git"
+    "url": "git+https://github.com/TheWidlarzGroup/react-native-video-v7.git"
   },
   "author": "TheWidlarzGroup <hi@thewidlarzgroup.com> (https://github.com/TheWidlarzGroup)",
   "license": "Custom",
@@ -67,7 +68,8 @@
   },
   "homepage": "https://github.com/TheWidlarzGroup/react-native-video#readme",
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
+    "TODO_CHANGE_AFTER_PUBLISHING": "https://registry.npmjs.org/",
+    "registry": "https://npm.pkg.github.com/"
   },
   "devDependencies": {
     "@types/react": "^18.2.44",
