@@ -29,6 +29,8 @@
     "nitrogen",
     "*.podspec",
     "react-native.config.js",
+    "THIRD-PARTY-LICENSES",
+    "LICENSE",
     "!ios/build",
     "!android/build",
     "!android/gradle",
