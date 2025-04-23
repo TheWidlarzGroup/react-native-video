@@ -1,5 +1,3 @@
-plugin 'cocoapods-swift-modular-headers'
-
 ws_dir = Pathname.new(__dir__)
 ws_dir = ws_dir.parent until
   File.exist?("#{ws_dir}/node_modules/react-native-test-app/test_app.rb") ||
@@ -24,6 +22,7 @@ if ENV['RNV_SAMPLE_ENABLE_ADS']
   $RNVideoUseGoogleIMA = true
 end
 if ENV['RNV_SAMPLE_VIDEO_CACHING']
+  plugin 'cocoapods-swift-modular-headers'
   $RNVideoUseVideoCaching = true
   apply_modular_headers_for_swift_dependencies()
 end
