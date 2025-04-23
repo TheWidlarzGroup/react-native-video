@@ -51,6 +51,21 @@ $RNVideoUseGoogleIMA=true
 
 **If you are using Expo, you can use the [Expo plugin](other/expo.md).**
 
+> **Note:** If you are enabling video caching (using `$RNVideoUseVideoCaching`), you must add the following to your `Gemfile`:
+>
+> ```ruby
+> gem "cocoapods-swift-modular-headers"
+> ```
+>
+> Then, install dependencies using:
+>
+> ```sh
+> bundle install
+> bundle exec pod install
+> ```
+>
+> This enables Swift modular headers for Swift dependencies.
+
 </details>
 
 <details>
