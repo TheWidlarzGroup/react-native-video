@@ -14,13 +14,12 @@ else
   Pod::UI.puts "New Architecture is DISABLED".red
 end
 
-ENV['RNV_SAMPLE_VIDEO_CACHING'] = '1'
-
 # This is used by CI to test different configurations
 # If you want to enable it look to README.md
 if ENV['RNV_SAMPLE_ENABLE_ADS']
   $RNVideoUseGoogleIMA = true
 end
+
 if ENV['RNV_SAMPLE_VIDEO_CACHING']
   plugin 'cocoapods-swift-modular-headers'
   $RNVideoUseVideoCaching = true
