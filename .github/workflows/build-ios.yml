@@ -190,11 +190,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pods-
 
+      - name: Install gem dependencies
+        run: bundle install
+
       - name: Generate Native Project
-        run: export RNV_SAMPLE_VIDEO_CACHING=true && pod install
+        run: export RNV_SAMPLE_VIDEO_CACHING=true && bundle exec pod install
 
       - name: Install Pods
-        run: export RNV_SAMPLE_VIDEO_CACHING=true && pod install
+        run: export RNV_SAMPLE_VIDEO_CACHING=true && bundle exec pod install
 
       - name: Install xcpretty
         run: gem install xcpretty
