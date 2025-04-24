@@ -37,6 +37,21 @@ You can remove the following lines from your Podfile as they are no longer neede
 
 If you were previously using VideoCaching, you should set the `$RNVideoUseVideoCaching` flag in your Podspec. See the [installation section](https://docs.thewidlarzgroup.com/react-native-video/installation#video-caching) for details.
 
+> **Note:** If you are enabling video caching (using `$RNVideoUseVideoCaching`), you must add the following to your `Gemfile`:
+>
+> ```ruby
+> gem "cocoapods-swift-modular-headers"
+> ```
+>
+> Then, install dependencies using:
+>
+> ```sh
+> bundle install
+> bundle exec pod install
+> ```
+>
+> This enables Swift modular headers for Swift dependencies.
+
 ### Android
 
 If you were using ExoPlayer on V5, remove the patch from **android/settings.gradle**:
