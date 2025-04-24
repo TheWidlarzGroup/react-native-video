@@ -6,8 +6,26 @@ import React, {
   useRef,
   useState,
   type RefObject,
+  type CSSProperties,
 } from 'react';
+import {StyleProp, ViewStyle} from 'react-native';
+import {unstable_createElement} from 'react-native-web';
 import type {ReactVideoProps, VideoMetadata, VideoRef} from './types';
+
+// Define a style prop that is accepted and transformed by React Native Web
+// for the native `video` element.
+interface WebVideoElementProps
+  extends Omit<React.ComponentProps<'video'>, 'style'> {
+  style?: StyleProp<ViewStyle | CSSProperties>;
+}
+
+// Wrap the native `video` element to accept both React Native styles and CSS
+// styles.
+//
+// See <https://necolas.github.io/react-native-web/docs/unstable-apis/#use-with-existing-react-dom-components>
+function WebVideo(props: WebVideoElementProps) {
+  return unstable_createElement('video', props);
+}
 
 // stolen from https://stackoverflow.com/a/77278013/21726244
 const isDeepEqual = <T,>(a: T, b: T): boolean => {
@@ -28,6 +46,7 @@ const isDeepEqual = <T,>(a: T, b: T): boolean => {
 const Video = forwardRef<VideoRef, ReactVideoProps>(
   (
     {
+      style,
       source,
       paused,
       muted,
@@ -306,7 +325,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     useMediaSession(src?.metadata, nativeRef, showNotificationControls);
 
     return (
-      <video
+      <WebVideo
         ref={nativeRef}
         src={src?.uri as string | undefined}
         muted={muted}
@@ -410,7 +429,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           onVolumeChange?.({volume: nativeRef.current.volume});
         }}
         onEnded={onEnd}
-        style={videoStyle}
+        style={[videoStyle, style]}
       />
     );
   },
