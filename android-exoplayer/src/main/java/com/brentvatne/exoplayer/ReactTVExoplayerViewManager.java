@@ -5,7 +5,6 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.LruCache;
-import android.util.Pair;
 import android.view.ContextThemeWrapper;
 
 import androidx.media3.common.C;
@@ -23,6 +22,7 @@ import com.brentvatne.react.R;
 import com.brentvatne.util.ReadableMapUtils;
 import com.dice.shield.drm.entity.ActionToken;
 import com.diceplatform.doris.custom.ui.entity.program.ProgramInfo;
+import com.diceplatform.doris.entity.AmtSsaiProperties;
 import com.diceplatform.doris.entity.ImaCsaiProperties;
 import com.diceplatform.doris.entity.TracksPolicy;
 import com.diceplatform.doris.entity.YoSsaiProperties;
@@ -317,17 +317,21 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
             }
 
             // Ads
-            Pair<ImaCsaiProperties, YoSsaiProperties> adProperties = ReactTVPropsParser.parseAdUnitsV2(videoView.isLive(), src);
+            Object[] adProperties = ReactTVPropsParser.parseAdUnitsV2(videoView.isLive(), src);
+            if (adProperties == null || adProperties.length != 3) return;
+            ImaCsaiProperties imaCsai = (ImaCsaiProperties) adProperties[0];
             TracksPolicy tracksPolicy = ReactTVPropsParser.parseTracksPolicy(ReadableMapUtils.getMap(src, "tracksPolicy"));
 
-            Log.i(WebUtil.DEBUG, String.format("setSrc - id %s, title %s, mimeType %s, isYoSsai %b, isImaDai %b, adTag %s, midRoll %s, license %s, url %s",
+            Log.i(WebUtil.DEBUG, String.format("setSrc - id %s, title %s, mimeType %s, isYoSsai %b, isAmtSsai %b, " +
+                            "isImaDai %b, adTag %s, midRoll %s, license %s, url %s",
                     id,
                     channelName == null && muxData != null && muxData.hasKey("videoTitle") ? muxData.getString("videoTitle") : channelName,
                     mimeType,
-                    adProperties.second != null,
+                    adProperties[1] != null,
+                    adProperties[2] != null,
                     ima != null,
-                    adProperties.first == null || adProperties.first.preRollAdTagUri == null ? "-" : adProperties.first.preRollAdTagUri.toString(),
-                    adProperties.first == null || adProperties.first.midRollAdTagUri == null ? "-" : adProperties.first.midRollAdTagUri.toString(),
+                    imaCsai == null || imaCsai.preRollAdTagUri == null ? "-" : imaCsai.preRollAdTagUri.toString(),
+                    imaCsai == null || imaCsai.midRollAdTagUri == null ? "-" : imaCsai.midRollAdTagUri.toString(),
                     (actionToken == null ? "-" : actionToken.getLicensingServerUrl()),
                     uriString));
 
@@ -343,9 +347,10 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                     actionToken,
                     headers,
                     muxData != null ? muxData.toHashMap() : null,
-                    adProperties.first,
+                    imaCsai,
                     ima != null ? ima.toHashMap() : null,
-                    adProperties.second,
+                    (YoSsaiProperties) adProperties[1],
+                    (AmtSsaiProperties) adProperties[2],
                     channelId,
                     seriesId,
                     seasonId,

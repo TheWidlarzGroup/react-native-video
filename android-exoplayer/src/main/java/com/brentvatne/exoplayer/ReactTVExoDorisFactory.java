@@ -18,6 +18,7 @@ import com.diceplatform.doris.entity.TracksPolicy;
 import com.diceplatform.doris.ext.imacsai.ExoDorisImaCsaiBuilder;
 import com.diceplatform.doris.ext.imacsailive.ExoDorisImaCsaiLiveBuilder;
 import com.diceplatform.doris.ext.imadai.ExoDorisImaDaiBuilder;
+import com.diceplatform.doris.ext.mediatailor.ssai.ExoDorisAmtSsaiBuilder;
 import com.diceplatform.doris.ext.yossai.ExoDorisYoSsaiBuilder;
 import com.diceplatform.doris.plugin.Plugin;
 
@@ -68,6 +69,11 @@ public final class ReactTVExoDorisFactory {
         final ExoDorisBuilder builder;
         if (adType == AdType.YO_SSAI) {
             builder = new ExoDorisYoSsaiBuilder(context)
+                .setAdViewProvider(checkNotNull(adViewProvider))
+                .setAdChoicesClickViewRenderer(adChoicesClickViewRenderer)
+                .setAdGlobalSettings(adGlobalSettings);
+        } else if (adType == AdType.AMT_SSAI) {
+            builder = new ExoDorisAmtSsaiBuilder(context)
                 .setAdViewProvider(checkNotNull(adViewProvider))
                 .setAdChoicesClickViewRenderer(adChoicesClickViewRenderer)
                 .setAdGlobalSettings(adGlobalSettings);

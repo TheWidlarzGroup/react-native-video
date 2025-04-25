@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.media3.common.endeavor.LimitedSeekRange;
 
+import com.diceplatform.doris.entity.AmtSsaiProperties;
 import com.diceplatform.doris.entity.ImaCsaiProperties;
 import com.diceplatform.doris.entity.TextTrack;
 import com.diceplatform.doris.entity.TracksPolicy;
@@ -39,6 +40,7 @@ public class RNSource {
     private final boolean apsTestFlag;
     private final ImaCsaiProperties imaCsai;
     private final YoSsaiProperties yoSsai;
+    private final AmtSsaiProperties amtSsai;
     private final LimitedSeekRange limitedSeekRange;
     private final TracksPolicy tracksPolicy;
     private final long dvrSeekForwardInterval;
@@ -65,6 +67,7 @@ public class RNSource {
             boolean apsTestFlag,
             @Nullable ImaCsaiProperties imaCsai,
             @Nullable YoSsaiProperties yoSsai,
+            @Nullable AmtSsaiProperties amtSsai,
             @Nullable LimitedSeekRange limitedSeekRange,
             TracksPolicy tracksPolicy,
             long dvrSeekForwardInterval,
@@ -90,6 +93,7 @@ public class RNSource {
         this.apsTestFlag = apsTestFlag;
         this.imaCsai = imaCsai;
         this.yoSsai = yoSsai;
+        this.amtSsai = amtSsai;
         this.limitedSeekRange = limitedSeekRange;
         this.tracksPolicy = tracksPolicy;
         this.dvrSeekForwardInterval = TimeUnit.SECONDS.toMillis(dvrSeekForwardInterval);
@@ -210,6 +214,10 @@ public class RNSource {
 
     public YoSsaiProperties getYoSsai() {
         return yoSsai;
+    }
+
+    public AmtSsaiProperties getAmtSsai() {
+        return amtSsai;
     }
 
     public LimitedSeekRange getLimitedSeekRange() {

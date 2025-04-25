@@ -2,11 +2,11 @@ package com.brentvatne.exoplayer;
 
 import android.net.Uri;
 import android.text.TextUtils;
-import android.util.Pair;
 
 import androidx.annotation.NonNull;
 
 import com.brentvatne.util.ReadableMapUtils;
+import com.diceplatform.doris.entity.AmtSsaiProperties;
 import com.diceplatform.doris.entity.ImaCsaiProperties;
 import com.diceplatform.doris.entity.TracksPolicy;
 import com.diceplatform.doris.entity.YoSsaiProperties;
@@ -80,18 +80,21 @@ public class ReactTVPropsParser {
      *   ]
      */
     @NonNull
-    public static Pair<ImaCsaiProperties, YoSsaiProperties> parseAdUnitsV2(
+    public static Object[] parseAdUnitsV2(
             boolean isLive,
             @Nullable ReadableMap src) {
         String adTagUrl = ReadableMapUtils.getString(src, "adTagUrl");
         ImaCsaiProperties imaCsai = ImaCsaiProperties.from(adTagUrl);
         ReadableMap adsMap = ReadableMapUtils.getMap(src, "ads");
         if (adsMap == null) {
-            return Pair.create(imaCsai.normalize(), null);
+            return new Object[]{imaCsai.normalize(), null, null};
         }
 
         YoVideoType videoType = isLive ? YoVideoType.DVRLIVE : YoVideoType.VOD;
         YoSsaiProperties.Builder yoSsaiBuilder = new YoSsaiProperties.Builder();
+        boolean findAmt = false;
+        AmtSsaiProperties.Builder amtSsaiBuilder = new AmtSsaiProperties.Builder();
+        amtSsaiBuilder.setDzConfigId(ReadableMapUtils.getString(adsMap, "datazoomConfigId"));
         ReadableArray adUnits = ReadableMapUtils.getArray(adsMap, "adUnits");
         int adUnitCount = adUnits == null ? 0 : adUnits.size();
         for (int i = 0; i < adUnitCount; i++) {
@@ -100,19 +103,37 @@ public class ReactTVPropsParser {
             if ("CSAI".equalsIgnoreCase(insertionType)) {
                 imaCsai = parseImaCsaiProperties(imaCsai, adUnit);
             } else if ("SSAI".equalsIgnoreCase(insertionType)) {
-                String adProvider = ReadableMapUtils.getString(adUnit, "adProvider");
+                String adProvider = getAdProvider(adUnit);
                 if ("YOSPACE".equalsIgnoreCase(adProvider)) {
                     yoSsaiBuilder.setYoVideoType(videoType);
                     parseYoSsaiProperties(yoSsaiBuilder, adUnit);
+                } else if (!findAmt && "MEDIATAILOR".equalsIgnoreCase(adProvider)) {
+                    String trackingUrl = ReadableMapUtils.getString(adUnit, "trackingUrl");
+                    if (!TextUtils.isEmpty(trackingUrl)) {
+                        findAmt = true;
+                        amtSsaiBuilder.setAdTrackingUrl(trackingUrl);
+                    }
                 }
             }
         }
         YoSsaiProperties yoSsai = yoSsaiBuilder.build();
-        if (yoSsai != null) {
-            // Currently we do not support csai ads on yospace ssai player.
+        AmtSsaiProperties amtSSai = amtSsaiBuilder.build();
+        if (yoSsai != null || amtSSai != null) {
+            // Currently we do not support csai ads on yospace / mediatailor ssai player.
             imaCsai = ImaCsaiProperties.from(null);
         }
-        return Pair.create(imaCsai.normalize(), yoSsai);
+        return new Object[]{imaCsai.normalize(), yoSsai, amtSSai};
+    }
+
+    private static String getAdProvider(ReadableMap adUnit) {
+        String adProvider = ReadableMapUtils.getString(adUnit, "adProvider");
+        if (TextUtils.isEmpty(adProvider)) {
+            String providerType = ReadableMapUtils.getString(adUnit, "providerType");
+            if (!"DIRECT_MANIFEST".equalsIgnoreCase(providerType)) {
+                return providerType;
+            }
+        }
+        return adProvider;
     }
 
     private static ImaCsaiProperties parseImaCsaiProperties(ImaCsaiProperties imaCsai, ReadableMap adUnit) {

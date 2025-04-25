@@ -68,6 +68,7 @@ import com.diceplatform.doris.common.ad.AdGlobalSettings;
 import com.diceplatform.doris.common.ad.ui.AdLabels;
 import com.diceplatform.doris.custom.ui.entity.program.ProgramInfo;
 import com.diceplatform.doris.entity.AdTagParameters;
+import com.diceplatform.doris.entity.AmtSsaiProperties;
 import com.diceplatform.doris.entity.DorisAdEvent;
 import com.diceplatform.doris.entity.DorisAdEvent.AdMarkers;
 import com.diceplatform.doris.entity.DorisAdEvent.AdType;
@@ -589,6 +590,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     .setUrl(src.getUrl())
                     .setMimeType(src.getMimeType())
                     .setYoSsaiProperties(src.getYoSsai())
+                    .setAmtSsaiProperties(src.getAmtSsai())
                     .setTextTracks(src.getTextTracks())
                     .setDrmParams(actionToken);
 
@@ -1342,6 +1344,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             ImaCsaiProperties imaCsai,
             Map<String, Object> imaDai,
             YoSsaiProperties yoSsai,
+            AmtSsaiProperties amtSsai,
             String channelId,
             String seriesId,
             String seasonId,
@@ -1368,6 +1371,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             this.isImaDaiStreamLoaded = false;
             if (yoSsai != null) {
                 this.adType = AdType.YO_SSAI;
+            } else if (amtSsai != null) {
+                this.adType = AdType.AMT_SSAI;
             } else if (imaDai != null && !imaDai.isEmpty()) {
                 this.adType = AdType.IMA_DAI;
                 this.imaDaiSrc = new RNImaDaiSource(imaDai);
@@ -1398,6 +1403,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     apsTestFlag,
                     imaCsai,
                     yoSsai,
+                    amtSsai,
                     limitedSeekRange,
                     tracksPolicy,
                     dvrSeekForwardInterval,
