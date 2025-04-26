@@ -1604,8 +1604,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         )
     }
 
-    func handlePlaybackBufferKeyEmpty(playerItem _: AVPlayerItem, change _: NSKeyValueObservedChange<Bool>) {
-        if !_isBuffering {
+    func handlePlaybackBufferKeyEmpty(playerItem _: AVPlayerItem, change: NSKeyValueObservedChange<Bool>) {
+        if !_isBuffering && change.newValue == true {
             _isBuffering = true
         }
     }
