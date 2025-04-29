@@ -62,24 +62,6 @@ class PlayerViewProxy {
         return jsConfig
     }
     
-    private static func convertRNVideoAdsToRNDV(sourceAds: react_native_video.JSAds?) -> RNDReactNativeDiceVideo.JSAds? {
-        var jsAds: RNDReactNativeDiceVideo.JSAds?
-        if let adUnits = sourceAds?.adUnits.map({ adUnit -> RNDReactNativeDiceVideo.JSAds.AdUnit in
-            let queryParams = adUnit.adManifestParams?.map { param -> RNDReactNativeDiceVideo.JSAds.AdUnit.QueryParam in
-                return RNDReactNativeDiceVideo.JSAds.AdUnit.QueryParam(key: param.key, value: param.value)
-            }
-            return RNDReactNativeDiceVideo.JSAds.AdUnit(
-                insertionType: RNDReactNativeDiceVideo.JSAds.AdUnit.AdInsertionType(rawValue: adUnit.insertionType.rawValue)!,
-                adFormat: RNDReactNativeDiceVideo.JSAds.AdUnit.AdFormat(rawValue: adUnit.adFormat?.rawValue ?? ""),
-                adProvider: RNDReactNativeDiceVideo.JSAds.AdUnit.AdProvider(rawValue: adUnit.adProvider?.rawValue ?? ""),
-                adTagUrl: adUnit.adTagUrl,
-                adManifestParams: queryParams)
-        }) {
-            jsAds = RNDReactNativeDiceVideo.JSAds(adUnits: adUnits)
-        }
-        return jsAds
-    }
-    
     private static func convertRNVideoTranslationsToRNDV(translations: Translations?) -> JSTranslations? {
         guard let translations else { return nil }
         let dorisTranslationsViewModel = convertRNVideoTranslationsToDorisTranslations(translations: translations)
@@ -230,7 +212,6 @@ class PlayerViewProxy {
                 title: sourceValue.partialVideoInformation?.title,
                 imageUri: sourceValue.partialVideoInformation?.imageUri)
             let jsConfig = PlayerViewProxy.convertRNVideoConfigToRNDV(sourceConfig: sourceValue.config)
-            let jsAds = PlayerViewProxy.convertRNVideoAdsToRNDV(sourceAds: sourceValue.ads)
             var jsSubtitles: [RNDReactNativeDiceVideo.JSSubtitles]?
             if let subtitles = sourceValue.subtitles {
                 jsSubtitles = [RNDReactNativeDiceVideo.JSSubtitles]()
@@ -259,7 +240,7 @@ class PlayerViewProxy {
                 thumbnailsPreview: sourceValue.thumbnailsPreview,
                 resumePosition: jsProps.startAt.value,
                 delay: nil,
-                ads: jsAds,
+                ads: sourceValue.ads,
                 metadata: metadata,
                 subtitles: jsSubtitles,
                 limitedSeekableRange: jsLimitedSeekableRange,
