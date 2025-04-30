@@ -11,9 +11,13 @@ export type SourceError =
   | 'source/invalid-uri'
   | 'source/missing-read-file-permission'
   | 'source/file-does-not-exist'
-  | 'source/failed-to-initialize-asset';
+  | 'source/failed-to-initialize-asset'
+  | 'source/unsupported-content-type';
 
-export type VideoViewError = 'view/not-found';
+export type VideoViewError =
+  | 'view/not-found'
+  | 'view/deallocated'
+  | 'view/picture-in-picture-not-supported';
 
 export type UnknownError = 'unknown/unknown';
 

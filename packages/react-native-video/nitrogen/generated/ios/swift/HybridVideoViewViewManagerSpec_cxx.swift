@@ -126,7 +126,94 @@ public class HybridVideoViewViewManagerSpec_cxx {
       }()
     }
   }
+  
+  public final var controls: Bool {
+    @inline(__always)
+    get {
+      return self.__implementation.controls
+    }
+    @inline(__always)
+    set {
+      self.__implementation.controls = newValue
+    }
+  }
+  
+  public final var pictureInPicture: Bool {
+    @inline(__always)
+    get {
+      return self.__implementation.pictureInPicture
+    }
+    @inline(__always)
+    set {
+      self.__implementation.pictureInPicture = newValue
+    }
+  }
+  
+  public final var autoEnterPictureInPicture: Bool {
+    @inline(__always)
+    get {
+      return self.__implementation.autoEnterPictureInPicture
+    }
+    @inline(__always)
+    set {
+      self.__implementation.autoEnterPictureInPicture = newValue
+    }
+  }
 
   // Methods
+  @inline(__always)
+  public final func enterFullscreen() -> bridge.Result_void_ {
+    do {
+      try self.__implementation.enterFullscreen()
+      return bridge.create_Result_void_()
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_void_(__exceptionPtr)
+    }
+  }
   
+  @inline(__always)
+  public final func exitFullscreen() -> bridge.Result_void_ {
+    do {
+      try self.__implementation.exitFullscreen()
+      return bridge.create_Result_void_()
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_void_(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func enterPictureInPicture() -> bridge.Result_void_ {
+    do {
+      try self.__implementation.enterPictureInPicture()
+      return bridge.create_Result_void_()
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_void_(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func exitPictureInPicture() -> bridge.Result_void_ {
+    do {
+      try self.__implementation.exitPictureInPicture()
+      return bridge.create_Result_void_()
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_void_(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func canEnterPictureInPicture() -> bridge.Result_bool_ {
+    do {
+      let __result = try self.__implementation.canEnterPictureInPicture()
+      let __resultCpp = __result
+      return bridge.create_Result_bool_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_bool_(__exceptionPtr)
+    }
+  }
 }

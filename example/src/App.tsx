@@ -1,14 +1,21 @@
 import Slider from '@react-native-community/slider';
 import * as React from 'react';
 import {
+  Alert,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Switch,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { VideoView, createSource, useVideoPlayer } from 'react-native-video';
+import {
+  createSource,
+  useVideoPlayer,
+  VideoView,
+  type VideoViewRef,
+} from 'react-native-video';
 
 const formatTime = (seconds: number) => {
   if (isNaN(seconds)) return '--:--';
@@ -18,11 +25,13 @@ const formatTime = (seconds: number) => {
 };
 
 const VideoDemo = () => {
+  const videoViewRef = React.useRef<VideoViewRef>(null);
   const [show, setShow] = React.useState(false);
   const [volume, setVolume] = React.useState(1);
   const [muted, setMuted] = React.useState(false);
   const [rate, setRate] = React.useState(1);
   const [loop, setLoop] = React.useState(false);
+  const [showNativeControls, setShowNativeControls] = React.useState(false);
 
   const player = useVideoPlayer(
     'https://www.w3schools.com/html/mov_bbb.mp4',
@@ -67,10 +76,20 @@ const VideoDemo = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{ alignItems: 'center' }}
+    >
       <View style={styles.card}>
         {show ? (
-          <VideoView player={player} style={styles.video} />
+          <VideoView
+            player={player}
+            style={styles.video}
+            ref={videoViewRef}
+            controls={showNativeControls}
+            pictureInPicture={true}
+            autoEnterPictureInPicture={true}
+          />
         ) : (
           <View style={styles.hiddenVideo}>
             <Text style={styles.hiddenVideoText}>Video Hidden</Text>
@@ -88,7 +107,7 @@ const VideoDemo = () => {
             show ? (isNaN(player.duration) ? 1 : player.duration) : 0
           }
           value={progress}
-          onValueChange={handleSeek}
+          onSlidingComplete={handleSeek}
           minimumTrackTintColor="#007aff"
           maximumTrackTintColor="#ccc"
           thumbTintColor="#007aff"
@@ -148,26 +167,98 @@ const VideoDemo = () => {
 
       {/* Extra actions */}
       <View style={styles.extraRow}>
-        <ActionButton
-          label="Preload"
-          onPress={() => player.preload().catch(console.error)}
-        />
-        <ActionButton
-          label="Replace Source"
-          onPress={() => {
-            const newSource = createSource(
-              'https://www.w3schools.com/html/movie.mp4'
-            );
-            newSource.getAssetInformationAsync().then(console.log);
-            player.replaceSourceAsync(newSource);
-          }}
-        />
-        <ActionButton
-          label={(show ? 'Hide' : 'Show') + ' Video'}
-          onPress={() => setShow((prev) => !prev)}
-        />
+        <Section title="Source">
+          <ActionButton
+            label="Preload"
+            onPress={() => player.preload().catch(console.error)}
+          />
+          <ActionButton
+            label="Replace Source"
+            onPress={() => {
+              const newSource = createSource(
+                'https://www.w3schools.com/html/movie.mp4'
+              );
+              newSource.getAssetInformationAsync().then(console.log);
+              player.replaceSourceAsync(newSource);
+            }}
+          />
+        </Section>
+        <Section title="Video">
+          <ActionButton
+            label={(show ? 'Hide' : 'Show') + ' Video'}
+            onPress={() => setShow((prev) => !prev)}
+          />
+          <View style={styles.setting}>
+            <Text style={styles.settingLabel}>Native Controls</Text>
+            <Switch
+              value={showNativeControls}
+              onValueChange={setShowNativeControls}
+              style={styles.switch}
+            />
+          </View>
+        </Section>
+        <Section title="Fullscreen">
+          <ActionButton
+            label="Enter Fullscreen"
+            onPress={() => {
+              if (videoViewRef.current) {
+                videoViewRef.current.enterFullscreen();
+              } else {
+                Alert.alert('No video view found');
+              }
+            }}
+          />
+          <ActionButton
+            label="Enter Fullscreen for 5s then exit"
+            onPress={() => {
+              if (videoViewRef.current) {
+                videoViewRef.current.enterFullscreen();
+
+                setTimeout(() => {
+                  videoViewRef.current?.exitFullscreen();
+                }, 5000);
+              }
+            }}
+          />
+        </Section>
+        <Section title="Picture In Picture">
+          <ActionButton
+            label="Enter Picture In Picture"
+            onPress={() => {
+              if (videoViewRef.current) {
+                videoViewRef.current.enterPictureInPicture();
+              } else {
+                Alert.alert('No video view found');
+              }
+            }}
+          />
+          <ActionButton
+            label="Can Enter Picture In Picture"
+            onPress={() => {
+              if (videoViewRef.current) {
+                const canEnter =
+                  videoViewRef.current.canEnterPictureInPicture();
+                Alert.alert(
+                  `${canEnter ? 'Can' : 'Cannot'} Enter Picture In Picture on this device`
+                );
+              } else {
+                Alert.alert('No video view found');
+              }
+            }}
+          />
+          <ActionButton
+            label="Exit Picture In Picture"
+            onPress={() => {
+              if (videoViewRef.current) {
+                videoViewRef.current.exitPictureInPicture();
+              } else {
+                Alert.alert('No video view found');
+              }
+            }}
+          />
+        </Section>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -200,6 +291,19 @@ const ActionButton = ({
   </TouchableOpacity>
 );
 
+const Section = ({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) => (
+  <>
+    <Text style={styles.sectionTitle}>{title}</Text>
+    <View style={styles.section}>{children}</View>
+  </>
+);
+
 export default function App() {
   const [mounted, setMounted] = React.useState(true);
   return (
@@ -218,7 +322,6 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    alignItems: 'center',
     paddingTop: 16,
   },
   card: {
@@ -247,13 +350,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 20,
     fontWeight: 'bold',
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#000a',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 2,
   },
   progressRow: {
     flexDirection: 'row',
@@ -297,19 +393,24 @@ const styles = StyleSheet.create({
   },
   settingsRow: {
     flexDirection: 'row',
-    width: 340,
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
+    flexWrap: 'wrap',
+    alignItems: 'flex-start',
+    width: '100%',
+    marginVertical: 8,
     gap: 8,
+    paddingHorizontal: 32,
   },
   setting: {
-    flex: 1,
+    flexDirection: 'row',
     alignItems: 'center',
     marginHorizontal: 4,
+    backgroundColor: '#fcfcfc',
+    borderRadius: 8,
+    padding: 8,
   },
   settingLabel: {
     fontSize: 12,
+    fontWeight: 'bold',
     color: '#555',
     marginBottom: 2,
   },
@@ -320,27 +421,19 @@ const styles = StyleSheet.create({
   settingValue: {
     fontSize: 12,
     color: '#555',
-    marginTop: 2,
   },
   switch: {
-    width: 40,
-    height: 22,
+    marginHorizontal: 8,
     borderRadius: 11,
     justifyContent: 'center',
     padding: 2,
   },
-  switchKnob: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: '#fff',
-    elevation: 1,
-  },
   extraRow: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     justifyContent: 'center',
     gap: 10,
     marginVertical: 8,
+    paddingHorizontal: 32,
   },
   actionButton: {
     backgroundColor: '#007aff',
@@ -352,5 +445,22 @@ const styles = StyleSheet.create({
   actionButtonText: {
     color: '#fff',
     fontWeight: 'bold',
+  },
+  section: {
+    padding: 8,
+    marginBottom: 8,
+    borderRadius: 8,
+    borderColor: 'black',
+    borderWidth: 1,
+    elevation: 2,
+    width: '100%',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 4,
   },
 });

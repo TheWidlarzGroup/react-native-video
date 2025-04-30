@@ -12,9 +12,16 @@ import NitroModules
 public protocol HybridVideoViewViewManagerSpec_protocol: HybridObject {
   // Properties
   var player: (any HybridVideoPlayerSpec)? { get set }
+  var controls: Bool { get set }
+  var pictureInPicture: Bool { get set }
+  var autoEnterPictureInPicture: Bool { get set }
 
   // Methods
-  
+  func enterFullscreen() throws -> Void
+  func exitFullscreen() throws -> Void
+  func enterPictureInPicture() throws -> Void
+  func exitPictureInPicture() throws -> Void
+  func canEnterPictureInPicture() throws -> Bool
 }
 
 /// See ``HybridVideoViewViewManagerSpec``

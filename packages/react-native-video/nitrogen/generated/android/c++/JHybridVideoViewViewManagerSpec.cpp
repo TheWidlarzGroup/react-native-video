@@ -43,8 +43,55 @@ namespace margelo::nitro::video {
     static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JHybridVideoPlayerSpec::javaobject> /* player */)>("setPlayer");
     method(_javaPart, player.has_value() ? std::dynamic_pointer_cast<JHybridVideoPlayerSpec>(player.value())->getJavaPart() : nullptr);
   }
+  bool JHybridVideoViewViewManagerSpec::getControls() {
+    static const auto method = javaClassStatic()->getMethod<jboolean()>("getControls");
+    auto __result = method(_javaPart);
+    return static_cast<bool>(__result);
+  }
+  void JHybridVideoViewViewManagerSpec::setControls(bool controls) {
+    static const auto method = javaClassStatic()->getMethod<void(jboolean /* controls */)>("setControls");
+    method(_javaPart, controls);
+  }
+  bool JHybridVideoViewViewManagerSpec::getPictureInPicture() {
+    static const auto method = javaClassStatic()->getMethod<jboolean()>("getPictureInPicture");
+    auto __result = method(_javaPart);
+    return static_cast<bool>(__result);
+  }
+  void JHybridVideoViewViewManagerSpec::setPictureInPicture(bool pictureInPicture) {
+    static const auto method = javaClassStatic()->getMethod<void(jboolean /* pictureInPicture */)>("setPictureInPicture");
+    method(_javaPart, pictureInPicture);
+  }
+  bool JHybridVideoViewViewManagerSpec::getAutoEnterPictureInPicture() {
+    static const auto method = javaClassStatic()->getMethod<jboolean()>("getAutoEnterPictureInPicture");
+    auto __result = method(_javaPart);
+    return static_cast<bool>(__result);
+  }
+  void JHybridVideoViewViewManagerSpec::setAutoEnterPictureInPicture(bool autoEnterPictureInPicture) {
+    static const auto method = javaClassStatic()->getMethod<void(jboolean /* autoEnterPictureInPicture */)>("setAutoEnterPictureInPicture");
+    method(_javaPart, autoEnterPictureInPicture);
+  }
 
   // Methods
-  
+  void JHybridVideoViewViewManagerSpec::enterFullscreen() {
+    static const auto method = javaClassStatic()->getMethod<void()>("enterFullscreen");
+    method(_javaPart);
+  }
+  void JHybridVideoViewViewManagerSpec::exitFullscreen() {
+    static const auto method = javaClassStatic()->getMethod<void()>("exitFullscreen");
+    method(_javaPart);
+  }
+  void JHybridVideoViewViewManagerSpec::enterPictureInPicture() {
+    static const auto method = javaClassStatic()->getMethod<void()>("enterPictureInPicture");
+    method(_javaPart);
+  }
+  void JHybridVideoViewViewManagerSpec::exitPictureInPicture() {
+    static const auto method = javaClassStatic()->getMethod<void()>("exitPictureInPicture");
+    method(_javaPart);
+  }
+  bool JHybridVideoViewViewManagerSpec::canEnterPictureInPicture() {
+    static const auto method = javaClassStatic()->getMethod<jboolean()>("canEnterPictureInPicture");
+    auto __result = method(_javaPart);
+    return static_cast<bool>(__result);
+  }
 
 } // namespace margelo::nitro::video

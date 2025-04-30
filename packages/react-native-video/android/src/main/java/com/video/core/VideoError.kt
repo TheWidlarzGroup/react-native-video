@@ -8,67 +8,83 @@ abstract class VideoError(
 
 // Library related errors
 sealed class LibraryError(code: String, message: String) : VideoError(code, message) {
-    data object Deallocated : LibraryError(
-        "library/deallocated",
-        "Object has been deallocated"
-    )
+  object Deallocated : LibraryError(
+    "library/deallocated",
+    "Object has been deallocated"
+  )
 
-    data object ApplicationContextNotFound : LibraryError(
-        "library/application-context-not-found",
-        "Application context not found"
-    )
+  object ApplicationContextNotFound : LibraryError(
+    "library/application-context-not-found",
+    "Application context not found"
+  )
+
+  class MethodNotSupported(val methodName: String) : LibraryError(
+    "library/method-not-supported",
+    "Method $methodName() is not supported on Android"
+  )
 }
 
 // Player related errors
 sealed class PlayerError(code: String, message: String) : VideoError(code, message) {
-    data object NotInitialized : PlayerError(
-        "player/not-initialized",
-        "Player has not been initialized (Or has been set to null)"
-    )
+  object NotInitialized : PlayerError(
+    "player/not-initialized",
+    "Player has not been initialized (Or has been set to null)"
+  )
 
-    data object AssetNotInitialized : PlayerError(
-        "player/asset-not-initialized",
-        "Asset has not been initialized (Or has been set to null)"
-    )
+  object AssetNotInitialized : PlayerError(
+    "player/asset-not-initialized",
+    "Asset has not been initialized (Or has been set to null)"
+  )
 
-    data object InvalidSource : PlayerError(
-        "player/invalid-source",
-        "Invalid source passed to player"
-    )
+  object InvalidSource : PlayerError(
+    "player/invalid-source",
+    "Invalid source passed to player"
+  )
 }
 
 // Source related errors
 sealed class SourceError(code: String, message: String) : VideoError(code, message) {
-    class InvalidUri(val uri: String) : SourceError(
-        "source/invalid-uri",
-        "Invalid source file uri: $uri"
-    )
+  class InvalidUri(val uri: String) : SourceError(
+    "source/invalid-uri",
+    "Invalid source file uri: $uri"
+  )
 
-    class MissingReadFilePermission(val uri: String) : SourceError(
-        "source/missing-read-file-permission",
-        "Missing read file permission for source file at $uri"
-    )
+  class MissingReadFilePermission(val uri: String) : SourceError(
+    "source/missing-read-file-permission",
+    "Missing read file permission for source file at $uri"
+  )
 
-    class FileDoesNotExist(val uri: String) : SourceError(
-        "source/file-does-not-exist",
-        "File does not exist at URI: $uri"
-    )
+  class FileDoesNotExist(val uri: String) : SourceError(
+    "source/file-does-not-exist",
+    "File does not exist at URI: $uri"
+  )
 
-    object FailedToInitializeAsset : SourceError(
-        "source/failed-to-initialize-asset",
-        "Failed to initialize asset"
-    )
+  object FailedToInitializeAsset : SourceError(
+    "source/failed-to-initialize-asset",
+    "Failed to initialize asset"
+  )
 
-    class UnsupportedContentType(val uri: String) : SourceError(
-        "source/unsupported-content-type",
-        "type of content (${uri}) is not supported"
-    )
+  class UnsupportedContentType(val uri: String) : SourceError(
+    "source/unsupported-content-type",
+    "type of content (${uri}) is not supported"
+  )
 }
 
 // View related errors
 sealed class VideoViewError(code: String, message: String) : VideoError(code, message) {
-    class ViewNotFound(val viewId: Int) : VideoViewError(
-        "view/not-found",
-        "View with viewId $viewId not found"
-    )
+  class ViewNotFound(val viewId: Int) : VideoViewError(
+    "view/not-found",
+    "View with viewId $viewId not found"
+  )
+  object ViewIsDeallocated : VideoViewError(
+    "view/deallocated",
+    "Attempt to access a view, but it has been deallocated (or not initialized)"
+  )
+  object PictureInPictureNotSupported : VideoViewError(
+    "view/picture-in-picture-not-supported",
+    "Picture in picture is not supported on this device"
+  )
 }
+
+// Unknown error
+class UnknownError : VideoError("unknown/unknown", "Unknown error")

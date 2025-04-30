@@ -68,6 +68,8 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, VideoPlayerObserverDelegate {
     
     super.init()
     self.playerObserver = VideoPlayerObserver(delegate: self)
+    
+    VideoManager.shared.register(player: self)
   }
   
   deinit {

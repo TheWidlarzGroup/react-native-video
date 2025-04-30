@@ -1,19 +1,25 @@
 package com.margelo.nitro.video
 
 import android.os.Looper
+import android.view.SurfaceView
 import androidx.media3.common.C
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.upstream.DefaultAllocator
+import androidx.media3.ui.PlayerView
 import com.facebook.proguard.annotations.DoNotStrip
 import com.margelo.nitro.NitroModules
 import com.margelo.nitro.core.Promise
 import com.video.core.LibraryError
 import com.video.core.PlayerError
+import com.video.core.VideoManager
+import com.video.core.activities.FullscreenVideoViewActivity
 import com.video.core.utils.Threading.runOnMainThread
 import com.video.core.utils.Threading.runOnMainThreadSync
+import com.video.view.VideoView
+import java.lang.ref.WeakReference
 import kotlin.math.max
 import kotlin.math.min
 
@@ -24,6 +30,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
   private var allocator: DefaultAllocator? = null
 
   private var player: ExoPlayer? = null
+  private var currentPlayerView: WeakReference<PlayerView>? = null
 
   var playerPointer: ExoPlayer
     get() {
@@ -131,6 +138,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
 
   constructor(source: HybridVideoPlayerSource) : this() {
     this.source = source
+    VideoManager.registerPlayer(this)
   }
 
   override fun play() {
@@ -185,6 +193,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
   }
 
   private fun release() {
+    VideoManager.unregisterPlayer(this)
     runOnMainThread {
       playerPointer.release()
     }
@@ -192,6 +201,24 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
 
   override fun clean() {
     release()
+  }
+
+  fun movePlayerToVideoView(videoView: VideoView) {
+    VideoManager.addViewToPlayer(videoView, this)
+
+    runOnMainThreadSync {
+      PlayerView.switchTargetView(playerPointer, currentPlayerView?.get(), videoView.playerView)
+      currentPlayerView = WeakReference(videoView.playerView)
+    }
+  }
+
+  fun moveToFullscreenActivity(activity: FullscreenVideoViewActivity) {
+    VideoManager.registerFullscreenActivity(activity, activity.hashCode())
+
+    runOnMainThreadSync {
+      PlayerView.switchTargetView(playerPointer, currentPlayerView?.get(), activity.playerView)
+      currentPlayerView = WeakReference(activity.playerView)
+    }
   }
 
   override val memorySize: Long

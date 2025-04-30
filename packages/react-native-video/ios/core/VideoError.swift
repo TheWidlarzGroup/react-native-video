@@ -29,13 +29,13 @@ enum LibraryError: VideoError {
 
 // MARK: - PlayerError
 enum PlayerError: VideoError {
-  case notIntilaized
+  case notInitialized
   case assetNotInitialized
   case invalidSource
   
   var code: String {
     switch self {
-    case .notIntilaized:
+    case .notInitialized:
       return "player/not-initialized"
     case .assetNotInitialized:
       return "player/asset-not-initialized"
@@ -46,11 +46,11 @@ enum PlayerError: VideoError {
   
   var message: String {
     switch self {
-    case .notIntilaized:
+    case .notInitialized:
       return "Player has not been initialized (Or has been set to nil)"
     case .assetNotInitialized:
       return "Asset has not been initialized (Or has been set to nil)"
-    case.invalidSource:
+    case .invalidSource:
       return "Invalid source passed to player"
     }
   }
@@ -62,6 +62,7 @@ enum SourceError: VideoError {
   case missingReadFilePermission(uri: String)
   case fileDoesNotExist(uri: String)
   case failedToInitializeAsset
+  case unsupportedContentType(uri: String)
 
   var code: String {
     switch self {
@@ -73,6 +74,8 @@ enum SourceError: VideoError {
       return "source/file-does-not-exist"
     case .failedToInitializeAsset:
       return "source/failed-to-initialize-asset"
+    case .unsupportedContentType:
+      return "source/unsupported-content-type"
     }
   }
 
@@ -81,11 +84,13 @@ enum SourceError: VideoError {
     case let .invalidUri(uri: uri):
       return "Invalid source file uri: \(uri)"
     case let .missingReadFilePermission(uri: uri):
-      return "Missing read file permission for soure file at \(uri)"
+      return "Missing read file permission for source file at \(uri)"
     case let .fileDoesNotExist(uri: uri):
       return "File does not exist at URI: \(uri)"
     case .failedToInitializeAsset:
       return "Failed to initialize asset"
+    case let .unsupportedContentType(uri: uri):
+      return "type of content (\(uri)) is not supported"
     }
   }
 }
@@ -93,11 +98,17 @@ enum SourceError: VideoError {
 // MARK: - VideoViewError
 enum VideoViewError: VideoError {
   case viewNotFound(nitroId: Double)
+  case viewIsDeallocated
+  case pictureInPictureNotSupported
   
   var code: String {
     switch self {
     case .viewNotFound:
       return "view/not-found"
+    case .viewIsDeallocated:
+      return "view/deallocated"
+    case .pictureInPictureNotSupported:
+      return "view/picture-in-picture-not-supported"
     }
   }
   
@@ -105,10 +116,19 @@ enum VideoViewError: VideoError {
     switch self {
     case let .viewNotFound(nitroId: nitroId):
       return "View with nitroId \(nitroId) not found"
+    case .viewIsDeallocated:
+      return "Attempt to access a view, but it has been deallocated (or not initialized)"
+    case .pictureInPictureNotSupported:
+      return "Picture in picture is not supported on this device"
     }
   }
 }
 
+// MARK: - UnknownError
+struct UnknownError: VideoError {
+  var code: String { "unknown/unknown" }
+  var message: String { "Unknown error" }
+}
 
 // MARK: - VideoError
 protocol VideoError {

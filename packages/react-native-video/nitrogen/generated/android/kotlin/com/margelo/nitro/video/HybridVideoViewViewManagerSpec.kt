@@ -42,9 +42,45 @@ abstract class HybridVideoViewViewManagerSpec: HybridObject() {
   @set:DoNotStrip
   @set:Keep
   abstract var player: HybridVideoPlayerSpec?
+  
+  @get:DoNotStrip
+  @get:Keep
+  @set:DoNotStrip
+  @set:Keep
+  abstract var controls: Boolean
+  
+  @get:DoNotStrip
+  @get:Keep
+  @set:DoNotStrip
+  @set:Keep
+  abstract var pictureInPicture: Boolean
+  
+  @get:DoNotStrip
+  @get:Keep
+  @set:DoNotStrip
+  @set:Keep
+  abstract var autoEnterPictureInPicture: Boolean
 
   // Methods
+  @DoNotStrip
+  @Keep
+  abstract fun enterFullscreen(): Unit
   
+  @DoNotStrip
+  @Keep
+  abstract fun exitFullscreen(): Unit
+  
+  @DoNotStrip
+  @Keep
+  abstract fun enterPictureInPicture(): Unit
+  
+  @DoNotStrip
+  @Keep
+  abstract fun exitPictureInPicture(): Unit
+  
+  @DoNotStrip
+  @Keep
+  abstract fun canEnterPictureInPicture(): Boolean
 
   private external fun initHybrid(): HybridData
 

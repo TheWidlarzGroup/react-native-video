@@ -61,10 +61,59 @@ namespace margelo::nitro::video {
     inline void setPlayer(const std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>>& player) noexcept override {
       _swiftPart.setPlayer(player);
     }
+    inline bool getControls() noexcept override {
+      return _swiftPart.getControls();
+    }
+    inline void setControls(bool controls) noexcept override {
+      _swiftPart.setControls(std::forward<decltype(controls)>(controls));
+    }
+    inline bool getPictureInPicture() noexcept override {
+      return _swiftPart.getPictureInPicture();
+    }
+    inline void setPictureInPicture(bool pictureInPicture) noexcept override {
+      _swiftPart.setPictureInPicture(std::forward<decltype(pictureInPicture)>(pictureInPicture));
+    }
+    inline bool getAutoEnterPictureInPicture() noexcept override {
+      return _swiftPart.getAutoEnterPictureInPicture();
+    }
+    inline void setAutoEnterPictureInPicture(bool autoEnterPictureInPicture) noexcept override {
+      _swiftPart.setAutoEnterPictureInPicture(std::forward<decltype(autoEnterPictureInPicture)>(autoEnterPictureInPicture));
+    }
 
   public:
     // Methods
-    
+    inline void enterFullscreen() override {
+      auto __result = _swiftPart.enterFullscreen();
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+    }
+    inline void exitFullscreen() override {
+      auto __result = _swiftPart.exitFullscreen();
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+    }
+    inline void enterPictureInPicture() override {
+      auto __result = _swiftPart.enterPictureInPicture();
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+    }
+    inline void exitPictureInPicture() override {
+      auto __result = _swiftPart.exitPictureInPicture();
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+    }
+    inline bool canEnterPictureInPicture() override {
+      auto __result = _swiftPart.canEnterPictureInPicture();
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
 
   private:
     ReactNativeVideo::HybridVideoViewViewManagerSpec_cxx _swiftPart;

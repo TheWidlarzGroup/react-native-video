@@ -266,6 +266,15 @@ namespace margelo::nitro::video::bridge::swift {
   using std__weak_ptr_margelo__nitro__video__HybridVideoViewViewManagerSpec_ = std::weak_ptr<margelo::nitro::video::HybridVideoViewViewManagerSpec>;
   inline std__weak_ptr_margelo__nitro__video__HybridVideoViewViewManagerSpec_ weakify_std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerSpec_(const std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerSpec>& strong) { return strong; }
   
+  // pragma MARK: Result<bool>
+  using Result_bool_ = Result<bool>;
+  inline Result_bool_ create_Result_bool_(bool value) {
+    return Result<bool>::withValue(std::move(value));
+  }
+  inline Result_bool_ create_Result_bool_(const std::exception_ptr& error) {
+    return Result<bool>::withError(error);
+  }
+  
   // pragma MARK: std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerFactorySpec>
   /**
    * Specialized version of `std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerFactorySpec>`.

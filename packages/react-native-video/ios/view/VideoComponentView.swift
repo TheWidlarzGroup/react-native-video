@@ -8,16 +8,49 @@
 import Foundation
 import UIKit
 import AVFoundation
+import AVKit
 
 @objc public class VideoComponentView: UIView {
   public weak var player: HybridVideoPlayerSpec? = nil {
     didSet {
       guard let player = player as? HybridVideoPlayer else { return }
-      configureAVPlayerLayer(with: player.playerPointer)
+      configureAVPlayerViewController(with: player.playerPointer)
     }
   }
+  
   private var playerView: UIView? = nil
-  private var avPlayerLayer: AVPlayerLayer?
+  private var playerViewController: AVPlayerViewController?
+  
+  public var controls: Bool = false {
+    didSet {
+      DispatchQueue.main.async { [weak self] in
+        guard let self = self, let playerViewController = self.playerViewController else { return }
+        playerViewController.showsPlaybackControls = self.controls
+      }
+    }
+  }
+  
+  public var allowsPictureInPicturePlayback: Bool = false {
+    didSet {
+      DispatchQueue.main.async { [weak self] in
+        guard let self = self, let playerViewController = self.playerViewController else { return }
+        
+        VideoManager.shared.requestAudioSessionUpdate()
+        playerViewController.allowsPictureInPicturePlayback = self.allowsPictureInPicturePlayback
+      }
+    }
+  }
+  
+  public var autoEnterPictureInPicture: Bool = false {
+    didSet {
+      DispatchQueue.main.async { [weak self] in
+        guard let self = self, let playerViewController = self.playerViewController else { return }
+        
+        VideoManager.shared.requestAudioSessionUpdate()
+        playerViewController.canStartPictureInPictureAutomaticallyFromInline = self.allowsPictureInPicturePlayback
+      }
+    }
+  }
   
   @objc public var nitroId: NSNumber = -1 {
     didSet {
@@ -29,7 +62,12 @@ import AVFoundation
   
   @objc public override init(frame: CGRect) {
     super.init(frame: frame)
+    VideoManager.shared.register(view: self)
     setupPlayerView()
+  }
+  
+  deinit {
+    VideoManager.shared.unregister(view: self)
   }
   
   @objc public required init?(coder: NSCoder) {
@@ -56,21 +94,104 @@ import AVFoundation
     }
   }
   
-  public func configureAVPlayerLayer(with player: AVPlayer) {
+  public func configureAVPlayerViewController(with player: AVPlayer) {
     DispatchQueue.main.async { [weak self] in
-      self?.avPlayerLayer = AVPlayerLayer(player: player)
+      guard let self = self, let playerView = self.playerView else { return }
+      // Remove previous controller if any
+      self.playerViewController?.willMove(toParent: nil)
+      self.playerViewController?.view.removeFromSuperview()
+      self.playerViewController?.removeFromParent()
       
-      if let avPlayerLayer = self?.avPlayerLayer, let playerView = self?.playerView {
-        avPlayerLayer.frame = playerView.bounds
-        avPlayerLayer.videoGravity = .resizeAspect
-        playerView.layer.addSublayer(avPlayerLayer)
+      let controller = AVPlayerViewController()
+      controller.player = player
+      controller.showsPlaybackControls = controls
+      controller.view.frame = playerView.bounds
+      controller.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+      controller.view.backgroundColor = .clear
+      
+      if #available(iOS 16.0, *) {
+        if let initialSpeed = controller.speeds.first(where: { $0.rate == player.rate }) {
+          controller.selectSpeed(initialSpeed)
+        }
+      }
+      
+      // Find nearest UIViewController
+      if let parentVC = self.findViewController() {
+        parentVC.addChild(controller)
+        playerView.addSubview(controller.view)
+        controller.didMove(toParent: parentVC)
+        self.playerViewController = controller
       }
     }
   }
   
+  // Helper to find nearest UIViewController
+  private func findViewController() -> UIViewController? {
+    var responder: UIResponder? = self
+    while let r = responder {
+      if let vc = r as? UIViewController {
+        return vc
+      }
+      responder = r.next
+    }
+    return nil
+  }
+  
   public override func layoutSubviews() {
     super.layoutSubviews()
-    // Update the frame of the player layer when the view's layout changes
-    avPlayerLayer?.frame = playerView?.bounds ?? .zero
+    
+    // Update the frame of the playerViewController's view when the view's layout changes
+    playerViewController?.view.frame = playerView?.bounds ?? .zero
+    playerViewController?.contentOverlayView?.frame = playerView?.bounds ?? .zero
+    for subview in playerViewController?.contentOverlayView?.subviews ?? [] {
+      subview.frame = playerView?.bounds ?? .zero
+    }
+  }
+  
+  public func enterFullscreen() throws {
+    guard let playerViewController else {
+      throw VideoViewError.viewIsDeallocated.error()
+    }
+    
+    DispatchQueue.main.async {
+      playerViewController.enterFullscreen(animated: true)
+    }
+  }
+  
+  public func exitFullscreen() throws {
+    guard let playerViewController else {
+      throw VideoViewError.viewIsDeallocated.error()
+    }
+    
+    DispatchQueue.main.async {
+      playerViewController.exitFullscreen(animated: true)
+    }
+  }
+  
+  public func startPictureInPicture() throws {
+    guard let playerViewController else {
+      throw VideoViewError.viewIsDeallocated.error()
+    }
+    
+    guard AVPictureInPictureController.isPictureInPictureSupported() else {
+      throw VideoViewError.pictureInPictureNotSupported.error()
+    }
+    
+    DispatchQueue.main.async {
+      // Here we skip error handling for simplicity
+      // We do check for PiP support earlier in the code
+      try? playerViewController.startPictureInPicture()
+    }
+  }
+  
+  public func stopPictureInPicture() throws {
+    guard let playerViewController else {
+      throw VideoViewError.viewIsDeallocated.error()
+    }
+    
+    DispatchQueue.main.async {
+      // Here we skip error handling for simplicity
+      playerViewController.stopPictureInPicture()
+    }
   }
 }

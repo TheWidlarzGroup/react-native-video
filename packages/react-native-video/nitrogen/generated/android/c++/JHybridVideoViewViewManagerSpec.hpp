@@ -49,10 +49,20 @@ namespace margelo::nitro::video {
     // Properties
     std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>> getPlayer() override;
     void setPlayer(const std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>>& player) override;
+    bool getControls() override;
+    void setControls(bool controls) override;
+    bool getPictureInPicture() override;
+    void setPictureInPicture(bool pictureInPicture) override;
+    bool getAutoEnterPictureInPicture() override;
+    void setAutoEnterPictureInPicture(bool autoEnterPictureInPicture) override;
 
   public:
     // Methods
-    
+    void enterFullscreen() override;
+    void exitFullscreen() override;
+    void enterPictureInPicture() override;
+    void exitPictureInPicture() override;
+    bool canEnterPictureInPicture() override;
 
   private:
     friend HybridBase;

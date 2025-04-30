@@ -16,6 +16,17 @@ namespace margelo::nitro::video {
     registerHybrids(this, [](Prototype& prototype) {
       prototype.registerHybridGetter("player", &HybridVideoViewViewManagerSpec::getPlayer);
       prototype.registerHybridSetter("player", &HybridVideoViewViewManagerSpec::setPlayer);
+      prototype.registerHybridGetter("controls", &HybridVideoViewViewManagerSpec::getControls);
+      prototype.registerHybridSetter("controls", &HybridVideoViewViewManagerSpec::setControls);
+      prototype.registerHybridGetter("pictureInPicture", &HybridVideoViewViewManagerSpec::getPictureInPicture);
+      prototype.registerHybridSetter("pictureInPicture", &HybridVideoViewViewManagerSpec::setPictureInPicture);
+      prototype.registerHybridGetter("autoEnterPictureInPicture", &HybridVideoViewViewManagerSpec::getAutoEnterPictureInPicture);
+      prototype.registerHybridSetter("autoEnterPictureInPicture", &HybridVideoViewViewManagerSpec::setAutoEnterPictureInPicture);
+      prototype.registerHybridMethod("enterFullscreen", &HybridVideoViewViewManagerSpec::enterFullscreen);
+      prototype.registerHybridMethod("exitFullscreen", &HybridVideoViewViewManagerSpec::exitFullscreen);
+      prototype.registerHybridMethod("enterPictureInPicture", &HybridVideoViewViewManagerSpec::enterPictureInPicture);
+      prototype.registerHybridMethod("exitPictureInPicture", &HybridVideoViewViewManagerSpec::exitPictureInPicture);
+      prototype.registerHybridMethod("canEnterPictureInPicture", &HybridVideoViewViewManagerSpec::canEnterPictureInPicture);
     });
   }
 
