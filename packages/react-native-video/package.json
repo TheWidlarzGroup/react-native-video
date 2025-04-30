@@ -1,6 +1,6 @@
 {
   "name": "react-native-video",
-  "version": "7.0.0-dev.1",
+  "version": "7.0.0-dev.2",
   "description": "<Video /> Component for React Native",
   "source": "./src/index.tsx",
   "main": "./lib/commonjs/index.js",

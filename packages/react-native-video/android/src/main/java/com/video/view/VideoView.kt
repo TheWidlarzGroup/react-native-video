@@ -25,6 +25,7 @@ import com.video.core.activities.FullscreenVideoViewActivity
 import com.video.core.fragments.PictureInPictureHelperFragment
 import com.video.core.utils.PictureInPictureUtils.canEnterPictureInPicture
 import com.video.core.utils.PictureInPictureUtils.createPictureInPictureParams
+import com.video.core.utils.Threading.runOnMainThread
 
 @UnstableApi
 class VideoView @JvmOverloads constructor(
@@ -68,13 +69,21 @@ class VideoView @JvmOverloads constructor(
       }
     }
 
-  var useController: Boolean = true
+  var useController: Boolean = false
+    set(value) {
+      field = value
+      runOnMainThread {
+        playerView.useController = value
+      }
+    }
+
   var pictureInPictureEnabled: Boolean = false
 
   var onNitroIdChange: ((Int?) -> Unit)? = null
   var playerView = PlayerView(context).apply {
     layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
     setShutterBackgroundColor(Color.TRANSPARENT)
+    useController = false
   }
   var isInFullscreen: Boolean = false
   var isInPictureInPicture: Boolean = false

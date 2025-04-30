@@ -62,7 +62,11 @@ class HybridVideoViewViewManager(nitroId: Int): HybridVideoViewViewManagerSpec()
       videoView.get()?.pictureInPictureEnabled = value
     }
 
-  override var controls: Boolean = false
+  override var controls: Boolean
+    get() = videoView.get()?.useController == true
+    set(value) {
+      videoView.get()?.useController = value
+    }
 
   override val memorySize: Long
     get() = 0
