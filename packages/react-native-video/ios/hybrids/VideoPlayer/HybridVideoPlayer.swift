@@ -173,7 +173,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, VideoPlayerObserverDelegate {
   
   func seekBy(time: Double) throws {
     guard let currentItem = playerPointer.currentItem else {
-      throw PlayerError.notIntilaized.error()
+      throw PlayerError.notInitialized.error()
     }
     
     let currentItemTime = currentItem.currentTime()
@@ -204,7 +204,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, VideoPlayerObserverDelegate {
           self.playerItem = try self.initializePlayerItem()
           
           guard let player = self.player else {
-            throw PlayerError.notIntilaized.error()
+            throw PlayerError.notInitialized.error()
           }
           
           player.replaceCurrentItem(with: self.playerItem)
