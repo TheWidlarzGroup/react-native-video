@@ -1,7 +1,12 @@
 #import "VideoView.h"
 
 #import "ReactNativeVideo-Swift-Cxx-Umbrella.hpp"
+
+#if __has_include("ReactNativeVideo/ReactNativeVideo-Swift.h")
+#import "ReactNativeVideo/ReactNativeVideo-Swift.h"
+#else
 #import "ReactNativeVideo-Swift.h"
+#endif
 
 @implementation VideoView {
   VideoComponentView* _view;
