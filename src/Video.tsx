@@ -243,7 +243,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           patchVer: resolvedSource.patchVer || 0,
           requestHeaders: generateHeaderForNative(resolvedSource.headers),
           startPosition: resolvedSource.startPosition ?? -1,
-          cropStart: resolvedSource.cropStart || 0,
+          cropStart: resolvedSource.cropStart,
           cropEnd: resolvedSource.cropEnd,
           contentStartTime: selectedContentStartTime,
           metadata: resolvedSource.metadata,
