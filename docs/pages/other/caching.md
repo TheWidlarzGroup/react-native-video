@@ -31,3 +31,18 @@ You will see warnings in the Xcode logs when using `debug` mode. If you're unsur
 By default, files expire after 30 days, and the maximum cache size is 100MB.
 
 Future updates may include more configurable caching options.
+
+> **Note:** If you are enabling video caching (using `$RNVideoUseVideoCaching`), you must add the following to your `Gemfile`:
+>
+> ```ruby
+> gem "cocoapods-swift-modular-headers"
+> ```
+>
+> Then, install dependencies using:
+>
+> ```sh
+> bundle install
+> bundle exec pod install
+> ```
+>
+> This enables Swift modular headers for Swift dependencies.

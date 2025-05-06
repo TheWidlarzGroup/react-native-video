@@ -1,4 +1,4 @@
-struct CustomMetadata {
+public struct CustomMetadata {
     let title: String?
     let subtitle: String?
     let artist: String?

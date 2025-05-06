@@ -4,20 +4,28 @@ ws_dir = ws_dir.parent until
   ws_dir.expand_path.to_s == '/'
 require "#{ws_dir}/node_modules/react-native-test-app/test_app.rb"
 
-workspace 'BareExample.xcworkspace'
+if ENV['RCT_NEW_ARCH_ENABLED'].nil?
+  ENV['RCT_NEW_ARCH_ENABLED'] = '0'
+end
 
-use_test_app!
+if ENV['RCT_NEW_ARCH_ENABLED'] == '1'
+  Pod::UI.puts "New Architecture is ENABLED".green
+else
+  Pod::UI.puts "New Architecture is DISABLED".red
+end
 
 # This is used by CI to test different configurations
 # If you want to enable it look to README.md
 if ENV['RNV_SAMPLE_ENABLE_ADS']
   $RNVideoUseGoogleIMA = true
 end
+
 if ENV['RNV_SAMPLE_VIDEO_CACHING']
+  plugin 'cocoapods-swift-modular-headers'
   $RNVideoUseVideoCaching = true
+  apply_modular_headers_for_swift_dependencies()
 end
 
-# Chache dependencies need to have modular headers
-if defined?($RNVideoUseVideoCaching)
-  use_modular_headers!
-end
+workspace 'BareExample.xcworkspace'
+
+use_test_app!

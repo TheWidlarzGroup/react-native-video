@@ -9,6 +9,7 @@
 .xcode.env
 Pods/
 build/
+vendor/bundle/
 dist/*
 !dist/.gitignore
 local.properties

@@ -1,5 +1,18 @@
 
 
+# [6.13.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.12.0...v6.13.0) (2025-04-18)
+
+
+### Bug Fixes
+
+* **macCatalyst:** allowsVideoFrameAnalysis not available in catalyst until 18.0 ([#4515](https://github.com/TheWidlarzGroup/react-native-video/issues/4515)) ([b17c319](https://github.com/TheWidlarzGroup/react-native-video/commit/b17c319c32ad8080ad911ec4be7fa02bc4a6d6ee))
+* **tvos:** build ([#4511](https://github.com/TheWidlarzGroup/react-native-video/issues/4511)) ([4034046](https://github.com/TheWidlarzGroup/react-native-video/commit/40340467d7df2ad606f25606041630c489c385f6))
+
+
+### Features
+
+* **ios:** add `overridePlayerAsset` to `AVPlayerPlugin` ([#4522](https://github.com/TheWidlarzGroup/react-native-video/issues/4522)) ([b1b3db3](https://github.com/TheWidlarzGroup/react-native-video/commit/b1b3db301097e82c8d449c08f7d334a2eaeac0ea))
+
 # [6.12.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.11.0...v6.12.0) (2025-04-06)
 
 
