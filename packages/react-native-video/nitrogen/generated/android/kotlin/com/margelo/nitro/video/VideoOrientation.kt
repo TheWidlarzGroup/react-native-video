@@ -21,6 +21,7 @@ enum class VideoOrientation {
   PORTRAIT_UPSIDE_DOWN,
   LANDSCAPE_LEFT,
   LANDSCAPE_RIGHT,
+  SQUARE,
   UNKNOWN;
 
   @DoNotStrip

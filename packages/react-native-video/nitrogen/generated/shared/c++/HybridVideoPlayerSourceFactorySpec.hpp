@@ -15,10 +15,13 @@
 
 // Forward declaration of `HybridVideoPlayerSourceSpec` to properly resolve imports.
 namespace margelo::nitro::video { class HybridVideoPlayerSourceSpec; }
+// Forward declaration of `NativeVideoConfig` to properly resolve imports.
+namespace margelo::nitro::video { struct NativeVideoConfig; }
 
 #include <memory>
 #include "HybridVideoPlayerSourceSpec.hpp"
 #include <string>
+#include "NativeVideoConfig.hpp"
 
 namespace margelo::nitro::video {
 
@@ -52,6 +55,7 @@ namespace margelo::nitro::video {
     public:
       // Methods
       virtual std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec> fromUri(const std::string& uri) = 0;
+      virtual std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec> fromVideoConfig(const NativeVideoConfig& config) = 0;
 
     protected:
       // Hybrid Setup

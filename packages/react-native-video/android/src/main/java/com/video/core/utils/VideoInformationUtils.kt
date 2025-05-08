@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Build
 import android.webkit.URLUtil
 import com.margelo.nitro.video.VideoInformation
+import androidx.core.net.toUri
 
 object VideoInformationUtils {
   fun fromUri(uri: String, headers: Map<String, String> = emptyMap()): VideoInformation {
@@ -13,7 +14,7 @@ object VideoInformationUtils {
 
     when {
       URLUtil.isFileUrl(uri) -> {
-        retriever.setDataSource(Uri.parse(uri).path)
+        retriever.setDataSource(uri.toUri().path)
       }
       else -> {
         retriever.setDataSource(uri, headers)

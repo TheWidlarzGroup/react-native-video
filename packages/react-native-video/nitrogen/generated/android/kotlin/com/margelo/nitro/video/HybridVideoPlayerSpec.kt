@@ -43,6 +43,14 @@ abstract class HybridVideoPlayerSpec: HybridObject() {
   
   @get:DoNotStrip
   @get:Keep
+  abstract val eventEmitter: HybridVideoPlayerEventEmitterSpec
+  
+  @get:DoNotStrip
+  @get:Keep
+  abstract val status: VideoPlayerStatus
+  
+  @get:DoNotStrip
+  @get:Keep
   abstract val duration: Double
   
   @get:DoNotStrip

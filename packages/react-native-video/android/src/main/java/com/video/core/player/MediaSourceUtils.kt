@@ -13,6 +13,8 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.dash.DashMediaSource
 import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.media3.exoplayer.source.MergingMediaSource
+import com.margelo.nitro.video.HybridVideoPlayerSource
 import com.video.core.SourceError
 
 @OptIn(UnstableApi::class)
@@ -24,32 +26,43 @@ fun buildMediaSource(context: Context, source: HybridVideoPlayerSourceSpec, medi
   // 1. Remove query params from uri to avoid getting false extension
   // 2. Get extension from uri
   val type = Util.inferContentType(uri)
+  val dataSourceFactory = buildBaseDataSourceFactory(context, source)
 
-  return when(type) {
+  if (!source.config.externalSubtitles.isNullOrEmpty()) {
+    return buildExternalSubtitlesMediaSource(context, source)
+  }
+
+  return when (type) {
     C.CONTENT_TYPE_DASH -> {
-      val mediaSourceFactory = DashMediaSource.Factory(buildBaseDataSourceFactory(context, source))
-      return mediaSourceFactory.createMediaSource(mediaItem)
+      DashMediaSource.Factory(dataSourceFactory)
+        .createMediaSource(mediaItem)
     }
-
     C.CONTENT_TYPE_HLS -> {
-      val mediaSourceFactory = HlsMediaSource.Factory(buildBaseDataSourceFactory(context, source))
-      return mediaSourceFactory.createMediaSource(mediaItem)
+      HlsMediaSource.Factory(dataSourceFactory)
+        .createMediaSource(mediaItem)
     }
-
     C.CONTENT_TYPE_OTHER -> {
-      return when (uri.scheme) {
-        else -> {
-          val mediaSourceFactory = DefaultMediaSourceFactory(context)
-            .setDataSourceFactory(buildBaseDataSourceFactory(context, source))
-          return mediaSourceFactory.createMediaSource(mediaItem)
-        }
-      }
+      DefaultMediaSourceFactory(context)
+        .setDataSourceFactory(dataSourceFactory)
+        .createMediaSource(mediaItem)
     }
-
     else -> {
       throw SourceError.UnsupportedContentType(source.uri)
     }
   }
+}
+
+@OptIn(UnstableApi::class)
+fun buildExternalSubtitlesMediaSource(context: Context, source: HybridVideoPlayerSourceSpec): MediaSource {
+  val dataSourceFactory = buildBaseDataSourceFactory(context, source)
+  val mediaItem = MediaItem.Builder()
+    .setUri(source.uri.toUri())
+    .setSubtitleConfigurations(getSubtitlesConfiguration(source.config))
+    .build()
+
+  return DefaultMediaSourceFactory(context)
+    .setDataSourceFactory(dataSourceFactory)
+    .createMediaSource(mediaItem)
 }
 
 

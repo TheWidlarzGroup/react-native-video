@@ -10,6 +10,7 @@ import com.facebook.react.bridge.ReactContext
 import com.facebook.react.modules.network.CookieJarContainer
 import com.facebook.react.modules.network.ForwardingCookieHandler
 import com.facebook.react.modules.network.OkHttpClientProvider
+import com.margelo.nitro.video.HybridVideoPlayerSource
 import com.margelo.nitro.video.HybridVideoPlayerSourceSpec
 import okhttp3.JavaNetCookieJar
 
@@ -32,14 +33,13 @@ fun buildHttpDataSourceFactory(context: Context, source: HybridVideoPlayerSource
 
   val factory = OkHttpDataSource.Factory(client)
 
-  // TODO: Apply Header here, once we add headers to source
-  val dummyHeaders: Map<String, String>? = mapOf()
+  val headers: Map<String, String>? = source.config.headers
 
-  if (dummyHeaders != null) {
-    factory.setDefaultRequestProperties(dummyHeaders)
+  if (headers != null) {
+    factory.setDefaultRequestProperties(headers)
   }
 
-  if (dummyHeaders == null || !dummyHeaders.containsKey("User-Agent")) {
+  if (headers == null || !headers.containsKey("User-Agent")) {
     factory.setUserAgent(getUserAgent(context))
   }
 

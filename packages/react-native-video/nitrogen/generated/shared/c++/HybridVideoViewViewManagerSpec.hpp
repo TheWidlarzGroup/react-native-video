@@ -19,6 +19,7 @@ namespace margelo::nitro::video { class HybridVideoPlayerSpec; }
 #include <optional>
 #include <memory>
 #include "HybridVideoPlayerSpec.hpp"
+#include <functional>
 
 namespace margelo::nitro::video {
 
@@ -55,6 +56,18 @@ namespace margelo::nitro::video {
       virtual void setPictureInPicture(bool pictureInPicture) = 0;
       virtual bool getAutoEnterPictureInPicture() = 0;
       virtual void setAutoEnterPictureInPicture(bool autoEnterPictureInPicture) = 0;
+      virtual std::optional<std::function<void(bool /* isInPictureInPicture */)>> getOnPictureInPictureChange() = 0;
+      virtual void setOnPictureInPictureChange(const std::optional<std::function<void(bool /* isInPictureInPicture */)>>& onPictureInPictureChange) = 0;
+      virtual std::optional<std::function<void(bool /* fullscreen */)>> getOnFullscreenChange() = 0;
+      virtual void setOnFullscreenChange(const std::optional<std::function<void(bool /* fullscreen */)>>& onFullscreenChange) = 0;
+      virtual std::optional<std::function<void()>> getWillEnterFullscreen() = 0;
+      virtual void setWillEnterFullscreen(const std::optional<std::function<void()>>& willEnterFullscreen) = 0;
+      virtual std::optional<std::function<void()>> getWillExitFullscreen() = 0;
+      virtual void setWillExitFullscreen(const std::optional<std::function<void()>>& willExitFullscreen) = 0;
+      virtual std::optional<std::function<void()>> getWillEnterPictureInPicture() = 0;
+      virtual void setWillEnterPictureInPicture(const std::optional<std::function<void()>>& willEnterPictureInPicture) = 0;
+      virtual std::optional<std::function<void()>> getWillExitPictureInPicture() = 0;
+      virtual void setWillExitPictureInPicture(const std::optional<std::function<void()>>& willExitPictureInPicture) = 0;
 
     public:
       // Methods

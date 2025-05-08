@@ -9,12 +9,23 @@
 
 // Forward declaration of `HybridVideoPlayerSourceSpec` to properly resolve imports.
 namespace margelo::nitro::video { class HybridVideoPlayerSourceSpec; }
+// Forward declaration of `NativeVideoConfig` to properly resolve imports.
+namespace margelo::nitro::video { struct NativeVideoConfig; }
+// Forward declaration of `ExternalSubtitle` to properly resolve imports.
+namespace margelo::nitro::video { struct ExternalSubtitle; }
 
 #include <memory>
 #include "HybridVideoPlayerSourceSpec.hpp"
 #include "JHybridVideoPlayerSourceSpec.hpp"
 #include <NitroModules/JNISharedPtr.hpp>
 #include <string>
+#include "NativeVideoConfig.hpp"
+#include "JNativeVideoConfig.hpp"
+#include <optional>
+#include <unordered_map>
+#include <vector>
+#include "ExternalSubtitle.hpp"
+#include "JExternalSubtitle.hpp"
 
 namespace margelo::nitro::video {
 
@@ -40,6 +51,11 @@ namespace margelo::nitro::video {
   std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec> JHybridVideoPlayerSourceFactorySpec::fromUri(const std::string& uri) {
     static const auto method = javaClassStatic()->getMethod<jni::local_ref<JHybridVideoPlayerSourceSpec::javaobject>(jni::alias_ref<jni::JString> /* uri */)>("fromUri");
     auto __result = method(_javaPart, jni::make_jstring(uri));
+    return JNISharedPtr::make_shared_from_jni<JHybridVideoPlayerSourceSpec>(jni::make_global(__result));
+  }
+  std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec> JHybridVideoPlayerSourceFactorySpec::fromVideoConfig(const NativeVideoConfig& config) {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JHybridVideoPlayerSourceSpec::javaobject>(jni::alias_ref<JNativeVideoConfig> /* config */)>("fromVideoConfig");
+    auto __result = method(_javaPart, JNativeVideoConfig::fromCpp(config));
     return JNISharedPtr::make_shared_from_jni<JHybridVideoPlayerSourceSpec>(jni::make_global(__result));
   }
 

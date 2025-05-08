@@ -34,7 +34,8 @@ namespace margelo::nitro::video {
     PORTRAIT_UPSIDE_DOWN      SWIFT_NAME(portraitUpsideDown) = 2,
     LANDSCAPE_LEFT      SWIFT_NAME(landscapeLeft) = 3,
     LANDSCAPE_RIGHT      SWIFT_NAME(landscapeRight) = 4,
-    UNKNOWN      SWIFT_NAME(unknown) = 5,
+    SQUARE      SWIFT_NAME(square) = 5,
+    UNKNOWN      SWIFT_NAME(unknown) = 6,
   } CLOSED_ENUM;
 
 } // namespace margelo::nitro::video
@@ -54,6 +55,7 @@ namespace margelo::nitro {
         case hashString("portrait-upside-down"): return VideoOrientation::PORTRAIT_UPSIDE_DOWN;
         case hashString("landscape-left"): return VideoOrientation::LANDSCAPE_LEFT;
         case hashString("landscape-right"): return VideoOrientation::LANDSCAPE_RIGHT;
+        case hashString("square"): return VideoOrientation::SQUARE;
         case hashString("unknown"): return VideoOrientation::UNKNOWN;
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert \"" + unionValue + "\" to enum VideoOrientation - invalid value!");
@@ -66,6 +68,7 @@ namespace margelo::nitro {
         case VideoOrientation::PORTRAIT_UPSIDE_DOWN: return JSIConverter<std::string>::toJSI(runtime, "portrait-upside-down");
         case VideoOrientation::LANDSCAPE_LEFT: return JSIConverter<std::string>::toJSI(runtime, "landscape-left");
         case VideoOrientation::LANDSCAPE_RIGHT: return JSIConverter<std::string>::toJSI(runtime, "landscape-right");
+        case VideoOrientation::SQUARE: return JSIConverter<std::string>::toJSI(runtime, "square");
         case VideoOrientation::UNKNOWN: return JSIConverter<std::string>::toJSI(runtime, "unknown");
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert VideoOrientation to JS - invalid value: "
@@ -83,6 +86,7 @@ namespace margelo::nitro {
         case hashString("portrait-upside-down"):
         case hashString("landscape-left"):
         case hashString("landscape-right"):
+        case hashString("square"):
         case hashString("unknown"):
           return true;
         default:

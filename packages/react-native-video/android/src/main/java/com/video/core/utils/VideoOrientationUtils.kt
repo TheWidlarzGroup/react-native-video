@@ -6,6 +6,8 @@ object VideoOrientationUtils {
   fun fromWHR(width: Int?, height: Int?, rotation: Int?): VideoOrientation {
     if (width == 0 || height == 0 || height == null || width == null) return VideoOrientation.UNKNOWN
 
+    if (width == height) return VideoOrientation.SQUARE
+
     // Check if video is portrait or landscape using natural size
     val isNaturalSizePortrait = height > width
 

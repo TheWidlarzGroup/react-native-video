@@ -7,12 +7,23 @@
 
 #include "JHybridVideoPlayerSourceSpec.hpp"
 
+// Forward declaration of `NativeVideoConfig` to properly resolve imports.
+namespace margelo::nitro::video { struct NativeVideoConfig; }
+// Forward declaration of `ExternalSubtitle` to properly resolve imports.
+namespace margelo::nitro::video { struct ExternalSubtitle; }
 // Forward declaration of `VideoInformation` to properly resolve imports.
 namespace margelo::nitro::video { struct VideoInformation; }
 // Forward declaration of `VideoOrientation` to properly resolve imports.
 namespace margelo::nitro::video { enum class VideoOrientation; }
 
 #include <string>
+#include "NativeVideoConfig.hpp"
+#include "JNativeVideoConfig.hpp"
+#include <optional>
+#include <unordered_map>
+#include <vector>
+#include "ExternalSubtitle.hpp"
+#include "JExternalSubtitle.hpp"
 #include <NitroModules/Promise.hpp>
 #include "VideoInformation.hpp"
 #include <NitroModules/JPromise.hpp>
@@ -42,6 +53,11 @@ namespace margelo::nitro::video {
     static const auto method = javaClassStatic()->getMethod<jni::local_ref<jni::JString>()>("getUri");
     auto __result = method(_javaPart);
     return __result->toStdString();
+  }
+  NativeVideoConfig JHybridVideoPlayerSourceSpec::getConfig() {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JNativeVideoConfig>()>("getConfig");
+    auto __result = method(_javaPart);
+    return __result->toCpp();
   }
 
   // Methods

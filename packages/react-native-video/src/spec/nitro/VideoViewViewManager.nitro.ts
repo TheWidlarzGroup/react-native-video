@@ -1,9 +1,11 @@
 import type { HybridObject } from 'react-native-nitro-modules';
+import type { VideoViewEvents } from '../../core/types/Events';
 import type { VideoPlayer } from './VideoPlayer.nitro';
 
 // @internal
 export interface VideoViewViewManager
-  extends HybridObject<{ ios: 'swift'; android: 'kotlin' }> {
+  extends HybridObject<{ ios: 'swift'; android: 'kotlin' }>,
+    Partial<VideoViewEvents> {
   player?: VideoPlayer;
   controls: boolean;
   pictureInPicture: boolean;

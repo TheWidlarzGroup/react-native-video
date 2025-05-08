@@ -12,6 +12,11 @@ extension AVAssetTrack {
     let transform = preferredTransform
     let size = naturalSize.applying(transform)
     
+    // Check if video is square
+    if size.width == size.height {
+      return .square
+    }
+    
     // Check if video is portrait or landscape
     let isNaturalSizePortrait = size.width < size.height
     

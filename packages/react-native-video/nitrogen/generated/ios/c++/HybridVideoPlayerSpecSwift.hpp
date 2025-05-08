@@ -14,9 +14,15 @@ namespace ReactNativeVideo { class HybridVideoPlayerSpec_cxx; }
 
 // Forward declaration of `HybridVideoPlayerSourceSpec` to properly resolve imports.
 namespace margelo::nitro::video { class HybridVideoPlayerSourceSpec; }
+// Forward declaration of `HybridVideoPlayerEventEmitterSpec` to properly resolve imports.
+namespace margelo::nitro::video { class HybridVideoPlayerEventEmitterSpec; }
+// Forward declaration of `VideoPlayerStatus` to properly resolve imports.
+namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 
 #include <memory>
 #include "HybridVideoPlayerSourceSpec.hpp"
+#include "HybridVideoPlayerEventEmitterSpec.hpp"
+#include "VideoPlayerStatus.hpp"
 #include <NitroModules/Promise.hpp>
 
 #include "ReactNativeVideo-Swift-Cxx-Umbrella.hpp"
@@ -57,6 +63,14 @@ namespace margelo::nitro::video {
     inline std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec> getSource() noexcept override {
       auto __result = _swiftPart.getSource();
       return __result;
+    }
+    inline std::shared_ptr<margelo::nitro::video::HybridVideoPlayerEventEmitterSpec> getEventEmitter() noexcept override {
+      auto __result = _swiftPart.getEventEmitter();
+      return __result;
+    }
+    inline VideoPlayerStatus getStatus() noexcept override {
+      auto __result = _swiftPart.getStatus();
+      return static_cast<VideoPlayerStatus>(__result);
     }
     inline double getDuration() noexcept override {
       return _swiftPart.getDuration();

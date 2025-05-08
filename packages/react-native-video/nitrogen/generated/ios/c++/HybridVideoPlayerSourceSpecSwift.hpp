@@ -12,12 +12,21 @@
 // Forward declaration of `HybridVideoPlayerSourceSpec_cxx` to properly resolve imports.
 namespace ReactNativeVideo { class HybridVideoPlayerSourceSpec_cxx; }
 
+// Forward declaration of `NativeVideoConfig` to properly resolve imports.
+namespace margelo::nitro::video { struct NativeVideoConfig; }
+// Forward declaration of `ExternalSubtitle` to properly resolve imports.
+namespace margelo::nitro::video { struct ExternalSubtitle; }
 // Forward declaration of `VideoInformation` to properly resolve imports.
 namespace margelo::nitro::video { struct VideoInformation; }
 // Forward declaration of `VideoOrientation` to properly resolve imports.
 namespace margelo::nitro::video { enum class VideoOrientation; }
 
 #include <string>
+#include "NativeVideoConfig.hpp"
+#include <optional>
+#include <unordered_map>
+#include <vector>
+#include "ExternalSubtitle.hpp"
 #include <NitroModules/Promise.hpp>
 #include "VideoInformation.hpp"
 #include "VideoOrientation.hpp"
@@ -59,6 +68,10 @@ namespace margelo::nitro::video {
     // Properties
     inline std::string getUri() noexcept override {
       auto __result = _swiftPart.getUri();
+      return __result;
+    }
+    inline NativeVideoConfig getConfig() noexcept override {
+      auto __result = _swiftPart.getConfig();
       return __result;
     }
 

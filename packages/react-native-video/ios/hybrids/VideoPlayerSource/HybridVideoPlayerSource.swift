@@ -12,11 +12,13 @@ import NitroModules
 class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec {
   public var asset: AVURLAsset?
   var uri: String
+  var config: NativeVideoConfig
   
   let url: URL
   
-  init(uri: String) throws {
-    self.uri = uri
+  init(config: NativeVideoConfig) throws {
+    self.uri = config.uri
+    self.config = config
     
     guard let url = URL(string: uri) else {
       throw SourceError.invalidUri(uri: uri).error()
@@ -29,33 +31,58 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec {
     releaseAsset()
   }
   
-  func getAssetInformationAsync() throws -> Promise<VideoInformation> {
-    return Promise.async(.utility) { [weak self] in
+  func getAssetInformationAsync() -> Promise<VideoInformation> {
+    let promise = Promise<VideoInformation>()
+    
+    Task.detached(priority: .utility) { [weak self] in
       guard let self else {
-        throw LibraryError.deallocated(objectName: "HybridVideoPlayerSource").error()
+        promise.reject(withError: LibraryError.deallocated(objectName: "HybridVideoPlayerSource").error())
+        return
       }
       
-      if self.url.isFileURL {
-        try VideoFileHelper.validateReadPermission(for: self.url)
+      do {
+        if self.url.isFileURL {
+          try VideoFileHelper.validateReadPermission(for: self.url)
+        }
+        
+        try await self.initializeAsset()
+        
+        guard let asset = self.asset else {
+          throw PlayerError.assetNotInitialized.error()
+        }
+        
+        let videoInformation = try await asset.getAssetInformation()
+        
+        promise.resolve(withResult: videoInformation)
+      } catch {
+        promise.reject(withError: error)
       }
-      
-      try initializeAsset()
-      
-      guard let asset = self.asset else {
-        throw PlayerError.assetNotInitialized.error()
-      }
-      
-      return try await asset.getAssetInformation()
     }
+    
+    return promise
   }
   
-  public func initializeAsset() throws {
+  public func initializeAsset() async throws {
     guard asset == nil else {
       return
     }
     
-    // TODO: Pass headers here
-    asset = AVURLAsset(url: url)
+    if let headers = config.headers {
+      let options = [
+        "AVURLAssetHTTPHeaderFieldsKey": headers
+      ]
+      asset = AVURLAsset(url: url, options: options)
+    } else {
+      asset = AVURLAsset(url: url)
+    }
+    
+    guard let asset else {
+      throw SourceError.failedToInitializeAsset.error()
+    }
+    
+    // Code browed from expo-video https://github.com/expo/expo/blob/ea17c9b1ce5111e1454b089ba381f3feb93f33cc/packages/expo-video/ios/VideoPlayerItem.swift#L40C30-L40C73
+    // If we don't load those properties, they will be loaded on main thread casuing lags
+    _ = try? await asset.load(.duration, .preferredTransform, .isPlayable)
   }
   
   public func releaseAsset() {

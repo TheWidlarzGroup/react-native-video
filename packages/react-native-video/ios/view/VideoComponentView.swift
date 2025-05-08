@@ -18,8 +18,23 @@ import AVKit
     }
   }
   
+  var delegate: VideoViewDelegate?
   private var playerView: UIView? = nil
-  private var playerViewController: AVPlayerViewController?
+  
+  private var observer: VideoComponentViewObserver? {
+    didSet {
+      playerViewController?.delegate = observer
+      observer?.updatePlayerViewControllerObservers()
+    }
+  }
+  
+  var playerViewController: AVPlayerViewController? {
+    didSet {
+      guard let observer, let playerViewController else { return }
+      playerViewController.delegate = observer
+      observer.updatePlayerViewControllerObservers()
+    }
+  }
   
   public var controls: Bool = false {
     didSet {
@@ -64,6 +79,7 @@ import AVKit
     super.init(frame: frame)
     VideoManager.shared.register(view: self)
     setupPlayerView()
+    observer = VideoComponentViewObserver(view: self)
   }
   
   deinit {

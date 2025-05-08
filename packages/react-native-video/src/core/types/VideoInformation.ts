@@ -1,10 +1,4 @@
-export type VideoOrientation =
-  | 'portrait'
-  | 'landscape'
-  | 'portrait-upside-down'
-  | 'landscape-left'
-  | 'landscape-right'
-  | 'unknown';
+import type { VideoOrientation } from './VideoOrientation';
 
 export interface VideoInformation {
   /**

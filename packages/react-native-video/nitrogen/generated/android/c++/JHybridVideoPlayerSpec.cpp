@@ -9,11 +9,19 @@
 
 // Forward declaration of `HybridVideoPlayerSourceSpec` to properly resolve imports.
 namespace margelo::nitro::video { class HybridVideoPlayerSourceSpec; }
+// Forward declaration of `HybridVideoPlayerEventEmitterSpec` to properly resolve imports.
+namespace margelo::nitro::video { class HybridVideoPlayerEventEmitterSpec; }
+// Forward declaration of `VideoPlayerStatus` to properly resolve imports.
+namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 
 #include <memory>
 #include "HybridVideoPlayerSourceSpec.hpp"
 #include "JHybridVideoPlayerSourceSpec.hpp"
 #include <NitroModules/JNISharedPtr.hpp>
+#include "HybridVideoPlayerEventEmitterSpec.hpp"
+#include "JHybridVideoPlayerEventEmitterSpec.hpp"
+#include "VideoPlayerStatus.hpp"
+#include "JVideoPlayerStatus.hpp"
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/JPromise.hpp>
 
@@ -39,6 +47,16 @@ namespace margelo::nitro::video {
     static const auto method = javaClassStatic()->getMethod<jni::local_ref<JHybridVideoPlayerSourceSpec::javaobject>()>("getSource");
     auto __result = method(_javaPart);
     return JNISharedPtr::make_shared_from_jni<JHybridVideoPlayerSourceSpec>(jni::make_global(__result));
+  }
+  std::shared_ptr<margelo::nitro::video::HybridVideoPlayerEventEmitterSpec> JHybridVideoPlayerSpec::getEventEmitter() {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JHybridVideoPlayerEventEmitterSpec::javaobject>()>("getEventEmitter");
+    auto __result = method(_javaPart);
+    return JNISharedPtr::make_shared_from_jni<JHybridVideoPlayerEventEmitterSpec>(jni::make_global(__result));
+  }
+  VideoPlayerStatus JHybridVideoPlayerSpec::getStatus() {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JVideoPlayerStatus>()>("getStatus");
+    auto __result = method(_javaPart);
+    return __result->toCpp();
   }
   double JHybridVideoPlayerSpec::getDuration() {
     static const auto method = javaClassStatic()->getMethod<double()>("getDuration");

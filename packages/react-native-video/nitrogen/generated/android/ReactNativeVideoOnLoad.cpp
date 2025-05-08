@@ -17,6 +17,18 @@
 
 #include "JHybridVideoPlayerSpec.hpp"
 #include "JHybridVideoPlayerFactorySpec.hpp"
+#include "JHybridVideoPlayerEventEmitterSpec.hpp"
+#include "JFunc_void.hpp"
+#include "JFunc_void_bool.hpp"
+#include "JFunc_void_BandwidthData.hpp"
+#include "JFunc_void_onLoadData.hpp"
+#include "JFunc_void_onLoadStartData.hpp"
+#include "JFunc_void_onPlaybackStateChangeData.hpp"
+#include "JFunc_void_double.hpp"
+#include "JFunc_void_onProgressData.hpp"
+#include "JFunc_void_TimedMetadata.hpp"
+#include "JFunc_void_std__vector_std__string_.hpp"
+#include "JFunc_void_VideoPlayerStatus.hpp"
 #include "JHybridVideoPlayerSourceSpec.hpp"
 #include "JHybridVideoPlayerSourceFactorySpec.hpp"
 #include "JHybridVideoViewViewManagerSpec.hpp"
@@ -35,6 +47,18 @@ int initialize(JavaVM* vm) {
     // Register native JNI methods
     margelo::nitro::video::JHybridVideoPlayerSpec::registerNatives();
     margelo::nitro::video::JHybridVideoPlayerFactorySpec::registerNatives();
+    margelo::nitro::video::JHybridVideoPlayerEventEmitterSpec::registerNatives();
+    margelo::nitro::video::JFunc_void_cxx::registerNatives();
+    margelo::nitro::video::JFunc_void_bool_cxx::registerNatives();
+    margelo::nitro::video::JFunc_void_BandwidthData_cxx::registerNatives();
+    margelo::nitro::video::JFunc_void_onLoadData_cxx::registerNatives();
+    margelo::nitro::video::JFunc_void_onLoadStartData_cxx::registerNatives();
+    margelo::nitro::video::JFunc_void_onPlaybackStateChangeData_cxx::registerNatives();
+    margelo::nitro::video::JFunc_void_double_cxx::registerNatives();
+    margelo::nitro::video::JFunc_void_onProgressData_cxx::registerNatives();
+    margelo::nitro::video::JFunc_void_TimedMetadata_cxx::registerNatives();
+    margelo::nitro::video::JFunc_void_std__vector_std__string__cxx::registerNatives();
+    margelo::nitro::video::JFunc_void_VideoPlayerStatus_cxx::registerNatives();
     margelo::nitro::video::JHybridVideoPlayerSourceSpec::registerNatives();
     margelo::nitro::video::JHybridVideoPlayerSourceFactorySpec::registerNatives();
     margelo::nitro::video::JHybridVideoViewViewManagerSpec::registerNatives();

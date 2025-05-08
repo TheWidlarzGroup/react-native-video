@@ -80,6 +80,7 @@ class FullscreenVideoViewActivity : Activity() {
   override fun onPostCreate(savedInstanceState: Bundle?) {
     super.onPostCreate(savedInstanceState)
     setupFullScreenButton()
+    playerView.setShowSubtitleButton(true)
     hideSystemUI()
   }
 

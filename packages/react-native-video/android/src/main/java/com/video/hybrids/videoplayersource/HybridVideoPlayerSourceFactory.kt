@@ -5,7 +5,12 @@ import com.facebook.proguard.annotations.DoNotStrip
 @DoNotStrip
 class HybridVideoPlayerSourceFactory: HybridVideoPlayerSourceFactorySpec() {
   override fun fromUri(uri: String): HybridVideoPlayerSourceSpec {
-    return HybridVideoPlayerSource(uri)
+    val config = NativeVideoConfig(uri, null, null)
+    return HybridVideoPlayerSource(config)
+  }
+
+  override fun fromVideoConfig(config: NativeVideoConfig): HybridVideoPlayerSourceSpec {
+    return HybridVideoPlayerSource(config)
   }
 
   override val memorySize: Long

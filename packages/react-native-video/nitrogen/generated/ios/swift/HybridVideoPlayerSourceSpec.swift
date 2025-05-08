@@ -12,6 +12,7 @@ import NitroModules
 public protocol HybridVideoPlayerSourceSpec_protocol: HybridObject {
   // Properties
   var uri: String { get }
+  var config: NativeVideoConfig { get }
 
   // Methods
   func getAssetInformationAsync() throws -> Promise<VideoInformation>

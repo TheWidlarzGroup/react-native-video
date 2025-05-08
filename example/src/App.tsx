@@ -14,6 +14,9 @@ import {
   createSource,
   useVideoPlayer,
   VideoView,
+  type onLoadData,
+  type onProgressData,
+  type VideoPlayerStatus,
   type VideoViewRef,
 } from 'react-native-video';
 
@@ -33,10 +36,71 @@ const VideoDemo = () => {
   const [loop, setLoop] = React.useState(false);
   const [showNativeControls, setShowNativeControls] = React.useState(false);
 
+  // For demo: log last event
+  const [lastEvent, setLastEvent] = React.useState<string>('');
+
+  // View event handlers
+  const handleFullscreenChange = React.useCallback((fullscreen: boolean) => {
+    setLastEvent(
+      'View: onFullscreenChange ' + (fullscreen ? 'entered' : 'exited')
+    );
+    console.log('Fullscreen:', fullscreen);
+  }, []);
+
+  const handlePictureInPictureChange = React.useCallback(
+    (pipEnabled: boolean) => {
+      setLastEvent(
+        'View: onPictureInPictureChange ' + (pipEnabled ? 'entered' : 'exited')
+      );
+      console.log('PictureInPicture:', pipEnabled);
+    },
+    []
+  );
+
+  const handlePlayerEnd = React.useCallback(() => {
+    setLastEvent('Player: onEnd');
+    console.log('Video has ended');
+  }, []);
+
+  const handlePlayerLoad = React.useCallback((data: onLoadData) => {
+    setLastEvent('Player: onLoad');
+    console.log('Video loaded', data);
+  }, []);
+
+  const handlePlayerBuffer = React.useCallback((buffering: boolean) => {
+    setLastEvent('Player: onBuffer ' + buffering);
+    console.log('Buffering:', buffering);
+  }, []);
+
+  const handlePlayerProgress = React.useCallback((data: onProgressData) => {
+    setProgress(data.currentTime);
+  }, []);
+
+  const handlePlayerStatusChange = React.useCallback(
+    (status: VideoPlayerStatus) => {
+      setLastEvent('Player: onStatusChange ' + status);
+      console.log('Status:', status);
+    },
+    []
+  );
+
+  // Setup player and events
   const player = useVideoPlayer(
-    'https://www.w3schools.com/html/mov_bbb.mp4',
+    {
+      uri: 'https://www.w3schools.com/html/movie.mp4',
+      externalSubtitles: [
+        {
+          uri: 'https://bitdash-a.akamaihd.net/content/sintel/subtitles/subtitles_en.vtt',
+          label: 'External',
+        },
+      ],
+    },
     (_player) => {
-      //_player.loop = loop;
+      _player.onEnd = handlePlayerEnd;
+      _player.onLoad = handlePlayerLoad;
+      _player.onBuffer = handlePlayerBuffer;
+      _player.onProgress = handlePlayerProgress;
+      _player.onStatusChange = handlePlayerStatusChange;
     }
   );
 
@@ -60,14 +124,6 @@ const VideoDemo = () => {
 
   // Progress state
   const [progress, setProgress] = React.useState(0);
-  React.useEffect(() => {
-    const interval = setInterval(() => {
-      setProgress(
-        show ? (isNaN(player.currentTime) ? 0 : player.currentTime) : 0
-      );
-    }, 300);
-    return () => clearInterval(interval);
-  }, [player, show]);
 
   // Handlers
   const handleSeek = (val: number) => {
@@ -89,6 +145,8 @@ const VideoDemo = () => {
             controls={showNativeControls}
             pictureInPicture={true}
             autoEnterPictureInPicture={true}
+            onFullscreenChange={handleFullscreenChange}
+            onPictureInPictureChange={handlePictureInPictureChange}
           />
         ) : (
           <View style={styles.hiddenVideo}>
@@ -114,6 +172,13 @@ const VideoDemo = () => {
         />
         <Text style={styles.timeText}>
           {formatTime(show ? player.duration : 0)}
+        </Text>
+      </View>
+
+      {/* Event log */}
+      <View style={{ marginBottom: 8 }}>
+        <Text style={{ color: '#888', fontSize: 12 }}>
+          Last event: {lastEvent}
         </Text>
       </View>
 

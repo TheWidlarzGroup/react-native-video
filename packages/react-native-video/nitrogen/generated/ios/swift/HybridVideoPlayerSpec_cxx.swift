@@ -107,6 +107,23 @@ public class HybridVideoPlayerSpec_cxx {
     }
   }
   
+  public final var eventEmitter: bridge.std__shared_ptr_margelo__nitro__video__HybridVideoPlayerEventEmitterSpec_ {
+    @inline(__always)
+    get {
+      return { () -> bridge.std__shared_ptr_margelo__nitro__video__HybridVideoPlayerEventEmitterSpec_ in
+        let __cxxWrapped = self.__implementation.eventEmitter.getCxxWrapper()
+        return __cxxWrapped.getCxxPart()
+      }()
+    }
+  }
+  
+  public final var status: Int32 {
+    @inline(__always)
+    get {
+      return self.__implementation.status.rawValue
+    }
+  }
+  
   public final var duration: Double {
     @inline(__always)
     get {

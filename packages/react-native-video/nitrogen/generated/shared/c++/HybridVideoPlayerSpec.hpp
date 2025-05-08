@@ -15,9 +15,15 @@
 
 // Forward declaration of `HybridVideoPlayerSourceSpec` to properly resolve imports.
 namespace margelo::nitro::video { class HybridVideoPlayerSourceSpec; }
+// Forward declaration of `HybridVideoPlayerEventEmitterSpec` to properly resolve imports.
+namespace margelo::nitro::video { class HybridVideoPlayerEventEmitterSpec; }
+// Forward declaration of `VideoPlayerStatus` to properly resolve imports.
+namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 
 #include <memory>
 #include "HybridVideoPlayerSourceSpec.hpp"
+#include "HybridVideoPlayerEventEmitterSpec.hpp"
+#include "VideoPlayerStatus.hpp"
 #include <NitroModules/Promise.hpp>
 
 namespace margelo::nitro::video {
@@ -48,6 +54,8 @@ namespace margelo::nitro::video {
     public:
       // Properties
       virtual std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec> getSource() = 0;
+      virtual std::shared_ptr<margelo::nitro::video::HybridVideoPlayerEventEmitterSpec> getEventEmitter() = 0;
+      virtual VideoPlayerStatus getStatus() = 0;
       virtual double getDuration() = 0;
       virtual double getVolume() = 0;
       virtual void setVolume(double volume) = 0;

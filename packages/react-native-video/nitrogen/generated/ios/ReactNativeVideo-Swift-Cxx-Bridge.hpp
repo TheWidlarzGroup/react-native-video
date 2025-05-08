@@ -8,6 +8,12 @@
 #pragma once
 
 // Forward declarations of C++ defined types
+// Forward declaration of `BandwidthData` to properly resolve imports.
+namespace margelo::nitro::video { struct BandwidthData; }
+// Forward declaration of `ExternalSubtitle` to properly resolve imports.
+namespace margelo::nitro::video { struct ExternalSubtitle; }
+// Forward declaration of `HybridVideoPlayerEventEmitterSpec` to properly resolve imports.
+namespace margelo::nitro::video { class HybridVideoPlayerEventEmitterSpec; }
 // Forward declaration of `HybridVideoPlayerFactorySpec` to properly resolve imports.
 namespace margelo::nitro::video { class HybridVideoPlayerFactorySpec; }
 // Forward declaration of `HybridVideoPlayerSourceFactorySpec` to properly resolve imports.
@@ -20,12 +26,30 @@ namespace margelo::nitro::video { class HybridVideoPlayerSpec; }
 namespace margelo::nitro::video { class HybridVideoViewViewManagerFactorySpec; }
 // Forward declaration of `HybridVideoViewViewManagerSpec` to properly resolve imports.
 namespace margelo::nitro::video { class HybridVideoViewViewManagerSpec; }
+// Forward declaration of `SourceType` to properly resolve imports.
+namespace margelo::nitro::video { enum class SourceType; }
+// Forward declaration of `TimedMetadataObject` to properly resolve imports.
+namespace margelo::nitro::video { struct TimedMetadataObject; }
+// Forward declaration of `TimedMetadata` to properly resolve imports.
+namespace margelo::nitro::video { struct TimedMetadata; }
 // Forward declaration of `VideoInformation` to properly resolve imports.
 namespace margelo::nitro::video { struct VideoInformation; }
 // Forward declaration of `VideoOrientation` to properly resolve imports.
 namespace margelo::nitro::video { enum class VideoOrientation; }
+// Forward declaration of `VideoPlayerStatus` to properly resolve imports.
+namespace margelo::nitro::video { enum class VideoPlayerStatus; }
+// Forward declaration of `onLoadData` to properly resolve imports.
+namespace margelo::nitro::video { struct onLoadData; }
+// Forward declaration of `onLoadStartData` to properly resolve imports.
+namespace margelo::nitro::video { struct onLoadStartData; }
+// Forward declaration of `onPlaybackStateChangeData` to properly resolve imports.
+namespace margelo::nitro::video { struct onPlaybackStateChangeData; }
+// Forward declaration of `onProgressData` to properly resolve imports.
+namespace margelo::nitro::video { struct onProgressData; }
 
 // Forward declarations of Swift defined types
+// Forward declaration of `HybridVideoPlayerEventEmitterSpec_cxx` to properly resolve imports.
+namespace ReactNativeVideo { class HybridVideoPlayerEventEmitterSpec_cxx; }
 // Forward declaration of `HybridVideoPlayerFactorySpec_cxx` to properly resolve imports.
 namespace ReactNativeVideo { class HybridVideoPlayerFactorySpec_cxx; }
 // Forward declaration of `HybridVideoPlayerSourceFactorySpec_cxx` to properly resolve imports.
@@ -40,14 +64,25 @@ namespace ReactNativeVideo { class HybridVideoViewViewManagerFactorySpec_cxx; }
 namespace ReactNativeVideo { class HybridVideoViewViewManagerSpec_cxx; }
 
 // Include C++ defined types
+#include "BandwidthData.hpp"
+#include "ExternalSubtitle.hpp"
+#include "HybridVideoPlayerEventEmitterSpec.hpp"
 #include "HybridVideoPlayerFactorySpec.hpp"
 #include "HybridVideoPlayerSourceFactorySpec.hpp"
 #include "HybridVideoPlayerSourceSpec.hpp"
 #include "HybridVideoPlayerSpec.hpp"
 #include "HybridVideoViewViewManagerFactorySpec.hpp"
 #include "HybridVideoViewViewManagerSpec.hpp"
+#include "SourceType.hpp"
+#include "TimedMetadata.hpp"
+#include "TimedMetadataObject.hpp"
 #include "VideoInformation.hpp"
 #include "VideoOrientation.hpp"
+#include "VideoPlayerStatus.hpp"
+#include "onLoadData.hpp"
+#include "onLoadStartData.hpp"
+#include "onPlaybackStateChangeData.hpp"
+#include "onProgressData.hpp"
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/PromiseHolder.hpp>
 #include <NitroModules/Result.hpp>
@@ -55,6 +90,9 @@ namespace ReactNativeVideo { class HybridVideoViewViewManagerSpec_cxx; }
 #include <functional>
 #include <memory>
 #include <optional>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 /**
  * Contains specialized versions of C++ templated types so they can be accessed from Swift,
@@ -73,6 +111,18 @@ namespace margelo::nitro::video::bridge::swift {
   // pragma MARK: std::weak_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>
   using std__weak_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_ = std::weak_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>;
   inline std__weak_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_ weakify_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_(const std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>& strong) { return strong; }
+  
+  // pragma MARK: std::shared_ptr<margelo::nitro::video::HybridVideoPlayerEventEmitterSpec>
+  /**
+   * Specialized version of `std::shared_ptr<margelo::nitro::video::HybridVideoPlayerEventEmitterSpec>`.
+   */
+  using std__shared_ptr_margelo__nitro__video__HybridVideoPlayerEventEmitterSpec_ = std::shared_ptr<margelo::nitro::video::HybridVideoPlayerEventEmitterSpec>;
+  std::shared_ptr<margelo::nitro::video::HybridVideoPlayerEventEmitterSpec> create_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerEventEmitterSpec_(void* _Nonnull swiftUnsafePointer);
+  void* _Nonnull get_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerEventEmitterSpec_(std__shared_ptr_margelo__nitro__video__HybridVideoPlayerEventEmitterSpec_ cppType);
+  
+  // pragma MARK: std::weak_ptr<margelo::nitro::video::HybridVideoPlayerEventEmitterSpec>
+  using std__weak_ptr_margelo__nitro__video__HybridVideoPlayerEventEmitterSpec_ = std::weak_ptr<margelo::nitro::video::HybridVideoPlayerEventEmitterSpec>;
+  inline std__weak_ptr_margelo__nitro__video__HybridVideoPlayerEventEmitterSpec_ weakify_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerEventEmitterSpec_(const std::shared_ptr<margelo::nitro::video::HybridVideoPlayerEventEmitterSpec>& strong) { return strong; }
   
   // pragma MARK: std::shared_ptr<Promise<void>>
   /**
@@ -181,6 +231,308 @@ namespace margelo::nitro::video::bridge::swift {
     return Result<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>>::withError(error);
   }
   
+  // pragma MARK: std::function<void(bool /* hasAudioFocus */)>
+  /**
+   * Specialized version of `std::function<void(bool)>`.
+   */
+  using Func_void_bool = std::function<void(bool /* hasAudioFocus */)>;
+  /**
+   * Wrapper class for a `std::function<void(bool / * hasAudioFocus * /)>`, this can be used from Swift.
+   */
+  class Func_void_bool_Wrapper final {
+  public:
+    explicit Func_void_bool_Wrapper(std::function<void(bool /* hasAudioFocus */)>&& func): _function(std::make_shared<std::function<void(bool /* hasAudioFocus */)>>(std::move(func))) {}
+    inline void call(bool hasAudioFocus) const {
+      _function->operator()(hasAudioFocus);
+    }
+  private:
+    std::shared_ptr<std::function<void(bool /* hasAudioFocus */)>> _function;
+  };
+  Func_void_bool create_Func_void_bool(void* _Nonnull swiftClosureWrapper);
+  inline Func_void_bool_Wrapper wrap_Func_void_bool(Func_void_bool value) {
+    return Func_void_bool_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::optional<double>
+  /**
+   * Specialized version of `std::optional<double>`.
+   */
+  using std__optional_double_ = std::optional<double>;
+  inline std::optional<double> create_std__optional_double_(const double& value) {
+    return std::optional<double>(value);
+  }
+  
+  // pragma MARK: std::function<void(const BandwidthData& /* data */)>
+  /**
+   * Specialized version of `std::function<void(const BandwidthData&)>`.
+   */
+  using Func_void_BandwidthData = std::function<void(const BandwidthData& /* data */)>;
+  /**
+   * Wrapper class for a `std::function<void(const BandwidthData& / * data * /)>`, this can be used from Swift.
+   */
+  class Func_void_BandwidthData_Wrapper final {
+  public:
+    explicit Func_void_BandwidthData_Wrapper(std::function<void(const BandwidthData& /* data */)>&& func): _function(std::make_shared<std::function<void(const BandwidthData& /* data */)>>(std::move(func))) {}
+    inline void call(BandwidthData data) const {
+      _function->operator()(data);
+    }
+  private:
+    std::shared_ptr<std::function<void(const BandwidthData& /* data */)>> _function;
+  };
+  Func_void_BandwidthData create_Func_void_BandwidthData(void* _Nonnull swiftClosureWrapper);
+  inline Func_void_BandwidthData_Wrapper wrap_Func_void_BandwidthData(Func_void_BandwidthData value) {
+    return Func_void_BandwidthData_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::function<void(const onLoadData& /* data */)>
+  /**
+   * Specialized version of `std::function<void(const onLoadData&)>`.
+   */
+  using Func_void_onLoadData = std::function<void(const onLoadData& /* data */)>;
+  /**
+   * Wrapper class for a `std::function<void(const onLoadData& / * data * /)>`, this can be used from Swift.
+   */
+  class Func_void_onLoadData_Wrapper final {
+  public:
+    explicit Func_void_onLoadData_Wrapper(std::function<void(const onLoadData& /* data */)>&& func): _function(std::make_shared<std::function<void(const onLoadData& /* data */)>>(std::move(func))) {}
+    inline void call(onLoadData data) const {
+      _function->operator()(data);
+    }
+  private:
+    std::shared_ptr<std::function<void(const onLoadData& /* data */)>> _function;
+  };
+  Func_void_onLoadData create_Func_void_onLoadData(void* _Nonnull swiftClosureWrapper);
+  inline Func_void_onLoadData_Wrapper wrap_Func_void_onLoadData(Func_void_onLoadData value) {
+    return Func_void_onLoadData_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::function<void(const onLoadStartData& /* data */)>
+  /**
+   * Specialized version of `std::function<void(const onLoadStartData&)>`.
+   */
+  using Func_void_onLoadStartData = std::function<void(const onLoadStartData& /* data */)>;
+  /**
+   * Wrapper class for a `std::function<void(const onLoadStartData& / * data * /)>`, this can be used from Swift.
+   */
+  class Func_void_onLoadStartData_Wrapper final {
+  public:
+    explicit Func_void_onLoadStartData_Wrapper(std::function<void(const onLoadStartData& /* data */)>&& func): _function(std::make_shared<std::function<void(const onLoadStartData& /* data */)>>(std::move(func))) {}
+    inline void call(onLoadStartData data) const {
+      _function->operator()(data);
+    }
+  private:
+    std::shared_ptr<std::function<void(const onLoadStartData& /* data */)>> _function;
+  };
+  Func_void_onLoadStartData create_Func_void_onLoadStartData(void* _Nonnull swiftClosureWrapper);
+  inline Func_void_onLoadStartData_Wrapper wrap_Func_void_onLoadStartData(Func_void_onLoadStartData value) {
+    return Func_void_onLoadStartData_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::function<void(const onPlaybackStateChangeData& /* data */)>
+  /**
+   * Specialized version of `std::function<void(const onPlaybackStateChangeData&)>`.
+   */
+  using Func_void_onPlaybackStateChangeData = std::function<void(const onPlaybackStateChangeData& /* data */)>;
+  /**
+   * Wrapper class for a `std::function<void(const onPlaybackStateChangeData& / * data * /)>`, this can be used from Swift.
+   */
+  class Func_void_onPlaybackStateChangeData_Wrapper final {
+  public:
+    explicit Func_void_onPlaybackStateChangeData_Wrapper(std::function<void(const onPlaybackStateChangeData& /* data */)>&& func): _function(std::make_shared<std::function<void(const onPlaybackStateChangeData& /* data */)>>(std::move(func))) {}
+    inline void call(onPlaybackStateChangeData data) const {
+      _function->operator()(data);
+    }
+  private:
+    std::shared_ptr<std::function<void(const onPlaybackStateChangeData& /* data */)>> _function;
+  };
+  Func_void_onPlaybackStateChangeData create_Func_void_onPlaybackStateChangeData(void* _Nonnull swiftClosureWrapper);
+  inline Func_void_onPlaybackStateChangeData_Wrapper wrap_Func_void_onPlaybackStateChangeData(Func_void_onPlaybackStateChangeData value) {
+    return Func_void_onPlaybackStateChangeData_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::function<void(double /* rate */)>
+  /**
+   * Specialized version of `std::function<void(double)>`.
+   */
+  using Func_void_double = std::function<void(double /* rate */)>;
+  /**
+   * Wrapper class for a `std::function<void(double / * rate * /)>`, this can be used from Swift.
+   */
+  class Func_void_double_Wrapper final {
+  public:
+    explicit Func_void_double_Wrapper(std::function<void(double /* rate */)>&& func): _function(std::make_shared<std::function<void(double /* rate */)>>(std::move(func))) {}
+    inline void call(double rate) const {
+      _function->operator()(rate);
+    }
+  private:
+    std::shared_ptr<std::function<void(double /* rate */)>> _function;
+  };
+  Func_void_double create_Func_void_double(void* _Nonnull swiftClosureWrapper);
+  inline Func_void_double_Wrapper wrap_Func_void_double(Func_void_double value) {
+    return Func_void_double_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::function<void(const onProgressData& /* data */)>
+  /**
+   * Specialized version of `std::function<void(const onProgressData&)>`.
+   */
+  using Func_void_onProgressData = std::function<void(const onProgressData& /* data */)>;
+  /**
+   * Wrapper class for a `std::function<void(const onProgressData& / * data * /)>`, this can be used from Swift.
+   */
+  class Func_void_onProgressData_Wrapper final {
+  public:
+    explicit Func_void_onProgressData_Wrapper(std::function<void(const onProgressData& /* data */)>&& func): _function(std::make_shared<std::function<void(const onProgressData& /* data */)>>(std::move(func))) {}
+    inline void call(onProgressData data) const {
+      _function->operator()(data);
+    }
+  private:
+    std::shared_ptr<std::function<void(const onProgressData& /* data */)>> _function;
+  };
+  Func_void_onProgressData create_Func_void_onProgressData(void* _Nonnull swiftClosureWrapper);
+  inline Func_void_onProgressData_Wrapper wrap_Func_void_onProgressData(Func_void_onProgressData value) {
+    return Func_void_onProgressData_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::vector<TimedMetadataObject>
+  /**
+   * Specialized version of `std::vector<TimedMetadataObject>`.
+   */
+  using std__vector_TimedMetadataObject_ = std::vector<TimedMetadataObject>;
+  inline std::vector<TimedMetadataObject> create_std__vector_TimedMetadataObject_(size_t size) {
+    std::vector<TimedMetadataObject> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::function<void(const TimedMetadata& /* metadata */)>
+  /**
+   * Specialized version of `std::function<void(const TimedMetadata&)>`.
+   */
+  using Func_void_TimedMetadata = std::function<void(const TimedMetadata& /* metadata */)>;
+  /**
+   * Wrapper class for a `std::function<void(const TimedMetadata& / * metadata * /)>`, this can be used from Swift.
+   */
+  class Func_void_TimedMetadata_Wrapper final {
+  public:
+    explicit Func_void_TimedMetadata_Wrapper(std::function<void(const TimedMetadata& /* metadata */)>&& func): _function(std::make_shared<std::function<void(const TimedMetadata& /* metadata */)>>(std::move(func))) {}
+    inline void call(TimedMetadata metadata) const {
+      _function->operator()(metadata);
+    }
+  private:
+    std::shared_ptr<std::function<void(const TimedMetadata& /* metadata */)>> _function;
+  };
+  Func_void_TimedMetadata create_Func_void_TimedMetadata(void* _Nonnull swiftClosureWrapper);
+  inline Func_void_TimedMetadata_Wrapper wrap_Func_void_TimedMetadata(Func_void_TimedMetadata value) {
+    return Func_void_TimedMetadata_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::vector<std::string>
+  /**
+   * Specialized version of `std::vector<std::string>`.
+   */
+  using std__vector_std__string_ = std::vector<std::string>;
+  inline std::vector<std::string> create_std__vector_std__string_(size_t size) {
+    std::vector<std::string> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::function<void(const std::vector<std::string>& /* texts */)>
+  /**
+   * Specialized version of `std::function<void(const std::vector<std::string>&)>`.
+   */
+  using Func_void_std__vector_std__string_ = std::function<void(const std::vector<std::string>& /* texts */)>;
+  /**
+   * Wrapper class for a `std::function<void(const std::vector<std::string>& / * texts * /)>`, this can be used from Swift.
+   */
+  class Func_void_std__vector_std__string__Wrapper final {
+  public:
+    explicit Func_void_std__vector_std__string__Wrapper(std::function<void(const std::vector<std::string>& /* texts */)>&& func): _function(std::make_shared<std::function<void(const std::vector<std::string>& /* texts */)>>(std::move(func))) {}
+    inline void call(std::vector<std::string> texts) const {
+      _function->operator()(texts);
+    }
+  private:
+    std::shared_ptr<std::function<void(const std::vector<std::string>& /* texts */)>> _function;
+  };
+  Func_void_std__vector_std__string_ create_Func_void_std__vector_std__string_(void* _Nonnull swiftClosureWrapper);
+  inline Func_void_std__vector_std__string__Wrapper wrap_Func_void_std__vector_std__string_(Func_void_std__vector_std__string_ value) {
+    return Func_void_std__vector_std__string__Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::function<void(VideoPlayerStatus /* status */)>
+  /**
+   * Specialized version of `std::function<void(VideoPlayerStatus)>`.
+   */
+  using Func_void_VideoPlayerStatus = std::function<void(VideoPlayerStatus /* status */)>;
+  /**
+   * Wrapper class for a `std::function<void(VideoPlayerStatus / * status * /)>`, this can be used from Swift.
+   */
+  class Func_void_VideoPlayerStatus_Wrapper final {
+  public:
+    explicit Func_void_VideoPlayerStatus_Wrapper(std::function<void(VideoPlayerStatus /* status */)>&& func): _function(std::make_shared<std::function<void(VideoPlayerStatus /* status */)>>(std::move(func))) {}
+    inline void call(int status) const {
+      _function->operator()(static_cast<VideoPlayerStatus>(status));
+    }
+  private:
+    std::shared_ptr<std::function<void(VideoPlayerStatus /* status */)>> _function;
+  };
+  Func_void_VideoPlayerStatus create_Func_void_VideoPlayerStatus(void* _Nonnull swiftClosureWrapper);
+  inline Func_void_VideoPlayerStatus_Wrapper wrap_Func_void_VideoPlayerStatus(Func_void_VideoPlayerStatus value) {
+    return Func_void_VideoPlayerStatus_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::unordered_map<std::string, std::string>
+  /**
+   * Specialized version of `std::unordered_map<std::string, std::string>`.
+   */
+  using std__unordered_map_std__string__std__string_ = std::unordered_map<std::string, std::string>;
+  inline std::unordered_map<std::string, std::string> create_std__unordered_map_std__string__std__string_(size_t size) {
+    std::unordered_map<std::string, std::string> map;
+    map.reserve(size);
+    return map;
+  }
+  inline std::vector<std::string> get_std__unordered_map_std__string__std__string__keys(const std__unordered_map_std__string__std__string_& map) {
+    std::vector<std::string> keys;
+    keys.reserve(map.size());
+    for (const auto& entry : map) {
+      keys.push_back(entry.first);
+    }
+    return keys;
+  }
+  inline void emplace_std__unordered_map_std__string__std__string_(std__unordered_map_std__string__std__string_& map, const std::string& key, const std::string& value) {
+    map.emplace(key, value);
+  }
+  
+  // pragma MARK: std::optional<std::unordered_map<std::string, std::string>>
+  /**
+   * Specialized version of `std::optional<std::unordered_map<std::string, std::string>>`.
+   */
+  using std__optional_std__unordered_map_std__string__std__string__ = std::optional<std::unordered_map<std::string, std::string>>;
+  inline std::optional<std::unordered_map<std::string, std::string>> create_std__optional_std__unordered_map_std__string__std__string__(const std::unordered_map<std::string, std::string>& value) {
+    return std::optional<std::unordered_map<std::string, std::string>>(value);
+  }
+  
+  // pragma MARK: std::vector<ExternalSubtitle>
+  /**
+   * Specialized version of `std::vector<ExternalSubtitle>`.
+   */
+  using std__vector_ExternalSubtitle_ = std::vector<ExternalSubtitle>;
+  inline std::vector<ExternalSubtitle> create_std__vector_ExternalSubtitle_(size_t size) {
+    std::vector<ExternalSubtitle> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::optional<std::vector<ExternalSubtitle>>
+  /**
+   * Specialized version of `std::optional<std::vector<ExternalSubtitle>>`.
+   */
+  using std__optional_std__vector_ExternalSubtitle__ = std::optional<std::vector<ExternalSubtitle>>;
+  inline std::optional<std::vector<ExternalSubtitle>> create_std__optional_std__vector_ExternalSubtitle__(const std::vector<ExternalSubtitle>& value) {
+    return std::optional<std::vector<ExternalSubtitle>>(value);
+  }
+  
   // pragma MARK: std::shared_ptr<Promise<VideoInformation>>
   /**
    * Specialized version of `std::shared_ptr<Promise<VideoInformation>>`.
@@ -252,6 +604,33 @@ namespace margelo::nitro::video::bridge::swift {
   using std__optional_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSpec__ = std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>>;
   inline std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>> create_std__optional_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSpec__(const std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>& value) {
     return std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>>(value);
+  }
+  
+  // pragma MARK: std::optional<std::function<void(bool /* isInPictureInPicture */)>>
+  /**
+   * Specialized version of `std::optional<std::function<void(bool / * isInPictureInPicture * /)>>`.
+   */
+  using std__optional_std__function_void_bool____isInPictureInPicture______ = std::optional<std::function<void(bool /* isInPictureInPicture */)>>;
+  inline std::optional<std::function<void(bool /* isInPictureInPicture */)>> create_std__optional_std__function_void_bool____isInPictureInPicture______(const std::function<void(bool /* isInPictureInPicture */)>& value) {
+    return std::optional<std::function<void(bool /* isInPictureInPicture */)>>(value);
+  }
+  
+  // pragma MARK: std::optional<std::function<void(bool /* fullscreen */)>>
+  /**
+   * Specialized version of `std::optional<std::function<void(bool / * fullscreen * /)>>`.
+   */
+  using std__optional_std__function_void_bool____fullscreen______ = std::optional<std::function<void(bool /* fullscreen */)>>;
+  inline std::optional<std::function<void(bool /* fullscreen */)>> create_std__optional_std__function_void_bool____fullscreen______(const std::function<void(bool /* fullscreen */)>& value) {
+    return std::optional<std::function<void(bool /* fullscreen */)>>(value);
+  }
+  
+  // pragma MARK: std::optional<std::function<void()>>
+  /**
+   * Specialized version of `std::optional<std::function<void()>>`.
+   */
+  using std__optional_std__function_void____ = std::optional<std::function<void()>>;
+  inline std::optional<std::function<void()>> create_std__optional_std__function_void____(const std::function<void()>& value) {
+    return std::optional<std::function<void()>>(value);
   }
   
   // pragma MARK: std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerSpec>

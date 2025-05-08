@@ -46,6 +46,7 @@ namespace margelo::nitro::video {
       static const auto fieldPORTRAIT_UPSIDE_DOWN = clazz->getStaticField<JVideoOrientation>("PORTRAIT_UPSIDE_DOWN");
       static const auto fieldLANDSCAPE_LEFT = clazz->getStaticField<JVideoOrientation>("LANDSCAPE_LEFT");
       static const auto fieldLANDSCAPE_RIGHT = clazz->getStaticField<JVideoOrientation>("LANDSCAPE_RIGHT");
+      static const auto fieldSQUARE = clazz->getStaticField<JVideoOrientation>("SQUARE");
       static const auto fieldUNKNOWN = clazz->getStaticField<JVideoOrientation>("UNKNOWN");
       
       switch (value) {
@@ -59,6 +60,8 @@ namespace margelo::nitro::video {
           return clazz->getStaticFieldValue(fieldLANDSCAPE_LEFT);
         case VideoOrientation::LANDSCAPE_RIGHT:
           return clazz->getStaticFieldValue(fieldLANDSCAPE_RIGHT);
+        case VideoOrientation::SQUARE:
+          return clazz->getStaticFieldValue(fieldSQUARE);
         case VideoOrientation::UNKNOWN:
           return clazz->getStaticFieldValue(fieldUNKNOWN);
         default:

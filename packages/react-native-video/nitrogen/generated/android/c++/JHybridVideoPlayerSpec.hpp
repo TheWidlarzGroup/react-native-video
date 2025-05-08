@@ -48,6 +48,8 @@ namespace margelo::nitro::video {
   public:
     // Properties
     std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec> getSource() override;
+    std::shared_ptr<margelo::nitro::video::HybridVideoPlayerEventEmitterSpec> getEventEmitter() override;
+    VideoPlayerStatus getStatus() override;
     double getDuration() override;
     double getVolume() override;
     void setVolume(double volume) override;

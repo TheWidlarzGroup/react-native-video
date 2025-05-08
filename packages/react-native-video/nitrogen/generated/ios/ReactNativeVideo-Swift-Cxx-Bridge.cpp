@@ -8,6 +8,7 @@
 #include "ReactNativeVideo-Swift-Cxx-Bridge.hpp"
 
 // Include C++ implementation defined types
+#include "HybridVideoPlayerEventEmitterSpecSwift.hpp"
 #include "HybridVideoPlayerFactorySpecSwift.hpp"
 #include "HybridVideoPlayerSourceFactorySpecSwift.hpp"
 #include "HybridVideoPlayerSourceSpecSwift.hpp"
@@ -31,6 +32,22 @@ namespace margelo::nitro::video::bridge::swift {
     }
   #endif
     ReactNativeVideo::HybridVideoPlayerSourceSpec_cxx& swiftPart = swiftWrapper->getSwiftPart();
+    return swiftPart.toUnsafe();
+  }
+  
+  // pragma MARK: std::shared_ptr<margelo::nitro::video::HybridVideoPlayerEventEmitterSpec>
+  std::shared_ptr<margelo::nitro::video::HybridVideoPlayerEventEmitterSpec> create_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerEventEmitterSpec_(void* _Nonnull swiftUnsafePointer) {
+    ReactNativeVideo::HybridVideoPlayerEventEmitterSpec_cxx swiftPart = ReactNativeVideo::HybridVideoPlayerEventEmitterSpec_cxx::fromUnsafe(swiftUnsafePointer);
+    return std::make_shared<margelo::nitro::video::HybridVideoPlayerEventEmitterSpecSwift>(swiftPart);
+  }
+  void* _Nonnull get_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerEventEmitterSpec_(std__shared_ptr_margelo__nitro__video__HybridVideoPlayerEventEmitterSpec_ cppType) {
+    std::shared_ptr<margelo::nitro::video::HybridVideoPlayerEventEmitterSpecSwift> swiftWrapper = std::dynamic_pointer_cast<margelo::nitro::video::HybridVideoPlayerEventEmitterSpecSwift>(cppType);
+  #ifdef NITRO_DEBUG
+    if (swiftWrapper == nullptr) [[unlikely]] {
+      throw std::runtime_error("Class \"HybridVideoPlayerEventEmitterSpec\" is not implemented in Swift!");
+    }
+  #endif
+    ReactNativeVideo::HybridVideoPlayerEventEmitterSpec_cxx& swiftPart = swiftWrapper->getSwiftPart();
     return swiftPart.toUnsafe();
   }
   
@@ -80,6 +97,86 @@ namespace margelo::nitro::video::bridge::swift {
   #endif
     ReactNativeVideo::HybridVideoPlayerFactorySpec_cxx& swiftPart = swiftWrapper->getSwiftPart();
     return swiftPart.toUnsafe();
+  }
+  
+  // pragma MARK: std::function<void(bool /* hasAudioFocus */)>
+  Func_void_bool create_Func_void_bool(void* _Nonnull swiftClosureWrapper) {
+    auto swiftClosure = ReactNativeVideo::Func_void_bool::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](bool hasAudioFocus) mutable -> void {
+      swiftClosure.call(hasAudioFocus);
+    };
+  }
+  
+  // pragma MARK: std::function<void(const BandwidthData& /* data */)>
+  Func_void_BandwidthData create_Func_void_BandwidthData(void* _Nonnull swiftClosureWrapper) {
+    auto swiftClosure = ReactNativeVideo::Func_void_BandwidthData::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const BandwidthData& data) mutable -> void {
+      swiftClosure.call(data);
+    };
+  }
+  
+  // pragma MARK: std::function<void(const onLoadData& /* data */)>
+  Func_void_onLoadData create_Func_void_onLoadData(void* _Nonnull swiftClosureWrapper) {
+    auto swiftClosure = ReactNativeVideo::Func_void_onLoadData::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const onLoadData& data) mutable -> void {
+      swiftClosure.call(data);
+    };
+  }
+  
+  // pragma MARK: std::function<void(const onLoadStartData& /* data */)>
+  Func_void_onLoadStartData create_Func_void_onLoadStartData(void* _Nonnull swiftClosureWrapper) {
+    auto swiftClosure = ReactNativeVideo::Func_void_onLoadStartData::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const onLoadStartData& data) mutable -> void {
+      swiftClosure.call(data);
+    };
+  }
+  
+  // pragma MARK: std::function<void(const onPlaybackStateChangeData& /* data */)>
+  Func_void_onPlaybackStateChangeData create_Func_void_onPlaybackStateChangeData(void* _Nonnull swiftClosureWrapper) {
+    auto swiftClosure = ReactNativeVideo::Func_void_onPlaybackStateChangeData::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const onPlaybackStateChangeData& data) mutable -> void {
+      swiftClosure.call(data);
+    };
+  }
+  
+  // pragma MARK: std::function<void(double /* rate */)>
+  Func_void_double create_Func_void_double(void* _Nonnull swiftClosureWrapper) {
+    auto swiftClosure = ReactNativeVideo::Func_void_double::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](double rate) mutable -> void {
+      swiftClosure.call(rate);
+    };
+  }
+  
+  // pragma MARK: std::function<void(const onProgressData& /* data */)>
+  Func_void_onProgressData create_Func_void_onProgressData(void* _Nonnull swiftClosureWrapper) {
+    auto swiftClosure = ReactNativeVideo::Func_void_onProgressData::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const onProgressData& data) mutable -> void {
+      swiftClosure.call(data);
+    };
+  }
+  
+  // pragma MARK: std::function<void(const TimedMetadata& /* metadata */)>
+  Func_void_TimedMetadata create_Func_void_TimedMetadata(void* _Nonnull swiftClosureWrapper) {
+    auto swiftClosure = ReactNativeVideo::Func_void_TimedMetadata::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const TimedMetadata& metadata) mutable -> void {
+      swiftClosure.call(metadata);
+    };
+  }
+  
+  // pragma MARK: std::function<void(const std::vector<std::string>& /* texts */)>
+  Func_void_std__vector_std__string_ create_Func_void_std__vector_std__string_(void* _Nonnull swiftClosureWrapper) {
+    auto swiftClosure = ReactNativeVideo::Func_void_std__vector_std__string_::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const std::vector<std::string>& texts) mutable -> void {
+      swiftClosure.call(texts);
+    };
+  }
+  
+  // pragma MARK: std::function<void(VideoPlayerStatus /* status */)>
+  Func_void_VideoPlayerStatus create_Func_void_VideoPlayerStatus(void* _Nonnull swiftClosureWrapper) {
+    auto swiftClosure = ReactNativeVideo::Func_void_VideoPlayerStatus::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](VideoPlayerStatus status) mutable -> void {
+      swiftClosure.call(static_cast<int>(status));
+    };
   }
   
   // pragma MARK: std::function<void(const VideoInformation& /* result */)>

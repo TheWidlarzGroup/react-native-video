@@ -1,6 +1,7 @@
 import * as React from 'react';
 import type { ViewStyle } from 'react-native';
 import { NitroModules } from 'react-native-nitro-modules';
+import type { VideoViewEvents } from './core/types/Events';
 import { tryParseNativeVideoError, VideoError } from './core/types/VideoError';
 import type { VideoPlayer } from './core/VideoPlayer';
 import { NativeVideoView } from './NativeVideoView';
@@ -9,7 +10,7 @@ import type {
   VideoViewViewManagerFactory,
 } from './spec/nitro/VideoViewViewManager.nitro';
 
-interface VideoViewProps {
+interface VideoViewProps extends Partial<VideoViewEvents> {
   /**
    * The player to play the video - {@link VideoPlayer}
    */
@@ -77,6 +78,19 @@ const wrapNativeViewManagerFunction = <T,>(
   }
 };
 
+const updateProps = (manager: VideoViewViewManager, props: VideoViewProps) => {
+  manager.player = props.player.__getNativePlayer();
+  manager.controls = props.controls ?? false;
+  manager.pictureInPicture = props.pictureInPicture ?? false;
+  manager.autoEnterPictureInPicture = props.autoEnterPictureInPicture ?? false;
+  manager.onPictureInPictureChange = props.onPictureInPictureChange;
+  manager.onFullscreenChange = props.onFullscreenChange;
+  manager.willEnterFullscreen = props.willEnterFullscreen;
+  manager.willExitFullscreen = props.willExitFullscreen;
+  manager.willEnterPictureInPicture = props.willEnterPictureInPicture;
+  manager.willExitPictureInPicture = props.willExitPictureInPicture;
+};
+
 /**
  * VideoView is a component that allows you to display a video from a {@link VideoPlayer}.
  * @param player - The player to play the video - {@link VideoPlayer}
@@ -119,16 +133,18 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
           }
 
           // Updates props to native view
-          nitroViewManager.current.player = player.__getNativePlayer();
-          nitroViewManager.current.controls = controls;
-          nitroViewManager.current.pictureInPicture = pictureInPicture;
-          nitroViewManager.current.autoEnterPictureInPicture =
-            autoEnterPictureInPicture;
+          updateProps(nitroViewManager.current, {
+            ...props,
+            player: player,
+            controls: controls,
+            pictureInPicture: pictureInPicture,
+            autoEnterPictureInPicture: autoEnterPictureInPicture,
+          });
         } catch (error) {
           throw tryParseNativeVideoError(error);
         }
       },
-      [player, controls, pictureInPicture, autoEnterPictureInPicture]
+      [props, player, controls, pictureInPicture, autoEnterPictureInPicture]
     );
 
     const onNitroIdChange = React.useCallback(
@@ -178,12 +194,15 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
         return;
       }
 
-      nitroViewManager.current.player = player.__getNativePlayer();
-      nitroViewManager.current.controls = controls;
-      nitroViewManager.current.pictureInPicture = pictureInPicture;
-      nitroViewManager.current.autoEnterPictureInPicture =
-        autoEnterPictureInPicture;
-    }, [player, controls, pictureInPicture, autoEnterPictureInPicture]);
+      // Updates props to native view
+      updateProps(nitroViewManager.current, {
+        ...props,
+        player: player,
+        controls: controls,
+        pictureInPicture: pictureInPicture,
+        autoEnterPictureInPicture: autoEnterPictureInPicture,
+      });
+    }, [player, controls, pictureInPicture, autoEnterPictureInPicture, props]);
 
     return (
       <NativeVideoView
@@ -195,4 +214,4 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
   }
 );
 
-export default VideoView;
+export default React.memo(VideoView);

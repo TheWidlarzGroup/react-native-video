@@ -7,16 +7,22 @@ import {
   VideoRuntimeError,
 } from './types/VideoError';
 import type { VideoPlayerBase } from './types/VideoPlayerBase';
+import type { VideoPlayerStatus } from './types/VideoPlayerStatus';
 import { createPlayer } from './utils/playerFactory';
 import { createSource } from './utils/sourceFactory';
+import { VideoPlayerEvents } from './VideoPlayerEvents';
 
-class VideoPlayer implements VideoPlayerBase {
+class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   protected player: VideoPlayerImpl;
 
   public onError?: (error: VideoRuntimeError) => void = undefined;
 
   constructor(source: VideoSource | VideoConfig | VideoPlayerSource) {
-    this.player = createPlayer(createSource(source));
+    const player = createPlayer(createSource(source));
+
+    // Initialize events
+    super(player.eventEmitter);
+    this.player = player;
   }
 
   /**
@@ -25,6 +31,7 @@ class VideoPlayer implements VideoPlayerBase {
    * @internal
    */
   __destroy() {
+    this.clearAllEvents();
     this.player.dispose();
   }
 
@@ -71,6 +78,11 @@ class VideoPlayer implements VideoPlayerBase {
   // Source
   get source(): VideoPlayerSource {
     return this.player.source;
+  }
+
+  // Status
+  get status(): VideoPlayerStatus {
+    return this.player.status;
   }
 
   // Duration

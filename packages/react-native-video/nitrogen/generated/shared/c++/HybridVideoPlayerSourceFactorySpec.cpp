@@ -15,6 +15,7 @@ namespace margelo::nitro::video {
     // load custom methods/properties
     registerHybrids(this, [](Prototype& prototype) {
       prototype.registerHybridMethod("fromUri", &HybridVideoPlayerSourceFactorySpec::fromUri);
+      prototype.registerHybridMethod("fromVideoConfig", &HybridVideoPlayerSourceFactorySpec::fromVideoConfig);
     });
   }
 

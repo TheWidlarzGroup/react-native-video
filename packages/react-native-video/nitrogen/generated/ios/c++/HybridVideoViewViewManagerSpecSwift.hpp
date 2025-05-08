@@ -18,6 +18,7 @@ namespace margelo::nitro::video { class HybridVideoPlayerSpec; }
 #include <optional>
 #include <memory>
 #include "HybridVideoPlayerSpec.hpp"
+#include <functional>
 
 #include "ReactNativeVideo-Swift-Cxx-Umbrella.hpp"
 
@@ -78,6 +79,48 @@ namespace margelo::nitro::video {
     }
     inline void setAutoEnterPictureInPicture(bool autoEnterPictureInPicture) noexcept override {
       _swiftPart.setAutoEnterPictureInPicture(std::forward<decltype(autoEnterPictureInPicture)>(autoEnterPictureInPicture));
+    }
+    inline std::optional<std::function<void(bool /* isInPictureInPicture */)>> getOnPictureInPictureChange() noexcept override {
+      auto __result = _swiftPart.getOnPictureInPictureChange();
+      return __result;
+    }
+    inline void setOnPictureInPictureChange(const std::optional<std::function<void(bool /* isInPictureInPicture */)>>& onPictureInPictureChange) noexcept override {
+      _swiftPart.setOnPictureInPictureChange(onPictureInPictureChange);
+    }
+    inline std::optional<std::function<void(bool /* fullscreen */)>> getOnFullscreenChange() noexcept override {
+      auto __result = _swiftPart.getOnFullscreenChange();
+      return __result;
+    }
+    inline void setOnFullscreenChange(const std::optional<std::function<void(bool /* fullscreen */)>>& onFullscreenChange) noexcept override {
+      _swiftPart.setOnFullscreenChange(onFullscreenChange);
+    }
+    inline std::optional<std::function<void()>> getWillEnterFullscreen() noexcept override {
+      auto __result = _swiftPart.getWillEnterFullscreen();
+      return __result;
+    }
+    inline void setWillEnterFullscreen(const std::optional<std::function<void()>>& willEnterFullscreen) noexcept override {
+      _swiftPart.setWillEnterFullscreen(willEnterFullscreen);
+    }
+    inline std::optional<std::function<void()>> getWillExitFullscreen() noexcept override {
+      auto __result = _swiftPart.getWillExitFullscreen();
+      return __result;
+    }
+    inline void setWillExitFullscreen(const std::optional<std::function<void()>>& willExitFullscreen) noexcept override {
+      _swiftPart.setWillExitFullscreen(willExitFullscreen);
+    }
+    inline std::optional<std::function<void()>> getWillEnterPictureInPicture() noexcept override {
+      auto __result = _swiftPart.getWillEnterPictureInPicture();
+      return __result;
+    }
+    inline void setWillEnterPictureInPicture(const std::optional<std::function<void()>>& willEnterPictureInPicture) noexcept override {
+      _swiftPart.setWillEnterPictureInPicture(willEnterPictureInPicture);
+    }
+    inline std::optional<std::function<void()>> getWillExitPictureInPicture() noexcept override {
+      auto __result = _swiftPart.getWillExitPictureInPicture();
+      return __result;
+    }
+    inline void setWillExitPictureInPicture(const std::optional<std::function<void()>>& willExitPictureInPicture) noexcept override {
+      _swiftPart.setWillExitPictureInPicture(willExitPictureInPicture);
     }
 
   public:

@@ -43,6 +43,10 @@ abstract class HybridVideoPlayerSourceFactorySpec: HybridObject() {
   @DoNotStrip
   @Keep
   abstract fun fromUri(uri: String): HybridVideoPlayerSourceSpec
+  
+  @DoNotStrip
+  @Keep
+  abstract fun fromVideoConfig(config: NativeVideoConfig): HybridVideoPlayerSourceSpec
 
   private external fun initHybrid(): HybridData
 

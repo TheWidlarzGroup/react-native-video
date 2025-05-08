@@ -40,6 +40,10 @@ abstract class HybridVideoPlayerSourceSpec: HybridObject() {
   @get:DoNotStrip
   @get:Keep
   abstract val uri: String
+  
+  @get:DoNotStrip
+  @get:Keep
+  abstract val config: NativeVideoConfig
 
   // Methods
   @DoNotStrip

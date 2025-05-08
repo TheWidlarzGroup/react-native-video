@@ -8,6 +8,12 @@
 #pragma once
 
 // Forward declarations of C++ defined types
+// Forward declaration of `BandwidthData` to properly resolve imports.
+namespace margelo::nitro::video { struct BandwidthData; }
+// Forward declaration of `ExternalSubtitle` to properly resolve imports.
+namespace margelo::nitro::video { struct ExternalSubtitle; }
+// Forward declaration of `HybridVideoPlayerEventEmitterSpec` to properly resolve imports.
+namespace margelo::nitro::video { class HybridVideoPlayerEventEmitterSpec; }
 // Forward declaration of `HybridVideoPlayerFactorySpec` to properly resolve imports.
 namespace margelo::nitro::video { class HybridVideoPlayerFactorySpec; }
 // Forward declaration of `HybridVideoPlayerSourceFactorySpec` to properly resolve imports.
@@ -20,26 +26,59 @@ namespace margelo::nitro::video { class HybridVideoPlayerSpec; }
 namespace margelo::nitro::video { class HybridVideoViewViewManagerFactorySpec; }
 // Forward declaration of `HybridVideoViewViewManagerSpec` to properly resolve imports.
 namespace margelo::nitro::video { class HybridVideoViewViewManagerSpec; }
+// Forward declaration of `NativeVideoConfig` to properly resolve imports.
+namespace margelo::nitro::video { struct NativeVideoConfig; }
+// Forward declaration of `SourceType` to properly resolve imports.
+namespace margelo::nitro::video { enum class SourceType; }
+// Forward declaration of `TimedMetadataObject` to properly resolve imports.
+namespace margelo::nitro::video { struct TimedMetadataObject; }
+// Forward declaration of `TimedMetadata` to properly resolve imports.
+namespace margelo::nitro::video { struct TimedMetadata; }
 // Forward declaration of `VideoInformation` to properly resolve imports.
 namespace margelo::nitro::video { struct VideoInformation; }
 // Forward declaration of `VideoOrientation` to properly resolve imports.
 namespace margelo::nitro::video { enum class VideoOrientation; }
+// Forward declaration of `VideoPlayerStatus` to properly resolve imports.
+namespace margelo::nitro::video { enum class VideoPlayerStatus; }
+// Forward declaration of `onLoadData` to properly resolve imports.
+namespace margelo::nitro::video { struct onLoadData; }
+// Forward declaration of `onLoadStartData` to properly resolve imports.
+namespace margelo::nitro::video { struct onLoadStartData; }
+// Forward declaration of `onPlaybackStateChangeData` to properly resolve imports.
+namespace margelo::nitro::video { struct onPlaybackStateChangeData; }
+// Forward declaration of `onProgressData` to properly resolve imports.
+namespace margelo::nitro::video { struct onProgressData; }
 
 // Include C++ defined types
+#include "BandwidthData.hpp"
+#include "ExternalSubtitle.hpp"
+#include "HybridVideoPlayerEventEmitterSpec.hpp"
 #include "HybridVideoPlayerFactorySpec.hpp"
 #include "HybridVideoPlayerSourceFactorySpec.hpp"
 #include "HybridVideoPlayerSourceSpec.hpp"
 #include "HybridVideoPlayerSpec.hpp"
 #include "HybridVideoViewViewManagerFactorySpec.hpp"
 #include "HybridVideoViewViewManagerSpec.hpp"
+#include "NativeVideoConfig.hpp"
+#include "SourceType.hpp"
+#include "TimedMetadata.hpp"
+#include "TimedMetadataObject.hpp"
 #include "VideoInformation.hpp"
 #include "VideoOrientation.hpp"
+#include "VideoPlayerStatus.hpp"
+#include "onLoadData.hpp"
+#include "onLoadStartData.hpp"
+#include "onPlaybackStateChangeData.hpp"
+#include "onProgressData.hpp"
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/Result.hpp>
 #include <exception>
+#include <functional>
 #include <memory>
 #include <optional>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 // C++ helpers for Swift
 #include "ReactNativeVideo-Swift-Cxx-Bridge.hpp"
@@ -50,6 +89,8 @@ namespace margelo::nitro::video { enum class VideoOrientation; }
 #include <NitroModules/RuntimeError.hpp>
 
 // Forward declarations of Swift defined types
+// Forward declaration of `HybridVideoPlayerEventEmitterSpec_cxx` to properly resolve imports.
+namespace ReactNativeVideo { class HybridVideoPlayerEventEmitterSpec_cxx; }
 // Forward declaration of `HybridVideoPlayerFactorySpec_cxx` to properly resolve imports.
 namespace ReactNativeVideo { class HybridVideoPlayerFactorySpec_cxx; }
 // Forward declaration of `HybridVideoPlayerSourceFactorySpec_cxx` to properly resolve imports.

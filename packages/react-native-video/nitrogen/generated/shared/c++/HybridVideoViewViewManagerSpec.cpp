@@ -22,6 +22,18 @@ namespace margelo::nitro::video {
       prototype.registerHybridSetter("pictureInPicture", &HybridVideoViewViewManagerSpec::setPictureInPicture);
       prototype.registerHybridGetter("autoEnterPictureInPicture", &HybridVideoViewViewManagerSpec::getAutoEnterPictureInPicture);
       prototype.registerHybridSetter("autoEnterPictureInPicture", &HybridVideoViewViewManagerSpec::setAutoEnterPictureInPicture);
+      prototype.registerHybridGetter("onPictureInPictureChange", &HybridVideoViewViewManagerSpec::getOnPictureInPictureChange);
+      prototype.registerHybridSetter("onPictureInPictureChange", &HybridVideoViewViewManagerSpec::setOnPictureInPictureChange);
+      prototype.registerHybridGetter("onFullscreenChange", &HybridVideoViewViewManagerSpec::getOnFullscreenChange);
+      prototype.registerHybridSetter("onFullscreenChange", &HybridVideoViewViewManagerSpec::setOnFullscreenChange);
+      prototype.registerHybridGetter("willEnterFullscreen", &HybridVideoViewViewManagerSpec::getWillEnterFullscreen);
+      prototype.registerHybridSetter("willEnterFullscreen", &HybridVideoViewViewManagerSpec::setWillEnterFullscreen);
+      prototype.registerHybridGetter("willExitFullscreen", &HybridVideoViewViewManagerSpec::getWillExitFullscreen);
+      prototype.registerHybridSetter("willExitFullscreen", &HybridVideoViewViewManagerSpec::setWillExitFullscreen);
+      prototype.registerHybridGetter("willEnterPictureInPicture", &HybridVideoViewViewManagerSpec::getWillEnterPictureInPicture);
+      prototype.registerHybridSetter("willEnterPictureInPicture", &HybridVideoViewViewManagerSpec::setWillEnterPictureInPicture);
+      prototype.registerHybridGetter("willExitPictureInPicture", &HybridVideoViewViewManagerSpec::getWillExitPictureInPicture);
+      prototype.registerHybridSetter("willExitPictureInPicture", &HybridVideoViewViewManagerSpec::setWillExitPictureInPicture);
       prototype.registerHybridMethod("enterFullscreen", &HybridVideoViewViewManagerSpec::enterFullscreen);
       prototype.registerHybridMethod("exitFullscreen", &HybridVideoViewViewManagerSpec::exitFullscreen);
       prototype.registerHybridMethod("enterPictureInPicture", &HybridVideoViewViewManagerSpec::enterPictureInPicture);

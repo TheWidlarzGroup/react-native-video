@@ -4,7 +4,11 @@ import type {
   VideoPlayerSource,
   VideoPlayerSourceFactory,
 } from '../../spec/nitro/VideoPlayerSource.nitro';
-import type { VideoConfig, VideoSource } from '../types/VideoConfig';
+import type {
+  NativeVideoConfig,
+  VideoConfig,
+  VideoSource,
+} from '../types/VideoConfig';
 
 const VideoPlayerSourceFactory =
   NitroModules.createHybridObject<VideoPlayerSourceFactory>(
@@ -22,6 +26,10 @@ export const isVideoPlayerSource = (obj: any): obj is VideoPlayerSource => {
 
 export const createSourceFromUri = (uri: string) => {
   return VideoPlayerSourceFactory.fromUri(uri);
+};
+
+export const createSourceFromVideoConfig = (config: NativeVideoConfig) => {
+  return VideoPlayerSourceFactory.fromVideoConfig(config);
 };
 
 export const createSource = (
@@ -44,7 +52,18 @@ export const createSource = (
 
   // If source is an object (VideoConfig)
   if (typeof source === 'object' && 'uri' in source) {
-    return createSource(source.uri);
+    if (typeof source.uri === 'string') {
+      return createSourceFromVideoConfig(source as NativeVideoConfig);
+    }
+
+    if (typeof source.uri === 'number') {
+      const nativeConfig = {
+        ...source,
+        uri: Image.resolveAssetSource(source.uri).uri,
+      } satisfies NativeVideoConfig;
+
+      return createSourceFromVideoConfig(nativeConfig);
+    }
   }
 
   throw new Error('RNV: Invalid source type');

@@ -1,4 +1,5 @@
 import type { HybridObject } from 'react-native-nitro-modules';
+import type { NativeVideoConfig } from '../../core/types/VideoConfig';
 import type { VideoPlayerSourceBase } from '../../core/types/VideoPlayerSourceBase';
 
 /**
@@ -13,4 +14,5 @@ export interface VideoPlayerSource
 export interface VideoPlayerSourceFactory
   extends HybridObject<{ ios: 'swift'; android: 'kotlin' }> {
   fromUri(uri: string): VideoPlayerSource;
+  fromVideoConfig(config: NativeVideoConfig): VideoPlayerSource;
 }

@@ -103,6 +103,13 @@ public class HybridVideoPlayerSourceSpec_cxx {
       return std.string(self.__implementation.uri)
     }
   }
+  
+  public final var config: NativeVideoConfig {
+    @inline(__always)
+    get {
+      return self.__implementation.config
+    }
+  }
 
   // Methods
   @inline(__always)

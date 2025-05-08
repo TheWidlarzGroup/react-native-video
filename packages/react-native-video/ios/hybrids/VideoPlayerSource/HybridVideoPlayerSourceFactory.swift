@@ -8,7 +8,12 @@
 import Foundation
 
 class HybridVideoPlayerSourceFactory: HybridVideoPlayerSourceFactorySpec {
+  func fromVideoConfig(config: NativeVideoConfig) throws -> any HybridVideoPlayerSourceSpec {
+    return try HybridVideoPlayerSource(config: config)
+  }
+  
   func fromUri(uri: String) throws -> HybridVideoPlayerSourceSpec {
-    return try HybridVideoPlayerSource(uri: uri)
+    let config = NativeVideoConfig(uri: uri, headers: nil, externalSubtitles: nil)
+    return try HybridVideoPlayerSource(config: config)
   }
 }

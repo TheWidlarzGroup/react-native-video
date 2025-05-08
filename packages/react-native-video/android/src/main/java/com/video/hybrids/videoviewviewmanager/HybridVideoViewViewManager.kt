@@ -12,7 +12,7 @@ import com.video.core.utils.Threading
 
 @DoNotStrip
 @OptIn(UnstableApi::class)
-class HybridVideoViewViewManager(nitroId: Int): HybridVideoViewViewManagerSpec() {
+class HybridVideoViewViewManager(nitroId: Int): HybridVideoViewViewManagerSpec(), VideoViewEvents {
   private var videoView =
     VideoManager.getVideoViewWeakReferenceByNitroId(nitroId) ?: throw VideoViewError.ViewNotFound(nitroId)
 
@@ -68,6 +68,47 @@ class HybridVideoViewViewManager(nitroId: Int): HybridVideoViewViewManagerSpec()
       videoView.get()?.useController = value
     }
 
+  // View callbacks
+  override var onPictureInPictureChange: ((Boolean) -> Unit)?
+    set(value) {
+      field = value
+      videoView.get()?.events?.onPictureInPictureChange = value
+    }
+  override var onFullscreenChange: ((Boolean) -> Unit)?
+    set(value) {
+      field = value
+      videoView.get()?.events?.onFullscreenChange = value
+    }
+  override var willEnterFullscreen: (() -> Unit)?
+    set(value) {
+      field = value
+      videoView.get()?.events?.willEnterFullscreen = value
+    }
+  override var willExitFullscreen: (() -> Unit)?
+    set(value) {
+      field = value
+      videoView.get()?.events?.willExitFullscreen = value
+    }
+  override var willEnterPictureInPicture: (() -> Unit)?
+    set(value) {
+      field = value
+      videoView.get()?.events?.willEnterPictureInPicture = value
+    }
+  override var willExitPictureInPicture: (() -> Unit)?
+    set(value) {
+      field = value
+      videoView.get()?.events?.willExitPictureInPicture = value
+    }
+
   override val memorySize: Long
     get() = 0
+}
+
+interface VideoViewEvents {
+  var onPictureInPictureChange: ((Boolean) -> Unit)?
+  var onFullscreenChange: ((Boolean) -> Unit)?
+  var willEnterFullscreen: (() -> Unit)?
+  var willExitFullscreen: (() -> Unit)?
+  var willEnterPictureInPicture: (() -> Unit)?
+  var willExitPictureInPicture: (() -> Unit)?
 }

@@ -1,4 +1,5 @@
 import type { VideoPlayerSourceBase } from './VideoPlayerSourceBase';
+import type { VideoPlayerStatus } from './VideoPlayerStatus';
 
 export interface VideoPlayerBase {
   /**
@@ -7,6 +8,15 @@ export interface VideoPlayerBase {
    * see {@link VideoPlayerSourceBase}
    */
   readonly source: VideoPlayerSourceBase;
+
+  /**
+   * The status of the player.
+   * @param idle - The player is idle (source is not loaded)
+   * @param loading - The player is loading.
+   * @param readyToPlay - The player is ready to play (source is loaded).
+   * @param error - The player has an error.
+   */
+  readonly status: VideoPlayerStatus;
 
   /**
    * The current time of the video in seconds (1.0 = 1 sec).

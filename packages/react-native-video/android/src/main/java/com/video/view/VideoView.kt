@@ -18,6 +18,7 @@ import androidx.media3.ui.PlayerView
 import com.facebook.react.bridge.ReactApplicationContext
 import com.margelo.nitro.NitroModules
 import com.margelo.nitro.video.HybridVideoPlayer
+import com.margelo.nitro.video.VideoViewEvents
 import com.video.core.LibraryError
 import com.video.core.VideoManager
 import com.video.core.VideoViewError
@@ -79,14 +80,32 @@ class VideoView @JvmOverloads constructor(
 
   var pictureInPictureEnabled: Boolean = false
 
+  var events = object : VideoViewEvents {
+    override var onPictureInPictureChange: ((Boolean) -> Unit)? = {}
+    override var onFullscreenChange: ((Boolean) -> Unit)? = {}
+    override var willEnterFullscreen: (() -> Unit)? = {}
+    override var willExitFullscreen: (() -> Unit)? = {}
+    override var willEnterPictureInPicture: (() -> Unit)? = {}
+    override var willExitPictureInPicture: (() -> Unit)? = {}
+  }
+
   var onNitroIdChange: ((Int?) -> Unit)? = null
   var playerView = PlayerView(context).apply {
     layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
     setShutterBackgroundColor(Color.TRANSPARENT)
+    setShowSubtitleButton(true)
     useController = false
   }
   var isInFullscreen: Boolean = false
+    set(value) {
+      field = value
+      events.onFullscreenChange?.let { it(value) }
+    }
   var isInPictureInPicture: Boolean = false
+    set(value) {
+      field = value
+      events.onPictureInPictureChange?.let { it(value) }
+    }
   private var rootContentViews: List<View> = listOf()
   private var pictureInPictureHelperTag: String? = null
 
@@ -229,6 +248,8 @@ class VideoView @JvmOverloads constructor(
 
     val currentActivity = applicationContent.currentActivity ?: return
 
+    events.willEnterPictureInPicture?.let { it() }
+
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       val params = createPictureInPictureParams(this)
       currentActivity.enterPictureInPictureMode(params)
@@ -244,7 +265,7 @@ class VideoView @JvmOverloads constructor(
     if (!isInPictureInPicture || isInFullscreen) {
       return
     }
-
+    events.willExitPictureInPicture?.let { it() }
     restoreRootContentViews()
     isInPictureInPicture = false
   }

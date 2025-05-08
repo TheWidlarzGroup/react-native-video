@@ -15,6 +15,7 @@ public protocol HybridVideoPlayerSourceFactorySpec_protocol: HybridObject {
 
   // Methods
   func fromUri(uri: String) throws -> (any HybridVideoPlayerSourceSpec)
+  func fromVideoConfig(config: NativeVideoConfig) throws -> (any HybridVideoPlayerSourceSpec)
 }
 
 /// See ``HybridVideoPlayerSourceFactorySpec``

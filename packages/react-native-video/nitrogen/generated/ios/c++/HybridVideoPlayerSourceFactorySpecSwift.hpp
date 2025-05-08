@@ -14,10 +14,19 @@ namespace ReactNativeVideo { class HybridVideoPlayerSourceFactorySpec_cxx; }
 
 // Forward declaration of `HybridVideoPlayerSourceSpec` to properly resolve imports.
 namespace margelo::nitro::video { class HybridVideoPlayerSourceSpec; }
+// Forward declaration of `NativeVideoConfig` to properly resolve imports.
+namespace margelo::nitro::video { struct NativeVideoConfig; }
+// Forward declaration of `ExternalSubtitle` to properly resolve imports.
+namespace margelo::nitro::video { struct ExternalSubtitle; }
 
 #include <memory>
 #include "HybridVideoPlayerSourceSpec.hpp"
 #include <string>
+#include "NativeVideoConfig.hpp"
+#include <optional>
+#include <unordered_map>
+#include <vector>
+#include "ExternalSubtitle.hpp"
 
 #include "ReactNativeVideo-Swift-Cxx-Umbrella.hpp"
 
@@ -60,6 +69,14 @@ namespace margelo::nitro::video {
     // Methods
     inline std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec> fromUri(const std::string& uri) override {
       auto __result = _swiftPart.fromUri(uri);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec> fromVideoConfig(const NativeVideoConfig& config) override {
+      auto __result = _swiftPart.fromVideoConfig(config);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

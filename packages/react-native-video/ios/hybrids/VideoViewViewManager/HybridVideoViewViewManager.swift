@@ -19,8 +19,12 @@ class HybridVideoViewViewManager: HybridVideoViewViewManagerSpec {
       throw VideoViewError.viewNotFound(nitroId: nitroId).error()
     }
     
-    self.view = view 
+    self.view = view
+    super.init()
+    view.delegate = VideoViewDelegate(viewManager: self)
   }
+  
+  // MARK: - Properties
   
   weak var player: (any HybridVideoPlayerSpec)? {
     get {
@@ -131,4 +135,20 @@ class HybridVideoViewViewManager: HybridVideoViewViewManagerSpec {
   func canEnterPictureInPicture() -> Bool {
     return AVPictureInPictureController.isPictureInPictureSupported()
   }
+  
+  // MARK: - Callbacks
+  
+  var onPictureInPictureChange: ((Bool) -> Void)?
+  
+  var onFullscreenChange: ((Bool) -> Void)?
+  
+  var willEnterFullscreen: (() -> Void)?
+  
+  var willExitFullscreen: (() -> Void)?
+  
+  var willEnterPictureInPicture: (() -> Void)?
+  
+  var willExitPictureInPicture: (() -> Void)?
+  
+  var onReadyToDisplay: (() -> Void)?
 }

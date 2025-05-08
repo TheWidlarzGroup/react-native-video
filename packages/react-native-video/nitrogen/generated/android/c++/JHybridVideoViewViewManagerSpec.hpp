@@ -55,6 +55,18 @@ namespace margelo::nitro::video {
     void setPictureInPicture(bool pictureInPicture) override;
     bool getAutoEnterPictureInPicture() override;
     void setAutoEnterPictureInPicture(bool autoEnterPictureInPicture) override;
+    std::optional<std::function<void(bool /* isInPictureInPicture */)>> getOnPictureInPictureChange() override;
+    void setOnPictureInPictureChange(const std::optional<std::function<void(bool /* isInPictureInPicture */)>>& onPictureInPictureChange) override;
+    std::optional<std::function<void(bool /* fullscreen */)>> getOnFullscreenChange() override;
+    void setOnFullscreenChange(const std::optional<std::function<void(bool /* fullscreen */)>>& onFullscreenChange) override;
+    std::optional<std::function<void()>> getWillEnterFullscreen() override;
+    void setWillEnterFullscreen(const std::optional<std::function<void()>>& willEnterFullscreen) override;
+    std::optional<std::function<void()>> getWillExitFullscreen() override;
+    void setWillExitFullscreen(const std::optional<std::function<void()>>& willExitFullscreen) override;
+    std::optional<std::function<void()>> getWillEnterPictureInPicture() override;
+    void setWillEnterPictureInPicture(const std::optional<std::function<void()>>& willEnterPictureInPicture) override;
+    std::optional<std::function<void()>> getWillExitPictureInPicture() override;
+    void setWillExitPictureInPicture(const std::optional<std::function<void()>>& willExitPictureInPicture) override;
 
   public:
     // Methods

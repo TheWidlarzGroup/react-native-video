@@ -27,6 +27,8 @@ public extension VideoOrientation {
         self = .landscapeLeft
       case "landscape-right":
         self = .landscapeRight
+      case "square":
+        self = .square
       case "unknown":
         self = .unknown
       default:
@@ -49,6 +51,8 @@ public extension VideoOrientation {
         return "landscape-left"
       case .landscapeRight:
         return "landscape-right"
+      case .square:
+        return "square"
       case .unknown:
         return "unknown"
     }

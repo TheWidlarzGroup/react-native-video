@@ -12,6 +12,8 @@ import NitroModules
 public protocol HybridVideoPlayerSpec_protocol: HybridObject {
   // Properties
   var source: (any HybridVideoPlayerSourceSpec) { get }
+  var eventEmitter: (any HybridVideoPlayerEventEmitterSpec) { get }
+  var status: VideoPlayerStatus { get }
   var duration: Double { get }
   var volume: Double { get set }
   var currentTime: Double { get set }

@@ -9,42 +9,45 @@ import Foundation
 import NitroModules
 import AVFoundation
 
-class HybridVideoPlayer: HybridVideoPlayerSpec, VideoPlayerObserverDelegate {
+class HybridVideoPlayer: HybridVideoPlayerSpec {
   /**
    * This in general should not be used directly, use `playerPointer` instead. This should be set only from within the playerQueue.
    */
   var player: AVPlayer? {
     didSet {
-      playerObserver?.updatePlayerObservers()
+      playerObserver?.initializePlayerObservers()
+    }
+    willSet {
+      playerObserver?.invalidatePlayerObservers()
     }
   }
   
   /**
    * The player queue is used to synchronize player initialization.
    */
-  private let playerQueue = DispatchQueue(label: "com.nitro.hybridplayer")
+  private let playerQueue =  DispatchQueue(label: "com.nitro.hybridplayer", qos: .userInitiated)
   
   /**
    * This is the actual player that should be used for playback. It is initialized lazily when `playerPointer` is accessed.
    */
   var playerPointer: AVPlayer {
     get {
-      // Synchronize access to player initialization
+      // Synchronize access to player instance
       playerQueue.sync {
-        // If player is already initialized and playerItem is set, return it
-        // If playerItem is not set, it means that player was not loaded with any source
         if player != nil && playerItem != nil {
           return player!
         }
-        
+
         do {
-          let item = try initializePlayerItem()
-          playerItem = item
+          if self.playerItem == nil {
+            self.playerItem = try initializePlayerItemSync()
+          }
+        
+          if player == nil {
+            player = AVPlayer()
+          }
           
-          // We need to intialize empty player first so player observers are set
-          // before we set the player item
-          player = AVPlayer()
-          player?.replaceCurrentItem(with: item)
+          player?.replaceCurrentItem(with: playerItem)
         } catch {
           playerItem = nil
           player = AVPlayer()
@@ -65,6 +68,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, VideoPlayerObserverDelegate {
   
   init(source: (any HybridVideoPlayerSourceSpec)) throws {
     self.source = source
+    self.eventEmitter = HybridVideoPlayerEventEmitter()
     
     super.init()
     self.playerObserver = VideoPlayerObserver(delegate: self)
@@ -79,6 +83,16 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, VideoPlayerObserverDelegate {
   // MARK: - Hybrid Impl
   
   var source: any HybridVideoPlayerSourceSpec
+  
+  var status: VideoPlayerStatus = .idle {
+    didSet {
+      if status != oldValue {
+        eventEmitter.onStatusChange(status)
+      }
+    }
+  }
+  
+  var eventEmitter: HybridVideoPlayerEventEmitterSpec
   
   var volume: Double {
     set {
@@ -100,6 +114,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, VideoPlayerObserverDelegate {
   
   var currentTime: Double {
     set {
+      eventEmitter.onSeek(newValue)
       playerPointer.seek(
         to: CMTime(seconds: newValue, preferredTimescale: 1000),
         toleranceBefore: .zero,
@@ -135,7 +150,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, VideoPlayerObserverDelegate {
   }
   
   func release() {
-    playerQueue.sync { [weak self] in
+    playerQueue.async { [weak self] in
       guard let self = self else { return }
       self.player?.replaceCurrentItem(with: nil)
       self.player = nil
@@ -151,16 +166,29 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, VideoPlayerObserverDelegate {
   }
   
   func preload() throws -> NitroModules.Promise<Void> {
-    return Promise.parallel { [weak self] in
+    let promise = Promise<Void>()
+    
+    Task.detached(priority: .userInitiated) { [weak self] in
       guard let self else {
-        throw LibraryError.deallocated(objectName: "HybridVideoPlayer").error()
+        promise.reject(withError: LibraryError.deallocated(objectName: "HybridVideoPlayer").error())
+        return
       }
       
-      try self.playerQueue.sync {
-        self.playerItem = try self.initializePlayerItem()
-        self.player = AVPlayer(playerItem: self.playerItem)
+      do {
+        let playerItem = try await self.initializePlayerItem()
+        self.playerItem = playerItem
+        
+        self.playerQueue.sync {
+          self.player = AVPlayer()
+          self.player?.replaceCurrentItem(with: playerItem)
+          promise.resolve(withResult: ())
+        }
+      } catch {
+        promise.reject(withError: error)
       }
     }
+    
+    return promise
   }
   
   func play() throws {
@@ -192,56 +220,94 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, VideoPlayerObserverDelegate {
   }
   
   func replaceSourceAsync(source: (any HybridVideoPlayerSourceSpec)) throws -> Promise<Void> {
-    return Promise.parallel { [weak self] in
+    let promise = Promise<Void>()
+    
+    Task.detached(priority: .userInitiated) { [weak self] in
       guard let self else {
-        throw LibraryError.deallocated(objectName: "HybridVideoPlayer").error()
+        promise.reject(withError: LibraryError.deallocated(objectName: "HybridVideoPlayer").error())
+        return
       }
       
-      try playerQueue.sync {
-        self.source = source
-        
+      self.playerItem = try await self.initializePlayerItem()
+      self.source = source
+      
+      playerQueue.sync {
         do {
-          self.playerItem = try self.initializePlayerItem()
-          
           guard let player = self.player else {
             throw PlayerError.notInitialized.error()
           }
           
           player.replaceCurrentItem(with: self.playerItem)
+          promise.resolve(withResult: ())
         } catch {
           self.playerItem = nil
           self.player = AVPlayer()
-          throw error
+          promise.reject(withError: error)
         }
       }
     }
+    
+    return promise
   }
   
   // MARK: - Internal Methods
   
-  private func initializePlayerItem() throws -> AVPlayerItem {
+  /**
+    * Initialize the player item synchronously. This is used to initialize the player item before it is set to the player.
+    * This is necessary because the player item is used to initialize the player.
+    * This is a blocking call and should be used with caution. prefer using `initializePlayerItem()` instead.
+    */
+  private func initializePlayerItemSync() throws -> AVPlayerItem {
+    let semaphore = DispatchSemaphore(value: 0)
+    var initializedItem: AVPlayerItem?
+    var initializationError: Error?
+
+    Task.detached(priority: .userInitiated) { [weak self] in
+      guard let strongSelf = self else {
+        semaphore.signal()
+        throw LibraryError.deallocated(objectName: "HybridVideoPlayer").error()
+      }
+      
+      do {
+        initializedItem = try await strongSelf.initializePlayerItem()
+      } catch {
+        initializationError = error
+      }
+      
+      semaphore.signal()
+    }
+    
+    semaphore.wait() // Block current thread (playerQueue)
+
+    if let error = initializationError, initializedItem == nil {
+      throw error
+    }
+  
+    return initializedItem!
+  }
+  
+  private func initializePlayerItem() async throws -> AVPlayerItem {
     guard let _source = source as? HybridVideoPlayerSource else {
+      status = .error
       throw PlayerError.invalidSource.error()
     }
     
-    try _source.initializeAsset()
+    let isNetowrkSource = _source.url.isFileURL == false
+    eventEmitter.onLoadStart(.init(sourceType: isNetowrkSource ? .network : .local, source: _source))
+    
+    try await _source.initializeAsset()
     
     guard let asset = _source.asset else {
+      status = .error
       throw SourceError.failedToInitializeAsset.error()
     }
     
-    return AVPlayerItem(asset: asset)
-  }
-  
-  // MARK: - VideoPlayerObserverDelegate
-  
-  func onPlayedToEnd(player: AVPlayer) {
-    // TODO: Notify listeners once we implement callbacks
-    
-    if loop {
-      currentTime = 0
-      try? play()
+    // iOS does not support external subtitles for HLS streams
+    if let externalSubtiles = source.config.externalSubtitles, externalSubtiles.isEmpty == false, source.uri.hasSuffix(".m3u8") == false {
+      return try await AVPlayerItem.withExternalSubtitles(for: asset, config: source.config)
     }
+    
+    return AVPlayerItem(asset: asset)
   }
   
   // MARK: - Memory Management
