@@ -63,5 +63,8 @@
         "!**/*.tsbuildinfo",
         "!docs",
         "!examples"
-    ]
+    ],
+    "resolutions": {
+        "react-native-test-app": "4.3.8"
+    }
 }
