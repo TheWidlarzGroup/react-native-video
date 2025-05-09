@@ -1,6 +1,6 @@
 {
   "extends": ["../../config/tsconfig.json"],
-  "include": ["src"],
+  "include": ["src", "./app.plugin.js"],
   "compilerOptions": {
     "rootDir": ".",
     "jsx": "react-jsx",

@@ -9,6 +9,7 @@
   "react-native": "src/index",
   "exports": {
    "./package.json": "./package.json",
+   "./app.plugin.js": "./app.plugin.js",
     ".": {
       "import": {
         "types": "./lib/typescript/module/src/index.d.ts",
@@ -29,6 +30,7 @@
     "nitrogen",
     "*.podspec",
     "react-native.config.js",
+    "app.plugin.js",
     "THIRD-PARTY-LICENSES",
     "LICENSE",
     "!ios/build",
@@ -72,6 +74,7 @@
     "registry": "https://npm.pkg.github.com/"
   },
   "devDependencies": {
+    "@expo/config-plugins": "^10.0.2",
     "@types/react": "^18.2.44",
     "del-cli": "^5.1.0",
     "eslint": "^8.51.0",
