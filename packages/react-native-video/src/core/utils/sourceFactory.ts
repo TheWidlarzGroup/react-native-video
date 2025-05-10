@@ -9,6 +9,7 @@ import type {
   VideoConfig,
   VideoSource,
 } from '../types/VideoConfig';
+import { tryParseNativeVideoError } from '../types/VideoError';
 
 const VideoPlayerSourceFactory =
   NitroModules.createHybridObject<VideoPlayerSourceFactory>(
@@ -25,11 +26,19 @@ export const isVideoPlayerSource = (obj: any): obj is VideoPlayerSource => {
 };
 
 export const createSourceFromUri = (uri: string) => {
-  return VideoPlayerSourceFactory.fromUri(uri);
+  try {
+    return VideoPlayerSourceFactory.fromUri(uri);
+  } catch (error) {
+    throw tryParseNativeVideoError(error);
+  }
 };
 
 export const createSourceFromVideoConfig = (config: NativeVideoConfig) => {
-  return VideoPlayerSourceFactory.fromVideoConfig(config);
+  try {
+    return VideoPlayerSourceFactory.fromVideoConfig(config);
+  } catch (error) {
+    throw tryParseNativeVideoError(error);
+  }
 };
 
 export const createSource = (

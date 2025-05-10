@@ -14,7 +14,7 @@ It's working both on New and Old Architecture.
 
 You have to install `react-native-nitro-modules` (>=0.13.0) in your project.
 ```sh
-yarn install react-native-nitro-modules
+npm install react-native-nitro-modules
 ```
 
 Then install the package
@@ -23,8 +23,46 @@ Then install the package
 > This package is not published on npm yet. You have to install it from the local path.
 
 ```sh
-yarn install react-native-video
+npm install react-native-video
 ```
+
+<details>
+<summary>For react-native < 0.80</summary>
+`react-native` < 0.80 have bug that prevents to properly handle errors by nitro modules on Android.
+We highly recommend to apply bellow patch for `react-native-nitro-modules` to fix this issue.
+You can apply it using `patch-package`.
+
+Without this patch you won't be able "recognize" errors, all will be unknown errors.
+
+```diff
+diff --git a/node_modules/react-native-nitro-modules/cpp/core/HybridFunction.hpp b/node_modules/react-native-nitro-modules/cpp/core/HybridFunction.hpp
+index aefd987..c2e06fb 100644
+--- a/node_modules/react-native-nitro-modules/cpp/core/HybridFunction.hpp
++++ b/node_modules/react-native-nitro-modules/cpp/core/HybridFunction.hpp
+@@ -23,6 +23,10 @@ struct JSIConverter;
+ #include <string>
+ #include <type_traits>
+ 
++#ifdef ANDROID
++#include <fbjni/fbjni.h>
++#endif
++
+ namespace margelo::nitro {
+ 
+ using namespace facebook;
+@@ -118,6 +122,10 @@ public:
+         std::string funcName = getHybridFuncFullName<THybrid>(kind, name, hybridInstance.get());
+         std::string message = exception.what();
+         throw jsi::JSError(runtime, funcName + ": " + message);
++      } catch (const jni::JniException& exception) {
++        std::string funcName = getHybridFuncFullName<THybrid>(kind, name, hybridInstance.get());
++        std::string message = exception.what();
++        throw jsi::JSError(runtime, funcName + ": " + message);
+ #pragma clang diagnostic pop
+ #endif
+       } catch (...) {
+```
+</details>
 
 ## Usage
 

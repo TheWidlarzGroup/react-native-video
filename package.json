@@ -15,7 +15,8 @@
     "clean": "git clean -xdf",
     "react-native-video": "bun run --cwd packages/react-native-video",
     "example": "bun run --cwd example",
-    "generate-license": "bun run ./scripts/generate-third-party-licenses.js"
+    "generate-license": "bun run ./scripts/generate-third-party-licenses.js",
+    "postinstall": "patch-package --patch-dir example/patches"
   },
   "devDependencies": {
     "@eslint/js": "^9.10.0",
@@ -36,7 +37,8 @@
     "react-native": "^0.77.0",
     "release-it": "^17.10.0",
     "typescript": "^5.2.2",
-    "typescript-eslint": "^8.13.0"
+    "typescript-eslint": "^8.13.0",
+    "patch-package": "^8.0.0"
   },
   "commitlint": {
     "extends": [

@@ -18,7 +18,8 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   public onError?: (error: VideoRuntimeError) => void = undefined;
 
   constructor(source: VideoSource | VideoConfig | VideoPlayerSource) {
-    const player = createPlayer(createSource(source));
+    const hybridSource = createSource(source);
+    const player = createPlayer(hybridSource);
 
     // Initialize events
     super(player.eventEmitter);
