@@ -1,5 +1,19 @@
 
 
+# [6.14.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.13.0...v6.14.0) (2025-05-10)
+
+
+### Bug Fixes
+
+* **ios:** default cropStart fallback ([#4540](https://github.com/TheWidlarzGroup/react-native-video/issues/4540)) ([ecfe12a](https://github.com/TheWidlarzGroup/react-native-video/commit/ecfe12aa816a3126e023d0c14896681d92fe8926))
+* **ios:** set `_isBuffering = true` only if newValue is also true ([#4532](https://github.com/TheWidlarzGroup/react-native-video/issues/4532)) ([089e938](https://github.com/TheWidlarzGroup/react-native-video/commit/089e938aebc222378f4d16006f585f20a8b0eed1))
+* **ios:** swfit modular headers ([#4527](https://github.com/TheWidlarzGroup/react-native-video/issues/4527)) ([987be4b](https://github.com/TheWidlarzGroup/react-native-video/commit/987be4b293dc21a40b0b183433707bc9a733b715))
+
+
+### Features
+
+* **web:** allow `style` prop overrides ([#4528](https://github.com/TheWidlarzGroup/react-native-video/issues/4528)) ([fc1e3f4](https://github.com/TheWidlarzGroup/react-native-video/commit/fc1e3f4fd17faf1503b6b3d7cc604dbe1bc659c1))
+
 # [6.13.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.12.0...v6.13.0) (2025-04-18)
 
 
