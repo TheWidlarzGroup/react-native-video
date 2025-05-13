@@ -136,7 +136,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc var onTextTracks: RCTDirectEventBlock?
     @objc var onAudioTracks: RCTDirectEventBlock?
     @objc var onTextTrackDataChanged: RCTDirectEventBlock?
-    @objc var onTimeUpdate: RCTDirectEventBlock? // To get EXT-X-PROGRaM-DATE from HLS streams
 
     @objc
     func _onPictureInPictureEnter() {
@@ -1457,13 +1456,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     func handleTimeUpdate(time _: CMTime) {
         sendProgressUpdate()
-        if let onTimeUpdate = onTimeUpdate,
-        let currentDate = _player?.currentItem?.currentDate() {
-            onTimeUpdate([
-                "programDateTime": NSNumber(value: Double(currentDate.timeIntervalSince1970 * 1000)).int64Value,
-                "target": reactTag as Any
-            ]) // Pass the current date (epoch time) to JS
-        }
     }
 
     func handleReadyForDisplay(changeObject _: Any, change _: NSKeyValueObservedChange<Bool>) {

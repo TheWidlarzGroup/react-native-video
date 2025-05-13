@@ -234,10 +234,6 @@ export type OnReceiveAdEventData = Readonly<{
   >;
 }>;
 
-export type OnTimeUpdateData = Readonly<{
-  programDateTime: number; // Unix timestamp in milliseconds
-}>;
-
 export interface ReactVideoEvents {
   onAudioBecomingNoisy?: () => void; //Android, iOS
   onAudioFocusChanged?: (e: OnAudioFocusChangedData) => void; // Android
@@ -271,5 +267,4 @@ export interface ReactVideoEvents {
   onTextTrackDataChanged?: (e: OnTextTrackDataChangedData) => void; // iOS
   onVideoTracks?: (e: OnVideoTracksData) => void; //Android
   onAspectRatio?: (e: OnVideoAspectRatioData) => void;
-  onTimeUpdate?: (e: OnTimeUpdateData) => void;
 }
