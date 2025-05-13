@@ -379,6 +379,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
                 )
               : 0,
             seekableDuration: 0,
+            currentPlaybackTime: 0,  //Update this with the correct playback time
           });
         }}
         onLoadedData={() => onReadyForDisplay?.()}
