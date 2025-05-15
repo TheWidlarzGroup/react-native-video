@@ -53,6 +53,13 @@ export interface VideoPlayerBase {
   rate: number;
 
   /**
+   * Whether the player is playing.
+   * @note This is a read-only property.
+   * @note To pause/resume the player, you need to use {@link play} and {@link pause} methods.
+   */
+  readonly isPlaying: boolean;
+
+  /**
    * Preload the video.
    * This is useful to avoid delay when the user plays the video.
    * Preloading too many videos can lead to memory issues or performance issues.

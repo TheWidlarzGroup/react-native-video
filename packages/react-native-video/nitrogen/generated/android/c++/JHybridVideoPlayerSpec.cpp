@@ -109,6 +109,11 @@ namespace margelo::nitro::video {
     static const auto method = javaClassStatic()->getMethod<void(double /* rate */)>("setRate");
     method(_javaPart, rate);
   }
+  bool JHybridVideoPlayerSpec::getIsPlaying() {
+    static const auto method = javaClassStatic()->getMethod<jboolean()>("isPlaying");
+    auto __result = method(_javaPart);
+    return static_cast<bool>(__result);
+  }
 
   // Methods
   std::shared_ptr<Promise<void>> JHybridVideoPlayerSpec::replaceSourceAsync(const std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>>& source) {

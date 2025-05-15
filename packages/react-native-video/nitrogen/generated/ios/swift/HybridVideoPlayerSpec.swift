@@ -20,6 +20,7 @@ public protocol HybridVideoPlayerSpec_protocol: HybridObject {
   var muted: Bool { get set }
   var loop: Bool { get set }
   var rate: Double { get set }
+  var isPlaying: Bool { get }
 
   // Methods
   func replaceSourceAsync(source: (any HybridVideoPlayerSourceSpec)?) throws -> Promise<Void>

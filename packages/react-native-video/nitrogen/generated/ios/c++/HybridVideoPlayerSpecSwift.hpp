@@ -106,6 +106,9 @@ namespace margelo::nitro::video {
     inline void setRate(double rate) noexcept override {
       _swiftPart.setRate(std::forward<decltype(rate)>(rate));
     }
+    inline bool getIsPlaying() noexcept override {
+      return _swiftPart.isPlaying();
+    }
 
   public:
     // Methods

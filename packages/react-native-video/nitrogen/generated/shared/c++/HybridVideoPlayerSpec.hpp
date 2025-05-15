@@ -68,6 +68,7 @@ namespace margelo::nitro::video {
       virtual void setLoop(bool loop) = 0;
       virtual double getRate() = 0;
       virtual void setRate(double rate) = 0;
+      virtual bool getIsPlaying() = 0;
 
     public:
       // Methods

@@ -82,6 +82,10 @@ abstract class HybridVideoPlayerSpec: HybridObject() {
   @set:DoNotStrip
   @set:Keep
   abstract var rate: Double
+  
+  @get:DoNotStrip
+  @get:Keep
+  abstract val isPlaying: Boolean
 
   // Methods
   @DoNotStrip

@@ -137,6 +137,11 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     this.player.rate = value;
   }
 
+  // Is Playing
+  get isPlaying(): boolean {
+    return this.player.isPlaying;
+  }
+
   async preload(): Promise<void> {
     await this.wrapPromise(this.player.preload());
 

@@ -144,6 +144,14 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
   }
   
   var loop: Bool = false
+
+  var isPlaying: Bool {
+    get {
+      // we are using here player as we don't want to initialize it
+      // player is initialized lazily when playerPointer is accessed
+      return player?.rate != 0
+    }
+  }
   
   func clean() throws {
     release()

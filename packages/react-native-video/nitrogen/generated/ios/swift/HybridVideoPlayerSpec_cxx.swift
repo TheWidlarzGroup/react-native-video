@@ -185,6 +185,13 @@ public class HybridVideoPlayerSpec_cxx {
       self.__implementation.rate = newValue
     }
   }
+  
+  public final var isPlaying: Bool {
+    @inline(__always)
+    get {
+      return self.__implementation.isPlaying
+    }
+  }
 
   // Methods
   @inline(__always)

@@ -61,6 +61,7 @@ namespace margelo::nitro::video {
     void setLoop(bool loop) override;
     double getRate() override;
     void setRate(double rate) override;
+    bool getIsPlaying() override;
 
   public:
     // Methods

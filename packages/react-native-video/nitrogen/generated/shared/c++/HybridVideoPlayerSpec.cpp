@@ -28,6 +28,7 @@ namespace margelo::nitro::video {
       prototype.registerHybridSetter("loop", &HybridVideoPlayerSpec::setLoop);
       prototype.registerHybridGetter("rate", &HybridVideoPlayerSpec::getRate);
       prototype.registerHybridSetter("rate", &HybridVideoPlayerSpec::setRate);
+      prototype.registerHybridGetter("isPlaying", &HybridVideoPlayerSpec::getIsPlaying);
       prototype.registerHybridMethod("replaceSourceAsync", &HybridVideoPlayerSpec::replaceSourceAsync);
       prototype.registerHybridMethod("clean", &HybridVideoPlayerSpec::clean);
       prototype.registerHybridMethod("preload", &HybridVideoPlayerSpec::preload);

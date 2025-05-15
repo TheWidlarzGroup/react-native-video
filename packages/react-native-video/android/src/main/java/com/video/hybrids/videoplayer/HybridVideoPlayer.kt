@@ -154,6 +154,10 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
       playerPointer.playbackParameters = playerPointer.playbackParameters.withSpeed(value.toFloat())
     }
 
+  override var isPlaying: Boolean = runOnMainThreadSync {
+    return@runOnMainThreadSync player?.isPlaying == true
+  }
+
   private fun initializePlayer() {
     if (NitroModules.applicationContext == null) {
       throw LibraryError.ApplicationContextNotFound
@@ -227,7 +231,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
   override fun replaceSourceAsync(source: HybridVideoPlayerSourceSpec?): Promise<Unit> {
     return Promise.async {
       if (source == null) {
-        playerPointer.stop()
+        release()
         return@async
       }
 
