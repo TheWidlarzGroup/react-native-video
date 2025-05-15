@@ -25,6 +25,7 @@ namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 #include "HybridVideoPlayerEventEmitterSpec.hpp"
 #include "VideoPlayerStatus.hpp"
 #include <NitroModules/Promise.hpp>
+#include <optional>
 
 namespace margelo::nitro::video {
 
@@ -70,7 +71,7 @@ namespace margelo::nitro::video {
 
     public:
       // Methods
-      virtual std::shared_ptr<Promise<void>> replaceSourceAsync(const std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>& source) = 0;
+      virtual std::shared_ptr<Promise<void>> replaceSourceAsync(const std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>>& source) = 0;
       virtual void clean() = 0;
       virtual std::shared_ptr<Promise<void>> preload() = 0;
       virtual void play() = 0;

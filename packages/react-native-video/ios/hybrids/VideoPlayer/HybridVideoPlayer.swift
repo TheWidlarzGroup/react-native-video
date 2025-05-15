@@ -162,11 +162,17 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
       
       // Clear player observer
       self.playerObserver = nil
+      status = .idle
     }
   }
   
   func preload() throws -> NitroModules.Promise<Void> {
     let promise = Promise<Void>()
+    
+    if status != .idle {
+      promise.resolve(withResult: ())
+      return promise
+    }
     
     Task.detached(priority: .userInitiated) { [weak self] in
       guard let self else {
@@ -219,8 +225,14 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
     currentTime = time
   }
   
-  func replaceSourceAsync(source: (any HybridVideoPlayerSourceSpec)) throws -> Promise<Void> {
+  func replaceSourceAsync(source: (any HybridVideoPlayerSourceSpec)?) throws -> Promise<Void> {
     let promise = Promise<Void>()
+    
+    guard let source else {
+      release()
+      promise.resolve(withResult: ())
+      return promise
+    }
     
     Task.detached(priority: .userInitiated) { [weak self] in
       guard let self else {

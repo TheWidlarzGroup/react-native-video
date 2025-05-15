@@ -64,7 +64,7 @@ namespace margelo::nitro::video {
 
   public:
     // Methods
-    std::shared_ptr<Promise<void>> replaceSourceAsync(const std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>& source) override;
+    std::shared_ptr<Promise<void>> replaceSourceAsync(const std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>>& source) override;
     void clean() override;
     std::shared_ptr<Promise<void>> preload() override;
     void play() override;

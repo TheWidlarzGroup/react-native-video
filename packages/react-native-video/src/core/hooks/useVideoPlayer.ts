@@ -1,4 +1,5 @@
 import type { VideoPlayerSource } from '../../spec/nitro/VideoPlayerSource.nitro';
+import type { NoAutocomplete } from '../types/Utils';
 import type { VideoConfig, VideoSource } from '../types/VideoConfig';
 import { isVideoPlayerSource } from '../utils/sourceFactory';
 import { VideoPlayer } from '../VideoPlayer';
@@ -16,7 +17,7 @@ const sourceEqual = <T extends VideoConfig | VideoSource | VideoPlayerSource>(
 };
 
 export const useVideoPlayer = (
-  source: VideoConfig | VideoSource | VideoPlayerSource,
+  source: VideoConfig | VideoSource | NoAutocomplete<VideoPlayerSource>,
   setup?: (player: VideoPlayer) => void
 ) => {
   return useManagedInstance(

@@ -22,7 +22,7 @@ public protocol HybridVideoPlayerSpec_protocol: HybridObject {
   var rate: Double { get set }
 
   // Methods
-  func replaceSourceAsync(source: (any HybridVideoPlayerSourceSpec)) throws -> Promise<Void>
+  func replaceSourceAsync(source: (any HybridVideoPlayerSourceSpec)?) throws -> Promise<Void>
   func clean() throws -> Void
   func preload() throws -> Promise<Void>
   func play() throws -> Void

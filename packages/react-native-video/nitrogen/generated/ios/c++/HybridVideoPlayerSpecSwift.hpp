@@ -24,6 +24,7 @@ namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 #include "HybridVideoPlayerEventEmitterSpec.hpp"
 #include "VideoPlayerStatus.hpp"
 #include <NitroModules/Promise.hpp>
+#include <optional>
 
 #include "ReactNativeVideo-Swift-Cxx-Umbrella.hpp"
 
@@ -108,7 +109,7 @@ namespace margelo::nitro::video {
 
   public:
     // Methods
-    inline std::shared_ptr<Promise<void>> replaceSourceAsync(const std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>& source) override {
+    inline std::shared_ptr<Promise<void>> replaceSourceAsync(const std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>>& source) override {
       auto __result = _swiftPart.replaceSourceAsync(source);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());

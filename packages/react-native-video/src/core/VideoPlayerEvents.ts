@@ -4,6 +4,27 @@ import type { VideoPlayerEvents as VideoPlayerEventsInterface } from './types/Ev
 export class VideoPlayerEvents implements VideoPlayerEventsInterface {
   protected eventEmitter: VideoPlayerEventEmitter;
 
+  protected readonly supportedEvents: (keyof VideoPlayerEventsInterface)[] = [
+    'onAudioBecomingNoisy',
+    'onAudioFocusChange',
+    'onBandwidthUpdate',
+    'onBuffer',
+    'onControlsVisibleChange',
+    'onEnd',
+    'onExternalPlaybackChange',
+    'onLoad',
+    'onLoadStart',
+    'onPlaybackRateChange',
+    'onPlaybackStateChange',
+    'onProgress',
+    'onReadyToDisplay',
+    'onSeek',
+    'onStatusChange',
+    'onTextTrackDataChanged',
+    'onTimedMetadata',
+    'onVolumeChange',
+  ];
+
   constructor(eventEmitter: VideoPlayerEventEmitter) {
     this.eventEmitter = eventEmitter;
   }
@@ -12,29 +33,7 @@ export class VideoPlayerEvents implements VideoPlayerEventsInterface {
    * Clears all events from the event emitter.
    */
   clearAllEvents() {
-    // should contain all events keys
-    const eventsKey: (keyof VideoPlayerEventsInterface)[] = [
-      'onAudioBecomingNoisy',
-      'onAudioFocusChange',
-      'onBandwidthUpdate',
-      'onBuffer',
-      'onControlsVisibleChange',
-      'onEnd',
-      'onExternalPlaybackChange',
-      'onLoad',
-      'onLoadStart',
-      'onPlaybackRateChange',
-      'onPlaybackStateChange',
-      'onProgress',
-      'onReadyToDisplay',
-      'onSeek',
-      'onStatusChange',
-      'onTextTrackDataChanged',
-      'onTimedMetadata',
-      'onVolumeChange',
-    ];
-
-    eventsKey.forEach((event) => {
+    this.supportedEvents.forEach((event) => {
       this.clearEvent(event);
     });
   }

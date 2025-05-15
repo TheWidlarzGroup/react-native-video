@@ -1,3 +1,4 @@
+export { useEvent } from './core/hooks/useEvent';
 export { useVideoPlayer } from './core/hooks/useVideoPlayer';
 export * from './core/types/Events';
 export type { VideoSource } from './core/types/VideoConfig';

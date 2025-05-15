@@ -188,12 +188,18 @@ public class HybridVideoPlayerSpec_cxx {
 
   // Methods
   @inline(__always)
-  public final func replaceSourceAsync(source: bridge.std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_) -> bridge.Result_std__shared_ptr_Promise_void___ {
+  public final func replaceSourceAsync(source: bridge.std__optional_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec__) -> bridge.Result_std__shared_ptr_Promise_void___ {
     do {
-      let __result = try self.__implementation.replaceSourceAsync(source: { () -> HybridVideoPlayerSourceSpec in
-        let __unsafePointer = bridge.get_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_(source)
-        let __instance = HybridVideoPlayerSourceSpec_cxx.fromUnsafe(__unsafePointer)
-        return __instance.getHybridVideoPlayerSourceSpec()
+      let __result = try self.__implementation.replaceSourceAsync(source: { () -> (any HybridVideoPlayerSourceSpec)? in
+        if let __unwrapped = source.value {
+          return { () -> HybridVideoPlayerSourceSpec in
+            let __unsafePointer = bridge.get_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_(__unwrapped)
+            let __instance = HybridVideoPlayerSourceSpec_cxx.fromUnsafe(__unsafePointer)
+            return __instance.getHybridVideoPlayerSourceSpec()
+          }()
+        } else {
+          return nil
+        }
       }())
       let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
         let __promise = bridge.create_std__shared_ptr_Promise_void__()

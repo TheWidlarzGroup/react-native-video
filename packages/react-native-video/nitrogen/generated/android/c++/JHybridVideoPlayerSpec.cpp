@@ -24,6 +24,7 @@ namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 #include "JVideoPlayerStatus.hpp"
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/JPromise.hpp>
+#include <optional>
 
 namespace margelo::nitro::video {
 
@@ -110,9 +111,9 @@ namespace margelo::nitro::video {
   }
 
   // Methods
-  std::shared_ptr<Promise<void>> JHybridVideoPlayerSpec::replaceSourceAsync(const std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>& source) {
+  std::shared_ptr<Promise<void>> JHybridVideoPlayerSpec::replaceSourceAsync(const std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>>& source) {
     static const auto method = javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<JHybridVideoPlayerSourceSpec::javaobject> /* source */)>("replaceSourceAsync");
-    auto __result = method(_javaPart, std::dynamic_pointer_cast<JHybridVideoPlayerSourceSpec>(source)->getJavaPart());
+    auto __result = method(_javaPart, source.has_value() ? std::dynamic_pointer_cast<JHybridVideoPlayerSourceSpec>(source.value())->getJavaPart() : nullptr);
     return [&]() {
       auto __promise = Promise<void>::create();
       __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& /* unit */) {

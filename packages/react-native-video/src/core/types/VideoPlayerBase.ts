@@ -88,7 +88,8 @@ export interface VideoPlayerBase {
   /**
    * Replace the current source of the player.
    * @param source - The new source of the video.
+   * @note If you want to clear the source, you can pass null.
    * see {@link VideoPlayerSourceBase}
    */
-  replaceSourceAsync(source: VideoPlayerSourceBase): Promise<void>;
+  replaceSourceAsync(source: VideoPlayerSourceBase | null): Promise<void>;
 }

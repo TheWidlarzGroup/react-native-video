@@ -12,7 +12,7 @@ export interface VideoPlayer
   // Holder of the video player events.
   readonly eventEmitter: VideoPlayerEventEmitter;
 
-  replaceSourceAsync(source: VideoPlayerSource): Promise<void>;
+  replaceSourceAsync(source: VideoPlayerSource | null): Promise<void>;
 
   /**
    * Release the player resources.

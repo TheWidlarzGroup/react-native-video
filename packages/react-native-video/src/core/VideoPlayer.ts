@@ -1,6 +1,7 @@
 import { NitroModules } from 'react-native-nitro-modules';
 import { type VideoPlayer as VideoPlayerImpl } from '../spec/nitro/VideoPlayer.nitro';
 import type { VideoPlayerSource } from '../spec/nitro/VideoPlayerSource.nitro';
+import type { NoAutocomplete } from './types/Utils';
 import type { VideoConfig, VideoSource } from './types/VideoConfig';
 import {
   tryParseNativeVideoError,
@@ -142,6 +143,16 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     NitroModules.updateMemorySize(this.player);
   }
 
+  /**
+   * Releases the player's native resources and releases native state.
+   * After calling this method, the player is no longer usable.
+   * Accessing any properties or methods of the player after calling this method will throw an error.
+   * If you want to clean player resource use `replaceSourceAsync` with `null` instead.
+   */
+  release(): void {
+    this.__destroy();
+  }
+
   play(): void {
     try {
       this.player.play();
@@ -175,10 +186,12 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   }
 
   async replaceSourceAsync(
-    source: VideoSource | VideoConfig | VideoPlayerSource
+    source: VideoSource | VideoConfig | NoAutocomplete<VideoPlayerSource> | null
   ): Promise<void> {
     await this.wrapPromise(
-      this.player.replaceSourceAsync(createSource(source))
+      this.player.replaceSourceAsync(
+        source === null ? null : createSource(source)
+      )
     );
 
     NitroModules.updateMemorySize(this.player);

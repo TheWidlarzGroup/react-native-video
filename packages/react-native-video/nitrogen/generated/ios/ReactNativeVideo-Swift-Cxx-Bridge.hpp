@@ -180,6 +180,15 @@ namespace margelo::nitro::video::bridge::swift {
     return Func_void_std__exception_ptr_Wrapper(std::move(value));
   }
   
+  // pragma MARK: std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>>
+  /**
+   * Specialized version of `std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>>`.
+   */
+  using std__optional_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec__ = std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>>;
+  inline std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>> create_std__optional_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec__(const std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>& value) {
+    return std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>>(value);
+  }
+  
   // pragma MARK: std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>
   /**
    * Specialized version of `std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>`.

@@ -13,6 +13,7 @@ import androidx.media3.common.Tracks
 import androidx.media3.common.text.CueGroup
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.DefaultLoadControl
+import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.analytics.AnalyticsListener
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
@@ -66,6 +67,10 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
   private companion object {
     const val PROGRESS_UPDATE_INTERVAL_MS = 250L
     private const val TAG = "HybridVideoPlayer"
+    private const val MIN_BUFFER_DURATION_MS = 5000
+    private const val MAX_BUFFER_DURATION_MS = 10000
+    private const val BUFFER_FOR_PLAYBACK_DURATION_MS = 1000
+    private const val BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_DURATION_MS = 2000
   }
 
   override var status: VideoPlayerStatus = VideoPlayerStatus.IDLE
@@ -165,17 +170,22 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
       .setAllocator(allocator!!)
       //TODO: Add buffer config to source
       .setBufferDurationsMs(
-        5000,  // minBufferMs
-        10000, // maxBufferMs
-        1000,  // bufferForPlaybackMs
-        2000   // bufferForPlaybackAfterRebufferMs
+        MIN_BUFFER_DURATION_MS,  // minBufferMs
+        MAX_BUFFER_DURATION_MS, // maxBufferMs
+        BUFFER_FOR_PLAYBACK_DURATION_MS,  // bufferForPlaybackMs
+        BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_DURATION_MS   // bufferForPlaybackAfterRebufferMs
       )
       .build()
+
+    val renderersFactory = DefaultRenderersFactory(appContext)
+      .forceEnableMediaCodecAsynchronousQueueing()
+      .setEnableDecoderFallback(true)
 
     // Build the player with the LoadControl
     playerPointer = ExoPlayer.Builder(NitroModules.applicationContext!!)
       .setLoadControl(loadControl)
       .setLooper(Looper.getMainLooper())
+      .setRenderersFactory(renderersFactory)
       .build()
 
     playerPointer.addListener(playerListener)
@@ -214,8 +224,13 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
     currentTime = time.coerceIn(0.0, duration)
   }
 
-  override fun replaceSourceAsync(source: HybridVideoPlayerSourceSpec): Promise<Unit> {
+  override fun replaceSourceAsync(source: HybridVideoPlayerSourceSpec?): Promise<Unit> {
     return Promise.async {
+      if (source == null) {
+        playerPointer.stop()
+        return@async
+      }
+
       val hybridSource = source as? HybridVideoPlayerSource ?: throw PlayerError.InvalidSource
 
       runOnMainThreadSync {
@@ -231,13 +246,17 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
 
   override fun preload(): Promise<Unit> {
     return Promise.async {
-      runOnMainThreadSync {
-        if (playerPointer.playbackState != Player.STATE_IDLE) {
-          return@runOnMainThreadSync
-        }
+      if (status == VideoPlayerStatus.IDLE) {
+        return@async
+      }
 
+      runOnMainThreadSync {
         if (player == null) {
           initializePlayer()
+        }
+
+        if (player != null && player?.playbackState != Player.STATE_IDLE) {
+          return@runOnMainThreadSync
         }
 
         player?.prepare()
@@ -257,6 +276,9 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
       // Clean Listeners
       audioFocusChangedListener.removeEventEmitter()
       audioBecomingNoisyReceiver.removeEventEmitter()
+
+      // Update status
+      status = VideoPlayerStatus.IDLE
     }
   }
 
@@ -283,7 +305,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
   }
 
   override val memorySize: Long
-    get() = (if (allocator == null) 0 else allocator!!.totalBytesAllocated).toLong()
+    get() = allocator?.totalBytesAllocated?.toLong() ?: 0L
 
   private fun startProgressUpdates() {
     stopProgressUpdates() // Ensure no multiple runnables
@@ -356,16 +378,19 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
           status = VideoPlayerStatus.READYTOPLAY
           eventEmitter.onBuffer(false)
 
-          val videoFormat = playerPointer.videoFormat
+          val generalVideoFormat = playerPointer.videoFormat
           val currentTracks = playerPointer.currentTracks
 
-          val trackVideo = currentTracks.groups.find { group -> group.type == C.TRACK_TYPE_VIDEO && group.isSelected }
-            ?.getTrackFormat(0)
+          val selectedVideoTrackGroup = currentTracks.groups.find { group -> group.type == C.TRACK_TYPE_VIDEO && group.isSelected }
+          val selectedVideoTrackFormat = if (selectedVideoTrackGroup != null && selectedVideoTrackGroup.length > 0) {
+            selectedVideoTrackGroup.getTrackFormat(0)
+          } else {
+            null
+          }
 
-
-          val width = trackVideo?.width ?: videoFormat?.width ?: 0
-          val height = trackVideo?.height ?: videoFormat?.height ?: 0
-
+          val width = selectedVideoTrackFormat?.width ?: generalVideoFormat?.width ?: 0
+          val height = selectedVideoTrackFormat?.height ?: generalVideoFormat?.height ?: 0
+          val rotationDegrees = selectedVideoTrackFormat?.rotationDegrees ?: generalVideoFormat?.rotationDegrees
 
           eventEmitter.onLoad(
             onLoadData(
@@ -373,7 +398,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
               duration = if (playerPointer.duration == C.TIME_UNSET) Double.NaN else playerPointer.duration / 1000.0,
               width = width.toDouble(),
               height = height.toDouble(),
-              orientation = VideoOrientationUtils.fromWHR(width, height, videoFormat?.rotationDegrees)
+              orientation = VideoOrientationUtils.fromWHR(width, height, rotationDegrees)
             )
           )
           // If player becomes ready and is set to play, start progress updates
