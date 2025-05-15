@@ -250,10 +250,6 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
 
   override fun preload(): Promise<Unit> {
     return Promise.async {
-      if (status == VideoPlayerStatus.IDLE) {
-        return@async
-      }
-
       runOnMainThreadSync {
         if (player == null) {
           initializePlayer()
