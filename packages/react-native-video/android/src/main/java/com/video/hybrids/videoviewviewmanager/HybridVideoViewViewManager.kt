@@ -51,7 +51,7 @@ class HybridVideoViewViewManager(nitroId: Int): HybridVideoViewViewManagerSpec()
   }
 
   override var autoEnterPictureInPicture: Boolean
-    get() = videoView.get()?.autoEnterPictureInPicture == true
+    get() = videoView.get()?.autoEnterPictureInPicture
     set(value) {
       videoView.get()?.autoEnterPictureInPicture = value
     }
@@ -69,32 +69,32 @@ class HybridVideoViewViewManager(nitroId: Int): HybridVideoViewViewManagerSpec()
     }
 
   // View callbacks
-  override var onPictureInPictureChange: ((Boolean) -> Unit)?
+  override var onPictureInPictureChange: ((Boolean) -> Unit)? = null
     set(value) {
       field = value
       videoView.get()?.events?.onPictureInPictureChange = value
     }
-  override var onFullscreenChange: ((Boolean) -> Unit)?
+  override var onFullscreenChange: ((Boolean) -> Unit)? = null
     set(value) {
       field = value
       videoView.get()?.events?.onFullscreenChange = value
     }
-  override var willEnterFullscreen: (() -> Unit)?
+  override var willEnterFullscreen: (() -> Unit)? = null
     set(value) {
       field = value
       videoView.get()?.events?.willEnterFullscreen = value
     }
-  override var willExitFullscreen: (() -> Unit)?
+  override var willExitFullscreen: (() -> Unit)? = null
     set(value) {
       field = value
       videoView.get()?.events?.willExitFullscreen = value
     }
-  override var willEnterPictureInPicture: (() -> Unit)?
+  override var willEnterPictureInPicture: (() -> Unit)? = null
     set(value) {
       field = value
       videoView.get()?.events?.willEnterPictureInPicture = value
     }
-  override var willExitPictureInPicture: (() -> Unit)?
+  override var willExitPictureInPicture: (() -> Unit)? = null
     set(value) {
       field = value
       videoView.get()?.events?.willExitPictureInPicture = value

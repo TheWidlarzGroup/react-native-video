@@ -11,9 +11,9 @@ class OnAudioFocusChangedListener : AudioManager.OnAudioFocusChangeListener {
 
   override fun onAudioFocusChange(focusChange: Int) {
     when (focusChange) {
-      AudioManager.AUDIOFOCUS_GAIN -> eventEmitter?.onAudioFocusChange(true)
-      AudioManager.AUDIOFOCUS_LOSS -> eventEmitter?.onAudioFocusChange(false)
-      AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> eventEmitter?.onAudioFocusChange(false)
+      AudioManager.AUDIOFOCUS_GAIN -> eventEmitter?.onAudioFocusChange?.invoke(true)
+      AudioManager.AUDIOFOCUS_LOSS -> eventEmitter?.onAudioFocusChange?.invoke(false)
+      AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> eventEmitter?.onAudioFocusChange?.invoke(false)
     }
   }
 

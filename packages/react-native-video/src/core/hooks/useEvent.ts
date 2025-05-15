@@ -2,12 +2,23 @@ import { useEffect } from 'react';
 import { VideoPlayer } from '../VideoPlayer';
 import { type VideoPlayerEvents } from '../types/Events';
 
-type Events = keyof VideoPlayerEvents & 'onError';
+// Omit undefined from events
+type NonUndefined<T> = T extends undefined ? never : T;
+
+// Valid events names
+type Events = keyof VideoPlayerEvents | 'onError';
+
+// Valid events params
+type EventsParams<T extends Events> = T extends keyof VideoPlayerEvents
+  ? // (Native) Events from VideoPlayerEvents
+    Parameters<VideoPlayerEvents[T]>
+  : // (JS) Events from Video Player
+    Parameters<NonUndefined<VideoPlayer[T]>>;
 
 export const useEvent = <T extends Events>(
   player: VideoPlayer,
   event: T,
-  callback: (...args: Parameters<VideoPlayerEvents[T]>) => void
+  callback: (...args: EventsParams<T>) => void
 ) => {
   useEffect(() => {
     // @ts-expect-error we narrow the type of the event
