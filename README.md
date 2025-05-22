@@ -1,6 +1,6 @@
 [![React Native Video Component](./docs/assets/baners/rnv-banner.png)](https://thewidlarzgroup.com/?utm_source=rnv&utm_medium=readme&utm_id=banner)
 
-The most battle-tested open-source video player component for React Native - now with support for DRM, offline playback, HLS/DASH streaming, and more.
+The most battle-tested open-source video player component for React Native with support for DRM, offline playback, HLS/DASH streaming, and more.
 
 
 ## 🔍 Features
@@ -26,7 +26,7 @@ The most battle-tested open-source video player component for React Native - now
 | **v6** | 🛠 Maintained (community + TWG) | Old + New (Interop Layer) |
 | **v7** | 🚀 Active Development | Old + New (Full Support) |
 
-v7 introduces full support for the new React Native architecture, unlocking better performance, improved consistency, and modern native modules.
+`react-native-video` v7 introduces full support for the new React Native architecture, unlocking better performance, improved consistency, and modern native modules.
 
 ---
 
@@ -38,11 +38,16 @@ v7 introduces full support for the new React Native architecture, unlocking bett
 
 ## 🚀 Quick Start
 
+### Install
 ```bash
+# Install dependencies
 yarn add react-native-video
+
+# Install pods
 cd ios && pod install
 ```
 
+### Usage
 ```tsx
 import Video from 'react-native-video';
 
