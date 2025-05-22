@@ -9,7 +9,7 @@ The most battle-tested open-source video player component for React Native - now
 - ▶️ Local and remote playback  
 - 🔁 Streaming: HLS • DASH • SmoothStreaming  
 - 🔐 DRM: Widevine & FairPlay ([See free DRM stream example](https://www.thewidlarzgroup.com/services/free-drm-token-generator-for-video?utm_source=rnv&utm_medium=readme&utm_id=free-drm))
-- 📴 Offline playback, video download, side-tracks, side-captions support (via [optional SDK](https://docs.thewidlarzgroup.com/offline-video-sdk?utm_source=rnv&utm_medium=readme&utm_id=features-text))  
+- 📴 Offline playback, video download, support for side-tracks and side-captions (via [optional SDK](https://docs.thewidlarzgroup.com/offline-video-sdk?utm_source=rnv&utm_medium=readme&utm_id=features-text))  
 - 🎚️ Fine-grained control over tracks, buffering & events
 - 🧩 Expo plugin support
 - 🌐 Basic Web Support 
@@ -65,7 +65,7 @@ export default () => (
 
 ### 1 · 📥 Offline SDK
 
-Enable offline streaming with full control over downloads, license lifecycle, secure storage and media access.
+Enable offline streaming with full control over downloads, license lifecycle, secure storage, and media access.
 
 - Track selection (bitrate, audio, subtitles)
 - Pause / resume & background queueing
@@ -85,7 +85,7 @@ Write your own plugins to extend library logic, attach analytics or add custom w
 | Offering | Description |
 |----------|-------------|
 | [**Professional Support Packages**](https://www.thewidlarzgroup.com/issue-boost?utm_source=rnv&utm_medium=readme&utm_campaign=professional-support-packages#Contact) | Priority bug-fixes, guaranteed SLAs, [roadmap influence](https://github.com/orgs/TheWidlarzGroup/projects/6) |
-| [**Issue Booster**](https://www.thewidlarzgroup.com/issue-boost?utm_source=rnv&utm_medium=readme) | Pay‑per‑issue fast‑track for urgent fixes |
+| [**Issue Booster**](https://www.thewidlarzgroup.com/issue-boost?utm_source=rnv&utm_medium=readme) | Fast-track urgent fixes with a pay‑per‑issue model |
 | [**Offline Video SDK**](https://www.thewidlarzgroup.com/offline-video-sdk/?utm_source=rnv&utm_medium=readme&utm_campaign=downloading&utm_id=offline-video-sdk-link) | Plug‑and‑play secure download solution for iOS & Android |
 | [**Integration Support**](https://www.thewidlarzgroup.com/?utm_source=rnv&utm_medium=readme&utm_campaign=integration-support#Contact) | Hands‑on help integrating video, DRM & offline into your app |
 | [**Free DRM Token Generator**](https://www.thewidlarzgroup.com/services/free-drm-token-generator-for-video?utm_source=rnv&utm_medium=readme&utm_id=free-drm) | Generate Widevine / FairPlay tokens for testing |
