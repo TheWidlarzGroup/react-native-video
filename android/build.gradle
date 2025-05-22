@@ -51,6 +51,10 @@ def safeExtGet(prop) {
     return rootProject.ext.has(prop) ?
             rootProject.ext.get(prop) : rootProject.ext.has("RNVideo_" + prop) ?
             rootProject.ext.get("RNVideo_" + prop) : project.properties["RNVideo_" + prop]
+dependencies {
+    //noinspection GradleDynamicVersion
+    implementation "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
+    implementation 'com.github.adityaxjha:Android-ScalableVideoView:10e7b4da8b'
 }
 
 def isNewArchitectureEnabled() {
