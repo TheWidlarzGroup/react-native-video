@@ -1,8 +1,5 @@
 # react-native-video
 
-This is v7 version of the react-native-video library.
-It's experimental and not recommended for production use.
-
 It's working both on New and Old Architecture.
 
 ## Requirements
@@ -19,8 +16,8 @@ npm install react-native-nitro-modules
 
 Then install the package
 
-> [!IMPORTANT]  
-> This package is not published on npm yet. You have to install it from the local path.
+> [NOTE]  
+> This package is published on the private npm
 
 ```sh
 npm install react-native-video
@@ -92,16 +89,6 @@ const VideoPlayer = () => {
   );
 };
 ```
-
-## Contributing
-
-See the [contributing guide](CONTRIBUTING.md) to learn how to contribute to the repository and the development workflow.
-
-## License
-
-[Custom](LICENSE)
-
-This project is provided solely for demonstration and contribution purposes. Forking is permitted exclusively for submitting changes to the [main repository](https://github.com/TheWidlarzGroup/react-native-video-v7). The code and its modifications may only be used within this repository or an authorized fork. Commercial use of the code is prohibited unless you have permission from TheWidlarzGroup
 
 ---
 
