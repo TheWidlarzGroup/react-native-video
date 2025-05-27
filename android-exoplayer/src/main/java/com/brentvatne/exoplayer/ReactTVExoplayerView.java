@@ -1730,20 +1730,22 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         // add frameLayout to ExoPlayerView, ReactRootView load data first, move to ExoPlayerControllerView.
         ReactRootFrameLayout frameLayout = new ReactRootFrameLayout(getContext());
         frameLayout.setOnSizeChangedListener((reactRootFrameLayout, childView) -> {
-            reactRootFrameLayout.removeView(childView);
-            childView.setLayoutParams(new FrameLayout.LayoutParams(
-                    width > 0 ? width : LayoutParams.WRAP_CONTENT,
-                    height > 0 ? height : LayoutParams.WRAP_CONTENT));
-            exoDorisPlayerView.setBottomComponentView(childView, view -> {
-                if (view != null) {
-                    String className = view.getClass().getName();
-                    if (className.equals("androidx.compose.ui.platform.AndroidComposeView")) {
-                        return true;
+            post(() -> {
+                reactRootFrameLayout.removeView(childView);
+                childView.setLayoutParams(new FrameLayout.LayoutParams(
+                        width > 0 ? width : LayoutParams.WRAP_CONTENT,
+                        height > 0 ? height : LayoutParams.WRAP_CONTENT));
+                exoDorisPlayerView.setBottomComponentView(childView, view -> {
+                    if (view != null) {
+                        String className = view.getClass().getName();
+                        if (className.equals("androidx.compose.ui.platform.AndroidComposeView")) {
+                            return true;
+                        }
                     }
-                }
-                return view instanceof ReactViewGroup;
+                    return view instanceof ReactViewGroup;
+                });
+                exoDorisPlayerView.removeView(reactRootFrameLayout);
             });
-            exoDorisPlayerView.removeView(reactRootFrameLayout);
         });
         ReactRootView reactRootView = new ReactRootView(getContext());
         reactRootView.setTag(R.id.bottom_overlay_component);
