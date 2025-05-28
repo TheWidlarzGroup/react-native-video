@@ -3,6 +3,7 @@ package com.brentvatne.exoplayer
 import androidx.media3.common.MediaItem
 import androidx.media3.datasource.DataSource
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.drm.DrmSessionManager
 import com.brentvatne.common.api.Source
 import com.brentvatne.react.RNVPlugin
 
@@ -17,6 +18,15 @@ interface RNVExoplayerPlugin : RNVPlugin {
      * @return DRMManagerSpec implementation if plugin wants to handle DRM, null otherwise
      */
     fun getDRMManager(): DRMManagerSpec? = null
+
+    /**
+     * Optional function that allows the plugin to override the DrmSessionManager after it has been created.
+     * This is called after buildDrmSessionManager and allows for final modifications to the DrmSessionManager.
+     * @param source The media source being initialized.
+     * @param drmSessionManager The current DrmSessionManager instance.
+     * @return A modified DrmSessionManager if override is needed, or null to use original.
+     */
+    fun overrideDrmSessionManager(source: Source, drmSessionManager: DrmSessionManager): DrmSessionManager? = null
 
     /**
      * Optional function that allows the plugin to override the media data source factory,

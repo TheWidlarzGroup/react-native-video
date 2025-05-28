@@ -953,7 +953,10 @@ public class ReactExoplayerView extends FrameLayout implements
             if (drmSessionManager == null) {
                 eventEmitter.onVideoError.invoke("Failed to build DRM session manager", new Exception("DRM session manager is null"), "3007");
             }
-            return drmSessionManager;
+
+            // Allow plugins to override the DrmSessionManager
+            DrmSessionManager overriddenManager = ReactNativeVideoManager.Companion.getInstance().overrideDrmSessionManager(source, drmSessionManager);
+            return overriddenManager != null ? overriddenManager : drmSessionManager;
         } catch (UnsupportedDrmException ex) {
             // Unsupported DRM exceptions are handled by the calling method
             throw ex;
