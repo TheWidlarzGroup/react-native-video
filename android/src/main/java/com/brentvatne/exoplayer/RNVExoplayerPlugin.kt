@@ -2,8 +2,8 @@ package com.brentvatne.exoplayer
 
 import androidx.media3.common.MediaItem
 import androidx.media3.datasource.DataSource
-import androidx.media3.exoplayer.drm.DrmSessionManager
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.drm.DrmSessionManager
 import com.brentvatne.common.api.Source
 import com.brentvatne.react.RNVPlugin
 
