@@ -1,5 +1,12 @@
 
 
+## [6.14.1](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.14.0...v6.14.1) (2025-05-28)
+
+
+### Features
+
+* **android:** allow plugins to override drm session manager ([#4558](https://github.com/TheWidlarzGroup/react-native-video/issues/4558)) ([9449eb3](https://github.com/TheWidlarzGroup/react-native-video/commit/9449eb34f3ebcf7ac08bde1ee55e5cc26a142217))
+
 # [6.14.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.13.0...v6.14.0) (2025-05-10)
 
 

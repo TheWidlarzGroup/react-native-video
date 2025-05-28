@@ -1,6 +1,6 @@
 {
     "name": "react-native-video",
-    "version": "6.14.0",
+    "version": "6.14.1",
     "description": "A <Video /> element for react-native",
     "main": "lib/index",
     "source": "src/index.ts",
