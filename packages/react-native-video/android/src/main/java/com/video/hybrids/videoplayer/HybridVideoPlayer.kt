@@ -28,7 +28,6 @@ import com.margelo.nitro.core.Promise
 import com.video.core.LibraryError
 import com.video.core.PlayerError
 import com.video.core.VideoManager
-import com.video.core.activities.FullscreenVideoViewActivity
 import com.video.core.player.OnAudioFocusChangedListener
 import com.video.core.recivers.AudioBecomingNoisyReceiver
 import com.video.core.utils.Threading.runOnMainThread
@@ -292,15 +291,6 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
     runOnMainThreadSync {
       PlayerView.switchTargetView(playerPointer, currentPlayerView?.get(), videoView.playerView)
       currentPlayerView = WeakReference(videoView.playerView)
-    }
-  }
-
-  fun moveToFullscreenActivity(activity: FullscreenVideoViewActivity) {
-    VideoManager.registerFullscreenActivity(activity, activity.hashCode())
-
-    runOnMainThreadSync {
-      PlayerView.switchTargetView(playerPointer, currentPlayerView?.get(), activity.playerView)
-      currentPlayerView = WeakReference(activity.playerView)
     }
   }
 

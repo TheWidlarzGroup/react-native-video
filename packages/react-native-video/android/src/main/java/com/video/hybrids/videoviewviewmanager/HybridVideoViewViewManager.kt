@@ -35,7 +35,7 @@ class HybridVideoViewViewManager(nitroId: Int): HybridVideoViewViewManagerSpec()
   }
 
   override fun exitFullscreen() {
-    throw LibraryError.MethodNotSupported("exitFullscreen")
+    videoView.get()?.exitFullscreen()
   }
 
   override fun enterPictureInPicture() {

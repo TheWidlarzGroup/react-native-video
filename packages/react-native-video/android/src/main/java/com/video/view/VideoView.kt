@@ -2,7 +2,6 @@ package com.video.view
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.util.AttributeSet
@@ -22,7 +21,7 @@ import com.margelo.nitro.video.VideoViewEvents
 import com.video.core.LibraryError
 import com.video.core.VideoManager
 import com.video.core.VideoViewError
-import com.video.core.activities.FullscreenVideoViewActivity
+import com.video.core.fragments.FullscreenVideoFragment
 import com.video.core.fragments.PictureInPictureHelperFragment
 import com.video.core.utils.PictureInPictureUtils.canEnterPictureInPicture
 import com.video.core.utils.PictureInPictureUtils.createPictureInPictureParams
@@ -108,6 +107,7 @@ class VideoView @JvmOverloads constructor(
     }
   private var rootContentViews: List<View> = listOf()
   private var pictureInPictureHelperTag: String? = null
+  private var fullscreenFragmentTag: String? = null
 
   val applicationContent: ReactApplicationContext
     get() {
@@ -136,10 +136,14 @@ class VideoView @JvmOverloads constructor(
     post(layoutRunnable)
   }
 
+  @SuppressLint("PrivateResource")
   private fun setupFullscreenButton() {
     playerView.setFullscreenButtonClickListener { _ ->
       enterFullscreen()
     }
+
+    playerView.findViewById<ImageButton>(androidx.media3.ui.R.id.exo_fullscreen)
+      ?.setImageResource(androidx.media3.ui.R.drawable.exo_ic_fullscreen_enter)
   }
 
   fun enterFullscreen() {
@@ -147,25 +151,54 @@ class VideoView @JvmOverloads constructor(
       return
     }
 
-    isInFullscreen = true
-
-    val intent = Intent(context, FullscreenVideoViewActivity::class.java)
-    intent.putExtra("nitroId", nitroId)
+    val currentActivity = applicationContent.currentActivity
+    if (currentActivity !is FragmentActivity) {
+      Log.e("ReactNativeVideo", "Current activity is not a FragmentActivity, cannot enter fullscreen")
+      return
+    }
 
     try {
-      val currentActivity = applicationContent.currentActivity
-      currentActivity?.startActivity(intent)
+      events.willEnterFullscreen?.let { it() }
+
+      val fragment = FullscreenVideoFragment(this)
+      fullscreenFragmentTag = fragment.id
+
+      currentActivity.supportFragmentManager.beginTransaction()
+        .add(fragment, fragment.id)
+        .commitAllowingStateLoss()
+
+      isInFullscreen = true
     } catch (err: Exception) {
-      val debugMessage = "Failed to start fullscreen activity for nitroId: $nitroId"
+      val debugMessage = "Failed to start fullscreen fragment for nitroId: $nitroId"
       Log.e("ReactNativeVideo", debugMessage, err)
     }
   }
 
   @SuppressLint("PrivateResource")
   fun exitFullscreen() {
-    // Change fullscreen button icon back to enter fullscreen
-    playerView.findViewById<ImageButton>(androidx.media3.ui.R.id.exo_fullscreen)
-      ?.setImageResource(androidx.media3.ui.R.drawable.exo_ic_fullscreen_enter)
+    if (!isInFullscreen) {
+      return
+    }
+
+    events.willExitFullscreen?.let { it() }
+
+    val currentActivity = applicationContent.currentActivity
+    fullscreenFragmentTag?.let { tag ->
+      (currentActivity as? FragmentActivity)?.let { activity ->
+        activity.supportFragmentManager.findFragmentByTag(tag)?.let { fragment ->
+          // The fragment will handle its own removal in exitFullscreen()
+          if (fragment is FullscreenVideoFragment) {
+            runOnMainThread {
+              fragment.exitFullscreen()
+            }
+          }
+        }
+      }
+      fullscreenFragmentTag = null
+    }
+
+    // Change fullscreen button icon back to enter fullscreen and update callback
+    setupFullscreenButton()
 
     isInFullscreen = false
   }
@@ -199,11 +232,28 @@ class VideoView @JvmOverloads constructor(
     }
   }
 
+  private fun removeFullscreenFragment() {
+    val currentActivity = applicationContent.currentActivity
+    fullscreenFragmentTag?.let { tag ->
+      (currentActivity as? FragmentActivity)?.let { activity ->
+        activity.supportFragmentManager.findFragmentByTag(tag)?.let { fragment ->
+          activity.supportFragmentManager.beginTransaction()
+            .remove(fragment)
+            .commitAllowingStateLoss()
+        }
+      }
+      fullscreenFragmentTag = null
+    }
+  }
+
   fun hideRootContentViews() {
     // Remove playerView from parent
     // In PiP mode, we don't want to show the controller
     // Controls are handled by System if we have MediaSession
     playerView.useController = false
+    playerView.setBackgroundColor(Color.BLACK)
+    playerView.setShutterBackgroundColor(Color.BLACK)
+
     (playerView.parent as? ViewGroup)?.removeView(playerView)
 
     val currentActivity = applicationContent.currentActivity ?: return
@@ -224,6 +274,9 @@ class VideoView @JvmOverloads constructor(
   fun restoreRootContentViews() {
     // Reset PlayerView settings
     playerView.useController = useController
+
+    playerView.setBackgroundColor(Color.BLACK)
+    playerView.setShutterBackgroundColor(Color.BLACK)
 
     val currentActivity = applicationContent.currentActivity ?: return
     val rootContent = currentActivity.window.decorView.findViewById<ViewGroup>(android.R.id.content)
@@ -273,6 +326,7 @@ class VideoView @JvmOverloads constructor(
   // -------- View Lifecycle Methods --------
   override fun onDetachedFromWindow() {
     removePipHelper()
+    removeFullscreenFragment()
     VideoManager.unregisterView(this)
     super.onDetachedFromWindow()
   }
