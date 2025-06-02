@@ -6,7 +6,8 @@
   "author": "TheWidlarzGroup <hi@thewidlarzgroup.com> (https://github.com/TheWidlarzGroup)",
   "workspaces": [
     "packages/react-native-video",
-    "example"
+    "example",
+    "docs"
   ],
   "scripts": {
     "build": "bun react-native-video build",

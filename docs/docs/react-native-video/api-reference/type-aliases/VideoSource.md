@@ -1,0 +1,7 @@
+# Type Alias: VideoSource
+
+```ts
+type VideoSource = number | string;
+```
+
+Defined in: [types/VideoConfig.ts:1](https://github.com/TheWidlarzGroup/react-native-video-v7/blob/d4046f8eca07df9e2ec69f8007c800ebf23ec7a7/packages/react-native-video/src/core/types/VideoConfig.ts#L1)

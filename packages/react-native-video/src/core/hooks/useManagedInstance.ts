@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, type DependencyList } from 'react';
 
 /**
+ * @internal
  * A hook that helps to manage the lifecycle of a native instance in a React component.
  * It allows instance to be recreated when dependencies change, but not when the component is hot reloaded.
  *

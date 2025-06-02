@@ -25,6 +25,12 @@ export const isVideoPlayerSource = (obj: any): obj is VideoPlayerSource => {
   );
 };
 
+/**
+ * Creates a `VideoPlayerSource` instance from a URI (string).
+ *
+ * @param uri - The URI of the video to play
+ * @returns The `VideoPlayerSource` instance
+ */
 export const createSourceFromUri = (uri: string) => {
   try {
     return VideoPlayerSourceFactory.fromUri(uri);
@@ -33,6 +39,12 @@ export const createSourceFromUri = (uri: string) => {
   }
 };
 
+/**
+ * Creates a `VideoPlayerSource` instance from a `VideoConfig`.
+ *
+ * @param config - The `VideoConfig` to create the `VideoPlayerSource` from
+ * @returns The `VideoPlayerSource` instance
+ */
 export const createSourceFromVideoConfig = (config: NativeVideoConfig) => {
   try {
     return VideoPlayerSourceFactory.fromVideoConfig(config);
@@ -41,6 +53,12 @@ export const createSourceFromVideoConfig = (config: NativeVideoConfig) => {
   }
 };
 
+/**
+ * Creates a `VideoPlayerSource`
+ *
+ * @param source - The `VideoSource` to create the `VideoPlayerSource` from
+ * @returns The `VideoPlayerSource` instance
+ */
 export const createSource = (
   source: VideoSource | VideoConfig | VideoPlayerSource
 ): VideoPlayerSource => {

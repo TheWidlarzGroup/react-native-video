@@ -16,6 +16,13 @@ const sourceEqual = <T extends VideoConfig | VideoSource | VideoPlayerSource>(
   return JSON.stringify(a) === JSON.stringify(b);
 };
 
+/**
+ * Creates a `VideoPlayer` instance and manages its lifecycle.
+ *
+ * @param source - The source of the video to play
+ * @param setup - A function to setup the player
+ * @returns The `VideoPlayer` instance
+ */
 export const useVideoPlayer = (
   source: VideoConfig | VideoSource | NoAutocomplete<VideoPlayerSource>,
   setup?: (player: VideoPlayer) => void

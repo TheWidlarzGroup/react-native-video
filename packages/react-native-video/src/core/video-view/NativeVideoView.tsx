@@ -1,6 +1,6 @@
-import { UIManager, Platform } from 'react-native';
+import { Platform, UIManager } from 'react-native';
 
-import VideoViewNativeComponent from './spec/fabric/VideoViewNativeComponent';
+import VideoViewNativeComponent from '../../spec/fabric/VideoViewNativeComponent';
 
 const LINKING_ERROR =
   `The package 'react-native-video' doesn't seem to be linked. Make sure: \n\n` +

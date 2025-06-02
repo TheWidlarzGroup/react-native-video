@@ -1,16 +1,16 @@
 import * as React from 'react';
 import type { ViewStyle } from 'react-native';
 import { NitroModules } from 'react-native-nitro-modules';
-import type { VideoViewEvents } from './core/types/Events';
-import { tryParseNativeVideoError, VideoError } from './core/types/VideoError';
-import type { VideoPlayer } from './core/VideoPlayer';
-import { NativeVideoView } from './NativeVideoView';
 import type {
   VideoViewViewManager,
   VideoViewViewManagerFactory,
-} from './spec/nitro/VideoViewViewManager.nitro';
+} from '../../spec/nitro/VideoViewViewManager.nitro';
+import type { VideoViewEvents } from '../types/Events';
+import { tryParseNativeVideoError, VideoError } from '../types/VideoError';
+import type { VideoPlayer } from '../VideoPlayer';
+import { NativeVideoView } from './NativeVideoView';
 
-interface VideoViewProps extends Partial<VideoViewEvents> {
+export interface VideoViewProps extends Partial<VideoViewEvents> {
   /**
    * The player to play the video - {@link VideoPlayer}
    */
@@ -93,6 +93,7 @@ const updateProps = (manager: VideoViewViewManager, props: VideoViewProps) => {
 
 /**
  * VideoView is a component that allows you to display a video from a {@link VideoPlayer}.
+ *
  * @param player - The player to play the video - {@link VideoPlayer}
  * @param controls - Whether to show the controls. Defaults to false.
  * @param style - The style of the video view - {@link ViewStyle}
@@ -213,5 +214,7 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
     );
   }
 );
+
+VideoView.displayName = 'VideoView';
 
 export default React.memo(VideoView);

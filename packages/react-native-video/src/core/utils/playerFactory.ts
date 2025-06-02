@@ -10,6 +10,13 @@ import { createSource, isVideoPlayerSource } from './sourceFactory';
 const VideoPlayerFactory =
   NitroModules.createHybridObject<VideoPlayerFactory>('VideoPlayerFactory');
 
+/**
+ * @internal
+ * Creates a Native VideoPlayer instance.
+ *
+ * @param source - The source of the video to play
+ * @returns The Native VideoPlayer instance
+ */
 export const createPlayer = (
   source: VideoSource | VideoConfig | VideoPlayerSource
 ): VideoPlayer => {

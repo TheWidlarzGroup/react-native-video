@@ -22,6 +22,7 @@ export type VideoConfig = {
   externalSubtitles?: ExternalSubtitle[];
 };
 
+// @internal
 export interface NativeVideoConfig extends VideoConfig {
   // The uri should be resolved to string before creating the source
   uri: string;
