@@ -156,7 +156,22 @@ override fun overrideMediaDataSourceFactory(
 }
 ```
 
-##### 3. `shouldDisableCache`
+##### 3. `overrideMediaSourceFactory`
+
+Allows you to override the default MediaSource.Factory used by ExoPlayer for creating media sources.
+Use this if you need to inject a custom media source implementation. If you return null, the default media source factory will be used.
+
+```kotlin
+override fun overrideMediaSourceFactory(
+    source: Source,
+    mediaSourceFactory: MediaSource.Factory,
+    mediaDataSourceFactory: DataSource.Factory
+  ): MediaSource.Factory? {
+    // Return your custom factory or null to use default
+  }
+```
+
+##### 4. `shouldDisableCache`
 
 Enables dynamic disabling of the caching system per source.
 
