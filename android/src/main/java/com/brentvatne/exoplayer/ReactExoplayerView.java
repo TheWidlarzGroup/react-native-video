@@ -1248,6 +1248,12 @@ public class ReactExoplayerView extends FrameLayout implements
             );
         }
 
+        mediaSourceFactory = Objects.requireNonNullElse(
+                ReactNativeVideoManager.Companion.getInstance()
+                        .overrideMediaSourceFactory(source, mediaSourceFactory, mediaDataSourceFactory),
+                mediaSourceFactory
+        );
+
         mediaItemBuilder.setStreamKeys(streamKeys);
 
         @Nullable
