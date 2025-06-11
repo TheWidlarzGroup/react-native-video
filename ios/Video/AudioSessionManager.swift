@@ -139,7 +139,11 @@ class AudioSessionManager {
             return view._playInBackground
         }
 
-        let canAllowMixing = !anyPlayerShowNotificationControls && !anyPlayerNeedsBackgroundPlayback
+        let anyPlayerWantsMixing = videoViews.allObjects.contains { view in
+            return view._mixWithOthers == "mix" || view._mixWithOthers == "duck"
+        }
+
+        let canAllowMixing = anyPlayerWantsMixing || (!anyPlayerShowNotificationControls && !anyPlayerNeedsBackgroundPlayback)
 
         if isAudioSessionManagementDisabled {
             // AUDIO SESSION MANAGEMENT DISABLED BY USER
