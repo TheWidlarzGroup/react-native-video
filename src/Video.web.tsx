@@ -23,7 +23,7 @@ interface WebVideoElementProps
 // styles.
 //
 // See <https://necolas.github.io/react-native-web/docs/unstable-apis/#use-with-existing-react-dom-components>
-function WebVideo(props: WebVideoElementProps) {
+function WebVideo(props: WebVideoElementProps): React.JSX.Element {
   return unstable_createElement('video', props);
 }
 
