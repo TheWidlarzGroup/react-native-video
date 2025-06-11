@@ -1,11 +1,11 @@
 public struct DRMParams {
-    let type: String?
-    let licenseServer: String?
-    let headers: [String: Any]?
-    let contentId: String?
-    let certificateUrl: String?
-    let base64Certificate: Bool?
-    let localSourceEncryptionKeyScheme: String?
+    public let type: String?
+    public let licenseServer: String?
+    public let headers: [String: Any]?
+    public let contentId: String?
+    public let certificateUrl: String?
+    public let base64Certificate: Bool?
+    public let localSourceEncryptionKeyScheme: String?
 
     let json: NSDictionary?
 
