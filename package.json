@@ -10,7 +10,7 @@
     "homepage": "https://docs.thewidlarzgroup.com/react-native-video/",
     "repository": {
         "type": "git",
-        "url": "git@github.com:TheWidlarzGroup/react-native-video.git"
+        "url": "git+https://github.com/TheWidlarzGroup/react-native-video.git"
     },
     "devDependencies": {
         "@expo/config-plugins": "^8.0.5",
