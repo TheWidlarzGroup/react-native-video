@@ -1843,7 +1843,14 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                 event.getKeyCode() != KeyEvent.KEYCODE_BACK) {
             return true;
         }
-        return (exoDorisPlayerView != null && exoDorisPlayerView.dispatchKeyEvent(event)) || super.dispatchKeyEvent(event);
+        if (exoDorisPlayerView != null) {
+            if (!exoDorisPlayerView.getControllerAutoShow()) {
+                exoDorisPlayerView.setControllerAutoShow(true);
+            }
+            return exoDorisPlayerView.dispatchKeyEvent(event) || super.dispatchKeyEvent(event);
+        } else {
+            return super.dispatchKeyEvent(event);
+        }
     }
 
     public void showWatermark() {
@@ -1923,6 +1930,9 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
     @Override
     public void onAnnotationsButtonClicked() {
+        if (exoDorisPlayerView != null) {
+            exoDorisPlayerView.setControllerAutoShow(false);
+        }
         eventEmitter.annotationsButtonClick();
     }
 
