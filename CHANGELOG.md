@@ -1,5 +1,19 @@
 
 
+# [6.15.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.14.1...v6.15.0) (2025-06-12)
+
+
+### Bug Fixes
+
+* **web:** add missing component type ([9f03cc5](https://github.com/TheWidlarzGroup/react-native-video/commit/9f03cc5a0983e05515d3d194204a7c9eb71b383d))
+
+
+### Features
+
+* allow audio mixing if one of the video views require it ([#4559](https://github.com/TheWidlarzGroup/react-native-video/issues/4559)) ([3576a13](https://github.com/TheWidlarzGroup/react-native-video/commit/3576a134e678e6273d9195d7a17c9828c30426e2))
+* **ios:** forward real fullscreen events from AVPlayer instead of guessing ([#4509](https://github.com/TheWidlarzGroup/react-native-video/issues/4509)) ([88c20d1](https://github.com/TheWidlarzGroup/react-native-video/commit/88c20d1c065b2778a66ddde4a3b92bd58bec043b))
+* **plugin:** overrideMediaSourceFactory ([#4566](https://github.com/TheWidlarzGroup/react-native-video/issues/4566)) ([9cf7802](https://github.com/TheWidlarzGroup/react-native-video/commit/9cf780276af7f0a890025a13e1685e49c6589f0e))
+
 ## [6.14.1](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.14.0...v6.14.1) (2025-05-28)
 
 
