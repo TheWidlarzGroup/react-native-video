@@ -543,10 +543,13 @@ public class ReactExoplayerView extends FrameLayout implements
             switch (which) {
                 case 0:
                     speed = 0.5f;
+                    break;
                 case 2:
                     speed = 1.5f;
+                    break;
                 case 3:
                     speed = 2.0f;
+                    break;
                 default:
                     speed = 1.0f;;
             };
