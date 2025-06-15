@@ -1,3 +1,6 @@
+import type { IgnoreSilentSwitchMode } from './IgnoreSilentSwitchMode';
+import type { MixAudioMode } from './MixAudioMode';
+import type { TextTrack } from './TextTrack';
 import type { VideoPlayerSourceBase } from './VideoPlayerSourceBase';
 import type { VideoPlayerStatus } from './VideoPlayerStatus';
 
@@ -53,6 +56,49 @@ export interface VideoPlayerBase {
   rate: number;
 
   /**
+   * Controls the audio mixing mode of the player.
+   *
+   * - `mixWithOthers` - Mix with other players.
+   * - `doNotMix` - Do not mix with other players.
+   * - `duckOthers` - Duck other players.
+   * - `auto` - uses default behavior for player.
+   *
+   * default is `auto`.
+   */
+  mixAudioMode: MixAudioMode;
+
+  /**
+   * Controls the silent switch mode of the player.
+   * @note This is only supported on iOS.
+   *
+   * - `auto` - uses default behavior for player.
+   * - `ignore` - ignore the silent switch.
+   * - `obey` - obey the silent switch.
+   */
+  ignoreSilentSwitchMode: IgnoreSilentSwitchMode;
+
+  /**
+   * Whether the player should play in background.
+   *
+   * - `true` - play in background.
+   * - `false` - pause in background (default).
+   *
+   * @note this can override {@link playWhenInactive}.
+   */
+  playInBackground: boolean;
+
+  /**
+   * Whether the player should play when the app is inactive (user opened control center).
+   *
+   * - `true` - play when the app is inactive.
+   * - `false` - pause when the app is inactive (default).
+   *
+   * @note this can be overridden by {@link playInBackground}.
+   * @note This is only supported on iOS.
+   */
+  playWhenInactive: boolean;
+
+  /**
    * Whether the player is playing.
    * @note This is a read-only property.
    * @note To pause/resume the player, you need to use {@link play} and {@link pause} methods.
@@ -99,4 +145,22 @@ export interface VideoPlayerBase {
    * see {@link VideoPlayerSourceBase}
    */
   replaceSourceAsync(source: VideoPlayerSourceBase | null): Promise<void>;
+
+  /**
+   * Get all available text tracks for the current source.
+   * @returns Array of available text tracks
+   */
+  getAvailableTextTracks(): TextTrack[];
+
+  /**
+   * Select a text track to display.
+   * @param textTrack - Text track to select, or null to unselect current track
+   */
+  selectTextTrack(textTrack: TextTrack | null): void;
+
+  /**
+   * Get the currently selected text track.
+   * @returns The currently selected text track, or undefined if none is selected
+   */
+  readonly selectedTrack?: TextTrack;
 }

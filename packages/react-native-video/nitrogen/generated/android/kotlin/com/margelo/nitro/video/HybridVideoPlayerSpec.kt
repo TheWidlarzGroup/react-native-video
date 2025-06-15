@@ -85,12 +85,48 @@ abstract class HybridVideoPlayerSpec: HybridObject() {
   
   @get:DoNotStrip
   @get:Keep
+  @set:DoNotStrip
+  @set:Keep
+  abstract var mixAudioMode: MixAudioMode
+  
+  @get:DoNotStrip
+  @get:Keep
+  @set:DoNotStrip
+  @set:Keep
+  abstract var ignoreSilentSwitchMode: IgnoreSilentSwitchMode
+  
+  @get:DoNotStrip
+  @get:Keep
+  @set:DoNotStrip
+  @set:Keep
+  abstract var playInBackground: Boolean
+  
+  @get:DoNotStrip
+  @get:Keep
+  @set:DoNotStrip
+  @set:Keep
+  abstract var playWhenInactive: Boolean
+  
+  @get:DoNotStrip
+  @get:Keep
   abstract val isPlaying: Boolean
+  
+  @get:DoNotStrip
+  @get:Keep
+  abstract val selectedTrack: TextTrack?
 
   // Methods
   @DoNotStrip
   @Keep
   abstract fun replaceSourceAsync(source: HybridVideoPlayerSourceSpec?): Promise<Unit>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun getAvailableTextTracks(): Array<TextTrack>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun selectTextTrack(textTrack: TextTrack?): Unit
   
   @DoNotStrip
   @Keep

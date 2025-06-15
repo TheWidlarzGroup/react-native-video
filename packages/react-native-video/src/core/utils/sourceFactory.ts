@@ -5,7 +5,9 @@ import type {
   VideoPlayerSourceFactory,
 } from '../../spec/nitro/VideoPlayerSource.nitro';
 import type {
+  ExternalSubtitle,
   NativeVideoConfig,
+  SubtitleType,
   VideoConfig,
   VideoSource,
 } from '../types/VideoConfig';
@@ -42,15 +44,41 @@ export const createSourceFromUri = (uri: string) => {
 /**
  * Creates a `VideoPlayerSource` instance from a `VideoConfig`.
  *
+ * @note The `uri` property is required to be a string.
+ *
  * @param config - The `VideoConfig` to create the `VideoPlayerSource` from
  * @returns The `VideoPlayerSource` instance
  */
-export const createSourceFromVideoConfig = (config: NativeVideoConfig) => {
+export const createSourceFromVideoConfig = (
+  config: VideoConfig & { uri: string }
+) => {
+  if (config.externalSubtitles) {
+    config.externalSubtitles = parseExternalSubtitles(config.externalSubtitles);
+  }
+
   try {
-    return VideoPlayerSourceFactory.fromVideoConfig(config);
+    return VideoPlayerSourceFactory.fromVideoConfig(
+      config as NativeVideoConfig
+    );
   } catch (error) {
     throw tryParseNativeVideoError(error);
   }
+};
+
+/**
+ * Parses the external subtitles from the `ExternalSubtitle` to the `NativeExternalSubtitle` format.
+ *
+ * @param externalSubtitles - The external subtitles to parse
+ * @returns The parsed external subtitles
+ */
+const parseExternalSubtitles = (
+  externalSubtitles: ExternalSubtitle[]
+): NativeVideoConfig['externalSubtitles'] => {
+  return externalSubtitles.map((subtitle) => ({
+    uri: subtitle.uri,
+    label: subtitle.label,
+    type: (subtitle.type ?? 'auto') as SubtitleType,
+  }));
 };
 
 /**
@@ -80,16 +108,19 @@ export const createSource = (
   // If source is an object (VideoConfig)
   if (typeof source === 'object' && 'uri' in source) {
     if (typeof source.uri === 'string') {
-      return createSourceFromVideoConfig(source as NativeVideoConfig);
+      return createSourceFromVideoConfig(
+        source as VideoConfig & { uri: string }
+      );
     }
 
     if (typeof source.uri === 'number') {
-      const nativeConfig = {
+      const config = {
         ...source,
+        // Resolve the asset source to get the URI
         uri: Image.resolveAssetSource(source.uri).uri,
-      } satisfies NativeVideoConfig;
+      };
 
-      return createSourceFromVideoConfig(nativeConfig);
+      return createSourceFromVideoConfig(config);
     }
   }
 

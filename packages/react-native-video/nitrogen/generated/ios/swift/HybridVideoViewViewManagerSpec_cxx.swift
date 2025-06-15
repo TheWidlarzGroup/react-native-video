@@ -160,6 +160,17 @@ public class HybridVideoViewViewManagerSpec_cxx {
     }
   }
   
+  public final var resizeMode: Int32 {
+    @inline(__always)
+    get {
+      return self.__implementation.resizeMode.rawValue
+    }
+    @inline(__always)
+    set {
+      self.__implementation.resizeMode = margelo.nitro.video.ResizeMode(rawValue: newValue)!
+    }
+  }
+  
   public final var onPictureInPictureChange: bridge.std__optional_std__function_void_bool____isInPictureInPicture______ {
     @inline(__always)
     get {

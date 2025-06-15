@@ -19,13 +19,23 @@ namespace margelo::nitro::video { class HybridVideoPlayerSourceSpec; }
 namespace margelo::nitro::video { class HybridVideoPlayerEventEmitterSpec; }
 // Forward declaration of `VideoPlayerStatus` to properly resolve imports.
 namespace margelo::nitro::video { enum class VideoPlayerStatus; }
+// Forward declaration of `MixAudioMode` to properly resolve imports.
+namespace margelo::nitro::video { enum class MixAudioMode; }
+// Forward declaration of `IgnoreSilentSwitchMode` to properly resolve imports.
+namespace margelo::nitro::video { enum class IgnoreSilentSwitchMode; }
+// Forward declaration of `TextTrack` to properly resolve imports.
+namespace margelo::nitro::video { struct TextTrack; }
 
 #include <memory>
 #include "HybridVideoPlayerSourceSpec.hpp"
 #include "HybridVideoPlayerEventEmitterSpec.hpp"
 #include "VideoPlayerStatus.hpp"
-#include <NitroModules/Promise.hpp>
+#include "MixAudioMode.hpp"
+#include "IgnoreSilentSwitchMode.hpp"
 #include <optional>
+#include "TextTrack.hpp"
+#include <NitroModules/Promise.hpp>
+#include <vector>
 
 namespace margelo::nitro::video {
 
@@ -68,11 +78,22 @@ namespace margelo::nitro::video {
       virtual void setLoop(bool loop) = 0;
       virtual double getRate() = 0;
       virtual void setRate(double rate) = 0;
+      virtual MixAudioMode getMixAudioMode() = 0;
+      virtual void setMixAudioMode(MixAudioMode mixAudioMode) = 0;
+      virtual IgnoreSilentSwitchMode getIgnoreSilentSwitchMode() = 0;
+      virtual void setIgnoreSilentSwitchMode(IgnoreSilentSwitchMode ignoreSilentSwitchMode) = 0;
+      virtual bool getPlayInBackground() = 0;
+      virtual void setPlayInBackground(bool playInBackground) = 0;
+      virtual bool getPlayWhenInactive() = 0;
+      virtual void setPlayWhenInactive(bool playWhenInactive) = 0;
       virtual bool getIsPlaying() = 0;
+      virtual std::optional<TextTrack> getSelectedTrack() = 0;
 
     public:
       // Methods
       virtual std::shared_ptr<Promise<void>> replaceSourceAsync(const std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>>& source) = 0;
+      virtual std::vector<TextTrack> getAvailableTextTracks() = 0;
+      virtual void selectTextTrack(const std::optional<TextTrack>& textTrack) = 0;
       virtual void clean() = 0;
       virtual std::shared_ptr<Promise<void>> preload() = 0;
       virtual void play() = 0;

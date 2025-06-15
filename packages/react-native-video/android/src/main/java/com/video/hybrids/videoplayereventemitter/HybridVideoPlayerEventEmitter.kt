@@ -33,6 +33,8 @@ class HybridVideoPlayerEventEmitter(): HybridVideoPlayerEventEmitterSpec() {
 
   override var onTextTrackDataChanged: (Array<String>) -> Unit = {}
 
+  override var onTrackChange: (TextTrack?) -> Unit = {}
+
   override var onVolumeChange: (Double) -> Unit = {}
 
   override var onStatusChange: (VideoPlayerStatus) -> Unit = {}

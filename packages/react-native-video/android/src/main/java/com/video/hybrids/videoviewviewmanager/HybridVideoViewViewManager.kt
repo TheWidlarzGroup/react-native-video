@@ -3,11 +3,9 @@ package com.margelo.nitro.video
 import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
 import com.facebook.proguard.annotations.DoNotStrip
-import com.video.core.LibraryError
 import com.video.core.VideoManager
 import com.video.core.VideoViewError
 import com.video.core.utils.PictureInPictureUtils
-import com.video.view.VideoView
 import com.video.core.utils.Threading
 
 @DoNotStrip
@@ -66,6 +64,12 @@ class HybridVideoViewViewManager(nitroId: Int): HybridVideoViewViewManagerSpec()
     get() = videoView.get()?.useController == true
     set(value) {
       videoView.get()?.useController = value
+    }
+
+  override var resizeMode: ResizeMode
+    get() = videoView.get()?.resizeMode ?: ResizeMode.NONE
+    set(value) {
+      videoView.get()?.resizeMode = value
     }
 
   // View callbacks

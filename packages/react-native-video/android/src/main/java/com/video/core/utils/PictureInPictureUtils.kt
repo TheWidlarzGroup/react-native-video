@@ -25,7 +25,7 @@ object PictureInPictureUtils {
   fun createPictureInPictureParams(videoView: VideoView): PictureInPictureParams {
     val builder = PictureInPictureParams.Builder()
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && videoView.autoEnterPictureInPicture) {
       builder.setAutoEnterEnabled(videoView.autoEnterPictureInPicture)
     }
 
@@ -33,6 +33,19 @@ object PictureInPictureUtils {
       .setAspectRatio(calculateAspectRatio(videoView.playerView))
       .setSourceRectHint(calculateSourceRectHint(videoView.playerView))
       .build()
+  }
+
+  @RequiresApi(Build.VERSION_CODES.O)
+  fun createDisabledPictureInPictureParams(videoView: VideoView): PictureInPictureParams {
+    val defaultParams = PictureInPictureParams.Builder()
+      .setAspectRatio(null) // Clear aspect ratio
+      .setSourceRectHint(null) // Clear source rect hint
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+      defaultParams.setAutoEnterEnabled(false)
+    }
+
+    return defaultParams.build()
   }
 
   fun calculateAspectRatio(view: View): Rational {

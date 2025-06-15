@@ -231,6 +231,9 @@ dependencies {
   // For loading data using the OkHttp network stack
   implementation "androidx.media3:media3-datasource-okhttp:$media3_version"
 
+  // For Media Session
+  implementation "androidx.media3:media3-session:$media3_version"
+
   if (ExoplayerDependencies.useExoplayerDash) {
     implementation "androidx.media3:media3-exoplayer-dash:$media3_version"
   }

@@ -34,9 +34,11 @@ export const useVideoPlayer = (
         setup?.(player);
         return player;
       },
-      cleanup: (player) => player.__destroy(),
+      cleanup: (player) => {
+        player.__destroy();
+      },
       dependenciesEqualFn: sourceEqual,
     },
-    [source]
+    [JSON.stringify(source)]
   );
 };

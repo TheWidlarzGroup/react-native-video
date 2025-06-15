@@ -32,6 +32,8 @@ namespace margelo::nitro::video { struct onProgressData; }
 namespace margelo::nitro::video { struct TimedMetadata; }
 // Forward declaration of `TimedMetadataObject` to properly resolve imports.
 namespace margelo::nitro::video { struct TimedMetadataObject; }
+// Forward declaration of `TextTrack` to properly resolve imports.
+namespace margelo::nitro::video { struct TextTrack; }
 // Forward declaration of `VideoPlayerStatus` to properly resolve imports.
 namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 
@@ -50,6 +52,7 @@ namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 #include <vector>
 #include "TimedMetadataObject.hpp"
 #include <string>
+#include "TextTrack.hpp"
 #include "VideoPlayerStatus.hpp"
 
 #include "ReactNativeVideo-Swift-Cxx-Umbrella.hpp"
@@ -198,6 +201,13 @@ namespace margelo::nitro::video {
     }
     inline void setOnTextTrackDataChanged(const std::function<void(const std::vector<std::string>& /* texts */)>& onTextTrackDataChanged) noexcept override {
       _swiftPart.setOnTextTrackDataChanged(onTextTrackDataChanged);
+    }
+    inline std::function<void(const std::optional<TextTrack>& /* track */)> getOnTrackChange() noexcept override {
+      auto __result = _swiftPart.getOnTrackChange();
+      return __result;
+    }
+    inline void setOnTrackChange(const std::function<void(const std::optional<TextTrack>& /* track */)>& onTrackChange) noexcept override {
+      _swiftPart.setOnTrackChange(onTrackChange);
     }
     inline std::function<void(double /* volume */)> getOnVolumeChange() noexcept override {
       auto __result = _swiftPart.getOnVolumeChange();

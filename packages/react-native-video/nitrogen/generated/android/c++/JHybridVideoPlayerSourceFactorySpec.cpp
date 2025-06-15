@@ -11,8 +11,10 @@
 namespace margelo::nitro::video { class HybridVideoPlayerSourceSpec; }
 // Forward declaration of `NativeVideoConfig` to properly resolve imports.
 namespace margelo::nitro::video { struct NativeVideoConfig; }
-// Forward declaration of `ExternalSubtitle` to properly resolve imports.
-namespace margelo::nitro::video { struct ExternalSubtitle; }
+// Forward declaration of `NativeExternalSubtitle` to properly resolve imports.
+namespace margelo::nitro::video { struct NativeExternalSubtitle; }
+// Forward declaration of `SubtitleType` to properly resolve imports.
+namespace margelo::nitro::video { enum class SubtitleType; }
 
 #include <memory>
 #include "HybridVideoPlayerSourceSpec.hpp"
@@ -22,10 +24,12 @@ namespace margelo::nitro::video { struct ExternalSubtitle; }
 #include "NativeVideoConfig.hpp"
 #include "JNativeVideoConfig.hpp"
 #include <optional>
-#include <unordered_map>
 #include <vector>
-#include "ExternalSubtitle.hpp"
-#include "JExternalSubtitle.hpp"
+#include "NativeExternalSubtitle.hpp"
+#include "JNativeExternalSubtitle.hpp"
+#include "SubtitleType.hpp"
+#include "JSubtitleType.hpp"
+#include <unordered_map>
 
 namespace margelo::nitro::video {
 

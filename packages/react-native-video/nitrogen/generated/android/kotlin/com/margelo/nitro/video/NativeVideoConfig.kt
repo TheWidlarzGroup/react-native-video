@@ -21,8 +21,8 @@ data class NativeVideoConfig
   @Keep
   constructor(
     val uri: String,
-    val headers: Map<String, String>?,
-    val externalSubtitles: Array<ExternalSubtitle>?
+    val externalSubtitles: Array<NativeExternalSubtitle>?,
+    val headers: Map<String, String>?
   ) {
   /* main constructor */
 }

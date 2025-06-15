@@ -407,6 +407,31 @@ public class HybridVideoPlayerEventEmitterSpec_cxx {
     }
   }
   
+  public final var onTrackChange: bridge.Func_void_std__optional_TextTrack_ {
+    @inline(__always)
+    get {
+      return { () -> bridge.Func_void_std__optional_TextTrack_ in
+        let __closureWrapper = Func_void_std__optional_TextTrack_(self.__implementation.onTrackChange)
+        return bridge.create_Func_void_std__optional_TextTrack_(__closureWrapper.toUnsafe())
+      }()
+    }
+    @inline(__always)
+    set {
+      self.__implementation.onTrackChange = { () -> (TextTrack?) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_std__optional_TextTrack_(newValue)
+        return { (__track: TextTrack?) -> Void in
+          __wrappedFunction.call({ () -> bridge.std__optional_TextTrack_ in
+            if let __unwrappedValue = __track {
+              return bridge.create_std__optional_TextTrack_(__unwrappedValue)
+            } else {
+              return .init()
+            }
+          }())
+        }
+      }()
+    }
+  }
+  
   public final var onVolumeChange: bridge.Func_void_double {
     @inline(__always)
     get {

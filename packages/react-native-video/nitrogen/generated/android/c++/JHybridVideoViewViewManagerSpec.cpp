@@ -9,12 +9,16 @@
 
 // Forward declaration of `HybridVideoPlayerSpec` to properly resolve imports.
 namespace margelo::nitro::video { class HybridVideoPlayerSpec; }
+// Forward declaration of `ResizeMode` to properly resolve imports.
+namespace margelo::nitro::video { enum class ResizeMode; }
 
 #include <optional>
 #include <memory>
 #include "HybridVideoPlayerSpec.hpp"
 #include "JHybridVideoPlayerSpec.hpp"
 #include <NitroModules/JNISharedPtr.hpp>
+#include "ResizeMode.hpp"
+#include "JResizeMode.hpp"
 #include <functional>
 #include "JFunc_void_bool.hpp"
 #include "JFunc_void.hpp"
@@ -72,6 +76,15 @@ namespace margelo::nitro::video {
   void JHybridVideoViewViewManagerSpec::setAutoEnterPictureInPicture(bool autoEnterPictureInPicture) {
     static const auto method = javaClassStatic()->getMethod<void(jboolean /* autoEnterPictureInPicture */)>("setAutoEnterPictureInPicture");
     method(_javaPart, autoEnterPictureInPicture);
+  }
+  ResizeMode JHybridVideoViewViewManagerSpec::getResizeMode() {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JResizeMode>()>("getResizeMode");
+    auto __result = method(_javaPart);
+    return __result->toCpp();
+  }
+  void JHybridVideoViewViewManagerSpec::setResizeMode(ResizeMode resizeMode) {
+    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JResizeMode> /* resizeMode */)>("setResizeMode");
+    method(_javaPart, JResizeMode::fromCpp(resizeMode));
   }
   std::optional<std::function<void(bool /* isInPictureInPicture */)>> JHybridVideoViewViewManagerSpec::getOnPictureInPictureChange() {
     static const auto method = javaClassStatic()->getMethod<jni::local_ref<JFunc_void_bool::javaobject>()>("getOnPictureInPictureChange_cxx");

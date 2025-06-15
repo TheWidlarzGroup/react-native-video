@@ -15,10 +15,13 @@
 
 // Forward declaration of `HybridVideoPlayerSpec` to properly resolve imports.
 namespace margelo::nitro::video { class HybridVideoPlayerSpec; }
+// Forward declaration of `ResizeMode` to properly resolve imports.
+namespace margelo::nitro::video { enum class ResizeMode; }
 
 #include <optional>
 #include <memory>
 #include "HybridVideoPlayerSpec.hpp"
+#include "ResizeMode.hpp"
 #include <functional>
 
 namespace margelo::nitro::video {
@@ -56,6 +59,8 @@ namespace margelo::nitro::video {
       virtual void setPictureInPicture(bool pictureInPicture) = 0;
       virtual bool getAutoEnterPictureInPicture() = 0;
       virtual void setAutoEnterPictureInPicture(bool autoEnterPictureInPicture) = 0;
+      virtual ResizeMode getResizeMode() = 0;
+      virtual void setResizeMode(ResizeMode resizeMode) = 0;
       virtual std::optional<std::function<void(bool /* isInPictureInPicture */)>> getOnPictureInPictureChange() = 0;
       virtual void setOnPictureInPictureChange(const std::optional<std::function<void(bool /* isInPictureInPicture */)>>& onPictureInPictureChange) = 0;
       virtual std::optional<std::function<void(bool /* fullscreen */)>> getOnFullscreenChange() = 0;

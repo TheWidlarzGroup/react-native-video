@@ -27,6 +27,8 @@ namespace margelo::nitro::video { struct onProgressData; }
 namespace margelo::nitro::video { struct TimedMetadata; }
 // Forward declaration of `TimedMetadataObject` to properly resolve imports.
 namespace margelo::nitro::video { struct TimedMetadataObject; }
+// Forward declaration of `TextTrack` to properly resolve imports.
+namespace margelo::nitro::video { struct TextTrack; }
 // Forward declaration of `VideoPlayerStatus` to properly resolve imports.
 namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 
@@ -66,6 +68,9 @@ namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 #include "JTimedMetadataObject.hpp"
 #include <string>
 #include "JFunc_void_std__vector_std__string_.hpp"
+#include "TextTrack.hpp"
+#include "JFunc_void_std__optional_TextTrack_.hpp"
+#include "JTextTrack.hpp"
 #include "VideoPlayerStatus.hpp"
 #include "JFunc_void_VideoPlayerStatus.hpp"
 #include "JVideoPlayerStatus.hpp"
@@ -375,6 +380,24 @@ namespace margelo::nitro::video {
   void JHybridVideoPlayerEventEmitterSpec::setOnTextTrackDataChanged(const std::function<void(const std::vector<std::string>& /* texts */)>& onTextTrackDataChanged) {
     static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_std__vector_std__string_::javaobject> /* onTextTrackDataChanged */)>("setOnTextTrackDataChanged_cxx");
     method(_javaPart, JFunc_void_std__vector_std__string__cxx::fromCpp(onTextTrackDataChanged));
+  }
+  std::function<void(const std::optional<TextTrack>& /* track */)> JHybridVideoPlayerEventEmitterSpec::getOnTrackChange() {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JFunc_void_std__optional_TextTrack_::javaobject>()>("getOnTrackChange_cxx");
+    auto __result = method(_javaPart);
+    return [&]() -> std::function<void(const std::optional<TextTrack>& /* track */)> {
+      if (__result->isInstanceOf(JFunc_void_std__optional_TextTrack__cxx::javaClassStatic())) [[likely]] {
+        auto downcast = jni::static_ref_cast<JFunc_void_std__optional_TextTrack__cxx::javaobject>(__result);
+        return downcast->cthis()->getFunction();
+      } else {
+        return [__result](std::optional<TextTrack> track) -> void {
+          return __result->invoke(track);
+        };
+      }
+    }();
+  }
+  void JHybridVideoPlayerEventEmitterSpec::setOnTrackChange(const std::function<void(const std::optional<TextTrack>& /* track */)>& onTrackChange) {
+    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_std__optional_TextTrack_::javaobject> /* onTrackChange */)>("setOnTrackChange_cxx");
+    method(_javaPart, JFunc_void_std__optional_TextTrack__cxx::fromCpp(onTrackChange));
   }
   std::function<void(double /* volume */)> JHybridVideoPlayerEventEmitterSpec::getOnVolumeChange() {
     static const auto method = javaClassStatic()->getMethod<jni::local_ref<JFunc_void_double::javaobject>()>("getOnVolumeChange_cxx");

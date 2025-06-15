@@ -1,4 +1,5 @@
 import type { VideoPlayerSource } from '../../spec/nitro/VideoPlayerSource.nitro';
+import type { TextTrack } from './TextTrack';
 import type { VideoOrientation } from './VideoOrientation';
 import type { VideoPlayerStatus } from './VideoPlayerStatus';
 
@@ -76,6 +77,11 @@ export interface VideoPlayerEvents {
    * Called when the text track (currently displayed subtitle) data changes.
    */
   onTextTrackDataChanged: (texts: string[]) => void;
+  /**
+   * Called when the selected text track changes.
+   * @param track - The newly selected text track, or null if no track is selected
+   */
+  onTrackChange: (track: TextTrack | null) => void;
   /**
    * Called when the volume of the player changes.
    */

@@ -22,6 +22,7 @@ export class VideoPlayerEvents implements VideoPlayerEventsInterface {
     'onStatusChange',
     'onTextTrackDataChanged',
     'onTimedMetadata',
+    'onTrackChange',
     'onVolumeChange',
   ];
 
@@ -198,6 +199,14 @@ export class VideoPlayerEvents implements VideoPlayerEventsInterface {
 
   get onTextTrackDataChanged(): VideoPlayerEventsInterface['onTextTrackDataChanged'] {
     return this.eventEmitter.onTextTrackDataChanged;
+  }
+
+  set onTrackChange(value: VideoPlayerEventsInterface['onTrackChange']) {
+    this.eventEmitter.onTrackChange = value;
+  }
+
+  get onTrackChange(): VideoPlayerEventsInterface['onTrackChange'] {
+    return this.eventEmitter.onTrackChange;
   }
 
   set onVolumeChange(value: VideoPlayerEventsInterface['onVolumeChange']) {

@@ -14,10 +14,13 @@ namespace ReactNativeVideo { class HybridVideoViewViewManagerSpec_cxx; }
 
 // Forward declaration of `HybridVideoPlayerSpec` to properly resolve imports.
 namespace margelo::nitro::video { class HybridVideoPlayerSpec; }
+// Forward declaration of `ResizeMode` to properly resolve imports.
+namespace margelo::nitro::video { enum class ResizeMode; }
 
 #include <optional>
 #include <memory>
 #include "HybridVideoPlayerSpec.hpp"
+#include "ResizeMode.hpp"
 #include <functional>
 
 #include "ReactNativeVideo-Swift-Cxx-Umbrella.hpp"
@@ -79,6 +82,13 @@ namespace margelo::nitro::video {
     }
     inline void setAutoEnterPictureInPicture(bool autoEnterPictureInPicture) noexcept override {
       _swiftPart.setAutoEnterPictureInPicture(std::forward<decltype(autoEnterPictureInPicture)>(autoEnterPictureInPicture));
+    }
+    inline ResizeMode getResizeMode() noexcept override {
+      auto __result = _swiftPart.getResizeMode();
+      return static_cast<ResizeMode>(__result);
+    }
+    inline void setResizeMode(ResizeMode resizeMode) noexcept override {
+      _swiftPart.setResizeMode(static_cast<int>(resizeMode));
     }
     inline std::optional<std::function<void(bool /* isInPictureInPicture */)>> getOnPictureInPictureChange() noexcept override {
       auto __result = _swiftPart.getOnPictureInPictureChange();

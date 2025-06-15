@@ -186,10 +186,67 @@ public class HybridVideoPlayerSpec_cxx {
     }
   }
   
+  public final var mixAudioMode: Int32 {
+    @inline(__always)
+    get {
+      return self.__implementation.mixAudioMode.rawValue
+    }
+    @inline(__always)
+    set {
+      self.__implementation.mixAudioMode = margelo.nitro.video.MixAudioMode(rawValue: newValue)!
+    }
+  }
+  
+  public final var ignoreSilentSwitchMode: Int32 {
+    @inline(__always)
+    get {
+      return self.__implementation.ignoreSilentSwitchMode.rawValue
+    }
+    @inline(__always)
+    set {
+      self.__implementation.ignoreSilentSwitchMode = margelo.nitro.video.IgnoreSilentSwitchMode(rawValue: newValue)!
+    }
+  }
+  
+  public final var playInBackground: Bool {
+    @inline(__always)
+    get {
+      return self.__implementation.playInBackground
+    }
+    @inline(__always)
+    set {
+      self.__implementation.playInBackground = newValue
+    }
+  }
+  
+  public final var playWhenInactive: Bool {
+    @inline(__always)
+    get {
+      return self.__implementation.playWhenInactive
+    }
+    @inline(__always)
+    set {
+      self.__implementation.playWhenInactive = newValue
+    }
+  }
+  
   public final var isPlaying: Bool {
     @inline(__always)
     get {
       return self.__implementation.isPlaying
+    }
+  }
+  
+  public final var selectedTrack: bridge.std__optional_TextTrack_ {
+    @inline(__always)
+    get {
+      return { () -> bridge.std__optional_TextTrack_ in
+        if let __unwrappedValue = self.__implementation.selectedTrack {
+          return bridge.create_std__optional_TextTrack_(__unwrappedValue)
+        } else {
+          return .init()
+        }
+      }()
     }
   }
 
@@ -220,6 +277,41 @@ public class HybridVideoPlayerSpec_cxx {
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
       return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func getAvailableTextTracks() -> bridge.Result_std__vector_TextTrack__ {
+    do {
+      let __result = try self.__implementation.getAvailableTextTracks()
+      let __resultCpp = { () -> bridge.std__vector_TextTrack_ in
+        var __vector = bridge.create_std__vector_TextTrack_(__result.count)
+        for __item in __result {
+          __vector.push_back(__item)
+        }
+        return __vector
+      }()
+      return bridge.create_Result_std__vector_TextTrack__(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__vector_TextTrack__(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func selectTextTrack(textTrack: bridge.std__optional_TextTrack_) -> bridge.Result_void_ {
+    do {
+      try self.__implementation.selectTextTrack(textTrack: { () -> TextTrack? in
+        if let __unwrapped = textTrack.value {
+          return __unwrapped
+        } else {
+          return nil
+        }
+      }())
+      return bridge.create_Result_void_()
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_void_(__exceptionPtr)
     }
   }
   

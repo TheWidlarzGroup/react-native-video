@@ -61,11 +61,22 @@ namespace margelo::nitro::video {
     void setLoop(bool loop) override;
     double getRate() override;
     void setRate(double rate) override;
+    MixAudioMode getMixAudioMode() override;
+    void setMixAudioMode(MixAudioMode mixAudioMode) override;
+    IgnoreSilentSwitchMode getIgnoreSilentSwitchMode() override;
+    void setIgnoreSilentSwitchMode(IgnoreSilentSwitchMode ignoreSilentSwitchMode) override;
+    bool getPlayInBackground() override;
+    void setPlayInBackground(bool playInBackground) override;
+    bool getPlayWhenInactive() override;
+    void setPlayWhenInactive(bool playWhenInactive) override;
     bool getIsPlaying() override;
+    std::optional<TextTrack> getSelectedTrack() override;
 
   public:
     // Methods
     std::shared_ptr<Promise<void>> replaceSourceAsync(const std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>>& source) override;
+    std::vector<TextTrack> getAvailableTextTracks() override;
+    void selectTextTrack(const std::optional<TextTrack>& textTrack) override;
     void clean() override;
     std::shared_ptr<Promise<void>> preload() override;
     void play() override;

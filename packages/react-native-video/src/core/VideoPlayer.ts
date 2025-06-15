@@ -1,6 +1,10 @@
+import { Platform } from 'react-native';
 import { NitroModules } from 'react-native-nitro-modules';
 import { type VideoPlayer as VideoPlayerImpl } from '../spec/nitro/VideoPlayer.nitro';
 import type { VideoPlayerSource } from '../spec/nitro/VideoPlayerSource.nitro';
+import type { IgnoreSilentSwitchMode } from './types/IgnoreSilentSwitchMode';
+import type { MixAudioMode } from './types/MixAudioMode';
+import type { TextTrack } from './types/TextTrack';
 import type { NoAutocomplete } from './types/Utils';
 import type { VideoConfig, VideoSource } from './types/VideoConfig';
 import {
@@ -137,6 +141,48 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     this.player.rate = value;
   }
 
+  // Mix Audio Mode
+  get mixAudioMode(): MixAudioMode {
+    return this.player.mixAudioMode;
+  }
+
+  set mixAudioMode(value: MixAudioMode) {
+    this.player.mixAudioMode = value;
+  }
+
+  // Ignore Silent Switch Mode
+  get ignoreSilentSwitchMode(): IgnoreSilentSwitchMode {
+    return this.player.ignoreSilentSwitchMode;
+  }
+
+  set ignoreSilentSwitchMode(value: IgnoreSilentSwitchMode) {
+    if (__DEV__ && !['ios'].includes(Platform.OS)) {
+      console.warn(
+        'ignoreSilentSwitchMode is not supported on this platform, it wont have any effect'
+      );
+    }
+
+    this.player.ignoreSilentSwitchMode = value;
+  }
+
+  // Play In Background
+  get playInBackground(): boolean {
+    return this.player.playInBackground;
+  }
+
+  set playInBackground(value: boolean) {
+    this.player.playInBackground = value;
+  }
+
+  // Play When Inactive
+  get playWhenInactive(): boolean {
+    return this.player.playWhenInactive;
+  }
+
+  set playWhenInactive(value: boolean) {
+    this.player.playWhenInactive = value;
+  }
+
   // Is Playing
   get isPlaying(): boolean {
     return this.player.isPlaying;
@@ -200,6 +246,29 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     );
 
     NitroModules.updateMemorySize(this.player);
+  }
+
+  // Text Track Management
+  getAvailableTextTracks(): TextTrack[] {
+    try {
+      return this.player.getAvailableTextTracks();
+    } catch (error) {
+      this.throwError(error);
+      return [];
+    }
+  }
+
+  selectTextTrack(textTrack: TextTrack | null): void {
+    try {
+      this.player.selectTextTrack(textTrack);
+    } catch (error) {
+      this.throwError(error);
+    }
+  }
+
+  // Selected Text Track
+  get selectedTrack(): TextTrack | undefined {
+    return this.player.selectedTrack;
   }
 }
 

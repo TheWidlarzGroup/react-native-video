@@ -3,6 +3,7 @@ export type LibraryError =
   | 'library/application-context-not-found';
 
 export type PlayerError =
+  | 'player/released'
   | 'player/not-initialized'
   | 'player/asset-not-initialized'
   | 'player/invalid-source';

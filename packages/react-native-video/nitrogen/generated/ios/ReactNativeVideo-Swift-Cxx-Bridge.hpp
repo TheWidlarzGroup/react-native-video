@@ -10,8 +10,6 @@
 // Forward declarations of C++ defined types
 // Forward declaration of `BandwidthData` to properly resolve imports.
 namespace margelo::nitro::video { struct BandwidthData; }
-// Forward declaration of `ExternalSubtitle` to properly resolve imports.
-namespace margelo::nitro::video { struct ExternalSubtitle; }
 // Forward declaration of `HybridVideoPlayerEventEmitterSpec` to properly resolve imports.
 namespace margelo::nitro::video { class HybridVideoPlayerEventEmitterSpec; }
 // Forward declaration of `HybridVideoPlayerFactorySpec` to properly resolve imports.
@@ -26,8 +24,14 @@ namespace margelo::nitro::video { class HybridVideoPlayerSpec; }
 namespace margelo::nitro::video { class HybridVideoViewViewManagerFactorySpec; }
 // Forward declaration of `HybridVideoViewViewManagerSpec` to properly resolve imports.
 namespace margelo::nitro::video { class HybridVideoViewViewManagerSpec; }
+// Forward declaration of `NativeExternalSubtitle` to properly resolve imports.
+namespace margelo::nitro::video { struct NativeExternalSubtitle; }
 // Forward declaration of `SourceType` to properly resolve imports.
 namespace margelo::nitro::video { enum class SourceType; }
+// Forward declaration of `SubtitleType` to properly resolve imports.
+namespace margelo::nitro::video { enum class SubtitleType; }
+// Forward declaration of `TextTrack` to properly resolve imports.
+namespace margelo::nitro::video { struct TextTrack; }
 // Forward declaration of `TimedMetadataObject` to properly resolve imports.
 namespace margelo::nitro::video { struct TimedMetadataObject; }
 // Forward declaration of `TimedMetadata` to properly resolve imports.
@@ -65,7 +69,6 @@ namespace ReactNativeVideo { class HybridVideoViewViewManagerSpec_cxx; }
 
 // Include C++ defined types
 #include "BandwidthData.hpp"
-#include "ExternalSubtitle.hpp"
 #include "HybridVideoPlayerEventEmitterSpec.hpp"
 #include "HybridVideoPlayerFactorySpec.hpp"
 #include "HybridVideoPlayerSourceFactorySpec.hpp"
@@ -73,7 +76,10 @@ namespace ReactNativeVideo { class HybridVideoViewViewManagerSpec_cxx; }
 #include "HybridVideoPlayerSpec.hpp"
 #include "HybridVideoViewViewManagerFactorySpec.hpp"
 #include "HybridVideoViewViewManagerSpec.hpp"
+#include "NativeExternalSubtitle.hpp"
 #include "SourceType.hpp"
+#include "SubtitleType.hpp"
+#include "TextTrack.hpp"
 #include "TimedMetadata.hpp"
 #include "TimedMetadataObject.hpp"
 #include "VideoInformation.hpp"
@@ -189,6 +195,35 @@ namespace margelo::nitro::video::bridge::swift {
     return std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>>(value);
   }
   
+  // pragma MARK: std::optional<std::string>
+  /**
+   * Specialized version of `std::optional<std::string>`.
+   */
+  using std__optional_std__string_ = std::optional<std::string>;
+  inline std::optional<std::string> create_std__optional_std__string_(const std::string& value) {
+    return std::optional<std::string>(value);
+  }
+  
+  // pragma MARK: std::vector<TextTrack>
+  /**
+   * Specialized version of `std::vector<TextTrack>`.
+   */
+  using std__vector_TextTrack_ = std::vector<TextTrack>;
+  inline std::vector<TextTrack> create_std__vector_TextTrack_(size_t size) {
+    std::vector<TextTrack> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::optional<TextTrack>
+  /**
+   * Specialized version of `std::optional<TextTrack>`.
+   */
+  using std__optional_TextTrack_ = std::optional<TextTrack>;
+  inline std::optional<TextTrack> create_std__optional_TextTrack_(const TextTrack& value) {
+    return std::optional<TextTrack>(value);
+  }
+  
   // pragma MARK: std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>
   /**
    * Specialized version of `std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>`.
@@ -208,6 +243,15 @@ namespace margelo::nitro::video::bridge::swift {
   }
   inline Result_std__shared_ptr_Promise_void___ create_Result_std__shared_ptr_Promise_void___(const std::exception_ptr& error) {
     return Result<std::shared_ptr<Promise<void>>>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::vector<TextTrack>>
+  using Result_std__vector_TextTrack__ = Result<std::vector<TextTrack>>;
+  inline Result_std__vector_TextTrack__ create_Result_std__vector_TextTrack__(const std::vector<TextTrack>& value) {
+    return Result<std::vector<TextTrack>>::withValue(value);
+  }
+  inline Result_std__vector_TextTrack__ create_Result_std__vector_TextTrack__(const std::exception_ptr& error) {
+    return Result<std::vector<TextTrack>>::withError(error);
   }
   
   // pragma MARK: Result<void>
@@ -469,6 +513,28 @@ namespace margelo::nitro::video::bridge::swift {
     return Func_void_std__vector_std__string__Wrapper(std::move(value));
   }
   
+  // pragma MARK: std::function<void(const std::optional<TextTrack>& /* track */)>
+  /**
+   * Specialized version of `std::function<void(const std::optional<TextTrack>&)>`.
+   */
+  using Func_void_std__optional_TextTrack_ = std::function<void(const std::optional<TextTrack>& /* track */)>;
+  /**
+   * Wrapper class for a `std::function<void(const std::optional<TextTrack>& / * track * /)>`, this can be used from Swift.
+   */
+  class Func_void_std__optional_TextTrack__Wrapper final {
+  public:
+    explicit Func_void_std__optional_TextTrack__Wrapper(std::function<void(const std::optional<TextTrack>& /* track */)>&& func): _function(std::make_shared<std::function<void(const std::optional<TextTrack>& /* track */)>>(std::move(func))) {}
+    inline void call(std::optional<TextTrack> track) const {
+      _function->operator()(track);
+    }
+  private:
+    std::shared_ptr<std::function<void(const std::optional<TextTrack>& /* track */)>> _function;
+  };
+  Func_void_std__optional_TextTrack_ create_Func_void_std__optional_TextTrack_(void* _Nonnull swiftClosureWrapper);
+  inline Func_void_std__optional_TextTrack__Wrapper wrap_Func_void_std__optional_TextTrack_(Func_void_std__optional_TextTrack_ value) {
+    return Func_void_std__optional_TextTrack__Wrapper(std::move(value));
+  }
+  
   // pragma MARK: std::function<void(VideoPlayerStatus /* status */)>
   /**
    * Specialized version of `std::function<void(VideoPlayerStatus)>`.
@@ -489,6 +555,26 @@ namespace margelo::nitro::video::bridge::swift {
   Func_void_VideoPlayerStatus create_Func_void_VideoPlayerStatus(void* _Nonnull swiftClosureWrapper);
   inline Func_void_VideoPlayerStatus_Wrapper wrap_Func_void_VideoPlayerStatus(Func_void_VideoPlayerStatus value) {
     return Func_void_VideoPlayerStatus_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::vector<NativeExternalSubtitle>
+  /**
+   * Specialized version of `std::vector<NativeExternalSubtitle>`.
+   */
+  using std__vector_NativeExternalSubtitle_ = std::vector<NativeExternalSubtitle>;
+  inline std::vector<NativeExternalSubtitle> create_std__vector_NativeExternalSubtitle_(size_t size) {
+    std::vector<NativeExternalSubtitle> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::optional<std::vector<NativeExternalSubtitle>>
+  /**
+   * Specialized version of `std::optional<std::vector<NativeExternalSubtitle>>`.
+   */
+  using std__optional_std__vector_NativeExternalSubtitle__ = std::optional<std::vector<NativeExternalSubtitle>>;
+  inline std::optional<std::vector<NativeExternalSubtitle>> create_std__optional_std__vector_NativeExternalSubtitle__(const std::vector<NativeExternalSubtitle>& value) {
+    return std::optional<std::vector<NativeExternalSubtitle>>(value);
   }
   
   // pragma MARK: std::unordered_map<std::string, std::string>
@@ -520,26 +606,6 @@ namespace margelo::nitro::video::bridge::swift {
   using std__optional_std__unordered_map_std__string__std__string__ = std::optional<std::unordered_map<std::string, std::string>>;
   inline std::optional<std::unordered_map<std::string, std::string>> create_std__optional_std__unordered_map_std__string__std__string__(const std::unordered_map<std::string, std::string>& value) {
     return std::optional<std::unordered_map<std::string, std::string>>(value);
-  }
-  
-  // pragma MARK: std::vector<ExternalSubtitle>
-  /**
-   * Specialized version of `std::vector<ExternalSubtitle>`.
-   */
-  using std__vector_ExternalSubtitle_ = std::vector<ExternalSubtitle>;
-  inline std::vector<ExternalSubtitle> create_std__vector_ExternalSubtitle_(size_t size) {
-    std::vector<ExternalSubtitle> vector;
-    vector.reserve(size);
-    return vector;
-  }
-  
-  // pragma MARK: std::optional<std::vector<ExternalSubtitle>>
-  /**
-   * Specialized version of `std::optional<std::vector<ExternalSubtitle>>`.
-   */
-  using std__optional_std__vector_ExternalSubtitle__ = std::optional<std::vector<ExternalSubtitle>>;
-  inline std::optional<std::vector<ExternalSubtitle>> create_std__optional_std__vector_ExternalSubtitle__(const std::vector<ExternalSubtitle>& value) {
-    return std::optional<std::vector<ExternalSubtitle>>(value);
   }
   
   // pragma MARK: std::shared_ptr<Promise<VideoInformation>>

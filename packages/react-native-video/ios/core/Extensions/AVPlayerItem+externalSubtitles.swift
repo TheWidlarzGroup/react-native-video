@@ -43,9 +43,11 @@ extension AVPlayerItem {
       for textTrack in textTracks {
         // Add subtitle track
         if let compositionTextTrack = composition.addMutableTrack(withMediaType: .text, preferredTrackID: kCMPersistentTrackID_Invalid) {
-          try compositionTextTrack.insertTimeRange(CMTimeRange(start: .zero, duration: textTrack.timeRange.duration), of: textTrack, at: .zero)
+          // We will trim the subtitle track to the duration of the video to match android behavior
+          try compositionTextTrack.insertTimeRange(CMTimeRange(start: .zero, duration: textTrack.timeRange.duration), of: videoTrack, at: .zero)
           
           compositionTextTrack.languageCode = textTrack.languageCode
+          compositionTextTrack.isEnabled = false // Disable by default
         }
       }
       

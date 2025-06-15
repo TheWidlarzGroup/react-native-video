@@ -1,5 +1,6 @@
 package com.margelo.nitro.video
 
+import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -8,15 +9,14 @@ import androidx.media3.common.Metadata
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
-import androidx.media3.common.TrackSelectionOverride
 import androidx.media3.common.Tracks
 import androidx.media3.common.text.CueGroup
+import androidx.media3.common.TrackSelectionOverride
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.analytics.AnalyticsListener
-import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.exoplayer.upstream.DefaultAllocator
 import androidx.media3.extractor.metadata.emsg.EventMessage
 import androidx.media3.extractor.metadata.id3.Id3Frame
@@ -30,12 +30,18 @@ import com.video.core.PlayerError
 import com.video.core.VideoManager
 import com.video.core.player.OnAudioFocusChangedListener
 import com.video.core.recivers.AudioBecomingNoisyReceiver
+import com.video.core.services.playback.VideoPlaybackService
+import com.video.core.utils.Threading.mainThreadProperty
 import com.video.core.utils.Threading.runOnMainThread
 import com.video.core.utils.Threading.runOnMainThreadSync
 import com.video.core.utils.VideoOrientationUtils
 import com.video.view.VideoView
 import java.lang.ref.WeakReference
 import kotlin.math.max
+import com.video.core.extensions.startService
+import com.video.core.extensions.stopService
+import com.video.core.services.playback.VideoPlaybackServiceConnection
+import com.video.core.utils.TextTrackUtils
 
 @UnstableApi
 @DoNotStrip
@@ -51,9 +57,17 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
     }
 
   private var allocator: DefaultAllocator? = null
+  private var context: Context = NitroModules.applicationContext
+    ?.currentActivity
+    ?.applicationContext
+    ?: run {
+    throw LibraryError.ApplicationContextNotFound
+  }
 
-  private var player: ExoPlayer? = null
+  var player: ExoPlayer? = null
   private var currentPlayerView: WeakReference<PlayerView>? = null
+
+  var wasAutoPaused = false
 
   // Time updates
   private val progressHandler = Handler(Looper.getMainLooper())
@@ -62,6 +76,12 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
   // Listeners
   private val audioFocusChangedListener = OnAudioFocusChangedListener()
   private val audioBecomingNoisyReceiver = AudioBecomingNoisyReceiver()
+
+  // Service Connection
+  private val videoPlaybackServiceConnection = VideoPlaybackServiceConnection(WeakReference(this))
+
+  // Text track selection state
+  private var selectedExternalTrackIndex: Int? = null
 
   private companion object {
     const val PROGRESS_UPDATE_INTERVAL_MS = 250L
@@ -103,42 +123,44 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
     }
 
   // Player Properties
-  override var currentTime: Double
-    get() = runOnMainThreadSync { return@runOnMainThreadSync playerPointer.currentPosition.toDouble() / 1000.0 }
-    set(value) = runOnMainThread { playerPointer.seekTo((value * 1000).toLong()) }
+  override var currentTime: Double by mainThreadProperty(
+    get = { playerPointer.currentPosition.toDouble() / 1000.0 },
+    set = { value -> runOnMainThread { playerPointer.seekTo((value * 1000).toLong()) } }
+  )
 
   // volume defined by user
   var userVolume: Double = 1.0
 
-  override var volume: Double
-    get() = runOnMainThreadSync { return@runOnMainThreadSync playerPointer.volume.toDouble() }
-    set(value) = runOnMainThread {
+  override var volume: Double by mainThreadProperty(
+    get = { playerPointer.volume.toDouble() },
+    set = { value ->
       userVolume = value
       playerPointer.volume = value.toFloat()
     }
+  )
 
-  override val duration: Double
-    get() {
-      val duration = runOnMainThreadSync { return@runOnMainThreadSync playerPointer.duration }
-      return if (duration == C.TIME_UNSET) Double.NaN else duration.toDouble() / 1000.0
+  override val duration: Double by mainThreadProperty(
+    get = {
+      val duration = playerPointer.duration
+      return@mainThreadProperty if (duration == C.TIME_UNSET) Double.NaN else duration.toDouble() / 1000.0
     }
+  )
 
-  override var loop: Boolean
-    get() {
-      val repeatMode = runOnMainThreadSync { return@runOnMainThreadSync playerPointer.repeatMode }
-      return repeatMode == Player.REPEAT_MODE_ONE
-    }
-    set(value) = runOnMainThread {
+  override var loop: Boolean by mainThreadProperty(
+    get = {
+      playerPointer.repeatMode == Player.REPEAT_MODE_ONE
+    },
+    set = { value ->
       playerPointer.repeatMode = if (value) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
     }
+  )
 
-  override var muted: Boolean
-    get() = runOnMainThreadSync {
+  override var muted: Boolean by mainThreadProperty(
+    get = {
       val playerVolume = playerPointer.volume.toDouble()
-      val isMuted = playerVolume == 0.0
-      return@runOnMainThreadSync isMuted
-    }
-    set(value) = runOnMainThread {
+      return@mainThreadProperty playerVolume == 0.0
+    },
+    set = { value ->
       if (value) {
         userVolume = volume
         playerPointer.volume = 0f
@@ -146,16 +168,43 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
         playerPointer.volume = userVolume.toFloat()
       }
     }
+  )
 
-  override var rate: Double
-    get() = runOnMainThreadSync { return@runOnMainThreadSync playerPointer.playbackParameters.speed.toDouble() }
-    set(value) = runOnMainThread {
+  override var rate: Double by mainThreadProperty(
+    get = { playerPointer.playbackParameters.speed.toDouble() },
+    set = { value ->
       playerPointer.playbackParameters = playerPointer.playbackParameters.withSpeed(value.toFloat())
     }
+  )
 
-  override var isPlaying: Boolean = runOnMainThreadSync {
-    return@runOnMainThreadSync player?.isPlaying == true
-  }
+  override var mixAudioMode: MixAudioMode = MixAudioMode.AUTO
+    set(value) {
+      VideoManager.audioFocusManager.requestAudioFocusUpdate()
+      field = value
+    }
+
+  // iOS only property
+  override var ignoreSilentSwitchMode: IgnoreSilentSwitchMode = IgnoreSilentSwitchMode.AUTO
+
+  override var playInBackground: Boolean = false
+    set(value) {
+      // playback in background was disabled and is now enabled
+      if (value == true && field == false) {
+        VideoPlaybackService.startService(context, videoPlaybackServiceConnection)
+        field = true
+      }
+      // playback in background was enabled and is now disabled
+      else if (field == true) {
+        VideoPlaybackService.stopService(this, videoPlaybackServiceConnection)
+        field = false
+      }
+    }
+
+  override var playWhenInactive: Boolean = false
+
+  override var isPlaying: Boolean by mainThreadProperty(
+    get = { player?.isPlaying == true }
+  )
 
   private fun initializePlayer() {
     if (NitroModules.applicationContext == null) {
@@ -264,6 +313,10 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
   }
 
   private fun release() {
+    if (playInBackground) {
+      VideoPlaybackService.stopService(this, videoPlaybackServiceConnection)
+    }
+
     VideoManager.unregisterPlayer(this)
     stopProgressUpdates()
     runOnMainThread {
@@ -458,6 +511,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
         this@HybridVideoPlayer.volume = volume.toDouble()
       }
 
+      VideoManager.audioFocusManager.requestAudioFocusUpdate()
       eventEmitter.onVolumeChange(volume.toDouble())
     }
 
@@ -497,4 +551,22 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
       super.onTracksChanged(tracks)
     }
   }
+
+  // MARK: - Text Track Management
+
+  override fun getAvailableTextTracks(): Array<TextTrack> {
+    return TextTrackUtils.getAvailableTextTracks(playerPointer, source)
+  }
+
+  override fun selectTextTrack(textTrack: TextTrack?) {
+    selectedExternalTrackIndex = TextTrackUtils.selectTextTrack(
+      player = playerPointer,
+      textTrack = textTrack,
+      source = source,
+      onTrackChange = { track -> eventEmitter.onTrackChange(track) }
+    )
+  }
+
+  override val selectedTrack: TextTrack?
+    get() = TextTrackUtils.getSelectedTrack(playerPointer, source)
 }

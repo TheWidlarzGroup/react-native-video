@@ -80,9 +80,9 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec {
       throw SourceError.failedToInitializeAsset.error()
     }
     
-    // Code browed from expo-video https://github.com/expo/expo/blob/ea17c9b1ce5111e1454b089ba381f3feb93f33cc/packages/expo-video/ios/VideoPlayerItem.swift#L40C30-L40C73
-    // If we don't load those properties, they will be loaded on main thread casuing lags
-    _ = try? await asset.load(.duration, .preferredTransform, .isPlayable)
+    // Code browned from expo-video https://github.com/expo/expo/blob/ea17c9b1ce5111e1454b089ba381f3feb93f33cc/packages/expo-video/ios/VideoPlayerItem.swift#L40C30-L40C73
+    // If we don't load those properties, they will be loaded on main thread causing lags
+    _ = try? await asset.load(.duration, .preferredTransform, .isPlayable) as Any
   }
   
   public func releaseAsset() {

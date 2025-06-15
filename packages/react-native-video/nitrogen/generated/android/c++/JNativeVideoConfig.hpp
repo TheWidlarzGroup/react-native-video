@@ -10,8 +10,10 @@
 #include <fbjni/fbjni.h>
 #include "NativeVideoConfig.hpp"
 
-#include "ExternalSubtitle.hpp"
-#include "JExternalSubtitle.hpp"
+#include "JNativeExternalSubtitle.hpp"
+#include "JSubtitleType.hpp"
+#include "NativeExternalSubtitle.hpp"
+#include "SubtitleType.hpp"
 #include <optional>
 #include <string>
 #include <unordered_map>
@@ -38,12 +40,22 @@ namespace margelo::nitro::video {
       static const auto clazz = javaClassStatic();
       static const auto fieldUri = clazz->getField<jni::JString>("uri");
       jni::local_ref<jni::JString> uri = this->getFieldValue(fieldUri);
+      static const auto fieldExternalSubtitles = clazz->getField<jni::JArrayClass<JNativeExternalSubtitle>>("externalSubtitles");
+      jni::local_ref<jni::JArrayClass<JNativeExternalSubtitle>> externalSubtitles = this->getFieldValue(fieldExternalSubtitles);
       static const auto fieldHeaders = clazz->getField<jni::JMap<jni::JString, jni::JString>>("headers");
       jni::local_ref<jni::JMap<jni::JString, jni::JString>> headers = this->getFieldValue(fieldHeaders);
-      static const auto fieldExternalSubtitles = clazz->getField<jni::JArrayClass<JExternalSubtitle>>("externalSubtitles");
-      jni::local_ref<jni::JArrayClass<JExternalSubtitle>> externalSubtitles = this->getFieldValue(fieldExternalSubtitles);
       return NativeVideoConfig(
         uri->toStdString(),
+        externalSubtitles != nullptr ? std::make_optional([&]() {
+          size_t __size = externalSubtitles->size();
+          std::vector<NativeExternalSubtitle> __vector;
+          __vector.reserve(__size);
+          for (size_t __i = 0; __i < __size; __i++) {
+            auto __element = externalSubtitles->getElement(__i);
+            __vector.push_back(__element->toCpp());
+          }
+          return __vector;
+        }()) : std::nullopt,
         headers != nullptr ? std::make_optional([&]() {
           std::unordered_map<std::string, std::string> __map;
           __map.reserve(headers->size());
@@ -51,16 +63,6 @@ namespace margelo::nitro::video {
             __map.emplace(__entry.first->toStdString(), __entry.second->toStdString());
           }
           return __map;
-        }()) : std::nullopt,
-        externalSubtitles != nullptr ? std::make_optional([&]() {
-          size_t __size = externalSubtitles->size();
-          std::vector<ExternalSubtitle> __vector;
-          __vector.reserve(__size);
-          for (size_t __i = 0; __i < __size; __i++) {
-            auto __element = externalSubtitles->getElement(__i);
-            __vector.push_back(__element->toCpp());
-          }
-          return __vector;
         }()) : std::nullopt
       );
     }
@@ -73,21 +75,21 @@ namespace margelo::nitro::video {
     static jni::local_ref<JNativeVideoConfig::javaobject> fromCpp(const NativeVideoConfig& value) {
       return newInstance(
         jni::make_jstring(value.uri),
+        value.externalSubtitles.has_value() ? [&]() {
+          size_t __size = value.externalSubtitles.value().size();
+          jni::local_ref<jni::JArrayClass<JNativeExternalSubtitle>> __array = jni::JArrayClass<JNativeExternalSubtitle>::newArray(__size);
+          for (size_t __i = 0; __i < __size; __i++) {
+            const auto& __element = value.externalSubtitles.value()[__i];
+            __array->setElement(__i, *JNativeExternalSubtitle::fromCpp(__element));
+          }
+          return __array;
+        }() : nullptr,
         value.headers.has_value() ? [&]() -> jni::local_ref<jni::JMap<jni::JString, jni::JString>> {
           auto __map = jni::JHashMap<jni::JString, jni::JString>::create(value.headers.value().size());
           for (const auto& __entry : value.headers.value()) {
             __map->put(jni::make_jstring(__entry.first), jni::make_jstring(__entry.second));
           }
           return __map;
-        }() : nullptr,
-        value.externalSubtitles.has_value() ? [&]() {
-          size_t __size = value.externalSubtitles.value().size();
-          jni::local_ref<jni::JArrayClass<JExternalSubtitle>> __array = jni::JArrayClass<JExternalSubtitle>::newArray(__size);
-          for (size_t __i = 0; __i < __size; __i++) {
-            const auto& __element = value.externalSubtitles.value()[__i];
-            __array->setElement(__i, *JExternalSubtitle::fromCpp(__element));
-          }
-          return __array;
         }() : nullptr
       );
     }

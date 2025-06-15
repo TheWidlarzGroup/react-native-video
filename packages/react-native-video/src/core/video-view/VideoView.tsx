@@ -1,16 +1,17 @@
 import * as React from 'react';
-import type { ViewStyle } from 'react-native';
+import type { ViewProps, ViewStyle } from 'react-native';
 import { NitroModules } from 'react-native-nitro-modules';
 import type {
   VideoViewViewManager,
   VideoViewViewManagerFactory,
 } from '../../spec/nitro/VideoViewViewManager.nitro';
 import type { VideoViewEvents } from '../types/Events';
+import type { ResizeMode } from '../types/ResizeMode';
 import { tryParseNativeVideoError, VideoError } from '../types/VideoError';
 import type { VideoPlayer } from '../VideoPlayer';
 import { NativeVideoView } from './NativeVideoView';
 
-export interface VideoViewProps extends Partial<VideoViewEvents> {
+export interface VideoViewProps extends Partial<VideoViewEvents>, ViewProps {
   /**
    * The player to play the video - {@link VideoPlayer}
    */
@@ -31,6 +32,14 @@ export interface VideoViewProps extends Partial<VideoViewEvents> {
    * Whether to automatically enter picture in picture mode when the video is playing. Defaults to false.
    */
   autoEnterPictureInPicture?: boolean;
+  /**
+   * How the video should be resized to fit the view. Defaults to 'none'.
+   * - 'contain': Scale the video uniformly (maintain aspect ratio) so that it fits entirely within the view
+   * - 'cover': Scale the video uniformly (maintain aspect ratio) so that it fills the entire view (may crop)
+   * - 'stretch': Scale the video to fill the entire view without maintaining aspect ratio
+   * - 'none': Do not resize the video
+   */
+  resizeMode?: ResizeMode;
 }
 
 export interface VideoViewRef {
@@ -83,6 +92,7 @@ const updateProps = (manager: VideoViewViewManager, props: VideoViewProps) => {
   manager.controls = props.controls ?? false;
   manager.pictureInPicture = props.pictureInPicture ?? false;
   manager.autoEnterPictureInPicture = props.autoEnterPictureInPicture ?? false;
+  manager.resizeMode = props.resizeMode ?? 'none';
   manager.onPictureInPictureChange = props.onPictureInPictureChange;
   manager.onFullscreenChange = props.onFullscreenChange;
   manager.willEnterFullscreen = props.willEnterFullscreen;
@@ -100,6 +110,7 @@ const updateProps = (manager: VideoViewViewManager, props: VideoViewProps) => {
  * @param pictureInPicture - Whether to show the picture in picture button. Defaults to false.
  * @param autoEnterPictureInPicture - Whether to automatically enter picture in picture mode
  * when the video is playing. Defaults to false.
+ * @param resizeMode - How the video should be resized to fit the view. Defaults to 'none'.
  */
 const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
   (
@@ -108,6 +119,7 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
       controls = false,
       pictureInPicture = false,
       autoEnterPictureInPicture = false,
+      resizeMode = 'none',
       ...props
     },
     ref
@@ -118,19 +130,17 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
     const setupViewManager = React.useCallback(
       (id: number) => {
         try {
-          if (nitroViewManager.current !== null) {
-            return;
-          }
+          if (nitroViewManager.current === null) {
+            nitroViewManager.current =
+              VideoViewViewManagerFactory.createViewManager(id);
 
-          nitroViewManager.current =
-            VideoViewViewManagerFactory.createViewManager(id);
-
-          // Should never happen
-          if (!nitroViewManager.current) {
-            throw new VideoError(
-              'view/not-found',
-              'Failed to create View Manager'
-            );
+            // Should never happen
+            if (!nitroViewManager.current) {
+              throw new VideoError(
+                'view/not-found',
+                'Failed to create View Manager'
+              );
+            }
           }
 
           // Updates props to native view
@@ -140,12 +150,20 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
             controls: controls,
             pictureInPicture: pictureInPicture,
             autoEnterPictureInPicture: autoEnterPictureInPicture,
+            resizeMode: resizeMode,
           });
         } catch (error) {
           throw tryParseNativeVideoError(error);
         }
       },
-      [props, player, controls, pictureInPicture, autoEnterPictureInPicture]
+      [
+        props,
+        player,
+        controls,
+        pictureInPicture,
+        autoEnterPictureInPicture,
+        resizeMode,
+      ]
     );
 
     const onNitroIdChange = React.useCallback(
@@ -202,8 +220,16 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
         controls: controls,
         pictureInPicture: pictureInPicture,
         autoEnterPictureInPicture: autoEnterPictureInPicture,
+        resizeMode: resizeMode,
       });
-    }, [player, controls, pictureInPicture, autoEnterPictureInPicture, props]);
+    }, [
+      player,
+      controls,
+      pictureInPicture,
+      autoEnterPictureInPicture,
+      resizeMode,
+      props,
+    ]);
 
     return (
       <NativeVideoView

@@ -18,8 +18,20 @@ public extension NativeVideoConfig {
   /**
    * Create a new instance of `NativeVideoConfig`.
    */
-  init(uri: String, headers: Dictionary<String, String>?, externalSubtitles: [ExternalSubtitle]?) {
-    self.init(std.string(uri), { () -> bridge.std__optional_std__unordered_map_std__string__std__string__ in
+  init(uri: String, externalSubtitles: [NativeExternalSubtitle]?, headers: Dictionary<String, String>?) {
+    self.init(std.string(uri), { () -> bridge.std__optional_std__vector_NativeExternalSubtitle__ in
+      if let __unwrappedValue = externalSubtitles {
+        return bridge.create_std__optional_std__vector_NativeExternalSubtitle__({ () -> bridge.std__vector_NativeExternalSubtitle_ in
+          var __vector = bridge.create_std__vector_NativeExternalSubtitle_(__unwrappedValue.count)
+          for __item in __unwrappedValue {
+            __vector.push_back(__item)
+          }
+          return __vector
+        }())
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_std__unordered_map_std__string__std__string__ in
       if let __unwrappedValue = headers {
         return bridge.create_std__optional_std__unordered_map_std__string__std__string__({ () -> bridge.std__unordered_map_std__string__std__string_ in
           var __map = bridge.create_std__unordered_map_std__string__std__string_(__unwrappedValue.count)
@@ -27,18 +39,6 @@ public extension NativeVideoConfig {
             bridge.emplace_std__unordered_map_std__string__std__string_(&__map, std.string(__k), std.string(__v))
           }
           return __map
-        }())
-      } else {
-        return .init()
-      }
-    }(), { () -> bridge.std__optional_std__vector_ExternalSubtitle__ in
-      if let __unwrappedValue = externalSubtitles {
-        return bridge.create_std__optional_std__vector_ExternalSubtitle__({ () -> bridge.std__vector_ExternalSubtitle_ in
-          var __vector = bridge.create_std__vector_ExternalSubtitle_(__unwrappedValue.count)
-          for __item in __unwrappedValue {
-            __vector.push_back(__item)
-          }
-          return __vector
         }())
       } else {
         return .init()
@@ -54,6 +54,35 @@ public extension NativeVideoConfig {
     @inline(__always)
     set {
       self.__uri = std.string(newValue)
+    }
+  }
+  
+  var externalSubtitles: [NativeExternalSubtitle]? {
+    @inline(__always)
+    get {
+      return { () -> [NativeExternalSubtitle]? in
+        if let __unwrapped = self.__externalSubtitles.value {
+          return __unwrapped.map({ __item in __item })
+        } else {
+          return nil
+        }
+      }()
+    }
+    @inline(__always)
+    set {
+      self.__externalSubtitles = { () -> bridge.std__optional_std__vector_NativeExternalSubtitle__ in
+        if let __unwrappedValue = newValue {
+          return bridge.create_std__optional_std__vector_NativeExternalSubtitle__({ () -> bridge.std__vector_NativeExternalSubtitle_ in
+            var __vector = bridge.create_std__vector_NativeExternalSubtitle_(__unwrappedValue.count)
+            for __item in __unwrappedValue {
+              __vector.push_back(__item)
+            }
+            return __vector
+          }())
+        } else {
+          return .init()
+        }
+      }()
     }
   }
   
@@ -86,35 +115,6 @@ public extension NativeVideoConfig {
               bridge.emplace_std__unordered_map_std__string__std__string_(&__map, std.string(__k), std.string(__v))
             }
             return __map
-          }())
-        } else {
-          return .init()
-        }
-      }()
-    }
-  }
-  
-  var externalSubtitles: [ExternalSubtitle]? {
-    @inline(__always)
-    get {
-      return { () -> [ExternalSubtitle]? in
-        if let __unwrapped = self.__externalSubtitles.value {
-          return __unwrapped.map({ __item in __item })
-        } else {
-          return nil
-        }
-      }()
-    }
-    @inline(__always)
-    set {
-      self.__externalSubtitles = { () -> bridge.std__optional_std__vector_ExternalSubtitle__ in
-        if let __unwrappedValue = newValue {
-          return bridge.create_std__optional_std__vector_ExternalSubtitle__({ () -> bridge.std__vector_ExternalSubtitle_ in
-            var __vector = bridge.create_std__vector_ExternalSubtitle_(__unwrappedValue.count)
-            for __item in __unwrappedValue {
-              __vector.push_back(__item)
-            }
-            return __vector
           }())
         } else {
           return .init()

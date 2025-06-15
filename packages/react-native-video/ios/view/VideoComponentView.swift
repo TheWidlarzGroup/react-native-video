@@ -67,6 +67,15 @@ import AVKit
     }
   }
   
+  public var resizeMode: ResizeMode = .none {
+    didSet {
+      DispatchQueue.main.async { [weak self] in
+        guard let self = self, let playerViewController = self.playerViewController else { return }
+        playerViewController.videoGravity = resizeMode.toVideoGravity()
+      }
+    }
+  }
+  
   @objc public var nitroId: NSNumber = -1 {
     didSet {
       VideoComponentView.globalViewsMap.setObject(self, forKey: nitroId)
@@ -121,6 +130,7 @@ import AVKit
       let controller = AVPlayerViewController()
       controller.player = player
       controller.showsPlaybackControls = controls
+      controller.videoGravity = self.resizeMode.toVideoGravity()
       controller.view.frame = playerView.bounds
       controller.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
       controller.view.backgroundColor = .clear
@@ -207,6 +217,7 @@ import AVKit
     
     DispatchQueue.main.async {
       // Here we skip error handling for simplicity
+      // We do check for PiP support earlier in the code
       playerViewController.stopPictureInPicture()
     }
   }

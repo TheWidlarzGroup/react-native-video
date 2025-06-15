@@ -18,14 +18,14 @@
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
 
-// Forward declaration of `ExternalSubtitle` to properly resolve imports.
-namespace margelo::nitro::video { struct ExternalSubtitle; }
+// Forward declaration of `NativeExternalSubtitle` to properly resolve imports.
+namespace margelo::nitro::video { struct NativeExternalSubtitle; }
 
 #include <string>
 #include <optional>
-#include <unordered_map>
 #include <vector>
-#include "ExternalSubtitle.hpp"
+#include "NativeExternalSubtitle.hpp"
+#include <unordered_map>
 
 namespace margelo::nitro::video {
 
@@ -35,12 +35,12 @@ namespace margelo::nitro::video {
   struct NativeVideoConfig {
   public:
     std::string uri     SWIFT_PRIVATE;
+    std::optional<std::vector<NativeExternalSubtitle>> externalSubtitles     SWIFT_PRIVATE;
     std::optional<std::unordered_map<std::string, std::string>> headers     SWIFT_PRIVATE;
-    std::optional<std::vector<ExternalSubtitle>> externalSubtitles     SWIFT_PRIVATE;
 
   public:
     NativeVideoConfig() = default;
-    explicit NativeVideoConfig(std::string uri, std::optional<std::unordered_map<std::string, std::string>> headers, std::optional<std::vector<ExternalSubtitle>> externalSubtitles): uri(uri), headers(headers), externalSubtitles(externalSubtitles) {}
+    explicit NativeVideoConfig(std::string uri, std::optional<std::vector<NativeExternalSubtitle>> externalSubtitles, std::optional<std::unordered_map<std::string, std::string>> headers): uri(uri), externalSubtitles(externalSubtitles), headers(headers) {}
   };
 
 } // namespace margelo::nitro::video
@@ -56,15 +56,15 @@ namespace margelo::nitro {
       jsi::Object obj = arg.asObject(runtime);
       return NativeVideoConfig(
         JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, "uri")),
-        JSIConverter<std::optional<std::unordered_map<std::string, std::string>>>::fromJSI(runtime, obj.getProperty(runtime, "headers")),
-        JSIConverter<std::optional<std::vector<ExternalSubtitle>>>::fromJSI(runtime, obj.getProperty(runtime, "externalSubtitles"))
+        JSIConverter<std::optional<std::vector<NativeExternalSubtitle>>>::fromJSI(runtime, obj.getProperty(runtime, "externalSubtitles")),
+        JSIConverter<std::optional<std::unordered_map<std::string, std::string>>>::fromJSI(runtime, obj.getProperty(runtime, "headers"))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const NativeVideoConfig& arg) {
       jsi::Object obj(runtime);
       obj.setProperty(runtime, "uri", JSIConverter<std::string>::toJSI(runtime, arg.uri));
+      obj.setProperty(runtime, "externalSubtitles", JSIConverter<std::optional<std::vector<NativeExternalSubtitle>>>::toJSI(runtime, arg.externalSubtitles));
       obj.setProperty(runtime, "headers", JSIConverter<std::optional<std::unordered_map<std::string, std::string>>>::toJSI(runtime, arg.headers));
-      obj.setProperty(runtime, "externalSubtitles", JSIConverter<std::optional<std::vector<ExternalSubtitle>>>::toJSI(runtime, arg.externalSubtitles));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -73,8 +73,8 @@ namespace margelo::nitro {
       }
       jsi::Object obj = value.getObject(runtime);
       if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, "uri"))) return false;
+      if (!JSIConverter<std::optional<std::vector<NativeExternalSubtitle>>>::canConvert(runtime, obj.getProperty(runtime, "externalSubtitles"))) return false;
       if (!JSIConverter<std::optional<std::unordered_map<std::string, std::string>>>::canConvert(runtime, obj.getProperty(runtime, "headers"))) return false;
-      if (!JSIConverter<std::optional<std::vector<ExternalSubtitle>>>::canConvert(runtime, obj.getProperty(runtime, "externalSubtitles"))) return false;
       return true;
     }
   };

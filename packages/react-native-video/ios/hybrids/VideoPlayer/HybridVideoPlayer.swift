@@ -144,6 +144,27 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
   }
   
   var loop: Bool = false
+  
+  var mixAudioMode: MixAudioMode = .auto {
+    didSet {
+      VideoManager.shared.requestAudioSessionUpdate()
+    }
+  }
+  
+  var ignoreSilentSwitchMode: IgnoreSilentSwitchMode = .auto {
+    didSet {
+      VideoManager.shared.requestAudioSessionUpdate()
+    }
+  }
+  
+  var playInBackground: Bool = false
+  
+  var playWhenInactive: Bool = false
+  
+  var wasAutoPaused: Bool = false
+  
+  // Text track selection state
+  private var selectedExternalTrackIndex: Int? = nil
 
   var isPlaying: Bool {
     get {
@@ -248,8 +269,8 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
         return
       }
       
-      self.playerItem = try await self.initializePlayerItem()
       self.source = source
+      self.playerItem = try await self.initializePlayerItem()
       
       playerQueue.sync {
         do {
@@ -322,12 +343,132 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
       throw SourceError.failedToInitializeAsset.error()
     }
     
+    let playerItem: AVPlayerItem
+    
     // iOS does not support external subtitles for HLS streams
     if let externalSubtiles = source.config.externalSubtitles, externalSubtiles.isEmpty == false, source.uri.hasSuffix(".m3u8") == false {
-      return try await AVPlayerItem.withExternalSubtitles(for: asset, config: source.config)
+      playerItem = try await AVPlayerItem.withExternalSubtitles(for: asset, config: source.config)
+    } else {
+      playerItem = AVPlayerItem(asset: asset)
     }
     
-    return AVPlayerItem(asset: asset)
+    return playerItem
+  }
+  
+  // MARK: - Text Track Management
+  
+  func getAvailableTextTracks() throws -> [TextTrack] {
+    guard let currentItem = playerPointer.currentItem else {
+      return []
+    }
+    
+    var tracks: [TextTrack] = []
+    
+    // Get all text tracks from the media selection group (includes both built-in and external)
+    if let mediaSelection = currentItem.asset.mediaSelectionGroup(forMediaCharacteristic: .legible) {
+      for (index, option) in mediaSelection.options.enumerated() {
+        let isSelected = currentItem.currentMediaSelection.selectedMediaOption(in: mediaSelection) == option
+        
+        // Determine if this is an external track based on the display name or other characteristics
+        let isExternal = source.config.externalSubtitles?.contains { subtitle in
+          option.displayName.contains(subtitle.label)
+        } ?? false
+        
+        let trackId = isExternal ? "external-\(index)" : "builtin-\(option.displayName)-\(option.locale?.identifier ?? "unknown")"
+        
+        tracks.append(TextTrack(
+          id: trackId,
+          label: option.displayName,
+          language: option.locale?.identifier,
+          selected: isSelected
+        ))
+      }
+    }
+    
+    return tracks
+  }
+  
+  func selectTextTrack(textTrack: TextTrack?) throws {
+    guard let currentItem = playerPointer.currentItem else {
+      throw PlayerError.notInitialized.error()
+    }
+    
+    guard let mediaSelection = currentItem.asset.mediaSelectionGroup(forMediaCharacteristic: .legible) else {
+      return
+    }
+    
+    // If textTrack is nil, disable all text tracks
+    guard let textTrack = textTrack else {
+      currentItem.select(nil, in: mediaSelection)
+      selectedExternalTrackIndex = nil
+      eventEmitter.onTrackChange(nil)
+      return
+    }
+    
+    if textTrack.id.isEmpty {
+      // Disable all text tracks
+      currentItem.select(nil, in: mediaSelection)
+      selectedExternalTrackIndex = nil
+      eventEmitter.onTrackChange(nil)
+      return
+    }
+    
+    // Find and select the track by matching the ID
+    if textTrack.id.hasPrefix("external-") {
+      let trackIndexStr = String(textTrack.id.dropFirst("external-".count))
+      if let trackIndex = Int(trackIndexStr), trackIndex < mediaSelection.options.count {
+        let option = mediaSelection.options[trackIndex]
+        currentItem.select(option, in: mediaSelection)
+        selectedExternalTrackIndex = trackIndex
+        eventEmitter.onTrackChange(textTrack)
+      }
+    } else if textTrack.id.hasPrefix("builtin-") {
+      // Handle built-in tracks
+      for option in mediaSelection.options {
+        let optionId = "builtin-\(option.displayName)-\(option.locale?.identifier ?? "unknown")"
+        if optionId == textTrack.id {
+          currentItem.select(option, in: mediaSelection)
+          selectedExternalTrackIndex = nil
+          eventEmitter.onTrackChange(textTrack)
+          return
+        }
+      }
+    }
+  }
+  
+  var selectedTrack: TextTrack? {
+    get {
+      guard let currentItem = playerPointer.currentItem else {
+        return nil
+      }
+      
+      guard let mediaSelection = currentItem.asset.mediaSelectionGroup(forMediaCharacteristic: .legible) else {
+        return nil
+      }
+      
+      guard let selectedOption = currentItem.currentMediaSelection.selectedMediaOption(in: mediaSelection) else {
+        return nil
+      }
+      
+      // Find the index of the selected option
+      guard let index = mediaSelection.options.firstIndex(of: selectedOption) else {
+        return nil
+      }
+      
+      // Determine if this is an external track based on the display name or other characteristics
+      let isExternal = source.config.externalSubtitles?.contains { subtitle in
+        selectedOption.displayName.contains(subtitle.label)
+      } ?? false
+      
+      let trackId = isExternal ? "external-\(index)" : "builtin-\(selectedOption.displayName)-\(selectedOption.locale?.identifier ?? "unknown")"
+      
+      return TextTrack(
+        id: trackId,
+        label: selectedOption.displayName,
+        language: selectedOption.locale?.identifier,
+        selected: true
+      )
+    }
   }
   
   // MARK: - Memory Management

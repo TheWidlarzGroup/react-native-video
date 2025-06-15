@@ -2,16 +2,26 @@ package com.video.core
 
 import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
+import com.facebook.react.bridge.LifecycleEventListener
+import com.margelo.nitro.NitroModules
 import com.margelo.nitro.video.HybridVideoPlayer
 import com.video.view.VideoView
 import java.lang.ref.WeakReference
 
 @OptIn(UnstableApi::class)
-object VideoManager {
+object VideoManager : LifecycleEventListener {
   // nitroId -> weak VideoView
   private val views = mutableMapOf<Int, WeakReference<VideoView>>()
   // player -> list of nitroIds of views that are using this player
   private val players = mutableMapOf<HybridVideoPlayer, MutableList<Int>>()
+
+  var audioFocusManager = AudioFocusManager()
+
+  init {
+    NitroModules.applicationContext?.apply {
+      addLifecycleEventListener(this@VideoManager)
+    }
+  }
 
   fun maybePassPlayerToView(player: HybridVideoPlayer) {
     val views = players[player]?.mapNotNull { getVideoViewWeakReferenceByNitroId(it)?.get() } ?: return
@@ -59,10 +69,13 @@ object VideoManager {
     if (!players.containsKey(player)) {
       players[player] = mutableListOf()
     }
+
+    audioFocusManager.registerPlayer(player)
   }
 
   fun unregisterPlayer(player: HybridVideoPlayer) {
     players.remove(player)
+    audioFocusManager.unregisterPlayer(player)
   }
 
   fun getPlayerByNitroId(nitroId: Int): HybridVideoPlayer? {
@@ -75,7 +88,7 @@ object VideoManager {
     // Remove old mapping
     if (oldNitroId != -1) {
       views.remove(oldNitroId)
-      
+
       // Update player mappings
       players.keys.forEach { player ->
         players[player]?.let { nitroIds ->
@@ -85,7 +98,7 @@ object VideoManager {
         }
       }
     }
-    
+
     // Add new mapping
     views[newNitroId] = WeakReference(view)
   }
@@ -93,4 +106,32 @@ object VideoManager {
   fun getVideoViewWeakReferenceByNitroId(nitroId: Int): WeakReference<VideoView>? {
     return views[nitroId]
   }
+
+  // ------------ Lifecycle Handler ------------
+  private fun onAppEnterForeground() {
+    players.keys.forEach { player ->
+      if (player.wasAutoPaused) {
+        player.play()
+      }
+    }
+  }
+
+  private fun onAppEnterBackground() {
+    players.keys.forEach { player ->
+      if (!player.playInBackground && player.isPlaying) {
+        player.wasAutoPaused = player.isPlaying
+        player.pause()
+      }
+    }
+  }
+
+  override fun onHostResume() {
+    onAppEnterForeground()
+  }
+
+  override fun onHostPause() {
+    onAppEnterBackground()
+  }
+
+  override fun onHostDestroy() {}
 }

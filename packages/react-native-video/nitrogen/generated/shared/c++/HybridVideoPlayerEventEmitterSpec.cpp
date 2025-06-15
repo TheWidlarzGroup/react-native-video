@@ -46,6 +46,8 @@ namespace margelo::nitro::video {
       prototype.registerHybridSetter("onTimedMetadata", &HybridVideoPlayerEventEmitterSpec::setOnTimedMetadata);
       prototype.registerHybridGetter("onTextTrackDataChanged", &HybridVideoPlayerEventEmitterSpec::getOnTextTrackDataChanged);
       prototype.registerHybridSetter("onTextTrackDataChanged", &HybridVideoPlayerEventEmitterSpec::setOnTextTrackDataChanged);
+      prototype.registerHybridGetter("onTrackChange", &HybridVideoPlayerEventEmitterSpec::getOnTrackChange);
+      prototype.registerHybridSetter("onTrackChange", &HybridVideoPlayerEventEmitterSpec::setOnTrackChange);
       prototype.registerHybridGetter("onVolumeChange", &HybridVideoPlayerEventEmitterSpec::getOnVolumeChange);
       prototype.registerHybridSetter("onVolumeChange", &HybridVideoPlayerEventEmitterSpec::setOnVolumeChange);
       prototype.registerHybridGetter("onStatusChange", &HybridVideoPlayerEventEmitterSpec::getOnStatusChange);

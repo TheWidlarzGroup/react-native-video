@@ -100,6 +100,25 @@ class HybridVideoViewViewManager: HybridVideoViewViewManagerSpec {
     }
   }
   
+  var resizeMode: ResizeMode {
+    get {
+      guard let view else {
+        print(DEALOCATED_WARNING)
+        return .none
+      }
+      
+      return view.resizeMode
+    }
+    set {
+      guard let view else {
+        print(DEALOCATED_WARNING)
+        return
+      }
+      
+      view.resizeMode = newValue
+    }
+  }
+  
   func enterFullscreen() throws {
     guard let view else {
       throw VideoViewError.viewIsDeallocated.error()

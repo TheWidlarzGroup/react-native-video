@@ -20,10 +20,17 @@ public protocol HybridVideoPlayerSpec_protocol: HybridObject {
   var muted: Bool { get set }
   var loop: Bool { get set }
   var rate: Double { get set }
+  var mixAudioMode: MixAudioMode { get set }
+  var ignoreSilentSwitchMode: IgnoreSilentSwitchMode { get set }
+  var playInBackground: Bool { get set }
+  var playWhenInactive: Bool { get set }
   var isPlaying: Bool { get }
+  var selectedTrack: TextTrack? { get }
 
   // Methods
   func replaceSourceAsync(source: (any HybridVideoPlayerSourceSpec)?) throws -> Promise<Void>
+  func getAvailableTextTracks() throws -> [TextTrack]
+  func selectTextTrack(textTrack: TextTrack?) throws -> Void
   func clean() throws -> Void
   func preload() throws -> Promise<Void>
   func play() throws -> Void

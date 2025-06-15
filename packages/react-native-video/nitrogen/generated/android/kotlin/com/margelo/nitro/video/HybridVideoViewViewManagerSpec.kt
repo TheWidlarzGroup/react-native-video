@@ -61,6 +61,12 @@ abstract class HybridVideoViewViewManagerSpec: HybridObject() {
   @set:Keep
   abstract var autoEnterPictureInPicture: Boolean
   
+  @get:DoNotStrip
+  @get:Keep
+  @set:DoNotStrip
+  @set:Keep
+  abstract var resizeMode: ResizeMode
+  
   abstract var onPictureInPictureChange: ((isInPictureInPicture: Boolean) -> Unit)?
   
   private var onPictureInPictureChange_cxx: Func_void_bool?

@@ -1,4 +1,10 @@
-import { useEffect, useMemo, useRef, type DependencyList } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type DependencyList,
+} from 'react';
 
 /**
  * @internal
@@ -26,6 +32,9 @@ export const useManagedInstance = <T, D extends DependencyList[number]>(
   const isFastRefresh = useRef(false);
   const previousDependencies = useRef(dependencies);
 
+  // Wee need to force a "re-render" to recalculate the object
+  const [released, setReleased] = useState(false);
+
   if (objectRef.current == null) {
     objectRef.current = factory();
   }
@@ -41,7 +50,7 @@ export const useManagedInstance = <T, D extends DependencyList[number]>(
           value === previousDependencies.current[index]
       );
 
-    if (!newObject || !dependenciesChanged) {
+    if (!newObject || !dependenciesChanged || released) {
       // Destroy the old object
       if (objectRef.current) {
         cleanup(objectRef.current);
@@ -51,6 +60,7 @@ export const useManagedInstance = <T, D extends DependencyList[number]>(
       // Create a new object
       newObject = factory();
       objectRef.current = newObject;
+      setReleased(false);
 
       // Update the previous dependencies
       previousDependencies.current = dependencies;
@@ -65,7 +75,7 @@ export const useManagedInstance = <T, D extends DependencyList[number]>(
 
     // factory and cleanup are stable, so we don't need to re-evaluate
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, dependencies);
+  }, [...dependencies, released]);
 
   useEffect(() => {
     isFastRefresh.current = false;
@@ -74,6 +84,7 @@ export const useManagedInstance = <T, D extends DependencyList[number]>(
       if (!isFastRefresh.current && objectRef.current) {
         cleanup(objectRef.current);
         objectRef.current = null;
+        setReleased(true);
       }
     };
 

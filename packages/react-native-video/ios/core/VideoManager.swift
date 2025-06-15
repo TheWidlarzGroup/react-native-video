@@ -37,6 +37,34 @@ class VideoManager {
       name: AVAudioSession.routeChangeNotification,
       object: nil
     )
+    
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(applicationWillResignActive(notification:)),
+      name: UIApplication.willResignActiveNotification,
+      object: nil
+    )
+    
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(applicationDidBecomeActive(notification:)),
+      name: UIApplication.didBecomeActiveNotification,
+      object: nil
+    )
+    
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(applicationDidEnterBackground(notification:)),
+      name: UIApplication.didEnterBackgroundNotification,
+      object: nil
+    )
+    
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(applicationWillEnterForeground(notification:)),
+      name: UIApplication.willEnterForegroundNotification,
+      object: nil
+    )
   }
   
   deinit {
@@ -99,7 +127,11 @@ class VideoManager {
       hybridPlayer.player?.isMuted == false && hybridPlayer.player?.rate != 0
     }
     
-    if isAnyPlayerPlaying {
+    let anyPlayerNeedsNotMixWithOthers = players.allObjects.contains { player in
+      player.mixAudioMode == .donotmix
+    }
+    
+    if isAnyPlayerPlaying || anyPlayerNeedsNotMixWithOthers {
       activateAudioSession()
     } else {
       deactivateAudioSession()
@@ -110,9 +142,22 @@ class VideoManager {
   
   private func configureAudioSession() {
     let audioSession = AVAudioSession.sharedInstance()
+    var audioSessionCategoryOptions: AVAudioSession.CategoryOptions = audioSession.categoryOptions
     
     let anyViewNeedsPictureInPicture = videoView.allObjects.contains { view in
       view.allowsPictureInPicturePlayback
+    }
+    
+    let anyPlayerNeedsSilentSwitchObey = players.allObjects.contains { player in
+      player.ignoreSilentSwitchMode == .obey
+    }
+    
+    let anyPlayerNeedsSilentSwitchIgnore = players.allObjects.contains { player in
+      player.ignoreSilentSwitchMode == .ignore
+    }
+
+    let anyPlayerNeedsBackgroundPlayback = players.allObjects.contains { player in
+      player.playInBackground
     }
     
     if isAudioSessionManagementDisabled {
@@ -120,16 +165,30 @@ class VideoManager {
     }
     
     let category: AVAudioSession.Category = determineAudioCategory(
-      silentSwitchObey: false, // TODO: Pass actual value after we add prop
-      silentSwitchIgnore: false, // TODO: Pass actual value after we add prop
+      silentSwitchObey: anyPlayerNeedsSilentSwitchObey,
+      silentSwitchIgnore: anyPlayerNeedsSilentSwitchIgnore,
       earpiece: false, // TODO: Pass actual value after we add prop
       pip: anyViewNeedsPictureInPicture,
-      backgroundPlayback: false, // TODO: Pass actual value after we add prop
+      backgroundPlayback: anyPlayerNeedsBackgroundPlayback,
       notificationControls: false // TODO: Pass actual value after we add prop
     )
     
+    let audioMixingMode = determineAudioMixingMode()
+    
+    switch audioMixingMode {
+    case .mixwithothers:
+      audioSessionCategoryOptions.insert(.mixWithOthers)
+    case .donotmix:
+      audioSessionCategoryOptions.remove(.mixWithOthers)
+    case .duckothers:
+      audioSessionCategoryOptions.insert(.duckOthers)
+    case .auto:
+      audioSessionCategoryOptions.remove(.mixWithOthers)
+      audioSessionCategoryOptions.remove(.duckOthers)
+    }
+    
     do {
-      try audioSession.setCategory(category)
+      try audioSession.setCategory(category, mode: .moviePlayback, options: audioSessionCategoryOptions)
     } catch {
       print("ReactNativeVideo: Failed to set audio session category: \(error.localizedDescription)")
     }
@@ -187,6 +246,46 @@ class VideoManager {
     return .playback
   }
   
+  func determineAudioMixingMode() -> MixAudioMode {
+    let activePlayers = players.allObjects.filter { player in
+      player.isPlaying && player.player?.isMuted != true
+    }
+    
+    if activePlayers.isEmpty {
+      return .mixwithothers
+    }
+    
+    let anyPlayerNeedsMixWithOthers = activePlayers.contains { player in
+      player.mixAudioMode == .mixwithothers
+    }
+    
+    let anyPlayerNeedsNotMixWithOthers = activePlayers.contains { player in
+      player.mixAudioMode == .donotmix
+    }
+    
+    let anyPlayerNeedsDucksOthers = activePlayers.contains { player in
+      player.mixAudioMode == .duckothers
+    }
+    
+    let anyPlayerHasAutoMixAudioMode = activePlayers.contains { player in
+      player.mixAudioMode == .auto
+    }
+    
+    if anyPlayerNeedsNotMixWithOthers {
+      return .donotmix
+    }
+    
+    if anyPlayerHasAutoMixAudioMode {
+      return .auto
+    }
+    
+    if anyPlayerNeedsDucksOthers {
+      return .duckothers
+    }
+    
+    return .mixwithothers
+  }
+  
   
   // MARK: - Notification Handlers
   
@@ -233,6 +332,50 @@ class VideoManager {
       updateAudioSessionConfiguration()
     default:
       break
+    }
+  }
+  
+  @objc func applicationWillResignActive(notification: Notification) {
+    // Pause all players when the app is about to become inactive
+    for player in players.allObjects {
+      if player.playInBackground || player.playWhenInactive || !player.isPlaying || player.player?.isExternalPlaybackActive == true {
+        continue
+      }
+      
+      try? player.pause()
+      player.wasAutoPaused = true
+    }
+  }
+  
+  @objc func applicationDidBecomeActive(notification: Notification) {
+    // Resume all players when the app becomes active
+    for player in players.allObjects {
+      if player.wasAutoPaused {
+        try? player.play()
+        player.wasAutoPaused = false
+      }
+    }
+  }
+  
+  @objc func applicationDidEnterBackground(notification: Notification) {
+    // Pause all players when the app enters background
+    for player in players.allObjects {
+      if player.playInBackground || player.player?.isExternalPlaybackActive == true || !player.isPlaying {
+        continue
+      }
+      
+      try? player.pause()
+      player.wasAutoPaused = true
+    }
+  }
+  
+  @objc func applicationWillEnterForeground(notification: Notification) {
+    // Resume all players when the app enters foreground
+    for player in players.allObjects {
+      if player.wasAutoPaused {
+        try? player.play()
+        player.wasAutoPaused = false
+      }
     }
   }
 }

@@ -9,7 +9,9 @@ import androidx.media3.common.C
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.util.UnstableApi
 import com.margelo.nitro.video.NativeVideoConfig
+import com.margelo.nitro.video.SubtitleType
 import com.video.core.SourceError
+import com.video.core.extensions.toStringExtension
 
 private const val TAG = "MediaItemUtils"
 
@@ -32,7 +34,11 @@ fun getSubtitlesConfiguration(
 
   if (config.externalSubtitles != null) {
     for (subtitle in config.externalSubtitles) {
-      val ext = MimeTypeMap.getFileExtensionFromUrl(subtitle.uri)
+      val ext = if (subtitle.type == SubtitleType.AUTO) {
+        MimeTypeMap.getFileExtensionFromUrl(subtitle.uri)
+      } else {
+        subtitle.type.toStringExtension()
+      }
 
       val mimeType = when (ext?.lowercase()) {
         "srt" -> MimeTypes.APPLICATION_SUBRIP
@@ -48,7 +54,7 @@ fun getSubtitlesConfiguration(
         val subtitleConfig = MediaItem.SubtitleConfiguration.Builder(subtitle.uri.toUri())
           .setId("external-subtitle-${subtitle.uri}")
           .setMimeType(mimeType)
-          .setSelectionFlags(C.SELECTION_FLAG_DEFAULT or C.SELECTION_FLAG_AUTOSELECT)
+          .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
           .setRoleFlags(C.ROLE_FLAG_SUBTITLE)
           .setLabel(subtitle.label)
           .build()

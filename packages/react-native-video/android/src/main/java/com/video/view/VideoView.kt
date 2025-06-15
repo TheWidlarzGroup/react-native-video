@@ -1,6 +1,7 @@
 package com.video.view
 
 import android.annotation.SuppressLint
+import android.app.PictureInPictureParams
 import android.content.Context
 import android.graphics.Color
 import android.os.Build
@@ -17,6 +18,7 @@ import androidx.media3.ui.PlayerView
 import com.facebook.react.bridge.ReactApplicationContext
 import com.margelo.nitro.NitroModules
 import com.margelo.nitro.video.HybridVideoPlayer
+import com.margelo.nitro.video.ResizeMode
 import com.margelo.nitro.video.VideoViewEvents
 import com.video.core.LibraryError
 import com.video.core.VideoManager
@@ -26,6 +28,8 @@ import com.video.core.fragments.PictureInPictureHelperFragment
 import com.video.core.utils.PictureInPictureUtils.canEnterPictureInPicture
 import com.video.core.utils.PictureInPictureUtils.createPictureInPictureParams
 import com.video.core.utils.Threading.runOnMainThread
+import com.video.core.extensions.toAspectRatioFrameLayout
+import com.video.core.utils.PictureInPictureUtils.createDisabledPictureInPictureParams
 
 @UnstableApi
 class VideoView @JvmOverloads constructor(
@@ -61,7 +65,7 @@ class VideoView @JvmOverloads constructor(
   var autoEnterPictureInPicture: Boolean = false
     set(value) {
       field = value
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         try {
           val currentActivity = applicationContent.currentActivity
           currentActivity?.setPictureInPictureParams(createPictureInPictureParams(this))
@@ -78,6 +82,14 @@ class VideoView @JvmOverloads constructor(
     }
 
   var pictureInPictureEnabled: Boolean = false
+
+  var resizeMode: ResizeMode = ResizeMode.NONE
+    set(value) {
+      field = value
+      runOnMainThread {
+        applyResizeMode()
+      }
+    }
 
   var events = object : VideoViewEvents {
     override var onPictureInPictureChange: ((Boolean) -> Unit)? = {}
@@ -117,6 +129,11 @@ class VideoView @JvmOverloads constructor(
   init {
     addView(playerView)
     setupFullscreenButton()
+    applyResizeMode()
+  }
+
+  private fun applyResizeMode() {
+    playerView.resizeMode = resizeMode.toAspectRatioFrameLayout()
   }
 
   private val layoutRunnable = Runnable {
@@ -328,6 +345,13 @@ class VideoView @JvmOverloads constructor(
     removePipHelper()
     removeFullscreenFragment()
     VideoManager.unregisterView(this)
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      // We don't want activity to go to PiP Mode when video view is not presented
+      val currentActivity = applicationContent.currentActivity
+      currentActivity?.setPictureInPictureParams(createDisabledPictureInPictureParams(this))
+    }
+
     super.onDetachedFromWindow()
   }
 

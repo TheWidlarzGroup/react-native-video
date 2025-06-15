@@ -18,13 +18,24 @@ namespace margelo::nitro::video { class HybridVideoPlayerSourceSpec; }
 namespace margelo::nitro::video { class HybridVideoPlayerEventEmitterSpec; }
 // Forward declaration of `VideoPlayerStatus` to properly resolve imports.
 namespace margelo::nitro::video { enum class VideoPlayerStatus; }
+// Forward declaration of `MixAudioMode` to properly resolve imports.
+namespace margelo::nitro::video { enum class MixAudioMode; }
+// Forward declaration of `IgnoreSilentSwitchMode` to properly resolve imports.
+namespace margelo::nitro::video { enum class IgnoreSilentSwitchMode; }
+// Forward declaration of `TextTrack` to properly resolve imports.
+namespace margelo::nitro::video { struct TextTrack; }
 
 #include <memory>
 #include "HybridVideoPlayerSourceSpec.hpp"
 #include "HybridVideoPlayerEventEmitterSpec.hpp"
 #include "VideoPlayerStatus.hpp"
-#include <NitroModules/Promise.hpp>
+#include "MixAudioMode.hpp"
+#include "IgnoreSilentSwitchMode.hpp"
 #include <optional>
+#include "TextTrack.hpp"
+#include <string>
+#include <NitroModules/Promise.hpp>
+#include <vector>
 
 #include "ReactNativeVideo-Swift-Cxx-Umbrella.hpp"
 
@@ -106,8 +117,38 @@ namespace margelo::nitro::video {
     inline void setRate(double rate) noexcept override {
       _swiftPart.setRate(std::forward<decltype(rate)>(rate));
     }
+    inline MixAudioMode getMixAudioMode() noexcept override {
+      auto __result = _swiftPart.getMixAudioMode();
+      return static_cast<MixAudioMode>(__result);
+    }
+    inline void setMixAudioMode(MixAudioMode mixAudioMode) noexcept override {
+      _swiftPart.setMixAudioMode(static_cast<int>(mixAudioMode));
+    }
+    inline IgnoreSilentSwitchMode getIgnoreSilentSwitchMode() noexcept override {
+      auto __result = _swiftPart.getIgnoreSilentSwitchMode();
+      return static_cast<IgnoreSilentSwitchMode>(__result);
+    }
+    inline void setIgnoreSilentSwitchMode(IgnoreSilentSwitchMode ignoreSilentSwitchMode) noexcept override {
+      _swiftPart.setIgnoreSilentSwitchMode(static_cast<int>(ignoreSilentSwitchMode));
+    }
+    inline bool getPlayInBackground() noexcept override {
+      return _swiftPart.getPlayInBackground();
+    }
+    inline void setPlayInBackground(bool playInBackground) noexcept override {
+      _swiftPart.setPlayInBackground(std::forward<decltype(playInBackground)>(playInBackground));
+    }
+    inline bool getPlayWhenInactive() noexcept override {
+      return _swiftPart.getPlayWhenInactive();
+    }
+    inline void setPlayWhenInactive(bool playWhenInactive) noexcept override {
+      _swiftPart.setPlayWhenInactive(std::forward<decltype(playWhenInactive)>(playWhenInactive));
+    }
     inline bool getIsPlaying() noexcept override {
       return _swiftPart.isPlaying();
+    }
+    inline std::optional<TextTrack> getSelectedTrack() noexcept override {
+      auto __result = _swiftPart.getSelectedTrack();
+      return __result;
     }
 
   public:
@@ -119,6 +160,20 @@ namespace margelo::nitro::video {
       }
       auto __value = std::move(__result.value());
       return __value;
+    }
+    inline std::vector<TextTrack> getAvailableTextTracks() override {
+      auto __result = _swiftPart.getAvailableTextTracks();
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline void selectTextTrack(const std::optional<TextTrack>& textTrack) override {
+      auto __result = _swiftPart.selectTextTrack(textTrack);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
     }
     inline void clean() override {
       auto __result = _swiftPart.clean();

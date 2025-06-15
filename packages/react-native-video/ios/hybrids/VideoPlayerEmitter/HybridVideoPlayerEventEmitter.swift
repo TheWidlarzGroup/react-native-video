@@ -43,5 +43,7 @@ class HybridVideoPlayerEventEmitter: HybridVideoPlayerEventEmitterSpec {
   
   var onTextTrackDataChanged: ([String]) -> Void = { _ in }
   
+  var onTrackChange: ((TextTrack?) -> Void) = { _ in }
+  
   var onVolumeChange: ((Double) -> Void) = { _ in }
 }

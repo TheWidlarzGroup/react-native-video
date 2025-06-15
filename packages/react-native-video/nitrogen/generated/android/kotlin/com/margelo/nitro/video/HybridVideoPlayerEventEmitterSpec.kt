@@ -261,6 +261,20 @@ abstract class HybridVideoPlayerEventEmitterSpec: HybridObject() {
       onTextTrackDataChanged = value
     }
   
+  abstract var onTrackChange: (track: TextTrack?) -> Unit
+  
+  private var onTrackChange_cxx: Func_void_std__optional_TextTrack_
+    @Keep
+    @DoNotStrip
+    get() {
+      return Func_void_std__optional_TextTrack__java(onTrackChange)
+    }
+    @Keep
+    @DoNotStrip
+    set(value) {
+      onTrackChange = value
+    }
+  
   abstract var onVolumeChange: (volume: Double) -> Unit
   
   private var onVolumeChange_cxx: Func_void_double

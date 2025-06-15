@@ -27,6 +27,7 @@ public protocol HybridVideoPlayerEventEmitterSpec_protocol: HybridObject {
   var onSeek: (_ seekTime: Double) -> Void { get set }
   var onTimedMetadata: (_ metadata: TimedMetadata) -> Void { get set }
   var onTextTrackDataChanged: (_ texts: [String]) -> Void { get set }
+  var onTrackChange: (_ track: TextTrack?) -> Void { get set }
   var onVolumeChange: (_ volume: Double) -> Void { get set }
   var onStatusChange: (_ status: VideoPlayerStatus) -> Void { get set }
 

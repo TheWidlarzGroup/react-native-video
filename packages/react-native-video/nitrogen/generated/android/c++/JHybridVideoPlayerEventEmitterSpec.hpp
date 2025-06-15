@@ -79,6 +79,8 @@ namespace margelo::nitro::video {
     void setOnTimedMetadata(const std::function<void(const TimedMetadata& /* metadata */)>& onTimedMetadata) override;
     std::function<void(const std::vector<std::string>& /* texts */)> getOnTextTrackDataChanged() override;
     void setOnTextTrackDataChanged(const std::function<void(const std::vector<std::string>& /* texts */)>& onTextTrackDataChanged) override;
+    std::function<void(const std::optional<TextTrack>& /* track */)> getOnTrackChange() override;
+    void setOnTrackChange(const std::function<void(const std::optional<TextTrack>& /* track */)>& onTrackChange) override;
     std::function<void(double /* volume */)> getOnVolumeChange() override;
     void setOnVolumeChange(const std::function<void(double /* volume */)>& onVolumeChange) override;
     std::function<void(VideoPlayerStatus /* status */)> getOnStatusChange() override;
