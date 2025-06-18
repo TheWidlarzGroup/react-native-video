@@ -293,18 +293,19 @@ class VideoEventEmitter {
         viewId: Int,
         private val event: EventTypes,
         private val paramsSetter: (WritableMap.() -> Unit)?
-    ) : Event<VideoCustomEvent>(surfaceId, viewId) {
+    ) :
+        Event<VideoCustomEvent>(surfaceId, viewId) {
 
-        override fun getEventName(): String {
-            return "top${event.eventName.removePrefix("on")}"
-        }
+        override fun getEventName(): String = "top${event.eventName.removePrefix("on")}"
 
-        override fun getEventData(): WritableMap? {
-            return Arguments.createMap().apply(paramsSetter ?: {})
-        }
+        override fun getEventData(): WritableMap? = Arguments.createMap().apply(paramsSetter ?: {})
     }
 
-    private class EventBuilder(private val surfaceId: Int, private val viewId: Int, private val dispatcher: EventDispatcher) {
+    private class EventBuilder(
+        private val surfaceId: Int,
+        private val viewId: Int,
+        private val dispatcher: EventDispatcher
+    ) {
         fun dispatch(event: EventTypes, paramsSetter: (WritableMap.() -> Unit)? = null) =
             dispatcher.dispatchEvent(VideoCustomEvent(surfaceId, viewId, event, paramsSetter))
     }
