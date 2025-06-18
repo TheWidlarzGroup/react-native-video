@@ -157,7 +157,11 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
     }
   }
   
-  var playInBackground: Bool = false
+  var playInBackground: Bool = false {
+    didSet {
+      VideoManager.shared.requestAudioSessionUpdate()
+    }
+  }
   
   var playWhenInactive: Bool = false
   

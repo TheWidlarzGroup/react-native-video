@@ -224,6 +224,17 @@ class VideoManager {
         )
       }
       
+      // Set up background playback policy if needed
+      if backgroundPlayback {
+        players.allObjects.forEach { player in
+          if player.playInBackground {
+            player.player?.audiovisualBackgroundPlaybackPolicy = .continuesIfPossible
+          } else {
+            player.player?.audiovisualBackgroundPlaybackPolicy = .pauses
+          }
+        }
+      }
+      
       return .playback
     }
     
