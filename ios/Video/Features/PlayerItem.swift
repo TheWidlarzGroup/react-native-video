@@ -41,15 +41,15 @@ final class PlayerItem: AVPlayerItem {
         } else {
             self.payload = .init(modifiedLink: url.change(scheme: Self.hlsCommonScheme), payload: source)
         }
-
-        guard let assetResult = RCTVideoUtils.prepareAsset(source: source),
-              let asset = assetResult.asset,
-              let assetOptions = assetResult.assetOptions else {
+        let modifiedSource = source.json
+        modifiedSource!.setValue(self.payload.modifiedLink.absoluteString, forKey: "uri")
+        guard let assetResult = RCTVideoUtils.prepareAsset(source: VideoSource(modifiedSource)),
+              let asset = assetResult.asset else {
             DebugLog("Could not find video URL in source '\(String(describing: source))'")
             throw NSError(domain: "", code: 0, userInfo: nil)
         }
 
-        super.init(asset: asset)
+        super.init(asset: asset as AVAsset, automaticallyLoadedAssetKeys: nil)
 
         asset.resourceLoader.setDelegate(self, queue: resourceQueue)
     }
