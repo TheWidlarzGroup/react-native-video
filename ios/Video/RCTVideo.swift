@@ -676,7 +676,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     func playerItemPrepareText(source: VideoSource, asset: AVAsset!, assetOptions: NSDictionary?, uri: String) async -> AVPlayerItem {
         if source.textTracks.isEmpty == true || uri.hasSuffix(".m3u8") {
-            return await self.playerItemPropegateMetadata(AVPlayerItem(asset: asset))
+            do {
+                return try await self.playerItemPropegateMetadata(PlayerItem(source: source, uri: uri))
+            } catch {
+                return await self.playerItemPropegateMetadata(AVPlayerItem(asset: asset))
+            }
         }
 
         // AVPlayer can't airplay AVMutableCompositions
@@ -1031,7 +1035,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     func setSelectedTextTrack(_ selectedTextTrack: SelectedTrackCriteria?) {
         _selectedTextTrackCriteria = selectedTextTrack ?? SelectedTrackCriteria.none()
         guard let source = _source else { return }
-        if !source.textTracks.isEmpty { // sideloaded text tracks
+        if !source.textTracks.isEmpty || !(source.uri?.hasSuffix(".m3u8") ?? true) { // sideloaded text tracks
             RCTPlayerOperations.setSideloadedText(player: _player, textTracks: source.textTracks, criteria: _selectedTextTrackCriteria)
         } else { // text tracks included in the HLS playlist
             Task { [weak self] in
