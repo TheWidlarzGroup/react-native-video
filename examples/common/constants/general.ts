@@ -22,6 +22,18 @@ export const isAndroid = Platform.OS === 'android';
 
 export const srcAllPlatformList = [
   {
+    description: 'HLS external texttrack',
+    uri: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+    textTracks: [
+      {
+        title: 'test',
+        language: 'en' as ISO639_1,
+        type: TextTrackType.VTT,
+        uri: 'https://gist.githubusercontent.com/chdemko/5356310/raw/c8f1e1424e8bbb2ffacd28541bfac87b351af8a4/example.vtt',
+      },
+    ],
+  },
+  {
     description: 'local file landscape',
     uri: localeVideo.broadchurch,
   },
@@ -120,7 +132,7 @@ export const srcAllPlatformList = [
     ad: {
       adTagUrl:
         'https://pubads.g.doubleclick.net/gampad/ads?iu=/21775744923/external/vmap_ad_samples&sz=640x480&cust_params=sample_ar%3Dpremidpostoptimizedpodbumper&ciu_szs=300x250&gdfp_req=1&ad_rule=1&output=vmap&unviewed_position_start=1&env=vp&impl=s&cmsid=496&vid=short_onecue&correlator=',
-      },
+    },
     uri: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4',
   },
 ];
