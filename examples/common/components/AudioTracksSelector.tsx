@@ -28,7 +28,7 @@ export const AudioTrackSelector = ({
         style={styles.picker}
         itemStyle={styles.pickerItem}
         selectedValue={selectedAudioTrack?.value}
-        onValueChange={itemValue => {
+        onValueChange={(itemValue) => {
           if (itemValue !== 'empty') {
             console.log('on audio value change ' + itemValue);
             onValueChange(itemValue);
@@ -39,7 +39,7 @@ export const AudioTrackSelector = ({
         ) : (
           <Picker.Item label={'none'} value={'none'} key={'none'} />
         )}
-        {audioTracks.map(track => {
+        {audioTracks.map((track) => {
           if (!track) {
             return;
           }
@@ -53,7 +53,9 @@ export const AudioTrackSelector = ({
           }
           return (
             <Picker.Item
-              label={`${value} - ${track.selected}`}
+              label={`${
+                track.title || track.language || `Track ${track.index}`
+              }${track.selected ? ' (Selected)' : ''}`}
               value={`${value}`}
               key={`${value}`}
             />

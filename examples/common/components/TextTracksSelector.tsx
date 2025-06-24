@@ -28,7 +28,7 @@ export const TextTrackSelector = ({
         style={styles.picker}
         itemStyle={styles.pickerItem}
         selectedValue={`${selectedTextTrack?.value}`}
-        onValueChange={itemValue => {
+        onValueChange={(itemValue) => {
           if (itemValue !== 'empty') {
             onValueChange(itemValue);
           }
@@ -38,7 +38,7 @@ export const TextTrackSelector = ({
         ) : (
           <Picker.Item label={'none'} value={'none'} key={'none'} />
         )}
-        {textTracks.map(track => {
+        {textTracks.map((track) => {
           if (!track) {
             return;
           }
@@ -50,7 +50,15 @@ export const TextTrackSelector = ({
           } else if (textTracksSelectionBy === SelectedTrackType.TITLE) {
             value = track.title;
           }
-          return <Picker.Item label={`${value}`} value={value} key={value} />;
+          return (
+            <Picker.Item
+              label={`${
+                track.title || track.language || `Subtitle ${track.index}`
+              }${track.selected ? ' (Selected)' : ''}`}
+              value={value}
+              key={value}
+            />
+          );
         })}
       </Picker>
     </>
