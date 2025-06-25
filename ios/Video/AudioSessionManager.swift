@@ -205,7 +205,7 @@ class AudioSessionManager {
 
         do {
             try audioSession.setCategory(
-                category, mode: .moviePlayback, options: canAllowMixing ? options : []
+                category, mode: .moviePlayback, options: options
             )
 
             // Configure audio port
