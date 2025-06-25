@@ -2863,7 +2863,7 @@
 
     "react-native-monorepo-config": ["react-native-monorepo-config@0.1.9", "", { "dependencies": { "escape-string-regexp": "^5.0.0", "fast-glob": "^3.3.3" } }, "sha512-GLFYMEEcbltxZw7oUbbh/p0oXqA52lSirXt7o/N1qD6CFTvku84OVL6teeQ1Ef92pq+bepq4x0Qz+d6lapVbuQ=="],
 
-    "react-native-nitro-modules": ["react-native-nitro-modules@0.25.2", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-rL+X0LzB8BXvpdrUE/+oZ5v4qS/1nZIq0M8Uctbvqq2q53sVCHX4995ffT8+lGIJe/f0QcBvvrEeXtBPl86iwQ=="],
+    "react-native-nitro-modules": ["react-native-nitro-modules@0.26.2", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-PvTUOryU/J1RDsPh1IvmAEDkYVVL32wCIYxkg6HsKgq+Dl+C8lth/MtW7cRZ+fJ0qW21NILbhBdhSXFzBx51fA=="],
 
     "react-native-video": ["react-native-video@workspace:packages/react-native-video"],
 
@@ -4053,8 +4053,6 @@
 
     "nitro-codegen/chalk": ["chalk@5.4.1", "", {}, "sha512-zgVZuo2WcZgfUEmsn6eO3kINexW8RAE4maiQ8QNs8CtpPCSyMiYsULR3HQYkm3w8FIA3SberyMJMSldGsW+U3w=="],
 
-    "nitro-codegen/react-native-nitro-modules": ["react-native-nitro-modules@0.26.2", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-PvTUOryU/J1RDsPh1IvmAEDkYVVL32wCIYxkg6HsKgq+Dl+C8lth/MtW7cRZ+fJ0qW21NILbhBdhSXFzBx51fA=="],
-
     "normalize-package-data/hosted-git-info": ["hosted-git-info@4.1.0", "", { "dependencies": { "lru-cache": "^6.0.0" } }, "sha512-kyCuEOWjJqZuDbRHzL8V93NzQhwIB71oFWSyzVo+KPZI+pnQPPxucdkrOZvkLRnrf5URsQM+IJ09Dw29cRALIA=="],
 
     "npm-run-path/path-key": ["path-key@4.0.0", "", {}, "sha512-haREypq7xkM7ErfgIyA0z+Bj4AGKlMSdlQE2jvJo6huWD1EdkKYV+G/T4nq0YEF2vgTT8kqMFKo1uHn950r4SQ=="],
@@ -4124,10 +4122,6 @@
     "react-native-monorepo-config/escape-string-regexp": ["escape-string-regexp@5.0.0", "", {}, "sha512-/veY75JbMK4j1yjvuUxuVsiS/hr/4iHs9FTT6cgTexxdE0Ly/glccBAkloH/DofkjRbZU3bnoj38mOmhkZ0lHw=="],
 
     "react-native-video/@react-native/eslint-config": ["@react-native/eslint-config@0.80.0", "", { "dependencies": { "@babel/core": "^7.25.2", "@babel/eslint-parser": "^7.25.1", "@react-native/eslint-plugin": "0.80.0", "@typescript-eslint/eslint-plugin": "^7.1.1", "@typescript-eslint/parser": "^7.1.1", "eslint-config-prettier": "^8.5.0", "eslint-plugin-eslint-comments": "^3.2.0", "eslint-plugin-ft-flow": "^2.0.1", "eslint-plugin-jest": "^27.9.0", "eslint-plugin-react": "^7.30.1", "eslint-plugin-react-hooks": "^5.2.0", "eslint-plugin-react-native": "^4.0.0" }, "peerDependencies": { "eslint": ">=8", "prettier": ">=2" } }, "sha512-bd0GOcG++qIKzEngeyeNrGaDWWHtB8CpC5zbpYho2TTWpJDxBRcoPAzBdpPkxQtpBMdXyYRZMENRp6Khrg0YYQ=="],
-
-    "react-native-video/react-native-nitro-modules": ["react-native-nitro-modules@0.26.2", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-PvTUOryU/J1RDsPh1IvmAEDkYVVL32wCIYxkg6HsKgq+Dl+C8lth/MtW7cRZ+fJ0qW21NILbhBdhSXFzBx51fA=="],
-
-    "react-native-video-example/react-native-nitro-modules": ["react-native-nitro-modules@0.26.2", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-PvTUOryU/J1RDsPh1IvmAEDkYVVL32wCIYxkg6HsKgq+Dl+C8lth/MtW7cRZ+fJ0qW21NILbhBdhSXFzBx51fA=="],
 
     "react-router/react-is": ["react-is@16.13.1", "", {}, "sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ=="],
 

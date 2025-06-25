@@ -178,16 +178,12 @@ android {
         java.srcDirs += ["src/paper/java"]
       }
 
-      java.srcDirs += ["src/androidx"]
+      if (!ExoplayerDependencies.useExoplayerDash) {
+        java.srcDirs += ["src/stubs/dash"]
+      }
 
-      java {
-        if (ExoplayerDependencies.useExoplayerDash == true) {
-          exclude "src/androidx/media3/exoplayer/dash"
-        }
-
-        if (ExoplayerDependencies.useExoplayerHls == true) {
-          exclude "src/androidx/media3/exoplayer/hls"
-        }
+      if (!ExoplayerDependencies.useExoplayerHls) {
+        java.srcDirs += ["src/stubs/hls"]
       }
     }
   }
