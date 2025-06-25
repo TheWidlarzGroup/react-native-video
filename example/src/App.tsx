@@ -136,6 +136,22 @@ const VideoDemo = () => {
     [addEvent]
   );
 
+  const handlePlayerSeek = React.useCallback(
+    (time: number) => {
+      addEvent(`Player: onSeek ${time.toFixed(2)}s`);
+    },
+    [addEvent]
+  );
+
+  const handlePlayerStateChange = React.useCallback(
+    (state: { isPlaying: boolean; isBuffering: boolean }) => {
+      addEvent(
+        `Player: onPlaybackStateChange isPlaying=${state.isPlaying}, isBuffering=${state.isBuffering}`
+      );
+    },
+    [addEvent]
+  );
+
   // Setup player
   const player = useVideoPlayer(
     {
@@ -157,6 +173,8 @@ const VideoDemo = () => {
   useEvent(player, 'onBuffer', handlePlayerBuffer);
   useEvent(player, 'onProgress', handlePlayerProgress);
   useEvent(player, 'onStatusChange', handlePlayerStatusChange);
+  useEvent(player, 'onSeek', handlePlayerSeek);
+  useEvent(player, 'onPlaybackStateChange', handlePlayerStateChange);
 
   // Sync settings with player
   React.useEffect(() => {

@@ -169,6 +169,9 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
   
   // Text track selection state
   private var selectedExternalTrackIndex: Int? = nil
+  
+  // MARK: - Buffering state tracking
+  var isCurrentlyBuffering: Bool = false
 
   var isPlaying: Bool {
     get {
@@ -185,6 +188,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
   func release() {
     playerQueue.async { [weak self] in
       guard let self = self else { return }
+      
       self.player?.replaceCurrentItem(with: nil)
       self.player = nil
       self.playerItem = nil
@@ -295,7 +299,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
     return promise
   }
   
-  // MARK: - Internal Methods
+  // MARK: - Methods
   
   /**
     * Initialize the player item synchronously. This is used to initialize the player item before it is set to the player.

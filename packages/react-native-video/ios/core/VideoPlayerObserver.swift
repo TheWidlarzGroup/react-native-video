@@ -11,6 +11,7 @@ import AVFoundation
 protocol VideoPlayerObserverDelegate: AnyObject {
   func onPlayedToEnd(player: AVPlayer)
   func onPlayerItemChange(player: AVPlayer, playerItem: AVPlayerItem?)
+  func onPlayerItemWillChange(hasNewPlayerItem: Bool)
   func onTextTrackDataChanged(texts: [NSAttributedString])
   func onTimedMetadataChanged(timedMetadata: [AVMetadataItem])
   func onRateChanged(rate: Float)
@@ -28,6 +29,7 @@ protocol VideoPlayerObserverDelegate: AnyObject {
 extension VideoPlayerObserverDelegate {
   func onPlayedToEnd(player: AVPlayer) {}
   func onPlayerItemChange(player: AVPlayer, playerItem: AVPlayerItem?) {}
+  func onPlayerItemWillChange(hasNewPlayerItem: Bool) {}
   func onTextTrackDataChanged(texts: [NSAttributedString]) {}
   func onTimedMetadataChanged(timedMetadata: [AVMetadataItem]) {}
   func onRateChanged(rate: Float) {}
@@ -62,6 +64,7 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
   var playbackEndedObserver: NSObjectProtocol?
   var playbackBufferEmptyObserver: NSKeyValueObservation?
   var playbackLikelyToKeepUpObserver: NSKeyValueObservation?
+  var playbackBufferFullObserver: NSKeyValueObservation?
   var playerItemStatusObserver: NSKeyValueObservation?
   var playerItemAccessLogObserver: NSObjectProtocol?
   
@@ -144,15 +147,7 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
       self?.onPlayerAccessLog(playerItem: playerItem)
     }
     
-    playbackBufferEmptyObserver = playerItem.observe(\.isPlaybackBufferEmpty, options: [.new]) { [weak self] _, change in
-      guard change.newValue == true else { return }
-      self?.delegate?.onPlaybackBufferEmpty()
-    }
-    
-    playbackLikelyToKeepUpObserver = playerItem.observe(\.isPlaybackLikelyToKeepUp, options: [.new]) { [weak self] _, change in
-      guard change.newValue == true else { return }
-      self?.delegate?.onPlaybackLikelyToKeepUp()
-    }
+    setupBufferObservers(for: playerItem)
     
     playerItemStatusObserver = playerItem.observe(\.status, options: [.new]) { [weak self] _, change in
       self?.delegate?.onPlayerItemStatusChanged(status: playerItem.status)
@@ -178,10 +173,7 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
       self.playerItemAccessLogObserver = nil
     }
     // Invalidate KVO observers
-    playbackBufferEmptyObserver?.invalidate()
-    playbackBufferEmptyObserver = nil
-    playbackLikelyToKeepUpObserver?.invalidate()
-    playbackLikelyToKeepUpObserver = nil
+    clearBufferObservers()
     playerItemStatusObserver?.invalidate()
     playerItemStatusObserver = nil
     // Remove outputs if needed
@@ -241,6 +233,9 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
     // Remove observers for old player item
     invalidatePlayerItemObservers()
     
+    // Notify delegate about player item state change
+    delegate?.onPlayerItemWillChange(hasNewPlayerItem: newPlayerItem != nil)
+    
     if let playerItem = newPlayerItem {
       // Initialize observers for new player item
       initializePlayerItemObservers(player: player, playerItem: playerItem)
@@ -255,5 +250,45 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
     guard let lastEvent = accessLog.events.last else { return }
     
     delegate?.onBandwidthUpdate(bitrate: lastEvent.indicatedBitrate)
+  }
+  
+  // MARK: - Buffer State Management
+  
+  func setupBufferObservers(for playerItem: AVPlayerItem) {
+    clearBufferObservers()
+    
+    // Observe buffer empty - this indicates definite buffering
+    playbackBufferEmptyObserver = playerItem.observe(\.isPlaybackBufferEmpty, options: [.new, .initial]) { [weak self] playerItem, change in
+      let isEmpty = change.newValue ?? playerItem.isPlaybackBufferEmpty
+      if isEmpty {
+        self?.delegate?.onPlaybackBufferEmpty()
+      }
+    }
+    
+    // Observe likely to keep up - this indicates that buffering has finished
+    playbackLikelyToKeepUpObserver = playerItem.observe(\.isPlaybackLikelyToKeepUp, options: [.new, .initial]) { [weak self] playerItem, change in
+      let isLikelyToKeepUp = change.newValue ?? playerItem.isPlaybackLikelyToKeepUp
+      if isLikelyToKeepUp {
+        self?.delegate?.onPlaybackLikelyToKeepUp()
+      }
+    }
+    
+    // Observe buffer full as an additional signal
+    playbackBufferFullObserver = playerItem.observe(\.isPlaybackBufferFull, options: [.new, .initial]) { [weak self] playerItem, change in
+      let isFull = change.newValue ?? playerItem.isPlaybackBufferFull
+      if isFull {
+        self?.delegate?.onPlaybackLikelyToKeepUp()
+      }
+    }
+  }
+  
+  func clearBufferObservers() {
+    playbackBufferEmptyObserver?.invalidate()
+    playbackBufferFullObserver?.invalidate()
+    playbackLikelyToKeepUpObserver?.invalidate()
+    
+    playbackBufferEmptyObserver = nil
+    playbackBufferFullObserver = nil
+    playbackLikelyToKeepUpObserver = nil
   }
 }
