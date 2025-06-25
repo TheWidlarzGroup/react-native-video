@@ -83,4 +83,16 @@ object PictureInPictureUtils {
 
     return visibleRect
   }
+
+  fun safeSetPictureInPictureParams(params: PictureInPictureParams) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      try {
+        val currentActivity = NitroModules.applicationContext?.currentActivity
+        currentActivity?.setPictureInPictureParams(params)
+      } catch (_: Exception) {
+        // Ignore: We cannot check if user has added support for PIP in manifest
+        // so we need to catch error if he did not add it.
+      }
+    }
+  }
 }

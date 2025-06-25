@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageButton
+import androidx.annotation.RequiresApi
 import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentActivity
 import androidx.media3.common.util.UnstableApi
@@ -29,6 +30,7 @@ import com.video.core.utils.PictureInPictureUtils.canEnterPictureInPicture
 import com.video.core.utils.PictureInPictureUtils.createPictureInPictureParams
 import com.video.core.utils.Threading.runOnMainThread
 import com.video.core.extensions.toAspectRatioFrameLayout
+import com.video.core.utils.PictureInPictureUtils
 import com.video.core.utils.PictureInPictureUtils.createDisabledPictureInPictureParams
 
 @UnstableApi
@@ -65,11 +67,12 @@ class VideoView @JvmOverloads constructor(
   var autoEnterPictureInPicture: Boolean = false
     set(value) {
       field = value
+
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        try {
-          val currentActivity = applicationContent.currentActivity
-          currentActivity?.setPictureInPictureParams(createPictureInPictureParams(this))
-        } catch (_: Exception) {}
+        PictureInPictureUtils.safeSetPictureInPictureParams(
+          if (value) createPictureInPictureParams(this)
+          else createDisabledPictureInPictureParams(this)
+        )
       }
     }
 
@@ -347,9 +350,9 @@ class VideoView @JvmOverloads constructor(
     VideoManager.unregisterView(this)
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      // We don't want activity to go to PiP Mode when video view is not presented
-      val currentActivity = applicationContent.currentActivity
-      currentActivity?.setPictureInPictureParams(createDisabledPictureInPictureParams(this))
+      PictureInPictureUtils.safeSetPictureInPictureParams(
+        createDisabledPictureInPictureParams(this)
+      )
     }
 
     super.onDetachedFromWindow()
