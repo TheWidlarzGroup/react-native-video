@@ -6,9 +6,11 @@ import android.content.Context
 import android.graphics.Color
 import android.os.Build
 import android.util.AttributeSet
+import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import androidx.annotation.RequiresApi
@@ -32,6 +34,7 @@ import com.video.core.utils.Threading.runOnMainThread
 import com.video.core.extensions.toAspectRatioFrameLayout
 import com.video.core.utils.PictureInPictureUtils
 import com.video.core.utils.PictureInPictureUtils.createDisabledPictureInPictureParams
+import com.video.core.utils.SmallVideoPlayerOptimizer
 
 @UnstableApi
 class VideoView @JvmOverloads constructor(
@@ -109,6 +112,9 @@ class VideoView @JvmOverloads constructor(
     setShutterBackgroundColor(Color.TRANSPARENT)
     setShowSubtitleButton(true)
     useController = false
+
+    // Apply optimizations based on video player size if needed
+    configureForSmallPlayer()
   }
   var isInFullscreen: Boolean = false
     set(value) {
@@ -145,6 +151,9 @@ class VideoView @JvmOverloads constructor(
       MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY)
     )
     layout(left, top, right, bottom)
+
+    // Additional layout fixes for small video players
+    applySmallPlayerLayoutFixes()
   }
 
   override fun requestLayout() {
@@ -362,5 +371,18 @@ class VideoView @JvmOverloads constructor(
     hybridPlayer?.movePlayerToVideoView(this)
     setupPipHelper()
     super.onAttachedToWindow()
+  }
+
+  private fun PlayerView.configureForSmallPlayer() {
+    SmallVideoPlayerOptimizer.applyOptimizations(this, context, isFullscreen = false)
+
+    // Also apply after any layout changes
+    viewTreeObserver.addOnGlobalLayoutListener {
+      SmallVideoPlayerOptimizer.applyOptimizations(this, context, isFullscreen = false)
+    }
+  }
+
+  private fun applySmallPlayerLayoutFixes() {
+    SmallVideoPlayerOptimizer.applyOptimizations(playerView, context, isFullscreen = false)
   }
 }

@@ -1,6 +1,7 @@
 package com.video.core.fragments
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
@@ -9,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowInsetsController
+import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import androidx.activity.OnBackPressedCallback
@@ -17,6 +19,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.media3.common.util.UnstableApi
 import com.video.core.utils.PictureInPictureUtils.createPictureInPictureParams
+import com.video.core.utils.SmallVideoPlayerOptimizer
 import com.video.view.VideoView
 import java.util.UUID
 
@@ -131,6 +134,9 @@ class FullscreenVideoFragment(private val videoView: VideoView) : Fragment() {
 
     setupFullscreenButton()
     videoView.playerView.setShowSubtitleButton(true)
+    
+    // Apply optimizations based on video player size in fullscreen mode
+    SmallVideoPlayerOptimizer.applyOptimizations(videoView.playerView, requireContext(), isFullscreen = true)
   }
 
   @SuppressLint("PrivateResource")
@@ -219,6 +225,8 @@ class FullscreenVideoFragment(private val videoView: VideoView) : Fragment() {
     // Notify VideoView that we've exited fullscreen
     videoView.isInFullscreen = false
   }
+
+
 
   override fun onDestroy() {
     super.onDestroy()
