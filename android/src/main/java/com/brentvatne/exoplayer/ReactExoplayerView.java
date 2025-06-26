@@ -427,59 +427,38 @@ public class ReactExoplayerView extends FrameLayout implements
         }
     }
 
-    /**
-     * Initializing Player control using PlayerView's built-in controls
-     */
     private void initializePlayerControl() {
         exoPlayerView.setPlayer(player);
         
-        // Set up control visibility listener using PlayerView's built-in mechanism
         exoPlayerView.setControllerVisibilityListener(visibility -> {
             boolean isVisible = visibility == View.VISIBLE;
             eventEmitter.onControlsVisibilityChange.invoke(isVisible);
         });
 
-        // Configure fullscreen button behavior
         exoPlayerView.setFullscreenButtonClickListener(isFullscreen -> {
             setFullscreen(!this.isFullscreen);
         });
 
-        // Configure controller settings
         updateControllerConfig();
     }
 
-    /**
-     * Update controller configuration for PlayerView
-     */
     private void updateControllerConfig() {
         if (exoPlayerView == null) return;
         
-        // Configure controller timeout
         exoPlayerView.setControllerShowTimeoutMs(5000);
         
-        // Configure controller auto-show behavior
         exoPlayerView.setControllerAutoShow(true);
         exoPlayerView.setControllerHideOnTouch(true);
         
-        // Apply control visibility settings
         updateControllerVisibility();
     }
 
-    /**
-     * Update controller visibility settings
-     */
     private void updateControllerVisibility() {
         if (exoPlayerView == null) return;
         
-        // Enable/disable specific controls based on ControlsConfig
-        // Note: PlayerView has limited customization compared to custom controls
-        // Some features may need to be implemented differently
-        
-        // Configure rewind/fast forward increments
         exoPlayerView.setRewindIncrementMs(controlsConfig.getSeekIncrementMS());
         exoPlayerView.setFastForwardIncrementMs(controlsConfig.getSeekIncrementMS());
         
-        // Show/hide fullscreen button
         exoPlayerView.setUseController(!controlsConfig.getHideFullscreen());
     }
 
@@ -521,11 +500,7 @@ public class ReactExoplayerView extends FrameLayout implements
         builder.show();
     }
 
-    /**
-     * Adding Player control to the frame layout - now handled by PlayerView automatically
-     */
     private void addPlayerControl() {
-        // PlayerView manages controls automatically - no manual addition needed
         updateControllerConfig();
     }
 
@@ -544,8 +519,6 @@ public class ReactExoplayerView extends FrameLayout implements
 
     private void refreshControlsStyles() {
         if (exoPlayerView == null || player == null || !controls) return;
-        // PlayerView's built-in controls have limited customization
-        // Update what we can through PlayerView's API
         updateControllerVisibility();
     }
 
@@ -872,7 +845,7 @@ public class ReactExoplayerView extends FrameLayout implements
             DebugLog.e(TAG, "Failed to initialize DRM Session Manager Framework!");
             return;
         }
-        // init source to manage ads and external text tracks
+        // init source to manage ads (external text tracks are now handled in MediaItem)
         MediaSource videoSource = buildMediaSource(runningSource.getUri(),
                 runningSource.getExtension(),
                 drmSessionManager,
@@ -880,12 +853,6 @@ public class ReactExoplayerView extends FrameLayout implements
                 runningSource.getCropEndMs());
         MediaSource mediaSourceWithAds = initializeAds(videoSource, runningSource);
         MediaSource mediaSource = Objects.requireNonNullElse(mediaSourceWithAds, videoSource);
-
-        MediaSource subtitlesSource = buildTextSource();
-        if (subtitlesSource != null) {
-            MediaSource[] mediaSourceArray = {mediaSource, subtitlesSource};
-            mediaSource = new MergingMediaSource(mediaSourceArray);
-        }
 
         // wait for player to be set
         while (player == null) {
@@ -1042,6 +1009,13 @@ public class ReactExoplayerView extends FrameLayout implements
         if (customMetadata != null) {
             mediaItemBuilder.setMediaMetadata(customMetadata);
         }
+        
+        // Add external subtitles to MediaItem
+        List<MediaItem.SubtitleConfiguration> subtitleConfigurations = buildSubtitleConfigurations();
+        if (subtitleConfigurations != null) {
+            mediaItemBuilder.setSubtitleConfigurations(subtitleConfigurations);
+        }
+        
         if (source.getAdsProps() != null) {
             Uri adTagUrl = source.getAdsProps().getAdTagUrl();
             if (adTagUrl != null) {
@@ -1176,29 +1150,59 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     @Nullable
-    private MediaSource buildTextSource() {
-        if (source.getSideLoadedTextTracks() == null) {
+    private List<MediaItem.SubtitleConfiguration> buildSubtitleConfigurations() {
+        if (source.getSideLoadedTextTracks() == null || source.getSideLoadedTextTracks().getTracks().isEmpty()) {
             return null;
         }
 
         List<MediaItem.SubtitleConfiguration> subtitleConfigurations = new ArrayList<>();
+        int trackIndex = 0;
 
         for (SideLoadedTextTrack track : source.getSideLoadedTextTracks().getTracks()) {
-            MediaItem.SubtitleConfiguration subtitleConfiguration = new MediaItem.SubtitleConfiguration.Builder(track.getUri())
-                    .setMimeType(track.getType())
-                    .setLanguage(track.getLanguage())
-                    .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
-                    .setRoleFlags(C.ROLE_FLAG_SUBTITLE)
-                    .setLabel(track.getTitle())
-                    .build();
-            subtitleConfigurations.add(subtitleConfiguration);
+            try {
+                // Create a more descriptive ID that PlayerView can use
+                String trackId = "external-subtitle-" + trackIndex;
+                String label = track.getTitle();
+                if (label == null || label.isEmpty()) {
+                    label = "External " + (trackIndex + 1);
+                    if (track.getLanguage() != null && !track.getLanguage().isEmpty()) {
+                        label += " (" + track.getLanguage() + ")";
+                    }
+                }
+                
+                MediaItem.SubtitleConfiguration.Builder configBuilder = new MediaItem.SubtitleConfiguration.Builder(track.getUri())
+                        .setId(trackId)
+                        .setMimeType(track.getType())
+                        .setLabel(label)
+                        .setRoleFlags(C.ROLE_FLAG_SUBTITLE);
+                
+                // Set language if available
+                if (track.getLanguage() != null && !track.getLanguage().isEmpty()) {
+                    configBuilder.setLanguage(track.getLanguage());
+                }
+                
+                // Set selection flags - make first track default if no specific track is selected
+                if (trackIndex == 0 && (textTrackType == null || "disabled".equals(textTrackType))) {
+                    configBuilder.setSelectionFlags(C.SELECTION_FLAG_DEFAULT);
+                } else {
+                    configBuilder.setSelectionFlags(0);
+                }
+                
+                MediaItem.SubtitleConfiguration subtitleConfiguration = configBuilder.build();
+                subtitleConfigurations.add(subtitleConfiguration);
+                
+                DebugLog.d(TAG, "Created subtitle configuration: " + trackId + " - " + label + " (" + track.getType() + ")");
+                trackIndex++;
+            } catch (Exception e) {
+                DebugLog.e(TAG, "Error creating SubtitleConfiguration for URI " + track.getUri() + ": " + e.getMessage());
+            }
         }
 
-        MediaItem subtitlesMediaItem = new MediaItem.Builder()
-                .setUri(source.getUri())
-                .setSubtitleConfigurations(subtitleConfigurations).build();
+        if (!subtitleConfigurations.isEmpty()) {
+            DebugLog.d(TAG, "Built " + subtitleConfigurations.size() + " external subtitle configurations");
+        }
 
-        return new DefaultMediaSourceFactory(mediaDataSourceFactory).createMediaSource(subtitlesMediaItem);
+        return subtitleConfigurations.isEmpty() ? null : subtitleConfigurations;
     }
 
     private void releasePlayer() {
@@ -1489,7 +1493,8 @@ public class ReactExoplayerView extends FrameLayout implements
                     }
                     eventEmitter.onVideoLoad.invoke(duration, currentPosition, width, height,
                             audioTracks, textTracks, videoTracks, trackId );
-
+                    
+                    updateSubtitleButtonVisibility();
                 });
                 return;
             }
@@ -1498,6 +1503,8 @@ public class ReactExoplayerView extends FrameLayout implements
 
             eventEmitter.onVideoLoad.invoke(duration, currentPosition, width, height,
                     audioTracks, textTracks, videoTracks, trackId);
+
+            updateSubtitleButtonVisibility();
             refreshControlsStyles();
         }
     }
@@ -1656,20 +1663,38 @@ public class ReactExoplayerView extends FrameLayout implements
         if (trackSelector == null) {
             return textTracks;
         }
+        
         MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
         int index = getTrackRendererIndex(C.TRACK_TYPE_TEXT);
         if (info == null || index == C.INDEX_UNSET) {
             return textTracks;
         }
+        
         TrackSelectionArray selectionArray = player.getCurrentTrackSelections();
-        TrackSelection selection = selectionArray.get( C.TRACK_TYPE_VIDEO );
+        TrackSelection selection = selectionArray.get(C.TRACK_TYPE_TEXT);
         TrackGroupArray groups = info.getTrackGroups(index);
 
-        for (int i = 0; i < groups.length; ++i) {
-            TrackGroup group = groups.get(i);
-            Format format = group.getFormat(0);
-            Track textTrack = exoplayerTrackToGenericTrack(format, i, selection, group);
-            textTracks.add(textTrack);
+        for (int groupIndex = 0; groupIndex < groups.length; ++groupIndex) {
+            TrackGroup group = groups.get(groupIndex);
+            for (int trackIndex = 0; trackIndex < group.length; trackIndex++) {
+                Format format = group.getFormat(trackIndex);
+                Track textTrack = exoplayerTrackToGenericTrack(format, trackIndex, selection, group);
+                
+                boolean isExternal = format.id != null && format.id.startsWith("external-subtitle-");
+                boolean isSelected = isTrackSelected(selection, group, trackIndex);
+                
+                textTrack.setIndex(textTracks.size());
+                
+                if (textTrack.getTitle() == null || textTrack.getTitle().isEmpty()) {
+                    if (isExternal) {
+                        textTrack.setTitle("External " + (trackIndex + 1));
+                    } else {
+                        textTrack.setTitle("Track " + (textTracks.size() + 1));
+                    }
+                }
+                
+                textTracks.add(textTrack);
+            }
         }
         return textTracks;
     }
@@ -1726,9 +1751,85 @@ public class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onTracksChanged(@NonNull Tracks tracks) {
+        // Emit track information to JS
         eventEmitter.onTextTracks.invoke(getTextTrackInfo());
         eventEmitter.onAudioTracks.invoke(getAudioTrackInfo());
         eventEmitter.onVideoTracks.invoke(getVideoTrackInfo());
+        
+        updateSubtitleButtonVisibility();
+        
+        ensureAudioEnabled();
+    }
+    
+    private void ensureAudioEnabled() {
+        if (player == null) return;
+        
+        mainHandler.postDelayed(() -> {
+            if (player != null) {
+                boolean hasAudioTracks = false;
+                if (trackSelector != null) {
+                    MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
+                    if (info != null) {
+                        int audioRendererIndex = getTrackRendererIndex(C.TRACK_TYPE_AUDIO);
+                        if (audioRendererIndex != C.INDEX_UNSET) {
+                            TrackGroupArray groups = info.getTrackGroups(audioRendererIndex);
+                            hasAudioTracks = groups.length > 0;
+                        }
+                    }
+                }
+                
+                if (hasAudioTracks) {
+                    float targetVolume = muted ? 0f : audioVolume;
+                    if (player.getVolume() != targetVolume) {
+                        player.setVolume(targetVolume);
+                        DebugLog.d(TAG, "Restored audio volume after track change: " + targetVolume);
+                    }
+                    
+                    changeAudioOutput(audioOutput);
+                    
+                    if (!muted && !hasAudioFocus) {
+                        requestAudioFocus();
+                    }
+                }
+            }
+        }, 100);
+    }
+    
+    private boolean hasBuiltInTextTracks() {
+        if (player == null || trackSelector == null) return false;
+        
+        MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
+        if (info == null) return false;
+        
+        int textRendererIndex = getTrackRendererIndex(C.TRACK_TYPE_TEXT);
+        if (textRendererIndex == C.INDEX_UNSET) return false;
+        
+        TrackGroupArray groups = info.getTrackGroups(textRendererIndex);
+        
+        // Check if any groups have tracks that are NOT external subtitles
+        for (int i = 0; i < groups.length; i++) {
+            TrackGroup group = groups.get(i);
+            for (int j = 0; j < group.length; j++) {
+                Format format = group.getFormat(j);
+                // If track ID doesn't start with "external-subtitle-", it's built-in
+                if (format.id == null || !format.id.startsWith("external-subtitle-")) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+
+    private void updateSubtitleButtonVisibility() {
+        if (exoPlayerView == null) return;
+        
+        boolean hasTextTracks = (source.getSideLoadedTextTracks() != null && 
+                                !source.getSideLoadedTextTracks().getTracks().isEmpty()) ||
+                               hasBuiltInTextTracks();
+        
+        exoPlayerView.setShowSubtitleButton(hasTextTracks);
+        DebugLog.d(TAG, "Updated subtitle button visibility: " + hasTextTracks);
     }
 
     @Override
@@ -1920,6 +2021,8 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     public void disableTrack(int rendererIndex) {
+        if (trackSelector == null) return;
+        
         DefaultTrackSelector.Parameters disableParameters = trackSelector.getParameters()
                 .buildUpon()
                 .setRendererDisabled(rendererIndex, true)
@@ -1927,12 +2030,82 @@ public class ReactExoplayerView extends FrameLayout implements
         trackSelector.setParameters(disableParameters);
     }
 
+    private void selectTextTrackInternal(String type, String value) {
+        if (player == null || trackSelector == null) return;
+        
+        DebugLog.d(TAG, "selectTextTrackInternal: type=" + type + ", value=" + value);
+        
+        DefaultTrackSelector.Parameters.Builder parametersBuilder = trackSelector.getParameters().buildUpon();
+        
+        if ("disabled".equals(type) || value == null) {
+            parametersBuilder.setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true);
+        } else {
+            parametersBuilder.setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false);
+            
+            parametersBuilder.clearOverridesOfType(C.TRACK_TYPE_TEXT);
+            
+            MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
+            if (info != null) {
+                int textRendererIndex = getTrackRendererIndex(C.TRACK_TYPE_TEXT);
+                if (textRendererIndex != C.INDEX_UNSET) {
+                    TrackGroupArray groups = info.getTrackGroups(textRendererIndex);
+                    boolean trackFound = false;
+                    
+                    for (int groupIndex = 0; groupIndex < groups.length; groupIndex++) {
+                        TrackGroup group = groups.get(groupIndex);
+                        for (int trackIndex = 0; trackIndex < group.length; trackIndex++) {
+                            Format format = group.getFormat(trackIndex);
+                            
+                            boolean isMatch = false;
+                            if ("language".equals(type) && format.language != null && format.language.equals(value)) {
+                                isMatch = true;
+                            } else if ("title".equals(type) && format.label != null && format.label.equals(value)) {
+                                isMatch = true;
+                            } else if ("index".equals(type)) {
+                                int targetIndex = ReactBridgeUtils.safeParseInt(value, -1);
+                                if (targetIndex == trackIndex) {
+                                    isMatch = true;
+                                }
+                            }
+                            
+                            if (isMatch) {
+                                TrackSelectionOverride override = new TrackSelectionOverride(group, 
+                                    java.util.Arrays.asList(trackIndex));
+                                parametersBuilder.addOverride(override);
+                                trackFound = true;
+                                break;
+                            }
+                        }
+                        if (trackFound) break;
+                    }
+                    
+                    if (!trackFound) {
+                    }
+                }
+            }
+        }
+        
+        try {
+            trackSelector.setParameters(parametersBuilder.build());
+            
+            // Give PlayerView time to update its controls
+            mainHandler.postDelayed(() -> {
+                if (exoPlayerView != null) {
+                }
+            }, 100);
+        } catch (Exception e) {
+            DebugLog.e(TAG, "Error setting text track parameters: " + e.getMessage());
+        }
+    }
+
     public void setSelectedTrack(int trackType, String type, String value) {
-        if (player == null) return;
+        if (player == null || trackSelector == null) return;
+        
         int rendererIndex = getTrackRendererIndex(trackType);
         if (rendererIndex == C.INDEX_UNSET) {
             return;
         }
+        
         MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
         if (info == null) {
             return;
@@ -2037,7 +2210,7 @@ public class ReactExoplayerView extends FrameLayout implements
             if (captioningManager != null && captioningManager.isEnabled()) {
                 groupIndex = getGroupIndexForDefaultLocale(groups);
             }
-        } else if (rendererIndex == C.TRACK_TYPE_AUDIO) { // Audio default
+        } else if (trackType == C.TRACK_TYPE_AUDIO) { // Audio default
             groupIndex = getGroupIndexForDefaultLocale(groups);
         }
 
@@ -2077,23 +2250,35 @@ public class ReactExoplayerView extends FrameLayout implements
             return;
         }
 
-        TrackSelectionOverride selectionOverride = new TrackSelectionOverride(groups.get(groupIndex), tracks);
+        try {
+            TrackSelectionOverride selectionOverride = new TrackSelectionOverride(groups.get(groupIndex), tracks);
 
-        DefaultTrackSelector.Parameters.Builder selectionParameters = trackSelector.getParameters()
-                .buildUpon()
-                .setExceedAudioConstraintsIfNecessary(true)
-                .setExceedRendererCapabilitiesIfNecessary(true)
-                .setExceedVideoConstraintsIfNecessary(true)
-                .setRendererDisabled(rendererIndex, false)
-                .clearOverridesOfType(selectionOverride.getType());
+            DefaultTrackSelector.Parameters.Builder selectionParameters = trackSelector.getParameters()
+                    .buildUpon()
+                    .setExceedAudioConstraintsIfNecessary(true)
+                    .setExceedRendererCapabilitiesIfNecessary(true)
+                    .setExceedVideoConstraintsIfNecessary(true)
+                    .setRendererDisabled(rendererIndex, false);
 
-        if (trackType == C.TRACK_TYPE_VIDEO && isUsingVideoABR()) {
-            selectionParameters.setMaxVideoBitrate(maxBitRate == 0 ? Integer.MAX_VALUE : maxBitRate);
-        } else {
-            selectionParameters.addOverride(selectionOverride);
+            // Clear existing overrides for this track type to avoid conflicts
+            selectionParameters.clearOverridesOfType(selectionOverride.getType());
+
+            if (trackType == C.TRACK_TYPE_VIDEO && isUsingVideoABR()) {
+                selectionParameters.setMaxVideoBitrate(maxBitRate == 0 ? Integer.MAX_VALUE : maxBitRate);
+            } else {
+                selectionParameters.addOverride(selectionOverride);
+            }
+
+            // For audio tracks, ensure we don't accidentally disable audio
+            if (trackType == C.TRACK_TYPE_AUDIO) {
+                selectionParameters.setForceHighestSupportedBitrate(false);
+                selectionParameters.setForceLowestBitrate(false);
+            }
+
+            trackSelector.setParameters(selectionParameters.build());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        trackSelector.setParameters(selectionParameters.build());
     }
 
     private boolean isFormatSupported(Format format) {
@@ -2143,13 +2328,41 @@ public class ReactExoplayerView extends FrameLayout implements
     public void setSelectedAudioTrack(String type, String value) {
         audioTrackType = type;
         audioTrackValue = value;
+        
+        DebugLog.d(TAG, "setSelectedAudioTrack: type=" + type + ", value=" + value);
+        
+        // Improved audio track selection to prevent audio loss
+        if (player == null || trackSelector == null) return;
+        
+        float currentVolume = player.getVolume();
+        boolean wasPlaying = player.isPlaying();
+        AudioAttributes currentAudioAttributes = player.getAudioAttributes();
+        
         setSelectedTrack(C.TRACK_TYPE_AUDIO, audioTrackType, audioTrackValue);
+        
+        mainHandler.postDelayed(() -> {
+            if (player != null) {
+                float targetVolume = muted ? 0f : audioVolume;
+                player.setVolume(targetVolume);
+                
+                if (currentAudioAttributes != null) {
+                    player.setAudioAttributes(currentAudioAttributes, false);
+                }
+                changeAudioOutput(audioOutput);
+                
+                if (!muted && !hasAudioFocus) {
+                    requestAudioFocus();
+                }
+                
+            }
+        }, 200);
     }
 
     public void setSelectedTextTrack(String type, String value) {
         textTrackType = type;
         textTrackValue = value;
-        setSelectedTrack(C.TRACK_TYPE_TEXT, textTrackType, textTrackValue);
+        
+        selectTextTrackInternal(type, value);
     }
 
     public void setPausedModifier(boolean paused) {

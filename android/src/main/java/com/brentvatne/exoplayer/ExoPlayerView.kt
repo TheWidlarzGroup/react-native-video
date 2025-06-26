@@ -23,31 +23,29 @@ class ExoPlayerView @JvmOverloads constructor(
 
     private var localStyle = SubtitleStyle()
 
-    val playerView = PlayerView(context).apply {
+    private val playerView = PlayerView(context).apply {
         layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
         setShutterBackgroundColor(Color.TRANSPARENT)
         useController = true
         controllerAutoShow = true
         controllerHideOnTouch = true
         controllerShowTimeoutMs = 5000
-        // Show CC / subtitle button so users can toggle text tracks
-        setShowSubtitleButton(true)
+        // Don't show subtitle button by default - will be enabled when tracks are available
+        setShowSubtitleButton(false)
     }
 
     init {
         addView(playerView)
     }
 
-    /**
-     * Set the ExoPlayer instance
-     */
     fun setPlayer(player: ExoPlayer?) {
         playerView.player = player
     }
 
-    /**
-     * Sets the resize mode
-     */
+    fun getPlayerView(): PlayerView {
+        return playerView
+    }
+
     fun setResizeMode(@ResizeMode.Mode resizeMode: Int) {
         playerView.resizeMode = when (resizeMode) {
             ResizeMode.RESIZE_MODE_FILL -> AspectRatioFrameLayout.RESIZE_MODE_FILL
@@ -59,9 +57,6 @@ class ExoPlayerView @JvmOverloads constructor(
         }
     }
 
-    /**
-     * Set subtitle style
-     */
     fun setSubtitleStyle(style: SubtitleStyle) {
         playerView.subtitleView?.let { subtitleView ->
             // Reset to defaults
@@ -90,63 +85,39 @@ class ExoPlayerView @JvmOverloads constructor(
         localStyle = style
     }
 
-    /**
-     * Set shutter color (background color when video is not playing)
-     */
     fun setShutterColor(color: Int) {
         playerView.setShutterBackgroundColor(color)
     }
 
-    /**
-     * Update surface view type
-     */
     fun updateSurfaceView(@ViewType.ViewType viewType: Int) {
         // PlayerView handles surface view internally
         // This method is kept for compatibility but does nothing
         // as PlayerView manages the surface automatically
     }
 
-    /**
-     * Set hide shutter view
-     */
     fun setHideShutterView(hideShutterView: Boolean) {
         // PlayerView manages shutter view internally
         // This method is kept for compatibility
     }
 
-    /**
-     * Show ads overlay
-     */
     fun showAds() {
         // PlayerView has built-in ad overlay support
         // This will be handled by the PlayerView automatically
     }
 
-    /**
-     * Hide ads overlay
-     */
     fun hideAds() {
         // PlayerView has built-in ad overlay support
         // This will be handled by the PlayerView automatically
     }
 
-    /**
-     * Check if player is currently playing
-     */
     val isPlaying: Boolean
         get() = playerView.player?.isPlaying ?: false
 
-    /**
-     * Invalidate aspect ratio (force refresh)
-     */
     fun invalidateAspectRatio() {
         // PlayerView handles aspect ratio automatically
         requestLayout()
     }
 
-    /**
-     * Set controller visibility and configuration
-     */
     fun setUseController(useController: Boolean) {
         playerView.useController = useController
         if (useController) {
@@ -186,9 +157,6 @@ class ExoPlayerView @JvmOverloads constructor(
         playerView.setShowSubtitleButton(show)
     }
 
-    /**
-     * Additional PlayerView method wrappers for compatibility
-     */
     fun isControllerVisible(): Boolean {
         return playerView.isControllerFullyVisible
     }
