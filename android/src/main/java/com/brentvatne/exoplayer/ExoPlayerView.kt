@@ -32,6 +32,11 @@ class ExoPlayerView @JvmOverloads constructor(
         controllerShowTimeoutMs = 5000
         // Don't show subtitle button by default - will be enabled when tracks are available
         setShowSubtitleButton(false)
+        // Enable proper surface view handling to prevent rendering issues
+        setUseArtwork(false)
+        setDefaultArtwork(null)
+        // Ensure proper video scaling
+        resizeMode = androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT
     }
 
     init {
@@ -39,7 +44,24 @@ class ExoPlayerView @JvmOverloads constructor(
     }
 
     fun setPlayer(player: ExoPlayer?) {
-        playerView.player = player
+        val currentPlayer = playerView.player
+        
+        if (currentPlayer != null && currentPlayer != player) {
+            playerView.player = null
+            
+            playerView.invalidate()
+            
+            post {
+                playerView.player = player
+                
+                if (player != null) {
+                    playerView.invalidate()
+                    requestLayout()
+                }
+            }
+        } else {
+            playerView.player = player
+        }
     }
 
     fun getPlayerView(): PlayerView {

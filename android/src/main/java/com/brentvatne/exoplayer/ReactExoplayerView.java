@@ -1518,7 +1518,6 @@ public class ReactExoplayerView extends FrameLayout implements
     private ArrayList<Track> getAudioTrackInfo() {
         ArrayList<Track> audioTracks = new ArrayList<>();
         if (trackSelector == null) {
-            // Likely player is unmounting so no audio tracks are available anymore
             return audioTracks;
         }
 
@@ -1529,15 +1528,25 @@ public class ReactExoplayerView extends FrameLayout implements
         }
         TrackGroupArray groups = info.getTrackGroups(index);
         TrackSelectionArray selectionArray = player.getCurrentTrackSelections();
-        TrackSelection selection = selectionArray.get( C.TRACK_TYPE_AUDIO );
+        TrackSelection selection = selectionArray.get(C.TRACK_TYPE_AUDIO);
 
-        for (int i = 0; i < groups.length; ++i) {
-            TrackGroup group = groups.get(i);
+
+        for (int groupIndex = 0; groupIndex < groups.length; ++groupIndex) {
+            TrackGroup group = groups.get(groupIndex);
             Format format = group.getFormat(0);
-            Track audioTrack = exoplayerTrackToGenericTrack(format, i, selection, group);
+            
+            // Check if this specific group is the currently selected one
+            boolean isSelected = false;
+            if (selection != null && selection.getTrackGroup() == group) {
+                isSelected = true;
+            }
+            
+            Track audioTrack = exoplayerTrackToGenericTrack(format, groupIndex, selection, group);
             audioTrack.setBitrate(format.bitrate == Format.NO_VALUE ? 0 : format.bitrate);
+            audioTrack.setSelected(isSelected);
             audioTracks.add(audioTrack);
         }
+        
         return audioTracks;
     }
 
@@ -1699,6 +1708,81 @@ public class ReactExoplayerView extends FrameLayout implements
         return textTracks;
     }
 
+    private ArrayList<Track> getBasicAudioTrackInfo() {
+        ArrayList<Track> tracks = new ArrayList<>();
+        if (trackSelector == null) {
+            return tracks;
+        }
+
+        MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
+        int index = getTrackRendererIndex(C.TRACK_TYPE_AUDIO);
+        if (info == null || index == C.INDEX_UNSET) {
+            return tracks;
+        }
+
+        TrackGroupArray groups = info.getTrackGroups(index);
+        
+        for (int groupIndex = 0; groupIndex < groups.length; ++groupIndex) {
+            TrackGroup group = groups.get(groupIndex);
+            Format format = group.getFormat(0);
+            
+            // Create track without trying to determine selection status
+            Track track = new Track();
+            track.setIndex(groupIndex);
+            track.setLanguage(format.language != null ? format.language : "unknown");
+            track.setTitle(format.label != null ? format.label : "Track " + (groupIndex + 1));
+            track.setSelected(false); // Don't report selection status - let PlayerView handle it
+            if (format.sampleMimeType != null) track.setMimeType(format.sampleMimeType);
+            track.setBitrate(format.bitrate == Format.NO_VALUE ? 0 : format.bitrate);
+            
+            tracks.add(track);
+        }
+        
+        DebugLog.d(TAG, "getBasicAudioTrackInfo: returning " + tracks.size() + " audio tracks (no selection status)");
+        return tracks;
+    }
+
+    private ArrayList<Track> getBasicTextTrackInfo() {
+        ArrayList<Track> textTracks = new ArrayList<>();
+        if (trackSelector == null) {
+            return textTracks;
+        }
+        
+        MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
+        int index = getTrackRendererIndex(C.TRACK_TYPE_TEXT);
+        if (info == null || index == C.INDEX_UNSET) {
+            return textTracks;
+        }
+        
+        TrackGroupArray groups = info.getTrackGroups(index);
+
+        for (int groupIndex = 0; groupIndex < groups.length; ++groupIndex) {
+            TrackGroup group = groups.get(groupIndex);
+            for (int trackIndex = 0; trackIndex < group.length; trackIndex++) {
+                Format format = group.getFormat(trackIndex);
+                
+                Track textTrack = new Track();
+                textTrack.setIndex(textTracks.size());
+                if (format.sampleMimeType != null) textTrack.setMimeType(format.sampleMimeType);
+                if (format.language != null) textTrack.setLanguage(format.language);
+                
+                boolean isExternal = format.id != null && format.id.startsWith("external-subtitle-");
+                
+                if (format.label != null && !format.label.isEmpty()) {
+                    textTrack.setTitle(format.label);
+                } else if (isExternal) {
+                    textTrack.setTitle("External " + (trackIndex + 1));
+                } else {
+                    textTrack.setTitle("Track " + (textTracks.size() + 1));
+                }
+                
+                textTrack.setSelected(false); // Don't report selection status - let PlayerView handle it
+                textTracks.add(textTrack);
+            }
+        }
+        return textTracks;
+    }
+
     private void onBuffering(boolean buffering) {
         if (isBuffering == buffering) {
             return;
@@ -1751,49 +1835,35 @@ public class ReactExoplayerView extends FrameLayout implements
 
     @Override
     public void onTracksChanged(@NonNull Tracks tracks) {
-        // Emit track information to JS
-        eventEmitter.onTextTracks.invoke(getTextTrackInfo());
-        eventEmitter.onAudioTracks.invoke(getAudioTrackInfo());
-        eventEmitter.onVideoTracks.invoke(getVideoTrackInfo());
+        DebugLog.d(TAG, "onTracksChanged called - updating track information, controls=" + controls);
         
-        updateSubtitleButtonVisibility();
-        
-        ensureAudioEnabled();
-    }
-    
-    private void ensureAudioEnabled() {
-        if (player == null) return;
-        
-        mainHandler.postDelayed(() -> {
-            if (player != null) {
-                boolean hasAudioTracks = false;
-                if (trackSelector != null) {
-                    MappingTrackSelector.MappedTrackInfo info = trackSelector.getCurrentMappedTrackInfo();
-                    if (info != null) {
-                        int audioRendererIndex = getTrackRendererIndex(C.TRACK_TYPE_AUDIO);
-                        if (audioRendererIndex != C.INDEX_UNSET) {
-                            TrackGroupArray groups = info.getTrackGroups(audioRendererIndex);
-                            hasAudioTracks = groups.length > 0;
-                        }
-                    }
-                }
-                
-                if (hasAudioTracks) {
-                    float targetVolume = muted ? 0f : audioVolume;
-                    if (player.getVolume() != targetVolume) {
-                        player.setVolume(targetVolume);
-                        DebugLog.d(TAG, "Restored audio volume after track change: " + targetVolume);
-                    }
-                    
-                    changeAudioOutput(audioOutput);
-                    
-                    if (!muted && !hasAudioFocus) {
-                        requestAudioFocus();
-                    }
+        if (controls) {
+            ArrayList<Track> textTracks = getBasicTextTrackInfo();
+            ArrayList<Track> audioTracks = getBasicAudioTrackInfo(); 
+            ArrayList<VideoTrack> videoTracks = getVideoTrackInfo();
+            
+            eventEmitter.onTextTracks.invoke(textTracks);
+            eventEmitter.onAudioTracks.invoke(audioTracks);
+            eventEmitter.onVideoTracks.invoke(videoTracks);
+        } else {
+            ArrayList<Track> textTracks = getTextTrackInfo();
+            ArrayList<Track> audioTracks = getAudioTrackInfo();
+            ArrayList<VideoTrack> videoTracks = getVideoTrackInfo();
+            
+            eventEmitter.onTextTracks.invoke(textTracks);
+            eventEmitter.onAudioTracks.invoke(audioTracks);
+            eventEmitter.onVideoTracks.invoke(videoTracks);
+            int selectedAudioTracks = 0;
+            for (Track track : audioTracks) {
+                if (track.isSelected()) {
+                    selectedAudioTracks++;
                 }
             }
-        }, 100);
+        }
+        
+        updateSubtitleButtonVisibility();
     }
+    
     
     private boolean hasBuiltInTextTracks() {
         if (player == null || trackSelector == null) return false;
@@ -1829,7 +1899,6 @@ public class ReactExoplayerView extends FrameLayout implements
                                hasBuiltInTextTracks();
         
         exoPlayerView.setShowSubtitleButton(hasTextTracks);
-        DebugLog.d(TAG, "Updated subtitle button visibility: " + hasTextTracks);
     }
 
     @Override
@@ -2101,6 +2170,10 @@ public class ReactExoplayerView extends FrameLayout implements
     public void setSelectedTrack(int trackType, String type, String value) {
         if (player == null || trackSelector == null) return;
         
+        if (controls) {
+            return;
+        }
+        
         int rendererIndex = getTrackRendererIndex(trackType);
         if (rendererIndex == C.INDEX_UNSET) {
             return;
@@ -2260,8 +2333,11 @@ public class ReactExoplayerView extends FrameLayout implements
                     .setExceedVideoConstraintsIfNecessary(true)
                     .setRendererDisabled(rendererIndex, false);
 
-            // Clear existing overrides for this track type to avoid conflicts
-            selectionParameters.clearOverridesOfType(selectionOverride.getType());
+            // Clear existing overrides for this track type to avoid conflicts  
+            // But be careful with audio tracks - don't clear unless explicitly selecting a different track
+            if (trackType != C.TRACK_TYPE_AUDIO || !type.equals("default")) {
+                selectionParameters.clearOverridesOfType(selectionOverride.getType());
+            }
 
             if (trackType == C.TRACK_TYPE_VIDEO && isUsingVideoABR()) {
                 selectionParameters.setMaxVideoBitrate(maxBitRate == 0 ? Integer.MAX_VALUE : maxBitRate);
@@ -2269,14 +2345,18 @@ public class ReactExoplayerView extends FrameLayout implements
                 selectionParameters.addOverride(selectionOverride);
             }
 
-            // For audio tracks, ensure we don't accidentally disable audio
+            // For audio tracks, ensure audio renderer stays enabled
             if (trackType == C.TRACK_TYPE_AUDIO) {
                 selectionParameters.setForceHighestSupportedBitrate(false);
                 selectionParameters.setForceLowestBitrate(false);
+                DebugLog.d(TAG, "Audio track selection: group=" + groupIndex + ", tracks=" + tracks + 
+                    ", override=" + selectionOverride);
             }
 
             trackSelector.setParameters(selectionParameters.build());
+            DebugLog.d(TAG, "Applied track selection for type: " + trackType + ", group: " + groupIndex);
         } catch (Exception e) {
+            DebugLog.e(TAG, "Error applying track selection: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -2329,33 +2409,9 @@ public class ReactExoplayerView extends FrameLayout implements
         audioTrackType = type;
         audioTrackValue = value;
         
-        DebugLog.d(TAG, "setSelectedAudioTrack: type=" + type + ", value=" + value);
-        
-        // Improved audio track selection to prevent audio loss
-        if (player == null || trackSelector == null) return;
-        
-        float currentVolume = player.getVolume();
-        boolean wasPlaying = player.isPlaying();
-        AudioAttributes currentAudioAttributes = player.getAudioAttributes();
-        
-        setSelectedTrack(C.TRACK_TYPE_AUDIO, audioTrackType, audioTrackValue);
-        
-        mainHandler.postDelayed(() -> {
-            if (player != null) {
-                float targetVolume = muted ? 0f : audioVolume;
-                player.setVolume(targetVolume);
-                
-                if (currentAudioAttributes != null) {
-                    player.setAudioAttributes(currentAudioAttributes, false);
-                }
-                changeAudioOutput(audioOutput);
-                
-                if (!muted && !hasAudioFocus) {
-                    requestAudioFocus();
-                }
-                
-            }
-        }, 200);
+        if (!controls && player != null && trackSelector != null) {
+            setSelectedTrack(C.TRACK_TYPE_AUDIO, audioTrackType, audioTrackValue);
+        }
     }
 
     public void setSelectedTextTrack(String type, String value) {
