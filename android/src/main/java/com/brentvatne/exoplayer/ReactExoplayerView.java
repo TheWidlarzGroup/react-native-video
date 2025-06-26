@@ -2149,6 +2149,8 @@ public class ReactExoplayerView extends FrameLayout implements
                     }
                     
                     if (!trackFound) {
+                        DebugLog.w(TAG, "Text track not found for type=" + type + ", value=" + value + 
+                            ". Keeping current selection.");
                     }
                 }
             }
@@ -2160,6 +2162,7 @@ public class ReactExoplayerView extends FrameLayout implements
             // Give PlayerView time to update its controls
             mainHandler.postDelayed(() -> {
                 if (exoPlayerView != null) {
+                    updateSubtitleButtonVisibility();
                 }
             }, 100);
         } catch (Exception e) {
