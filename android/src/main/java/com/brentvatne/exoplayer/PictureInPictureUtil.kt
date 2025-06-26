@@ -141,9 +141,10 @@ object PictureInPictureUtil {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun calcRectHint(playerView: ExoPlayerView): Rect {
         val hint = Rect()
-        playerView.surfaceView?.getGlobalVisibleRect(hint)
+        // Use the PlayerView itself since surfaceView is private
+        playerView.getGlobalVisibleRect(hint)
         val location = IntArray(2)
-        playerView.surfaceView?.getLocationOnScreen(location)
+        playerView.getLocationOnScreen(location)
 
         val height = hint.bottom - hint.top
         hint.top = location[1]

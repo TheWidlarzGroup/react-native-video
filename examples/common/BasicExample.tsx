@@ -75,6 +75,10 @@ const BasicExample = () => {
     useState(false);
   const [isSeeking, setIsSeeking] = useState(false);
 
+  // Add refs to store previous track data for comparison
+  const previousAudioTracksRef = useRef<AudioTrack[]>([]);
+  const previousTextTracksRef = useRef<TextTrack[]>([]);
+
   const videoRef = useRef<VideoRef>(null);
   const viewStyle = fullscreen ? styles.fullScreen : styles.halfScreen;
   const currentSrc = srcList[srcListId];
@@ -107,7 +111,36 @@ const BasicExample = () => {
 
   const onAudioTracks = (data: OnAudioTracksData) => {
     console.log('onAudioTracks', data);
-    const selectedTrack = data.audioTracks?.find((x: AudioTrack) => {
+
+    // Check if audio tracks have actually changed
+    const currentTracks = data.audioTracks || [];
+    const previousTracks = previousAudioTracksRef.current;
+
+    // Simple comparison - check if tracks array length or selected track changed
+    const tracksChanged =
+      currentTracks.length !== previousTracks.length ||
+      JSON.stringify(
+        currentTracks.map((t) => ({
+          index: t.index,
+          selected: t.selected,
+          language: t.language,
+        })),
+      ) !==
+        JSON.stringify(
+          previousTracks.map((t) => ({
+            index: t.index,
+            selected: t.selected,
+            language: t.language,
+          })),
+        );
+
+    if (!tracksChanged) {
+      return; // Skip if tracks haven't changed
+    }
+
+    previousAudioTracksRef.current = currentTracks;
+
+    const selectedTrack = currentTracks.find((x: AudioTrack) => {
       return x.selected;
     });
     let value;
@@ -118,7 +151,7 @@ const BasicExample = () => {
     } else if (audioTracksSelectionBy === SelectedTrackType.TITLE) {
       value = selectedTrack?.title;
     }
-    setAudioTracks(data.audioTracks);
+    setAudioTracks(currentTracks);
     setSelectedAudioTrack({
       type: audioTracksSelectionBy,
       value: value,
@@ -131,11 +164,39 @@ const BasicExample = () => {
   };
 
   const onTextTracks = (data: OnTextTracksData) => {
-    const selectedTrack = data.textTracks?.find((x: TextTrack) => {
+    // Check if text tracks have actually changed
+    const currentTracks = data.textTracks || [];
+    const previousTracks = previousTextTracksRef.current;
+
+    // Simple comparison - check if tracks array length or selected track changed
+    const tracksChanged =
+      currentTracks.length !== previousTracks.length ||
+      JSON.stringify(
+        currentTracks.map((t) => ({
+          index: t.index,
+          selected: t.selected,
+          language: t.language,
+        })),
+      ) !==
+        JSON.stringify(
+          previousTracks.map((t) => ({
+            index: t.index,
+            selected: t.selected,
+            language: t.language,
+          })),
+        );
+
+    if (!tracksChanged) {
+      return; // Skip if tracks haven't changed
+    }
+
+    previousTextTracksRef.current = currentTracks;
+
+    const selectedTrack = currentTracks.find((x: TextTrack) => {
       return x?.selected;
     });
 
-    setTextTracks(data.textTracks);
+    setTextTracks(currentTracks);
     let value;
     if (textTracksSelectionBy === SelectedTrackType.INDEX) {
       value = selectedTrack?.index;
