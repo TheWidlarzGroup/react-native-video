@@ -172,7 +172,7 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
   }
   
   func updateAndEmitPlaybackState() {
-    let isPlaying = playerPointer.rate > 0 && !isCurrentlyBuffering
+    let isPlaying = (player?.rate ?? 0) > 0 && !isCurrentlyBuffering
     
     eventEmitter.onPlaybackStateChange(.init(isPlaying: isPlaying, isBuffering: isCurrentlyBuffering))
     eventEmitter.onBuffer(isCurrentlyBuffering)
