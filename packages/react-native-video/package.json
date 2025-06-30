@@ -32,6 +32,7 @@
     "react-native.config.js",
     "app.plugin.js",
     "LICENSE",
+    "README.md",
     "!ios/build",
     "!android/build",
     "!android/gradle",
