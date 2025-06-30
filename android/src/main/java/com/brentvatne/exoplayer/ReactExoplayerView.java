@@ -245,7 +245,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private float mProgressUpdateInterval = 250.0f;
     protected boolean playInBackground = false;
     private boolean mReportBandwidth = false;
-    private boolean controls = true;  // Default to showing controls
+    private boolean controls = false;
 
     private boolean showNotificationControls = false;
     // \ End props
@@ -2615,15 +2615,6 @@ public class ReactExoplayerView extends FrameLayout implements
         return preventsDisplaySleepDuringVideoPlayback;
     }
 
-    private void updateFullScreenButtonVisibility() {
-        // PlayerView handles fullscreen button visibility automatically
-        // This method is kept for compatibility but functionality is now limited
-        if (exoPlayerView != null) {
-            // Can only show/hide the entire controller, not individual buttons
-            updateControllerVisibility();
-        }
-    }
-
     public void setDisableDisconnectError(boolean disableDisconnectError) {
         this.disableDisconnectError = disableDisconnectError;
     }
@@ -2664,8 +2655,6 @@ public class ReactExoplayerView extends FrameLayout implements
                 eventEmitter.onVideoFullscreenPlayerDidDismiss.invoke();
             });
         }
-        // need to be done at the end to avoid hiding fullscreen control button when fullScreenPlayerView is shown
-        updateFullScreenButtonVisibility();
     }
 
     public void setHideShutterView(boolean hideShutterView) {

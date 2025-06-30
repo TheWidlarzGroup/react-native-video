@@ -91,7 +91,6 @@ class FullScreenPlayerView(
         parent?.removeView(exoPlayerView)
         containerView.addView(exoPlayerView, generateDefaultLayoutParams())
         playerControlView?.let {
-            updateFullscreenButton(playerControlView, true)
             parent?.removeView(it)
             containerView.addView(it, generateDefaultLayoutParams())
         }
@@ -104,7 +103,6 @@ class FullScreenPlayerView(
         containerView.removeView(exoPlayerView)
         parent?.addView(exoPlayerView, generateDefaultLayoutParams())
         playerControlView?.let {
-            updateFullscreenButton(playerControlView, false)
             containerView.removeView(it)
             parent?.addView(it, generateDefaultLayoutParams())
         }
@@ -140,11 +138,6 @@ class FullScreenPlayerView(
         } else {
             androidx.media3.ui.R.drawable.exo_icon_fullscreen_enter
         }
-
-    private fun updateFullscreenButton(playerControlView: LegacyPlayerControlView, isFullscreen: Boolean) {
-        // Note: This method is no longer needed since we're using PlayerView's built-in controls
-        // PlayerView handles fullscreen button state automatically
-    }
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()

@@ -13,6 +13,13 @@ import com.brentvatne.common.api.ResizeMode
 import com.brentvatne.common.api.SubtitleStyle
 import com.brentvatne.common.api.ViewType
 import android.view.View.MeasureSpec
+import androidx.media3.common.Player
+import androidx.media3.common.Timeline
+import android.view.SurfaceView
+import android.view.TextureView
+import android.graphics.drawable.GradientDrawable
+import android.widget.TextView
+import androidx.media3.ui.DefaultTimeBar
 
 @UnstableApi
 class ExoPlayerView @JvmOverloads constructor(
@@ -22,6 +29,18 @@ class ExoPlayerView @JvmOverloads constructor(
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
     private var localStyle = SubtitleStyle()
+    private var surfaceView: View? = null
+    private val liveBadge: TextView = TextView(context).apply {
+        text = "LIVE"
+        setTextColor(Color.WHITE)
+        textSize = 12f
+        val drawable = GradientDrawable()
+        drawable.setColor(Color.RED)
+        drawable.cornerRadius = 6f
+        background = drawable
+        setPadding(12, 4, 12, 4)
+        visibility = View.GONE
+    }
 
     private val playerView = PlayerView(context).apply {
         layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
@@ -41,26 +60,32 @@ class ExoPlayerView @JvmOverloads constructor(
 
     init {
         addView(playerView)
+        val lp = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
+        lp.setMargins(16, 16, 16, 16)
+        addView(liveBadge, lp)
     }
 
     fun setPlayer(player: ExoPlayer?) {
         val currentPlayer = playerView.player
         
-        if (currentPlayer != null && currentPlayer != player) {
-            playerView.player = null
-            
-            playerView.invalidate()
-            
-            post {
-                playerView.player = player
-                
-                if (player != null) {
-                    playerView.invalidate()
-                    requestLayout()
-                }
+        if (currentPlayer != null) {
+            currentPlayer.removeListener(playerListener)
+            // Clear any existing surface from the player
+            when(surfaceView) {
+                is SurfaceView -> currentPlayer.clearVideoSurfaceView(surfaceView as SurfaceView)
+                is TextureView -> currentPlayer.clearVideoTextureView(surfaceView as TextureView)
             }
-        } else {
-            playerView.player = player
+        }
+
+        playerView.player = player
+
+        if (player != null) {
+            player.addListener(playerListener)
+            // Set the surface view for the new player
+            when(surfaceView) {
+                is SurfaceView -> player.setVideoSurfaceView(surfaceView as SurfaceView)
+                is TextureView -> player.setVideoTextureView(surfaceView as TextureView)
+            }
         }
     }
 
@@ -111,10 +136,40 @@ class ExoPlayerView @JvmOverloads constructor(
         playerView.setShutterBackgroundColor(color)
     }
 
-    fun updateSurfaceView(@ViewType.ViewType viewType: Int) {
-        // PlayerView handles surface view internally
-        // This method is kept for compatibility but does nothing
-        // as PlayerView manages the surface automatically
+    fun updateSurfaceView(viewType: Int) {
+        val currentSurfaceView = surfaceView
+        val newSurfaceView: View = when (viewType) {
+            ViewType.VIEW_TYPE_TEXTURE -> TextureView(context)
+            ViewType.VIEW_TYPE_SURFACE_SECURE -> SurfaceView(context).apply {
+                // Requires API 17+
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                    (this as SurfaceView).setSecure(true)
+                }
+            }
+            else -> SurfaceView(context)
+        }
+
+        if (currentSurfaceView === newSurfaceView) {
+            return
+        }
+        
+        // Remove the old surface view
+        if (currentSurfaceView != null) {
+            removeView(currentSurfaceView)
+        }
+
+        // Add the new surface view
+        surfaceView = newSurfaceView
+        val layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+        addView(newSurfaceView, 0, layoutParams)
+        
+        // Attach player to the new surface
+        playerView.player?.let {
+            when(newSurfaceView) {
+                is SurfaceView -> it.setVideoSurfaceView(newSurfaceView)
+                is TextureView -> it.setVideoTextureView(newSurfaceView)
+            }
+        }
     }
 
     fun setHideShutterView(hideShutterView: Boolean) {
@@ -208,6 +263,33 @@ class ExoPlayerView @JvmOverloads constructor(
 
     override fun setFocusable(focusable: Boolean) {
         playerView.isFocusable = focusable
+    }
+
+    private fun updateLiveUi() {
+        val player = playerView.player ?: return
+        val isLive = player.isCurrentMediaItemLive
+        val seekable = player.isCurrentMediaItemSeekable
+
+        // Show/hide badge
+        liveBadge.visibility = if (isLive) View.VISIBLE else View.GONE
+
+        // Disable/enable scrubbing based on seekable
+        val timeBar = playerView.findViewById<DefaultTimeBar?>(androidx.media3.ui.R.id.exo_progress)
+        timeBar?.isEnabled = !isLive || seekable
+    }
+
+    private val playerListener = object : Player.Listener {
+        override fun onTimelineChanged(timeline: Timeline, reason: Int) {
+            playerView.post { playerView.requestLayout() }
+            updateLiveUi()
+        }
+
+        override fun onEvents(player: Player, events: Player.Events) {
+            if (events.contains(Player.EVENT_MEDIA_ITEM_TRANSITION) ||
+                events.contains(Player.EVENT_IS_PLAYING_CHANGED)) {
+                updateLiveUi()
+            }
+        }
     }
 
     companion object {
