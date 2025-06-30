@@ -640,7 +640,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 DebugLog("setSrc Stopping playback")
                 return
             }
-            
+
             // Ensure UI operations are performed on main thread
             DispatchQueue.main.sync {
                 self.removePlayerLayer()

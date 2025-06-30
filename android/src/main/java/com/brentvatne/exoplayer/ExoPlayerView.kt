@@ -2,31 +2,28 @@ package com.brentvatne.exoplayer
 
 import android.content.Context
 import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
+import android.view.SurfaceView
+import android.view.TextureView
 import android.view.View
+import android.view.View.MeasureSpec
 import android.widget.FrameLayout
+import android.widget.TextView
+import androidx.media3.common.Player
+import androidx.media3.common.Timeline
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.ui.PlayerView
 import androidx.media3.ui.AspectRatioFrameLayout
+import androidx.media3.ui.DefaultTimeBar
+import androidx.media3.ui.PlayerView
 import com.brentvatne.common.api.ResizeMode
 import com.brentvatne.common.api.SubtitleStyle
 import com.brentvatne.common.api.ViewType
-import android.view.View.MeasureSpec
-import androidx.media3.common.Player
-import androidx.media3.common.Timeline
-import android.view.SurfaceView
-import android.view.TextureView
-import android.graphics.drawable.GradientDrawable
-import android.widget.TextView
-import androidx.media3.ui.DefaultTimeBar
 
 @UnstableApi
-class ExoPlayerView @JvmOverloads constructor(
-    context: Context, 
-    attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
-) : FrameLayout(context, attrs, defStyleAttr) {
+class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
+    FrameLayout(context, attrs, defStyleAttr) {
 
     private var localStyle = SubtitleStyle()
     private var surfaceView: View? = null
@@ -67,11 +64,11 @@ class ExoPlayerView @JvmOverloads constructor(
 
     fun setPlayer(player: ExoPlayer?) {
         val currentPlayer = playerView.player
-        
+
         if (currentPlayer != null) {
             currentPlayer.removeListener(playerListener)
             // Clear any existing surface from the player
-            when(surfaceView) {
+            when (surfaceView) {
                 is SurfaceView -> currentPlayer.clearVideoSurfaceView(surfaceView as SurfaceView)
                 is TextureView -> currentPlayer.clearVideoTextureView(surfaceView as TextureView)
             }
@@ -82,16 +79,14 @@ class ExoPlayerView @JvmOverloads constructor(
         if (player != null) {
             player.addListener(playerListener)
             // Set the surface view for the new player
-            when(surfaceView) {
+            when (surfaceView) {
                 is SurfaceView -> player.setVideoSurfaceView(surfaceView as SurfaceView)
                 is TextureView -> player.setVideoTextureView(surfaceView as TextureView)
             }
         }
     }
 
-    fun getPlayerView(): PlayerView {
-        return playerView
-    }
+    fun getPlayerView(): PlayerView = playerView
 
     fun setResizeMode(@ResizeMode.Mode resizeMode: Int) {
         playerView.resizeMode = when (resizeMode) {
@@ -114,14 +109,14 @@ class ExoPlayerView @JvmOverloads constructor(
             if (style.fontSize > 0) {
                 subtitleView.setFixedTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, style.fontSize.toFloat())
             }
-            
+
             subtitleView.setPadding(
                 style.paddingLeft,
                 style.paddingTop,
                 style.paddingRight,
                 style.paddingBottom
             )
-            
+
             if (style.opacity != 0.0f) {
                 subtitleView.alpha = style.opacity
                 subtitleView.visibility = android.view.View.VISIBLE
@@ -140,19 +135,21 @@ class ExoPlayerView @JvmOverloads constructor(
         val currentSurfaceView = surfaceView
         val newSurfaceView: View = when (viewType) {
             ViewType.VIEW_TYPE_TEXTURE -> TextureView(context)
+
             ViewType.VIEW_TYPE_SURFACE_SECURE -> SurfaceView(context).apply {
                 // Requires API 17+
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1) {
                     (this as SurfaceView).setSecure(true)
                 }
             }
+
             else -> SurfaceView(context)
         }
 
         if (currentSurfaceView === newSurfaceView) {
             return
         }
-        
+
         // Remove the old surface view
         if (currentSurfaceView != null) {
             removeView(currentSurfaceView)
@@ -162,10 +159,10 @@ class ExoPlayerView @JvmOverloads constructor(
         surfaceView = newSurfaceView
         val layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
         addView(newSurfaceView, 0, layoutParams)
-        
+
         // Attach player to the new surface
         playerView.player?.let {
-            when(newSurfaceView) {
+            when (newSurfaceView) {
                 is SurfaceView -> it.setVideoSurfaceView(newSurfaceView)
                 is TextureView -> it.setVideoTextureView(newSurfaceView)
             }
@@ -234,9 +231,7 @@ class ExoPlayerView @JvmOverloads constructor(
         playerView.setShowSubtitleButton(show)
     }
 
-    fun isControllerVisible(): Boolean {
-        return playerView.isControllerFullyVisible
-    }
+    fun isControllerVisible(): Boolean = playerView.isControllerFullyVisible
 
     fun setControllerVisibilityListener(listener: PlayerView.ControllerVisibilityListener?) {
         playerView.setControllerVisibilityListener(listener)
@@ -248,7 +243,7 @@ class ExoPlayerView @JvmOverloads constructor(
     }
 
     fun setFastForwardIncrementMs(fastForwardMs: Int) {
-        // PlayerView in Media3 uses different method names  
+        // PlayerView in Media3 uses different method names
         // This is kept for compatibility but may not have direct equivalent
     }
 
@@ -286,7 +281,8 @@ class ExoPlayerView @JvmOverloads constructor(
 
         override fun onEvents(player: Player, events: Player.Events) {
             if (events.contains(Player.EVENT_MEDIA_ITEM_TRANSITION) ||
-                events.contains(Player.EVENT_IS_PLAYING_CHANGED)) {
+                events.contains(Player.EVENT_IS_PLAYING_CHANGED)
+            ) {
                 updateLiveUi()
             }
         }
