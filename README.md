@@ -43,7 +43,7 @@ The most battle-tested open-source video player component for React Native with 
 ## 📚 Documentation & Examples
 
 - 📖 Documentation - In progress 🏗️, will be available soon
-- 📦 [Example: Basic Usage](https://github.com/TheWidlarzGroup/react-native-video-v7/tree/master/example)
+- 📦 [Example: Basic Usage](https://github.com/TheWidlarzGroup/react-native-video/tree/master/example)
 - 📦 [Example: Free DRM Stream](https://www.thewidlarzgroup.com/services/free-drm-token-generator-for-video?utm_source=rnv&utm_medium=readme&utm_id=free-drm)
 - 📦 [Example: Offline SDK integration](https://docs.thewidlarzgroup.com/offline-video-sdk)
 
