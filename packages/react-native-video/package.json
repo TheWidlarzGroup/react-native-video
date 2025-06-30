@@ -31,7 +31,6 @@
     "*.podspec",
     "react-native.config.js",
     "app.plugin.js",
-    "THIRD-PARTY-LICENSES",
     "LICENSE",
     "!ios/build",
     "!android/build",
@@ -64,7 +63,7 @@
     "url": "git+https://github.com/TheWidlarzGroup/react-native-video-v7.git"
   },
   "author": "TheWidlarzGroup <hi@thewidlarzgroup.com> (https://github.com/TheWidlarzGroup)",
-  "license": "Custom",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/TheWidlarzGroup/react-native-video/issues"
   },
@@ -84,7 +83,7 @@
     "prettier": "^3.0.3",
     "react": "18.3.1",
     "react-native": "^0.77.0",
-    "@react-native/eslint-config": "^0.80.0",
+    "@react-native/eslint-config": "^0.77.0",
     "react-native-builder-bob": "^0.40.0",
     "react-native-nitro-modules": ">=0.26.0",
     "typescript": "^5.2.2"

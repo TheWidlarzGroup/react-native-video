@@ -16,7 +16,6 @@
     "clean": "git clean -xdf",
     "react-native-video": "bun run --cwd packages/react-native-video",
     "example": "bun run --cwd example",
-    "generate-license": "bun run ./scripts/generate-third-party-licenses.js",
     "postinstall": "patch-package --patch-dir example/patches"
   },
   "devDependencies": {

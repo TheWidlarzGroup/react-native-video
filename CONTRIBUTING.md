@@ -60,12 +60,6 @@ To fix formatting errors, run the following:
 bun lint --fix
 ```
 
-Remember to add tests for your change if possible. Run the unit tests by:
-
-```sh
-bun test
-```
-
 ### Commit message convention
 
 We follow the [conventional commits specification](https://www.conventionalcommits.org/en) for our commit messages:
@@ -122,4 +116,4 @@ When you're sending a pull request:
 
 ### License
 
-By contributing to this project, you agree that your contributions will be licensed under the [Custom License](LICENSE).
+By contributing to this project, you agree that your contributions will be licensed under the [MIT License](LICENSE).
