@@ -25,6 +25,8 @@ const BOT_LABELS = [
   'Missing Repro',
   'Waiting for Review',
   'Newer Version Available',
+  '6.x.x',
+  '7.0',
   ...Object.values(PLATFORM_LABELS),
 ];
 
@@ -124,6 +126,17 @@ const validateBugReport = async (body, labels) => {
 
     if (!isVersionValid) {
       labels.add('missing-version');
+    } else {
+      // Add version-specific labels
+      const versionMatch = words.find((word) => versionPattern.test(word));
+      if (versionMatch) {
+        const majorVersion = versionMatch.split('.')[0];
+        if (majorVersion === '6') {
+          labels.add('6.x.x');
+        } else if (majorVersion === '7') {
+          labels.add('7.0');
+        }
+      }
     }
 
     const latestVersion = await checkLatestVersion();
