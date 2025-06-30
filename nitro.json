@@ -1,0 +1,28 @@
+{
+  "android": {
+    "androidCxxLibName": "NitroVideo",
+    "androidNamespace": [
+      "video"
+    ]
+  },
+  "cxxNamespace": [
+    "video"
+  ],
+  "ios": {
+    "iosModulename": "NitroVideo"
+  },
+  "autolinking": {
+    "VideoPlayerFactory": {
+      "swift": "HybridVideoPlayerFactory",
+      "kotlin": "HybridVideoPlayerFactory"
+    },
+    "VideoPlayerSourceFactory": {
+      "swift": "HybridVideoPlayerSourceFactory",
+      "kotlin": "HybridVideoPlayerSourceFactory"
+    },
+    "VideoViewViewManagerFactory": {
+      "swift": "HybridVideoViewViewManagerFactory",
+      "kotlin": "HybridVideoViewViewManagerFactory"
+    }
+  }
+}

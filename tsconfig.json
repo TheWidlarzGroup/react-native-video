@@ -1,21 +1,18 @@
 {
   "compilerOptions": {
-    "rootDir": "./src",
-    "outDir": "lib",
+    "rootDir": ".",
     "paths": {
       "react-native-video": ["./src/index"]
     },
-    "composite": true,
-    "declaration": true,
-    "sourceMap": true,
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "jsx": "react",
-    "lib": ["esnext"],
-    "module": "CommonJS",
-    "moduleResolution": "node",
+    "jsx": "react-jsx",
+    "lib": ["ESNext"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "noEmit": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
     "noImplicitUseStrict": false,
@@ -26,9 +23,7 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,
-    "target": "esnext",
-    "verbatimModuleSyntax": false,
-    "allowSyntheticDefaultImports": true
-  },
-  "exclude": ["examples", "lib", "docs"]
+    "target": "ESNext",
+    "verbatimModuleSyntax": true
+  }
 }
