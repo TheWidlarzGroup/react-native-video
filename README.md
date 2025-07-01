@@ -24,9 +24,9 @@ The most battle-tested open-source video player component for React Native with 
 |---------|-------|--------------|
 | **v5 and lower** | ❌ End-of-life [Commercial Support Available](https://www.thewidlarzgroup.com/blog/react-native-video-upgrade-challenges-custom-maintenance-support#how-we-can-help?utm_source=rnv&utm_medium=readme&utm_id=upgradev5) | Old Architecture |
 | **v6** | 🛠 Maintained (community + TWG) | Old + New (Interop Layer) |
-| **v7** | 🚀 Active Development | Old + New (Full Support) |
+| [**v7**](https://github.com/TheWidlarzGroup/react-native-video/tree/v7) | [🚀 Active Development](https://github.com/TheWidlarzGroup/react-native-video/tree/v7) | Old + New (Full Support) |
 
-`react-native-video` v7 introduces full support for the new React Native architecture, unlocking better performance, improved consistency, and modern native modules.
+[`react-native-video` v7](https://github.com/TheWidlarzGroup/react-native-video/tree/v7) introduces full support for the new React Native architecture, unlocking better performance, improved consistency, and modern native modules.
 
 ---
 
