@@ -26,7 +26,9 @@ function* walk(dir) {
 function gatherDocs() {
   // Crawl all markdown files in the docs directory (excluding the static subdir)
   const docsDir = path.join(CWD, 'docs');
-  if (!fs.existsSync(docsDir)) return [];
+  if (!fs.existsSync(docsDir)) {
+    return [];
+  }
   return Array.from(walk(docsDir))
     .filter((p) => !p.includes(`${path.sep}static${path.sep}`))
     .sort();

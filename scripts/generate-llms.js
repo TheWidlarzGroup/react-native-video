@@ -8,7 +8,9 @@ const CWD = process.cwd();
 /** Simple helper that returns the first N lines of README.md (sans markdown headings). */
 function getProjectOverview(maxLines = 30) {
   const readmePath = path.join(CWD, 'README.md');
-  if (!fs.existsSync(readmePath)) return '';
+  if (!fs.existsSync(readmePath)) {
+    return '';
+  }
   const lines = fs.readFileSync(readmePath, 'utf8').split(/\r?\n/);
   return lines.slice(0, maxLines).join('\n');
 }
@@ -26,11 +28,15 @@ function buildFileTree(startPath, depth = 0, maxDepth = 2) {
     '.expo',
   ]);
 
-  if (depth > maxDepth) return [];
+  if (depth > maxDepth) {
+    return [];
+  }
   const entries = fs.readdirSync(startPath, {withFileTypes: true});
   const lines = [];
   for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
-    if (ignore.has(entry.name) || entry.name.startsWith('.')) continue;
+    if (ignore.has(entry.name) || entry.name.startsWith('.')) {
+      continue;
+    }
     const relPath = `${'  '.repeat(depth)}- ${entry.name}${
       entry.isDirectory() ? '/' : ''
     }`;
@@ -49,13 +55,15 @@ function buildFileTree(startPath, depth = 0, maxDepth = 2) {
 
 /** Minimal usage examples that are helpful for agents. */
 function getUsageExamples() {
-  return `1. Basic playback\n\n   \`\`\`tsx\n   import Video, { VideoRef } from 'react-native-video';\n   import { useRef } from 'react';\n   \n   export default function Example() {\n     const videoRef = useRef<VideoRef>(null);\n     \n     return (\n       <Video\n         source={{ uri: 'https://example.com/video.mp4' }}\n         ref={videoRef}\n         style={{ width: '100%', aspectRatio: 16 / 9 }}\n         controls\n       />\n     );\n   }\n   \`\`\`\n\n2. Advanced control (seek & pause)\n\n   \`\`\`tsx\n   // Using ref to control playback\n   videoRef.current?.setNativeProps({ paused: true });\n   videoRef.current?.seek(10); // seconds\n   \`\`\``;
+  return "1. Basic playback\n\n   ```tsx\n   import Video, { VideoRef } from 'react-native-video';\n   import { useRef } from 'react';\n   \n   export default function Example() {\n     const videoRef = useRef<VideoRef>(null);\n     \n     return (\n       <Video\n         source={{ uri: 'https://example.com/video.mp4' }}\n         ref={videoRef}\n         style={{ width: '100%', aspectRatio: 16 / 9 }}\n         controls\n       />\n     );\n   }\n   ```\n\n2. Advanced control (seek & pause)\n\n   ```tsx\n   // Using ref to control playback\n   videoRef.current?.setNativeProps({ paused: true });\n   videoRef.current?.seek(10); // seconds\n   ```";
 }
 
 /** Load docs metadata and build navigation structure */
 function generateDocsSections() {
   const docsRoot = path.join(CWD, 'docs', 'pages');
-  if (!fs.existsSync(docsRoot)) return [];
+  if (!fs.existsSync(docsRoot)) {
+    return [];
+  }
   const baseUrl = 'https://docs.thewidlarzgroup.com/react-native-video';
 
   const sections = [];
@@ -99,8 +107,12 @@ function getMarkdownTitle(filePath) {
 function collectMarkdownLinks(dir, urlPrefix) {
   const links = [];
   for (const file of fs.readdirSync(dir)) {
-    if (!file.endsWith('.md') && !file.endsWith('.mdx')) continue;
-    if (file.startsWith('_')) continue; // skip _category_.json etc
+    if (!file.endsWith('.md') && !file.endsWith('.mdx')) {
+      continue;
+    }
+    if (file.startsWith('_')) {
+      continue; // skip _category_.json etc
+    }
     const abs = path.join(dir, file);
     const title = getMarkdownTitle(abs) || toTitle(file.replace(/\.mdx?$/, ''));
     links.push({
@@ -112,7 +124,9 @@ function collectMarkdownLinks(dir, urlPrefix) {
 }
 
 function formatDocsSections(sections) {
-  if (!sections.length) return '';
+  if (!sections.length) {
+    return '';
+  }
   let md = '\n## Documentation\n';
   sections.forEach((sec) => {
     md += `\n### ${sec.title}\n`;
@@ -134,7 +148,9 @@ function generateContent() {
 
 function getPackageVersion() {
   const pkgPath = path.join(CWD, 'package.json');
-  if (!fs.existsSync(pkgPath)) return 'unknown';
+  if (!fs.existsSync(pkgPath)) {
+    return 'unknown';
+  }
   try {
     const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
     return pkg.version || 'unknown';
