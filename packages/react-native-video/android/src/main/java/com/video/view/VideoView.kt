@@ -30,6 +30,7 @@ import com.video.core.fragments.FullscreenVideoFragment
 import com.video.core.fragments.PictureInPictureHelperFragment
 import com.video.core.utils.PictureInPictureUtils.canEnterPictureInPicture
 import com.video.core.utils.PictureInPictureUtils.createPictureInPictureParams
+import com.video.core.utils.PictureInPictureUtils.safeEnterPictureInPictureMode
 import com.video.core.utils.Threading.runOnMainThread
 import com.video.core.extensions.toAspectRatioFrameLayout
 import com.video.core.utils.PictureInPictureUtils
@@ -276,6 +277,14 @@ class VideoView @JvmOverloads constructor(
   }
 
   fun hideRootContentViews() {
+    // Safety check: Only proceed if this is the designated PiP video
+    if (VideoManager.getCurrentPictureInPictureVideo() != this) {
+      Log.w("ReactNativeVideo", "hideRootContentViews called on non-PiP video nitroId: $nitroId - ignoring")
+      return
+    }
+    
+    Log.d("ReactNativeVideo", "Hiding root content views for PiP video nitroId: $nitroId")
+    
     // Remove playerView from parent
     // In PiP mode, we don't want to show the controller
     // Controls are handled by System if we have MediaSession
@@ -298,9 +307,13 @@ class VideoView @JvmOverloads constructor(
     rootContent.addView(playerView,
       LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
     )
+    
+    Log.d("ReactNativeVideo", "Successfully moved player view to root content for PiP nitroId: $nitroId")
   }
 
   fun restoreRootContentViews() {
+    Log.d("ReactNativeVideo", "Restoring root content views for video nitroId: $nitroId")
+    
     // Reset PlayerView settings
     playerView.useController = useController
 
@@ -317,6 +330,8 @@ class VideoView @JvmOverloads constructor(
 
     // Add PlayerView back to VideoView
     addView(playerView)
+    
+    Log.d("ReactNativeVideo", "Successfully restored root content views for video nitroId: $nitroId")
   }
 
   fun enterPictureInPicture() {
@@ -328,28 +343,89 @@ class VideoView @JvmOverloads constructor(
       throw VideoViewError.PictureInPictureNotSupported
     }
 
-    val currentActivity = applicationContent.currentActivity ?: return
+    // Use centralized PiP manager to handle multiple videos
+    VideoManager.requestPictureInPicture(this)
+  }
 
-    events.willEnterPictureInPicture?.let { it() }
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      val params = createPictureInPictureParams(this)
-      currentActivity.enterPictureInPictureMode(params)
-    } else {
-      @Suppress("Deprecation")
-      currentActivity.enterPictureInPictureMode()
+  internal fun internalEnterPictureInPicture(): Boolean {
+    if (isInPictureInPicture || isInFullscreen || !pictureInPictureEnabled) {
+      return false
     }
 
-    isInPictureInPicture = true
+    if (!canEnterPictureInPicture()) {
+      return false
+    }
+
+    val currentActivity = applicationContent.currentActivity ?: return false
+
+    return try {
+      events.willEnterPictureInPicture?.let { it() }
+
+      val success = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val params = createPictureInPictureParams(this)
+        safeEnterPictureInPictureMode(params)
+      } else {
+        try {
+          @Suppress("Deprecation")
+          currentActivity.enterPictureInPictureMode()
+          true
+        } catch (e: Exception) {
+          Log.e("ReactNativeVideo", "Failed to enter PiP mode (legacy)", e)
+          false
+        }
+      }
+
+      if (success) {
+        Log.d("ReactNativeVideo", "Successfully requested PiP mode for nitroId: $nitroId")
+        // Note: isInPictureInPicture will be set to true by the system callback in PictureInPictureHelperFragment
+      } else {
+        Log.w("ReactNativeVideo", "Failed to enter PiP mode for nitroId: $nitroId")
+      }
+      
+      success
+    } catch (e: Exception) {
+      Log.e("ReactNativeVideo", "Exception in internalEnterPictureInPicture for nitroId: $nitroId", e)
+      false
+    }
   }
 
   fun exitPictureInPicture() {
     if (!isInPictureInPicture || isInFullscreen) {
       return
     }
+    
+    VideoManager.notifyPictureInPictureExited(this)
+    
     events.willExitPictureInPicture?.let { it() }
     restoreRootContentViews()
     isInPictureInPicture = false
+  }
+
+  internal fun forceExitPictureInPicture() {
+    if (!isInPictureInPicture || isInFullscreen) {
+      Log.d("ReactNativeVideo", "Force exit PiP skipped for nitroId: $nitroId (not in PiP or in fullscreen)")
+      return
+    }
+
+    Log.d("ReactNativeVideo", "Force exiting PiP for nitroId: $nitroId")
+
+    try {
+      val currentActivity = applicationContent.currentActivity
+      if (currentActivity?.isInPictureInPictureMode == true) {
+        Log.d("ReactNativeVideo", "Activity is in PiP mode, preparing for transition")
+      }
+      
+      events.willExitPictureInPicture?.let { it() }
+      restoreRootContentViews()
+      isInPictureInPicture = false
+      
+      VideoManager.notifyPictureInPictureExited(this)
+      
+      Log.d("ReactNativeVideo", "Successfully force exited PiP for nitroId: $nitroId")
+      
+    } catch (e: Exception) {
+      Log.e("ReactNativeVideo", "Failed to force exit PiP mode for nitroId: $nitroId", e)
+    }
   }
 
   // -------- View Lifecycle Methods --------
