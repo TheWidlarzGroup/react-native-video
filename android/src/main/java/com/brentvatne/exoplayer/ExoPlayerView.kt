@@ -169,21 +169,6 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
         }
     }
 
-    fun setHideShutterView(hideShutterView: Boolean) {
-        // PlayerView manages shutter view internally
-        // This method is kept for compatibility
-    }
-
-    fun showAds() {
-        // PlayerView has built-in ad overlay support
-        // This will be handled by the PlayerView automatically
-    }
-
-    fun hideAds() {
-        // PlayerView has built-in ad overlay support
-        // This will be handled by the PlayerView automatically
-    }
-
     val isPlaying: Boolean
         get() = playerView.player?.isPlaying ?: false
 
@@ -235,21 +220,6 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
 
     fun setControllerVisibilityListener(listener: PlayerView.ControllerVisibilityListener?) {
         playerView.setControllerVisibilityListener(listener)
-    }
-
-    fun setRewindIncrementMs(rewindMs: Int) {
-        // PlayerView in Media3 uses different method names
-        // This is kept for compatibility but may not have direct equivalent
-    }
-
-    fun setFastForwardIncrementMs(fastForwardMs: Int) {
-        // PlayerView in Media3 uses different method names
-        // This is kept for compatibility but may not have direct equivalent
-    }
-
-    fun updateShutterViewVisibility() {
-        // PlayerView manages shutter view automatically
-        // This method is kept for compatibility
     }
 
     override fun addOnLayoutChangeListener(listener: View.OnLayoutChangeListener) {

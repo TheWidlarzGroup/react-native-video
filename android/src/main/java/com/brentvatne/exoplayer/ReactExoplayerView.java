@@ -455,10 +455,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
     private void updateControllerVisibility() {
         if (exoPlayerView == null) return;
-        
-        exoPlayerView.setRewindIncrementMs(controlsConfig.getSeekIncrementMS());
-        exoPlayerView.setFastForwardIncrementMs(controlsConfig.getSeekIncrementMS());
-        
+            
         exoPlayerView.setUseController(!controlsConfig.getHideFullscreen());
     }
 
@@ -655,7 +652,6 @@ public class ReactExoplayerView extends FrameLayout implements
                 }
                 if (playerNeedsSource) {
                     // Will force display of shutter view if needed
-                    exoPlayerView.updateShutterViewVisibility();
                     exoPlayerView.invalidateAspectRatio();
                     // DRM session manager creation must be done on a different thread to prevent crashes so we start a new thread
                     ExecutorService es = Executors.newSingleThreadExecutor();
@@ -774,7 +770,6 @@ public class ReactExoplayerView extends FrameLayout implements
         if (adProps != null && uri != null) {
             Uri adTagUrl = adProps.getAdTagUrl();
             if (adTagUrl != null) {
-                exoPlayerView.showAds();
                 // Create an AdsLoader.
                 ImaAdsLoader.Builder imaLoaderBuilder = new ImaAdsLoader
                         .Builder(themedReactContext)
@@ -799,7 +794,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 }
             }
         }
-        exoPlayerView.hideAds();
+
         return null;
     }
 
@@ -2049,7 +2044,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 player.clearMediaItems();
             }
         }
-        exoPlayerView.hideAds();
+
         this.source = new Source();
         this.mediaDataSourceFactory = null;
         clearResumePosition();
@@ -2655,10 +2650,6 @@ public class ReactExoplayerView extends FrameLayout implements
                 eventEmitter.onVideoFullscreenPlayerDidDismiss.invoke();
             });
         }
-    }
-
-    public void setHideShutterView(boolean hideShutterView) {
-        exoPlayerView.setHideShutterView(hideShutterView);
     }
 
     @Override
