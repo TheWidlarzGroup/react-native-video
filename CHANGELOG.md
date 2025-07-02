@@ -1,5 +1,20 @@
 
 
+# [6.16.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.15.0...v6.16.0) (2025-07-02)
+
+
+### Bug Fixes
+
+* **android:** create custom event class for dispatcher ([#4575](https://github.com/TheWidlarzGroup/react-native-video/issues/4575)) ([94967fc](https://github.com/TheWidlarzGroup/react-native-video/commit/94967fc4a61e00c521242d29fd28bed13bbba7c4))
+* **android:** speed control is not applied ([#4572](https://github.com/TheWidlarzGroup/react-native-video/issues/4572)) ([b56b647](https://github.com/TheWidlarzGroup/react-native-video/commit/b56b647d85aa24df2ba2ad436eb5ada67735417f))
+* **ios:** allow audio mixing when none of the players are playing ([#4579](https://github.com/TheWidlarzGroup/react-native-video/issues/4579)) ([2d7e039](https://github.com/TheWidlarzGroup/react-native-video/commit/2d7e03942d5e2525e5c71dc914926ba07f67d54a))
+* **ios:** retain cycle and memory leak involving the RCTVideo instance when using Google IMA ads in react-native-video. ([#4574](https://github.com/TheWidlarzGroup/react-native-video/issues/4574)) ([b51b579](https://github.com/TheWidlarzGroup/react-native-video/commit/b51b579ff00067231fb1d0754e1a86692f44bc50))
+
+
+### Features
+
+* **android:** replace custom VideoView with media3 `PlayerView` ([#4581](https://github.com/TheWidlarzGroup/react-native-video/issues/4581)) ([978683b](https://github.com/TheWidlarzGroup/react-native-video/commit/978683b64582e6363d7b5a1817e22fec342d1c47))
+
 # [6.15.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.14.1...v6.15.0) (2025-06-12)
 
 
