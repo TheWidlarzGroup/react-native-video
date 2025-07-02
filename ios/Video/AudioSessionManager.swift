@@ -139,6 +139,10 @@ class AudioSessionManager {
             return view._playInBackground
         }
 
+        let anyPlayerPlaying = videoViews.allObjects.contains { view in
+            return !view.isMuted() && view._player != nil && view._player?.rate != 0
+        }
+
         let anyPlayerWantsMixing = videoViews.allObjects.contains { view in
             return view._mixWithOthers == "mix" || view._mixWithOthers == "duck"
         }
@@ -150,7 +154,9 @@ class AudioSessionManager {
             return
         }
 
-        if canAllowMixing {
+        if !anyPlayerPlaying {
+            options.insert(.mixWithOthers)
+        } else if canAllowMixing {
             let shouldEnableMixing = videoViews.allObjects.contains { view in
                 return view._mixWithOthers == "mix"
             }
@@ -199,7 +205,7 @@ class AudioSessionManager {
 
         do {
             try audioSession.setCategory(
-                category, mode: .moviePlayback, options: canAllowMixing ? options : []
+                category, mode: .moviePlayback, options: options
             )
 
             // Configure audio port
