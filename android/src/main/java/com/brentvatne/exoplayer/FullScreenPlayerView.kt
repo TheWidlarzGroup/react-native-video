@@ -10,8 +10,6 @@ import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
 import android.widget.FrameLayout
-import android.widget.ImageButton
-import android.widget.LinearLayout
 import androidx.activity.OnBackPressedCallback
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -91,7 +89,6 @@ class FullScreenPlayerView(
         parent?.removeView(exoPlayerView)
         containerView.addView(exoPlayerView, generateDefaultLayoutParams())
         playerControlView?.let {
-            updateFullscreenButton(playerControlView, true)
             parent?.removeView(it)
             containerView.addView(it, generateDefaultLayoutParams())
         }
@@ -104,7 +101,6 @@ class FullScreenPlayerView(
         containerView.removeView(exoPlayerView)
         parent?.addView(exoPlayerView, generateDefaultLayoutParams())
         playerControlView?.let {
-            updateFullscreenButton(playerControlView, false)
             containerView.removeView(it)
             parent?.addView(it, generateDefaultLayoutParams())
         }
@@ -140,20 +136,6 @@ class FullScreenPlayerView(
         } else {
             androidx.media3.ui.R.drawable.exo_icon_fullscreen_enter
         }
-
-    private fun updateFullscreenButton(playerControlView: LegacyPlayerControlView, isFullscreen: Boolean) {
-        val imageButton = playerControlView.findViewById<ImageButton?>(com.brentvatne.react.R.id.exo_fullscreen)
-        imageButton?.let {
-            val imgResource = getFullscreenIconResource(isFullscreen)
-            val desc = if (isFullscreen) {
-                context.getString(androidx.media3.ui.R.string.exo_controls_fullscreen_exit_description)
-            } else {
-                context.getString(androidx.media3.ui.R.string.exo_controls_fullscreen_enter_description)
-            }
-            imageButton.setImageResource(imgResource)
-            imageButton.contentDescription = desc
-        }
-    }
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
@@ -226,13 +208,7 @@ class FullScreenPlayerView(
                 WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             )
         }
-        if (controlsConfig.hideNotificationBarOnFullScreenMode) {
-            val liveContainer = playerControlView?.findViewById<LinearLayout?>(com.brentvatne.react.R.id.exo_live_container)
-            liveContainer?.let {
-                val layoutParams = it.layoutParams as LinearLayout.LayoutParams
-                layoutParams.topMargin = 40
-                it.layoutParams = layoutParams
-            }
-        }
+        // Note: Live container adjustment is no longer needed since we're using PlayerView's built-in controls
+        // PlayerView handles UI adjustments automatically
     }
 }

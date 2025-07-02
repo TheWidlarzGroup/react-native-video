@@ -640,7 +640,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 DebugLog("setSrc Stopping playback")
                 return
             }
-            self.removePlayerLayer()
+
+            // Ensure UI operations are performed on main thread
+            DispatchQueue.main.sync {
+                self.removePlayerLayer()
+            }
             self._playerObserver.player = nil
             self._drmManager = nil
             self._playerObserver.playerItem = nil
@@ -1226,14 +1230,18 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         if _controls != controls || ((_playerLayer == nil) && (_playerViewController == nil)) {
             _controls = controls
             if _controls {
-                self.removePlayerLayer()
-                self.usePlayerViewController()
+                DispatchQueue.main.async {
+                    self.removePlayerLayer()
+                    self.usePlayerViewController()
+                }
             } else {
-                _playerViewController?.view.removeFromSuperview()
-                _playerViewController?.removeFromParent()
-                _playerViewController = nil
-                _playerObserver.playerViewController = nil
-                self.usePlayerLayer()
+                DispatchQueue.main.async {
+                    self._playerViewController?.view.removeFromSuperview()
+                    self._playerViewController?.removeFromParent()
+                    self._playerViewController = nil
+                    self._playerObserver.playerViewController = nil
+                    self.usePlayerLayer()
+                }
             }
         }
     }
