@@ -4,6 +4,7 @@ import android.app.PictureInPictureParams
 import android.content.pm.PackageManager
 import android.graphics.Rect
 import android.os.Build
+import android.util.Log
 import android.util.Rational
 import android.view.View
 import androidx.annotation.OptIn
@@ -14,6 +15,7 @@ import com.video.view.VideoView
 
 @OptIn(UnstableApi::class)
 object PictureInPictureUtils {
+  private const val TAG = "PictureInPictureUtils"
 
   fun canEnterPictureInPicture(): Boolean {
     val applicationContent = NitroModules.applicationContext
@@ -89,10 +91,39 @@ object PictureInPictureUtils {
       try {
         val currentActivity = NitroModules.applicationContext?.currentActivity
         currentActivity?.setPictureInPictureParams(params)
-      } catch (_: Exception) {
+        Log.d(TAG, "Successfully set PiP params")
+      } catch (e: Exception) {
+        Log.w(TAG, "Failed to set PiP params - PiP may not be enabled in manifest", e)
         // Ignore: We cannot check if user has added support for PIP in manifest
         // so we need to catch error if he did not add it.
       }
+    }
+  }
+  
+  @RequiresApi(Build.VERSION_CODES.O)
+  fun safeEnterPictureInPictureMode(params: PictureInPictureParams): Boolean {
+    return try {
+      val currentActivity = NitroModules.applicationContext?.currentActivity
+      val result = currentActivity?.enterPictureInPictureMode(params) ?: false
+      Log.d(TAG, "PiP enter result: $result")
+      result
+    } catch (e: Exception) {
+      Log.e(TAG, "Failed to enter PiP mode", e)
+      false
+    }
+  }
+  
+  fun isCurrentlyInPictureInPictureMode(): Boolean {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      try {
+        val currentActivity = NitroModules.applicationContext?.currentActivity
+        currentActivity?.isInPictureInPictureMode == true
+      } catch (e: Exception) {
+        Log.w(TAG, "Failed to check PiP mode status", e)
+        false
+      }
+    } else {
+      false
     }
   }
 }

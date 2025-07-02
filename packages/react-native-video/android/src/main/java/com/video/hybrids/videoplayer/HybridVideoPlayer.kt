@@ -461,6 +461,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
     }
 
     override fun onIsPlayingChanged(isPlaying: Boolean) {
+      super.onIsPlayingChanged(isPlaying)
       eventEmitter.onPlaybackStateChange(
         onPlaybackStateChangeData(
           isPlaying = isPlaying,
@@ -468,10 +469,11 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
         )
       )
       if (isPlaying) {
+        VideoManager.setLastPlayedPlayer(this@HybridVideoPlayer)
         startProgressUpdates()
       } else {
         if (playerPointer.playbackState == Player.STATE_ENDED || playerPointer.playbackState == Player.STATE_IDLE) {
-            stopProgressUpdates()
+          stopProgressUpdates()
         }
       }
     }
