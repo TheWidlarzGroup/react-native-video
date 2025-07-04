@@ -17,7 +17,25 @@ export type VideoConfig = {
   headers?: Record<string, string>;
   /**
    * The external subtitles to be used.
-   * @note on iOS, side loaded subtitles are not supported if source is stream.
+   * @note on iOS, only WebVTT (.vtt) subtitles are supported (for HLS streams and MP4 files).
+   * @note on iOS, `label` can be overridden by player and there is no way to get around it.
+   * @example
+   * ```ts
+   * externalSubtitles: [
+   *   {
+   *     uri: 'https://example.com/subtitles_en.vtt',
+   *     label: 'English',
+   *     type: 'vtt',
+   *     language: 'en'
+   *   },
+   *   {
+   *     uri: 'https://example.com/subtitles_es.vtt',
+   *     label: 'Español',
+   *     type: 'vtt',
+   *     language: 'es'
+   *   }
+   * ]
+   * ```
    */
   externalSubtitles?: ExternalSubtitle[];
 };
@@ -55,6 +73,12 @@ interface ExternalSubtitleWithInferredType {
    * The type of the subtitle.
    */
   type?: SubtitleType;
+  /**
+   * The language code for the subtitle (ISO 639-1 or ISO 639-2).
+   * @example 'en', 'es', 'fr', 'de', 'zh-CN'
+   * @default 'und' (undefined)
+   */
+  language?: string;
 }
 
 interface ExternalSubtitleWithCustomType {
@@ -70,6 +94,12 @@ interface ExternalSubtitleWithCustomType {
    * The type of the subtitle.
    */
   type: Omit<SubtitleType, 'auto'>;
+  /**
+   * The language code for the subtitle (ISO 639-1 or ISO 639-2).
+   * @example 'en', 'es', 'fr', 'de', 'zh-CN'
+   * @default 'und' (undefined)
+   */
+  language?: string;
 }
 
 export type ExternalSubtitle =
@@ -80,4 +110,5 @@ interface NativeExternalSubtitle {
   uri: string;
   label: string;
   type: SubtitleType;
+  language: string;
 }
