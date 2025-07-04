@@ -90,8 +90,13 @@ class HLSSubtitleInjector: NSObject {
         baseURL: baseURL
       )
 
-      if trimmedLine.hasPrefix("#EXT-X-STREAM-INF:") && hasSubtitleGroup {
-        let modifiedStreamLine = addSubtitleGroupToStreamInf(processedLine)
+      // Handle existing subtitle groups and stream info lines
+      if trimmedLine.hasPrefix("#EXT-X-MEDIA:") && trimmedLine.contains("TYPE=SUBTITLES") {
+        let modifiedMediaLine = replaceSubtitleGroupInMediaLine(processedLine)
+        modifiedLines.append(modifiedMediaLine)
+      } else if trimmedLine.hasPrefix("#EXT-X-STREAM-INF:") {
+        let modifiedStreamLine = replaceSubtitleGroupInStreamInf(
+          processedLine, hasSubtitleGroup: hasSubtitleGroup)
         modifiedLines.append(modifiedStreamLine)
       } else {
         modifiedLines.append(processedLine)
@@ -137,16 +142,40 @@ class HLSSubtitleInjector: NSObject {
         && !line.hasPrefix("#EXT-X-VERSION"))
   }
 
-  private func addSubtitleGroupToStreamInf(_ line: String) -> String {
-    if line.contains("SUBTITLES=") {
-      return line
+  private func replaceSubtitleGroupInMediaLine(_ line: String) -> String {
+    // Find and replace GROUP-ID in subtitle media lines
+    let groupIdPattern = #"GROUP-ID="[^"]*""#
+
+    if let regex = try? NSRegularExpression(pattern: groupIdPattern, options: []) {
+      let range = NSRange(location: 0, length: line.utf16.count)
+      let replacement = "GROUP-ID=\"\(Self.subtitleGroupID)\""
+      return regex.stringByReplacingMatches(
+        in: line, options: [], range: range, withTemplate: replacement)
     }
 
-    if line.hasSuffix(",") {
-      return line + "SUBTITLES=\"\(Self.subtitleGroupID)\""
-    } else {
-      return line + ",SUBTITLES=\"\(Self.subtitleGroupID)\""
+    return line
+  }
+
+  private func replaceSubtitleGroupInStreamInf(_ line: String, hasSubtitleGroup: Bool) -> String {
+    // First, handle existing SUBTITLES= references
+    let subtitlesPattern = #"SUBTITLES="[^"]*""#
+
+    var modifiedLine = line
+    if let regex = try? NSRegularExpression(pattern: subtitlesPattern, options: []) {
+      let range = NSRange(location: 0, length: line.utf16.count)
+      let replacement = "SUBTITLES=\"\(Self.subtitleGroupID)\""
+      modifiedLine = regex.stringByReplacingMatches(
+        in: line, options: [], range: range, withTemplate: replacement)
+    } else if hasSubtitleGroup && !line.contains("SUBTITLES=") {
+      // Add subtitle group reference if we have subtitles but no existing reference
+      if line.hasSuffix(",") {
+        modifiedLine = line + "SUBTITLES=\"\(Self.subtitleGroupID)\""
+      } else {
+        modifiedLine = line + ",SUBTITLES=\"\(Self.subtitleGroupID)\""
+      }
     }
+
+    return modifiedLine
   }
 
   private func createSubtitleTrackEntry(for subtitle: NativeExternalSubtitle, index: Int)

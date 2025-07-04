@@ -79,7 +79,7 @@ enum ExternalSubtitlesUtils {
           )
 
           compositionTextTrack.languageCode = textTrack.languageCode
-          compositionTextTrack.isEnabled = false
+          compositionTextTrack.isEnabled = true
         }
       }
 
