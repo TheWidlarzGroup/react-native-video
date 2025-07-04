@@ -13,23 +13,24 @@ object TextTrackUtils {
         return Threading.runOnMainThreadSync {
             val tracks = mutableListOf<TextTrack>()
             val currentTracks = player.currentTracks
+            var globalTrackIndex = 0
 
             // Get all text tracks from the current player tracks (includes both built-in and external)
             for (trackGroup in currentTracks.groups) {
                 if (trackGroup.type == C.TRACK_TYPE_TEXT) {
                     for (trackIndex in 0 until trackGroup.length) {
                         val format = trackGroup.getTrackFormat(trackIndex)
-                        val trackId = format.id ?: "text-$trackIndex"
-                        val label = format.label ?: "Unknown ${trackIndex + 1}"
+                        val trackId = format.id ?: "text-$globalTrackIndex"
+                        val label = format.label ?: "Unknown ${globalTrackIndex + 1}"
                         val language = format.language
                         val isSelected = trackGroup.isTrackSelected(trackIndex)
 
                         // Determine if this is an external track by checking if it matches external subtitle labels
                         val isExternal = source.config.externalSubtitles?.any { subtitle ->
                             label.contains(subtitle.label, ignoreCase = true)
-                        } ?: false
+                        } == true
 
-                        val finalTrackId = if (isExternal) "external-$trackIndex" else trackId
+                        val finalTrackId = if (isExternal) "external-$globalTrackIndex" else trackId
 
                         tracks.add(
                             TextTrack(
@@ -39,6 +40,8 @@ object TextTrackUtils {
                                 selected = isSelected
                             )
                         )
+                        
+                        globalTrackIndex++
                     }
                 }
             }
@@ -75,14 +78,15 @@ object TextTrackUtils {
             val currentTracks = player.currentTracks
             var trackFound = false
             var selectedExternalTrackIndex: Int? = null
+            var globalTrackIndex = 0
 
             // Find and select the specific text track
             for (trackGroup in currentTracks.groups) {
                 if (trackGroup.type == C.TRACK_TYPE_TEXT) {
                     for (trackIndex in 0 until trackGroup.length) {
                         val format = trackGroup.getTrackFormat(trackIndex)
-                        val currentTrackId = format.id ?: "text-$trackIndex"
-                        val label = format.label ?: "Unknown ${trackIndex + 1}"
+                        val currentTrackId = format.id ?: "text-$globalTrackIndex"
+                        val label = format.label ?: "Unknown ${globalTrackIndex + 1}"
 
                         // Check if this matches our target track (either by original ID or by external ID)
                         val isExternal = source.config.externalSubtitles?.any { subtitle ->
@@ -90,7 +94,7 @@ object TextTrackUtils {
                         } == true
 
                         val finalTrackId =
-                            if (isExternal) "external-$trackIndex" else currentTrackId
+                            if (isExternal) "external-$globalTrackIndex" else currentTrackId
 
                         if (finalTrackId == textTrack.id) {
                             // Enable this specific track
@@ -104,7 +108,7 @@ object TextTrackUtils {
 
                             // Update selection state
                             selectedExternalTrackIndex = if (isExternal) {
-                                trackIndex
+                                globalTrackIndex
                             } else {
                                 null
                             }
@@ -113,6 +117,8 @@ object TextTrackUtils {
                             trackFound = true
                             break
                         }
+                        
+                        globalTrackIndex++
                     }
                     if (trackFound) {
                         break
@@ -129,6 +135,7 @@ object TextTrackUtils {
     fun getSelectedTrack(player: ExoPlayer, source: HybridVideoPlayerSourceSpec): TextTrack? {
         return Threading.runOnMainThreadSync {
             val currentTracks = player.currentTracks
+            var globalTrackIndex = 0
 
             // Find the currently selected text track
             for (trackGroup in currentTracks.groups) {
@@ -136,8 +143,8 @@ object TextTrackUtils {
                     for (trackIndex in 0 until trackGroup.length) {
                         if (trackGroup.isTrackSelected(trackIndex)) {
                             val format = trackGroup.getTrackFormat(trackIndex)
-                            val trackId = format.id ?: "text-$trackIndex"
-                            val label = format.label ?: "Unknown ${trackIndex + 1}"
+                            val trackId = format.id ?: "text-$globalTrackIndex"
+                            val label = format.label ?: "Unknown ${globalTrackIndex + 1}"
                             val language = format.language
 
                             // Determine if this is an external track by checking if it matches external subtitle labels
@@ -145,7 +152,7 @@ object TextTrackUtils {
                                 label.contains(subtitle.label, ignoreCase = true)
                             } == true
 
-                            val finalTrackId = if (isExternal) "external-$trackIndex" else trackId
+                            val finalTrackId = if (isExternal) "external-$globalTrackIndex" else trackId
 
                             return@runOnMainThreadSync TextTrack(
                                 id = finalTrackId,
@@ -154,7 +161,11 @@ object TextTrackUtils {
                                 selected = true
                             )
                         }
+                        globalTrackIndex++
                     }
+                } else if (trackGroup.type == C.TRACK_TYPE_TEXT) {
+                    // Still need to increment global index for non-selected text track groups
+                    globalTrackIndex += trackGroup.length
                 }
             }
 

@@ -34,10 +34,11 @@ namespace margelo::nitro::video {
     std::string uri     SWIFT_PRIVATE;
     std::string label     SWIFT_PRIVATE;
     SubtitleType type     SWIFT_PRIVATE;
+    std::string language     SWIFT_PRIVATE;
 
   public:
     NativeExternalSubtitle() = default;
-    explicit NativeExternalSubtitle(std::string uri, std::string label, SubtitleType type): uri(uri), label(label), type(type) {}
+    explicit NativeExternalSubtitle(std::string uri, std::string label, SubtitleType type, std::string language): uri(uri), label(label), type(type), language(language) {}
   };
 
 } // namespace margelo::nitro::video
@@ -54,7 +55,8 @@ namespace margelo::nitro {
       return NativeExternalSubtitle(
         JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, "uri")),
         JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, "label")),
-        JSIConverter<SubtitleType>::fromJSI(runtime, obj.getProperty(runtime, "type"))
+        JSIConverter<SubtitleType>::fromJSI(runtime, obj.getProperty(runtime, "type")),
+        JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, "language"))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const NativeExternalSubtitle& arg) {
@@ -62,6 +64,7 @@ namespace margelo::nitro {
       obj.setProperty(runtime, "uri", JSIConverter<std::string>::toJSI(runtime, arg.uri));
       obj.setProperty(runtime, "label", JSIConverter<std::string>::toJSI(runtime, arg.label));
       obj.setProperty(runtime, "type", JSIConverter<SubtitleType>::toJSI(runtime, arg.type));
+      obj.setProperty(runtime, "language", JSIConverter<std::string>::toJSI(runtime, arg.language));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -72,6 +75,7 @@ namespace margelo::nitro {
       if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, "uri"))) return false;
       if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, "label"))) return false;
       if (!JSIConverter<SubtitleType>::canConvert(runtime, obj.getProperty(runtime, "type"))) return false;
+      if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, "language"))) return false;
       return true;
     }
   };

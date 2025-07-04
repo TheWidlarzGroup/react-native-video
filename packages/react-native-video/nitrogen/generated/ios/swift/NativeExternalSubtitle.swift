@@ -18,8 +18,8 @@ public extension NativeExternalSubtitle {
   /**
    * Create a new instance of `NativeExternalSubtitle`.
    */
-  init(uri: String, label: String, type: SubtitleType) {
-    self.init(std.string(uri), std.string(label), type)
+  init(uri: String, label: String, type: SubtitleType, language: String) {
+    self.init(std.string(uri), std.string(label), type, std.string(language))
   }
 
   var uri: String {
@@ -52,6 +52,17 @@ public extension NativeExternalSubtitle {
     @inline(__always)
     set {
       self.__type = newValue
+    }
+  }
+  
+  var language: String {
+    @inline(__always)
+    get {
+      return String(self.__language)
+    }
+    @inline(__always)
+    set {
+      self.__language = std.string(newValue)
     }
   }
 }

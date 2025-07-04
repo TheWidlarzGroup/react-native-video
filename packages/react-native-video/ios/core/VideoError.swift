@@ -32,6 +32,7 @@ enum PlayerError: VideoError {
   case notInitialized
   case assetNotInitialized
   case invalidSource
+  case invalidTrackUrl(url: String)
   
   var code: String {
     switch self {
@@ -41,6 +42,8 @@ enum PlayerError: VideoError {
       return "player/asset-not-initialized"
     case .invalidSource:
       return "player/invalid-source"
+    case .invalidTrackUrl:
+      return "player/invalid-track-url"
     }
   }
   
@@ -52,6 +55,8 @@ enum PlayerError: VideoError {
       return "Asset has not been initialized (Or has been set to nil)"
     case .invalidSource:
       return "Invalid source passed to player"
+    case let .invalidTrackUrl(url: url):
+      return "Invalid track URL: \(url)"
     }
   }
 }

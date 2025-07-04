@@ -21,6 +21,7 @@ import {
   type onProgressData,
   type ResizeMode,
   type TextTrack,
+  type VideoConfig,
   type VideoPlayerStatus,
   type VideoViewRef,
 } from 'react-native-video';
@@ -407,7 +408,21 @@ const VideoDemo = () => {
             onPress={() => {
               const newSource = {
                 uri: 'https://playertest.longtailvideo.com/adaptive/elephants_dream_v4/index.m3u8',
-              };
+                externalSubtitles: [
+                  {
+                    uri: 'https://bitdash-a.akamaihd.net/content/sintel/subtitles/subtitles_en.vtt',
+                    label: 'External English',
+                    language: 'en',
+                    type: 'vtt',
+                  },
+                  {
+                    uri: 'https://bitdash-a.akamaihd.net/content/sintel/subtitles/subtitles_fr.vtt',
+                    label: 'External French',
+                    language: 'External French',
+                    type: 'vtt',
+                  },
+                ],
+              } satisfies VideoConfig;
               player.replaceSourceAsync(newSource);
             }}
           />

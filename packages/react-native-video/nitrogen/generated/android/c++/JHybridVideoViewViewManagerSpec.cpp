@@ -94,8 +94,9 @@ namespace margelo::nitro::video {
         auto downcast = jni::static_ref_cast<JFunc_void_bool_cxx::javaobject>(__result);
         return downcast->cthis()->getFunction();
       } else {
-        return [__result](bool isInPictureInPicture) -> void {
-          return __result->invoke(isInPictureInPicture);
+        auto __resultRef = jni::make_global(__result);
+        return [__resultRef](bool isInPictureInPicture) -> void {
+          return __resultRef->invoke(isInPictureInPicture);
         };
       }
     }()) : std::nullopt;
@@ -112,8 +113,9 @@ namespace margelo::nitro::video {
         auto downcast = jni::static_ref_cast<JFunc_void_bool_cxx::javaobject>(__result);
         return downcast->cthis()->getFunction();
       } else {
-        return [__result](bool fullscreen) -> void {
-          return __result->invoke(fullscreen);
+        auto __resultRef = jni::make_global(__result);
+        return [__resultRef](bool fullscreen) -> void {
+          return __resultRef->invoke(fullscreen);
         };
       }
     }()) : std::nullopt;
@@ -130,8 +132,9 @@ namespace margelo::nitro::video {
         auto downcast = jni::static_ref_cast<JFunc_void_cxx::javaobject>(__result);
         return downcast->cthis()->getFunction();
       } else {
-        return [__result]() -> void {
-          return __result->invoke();
+        auto __resultRef = jni::make_global(__result);
+        return [__resultRef]() -> void {
+          return __resultRef->invoke();
         };
       }
     }()) : std::nullopt;
@@ -148,8 +151,9 @@ namespace margelo::nitro::video {
         auto downcast = jni::static_ref_cast<JFunc_void_cxx::javaobject>(__result);
         return downcast->cthis()->getFunction();
       } else {
-        return [__result]() -> void {
-          return __result->invoke();
+        auto __resultRef = jni::make_global(__result);
+        return [__resultRef]() -> void {
+          return __resultRef->invoke();
         };
       }
     }()) : std::nullopt;
@@ -166,8 +170,9 @@ namespace margelo::nitro::video {
         auto downcast = jni::static_ref_cast<JFunc_void_cxx::javaobject>(__result);
         return downcast->cthis()->getFunction();
       } else {
-        return [__result]() -> void {
-          return __result->invoke();
+        auto __resultRef = jni::make_global(__result);
+        return [__resultRef]() -> void {
+          return __resultRef->invoke();
         };
       }
     }()) : std::nullopt;
@@ -184,8 +189,9 @@ namespace margelo::nitro::video {
         auto downcast = jni::static_ref_cast<JFunc_void_cxx::javaobject>(__result);
         return downcast->cthis()->getFunction();
       } else {
-        return [__result]() -> void {
-          return __result->invoke();
+        auto __resultRef = jni::make_global(__result);
+        return [__resultRef]() -> void {
+          return __resultRef->invoke();
         };
       }
     }()) : std::nullopt;

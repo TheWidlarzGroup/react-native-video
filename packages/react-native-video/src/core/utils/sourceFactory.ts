@@ -78,6 +78,7 @@ const parseExternalSubtitles = (
     uri: subtitle.uri,
     label: subtitle.label,
     type: (subtitle.type ?? 'auto') as SubtitleType,
+    language: subtitle.language ?? 'und',
   }));
 };
 
