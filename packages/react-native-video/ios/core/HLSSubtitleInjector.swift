@@ -302,7 +302,7 @@ extension HLSSubtitleInjector: AVAssetResourceLoaderDelegate {
 
   private func extractDurationFromVTT(_ vttString: String) -> Double {
     // Extract duration from VTT timestamps (similar to the PR approach)
-    let timestampPattern = #"(?:(\d+):)?(\d+):([[\d\.]+)"#
+    let timestampPattern = #"(?:(\d+):)?(\d+):([\d\.]+)"#
 
     guard let regex = try? NSRegularExpression(pattern: timestampPattern, options: []) else {
       return 60.0  // Default fallback
