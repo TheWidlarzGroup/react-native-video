@@ -339,9 +339,9 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
       throw PlayerError.invalidSource.error()
     }
 
-    let isNetowrkSource = _source.url.isFileURL == false
+    let isNetworkSource = _source.url.isFileURL == false
     eventEmitter.onLoadStart(
-      .init(sourceType: isNetowrkSource ? .network : .local, source: _source))
+      .init(sourceType: isNetworkSource ? .network : .local, source: _source))
 
     try await _source.initializeAsset()
 
@@ -352,7 +352,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
 
     let playerItem: AVPlayerItem
 
-    if let externalSubtiles = source.config.externalSubtitles, externalSubtiles.isEmpty == false {
+    if let externalSubtitles = source.config.externalSubtitles, externalSubtitles.isEmpty == false {
       playerItem = try await AVPlayerItem.withExternalSubtitles(for: asset, config: source.config)
     } else {
       playerItem = AVPlayerItem(asset: asset)
