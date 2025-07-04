@@ -20,9 +20,9 @@ enum ExternalSubtitlesUtils {
     for asset: AVURLAsset,
     config: NativeVideoConfig
   ) async throws -> AVPlayerItem {
-    let subtitlesAssets = config.externalSubtitles?.map { subtitle in
+    let subtitlesAssets = try config.externalSubtitles?.map { subtitle in
       guard let url = URL(string: subtitle.uri) else {
-        throw PlayerError.invalidURL(subtitle.uri)
+        throw PlayerError.invalidTrackUrl(url: subtitle.uri).error()
       }
 
       return AVURLAsset(url: url)
@@ -74,7 +74,7 @@ enum ExternalSubtitlesUtils {
         ) {
           try compositionTextTrack.insertTimeRange(
             CMTimeRange(start: .zero, duration: videoTrack.timeRange.duration),
-            of: videoTrack,
+            of: textTrack,
             at: .zero
           )
 
