@@ -26,7 +26,7 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
     FrameLayout(context, attrs, defStyleAttr) {
 
     private var localStyle = SubtitleStyle()
-    private var surfaceView: View? = null
+    private var pendingResizeMode: Int? = null
     private val liveBadge: TextView = TextView(context).apply {
         text = "LIVE"
         setTextColor(Color.WHITE)
@@ -51,15 +51,19 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
         // Enable proper surface view handling to prevent rendering issues
         setUseArtwork(false)
         setDefaultArtwork(null)
-        // Ensure proper video scaling
+        // Ensure proper video scaling - start with FIT mode
         resizeMode = androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT
     }
 
     init {
-        addView(playerView)
-        val lp = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
-        lp.setMargins(16, 16, 16, 16)
-        addView(liveBadge, lp)
+        // Add PlayerView with explicit layout parameters
+        val playerViewLayoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+        addView(playerView, playerViewLayoutParams)
+        
+        // Add live badge with its own layout parameters
+        val liveBadgeLayoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
+        liveBadgeLayoutParams.setMargins(16, 16, 16, 16)
+        addView(liveBadge, liveBadgeLayoutParams)
     }
 
     fun setPlayer(player: ExoPlayer?) {
@@ -67,21 +71,16 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
 
         if (currentPlayer != null) {
             currentPlayer.removeListener(playerListener)
-            // Clear any existing surface from the player
-            when (surfaceView) {
-                is SurfaceView -> currentPlayer.clearVideoSurfaceView(surfaceView as SurfaceView)
-                is TextureView -> currentPlayer.clearVideoTextureView(surfaceView as TextureView)
-            }
         }
 
         playerView.player = player
 
         if (player != null) {
             player.addListener(playerListener)
-            // Set the surface view for the new player
-            when (surfaceView) {
-                is SurfaceView -> player.setVideoSurfaceView(surfaceView as SurfaceView)
-                is TextureView -> player.setVideoTextureView(surfaceView as TextureView)
+            
+            // Apply pending resize mode if we have one
+            pendingResizeMode?.let { resizeMode ->
+                playerView.resizeMode = resizeMode
             }
         }
     }
@@ -89,7 +88,7 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
     fun getPlayerView(): PlayerView = playerView
 
     fun setResizeMode(@ResizeMode.Mode resizeMode: Int) {
-        playerView.resizeMode = when (resizeMode) {
+        val targetResizeMode = when (resizeMode) {
             ResizeMode.RESIZE_MODE_FILL -> AspectRatioFrameLayout.RESIZE_MODE_FILL
             ResizeMode.RESIZE_MODE_CENTER_CROP -> AspectRatioFrameLayout.RESIZE_MODE_ZOOM
             ResizeMode.RESIZE_MODE_FIT -> AspectRatioFrameLayout.RESIZE_MODE_FIT
@@ -97,6 +96,18 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
             ResizeMode.RESIZE_MODE_FIXED_HEIGHT -> AspectRatioFrameLayout.RESIZE_MODE_FIXED_HEIGHT
             else -> AspectRatioFrameLayout.RESIZE_MODE_FIT
         }
+        
+        // Apply the resize mode to PlayerView immediately
+        playerView.resizeMode = targetResizeMode
+        
+        // Store it for reapplication if needed
+        pendingResizeMode = targetResizeMode
+        
+        // Force PlayerView to recalculate its layout
+        playerView.requestLayout()
+        
+        // Also request layout on the parent to ensure proper sizing
+        requestLayout()
     }
 
     fun setSubtitleStyle(style: SubtitleStyle) {
@@ -132,49 +143,20 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
     }
 
     fun updateSurfaceView(viewType: Int) {
-        val currentSurfaceView = surfaceView
-        val newSurfaceView: View = when (viewType) {
-            ViewType.VIEW_TYPE_TEXTURE -> TextureView(context)
-
-            ViewType.VIEW_TYPE_SURFACE_SECURE -> SurfaceView(context).apply {
-                // Requires API 17+
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                    (this as SurfaceView).setSecure(true)
-                }
-            }
-
-            else -> SurfaceView(context)
-        }
-
-        if (currentSurfaceView === newSurfaceView) {
-            return
-        }
-
-        // Remove the old surface view
-        if (currentSurfaceView != null) {
-            removeView(currentSurfaceView)
-        }
-
-        // Add the new surface view
-        surfaceView = newSurfaceView
-        val layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
-        addView(newSurfaceView, 0, layoutParams)
-
-        // Attach player to the new surface
-        playerView.player?.let {
-            when (newSurfaceView) {
-                is SurfaceView -> it.setVideoSurfaceView(newSurfaceView)
-                is TextureView -> it.setVideoTextureView(newSurfaceView)
-            }
-        }
+        // TODO: Implement proper surface type switching if needed
     }
 
     val isPlaying: Boolean
         get() = playerView.player?.isPlaying ?: false
 
     fun invalidateAspectRatio() {
-        // PlayerView handles aspect ratio automatically
-        requestLayout()
+        // PlayerView handles aspect ratio automatically through its internal AspectRatioFrameLayout
+        playerView.requestLayout()
+        
+        // Reapply the current resize mode to ensure it's properly set
+        pendingResizeMode?.let { resizeMode ->
+            playerView.resizeMode = resizeMode
+        }
     }
 
     fun setUseController(useController: Boolean) {
@@ -245,7 +227,13 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
 
     private val playerListener = object : Player.Listener {
         override fun onTimelineChanged(timeline: Timeline, reason: Int) {
-            playerView.post { playerView.requestLayout() }
+            playerView.post { 
+                playerView.requestLayout()
+                // Reapply resize mode to ensure it's properly set after timeline changes
+                pendingResizeMode?.let { resizeMode ->
+                    playerView.resizeMode = resizeMode
+                }
+            }
             updateLiveUi()
         }
 
@@ -254,6 +242,15 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
                 events.contains(Player.EVENT_IS_PLAYING_CHANGED)
             ) {
                 updateLiveUi()
+            }
+            
+            // Handle video size changes which affect aspect ratio
+            if (events.contains(Player.EVENT_VIDEO_SIZE_CHANGED)) {
+                pendingResizeMode?.let { resizeMode ->
+                    playerView.resizeMode = resizeMode
+                }
+                playerView.requestLayout()
+                requestLayout()
             }
         }
     }
@@ -281,5 +278,15 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
         super.requestLayout()
         // Post a second layout pass so the ExoPlayer internal views get correct bounds.
         post(layoutRunnable)
+    }
+
+    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+        super.onLayout(changed, left, top, right, bottom)
+        
+        if (changed) {
+            pendingResizeMode?.let { resizeMode ->
+                playerView.resizeMode = resizeMode
+            }
+        }
     }
 }
