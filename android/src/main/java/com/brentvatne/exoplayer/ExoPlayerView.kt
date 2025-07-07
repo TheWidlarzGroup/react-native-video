@@ -4,8 +4,6 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
-import android.view.SurfaceView
-import android.view.TextureView
 import android.view.View
 import android.view.View.MeasureSpec
 import android.widget.FrameLayout
@@ -19,7 +17,6 @@ import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerView
 import com.brentvatne.common.api.ResizeMode
 import com.brentvatne.common.api.SubtitleStyle
-import com.brentvatne.common.api.ViewType
 
 @UnstableApi
 class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
@@ -59,7 +56,7 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
         // Add PlayerView with explicit layout parameters
         val playerViewLayoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
         addView(playerView, playerViewLayoutParams)
-        
+
         // Add live badge with its own layout parameters
         val liveBadgeLayoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
         liveBadgeLayoutParams.setMargins(16, 16, 16, 16)
@@ -77,7 +74,7 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
 
         if (player != null) {
             player.addListener(playerListener)
-            
+
             // Apply pending resize mode if we have one
             pendingResizeMode?.let { resizeMode ->
                 playerView.resizeMode = resizeMode
@@ -96,16 +93,16 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
             ResizeMode.RESIZE_MODE_FIXED_HEIGHT -> AspectRatioFrameLayout.RESIZE_MODE_FIXED_HEIGHT
             else -> AspectRatioFrameLayout.RESIZE_MODE_FIT
         }
-        
+
         // Apply the resize mode to PlayerView immediately
         playerView.resizeMode = targetResizeMode
-        
+
         // Store it for reapplication if needed
         pendingResizeMode = targetResizeMode
-        
+
         // Force PlayerView to recalculate its layout
         playerView.requestLayout()
-        
+
         // Also request layout on the parent to ensure proper sizing
         requestLayout()
     }
@@ -152,7 +149,7 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
     fun invalidateAspectRatio() {
         // PlayerView handles aspect ratio automatically through its internal AspectRatioFrameLayout
         playerView.requestLayout()
-        
+
         // Reapply the current resize mode to ensure it's properly set
         pendingResizeMode?.let { resizeMode ->
             playerView.resizeMode = resizeMode
@@ -227,7 +224,7 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
 
     private val playerListener = object : Player.Listener {
         override fun onTimelineChanged(timeline: Timeline, reason: Int) {
-            playerView.post { 
+            playerView.post {
                 playerView.requestLayout()
                 // Reapply resize mode to ensure it's properly set after timeline changes
                 pendingResizeMode?.let { resizeMode ->
@@ -243,7 +240,7 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
             ) {
                 updateLiveUi()
             }
-            
+
             // Handle video size changes which affect aspect ratio
             if (events.contains(Player.EVENT_VIDEO_SIZE_CHANGED)) {
                 pendingResizeMode?.let { resizeMode ->
@@ -282,7 +279,7 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         super.onLayout(changed, left, top, right, bottom)
-        
+
         if (changed) {
             pendingResizeMode?.let { resizeMode ->
                 playerView.resizeMode = resizeMode
