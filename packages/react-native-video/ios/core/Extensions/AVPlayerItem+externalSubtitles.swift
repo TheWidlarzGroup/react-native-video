@@ -5,53 +5,31 @@
 //  Created by Krzysztof Moch on 08/05/2025.
 //
 
-import Foundation
 import AVFoundation
+import Foundation
 
 extension AVPlayerItem {
-  static func withExternalSubtitles(for asset: AVURLAsset, config: NativeVideoConfig) async throws -> AVPlayerItem {
-    let subtitlesAssets = config.externalSubtitles?.map { subtitle in
-      let url = URL(string: subtitle.uri)
-      return AVURLAsset(url: url!)
+  static func withExternalSubtitles(for asset: AVURLAsset, config: NativeVideoConfig) async throws
+    -> AVPlayerItem
+  {
+    if config.externalSubtitles?.isEmpty != false {
+      return AVPlayerItem(asset: asset)
     }
-    
-    do {
-      let mainVideoTracks = asset.tracks(withMediaType: .video)
-      let mainAudioTracks = asset.tracks(withMediaType: .audio)
-      let textTracks = subtitlesAssets?.flatMap { $0.tracks(withMediaType: .text) } ?? []
-      
-      guard let videoTrack = mainVideoTracks.first(where: { $0.mediaType == .video }),
-            let audioTrack = mainAudioTracks.first(where: { $0.mediaType == .audio })
-      else {
-        print("Could not find required tracks.")
-        // TODO: Create Error for this case
-        throw PlayerError.invalidSource.error()
+
+    if asset.url.pathExtension == "m3u8" {
+      let supportedExternalSubtitles = config.externalSubtitles?.filter { subtitle in
+        ExternalSubtitlesUtils.isSubtitleTypeSupported(subtitle: subtitle)
       }
-      
-      let composition = AVMutableComposition()
-      
-      // Add video track
-      if let compositionVideoTrack = composition.addMutableTrack(withMediaType: .video, preferredTrackID: kCMPersistentTrackID_Invalid) {
-        try compositionVideoTrack.insertTimeRange(CMTimeRange(start: .zero, duration: videoTrack.timeRange.duration), of: videoTrack, at: .zero)
+
+      if supportedExternalSubtitles?.isEmpty == true {
+        return AVPlayerItem(asset: asset)
+      } else {
+        return try await ExternalSubtitlesUtils.modifyStreamManifestWithExternalSubtitles(
+          for: asset, config: config)
       }
-      
-      // Add audio track
-      if let compositionAudioTrack = composition.addMutableTrack(withMediaType: .audio, preferredTrackID: kCMPersistentTrackID_Invalid) {
-        try compositionAudioTrack.insertTimeRange(CMTimeRange(start: .zero, duration: audioTrack.timeRange.duration), of: audioTrack, at: .zero)
-      }
-      
-      for textTrack in textTracks {
-        // Add subtitle track
-        if let compositionTextTrack = composition.addMutableTrack(withMediaType: .text, preferredTrackID: kCMPersistentTrackID_Invalid) {
-          // We will trim the subtitle track to the duration of the video to match android behavior
-          try compositionTextTrack.insertTimeRange(CMTimeRange(start: .zero, duration: textTrack.timeRange.duration), of: videoTrack, at: .zero)
-          
-          compositionTextTrack.languageCode = textTrack.languageCode
-          compositionTextTrack.isEnabled = false // Disable by default
-        }
-      }
-      
-      return AVPlayerItem(asset: composition)
     }
+
+    return try await ExternalSubtitlesUtils.createCompositionWithExternalSubtitles(
+      for: asset, config: config)
   }
 }

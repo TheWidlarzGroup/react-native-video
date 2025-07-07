@@ -39,10 +39,13 @@ namespace margelo::nitro::video {
       jni::local_ref<jni::JString> label = this->getFieldValue(fieldLabel);
       static const auto fieldType = clazz->getField<JSubtitleType>("type");
       jni::local_ref<JSubtitleType> type = this->getFieldValue(fieldType);
+      static const auto fieldLanguage = clazz->getField<jni::JString>("language");
+      jni::local_ref<jni::JString> language = this->getFieldValue(fieldLanguage);
       return NativeExternalSubtitle(
         uri->toStdString(),
         label->toStdString(),
-        type->toCpp()
+        type->toCpp(),
+        language->toStdString()
       );
     }
 
@@ -55,7 +58,8 @@ namespace margelo::nitro::video {
       return newInstance(
         jni::make_jstring(value.uri),
         jni::make_jstring(value.label),
-        JSubtitleType::fromCpp(value.type)
+        JSubtitleType::fromCpp(value.type),
+        jni::make_jstring(value.language)
       );
     }
   };

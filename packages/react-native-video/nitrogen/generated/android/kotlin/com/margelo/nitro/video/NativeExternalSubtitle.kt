@@ -22,7 +22,8 @@ data class NativeExternalSubtitle
   constructor(
     val uri: String,
     val label: String,
-    val type: SubtitleType
+    val type: SubtitleType,
+    val language: String
   ) {
   /* main constructor */
 }

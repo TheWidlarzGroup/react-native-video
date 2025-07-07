@@ -101,8 +101,9 @@ namespace margelo::nitro::video {
         auto downcast = jni::static_ref_cast<JFunc_void_cxx::javaobject>(__result);
         return downcast->cthis()->getFunction();
       } else {
-        return [__result]() -> void {
-          return __result->invoke();
+        auto __resultRef = jni::make_global(__result);
+        return [__resultRef]() -> void {
+          return __resultRef->invoke();
         };
       }
     }();
@@ -119,8 +120,9 @@ namespace margelo::nitro::video {
         auto downcast = jni::static_ref_cast<JFunc_void_bool_cxx::javaobject>(__result);
         return downcast->cthis()->getFunction();
       } else {
-        return [__result](bool hasAudioFocus) -> void {
-          return __result->invoke(hasAudioFocus);
+        auto __resultRef = jni::make_global(__result);
+        return [__resultRef](bool hasAudioFocus) -> void {
+          return __resultRef->invoke(hasAudioFocus);
         };
       }
     }();
@@ -137,8 +139,9 @@ namespace margelo::nitro::video {
         auto downcast = jni::static_ref_cast<JFunc_void_BandwidthData_cxx::javaobject>(__result);
         return downcast->cthis()->getFunction();
       } else {
-        return [__result](BandwidthData data) -> void {
-          return __result->invoke(data);
+        auto __resultRef = jni::make_global(__result);
+        return [__resultRef](BandwidthData data) -> void {
+          return __resultRef->invoke(data);
         };
       }
     }();
@@ -155,8 +158,9 @@ namespace margelo::nitro::video {
         auto downcast = jni::static_ref_cast<JFunc_void_bool_cxx::javaobject>(__result);
         return downcast->cthis()->getFunction();
       } else {
-        return [__result](bool buffering) -> void {
-          return __result->invoke(buffering);
+        auto __resultRef = jni::make_global(__result);
+        return [__resultRef](bool buffering) -> void {
+          return __resultRef->invoke(buffering);
         };
       }
     }();
@@ -173,8 +177,9 @@ namespace margelo::nitro::video {
         auto downcast = jni::static_ref_cast<JFunc_void_bool_cxx::javaobject>(__result);
         return downcast->cthis()->getFunction();
       } else {
-        return [__result](bool visible) -> void {
-          return __result->invoke(visible);
+        auto __resultRef = jni::make_global(__result);
+        return [__resultRef](bool visible) -> void {
+          return __resultRef->invoke(visible);
         };
       }
     }();
@@ -191,8 +196,9 @@ namespace margelo::nitro::video {
         auto downcast = jni::static_ref_cast<JFunc_void_cxx::javaobject>(__result);
         return downcast->cthis()->getFunction();
       } else {
-        return [__result]() -> void {
-          return __result->invoke();
+        auto __resultRef = jni::make_global(__result);
+        return [__resultRef]() -> void {
+          return __resultRef->invoke();
         };
       }
     }();
@@ -209,8 +215,9 @@ namespace margelo::nitro::video {
         auto downcast = jni::static_ref_cast<JFunc_void_bool_cxx::javaobject>(__result);
         return downcast->cthis()->getFunction();
       } else {
-        return [__result](bool externalPlaybackActive) -> void {
-          return __result->invoke(externalPlaybackActive);
+        auto __resultRef = jni::make_global(__result);
+        return [__resultRef](bool externalPlaybackActive) -> void {
+          return __resultRef->invoke(externalPlaybackActive);
         };
       }
     }();
@@ -227,8 +234,9 @@ namespace margelo::nitro::video {
         auto downcast = jni::static_ref_cast<JFunc_void_onLoadData_cxx::javaobject>(__result);
         return downcast->cthis()->getFunction();
       } else {
-        return [__result](onLoadData data) -> void {
-          return __result->invoke(data);
+        auto __resultRef = jni::make_global(__result);
+        return [__resultRef](onLoadData data) -> void {
+          return __resultRef->invoke(data);
         };
       }
     }();
@@ -245,8 +253,9 @@ namespace margelo::nitro::video {
         auto downcast = jni::static_ref_cast<JFunc_void_onLoadStartData_cxx::javaobject>(__result);
         return downcast->cthis()->getFunction();
       } else {
-        return [__result](onLoadStartData data) -> void {
-          return __result->invoke(data);
+        auto __resultRef = jni::make_global(__result);
+        return [__resultRef](onLoadStartData data) -> void {
+          return __resultRef->invoke(data);
         };
       }
     }();
@@ -263,8 +272,9 @@ namespace margelo::nitro::video {
         auto downcast = jni::static_ref_cast<JFunc_void_onPlaybackStateChangeData_cxx::javaobject>(__result);
         return downcast->cthis()->getFunction();
       } else {
-        return [__result](onPlaybackStateChangeData data) -> void {
-          return __result->invoke(data);
+        auto __resultRef = jni::make_global(__result);
+        return [__resultRef](onPlaybackStateChangeData data) -> void {
+          return __resultRef->invoke(data);
         };
       }
     }();
@@ -281,8 +291,9 @@ namespace margelo::nitro::video {
         auto downcast = jni::static_ref_cast<JFunc_void_double_cxx::javaobject>(__result);
         return downcast->cthis()->getFunction();
       } else {
-        return [__result](double rate) -> void {
-          return __result->invoke(rate);
+        auto __resultRef = jni::make_global(__result);
+        return [__resultRef](double rate) -> void {
+          return __resultRef->invoke(rate);
         };
       }
     }();
@@ -299,8 +310,9 @@ namespace margelo::nitro::video {
         auto downcast = jni::static_ref_cast<JFunc_void_onProgressData_cxx::javaobject>(__result);
         return downcast->cthis()->getFunction();
       } else {
-        return [__result](onProgressData data) -> void {
-          return __result->invoke(data);
+        auto __resultRef = jni::make_global(__result);
+        return [__resultRef](onProgressData data) -> void {
+          return __resultRef->invoke(data);
         };
       }
     }();
@@ -317,8 +329,9 @@ namespace margelo::nitro::video {
         auto downcast = jni::static_ref_cast<JFunc_void_cxx::javaobject>(__result);
         return downcast->cthis()->getFunction();
       } else {
-        return [__result]() -> void {
-          return __result->invoke();
+        auto __resultRef = jni::make_global(__result);
+        return [__resultRef]() -> void {
+          return __resultRef->invoke();
         };
       }
     }();
@@ -335,8 +348,9 @@ namespace margelo::nitro::video {
         auto downcast = jni::static_ref_cast<JFunc_void_double_cxx::javaobject>(__result);
         return downcast->cthis()->getFunction();
       } else {
-        return [__result](double seekTime) -> void {
-          return __result->invoke(seekTime);
+        auto __resultRef = jni::make_global(__result);
+        return [__resultRef](double seekTime) -> void {
+          return __resultRef->invoke(seekTime);
         };
       }
     }();
@@ -353,8 +367,9 @@ namespace margelo::nitro::video {
         auto downcast = jni::static_ref_cast<JFunc_void_TimedMetadata_cxx::javaobject>(__result);
         return downcast->cthis()->getFunction();
       } else {
-        return [__result](TimedMetadata metadata) -> void {
-          return __result->invoke(metadata);
+        auto __resultRef = jni::make_global(__result);
+        return [__resultRef](TimedMetadata metadata) -> void {
+          return __resultRef->invoke(metadata);
         };
       }
     }();
@@ -371,8 +386,9 @@ namespace margelo::nitro::video {
         auto downcast = jni::static_ref_cast<JFunc_void_std__vector_std__string__cxx::javaobject>(__result);
         return downcast->cthis()->getFunction();
       } else {
-        return [__result](std::vector<std::string> texts) -> void {
-          return __result->invoke(texts);
+        auto __resultRef = jni::make_global(__result);
+        return [__resultRef](std::vector<std::string> texts) -> void {
+          return __resultRef->invoke(texts);
         };
       }
     }();
@@ -389,8 +405,9 @@ namespace margelo::nitro::video {
         auto downcast = jni::static_ref_cast<JFunc_void_std__optional_TextTrack__cxx::javaobject>(__result);
         return downcast->cthis()->getFunction();
       } else {
-        return [__result](std::optional<TextTrack> track) -> void {
-          return __result->invoke(track);
+        auto __resultRef = jni::make_global(__result);
+        return [__resultRef](std::optional<TextTrack> track) -> void {
+          return __resultRef->invoke(track);
         };
       }
     }();
@@ -407,8 +424,9 @@ namespace margelo::nitro::video {
         auto downcast = jni::static_ref_cast<JFunc_void_double_cxx::javaobject>(__result);
         return downcast->cthis()->getFunction();
       } else {
-        return [__result](double volume) -> void {
-          return __result->invoke(volume);
+        auto __resultRef = jni::make_global(__result);
+        return [__resultRef](double volume) -> void {
+          return __resultRef->invoke(volume);
         };
       }
     }();
@@ -425,8 +443,9 @@ namespace margelo::nitro::video {
         auto downcast = jni::static_ref_cast<JFunc_void_VideoPlayerStatus_cxx::javaobject>(__result);
         return downcast->cthis()->getFunction();
       } else {
-        return [__result](VideoPlayerStatus status) -> void {
-          return __result->invoke(status);
+        auto __resultRef = jni::make_global(__result);
+        return [__resultRef](VideoPlayerStatus status) -> void {
+          return __resultRef->invoke(status);
         };
       }
     }();
