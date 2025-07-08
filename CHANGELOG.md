@@ -1,5 +1,7 @@
 
 
+## [6.16.1](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.16.0...v6.16.1) (2025-07-08)
+
 # [6.16.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.15.0...v6.16.0) (2025-07-02)
 
 
