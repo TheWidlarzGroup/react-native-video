@@ -574,6 +574,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
             _player!.replaceCurrentItem(with: playerItem)
 
+            if #available(iOS 15.0, *) {
+                if _playInBackground {
+                    _player!.audiovisualBackgroundPlaybackPolicy = .continuesIfPossible
+                } else {
+                    _player!.audiovisualBackgroundPlaybackPolicy = .automatic
+                }
+            }
+
             if _showNotificationControls {
                 // We need to register player after we set current item and only for init
                 NowPlayingInfoCenterManager.shared.registerPlayer(player: _player!)
@@ -592,6 +600,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     self._playerViewController?.allowsVideoFrameAnalysis = true
                 }
             #endif
+
+            if #available(iOS 15.0, *) {
+                if _playInBackground {
+                    _player!.audiovisualBackgroundPlaybackPolicy = .continuesIfPossible
+                } else {
+                    _player!.audiovisualBackgroundPlaybackPolicy = .automatic
+                }
+            }
             // later we can just call "updateNowPlayingInfo:
             NowPlayingInfoCenterManager.shared.updateNowPlayingInfo()
         }
