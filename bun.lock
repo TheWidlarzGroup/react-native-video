@@ -49,7 +49,7 @@
     },
     "example": {
       "name": "react-native-video-example",
-      "version": "7.0.0-alpha.0",
+      "version": "7.0.0-alpha.1",
       "dependencies": {
         "@react-native-community/slider": "^4.5.6",
         "react": "18.3.1",
@@ -78,7 +78,7 @@
     },
     "packages/react-native-video": {
       "name": "react-native-video",
-      "version": "7.0.0-alpha.0",
+      "version": "7.0.0-alpha.1",
       "devDependencies": {
         "@expo/config-plugins": "^10.0.2",
         "@react-native/eslint-config": "^0.77.0",
