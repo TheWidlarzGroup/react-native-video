@@ -1,5 +1,5 @@
 node_modules/
 out/
 .next/
-static/llms.txt
-static/llms-full.txt
+public/llms.txt
+public/llms-full.txt

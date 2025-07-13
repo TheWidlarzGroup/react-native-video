@@ -167,7 +167,7 @@ function writeFileSafe(targetPath, content) {
 
 function main() {
   const content = generateContent();
-  writeFileSafe(path.join(CWD, 'docs', 'static', 'llms.txt'), content);
+  writeFileSafe(path.join(CWD, 'docs', 'public', 'llms.txt'), content);
 }
 
 main();

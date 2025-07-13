@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 
 const CWD = process.cwd();
-const STATIC_DIR = path.join(CWD, 'docs', 'static');
+const STATIC_DIR = path.join(CWD, 'docs', 'public');
 
 const LLMS_FILE = path.join(STATIC_DIR, 'llms.txt');
 const OUTPUT_PATH_STATIC = path.join(STATIC_DIR, 'llms-full.txt');
