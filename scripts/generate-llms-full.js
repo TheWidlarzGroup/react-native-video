@@ -25,13 +25,12 @@ function* walk(dir) {
 
 function gatherDocs() {
   // Crawl all markdown files in the docs directory (excluding the static subdir)
-  const docsDir = path.join(CWD, 'docs');
+  const docsDir = path.join(CWD, 'docs', 'pages');
   if (!fs.existsSync(docsDir)) {
-    return [];
+    throw new Error(`Docs directory not found! Tried to read ${docsDir}`);
   }
-  return Array.from(walk(docsDir))
-    .filter((p) => !p.includes(`${path.sep}static${path.sep}`))
-    .sort();
+
+  return Array.from(walk(docsDir)).sort();
 }
 
 function renderFileContent(filepath) {
@@ -59,7 +58,7 @@ function main() {
   const output = parts.join('\n');
 
   fs.mkdirSync(STATIC_DIR, {recursive: true});
-  // Write to docs/static so it will be available at <site>/llms-full.txt
+  // Write to docs/public so it will be available at <site>/llms-full.txt
   fs.writeFileSync(OUTPUT_PATH_STATIC, output, 'utf8');
   console.log(
     `✔︎ wrote llms-full.txt (size: ${output.length.toLocaleString()} chars)`,
