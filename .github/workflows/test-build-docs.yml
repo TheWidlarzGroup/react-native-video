@@ -31,8 +31,8 @@ jobs:
 
       - name: Generate llms.txt and llms-full.txt
         run: |
-          bun --cwd .. run docs:llms
-          bun --cwd .. run docs:llms-full
+          bun run docs:llms
+          bun run docs:llms-full
 
       - name: Build docs
         run: |
