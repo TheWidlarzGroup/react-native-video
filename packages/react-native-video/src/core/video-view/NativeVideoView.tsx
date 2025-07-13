@@ -11,7 +11,7 @@ const LINKING_ERROR =
 const ComponentName = 'VideoView';
 
 export const NativeVideoView =
-  UIManager.getViewManagerConfig(ComponentName) != null
+  UIManager.hasViewManagerConfig(ComponentName) != null
     ? VideoViewNativeComponent
     : () => {
         throw new Error(LINKING_ERROR);
