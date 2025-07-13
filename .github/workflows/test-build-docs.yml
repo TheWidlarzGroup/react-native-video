@@ -29,6 +29,11 @@ jobs:
             ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lockb') }}
             ${{ runner.os }}-nextjs-
 
+      - name: Generate llms.txt and llms-full.txt
+        run: |
+          bun run docs:llms
+          bun run docs:llms-full
+
       - name: Build docs
         run: |
           bun --cwd docs build
