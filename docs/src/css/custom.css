@@ -24,3 +24,7 @@
   --ifm-background-color: #171717;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
+
+.hidden {
+  display: none !important;
+}

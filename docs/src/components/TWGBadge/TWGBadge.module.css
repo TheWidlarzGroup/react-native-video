@@ -1,0 +1,74 @@
+.extraContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 0.5rem;
+    text-align: center;
+    background-color: var(--ifm-color-primary);
+    padding: 1rem;
+    gap: 1rem;
+    border-radius: 0.5rem;
+}
+
+.extraText {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    font-weight: bold;
+    color: var(--ifm-background-color);
+    text-wrap: nowrap;
+    font-size: 0.95rem;
+}
+
+.extraButton {
+    width: 90%;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    font-weight: 500;
+    background-color: var(--ifm-background-color);
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    color: #fff;
+    border-radius: 0.5rem;
+}
+
+.extraButton:hover {
+    transform: scale(1.05);
+    background-color: #fff;
+}
+
+:is(html[class~=dark]) .extraContainer {
+    background-color: #87ccef;
+}
+
+:is(html[class~=dark]) .extraText {
+    color: #171717;
+}
+
+:is(html[class~=dark]) .extraButton {
+    background-color: #171717;
+}
+
+
+@media (min-width: 1280px) {
+    .visibleOnLarge {
+        display: flex;
+    }
+    .visibleOnSmall {
+        display: none;
+    }
+    .extraContainer {
+        margin: 1rem;
+    }
+}
+
+@media (max-width: 1279px) {
+    .visibleOnLarge {
+        display: none;
+    }
+    .visibleOnSmall {
+        display: flex;
+    }
+    .extraContainer {
+        margin: 2rem 0.2rem 0.2rem 0.2rem;
+    }
+}

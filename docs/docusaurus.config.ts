@@ -37,6 +37,30 @@ const config: Config = {
     ],
   ],
 
+  headTags: [
+    {
+      tagName: 'link',
+      attributes: {
+        rel: 'preconnect',
+        href: 'https://fonts.googleapis.com',
+      },
+    },
+    {
+      tagName: 'link',
+      attributes: {
+        rel: 'preconnect',
+        href: 'https://fonts.gstatic.com',
+      },
+    },
+    {
+      tagName: 'link',
+      attributes: {
+        rel: 'stylesheet',
+        href: 'https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap',
+      },
+    },
+  ],
+
   themeConfig: {
     image: 'img/twg-social-card.png',
     navbar: {
@@ -57,6 +81,11 @@ const config: Config = {
           sidebarId: 'docsSidebar',
           position: 'left',
           label: 'Documentation',
+        },
+        {
+          href: 'https://github.com/TheWidlarzGroup/react-native-video',
+          label: 'GitHub',
+          position: 'right',
         },
         {
           href: 'https://www.thewidlarzgroup.com/react-native-video',
@@ -92,28 +121,28 @@ const config: Config = {
 
   plugins: [
     require.resolve('docusaurus-lunr-search'),
-    [
-      'docusaurus-plugin-typedoc',
-      {
-        name: 'API Reference',
-        entryPoints: ['../packages/react-native-video/src'],
-        exclude: "../packages/react-native-video/src/index.ts",
-        tsconfig: '../packages/react-native-video/tsconfig.json',
-        out: './docs/react-native-video/api-reference',
-        watch: process.env.TYPEDOC_WATCH,
-        excludePrivate: true,
-        excludeProtected: true,
-        excludeExternals: true,
-        excludeInternal: true,
-        readme: "none",
-        sidebar: {
-          autoConfiguration: false,
-        },
-        parametersFormat: "table",
-        enumMembersFormat: "table",
-        useCodeBlocks: true,
-      },
-    ],
+    // [
+    //   'docusaurus-plugin-typedoc',
+    //   {
+    //     name: 'API Reference',
+    //     entryPoints: ['../packages/react-native-video/src'],
+    //     exclude: "../packages/react-native-video/src/index.ts",
+    //     tsconfig: '../packages/react-native-video/tsconfig.json',
+    //     out: './docs/react-native-video/api-reference',
+    //     watch: process.env.TYPEDOC_WATCH,
+    //     excludePrivate: true,
+    //     excludeProtected: true,
+    //     excludeExternals: true,
+    //     excludeInternal: true,
+    //     readme: "none",
+    //     sidebar: {
+    //       autoConfiguration: false,
+    //     },
+    //     parametersFormat: "table",
+    //     enumMembersFormat: "table",
+    //     useCodeBlocks: true,
+    //   },
+    // ],
   ],
 };
 
