@@ -20,11 +20,11 @@ The most battle-tested open-source video player component for React Native with 
 | 📴 Offline playback, video download, support for side-tracks and side-captions (via [optional SDK](https://docs.thewidlarzgroup.com/offline-video-sdk?utm_source=rnv&utm_medium=readme&utm_id=features-text)) | ✅ Available & Production Ready by August |
 | 📱 Picture in Picture | ✅ Available & Production Ready by August |
 | 🎚️ Fine-grained control over tracks, buffering & events | 🏗️ In Development |
-| 🧠 Advanced control over playback and buffering | 📝 Planned |
-| 🔐 DRM: Widevine & FairPlay ([See free DRM stream example](https://www.thewidlarzgroup.com/services/free-drm-token-generator-for-video?utm_source=rnv&utm_medium=readme&utm_id=free-drm)) | 📝 Planned |
-| 🌐 Basic Web Support | 📝 Planned |
-| 📺 TV Support | 📝 Planned |
-| 🥽 VisionOS Support | 📝 Planned |
+| 🧠 Advanced control over playback and buffering | 📝 [TODO](https://github.com/TheWidlarzGroup/react-native-video/issues/4604) |
+| 🔐 DRM: Widevine & FairPlay ([See free DRM stream example](https://www.thewidlarzgroup.com/services/free-drm-token-generator-for-video?utm_source=rnv&utm_medium=readme&utm_id=free-drm)) | 📝 [TODO](https://github.com/TheWidlarzGroup/react-native-video/issues/4606) |
+| 🌐 Basic Web Support | 📝 [TODO](https://github.com/TheWidlarzGroup/react-native-video/issues/4605) |
+| 📺 TV Support | 📝 [TODO](https://github.com/TheWidlarzGroup/react-native-video/issues/4607) |
+| 🥽 VisionOS Support | 📝 [TODO](https://github.com/TheWidlarzGroup/react-native-video/issues/4608) |
 
 
 
