@@ -177,7 +177,10 @@ const config: Config = {
         generateLLMsTxt: false,
         generateLLMsFullTxt: false,
         docsDir: "versioned_docs/version-6.x",
-        
+        pathTransformation: {
+          ignorePaths: ['docs'],
+          addPaths: ['react-native-video/docs/v6']
+        },
         version: '6.x.x',
         customLLMFiles: [
           {
@@ -186,7 +189,6 @@ const config: Config = {
             description: 'Complete documentation for React Native Video v6',
             includePatterns: ['**/*.md', '**/*.mdx'],
             fullContent: false,
-            version: '6.x.x'  // Overrides global version
           },
           {
             filename: 'llms-v6-full.txt',
@@ -194,7 +196,6 @@ const config: Config = {
             description: 'Complete documentation for React Native Video v6',
             includePatterns: ['**/*.md', '**/*.mdx'],
             fullContent: true,
-            version: '6.x.x'  // Overrides global version
           },
         ]
       }
@@ -207,7 +208,10 @@ const config: Config = {
         generateLLMsTxt: false,
         generateLLMsFullTxt: false,
         docsDir: "docs",
-        
+        pathTransformation: {
+          ignorePaths: ['docs'],
+          addPaths: ['react-native-video/docs/v7']
+        },
         version: '7.x.x',
         customLLMFiles: [
           {
