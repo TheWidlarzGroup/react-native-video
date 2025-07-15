@@ -34,6 +34,19 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
+          lastVersion: '6.x',
+          includeCurrentVersion: true,
+          versions: {
+            current: {
+              label: 'v7 Alpha',
+              path: 'v7',
+              banner: 'none',
+            },
+            '6.x': {
+              label: 'v6',
+              path: 'v6',
+            },
+          },
         },
         theme: {
           customCss: './src/css/custom.css',
@@ -88,6 +101,14 @@ const config: Config = {
           label: 'Documentation',
         },
         {
+          type: 'docsVersionDropdown',
+          versions: {
+            current: {label: 'v7 Alpha'},
+            '6.x': {label: 'v6'},
+          },
+          position: 'right',
+        },
+        {
           href: 'https://github.com/TheWidlarzGroup/react-native-video',
           label: 'GitHub',
           position: 'right',
@@ -126,28 +147,28 @@ const config: Config = {
 
   plugins: [
     require.resolve('docusaurus-lunr-search'),
-    // [
-    //   'docusaurus-plugin-typedoc',
-    //   {
-    //     name: 'API Reference',
-    //     entryPoints: ['../packages/react-native-video/src'],
-    //     exclude: "../packages/react-native-video/src/index.ts",
-    //     tsconfig: '../packages/react-native-video/tsconfig.json',
-    //     out: './docs/react-native-video/api-reference',
-    //     watch: process.env.TYPEDOC_WATCH,
-    //     excludePrivate: true,
-    //     excludeProtected: true,
-    //     excludeExternals: true,
-    //     excludeInternal: true,
-    //     readme: "none",
-    //     sidebar: {
-    //       autoConfiguration: false,
-    //     },
-    //     parametersFormat: "table",
-    //     enumMembersFormat: "table",
-    //     useCodeBlocks: true,
-    //   },
-    // ],
+    [
+      'docusaurus-plugin-typedoc',
+      {
+        name: 'API Reference',
+        entryPoints: ['../packages/react-native-video/src'],
+        exclude: "../packages/react-native-video/src/index.ts",
+        tsconfig: '../packages/react-native-video/tsconfig.json',
+        out: './docs/react-native-video/api-reference',
+        watch: process.env.TYPEDOC_WATCH,
+        excludePrivate: true,
+        excludeProtected: true,
+        excludeExternals: true,
+        excludeInternal: true,
+        readme: "none",
+        sidebar: {
+          autoConfiguration: false,
+        },
+        parametersFormat: "table",
+        enumMembersFormat: "table",
+        useCodeBlocks: true,
+      },
+    ],
   ],
 };
 

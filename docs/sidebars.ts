@@ -15,11 +15,11 @@ const sidebars: SidebarsConfig = {
       label: 'Example Apps',
       href: 'https://github.com/TheWidlarzGroup/react-native-video/tree/master/examples',
     },
-    {
-      type: 'doc',
-      label: 'Useful Projects',
-      id: 'projects',
-    },
+    // {
+    //   type: 'doc',
+    //   label: 'Useful Projects',
+    //   id: 'projects',
+    // },
     {
       type: 'html',
       value: '<hr style="margin: 1rem 0; border: none; border-top: 1px solid var(--ifm-color-emphasis-300);" />',
@@ -43,16 +43,11 @@ const sidebars: SidebarsConfig = {
       type: 'html',
       value: '<hr style="margin: 1rem 0; border: none; border-top: 1px solid var(--ifm-color-emphasis-300);" />',
     },
-    {
-      type: 'doc',
-      label: 'Updating',
-      id: 'updating',
-    },
-    {
-      type: 'link',
-      label: 'Changelog',
-      href: 'https://github.com/TheWidlarzGroup/react-native-video/blob/master/CHANGELOG.md',
-    },
+    // {
+    //   type: 'doc',
+    //   label: 'Updating',
+    //   id: 'updating',
+    // },
   ],
 };
 
