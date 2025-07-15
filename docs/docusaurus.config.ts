@@ -169,6 +169,64 @@ const config: Config = {
         useCodeBlocks: true,
       },
     ],
+    // LLMs txt generation for v6
+    [
+      'docusaurus-plugin-llms',
+      {
+        id: 'llms-v6',
+        generateLLMsTxt: false,
+        generateLLMsFullTxt: false,
+        docsDir: "versioned_docs/version-6.x",
+        
+        version: '6.x.x',
+        customLLMFiles: [
+          {
+            filename: 'llms-v6.txt',
+            title: 'React Native Video v6 Documentation',
+            description: 'Complete documentation for React Native Video v6',
+            includePatterns: ['**/*.md', '**/*.mdx'],
+            fullContent: false,
+            version: '6.x.x'  // Overrides global version
+          },
+          {
+            filename: 'llms-v6-full.txt',
+            title: 'React Native Video v6 Documentation',
+            description: 'Complete documentation for React Native Video v6',
+            includePatterns: ['**/*.md', '**/*.mdx'],
+            fullContent: true,
+            version: '6.x.x'  // Overrides global version
+          },
+        ]
+      }
+    ],
+    // LLMs txt generation for v7
+    [
+      'docusaurus-plugin-llms',
+      {
+        id: 'llms-v7',
+        generateLLMsTxt: false,
+        generateLLMsFullTxt: false,
+        docsDir: "docs",
+        
+        version: '7.x.x',
+        customLLMFiles: [
+          {
+            filename: 'llms-v7.txt',
+            title: 'React Native Video v7 Documentation',
+            description: 'Complete documentation for React Native Video v7',
+            includePatterns: ['docs/**/*.md'],
+            fullContent: false,
+          },
+          {
+            filename: 'llms-v7-full.txt',
+            title: 'React Native Video v7 Documentation',
+            description: 'Complete documentation for React Native Video v7',
+            includePatterns: ['docs/**/*.md'],
+            fullContent: true,
+          }
+        ]
+      }
+    ]
   ],
 };
 

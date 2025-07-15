@@ -1,6 +1,6 @@
 # Interface: onLoadData
 
-Defined in: [types/Events.ts:141](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L141)
+Defined in: [types/Events.ts:141](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L141)
 
 ## Properties
 
@@ -10,7 +10,7 @@ Defined in: [types/Events.ts:141](https://github.com/TheWidlarzGroup/react-nativ
 currentTime: number;
 ```
 
-Defined in: [types/Events.ts:145](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L145)
+Defined in: [types/Events.ts:145](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L145)
 
 The current time of the video in seconds.
 
@@ -22,7 +22,7 @@ The current time of the video in seconds.
 duration: number;
 ```
 
-Defined in: [types/Events.ts:150](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L150)
+Defined in: [types/Events.ts:150](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L150)
 
 The duration of the video in seconds.
 
@@ -38,7 +38,7 @@ NaN if the duration is unknown.
 height: number;
 ```
 
-Defined in: [types/Events.ts:154](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L154)
+Defined in: [types/Events.ts:154](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L154)
 
 The height of the video in pixels.
 
@@ -50,7 +50,7 @@ The height of the video in pixels.
 orientation: VideoOrientation;
 ```
 
-Defined in: [types/Events.ts:162](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L162)
+Defined in: [types/Events.ts:162](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L162)
 
 The orientation of the video.
 
@@ -62,6 +62,6 @@ The orientation of the video.
 width: number;
 ```
 
-Defined in: [types/Events.ts:158](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L158)
+Defined in: [types/Events.ts:158](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L158)
 
 The width of the video in pixels.

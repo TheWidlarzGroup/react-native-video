@@ -1,6 +1,6 @@
 # Interface: VideoViewProps
 
-Defined in: [video-view/VideoView.tsx:14](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/video-view/VideoView.tsx#L14)
+Defined in: [video-view/VideoView.tsx:14](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/video-view/VideoView.tsx#L14)
 
 ## Extends
 
@@ -14,7 +14,7 @@ Defined in: [video-view/VideoView.tsx:14](https://github.com/TheWidlarzGroup/rea
 optional autoEnterPictureInPicture: boolean;
 ```
 
-Defined in: [video-view/VideoView.tsx:34](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/video-view/VideoView.tsx#L34)
+Defined in: [video-view/VideoView.tsx:34](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/video-view/VideoView.tsx#L34)
 
 Whether to automatically enter picture in picture mode when the video is playing. Defaults to false.
 
@@ -26,7 +26,7 @@ Whether to automatically enter picture in picture mode when the video is playing
 optional controls: boolean;
 ```
 
-Defined in: [video-view/VideoView.tsx:26](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/video-view/VideoView.tsx#L26)
+Defined in: [video-view/VideoView.tsx:26](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/video-view/VideoView.tsx#L26)
 
 Whether to show the controls. Defaults to false.
 
@@ -38,7 +38,7 @@ Whether to show the controls. Defaults to false.
 optional onFullscreenChange: (fullscreen) => void;
 ```
 
-Defined in: [types/Events.ts:105](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L105)
+Defined in: [types/Events.ts:105](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L105)
 
 Called when the video view's fullscreen state changes.
 
@@ -66,7 +66,7 @@ Partial.onFullscreenChange
 optional onPictureInPictureChange: (isInPictureInPicture) => void;
 ```
 
-Defined in: [types/Events.ts:100](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L100)
+Defined in: [types/Events.ts:100](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L100)
 
 Called when the video view's picture in picture state changes.
 
@@ -94,7 +94,7 @@ Partial.onPictureInPictureChange
 optional pictureInPicture: boolean;
 ```
 
-Defined in: [video-view/VideoView.tsx:30](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/video-view/VideoView.tsx#L30)
+Defined in: [video-view/VideoView.tsx:30](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/video-view/VideoView.tsx#L30)
 
 Whether to enable & show the picture in picture button in native controls. Defaults to false.
 
@@ -106,7 +106,7 @@ Whether to enable & show the picture in picture button in native controls. Defau
 player: VideoPlayer;
 ```
 
-Defined in: [video-view/VideoView.tsx:18](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/video-view/VideoView.tsx#L18)
+Defined in: [video-view/VideoView.tsx:18](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/video-view/VideoView.tsx#L18)
 
 The player to play the video - [VideoPlayer](../classes/VideoPlayer.md)
 
@@ -118,7 +118,7 @@ The player to play the video - [VideoPlayer](../classes/VideoPlayer.md)
 optional resizeMode: ResizeMode;
 ```
 
-Defined in: [video-view/VideoView.tsx:42](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/video-view/VideoView.tsx#L42)
+Defined in: [video-view/VideoView.tsx:42](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/video-view/VideoView.tsx#L42)
 
 How the video should be resized to fit the view. Defaults to 'none'.
 - 'contain': Scale the video uniformly (maintain aspect ratio) so that it fits entirely within the view
@@ -134,7 +134,7 @@ How the video should be resized to fit the view. Defaults to 'none'.
 optional style: ViewStyle;
 ```
 
-Defined in: [video-view/VideoView.tsx:22](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/video-view/VideoView.tsx#L22)
+Defined in: [video-view/VideoView.tsx:22](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/video-view/VideoView.tsx#L22)
 
 The style of the video view - ViewStyle
 
@@ -152,7 +152,7 @@ ViewProps.style
 optional willEnterFullscreen: () => void;
 ```
 
-Defined in: [types/Events.ts:109](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L109)
+Defined in: [types/Events.ts:109](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L109)
 
 Called when the video view will enter fullscreen mode.
 
@@ -174,7 +174,7 @@ Partial.willEnterFullscreen
 optional willEnterPictureInPicture: () => void;
 ```
 
-Defined in: [types/Events.ts:117](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L117)
+Defined in: [types/Events.ts:117](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L117)
 
 Called when the video view will enter picture in picture mode.
 
@@ -196,7 +196,7 @@ Partial.willEnterPictureInPicture
 optional willExitFullscreen: () => void;
 ```
 
-Defined in: [types/Events.ts:113](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L113)
+Defined in: [types/Events.ts:113](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L113)
 
 Called when the video view will exit fullscreen mode.
 
@@ -218,7 +218,7 @@ Partial.willExitFullscreen
 optional willExitPictureInPicture: () => void;
 ```
 
-Defined in: [types/Events.ts:121](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L121)
+Defined in: [types/Events.ts:121](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L121)
 
 Called when the video view will exit picture in picture mode.
 

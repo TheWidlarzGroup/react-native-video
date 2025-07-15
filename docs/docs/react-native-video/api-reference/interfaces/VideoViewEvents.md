@@ -1,6 +1,6 @@
 # Interface: VideoViewEvents
 
-Defined in: [types/Events.ts:95](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L95)
+Defined in: [types/Events.ts:95](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L95)
 
 ## Properties
 
@@ -10,7 +10,7 @@ Defined in: [types/Events.ts:95](https://github.com/TheWidlarzGroup/react-native
 onFullscreenChange: (fullscreen) => void;
 ```
 
-Defined in: [types/Events.ts:105](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L105)
+Defined in: [types/Events.ts:105](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L105)
 
 Called when the video view's fullscreen state changes.
 
@@ -32,7 +32,7 @@ Called when the video view's fullscreen state changes.
 onPictureInPictureChange: (isInPictureInPicture) => void;
 ```
 
-Defined in: [types/Events.ts:100](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L100)
+Defined in: [types/Events.ts:100](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L100)
 
 Called when the video view's picture in picture state changes.
 
@@ -54,7 +54,7 @@ Called when the video view's picture in picture state changes.
 willEnterFullscreen: () => void;
 ```
 
-Defined in: [types/Events.ts:109](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L109)
+Defined in: [types/Events.ts:109](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L109)
 
 Called when the video view will enter fullscreen mode.
 
@@ -70,7 +70,7 @@ Called when the video view will enter fullscreen mode.
 willEnterPictureInPicture: () => void;
 ```
 
-Defined in: [types/Events.ts:117](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L117)
+Defined in: [types/Events.ts:117](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L117)
 
 Called when the video view will enter picture in picture mode.
 
@@ -86,7 +86,7 @@ Called when the video view will enter picture in picture mode.
 willExitFullscreen: () => void;
 ```
 
-Defined in: [types/Events.ts:113](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L113)
+Defined in: [types/Events.ts:113](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L113)
 
 Called when the video view will exit fullscreen mode.
 
@@ -102,7 +102,7 @@ Called when the video view will exit fullscreen mode.
 willExitPictureInPicture: () => void;
 ```
 
-Defined in: [types/Events.ts:121](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L121)
+Defined in: [types/Events.ts:121](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L121)
 
 Called when the video view will exit picture in picture mode.
 

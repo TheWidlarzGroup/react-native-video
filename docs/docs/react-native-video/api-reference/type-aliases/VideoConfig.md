@@ -4,7 +4,7 @@
 type VideoConfig = object;
 ```
 
-Defined in: [types/VideoConfig.ts:3](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/VideoConfig.ts#L3)
+Defined in: [types/VideoConfig.ts:3](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/VideoConfig.ts#L3)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [types/VideoConfig.ts:3](https://github.com/TheWidlarzGroup/react-na
 optional externalSubtitles: ExternalSubtitle[];
 ```
 
-Defined in: [types/VideoConfig.ts:40](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/VideoConfig.ts#L40)
+Defined in: [types/VideoConfig.ts:40](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/VideoConfig.ts#L40)
 
 The external subtitles to be used.
 
@@ -53,7 +53,7 @@ externalSubtitles: [
 optional headers: Record<string, string>;
 ```
 
-Defined in: [types/VideoConfig.ts:17](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/VideoConfig.ts#L17)
+Defined in: [types/VideoConfig.ts:17](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/VideoConfig.ts#L17)
 
 The headers to be sent with the request.
 
@@ -65,7 +65,7 @@ The headers to be sent with the request.
 uri: VideoSource;
 ```
 
-Defined in: [types/VideoConfig.ts:13](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/VideoConfig.ts#L13)
+Defined in: [types/VideoConfig.ts:13](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/VideoConfig.ts#L13)
 
 The uri of the video.
 

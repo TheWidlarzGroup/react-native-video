@@ -1,6 +1,6 @@
 # Interface: VideoPlayerEvents
 
-Defined in: [types/Events.ts:6](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L6)
+Defined in: [types/Events.ts:6](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L6)
 
 ## Properties
 
@@ -10,7 +10,7 @@ Defined in: [types/Events.ts:6](https://github.com/TheWidlarzGroup/react-native-
 onAudioBecomingNoisy: () => void;
 ```
 
-Defined in: [types/Events.ts:11](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L11)
+Defined in: [types/Events.ts:11](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L11)
 
 Called when the audio becomes noisy.
 
@@ -30,7 +30,7 @@ Android
 onAudioFocusChange: (hasAudioFocus) => void;
 ```
 
-Defined in: [types/Events.ts:17](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L17)
+Defined in: [types/Events.ts:17](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L17)
 
 Called when the audio focus changes.
 
@@ -56,7 +56,7 @@ Android
 onBandwidthUpdate: (data) => void;
 ```
 
-Defined in: [types/Events.ts:21](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L21)
+Defined in: [types/Events.ts:21](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L21)
 
 Called when the bandwidth of the video changes.
 
@@ -78,7 +78,7 @@ Called when the bandwidth of the video changes.
 onBuffer: (buffering) => void;
 ```
 
-Defined in: [types/Events.ts:26](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L26)
+Defined in: [types/Events.ts:26](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L26)
 
 Called when the video is buffering.
 
@@ -100,7 +100,7 @@ Called when the video is buffering.
 onControlsVisibleChange: (visible) => void;
 ```
 
-Defined in: [types/Events.ts:31](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L31)
+Defined in: [types/Events.ts:31](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L31)
 
 Called when the video view's controls visibility changes.
 
@@ -122,7 +122,7 @@ Called when the video view's controls visibility changes.
 onEnd: () => void;
 ```
 
-Defined in: [types/Events.ts:35](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L35)
+Defined in: [types/Events.ts:35](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L35)
 
 Called when the video ends.
 
@@ -138,7 +138,7 @@ Called when the video ends.
 onExternalPlaybackChange: (externalPlaybackActive) => void;
 ```
 
-Defined in: [types/Events.ts:41](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L41)
+Defined in: [types/Events.ts:41](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L41)
 
 Called when the external playback state changes.
 
@@ -164,7 +164,7 @@ iOS
 onLoad: (data) => void;
 ```
 
-Defined in: [types/Events.ts:46](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L46)
+Defined in: [types/Events.ts:46](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L46)
 
 Called when the video is loaded.
 
@@ -190,7 +190,7 @@ onLoadStart -> initialize the player -> onLoad
 onLoadStart: (data) => void;
 ```
 
-Defined in: [types/Events.ts:51](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L51)
+Defined in: [types/Events.ts:51](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L51)
 
 Called when the video starts loading.
 
@@ -216,7 +216,7 @@ onLoadStart -> initialize the player -> onLoad
 onPlaybackRateChange: (rate) => void;
 ```
 
-Defined in: [types/Events.ts:59](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L59)
+Defined in: [types/Events.ts:59](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L59)
 
 Called when the player playback rate changes.
 
@@ -238,7 +238,7 @@ Called when the player playback rate changes.
 onPlaybackStateChange: (data) => void;
 ```
 
-Defined in: [types/Events.ts:55](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L55)
+Defined in: [types/Events.ts:55](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L55)
 
 Called when the player playback state changes.
 
@@ -260,7 +260,7 @@ Called when the player playback state changes.
 onProgress: (data) => void;
 ```
 
-Defined in: [types/Events.ts:63](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L63)
+Defined in: [types/Events.ts:63](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L63)
 
 Called when the player progress changes.
 
@@ -282,7 +282,7 @@ Called when the player progress changes.
 onReadyToDisplay: () => void;
 ```
 
-Defined in: [types/Events.ts:67](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L67)
+Defined in: [types/Events.ts:67](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L67)
 
 Called when the video is ready to display.
 
@@ -298,7 +298,7 @@ Called when the video is ready to display.
 onSeek: (seekTime) => void;
 ```
 
-Defined in: [types/Events.ts:71](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L71)
+Defined in: [types/Events.ts:71](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L71)
 
 Called when the player seeks.
 
@@ -320,7 +320,7 @@ Called when the player seeks.
 onStatusChange: (status) => void;
 ```
 
-Defined in: [types/Events.ts:92](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L92)
+Defined in: [types/Events.ts:92](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L92)
 
 Called when the player status changes.
 
@@ -342,7 +342,7 @@ Called when the player status changes.
 onTextTrackDataChanged: (texts) => void;
 ```
 
-Defined in: [types/Events.ts:79](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L79)
+Defined in: [types/Events.ts:79](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L79)
 
 Called when the text track (currently displayed subtitle) data changes.
 
@@ -364,7 +364,7 @@ Called when the text track (currently displayed subtitle) data changes.
 onTimedMetadata: (metadata) => void;
 ```
 
-Defined in: [types/Events.ts:75](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L75)
+Defined in: [types/Events.ts:75](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L75)
 
 Called when player receives timed metadata.
 
@@ -386,7 +386,7 @@ Called when player receives timed metadata.
 onTrackChange: (track) => void;
 ```
 
-Defined in: [types/Events.ts:84](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L84)
+Defined in: [types/Events.ts:84](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L84)
 
 Called when the selected text track changes.
 
@@ -408,7 +408,7 @@ Called when the selected text track changes.
 onVolumeChange: (volume) => void;
 ```
 
-Defined in: [types/Events.ts:88](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L88)
+Defined in: [types/Events.ts:88](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L88)
 
 Called when the volume of the player changes.
 

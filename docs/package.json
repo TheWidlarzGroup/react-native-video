@@ -30,7 +30,8 @@
     "@docusaurus/tsconfig": "^3.8.1",
     "@docusaurus/types": "^3.8.1",
     "typescript": "^5.2.2",
-    "docusaurus-plugin-typedoc": "^1.4.0"
+    "docusaurus-plugin-typedoc": "^1.4.0",
+    "docusaurus-plugin-llms": "^0.1.5"
   },
   "browserslist": {
     "production": [

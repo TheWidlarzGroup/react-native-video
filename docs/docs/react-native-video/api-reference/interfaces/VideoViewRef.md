@@ -1,6 +1,6 @@
 # Interface: VideoViewRef
 
-Defined in: [video-view/VideoView.tsx:45](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/video-view/VideoView.tsx#L45)
+Defined in: [video-view/VideoView.tsx:45](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/video-view/VideoView.tsx#L45)
 
 ## Properties
 
@@ -10,7 +10,7 @@ Defined in: [video-view/VideoView.tsx:45](https://github.com/TheWidlarzGroup/rea
 canEnterPictureInPicture: () => boolean;
 ```
 
-Defined in: [video-view/VideoView.tsx:66](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/video-view/VideoView.tsx#L66)
+Defined in: [video-view/VideoView.tsx:66](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/video-view/VideoView.tsx#L66)
 
 Check if picture in picture mode is supported
 
@@ -28,7 +28,7 @@ true if picture in picture mode is supported, false otherwise
 enterFullscreen: () => void;
 ```
 
-Defined in: [video-view/VideoView.tsx:49](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/video-view/VideoView.tsx#L49)
+Defined in: [video-view/VideoView.tsx:49](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/video-view/VideoView.tsx#L49)
 
 Enter fullscreen mode
 
@@ -44,7 +44,7 @@ Enter fullscreen mode
 enterPictureInPicture: () => void;
 ```
 
-Defined in: [video-view/VideoView.tsx:57](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/video-view/VideoView.tsx#L57)
+Defined in: [video-view/VideoView.tsx:57](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/video-view/VideoView.tsx#L57)
 
 Enter picture in picture mode
 
@@ -60,7 +60,7 @@ Enter picture in picture mode
 exitFullscreen: () => void;
 ```
 
-Defined in: [video-view/VideoView.tsx:53](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/video-view/VideoView.tsx#L53)
+Defined in: [video-view/VideoView.tsx:53](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/video-view/VideoView.tsx#L53)
 
 Exit fullscreen mode
 
@@ -76,7 +76,7 @@ Exit fullscreen mode
 exitPictureInPicture: () => void;
 ```
 
-Defined in: [video-view/VideoView.tsx:61](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/video-view/VideoView.tsx#L61)
+Defined in: [video-view/VideoView.tsx:61](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/video-view/VideoView.tsx#L61)
 
 Exit picture in picture mode
 

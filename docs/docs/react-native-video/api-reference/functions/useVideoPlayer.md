@@ -4,7 +4,7 @@
 function useVideoPlayer(source, setup?): VideoPlayer;
 ```
 
-Defined in: [hooks/useVideoPlayer.ts:26](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/hooks/useVideoPlayer.ts#L26)
+Defined in: [hooks/useVideoPlayer.ts:26](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/hooks/useVideoPlayer.ts#L26)
 
 Creates a `VideoPlayer` instance and manages its lifecycle.
 

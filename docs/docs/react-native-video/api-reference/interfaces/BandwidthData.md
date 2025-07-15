@@ -1,6 +1,6 @@
 # Interface: BandwidthData
 
-Defined in: [types/Events.ts:124](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L124)
+Defined in: [types/Events.ts:124](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L124)
 
 ## Properties
 
@@ -10,7 +10,7 @@ Defined in: [types/Events.ts:124](https://github.com/TheWidlarzGroup/react-nativ
 bitrate: number;
 ```
 
-Defined in: [types/Events.ts:128](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L128)
+Defined in: [types/Events.ts:128](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L128)
 
 The bitrate of the video in bits per second.
 
@@ -22,7 +22,7 @@ The bitrate of the video in bits per second.
 optional height: number;
 ```
 
-Defined in: [types/Events.ts:138](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L138)
+Defined in: [types/Events.ts:138](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L138)
 
 The height of the video in pixels.
 
@@ -38,7 +38,7 @@ Android
 optional width: number;
 ```
 
-Defined in: [types/Events.ts:133](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/Events.ts#L133)
+Defined in: [types/Events.ts:133](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/Events.ts#L133)
 
 The width of the video in pixels.
 

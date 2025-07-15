@@ -4,7 +4,7 @@
 type ResizeMode = "contain" | "cover" | "stretch" | "none";
 ```
 
-Defined in: [types/ResizeMode.ts:9](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/ResizeMode.ts#L9)
+Defined in: [types/ResizeMode.ts:9](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/ResizeMode.ts#L9)
 
 Video resize modes that determine how video content is resized to fit the view
 

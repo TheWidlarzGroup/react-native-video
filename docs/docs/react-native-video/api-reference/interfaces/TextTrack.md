@@ -1,6 +1,6 @@
 # Interface: TextTrack
 
-Defined in: [types/TextTrack.ts:1](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/TextTrack.ts#L1)
+Defined in: [types/TextTrack.ts:1](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/TextTrack.ts#L1)
 
 ## Properties
 
@@ -10,7 +10,7 @@ Defined in: [types/TextTrack.ts:1](https://github.com/TheWidlarzGroup/react-nati
 id: string;
 ```
 
-Defined in: [types/TextTrack.ts:5](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/TextTrack.ts#L5)
+Defined in: [types/TextTrack.ts:5](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/TextTrack.ts#L5)
 
 Unique identifier for the text track
 
@@ -22,7 +22,7 @@ Unique identifier for the text track
 label: string;
 ```
 
-Defined in: [types/TextTrack.ts:10](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/TextTrack.ts#L10)
+Defined in: [types/TextTrack.ts:10](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/TextTrack.ts#L10)
 
 Display label for the text track
 
@@ -34,7 +34,7 @@ Display label for the text track
 optional language: string;
 ```
 
-Defined in: [types/TextTrack.ts:16](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/TextTrack.ts#L16)
+Defined in: [types/TextTrack.ts:16](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/TextTrack.ts#L16)
 
 Language code (ISO 639-1 or ISO 639-2)
 
@@ -52,6 +52,6 @@ Language code (ISO 639-1 or ISO 639-2)
 selected: boolean;
 ```
 
-Defined in: [types/TextTrack.ts:21](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/TextTrack.ts#L21)
+Defined in: [types/TextTrack.ts:21](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/TextTrack.ts#L21)
 
 Whether this track is currently selected

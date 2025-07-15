@@ -9,4 +9,4 @@ type VideoErrorCode =
   | UnknownError;
 ```
 
-Defined in: [types/VideoError.ts:25](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/VideoError.ts#L25)
+Defined in: [types/VideoError.ts:25](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/VideoError.ts#L25)

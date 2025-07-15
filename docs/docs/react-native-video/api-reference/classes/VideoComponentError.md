@@ -1,6 +1,6 @@
 # Class: VideoComponentError
 
-Defined in: [types/VideoError.ts:67](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/VideoError.ts#L67)
+Defined in: [types/VideoError.ts:67](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/VideoError.ts#L67)
 
 ## Extends
 
@@ -16,7 +16,7 @@ Defined in: [types/VideoError.ts:67](https://github.com/TheWidlarzGroup/react-na
 get code(): TCode;
 ```
 
-Defined in: [types/VideoError.ts:37](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/VideoError.ts#L37)
+Defined in: [types/VideoError.ts:37](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/VideoError.ts#L37)
 
 ##### Returns
 
@@ -36,7 +36,7 @@ Defined in: [types/VideoError.ts:37](https://github.com/TheWidlarzGroup/react-na
 get message(): string;
 ```
 
-Defined in: [types/VideoError.ts:40](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/VideoError.ts#L40)
+Defined in: [types/VideoError.ts:40](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/VideoError.ts#L40)
 
 ##### Returns
 
@@ -56,7 +56,7 @@ Defined in: [types/VideoError.ts:40](https://github.com/TheWidlarzGroup/react-na
 get stack(): undefined | string;
 ```
 
-Defined in: [types/VideoError.ts:44](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/VideoError.ts#L44)
+Defined in: [types/VideoError.ts:44](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/VideoError.ts#L44)
 
 ##### Returns
 
@@ -74,7 +74,7 @@ Defined in: [types/VideoError.ts:44](https://github.com/TheWidlarzGroup/react-na
 toString(): string;
 ```
 
-Defined in: [types/VideoError.ts:61](https://github.com/TheWidlarzGroup/react-native-video/blob/1403959cf63e77ce519800110e1872cc843e5d0f/packages/react-native-video/src/core/types/VideoError.ts#L61)
+Defined in: [types/VideoError.ts:61](https://github.com/TheWidlarzGroup/react-native-video/blob/f9ee42c2a80c20dca2b87dac6bcb2898c1a425c5/packages/react-native-video/src/core/types/VideoError.ts#L61)
 
 Returns a string representation of an object.
 
