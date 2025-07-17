@@ -1,9 +1,9 @@
-#import "VideoView.h"
+#import "RCTVideoViewComponentView.h"
 
-#import <react/renderer/components/RNVideoViewSpec/ComponentDescriptors.h>
-#import <react/renderer/components/RNVideoViewSpec/EventEmitters.h>
-#import <react/renderer/components/RNVideoViewSpec/Props.h>
-#import <react/renderer/components/RNVideoViewSpec/RCTComponentViewHelpers.h>
+#import <react/renderer/components/RNCVideoViewSpec/ComponentDescriptors.h>
+#import <react/renderer/components/RNCVideoViewSpec/EventEmitters.h>
+#import <react/renderer/components/RNCVideoViewSpec/Props.h>
+#import <react/renderer/components/RNCVideoViewSpec/RCTComponentViewHelpers.h>
 
 #import "RCTFabricComponentsPlugins.h"
 
@@ -17,10 +17,10 @@
 
 using namespace facebook::react;
 
-@interface VideoView () <RCTVideoViewViewProtocol>
+@interface RCTVideoViewComponentView () <RCTRNCVideoViewViewProtocol>
 @end
 
-@implementation VideoView {
+@implementation RCTVideoViewComponentView {
   VideoComponentView * _view;
   int _nitroId;
 }
@@ -28,7 +28,7 @@ using namespace facebook::react;
 - (instancetype)initWithFrame:(CGRect)frame
 {
   if (self = [super initWithFrame:frame]) {
-    static const auto defaultProps = std::make_shared<const VideoViewProps>();
+    static const auto defaultProps = std::make_shared<const RNCVideoViewProps>();
     _props = defaultProps;
     
     _view = [[VideoComponentView alloc] initWithFrame:frame];
@@ -44,8 +44,8 @@ using namespace facebook::react;
 
 - (void)updateProps:(Props::Shared const &)props oldProps:(Props::Shared const &)oldProps
 {
-  const auto &oldViewProps = *std::static_pointer_cast<VideoViewProps const>(_props);
-  const auto &newViewProps = *std::static_pointer_cast<VideoViewProps const>(props);
+  const auto &oldViewProps = *std::static_pointer_cast<RNCVideoViewProps const>(_props);
+  const auto &newViewProps = *std::static_pointer_cast<RNCVideoViewProps const>(props);
   
   if (oldViewProps.nitroId != newViewProps.nitroId) {
     [self setNitroId:newViewProps.nitroId];
@@ -63,7 +63,7 @@ using namespace facebook::react;
 // Event emitter convenience method
 - (void)onNitroIdChange:(int)nitroId
 {
-  auto eventEmitter = std::dynamic_pointer_cast<const VideoViewEventEmitter>(_eventEmitter);
+  auto eventEmitter = std::dynamic_pointer_cast<const RNCVideoViewEventEmitter>(_eventEmitter);
   if (!eventEmitter || nitroId == -1) {
     return;
   }
@@ -78,12 +78,12 @@ using namespace facebook::react;
 
 + (ComponentDescriptorProvider)componentDescriptorProvider
 {
-  return concreteComponentDescriptorProvider<VideoViewComponentDescriptor>();
+  return concreteComponentDescriptorProvider<RNCVideoViewComponentDescriptor>();
 }
 
 Class<RCTComponentViewProtocol> VideoViewCls(void)
 {
-  return VideoView.class;
+  return RCTVideoViewComponentView.class;
 }
 
 @end
