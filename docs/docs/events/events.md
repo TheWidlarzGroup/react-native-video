@@ -7,6 +7,36 @@ sidebar_position: 3
 
 The `VideoPlayer` emits a variety of events that allow you to monitor and react to changes in its state and playback.
 
+## Using the `useEvent` Hook
+
+For React functional components, the `useEvent` hook provides a convenient way to subscribe to player events and automatically manage cleanup.
+
+```typescript
+import { useVideoPlayer, useEvent } from 'react-native-video';
+import { useEffect } from 'react';
+
+const MyVideoComponent = () => {
+  const player = useVideoPlayer('https://example.com/video.mp4', (_player) => {
+    _player.play();
+  });
+
+  useEvent(player, 'onLoad', (data) => {
+    console.log('Video loaded via useEvent! Duration:', data.duration);
+  });
+
+  useEvent(player, 'onProgress', (data) => {
+    console.log('Progress via useEvent:', data.currentTime);
+  });
+
+  // For onError, which is a direct property on VideoPlayer, not from VideoPlayerEvents
+  useEvent(player, 'onError', (error) => {
+    console.error('Player Error via useEvent:', error.code, error.message);
+  });
+
+  return <VideoView player={player} />;
+};
+```
+
 ## Available Events
 
 The `VideoPlayer` class, through `VideoPlayerEvents`, supports the following events. You can subscribe to these by assigning a callback function to the corresponding property on the `VideoPlayer` instance.
@@ -35,38 +65,6 @@ The `VideoPlayer` class, through `VideoPlayerEvents`, supports the following eve
 Additionally, the `VideoPlayer` instance itself has an `onError` property:
 
 -   `onError`: Fired when a error occurs. The callback receives the `VideoRuntimeError` object.
-
-## Using the `useEvent` Hook
-
-For React functional components, the `useEvent` hook provides a convenient way to subscribe to player events and automatically manage cleanup.
-
-```typescript
-import { useVideoPlayer, useEvent } from 'react-native-video';
-import { useEffect } from 'react';
-
-const MyVideoComponent = () => {
-  const player = useVideoPlayer('https://example.com/video.mp4');
-
-  useEvent(player, 'onLoad', (data) => {
-    console.log('Video loaded via useEvent! Duration:', data.duration);
-  });
-
-  useEvent(player, 'onProgress', (data) => {
-    console.log('Progress via useEvent:', data.currentTime);
-  });
-
-  // For onError, which is a direct property on VideoPlayer, not from VideoPlayerEvents
-  useEvent(player, 'onError', (error) => {
-    console.error('Player Error via useEvent:', error.code, error.message);
-  });
-
-  useEffect(() => {
-    player.play();
-  }, [player]);
-
-  return <VideoView player={player} />;
-};
-```
 
 **Benefits of `useEvent`**:
 

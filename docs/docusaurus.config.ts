@@ -154,7 +154,7 @@ const config: Config = {
         entryPoints: ['../packages/react-native-video/src'],
         exclude: "../packages/react-native-video/src/index.ts",
         tsconfig: '../packages/react-native-video/tsconfig.json',
-        out: './docs/react-native-video/api-reference',
+        out: './docs/api-reference',
         watch: process.env.TYPEDOC_WATCH,
         excludePrivate: true,
         excludeProtected: true,

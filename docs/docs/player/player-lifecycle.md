@@ -14,11 +14,9 @@ Understanding the lifecycle of the `VideoPlayer` is crucial for managing resourc
     const player = new VideoPlayer('https://example.com/video.mp4');
     ```
 2.  **Native Player Creation**: Internally this creates a native player instance tailored to the platform (iOS/Android).
-3.  **Event Emitter Setup**: The `VideoPlayerEvents` class, which `VideoPlayer` extends, initializes an event emitter to handle various playback events.
-:::info 
 
+:::info
 Player does not initialize asset right after JS class creation. Asset will be initialized when you call `preload()` or access any property/method of the player.
-
 :::
 
 ## Playing a Video

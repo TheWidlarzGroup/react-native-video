@@ -1,5 +1,5 @@
 ---
-sidebar_position: 2
+sidebar_position: 4
 sidebar_label: VideoView
 ---
 
@@ -17,11 +17,10 @@ import { VideoPlayer, VideoView } from 'react-native-video';
 import { StyleSheet } from 'react-native';
 
 const App = () => {
-  const player = useVideoPlayer('https://example.com/video.mp4');
-
-  React.useEffect(() => {
-    player.play();
-  }, [player]);
+  const player = useVideoPlayer('https://example.com/video.mp4', (_player) => {
+    // This is optional setup function that will be called when the player is created.
+    _player.play();
+  });
 
   return (
     <VideoView
@@ -34,7 +33,7 @@ const App = () => {
 
 const styles = StyleSheet.create({
   video: {
-    width: 300,
+    width: '100%',
     height: 200,
   },
 });
@@ -45,10 +44,10 @@ export default App;
 ## Props
 
 -   **`player`**: (Required) The `VideoPlayer` instance that manages the video to be displayed.
--   **`style?`**: `ViewStyle` - Standard React Native styles to control the layout and appearance of the `VideoView`.
--   **`controls?`**: `boolean` (default: `false`) - Whether to show the native video playback controls (play/pause, seek bar, volume, etc.).
--   **`pictureInPicture?`**: `boolean` (default: `false`) - Whether to enable and show the picture-in-picture (PiP) button in the native controls (if supported by the platform and controls are visible).
--   **`autoEnterPictureInPicture?`**: `boolean` (default: `false`) - Whether the video should automatically enter PiP mode when it starts playing and the app is backgrounded (behavior might vary by platform).
+-   **`style`** (Optional): `ViewStyle` - Standard React Native styles to control the layout and appearance of the `VideoView`.
+-   **`controls`** (Optional): `boolean` (default: `false`) - Whether to show the native video playback controls (play/pause, seek bar, volume, etc.).
+-   **`pictureInPicture`** (Optional): `boolean` (default: `false`) - Whether to enable and show the picture-in-picture (PiP) button in the native controls (if supported by the platform and controls are visible).
+-   **`autoEnterPictureInPicture`** (Optional): `boolean` (default: `false`) - Whether the video should automatically enter PiP mode when it starts playing and the app is backgrounded (behavior might vary by platform).
 
 ### Event Props
 
@@ -97,5 +96,3 @@ Available methods on the `VideoViewRef`:
 -   **`enterPictureInPicture()`**: Programmatically requests the video view to enter picture-in-picture mode.
 -   **`exitPictureInPicture()`**: Programmatically requests the video view to exit picture-in-picture mode.
 -   **`canEnterPictureInPicture()`**: `() => boolean` - Checks if picture-in-picture mode is currently available and supported. Returns `true` if PiP can be entered, `false` otherwise.
-
-Ensure your app is correctly linked (run `pod install` on iOS, rebuild the app) if you encounter linking errors. 
