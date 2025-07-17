@@ -135,11 +135,16 @@
     ]
   },
   "codegenConfig": {
-    "name": "RNVideoViewSpec",
-    "type": "all",
+    "name": "RNCVideoViewSpec",
+    "type": "components",
     "jsSrcsDir": "src/spec/fabric",
     "android": {
       "javaPackageName": "com.video.react"
+    },
+    "ios": {
+      "componentProvider": {
+        "RNCVideoView": "RCTVideoViewComponentView"
+      }
     }
   },
   "create-react-native-library": {

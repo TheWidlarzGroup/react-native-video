@@ -242,7 +242,7 @@ dependencies {
 if (isNewArchitectureEnabled()) {
   react {
     jsRootDir = file("../src/spec/fabric")
-    libraryName = "VideoView"
+    libraryName = "RNCVideoView"
     codegenJavaPackageName = "com.video"
   }
 }

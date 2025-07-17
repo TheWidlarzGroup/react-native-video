@@ -3,7 +3,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface VideoView : RCTViewComponentView
+@interface RCTVideoViewComponentView : RCTViewComponentView
 
 @end
 

@@ -15,8 +15,8 @@ import com.facebook.react.uimanager.BaseViewManager;
 import com.facebook.react.uimanager.BaseViewManagerDelegate;
 import com.facebook.react.uimanager.LayoutShadowNode;
 
-public class VideoViewManagerDelegate<T extends View, U extends BaseViewManager<T, ? extends LayoutShadowNode> & VideoViewManagerInterface<T>> extends BaseViewManagerDelegate<T, U> {
-  public VideoViewManagerDelegate(U viewManager) {
+public class RNCVideoViewManagerDelegate<T extends View, U extends BaseViewManager<T, ? extends LayoutShadowNode> & RNCVideoViewManagerInterface<T>> extends BaseViewManagerDelegate<T, U> {
+  public RNCVideoViewManagerDelegate(U viewManager) {
     super(viewManager);
   }
   @Override

@@ -1,4 +1,4 @@
-#import "VideoView.h"
+#import "RCTVideoViewComponentView.h"
 
 #import "ReactNativeVideo-Swift-Cxx-Umbrella.hpp"
 
@@ -8,7 +8,7 @@
 #import "ReactNativeVideo-Swift.h"
 #endif
 
-@implementation VideoView {
+@implementation RCTVideoViewComponentView {
   VideoComponentView* _view;
 }
 
@@ -20,7 +20,7 @@
     _view.translatesAutoresizingMaskIntoConstraints = NO;
     [self addSubview:_view];
     
-    // Set up constraints to make VideoComponentView fill NitroView
+    // Set up constraints to make VideoComponentView fill RCTVideoViewComponentView
     [NSLayoutConstraint activateConstraints:@[
       [_view.leadingAnchor constraintEqualToAnchor:self.leadingAnchor],
       [_view.trailingAnchor constraintEqualToAnchor:self.trailingAnchor],
