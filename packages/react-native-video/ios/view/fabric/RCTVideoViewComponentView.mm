@@ -81,7 +81,7 @@ using namespace facebook::react;
   return concreteComponentDescriptorProvider<RNCVideoViewComponentDescriptor>();
 }
 
-Class<RCTComponentViewProtocol> VideoViewCls(void)
+Class<RCTComponentViewProtocol> RNCVideoViewCls(void)
 {
   return RCTVideoViewComponentView.class;
 }
