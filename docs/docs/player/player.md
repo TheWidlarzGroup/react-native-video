@@ -3,7 +3,7 @@ sidebar_position: 3
 sidebar_label: Player
 ---
 
-# VideoPlayer Overview
+# Player
 
 The `VideoPlayer` class is the primary way to control video playback. It provides methods and properties to manage the video source, playback state, volume, and other aspects of the video.
 
@@ -22,6 +22,10 @@ const player = useVideoPlayer({
 });
 ```
 
+:::info
+`useVideoPlayer` hook is recommended for most use cases. It automatically manages the player lifecycle between the component mount and unmount.
+:::
+
 or using `VideoPlayer` class constructor directly
 ```typescript
 import { VideoPlayer } from 'react-native-video';
@@ -38,6 +42,10 @@ const playerWithConfig = new VideoPlayer({
   // other configurations
 });
 ```
+
+:::warning
+When using `VideoPlayer` class directly, you need to manually manage the player lifecycle. Once you no longer need the player, you need to call `release()` method to release the player's native resources. see [Player Lifecycle](./player-lifecycle.md) for more details.
+:::
 
 ## Core Functionality
 
@@ -67,6 +75,10 @@ The `VideoPlayer` class offers a comprehensive set of methods and properties to 
 | `muted` | Read/Write | `boolean` | Gets or sets whether the video is muted. |
 | `loop` | Read/Write | `boolean` | Gets or sets whether the video should loop. |
 | `rate` | Read/Write | `number` | Gets or sets the playback rate (e.g., 1.0 for normal speed, 0.5 for half speed, 2.0 for double speed). |
+| `mixAudioMode` | Read/Write | `MixAudioMode` | Controls how this player's audio mixes with other audio sources (see [MixAudioMode](../api-reference/type-aliases/MixAudioMode.md)). |
+| `ignoreSilentSwitchMode` | Read/Write | `IgnoreSilentSwitchMode` | iOS-only. Determines how audio should behave when the hardware mute (silent) switch is on. |
+| `playInBackground` | Read/Write | `boolean` | Whether playback should continue when the app goes to the background. |
+| `playWhenInactive` | Read/Write | `boolean` | Whether playback should continue when the app is inactive (e.g., during a phone call). |
 | `isPlaying` | Read-only | `boolean` | Returns `true` if the video is currently playing. |
 
 ### Error Handling

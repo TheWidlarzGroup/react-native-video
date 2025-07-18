@@ -9,7 +9,7 @@
 .cache-loader
 
 # API Reference generated files
-docs/react-native-video/api-reference/
+docs/api-reference/
 
 # Misc
 .DS_Store

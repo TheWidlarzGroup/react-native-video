@@ -5,8 +5,6 @@ description: Introduction to React Native Video library
 
 # Intro
 
-![React Native Video](../static/baners/rnv-banner.png)
-
 **The powerful and feature-rich video playback library for React Native applications.**
 
 React Native Video provides a comprehensive solution for video playback in React Native, built on top of the blazing-fast [`react-native-nitro-modules`](https://nitro.margelo.com/docs/what-is-nitro) framework. Whether you're building a video streaming app, media player, or educational platform, React Native Video gives you the tools you need to create exceptional video experiences.
@@ -48,5 +46,8 @@ export default function App() {
 - **[VideoPlayer](./player/player.md)** - Learn about the core player functionality
 - **[VideoView Component](./video-view.md)** - Understand the video display component
 - **[Event Handling](./events/events.md)** - Master player events and callbacks
-- **[API Reference](../api-reference/index.md)** - Complete API documentation
+- **[Configuration](./configuration/expo-plugin.md)** - Configure the player
+- **[API Reference](./api-reference/index.md)** - Complete API documentation
+
+[![React Native Video](../static/baners/rnv-banner.png)](https://www.thewidlarzgroup.com/react-native-video/?utm_source=rnv&utm_medium=docs&utm_campaign=intro&utm_id=rnv-banner)
 
