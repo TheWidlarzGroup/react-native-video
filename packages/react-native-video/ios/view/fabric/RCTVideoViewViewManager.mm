@@ -2,12 +2,12 @@
 #import <React/RCTUIManager.h>
 #import "RCTBridge.h"
 
-@interface VideoViewManager : RCTViewManager
+@interface RCTVideoViewViewManager : RCTViewManager
 @end
 
-@implementation VideoViewManager
+@implementation RCTVideoViewViewManager
 
-RCT_EXPORT_MODULE(VideoView)
+RCT_EXPORT_MODULE(RNCVideoView)
 
 RCT_EXPORT_VIEW_PROPERTY(nitroId, NSNumber)
 

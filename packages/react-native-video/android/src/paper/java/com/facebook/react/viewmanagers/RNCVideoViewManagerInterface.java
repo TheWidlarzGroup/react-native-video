@@ -11,6 +11,6 @@ package com.facebook.react.viewmanagers;
 
 import android.view.View;
 
-public interface VideoViewManagerInterface<T extends View> {
+public interface RNCVideoViewManagerInterface<T extends View> {
   void setNitroId(T view, int value);
 }

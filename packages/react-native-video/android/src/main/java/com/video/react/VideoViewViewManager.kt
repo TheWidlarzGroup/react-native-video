@@ -11,8 +11,8 @@ import com.facebook.react.uimanager.UIManagerHelper
 import com.facebook.react.uimanager.ViewManagerDelegate
 import com.facebook.react.uimanager.annotations.ReactProp
 import com.facebook.react.uimanager.events.Event
-import com.facebook.react.viewmanagers.VideoViewManagerDelegate
-import com.facebook.react.viewmanagers.VideoViewManagerInterface
+import com.facebook.react.viewmanagers.RNCVideoViewManagerDelegate
+import com.facebook.react.viewmanagers.RNCVideoViewManagerInterface
 import com.video.view.VideoView
 
 internal class NitroIdChange(
@@ -33,11 +33,11 @@ internal class NitroIdChange(
 
 @UnstableApi
 @ReactModule(name = VideoViewViewManager.NAME)
-class VideoViewViewManager : SimpleViewManager<VideoView>(), VideoViewManagerInterface<VideoView> {
+class VideoViewViewManager : SimpleViewManager<VideoView>(), RNCVideoViewManagerInterface<VideoView> {
   private val mDelegate: ViewManagerDelegate<VideoView>
 
   init {
-    mDelegate = VideoViewManagerDelegate(this)
+    mDelegate = RNCVideoViewManagerDelegate(this)
   }
 
   @ReactProp(name = "nitroId")
@@ -73,6 +73,6 @@ class VideoViewViewManager : SimpleViewManager<VideoView>(), VideoViewManagerInt
   }
 
   companion object {
-    const val NAME = "VideoView"
+    const val NAME = "RNCVideoView"
   }
 }
