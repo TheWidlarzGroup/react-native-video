@@ -81,6 +81,7 @@ import com.diceplatform.doris.entity.SourceBuilder;
 import com.diceplatform.doris.entity.TextTrack;
 import com.diceplatform.doris.entity.Track;
 import com.diceplatform.doris.entity.TracksPolicy;
+import com.diceplatform.doris.entity.VideoType;
 import com.diceplatform.doris.entity.YoSsaiProperties;
 import com.diceplatform.doris.ext.imacsailive.ExoDorisImaCsaiLivePlayer;
 import com.diceplatform.doris.internal.ResumePositionHandler;
@@ -813,7 +814,9 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             public void onPause() {
                 super.onPause();
                 Log.d(TAG, "MediaSession onPause()");
-                setPausedModifier(true);
+                if (player == null || !isLive || player.getCurrentVideoType() == VideoType.LIVE_WITH_DVR){
+                  setPausedModifier(true);
+                }
             }
         });
     }
