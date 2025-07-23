@@ -1,0 +1,258 @@
+# react-native-video
+
+> A <Video /> element for React Native - the most battle-tested video player component with support for DRM, offline playback, HLS/DASH streaming, and more.
+
+## Project Overview
+[![React Native Video Component](./docs/assets/baners/rnv-banner.png)](https://thewidlarzgroup.com/?utm_source=rnv&utm_medium=readme&utm_id=banner)
+
+The most battle-tested open-source video player component for React Native with support for DRM, offline playback, HLS/DASH streaming, and more.
+
+
+## 🔍 Features
+
+- 📱 Plays all video formats natively supported by iOS/Android 
+- ▶️ Local and remote playback  
+- 🔁 Streaming: HLS • DASH • SmoothStreaming  
+- 🔐 DRM: Widevine & FairPlay ([See free DRM stream example](https://www.thewidlarzgroup.com/services/free-drm-token-generator-for-video?utm_source=rnv&utm_medium=readme&utm_id=free-drm))
+- 📴 Offline playback, video download, support for side-tracks and side-captions (via [optional SDK](https://docs.thewidlarzgroup.com/offline-video-sdk?utm_source=rnv&utm_medium=readme&utm_id=features-text))  
+- 🎚️ Fine-grained control over tracks, buffering & events
+- 🧩 Expo plugin support
+- 🌐 Basic Web Support 
+- 📱 Picture in Picture
+- 📺 TV Support
+
+
+
+## ✨ Project Status
+
+| Version | State | Architecture |
+|---------|-------|--------------|
+| **v5 and lower** | ❌ End-of-life [Commercial Support Available](https://www.thewidlarzgroup.com/blog/react-native-video-upgrade-challenges-custom-maintenance-support#how-we-can-help?utm_source=rnv&utm_medium=readme&utm_id=upgradev5) | Old Architecture |
+| **v6** | 🛠 Maintained (community + TWG) | Old + New (Interop Layer) |
+| [**v7**](https://github.com/TheWidlarzGroup/react-native-video/tree/v7) | [🚀 Active Development](https://github.com/TheWidlarzGroup/react-native-video/tree/v7) | Old + New (Full Support) |
+
+[`react-native-video` v7](https://github.com/TheWidlarzGroup/react-native-video/tree/v7) introduces full support for the new React Native architecture, unlocking better performance, improved consistency, and modern native modules.
+
+
+## Key Concepts & Terminology
+- **Video**: Main React component for rendering video content
+- **VideoRef**: Imperative API for controlling playback via refs
+- **Source**: Video source configuration (local files, URLs, streams)
+- **DRM**: Built-in support for Widevine & FairPlay DRM
+- **Tracks**: Audio, video, and text track selection and management
+- **Events**: Comprehensive event system for playback state, progress, errors, etc.
+
+## Documentation
+
+### Component
+- [Ads](https://docs.thewidlarzgroup.com/react-native-video/component/ads)
+- [DRM](https://docs.thewidlarzgroup.com/react-native-video/component/drm)
+- [Events](https://docs.thewidlarzgroup.com/react-native-video/component/events)
+- [Methods](https://docs.thewidlarzgroup.com/react-native-video/component/methods)
+- [Configurable Props](https://docs.thewidlarzgroup.com/react-native-video/component/props)
+
+### General
+- [A `<Video>` Component for React Native](https://docs.thewidlarzgroup.com/react-native-video/index)
+
+### General
+- [Installation](https://docs.thewidlarzgroup.com/react-native-video/installation)
+
+### Other
+- [Caching](https://docs.thewidlarzgroup.com/react-native-video/other/caching)
+- [Debugging](https://docs.thewidlarzgroup.com/react-native-video/other/debug)
+- [Offline Video SDK](https://docs.thewidlarzgroup.com/react-native-video/other/downloading)
+- [Expo](https://docs.thewidlarzgroup.com/react-native-video/other/expo)
+- [Miscellaneous](https://docs.thewidlarzgroup.com/react-native-video/other/misc)
+- [New Architecture](https://docs.thewidlarzgroup.com/react-native-video/other/new-arch)
+- [Plugin](https://docs.thewidlarzgroup.com/react-native-video/other/plugin)
+
+### General
+- [Useful Projects](https://docs.thewidlarzgroup.com/react-native-video/projects)
+
+### General
+- [Updating](https://docs.thewidlarzgroup.com/react-native-video/updating)
+
+
+## Repository Structure (truncated)
+- app.plugin.js
+- CHANGELOG.md
+- CONTRIBUTING.md
+- docs/
+  - assets/
+    - AppTransportSecuritySetting.png
+    - baners/
+    - tvOS-step-1.jpg
+    - tvOS-step-2.jpg
+    - tvOS-step-3.jpg
+    - tvOS-step-4.jpg
+  - bun.lockb
+  - components/
+    - PlatformsList/
+    - TWGBadge/
+  - font.ts
+  - json-ld.json
+  - next-env.d.ts
+  - next.config.js
+  - package.json
+  - pages/
+    - _app.mdx
+    - _meta.json
+    - component/
+    - index.md
+    - installation.md
+    - other/
+    - projects.md
+    - updating.md
+  - public/
+    - favicon-16x16.png
+    - favicon-32x32.png
+    - favicon.ico
+    - thumbnail.jpg
+  - README.md
+  - theme.config.jsx
+  - tsconfig.json
+- examples/
+  - bare/
+    - app.json
+    - babel.config.js
+    - Gemfile
+    - Gemfile.lock
+    - index.js
+    - metro.config.js
+    - package.json
+    - patches/
+    - react-native.config.js
+    - tsconfig.json
+    - visionos/
+    - windows/
+  - common/
+    - assets/
+    - BasicExample.tsx
+    - BasicExample.windows.tsx
+    - components/
+    - constants/
+    - DRMExample.tsx
+    - styles.tsx
+    - types/
+  - expo/
+    - app.json
+    - App.tsx
+    - App.tv.tsx
+    - assets/
+    - babel.config.js
+    - index.js
+    - metro.config.js
+    - package.json
+    - README.md
+    - tsconfig.json
+  - react-native-video-plugin-sample/
+    - package.json
+    - react-native-video-plugin-sample.podspec
+    - src/
+  - README.md
+- LICENSE
+- package.json
+- react-native-video.podspec
+- README.md
+- scripts/
+  - bootstrap.js
+  - clang-format.sh
+  - generate-llms-full.js
+  - generate-llms.js
+  - kotlin-lint.sh
+  - swift-format.sh
+  - swift-lint.sh
+- shell.nix
+- src/
+  - expo-plugins/
+    - @types.ts
+    - withAds.ts
+    - withAndroidExtensions.ts
+    - withAndroidPictureInPicture.ts
+    - withBackgroundAudio.ts
+    - withCaching.ts
+    - withNotificationControls.ts
+    - withRNVideo.ts
+    - writeToPodfile.ts
+  - index.ts
+  - specs/
+    - NativeVideoDecoderInfoModule.ts
+    - NativeVideoManager.ts
+    - VideoNativeComponent.ts
+  - types/
+    - Ads.ts
+    - events.ts
+    - FilterType.ts
+    - index.ts
+    - language.ts
+    - Orientation.ts
+    - ResizeMode.ts
+    - TextTrackType.ts
+    - video-ref.ts
+    - video.ts
+    - ViewType.ts
+  - utils.ts
+  - Video.tsx
+  - Video.web.tsx
+  - VideoDecoderProperties.ts
+  - VideoDecoderProperties.web.ts
+- tsconfig.build.json
+- tsconfig.json
+- windows/
+  - ReactNativeVideoCPP/
+    - packages.config
+    - pch.cpp
+    - pch.h
+    - PropertySheet.props
+    - ReactNativeVideoCPP.def
+    - ReactNativeVideoCPP.vcxproj
+    - ReactNativeVideoCPP.vcxproj.filters
+    - ReactPackageProvider.cpp
+    - ReactPackageProvider.h
+    - ReactPackageProvider.idl
+    - ReactVideoView.cpp
+    - ReactVideoView.h
+    - ReactVideoView.idl
+    - ReactVideoViewManager.cpp
+    - ReactVideoViewManager.h
+  - ReactNativeVideoCPP.sln
+  - ReactNativeVideoCPP61/
+    - packages.config
+    - PropertySheet.props
+    - ReactNativeVideoCPP61.vcxproj
+    - ReactNativeVideoCPP61.vcxproj.filters
+  - ReactNativeVideoCPP61.sln
+  - ReactNativeVideoCPP62.sln
+  - README.md
+
+## Usage Examples
+1. Basic playback
+
+   ```tsx
+   import Video, { VideoRef } from 'react-native-video';
+   import { useRef } from 'react';
+   
+   export default function Example() {
+     const videoRef = useRef<VideoRef>(null);
+     
+     return (
+       <Video
+         source={{ uri: 'https://example.com/video.mp4' }}
+         ref={videoRef}
+         style={{ width: '100%', aspectRatio: 16 / 9 }}
+         controls
+       />
+     );
+   }
+   ```
+
+2. Advanced control (seek & pause)
+
+   ```tsx
+   // Using ref to control playback
+   videoRef.current?.setNativeProps({ paused: true });
+   videoRef.current?.seek(10); // seconds
+   ```
+
+## Version
+Package version: 6.16.1
