@@ -1,0 +1,20 @@
+name: Test Documentation Build
+
+on:
+  pull_request:
+    branches:
+      - v7
+
+jobs:
+  test-docs-deploy:
+    name: Test Documentation Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup-bun
+
+      - name: Test build website
+        run: bun run --cwd docs build
