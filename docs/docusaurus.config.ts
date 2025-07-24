@@ -114,7 +114,7 @@ const config: Config = {
           position: 'right',
         },
         {
-          href: 'https://www.thewidlarzgroup.com/react-native-video',
+          href: 'https://www.thewidlarzgroup.com/react-native-vide?utm_source=rnv&utm_medium=docs&utm_campaign=navbar&utm_id=offer-button',
           label: 'Offer',
           position: 'right',
         },
@@ -132,7 +132,7 @@ const config: Config = {
     },
     footer: {
       style: 'light',
-      copyright: `Copyright © ${new Date().getFullYear()} TheWidlarzGroup & React Native Video Community`,
+      copyright: `Built With ❤️ By TheWidlarzGroup & React Native Video Community`,
     },
     colorMode: {
       defaultMode: 'dark',
