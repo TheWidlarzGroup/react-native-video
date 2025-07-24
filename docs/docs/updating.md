@@ -16,6 +16,9 @@ The most substantial change in v7 is the move from a monolithic `<Video>` compon
 *   **`VideoView`**: A UI component responsible for rendering the video on the screen. It takes a `VideoPlayer` instance as a prop.
 *   **`useVideoPlayer` hook**: The recommended way to create and manage the lifecycle of a `VideoPlayer` instance within a functional component. It automatically handles the creation and cleanup of the player.
 
+### New Dependency
+`react-native-video` v7 is now built on top of [`react-native-nitro-modules`](https://nitro.margelo.com/docs/what-is-nitro) framework. This means that you need to install the Nitro framework to use `react-native-video` v7.
+
 ### Step-by-Step Migration Guide
 
 #### 1. Installation
