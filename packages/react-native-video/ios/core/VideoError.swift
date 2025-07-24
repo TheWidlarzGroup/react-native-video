@@ -129,6 +129,24 @@ enum VideoViewError: VideoError {
   }
 }
 
+enum PluginError: VideoError {
+  case drmManagerAlreadyRegistered
+
+  var code: String {
+    switch self {
+    case .drmManagerAlreadyRegistered:
+      return "plugin/drm-manager-already-registered"
+    }
+  }
+
+  var message: String {
+    switch self {
+    case .drmManagerAlreadyRegistered:
+      return "DRM manager is already registered"
+    }
+  }
+}
+
 // MARK: - UnknownError
 struct UnknownError: VideoError {
   var code: String { "unknown/unknown" }

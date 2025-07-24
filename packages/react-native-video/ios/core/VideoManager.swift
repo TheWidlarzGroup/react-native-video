@@ -75,18 +75,22 @@ class VideoManager {
   
   func register(player: HybridVideoPlayer) {
     players.add(player)
+    PluginsRegistry.shared.notifyPlayerCreated(player: player)
   }
   
   func unregister(player: HybridVideoPlayer) {
     players.remove(player)
+    PluginsRegistry.shared.notifyPlayerDestroyed(player: player)
   }
   
   func register(view: VideoComponentView) {
     videoView.add(view)
+    // PluginsRegistry.shared.notifyVideoViewCreated(view: view)
   }
   
   func unregister(view: VideoComponentView) {
     videoView.remove(view)
+    // PluginsRegistry.shared.notifyVideoViewDestroyed(view: view)
   }
   
   func requestAudioSessionUpdate() {
