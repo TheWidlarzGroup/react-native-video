@@ -1,14 +1,30 @@
 import Link from '@docusaurus/Link';
+import { useDocsPreferredVersion } from '@docusaurus/theme-common';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import HomepageFeatures from '@site/src/components/HomepageFeatures';
 import Heading from '@theme/Heading';
 import Layout from '@theme/Layout';
 import clsx from 'clsx';
-import type { ReactNode } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import styles from './index.module.css';
+
+interface PreferredVersion {
+  preferredVersion: {label: string, mainDocId: string, path: string} | null;
+}
 
 function HomepageHeader() {
   const {siteConfig} = useDocusaurusContext();
+
+  const version = useDocsPreferredVersion() as PreferredVersion;
+
+  const link = useMemo(() => {
+    if (!version.preferredVersion) {
+      return '/docs/v6/intro'; // Default to v6 if no version is selected
+    }
+
+    return `${version.preferredVersion.path}/${version.preferredVersion.mainDocId}`;
+  }, [version]);
+
   return (
     <header className={clsx('hero hero--primary', styles.heroBanner)}>
       <div className="container">
@@ -20,7 +36,7 @@ function HomepageHeader() {
         <div className={styles.buttons}>
           <Link
             className="button button--secondary button--lg"
-            to="/docs/intro">
+            to={link}>
             Get Started
           </Link>
         </div>

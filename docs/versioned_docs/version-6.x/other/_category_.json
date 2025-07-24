@@ -1,0 +1,9 @@
+{
+  "label": "Other",
+  "position": 4,
+  "link": {
+    "type": "generated-index",
+    "description": "Other topics of React Native Video"
+  },
+  "collapsed": true
+}
