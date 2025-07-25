@@ -86,33 +86,33 @@
 
             var rawAdTagUrl: String?
 
-               switch type {
-               case .preRoll:
-                   rawAdTagUrl = _video.getAdTagUrl()
-               case .midRoll:
-                   rawAdTagUrl = _video.getMidrollAdTagUrl()
-               case .postRoll:
-                   rawAdTagUrl = _video.getPostrollAdTagUrl()
-               }
+            switch type {
+            case .preRoll:
+                rawAdTagUrl = _video.getAdTagUrl()
+            case .midRoll:
+                rawAdTagUrl = _video.getMidrollAdTagUrl()
+            case .postRoll:
+                rawAdTagUrl = _video.getPostrollAdTagUrl()
+            }
 
-               guard let baseUrl = rawAdTagUrl, !baseUrl.isEmpty, contentPlayhead != nil else {
-                   print("Invalid ad tag or playhead missing for \(type)")
-                   return
-               }
+            guard let baseUrl = rawAdTagUrl, !baseUrl.isEmpty, contentPlayhead != nil else {
+                print("Invalid ad tag or playhead missing for \(type)")
+                return
+            }
 
-               // Inject TIMESTAMP and CACHE_BUSTER values
-               let adTagUrl = resolveAdTagUrl(from: baseUrl)
+            // Inject TIMESTAMP and CACHE_BUSTER values
+            let adTagUrl = resolveAdTagUrl(from: baseUrl)
 
-                // Create an ad request with our ad tag, display container, and optional user context.
-                print("Requesting \(type) ad with tag URL: \(adTagUrl)")
-                let request = IMAAdsRequest(
-                    adTagUrl: adTagUrl,
-                    adDisplayContainer: adDisplayContainer,
-                    contentPlayhead: contentPlayhead,
-                    userContext: nil
-                )
+            // Create an ad request with our ad tag, display container, and optional user context.
+            print("Requesting \(type) ad with tag URL: \(adTagUrl)")
+            let request = IMAAdsRequest(
+                adTagUrl: adTagUrl,
+                adDisplayContainer: adDisplayContainer,
+                contentPlayhead: contentPlayhead,
+                userContext: nil
+            )
 
-                adsLoader.requestAds(with: request)
+            adsLoader.requestAds(with: request)
         }
 
         func releaseAds() {
@@ -193,10 +193,10 @@
 
                 switch event.type {
                 case .ALL_ADS_COMPLETED, .LOG, .AD_BREAK_FETCH_ERROR:
-                       resetAdsLoaderAndManager()
-                   default:
-                       break
-                   }
+                    esetAdsLoaderAndManager()
+                default:
+                    break
+                }
             }
         }
 
