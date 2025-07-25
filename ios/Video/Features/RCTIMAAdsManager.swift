@@ -11,7 +11,7 @@
         /* Main point of interaction with the SDK. Created by the SDK as the result of an ad request. */
         private var adsManager: IMAAdsManager!
         private var _hasSetUpIMA: Bool = false
-        
+
         enum AdType {
             case preRoll
             case midRoll
@@ -34,7 +34,7 @@
             adsLoader = IMAAdsLoader(settings: settings)
             adsLoader.delegate = self
         }
-        
+
         func resolveAdTagUrl(from baseUrl: String) -> String {
             let timestamp = Int(Date().timeIntervalSince1970 * 1000)
             let cacheBuster = Int.random(in: 100000...999999)
@@ -58,7 +58,7 @@
 
             return updatedUrl
         }
-        
+
         private func resetAdsLoaderAndManager() {
             // Destroy existing manager if any
             adsManager?.destroy()
@@ -71,7 +71,6 @@
             // Re-initialize loader
             setUpAdsLoader()
         }
-
 
         func requestAds(type: AdType) {
             guard let _video else { return }
@@ -114,7 +113,6 @@
                 )
 
                 adsLoader.requestAds(with: request)
-          
         }
 
         func releaseAds() {
@@ -192,7 +190,7 @@
                         "target": _video.reactTag!,
                     ])
                 }
-                
+
                 switch event.type {
                 case .ALL_ADS_COMPLETED, .LOG, .AD_BREAK_FETCH_ERROR:
                        resetAdsLoaderAndManager()
@@ -219,7 +217,7 @@
                     ],
                     "target": _video.reactTag!,
                 ])
-                
+
                 switch error.type {
                 case .adLoadingFailed, .adUnknownErrorType, .adPlayingFailed:
                        resetAdsLoaderAndManager()

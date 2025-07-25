@@ -102,7 +102,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _playedCuePoints: Set<Double> = []
     private var _skippedCuePoints: Set<Double> = []
 
-
     private lazy var _drmManager: DRMManagerSpec? = ReactNativeVideoManager.shared.getDRMManager()
     private var _playerObserver: RCTPlayerObserver = .init()
 
@@ -452,11 +451,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     _imaAdsManager.requestAds(type: .preRoll)
                     _didRequestAds = true
                 }
-            
+
             // Mid-roll logic handled here only
             if let cuePoints = _source?.adParams.cuePoints,
                _source?.adParams.midRollAdTagUrl != nil {
-
                 if let highestSkipped = _skippedCuePoints.max(),
                    currentTimeSecs >= highestSkipped,
                    !_skippedAdPlayed,
@@ -484,7 +482,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                        }
                    }
             }
-            
+
             // Post-roll Ad: Trigger 2 seconds before end
             if !_didRequestPostRollAd,
                _source?.adParams.postRollAdTagUrl != nil,
@@ -1404,11 +1402,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     func getAdTagUrl() -> String? {
         return _source?.adParams.adTagUrl
     }
-    
+
     func getMidrollAdTagUrl() -> String? {
         return _source?.adParams.midRollAdTagUrl
     }
-    
+
     func getPostrollAdTagUrl() -> String? {
         return _source?.adParams.postRollAdTagUrl
     }
