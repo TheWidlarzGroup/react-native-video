@@ -64,26 +64,31 @@
 
             switch type {
             case .preRoll:
-                adTagUrl = _video.getAdTagUrl()
+                rawAdTagUrl = _video.getAdTagUrl()
             case .midRoll:
-                adTagUrl = _video.getMidrollAdTagUrl()
+                rawAdTagUrl = _video.getMidrollAdTagUrl()
             case .postRoll:
-                adTagUrl = _video.getPostrollAdTagUrl()
+                rawAdTagUrl = _video.getPostrollAdTagUrl()
             }
 
-            guard let tagUrl = adTagUrl, !tagUrl.isEmpty, contentPlayhead != nil else {
+            guard let baseUrl = rawAdTagUrl, !baseUrl.isEmpty, contentPlayhead != nil else {
+                print("Invalid ad tag or playhead missing for \(type)")
                 return
             }
 
+            // Inject TIMESTAMP and CACHE_BUSTER values
+            let adTagUrl = resolveAdTagUrl(from: baseUrl)
+
             // Create an ad request with our ad tag, display container, and optional user context.
-            print("Requesting \(type) ad with tag URL: \(tagUrl)")
+            print("Requesting \(type) ad with tag URL: \(adTagUrl)")
             let request = IMAAdsRequest(
-                adTagUrl: tagUrl,
+                adTagUrl: adTagUrl,
                 adDisplayContainer: adDisplayContainer,
                 contentPlayhead: contentPlayhead,
                 userContext: nil
             )
 
+            adsLoader.requestAds(with: request)
             adsLoader.requestAds(with: request)
         }
 
@@ -165,7 +170,7 @@
 
                 switch event.type {
                 case .ALL_ADS_COMPLETED, .LOG, .AD_BREAK_FETCH_ERROR:
-                    resetAdsLoaderAndManager()
+                    esetAdsLoaderAndManager()
                 default:
                     break
                 }
