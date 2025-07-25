@@ -134,7 +134,6 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         Player.Listener,
         AnalyticsListener,
         BecomingNoisyListener,
-        AudioManager.OnAudioFocusChangeListener,
         ExoDorisPlayerViewListener {
 
     private static final String TAG = "ReactTvExoplayerView";
@@ -345,6 +344,33 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     //MediaSession
     private final MediaSessionCompat mediaSession;
     private final MediaSessionConnector mediaSessionConnector;
+
+    private final AudioManager.OnAudioFocusChangeListener audioFocusChangeListener = new AudioManager.OnAudioFocusChangeListener() {
+        @Override
+        public void onAudioFocusChange(int focusChange) {
+            switch (focusChange) {
+                case AudioManager.AUDIOFOCUS_LOSS:
+                    eventEmitter.audioFocusChanged(false);
+                    break;
+                case AudioManager.AUDIOFOCUS_GAIN:
+                    eventEmitter.audioFocusChanged(true);
+                    break;
+                default:
+                    break;
+            }
+
+            if (player != null) {
+                ExoPlayer exoPlayer = player.getExoPlayer();
+                if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
+                    // Lower the volume
+                    exoPlayer.setVolume(0.8f);
+                } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
+                    // Raise it back to normal
+                    exoPlayer.setVolume(1);
+                }
+            }
+        }
+    };
 
     public ReactTVExoplayerView(ThemedReactContext context) {
         super(context);
@@ -814,8 +840,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             public void onPause() {
                 super.onPause();
                 Log.d(TAG, "MediaSession onPause()");
-                if (player == null || !isLive || player.getCurrentVideoType() == VideoType.LIVE_WITH_DVR){
-                  setPausedModifier(true);
+                if (player == null || !isLive || player.getCurrentVideoType() == VideoType.LIVE_WITH_DVR) {
+                    setPausedModifier(true);
                 }
             }
         });
@@ -864,15 +890,22 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             trackSelector = null;
             clearResumePosition();
         }
-
+        if (dorisMessaging != null) {
+            dorisMessaging.release();
+        }
         jsProgressHandler.removeMessages(SHOW_JS_PROGRESS);
         nativeProgressHandler.removeMessages(SHOW_NATIVE_PROGRESS);
         themedReactContext.removeLifecycleEventListener(this);
         audioBecomingNoisyReceiver.removeListener();
         exoDorisPlayerView.setTag(R.id.bottomComponentTag, null);
+        exoDorisPlayerView.setPlayer(null);
         View bottomOverlayView = exoDorisPlayerView.findViewWithTag(R.id.bottom_overlay_component);
         if (bottomOverlayView instanceof ReactRootView) {
             ((ReactRootView) bottomOverlayView).unmountReactApplication();
+        }
+        ViewGroup bottomComponentContainer = exoDorisPlayerView.findViewById(R.id.bottomComponentContainer);
+        if (bottomComponentContainer != null) {
+            bottomComponentContainer.removeAllViews();
         }
     }
 
@@ -880,7 +913,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         if (disableFocus) {
             return true;
         }
-        int result = audioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+        int result = audioManager.requestAudioFocus(audioFocusChangeListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
         return result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
     }
 
@@ -966,7 +999,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
     private void onStopPlayback() {
         setKeepScreenOn(false);
-        audioManager.abandonAudioFocus(this);
+        audioManager.abandonAudioFocus(audioFocusChangeListener);
     }
 
     private void updateResumePosition() {
@@ -978,33 +1011,6 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
     private void clearResumePosition() {
         resumePosition = ResumePositionHandler.RESUME_UNSET;
-    }
-
-    // AudioManager.OnAudioFocusChangeListener implementation
-
-    @Override
-    public void onAudioFocusChange(int focusChange) {
-        switch (focusChange) {
-            case AudioManager.AUDIOFOCUS_LOSS:
-                eventEmitter.audioFocusChanged(false);
-                break;
-            case AudioManager.AUDIOFOCUS_GAIN:
-                eventEmitter.audioFocusChanged(true);
-                break;
-            default:
-                break;
-        }
-
-        if (player != null) {
-            ExoPlayer exoPlayer = player.getExoPlayer();
-            if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
-                // Lower the volume
-                exoPlayer.setVolume(0.8f);
-            } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
-                // Raise it back to normal
-                exoPlayer.setVolume(1);
-            }
-        }
     }
 
     // AudioBecomingNoisyListener implementation
