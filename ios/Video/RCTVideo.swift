@@ -94,8 +94,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         /* Playhead used by the SDK to track content video progress and insert mid-rolls. */
         private var _contentPlayhead: IMAAVPlayerContentPlayhead?
     #endif
+    private var _hasSetUpIMA: Bool = false
     private var _didRequestAds = false
+    private var _didRequestPostRollAd: Bool = false
     private var _adPlaying = false
+    private var _skippedAdPlayed: Bool = false
+    private var _playedCuePoints: Set<Double> = []
+    private var _skippedCuePoints: Set<Double> = []
+
 
     private lazy var _drmManager: DRMManagerSpec? = ReactNativeVideoManager.shared.getDRMManager()
     private var _playerObserver: RCTPlayerObserver = .init()
@@ -441,10 +447,52 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         if currentTimeSecs >= 0 {
             #if USE_GOOGLE_IMA
-                if !_didRequestAds && currentTimeSecs >= 0.0001 && _source?.adParams.adTagUrl != nil {
-                    _imaAdsManager.requestAds()
+            // Pre-roll Ad
+            if !_didRequestAds && currentTimeSecs >= 0.0001 && currentTimeSecs < 10 && _source?.adParams.adTagUrl != nil {
+                    _imaAdsManager.requestAds(type: .preRoll)
                     _didRequestAds = true
                 }
+            
+            // Mid-roll logic handled here only
+            if let cuePoints = _source?.adParams.cuePoints,
+               _source?.adParams.midRollAdTagUrl != nil {
+
+                if let highestSkipped = _skippedCuePoints.max(),
+                   currentTimeSecs >= highestSkipped,
+                   !_skippedAdPlayed,
+                   !_pendingSeek,
+                   !_playedCuePoints.contains(highestSkipped) {
+                    print("🔁 Playing highest skipped cue: \(highestSkipped)s")
+                    _imaAdsManager.requestAds(type: .midRoll)
+                    _playedCuePoints.insert(highestSkipped)
+                    _skippedCuePoints.remove(highestSkipped)
+                    _skippedAdPlayed = true
+                    return
+                }
+
+                   // Handle normal cue point (non-skipped, just reached naturally)
+                   for cueTime in cuePoints.map({ $0.doubleValue }) {
+                       let isAtCue = abs(currentTimeSecs - cueTime) < 0.5
+                       if isAtCue && !_pendingSeek && !_playedCuePoints.contains(cueTime) {
+                           print("▶️ Playing normal cue: \(cueTime)s")
+                           _imaAdsManager.requestAds(type: .midRoll)
+                           _playedCuePoints.insert(cueTime)
+                           if _skippedCuePoints.contains(cueTime) {
+                               _skippedCuePoints.remove(cueTime)
+                           }
+                           break
+                       }
+                   }
+            }
+            
+            // Post-roll Ad: Trigger 2 seconds before end
+            if !_didRequestPostRollAd,
+               _source?.adParams.postRollAdTagUrl != nil,
+               duration - currentTimeSecs <= 1 {
+                print("Triggering post-roll ad 1 seconds before content ends.")
+                _imaAdsManager.requestAds(type: .postRoll)
+                _didRequestPostRollAd = true
+            }
             #endif
             onVideoProgress?([
                 "currentTime": currentTimeSecs,
@@ -574,14 +622,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
             _player!.replaceCurrentItem(with: playerItem)
 
-            if #available(iOS 15.0, *) {
-                if _playInBackground {
-                    _player!.audiovisualBackgroundPlaybackPolicy = .continuesIfPossible
-                } else {
-                    _player!.audiovisualBackgroundPlaybackPolicy = .automatic
-                }
-            }
-
             if _showNotificationControls {
                 // We need to register player after we set current item and only for init
                 NowPlayingInfoCenterManager.shared.registerPlayer(player: _player!)
@@ -600,14 +640,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     self._playerViewController?.allowsVideoFrameAnalysis = true
                 }
             #endif
-
-            if #available(iOS 15.0, *) {
-                if _playInBackground {
-                    _player!.audiovisualBackgroundPlaybackPolicy = .continuesIfPossible
-                } else {
-                    _player!.audiovisualBackgroundPlaybackPolicy = .automatic
-                }
-            }
             // later we can just call "updateNowPlayingInfo:
             NowPlayingInfoCenterManager.shared.updateNowPlayingInfo()
         }
@@ -621,12 +653,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
 
         #if USE_GOOGLE_IMA
-            if _source?.adParams.adTagUrl != nil {
-                // Set up your content playhead and contentComplete callback.
-                _contentPlayhead = IMAAVPlayerContentPlayhead(avPlayer: _player!)
-
-                _imaAdsManager.setUpAdsLoader()
-            }
+        _imaAdsManager.releaseAds()
+        if !_hasSetUpIMA && _source?.adParams.hasAnyAds == true {
+           _contentPlayhead = IMAAVPlayerContentPlayhead(avPlayer: _player!)
+           _imaAdsManager.setUpAdsLoader()
+           _hasSetUpIMA = true
+        }
         #endif
         isSetSourceOngoing = false
         applyNextSource()
@@ -878,29 +910,46 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func setSeek(_ time: NSNumber, _ tolerance: NSNumber) {
-        let item: AVPlayerItem? = _player?.currentItem
+        guard let player = _player,
+              let item = player.currentItem,
+              item.status == .readyToPlay else {
+            _pendingSeekTime = time.floatValue
+            return
+        }
 
         _pendingSeek = true
 
-        guard item != nil, let player = _player, let item, item.status == AVPlayerItem.Status.readyToPlay else {
-            _pendingSeekTime = time.floatValue
-            return
+        let oldTime = CMTimeGetSeconds(player.currentTime())
+        let newTime = time.doubleValue
+
+        if newTime > oldTime, let cuePoints = _source?.adParams.cuePoints {
+            let skipped = cuePoints.map { $0.doubleValue }
+                .filter { $0 > oldTime && $0 < newTime && !_playedCuePoints.contains($0) }
+
+            for cue in skipped {
+                print("🕒 Seeked over cue point \(cue)s — marking as skipped")
+                _skippedCuePoints.insert(cue)
+                _skippedAdPlayed = false
+            }
         }
 
         RCTPlayerOperations.seek(
             player: player,
             playerItem: item,
             paused: _paused,
-            seekTime: time.floatValue,
+            seekTime: Float(newTime),
             seekTolerance: tolerance.floatValue
-        ) { [weak self] (_: Bool) in
+        ) { [weak self] _ in
             guard let self else { return }
 
             self._playerObserver.addTimeObserverIfNotSet()
             self.setPaused(self._paused)
-            self.onVideoSeek?(["currentTime": NSNumber(value: Float(CMTimeGetSeconds(item.currentTime()))),
-                               "seekTime": time,
-                               "target": self.reactTag as Any])
+
+            self.onVideoSeek?([
+                "currentTime": NSNumber(value: Float(CMTimeGetSeconds(item.currentTime()))),
+                "seekTime": time,
+                "target": self.reactTag as Any
+            ])
         }
 
         _pendingSeek = false
@@ -1354,6 +1403,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     func getAdTagUrl() -> String? {
         return _source?.adParams.adTagUrl
+    }
+    
+    func getMidrollAdTagUrl() -> String? {
+        return _source?.adParams.midRollAdTagUrl
+    }
+    
+    func getPostrollAdTagUrl() -> String? {
+        return _source?.adParams.postRollAdTagUrl
     }
 
     #if USE_GOOGLE_IMA

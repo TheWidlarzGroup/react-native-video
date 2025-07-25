@@ -80,6 +80,9 @@ export enum DRMType {
 export type AdConfig = Readonly<{
   adTagUrl?: string;
   adLanguage?: ISO639_1;
+  midRollAdTagUrl?: string;
+  postRollAdTagUrl?: string;
+  cuePoints?: number[];
 }>;
 
 export type Drm = Readonly<{
