@@ -29,6 +29,9 @@ type VideoMetadata = Readonly<{
 export type AdsConfig = Readonly<{
   adTagUrl?: string;
   adLanguage?: string;
+  midRollAdTagUrl?: string;
+  postRollAdTagUrl?: string;
+  cuePoints?: number[];
 }>;
 
 export type VideoSrc = Readonly<{

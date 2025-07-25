@@ -10,6 +10,13 @@
         private var adsLoader: IMAAdsLoader!
         /* Main point of interaction with the SDK. Created by the SDK as the result of an ad request. */
         private var adsManager: IMAAdsManager!
+        private var _hasSetUpIMA: Bool = false
+        
+        enum AdType {
+            case preRoll
+            case midRoll
+            case postRoll
+        }
 
         init(video: RCTVideo!, isPictureInPictureActive: @escaping () -> Bool) {
             _video = video
@@ -27,31 +34,87 @@
             adsLoader = IMAAdsLoader(settings: settings)
             adsLoader.delegate = self
         }
+        
+        func resolveAdTagUrl(from baseUrl: String) -> String {
+            let timestamp = Int(Date().timeIntervalSince1970 * 1000)
+            let cacheBuster = Int.random(in: 100000...999999)
 
-        func requestAds() {
+            var updatedUrl = baseUrl
+
+            // Replace placeholders if they exist
+            if updatedUrl.contains("{TIMESTAMP}") || updatedUrl.contains("{CACHE_BUSTER}") {
+                updatedUrl = updatedUrl
+                    .replacingOccurrences(of: "{TIMESTAMP}", with: "\(timestamp)")
+                    .replacingOccurrences(of: "{CACHE_BUSTER}", with: "\(cacheBuster)")
+            } else if let correlatorRange = updatedUrl.range(of: "correlator=") {
+                // Append timestamp and cb right after correlator=
+                let insertIndex = correlatorRange.upperBound
+                updatedUrl.insert(contentsOf: "&timestamp=\(timestamp)&cb=\(cacheBuster)", at: insertIndex)
+            } else {
+                // If correlator is not found, just append them as query parameters
+                let separator = updatedUrl.contains("?") ? "&" : "?"
+                updatedUrl += "\(separator)timestamp=\(timestamp)&cb=\(cacheBuster)"
+            }
+
+            return updatedUrl
+        }
+        
+        private func resetAdsLoaderAndManager() {
+            // Destroy existing manager if any
+            adsManager?.destroy()
+            adsManager = nil
+
+            // Reset loader
+            adsLoader?.delegate = nil
+            adsLoader = nil
+
+            // Re-initialize loader
+            setUpAdsLoader()
+        }
+
+
+        func requestAds(type: AdType) {
             guard let _video else { return }
             // fixes RCTVideo --> RCTIMAAdsManager --> IMAAdsLoader --> IMAAdDisplayContainer --> RCTVideo memory leak.
             let adContainerView = UIView(frame: _video.bounds)
             adContainerView.backgroundColor = .clear
+            adContainerView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
             _video.addSubview(adContainerView)
 
             // Create ad display container for ad rendering.
             let adDisplayContainer = IMAAdDisplayContainer(adContainer: adContainerView, viewController: _video.reactViewController())
-
-            let adTagUrl = _video.getAdTagUrl()
             let contentPlayhead = _video.getContentPlayhead()
 
-            if adTagUrl != nil && contentPlayhead != nil {
+            var rawAdTagUrl: String?
+
+               switch type {
+               case .preRoll:
+                   rawAdTagUrl = _video.getAdTagUrl()
+               case .midRoll:
+                   rawAdTagUrl = _video.getMidrollAdTagUrl()
+               case .postRoll:
+                   rawAdTagUrl = _video.getPostrollAdTagUrl()
+               }
+
+               guard let baseUrl = rawAdTagUrl, !baseUrl.isEmpty, contentPlayhead != nil else {
+                   print("Invalid ad tag or playhead missing for \(type)")
+                   return
+               }
+
+               // Inject TIMESTAMP and CACHE_BUSTER values
+               let adTagUrl = resolveAdTagUrl(from: baseUrl)
+
                 // Create an ad request with our ad tag, display container, and optional user context.
+                print("Requesting \(type) ad with tag URL: \(adTagUrl)")
                 let request = IMAAdsRequest(
-                    adTagUrl: adTagUrl!,
+                    adTagUrl: adTagUrl,
                     adDisplayContainer: adDisplayContainer,
                     contentPlayhead: contentPlayhead,
                     userContext: nil
                 )
 
                 adsLoader.requestAds(with: request)
-            }
+          
         }
 
         func releaseAds() {
@@ -129,6 +192,13 @@
                         "target": _video.reactTag!,
                     ])
                 }
+                
+                switch event.type {
+                case .ALL_ADS_COMPLETED, .LOG, .AD_BREAK_FETCH_ERROR:
+                       resetAdsLoaderAndManager()
+                   default:
+                       break
+                   }
             }
         }
 
@@ -149,6 +219,13 @@
                     ],
                     "target": _video.reactTag!,
                 ])
+                
+                switch error.type {
+                case .adLoadingFailed, .adUnknownErrorType, .adPlayingFailed:
+                       resetAdsLoaderAndManager()
+                   default:
+                       break
+                   }
             }
 
             // Fall back to playing content
