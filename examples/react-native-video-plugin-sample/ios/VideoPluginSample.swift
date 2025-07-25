@@ -15,17 +15,16 @@ class VideoPluginSample: RNVAVPlayerPlugin {
         super.init()
         ReactNativeVideoManager.shared.registerPlugin(plugin: self)
     }
-    
+
     deinit {
         ReactNativeVideoManager.shared.unregisterPlugin(plugin: self)
     }
-    
-    
+
     @objc(withResolver:withRejecter:)
-    func setMetadata(resolve:RCTPromiseResolveBlock,reject:RCTPromiseRejectBlock) -> Void {
+    func setMetadata(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         resolve(true)
     }
-        
+
     /*
      * Handlers called on player creation and destructon
      */
@@ -40,7 +39,7 @@ class VideoPluginSample: RNVAVPlayerPlugin {
         _playerRateChangeObserver?.invalidate()
         _playerCurrentItemChangeObserver?.invalidate()
     }
-    
+
     /**
      * custom functions to be able to track AVPlayer state change
      */
@@ -58,7 +57,7 @@ class VideoPluginSample: RNVAVPlayerPlugin {
             _playerItemStatusObserver?.invalidate()
             return
         }
-    
+
         _playerItemStatusObserver = playerItem.observe(\.status, options: [.new, .old], changeHandler: handlePlayerItemStatusChange)
     }
 }
