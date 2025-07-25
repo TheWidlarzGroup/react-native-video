@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - v7
+    paths:
+      # Update on workflow change
+      - '.github/workflows/deploy-docs.yml'
+      # Update on docs change
+      - 'docs/**'
+      # Update on code change (Api Reference)
+      - 'packages/react-native-video/src/**'
 
 jobs:
   build:
