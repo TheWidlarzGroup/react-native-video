@@ -57,7 +57,7 @@ The `VideoPlayer` class, through `VideoPlayerEvents`, supports the following eve
 | `onProgress`               | (data: [onProgressData](../api-reference/interfaces/onProgressData.md)) => void                       | Fired periodically during playback with the current time.                                   |
 | `onReadyToDisplay`         | () => void                                           | Fired when the player is ready to display the first frame of the video.                     |
 | `onSeek`                   | (seekTime: number) => void                           | Fired when a seek operation has completed.                                                  |
-| `onStatusChange`           | (status: [VideoPlayerStatus](../api-reference/interfaces/VideoPlayerStatus.md)) => void                  | Fired when the player status changes (detailed status updates).                             |
+| `onStatusChange`           | (status: [VideoPlayerStatus](../api-reference/type-aliases/VideoPlayerStatus.md)) => void                  | Fired when the player status changes (detailed status updates).                             |
 | `onTextTrackDataChanged`   | (texts: string[]) => void                            | Fired when text track data (e.g., subtitles) changes.                                       |
 | `onTimedMetadata`          | (metadata: [TimedMetadata](../api-reference/interfaces/TimedMetadata.md)) => void                    | Fired when timed metadata is encountered in the video stream.                               |
 | `onTrackChange`            | (track: [TextTrack](../api-reference/interfaces/TextTrack.md) \| null) => void                    | Fired when the selected text track changes.                                                 |
@@ -65,7 +65,7 @@ The `VideoPlayer` class, through `VideoPlayerEvents`, supports the following eve
 
 Additionally, the `VideoPlayer` instance itself has an `onError` property:
 
--   `onError: (error: ` [VideoRuntimeError](../api-reference/interfaces/VideoRuntimeError.md) `) => void` — Fired when an error occurs. The callback receives the `VideoRuntimeError` object.
+-   `onError: (error: ` [VideoRuntimeError](../api-reference/classes/VideoRuntimeError.md) `) => void` — Fired when an error occurs. The callback receives the `VideoRuntimeError` object.
 
 **Benefits of `useEvent`**:
 
