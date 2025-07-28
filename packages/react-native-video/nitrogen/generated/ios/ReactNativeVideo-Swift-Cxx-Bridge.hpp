@@ -50,6 +50,8 @@ namespace margelo::nitro::video { struct onLoadStartData; }
 namespace margelo::nitro::video { struct onPlaybackStateChangeData; }
 // Forward declaration of `onProgressData` to properly resolve imports.
 namespace margelo::nitro::video { struct onProgressData; }
+// Forward declaration of `onVolumeChangeData` to properly resolve imports.
+namespace margelo::nitro::video { struct onVolumeChangeData; }
 
 // Forward declarations of Swift defined types
 // Forward declaration of `HybridVideoPlayerEventEmitterSpec_cxx` to properly resolve imports.
@@ -89,6 +91,7 @@ namespace ReactNativeVideo { class HybridVideoViewViewManagerSpec_cxx; }
 #include "onLoadStartData.hpp"
 #include "onPlaybackStateChangeData.hpp"
 #include "onProgressData.hpp"
+#include "onVolumeChangeData.hpp"
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/PromiseHolder.hpp>
 #include <NitroModules/Result.hpp>
@@ -533,6 +536,28 @@ namespace margelo::nitro::video::bridge::swift {
   Func_void_std__optional_TextTrack_ create_Func_void_std__optional_TextTrack_(void* _Nonnull swiftClosureWrapper);
   inline Func_void_std__optional_TextTrack__Wrapper wrap_Func_void_std__optional_TextTrack_(Func_void_std__optional_TextTrack_ value) {
     return Func_void_std__optional_TextTrack__Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::function<void(const onVolumeChangeData& /* data */)>
+  /**
+   * Specialized version of `std::function<void(const onVolumeChangeData&)>`.
+   */
+  using Func_void_onVolumeChangeData = std::function<void(const onVolumeChangeData& /* data */)>;
+  /**
+   * Wrapper class for a `std::function<void(const onVolumeChangeData& / * data * /)>`, this can be used from Swift.
+   */
+  class Func_void_onVolumeChangeData_Wrapper final {
+  public:
+    explicit Func_void_onVolumeChangeData_Wrapper(std::function<void(const onVolumeChangeData& /* data */)>&& func): _function(std::make_shared<std::function<void(const onVolumeChangeData& /* data */)>>(std::move(func))) {}
+    inline void call(onVolumeChangeData data) const {
+      _function->operator()(data);
+    }
+  private:
+    std::shared_ptr<std::function<void(const onVolumeChangeData& /* data */)>> _function;
+  };
+  Func_void_onVolumeChangeData create_Func_void_onVolumeChangeData(void* _Nonnull swiftClosureWrapper);
+  inline Func_void_onVolumeChangeData_Wrapper wrap_Func_void_onVolumeChangeData(Func_void_onVolumeChangeData value) {
+    return Func_void_onVolumeChangeData_Wrapper(std::move(value));
   }
   
   // pragma MARK: std::function<void(VideoPlayerStatus /* status */)>

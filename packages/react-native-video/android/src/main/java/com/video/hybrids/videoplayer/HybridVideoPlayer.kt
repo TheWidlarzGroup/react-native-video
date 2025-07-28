@@ -167,6 +167,10 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
       } else {
         playerPointer.volume = userVolume.toFloat()
       }
+      eventEmitter.onVolumeChange(onVolumeChangeData(
+        volume = playerPointer.volume.toDouble(),
+        muted = muted
+      ))
     }
   )
 
@@ -514,7 +518,10 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
       }
 
       VideoManager.audioFocusManager.requestAudioFocusUpdate()
-      eventEmitter.onVolumeChange(volume.toDouble())
+      eventEmitter.onVolumeChange(onVolumeChangeData(
+        volume = volume.toDouble(),
+        muted = muted
+      ))
     }
 
     override fun onCues(cueGroup: CueGroup) {

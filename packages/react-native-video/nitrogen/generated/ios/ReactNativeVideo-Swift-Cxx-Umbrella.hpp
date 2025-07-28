@@ -58,6 +58,8 @@ namespace margelo::nitro::video { struct onLoadStartData; }
 namespace margelo::nitro::video { struct onPlaybackStateChangeData; }
 // Forward declaration of `onProgressData` to properly resolve imports.
 namespace margelo::nitro::video { struct onProgressData; }
+// Forward declaration of `onVolumeChangeData` to properly resolve imports.
+namespace margelo::nitro::video { struct onVolumeChangeData; }
 
 // Include C++ defined types
 #include "BandwidthData.hpp"
@@ -85,6 +87,7 @@ namespace margelo::nitro::video { struct onProgressData; }
 #include "onLoadStartData.hpp"
 #include "onPlaybackStateChangeData.hpp"
 #include "onProgressData.hpp"
+#include "onVolumeChangeData.hpp"
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/Result.hpp>
 #include <exception>

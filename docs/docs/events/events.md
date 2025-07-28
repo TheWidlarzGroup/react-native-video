@@ -61,7 +61,7 @@ The `VideoPlayer` class, through `VideoPlayerEvents`, supports the following eve
 | `onTextTrackDataChanged`   | (texts: string[]) => void                            | Fired when text track data (e.g., subtitles) changes.                                       |
 | `onTimedMetadata`          | (metadata: [TimedMetadata](../api-reference/interfaces/TimedMetadata.md)) => void                    | Fired when timed metadata is encountered in the video stream.                               |
 | `onTrackChange`            | (track: [TextTrack](../api-reference/interfaces/TextTrack.md) \| null) => void                    | Fired when the selected text track changes.                                                 |
-| `onVolumeChange`           | (volume: number) => void                             | Fired when the volume changes.                                                              |
+| `onVolumeChange`           | (data: [onVolumeChangeData](../api-reference/interfaces/onVolumeChangeData.md)) => void     | Fired when the volume changes.                                                              |
 
 Additionally, the `VideoPlayer` instance itself has an `onError` property:
 
