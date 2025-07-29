@@ -35,30 +35,6 @@
             adsLoader.delegate = self
         }
 
-        func resolveAdTagUrl(from baseUrl: String) -> String {
-            let timestamp = Int(Date().timeIntervalSince1970 * 1000)
-            let cacheBuster = Int.random(in: 100000...999999)
-
-            var updatedUrl = baseUrl
-
-            // Replace placeholders if they exist
-            if updatedUrl.contains("{TIMESTAMP}") || updatedUrl.contains("{CACHE_BUSTER}") {
-                updatedUrl = updatedUrl
-                    .replacingOccurrences(of: "{TIMESTAMP}", with: "\(timestamp)")
-                    .replacingOccurrences(of: "{CACHE_BUSTER}", with: "\(cacheBuster)")
-            } else if let correlatorRange = updatedUrl.range(of: "correlator=") {
-                // Append timestamp and cb right after correlator=
-                let insertIndex = correlatorRange.upperBound
-                updatedUrl.insert(contentsOf: "&timestamp=\(timestamp)&cb=\(cacheBuster)", at: insertIndex)
-            } else {
-                // If correlator is not found, just append them as query parameters
-                let separator = updatedUrl.contains("?") ? "&" : "?"
-                updatedUrl += "\(separator)timestamp=\(timestamp)&cb=\(cacheBuster)"
-            }
-
-            return updatedUrl
-        }
-
         private func resetAdsLoaderAndManager() {
             // Destroy existing manager if any
             adsManager?.destroy()
@@ -84,29 +60,25 @@
             let adDisplayContainer = IMAAdDisplayContainer(adContainer: adContainerView, viewController: _video.reactViewController())
             let contentPlayhead = _video.getContentPlayhead()
 
-            var rawAdTagUrl: String?
+            var adTagUrl: String?
 
             switch type {
             case .preRoll:
-                rawAdTagUrl = _video.getAdTagUrl()
+                adTagUrl = _video.getAdTagUrl()
             case .midRoll:
-                rawAdTagUrl = _video.getMidrollAdTagUrl()
+                adTagUrl = _video.getMidrollAdTagUrl()
             case .postRoll:
-                rawAdTagUrl = _video.getPostrollAdTagUrl()
+                adTagUrl = _video.getPostrollAdTagUrl()
             }
 
-            guard let baseUrl = rawAdTagUrl, !baseUrl.isEmpty, contentPlayhead != nil else {
-                print("Invalid ad tag or playhead missing for \(type)")
+            guard let tagUrl = adTagUrl, !tagUrl.isEmpty, contentPlayhead != nil else {
                 return
             }
-
-            // Inject TIMESTAMP and CACHE_BUSTER values
-            let adTagUrl = resolveAdTagUrl(from: baseUrl)
 
             // Create an ad request with our ad tag, display container, and optional user context.
             print("Requesting \(type) ad with tag URL: \(adTagUrl)")
             let request = IMAAdsRequest(
-                adTagUrl: adTagUrl,
+                adTagUrl: tagUrl,
                 adDisplayContainer: adDisplayContainer,
                 contentPlayhead: contentPlayhead,
                 userContext: nil

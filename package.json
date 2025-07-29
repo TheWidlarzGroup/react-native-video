@@ -39,8 +39,6 @@
     },
     "scripts": {
         "lint": "yarn eslint .",
-        "build": "yarn tsc",
-        "prepare": "yarn build",
         "xbasic": "yarn --cwd examples/basic",
         "docs": "yarn --cwd docs build",
         "docs:llms": "node scripts/generate-llms.js",

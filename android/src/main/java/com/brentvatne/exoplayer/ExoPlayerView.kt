@@ -163,7 +163,7 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
             playerView.controllerAutoShow = true
             playerView.controllerHideOnTouch = true
             // Show controls immediately when enabled
-            playerView.showController()
+            // playerView.showController()
         }
     }
 
