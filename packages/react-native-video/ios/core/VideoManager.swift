@@ -85,12 +85,12 @@ class VideoManager {
   
   func register(view: VideoComponentView) {
     videoView.add(view)
-    // PluginsRegistry.shared.notifyVideoViewCreated(view: view)
+    PluginsRegistry.shared.notifyVideoViewCreated(view: view)
   }
   
   func unregister(view: VideoComponentView) {
     videoView.remove(view)
-    // PluginsRegistry.shared.notifyVideoViewDestroyed(view: view)
+    PluginsRegistry.shared.notifyVideoViewDestroyed(view: view)
   }
   
   func requestAudioSessionUpdate() {

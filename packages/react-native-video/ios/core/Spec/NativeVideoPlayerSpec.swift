@@ -9,7 +9,7 @@ import Foundation
 import AVFoundation
 
 // Helper alias that allow to represet player outside of module
-public typealias NativeVideoPlayer = NativeVideoPlayerSpec & HybridVideoPlayerSpec & AnyObject
+public typealias NativeVideoPlayer = NativeVideoPlayerSpec & HybridVideoPlayerSpec
 
 public protocol NativeVideoPlayerSpec {
   // MARK: - Properties

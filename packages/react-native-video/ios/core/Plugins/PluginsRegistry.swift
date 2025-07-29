@@ -8,25 +8,19 @@
 import Foundation
 import AVFoundation
 
-public class Weak<T> where T: AnyObject {
-  weak var value: T?
-  
-  init(value: T) {
-    self.value = value
+public class Weak<T> {
+  private weak var _value: AnyObject?
+  public var value: T? {
+    return _value as? T
+  }
+
+  public init(value: T) {
+    _value = value as AnyObject
   }
 }
 
-//public class Weak<T> where T: NativeVideoPlayer {
-//  weak var value: T?
-//  
-//  init(value: T) {
-//    self.value = value
-//  }
-//}
-
-
 public final class PluginsRegistry {
-  static let shared = PluginsRegistry()
+  public static let shared = PluginsRegistry()
   
   private var plugins = NSHashTable<ReactNativeVideoPlugin>.weakObjects()
   
@@ -76,7 +70,7 @@ public final class PluginsRegistry {
   
   internal func notifyPlayerDestroyed(player: NativeVideoPlayer) {
     for plugin in plugins.allObjects {
-      plugin.onPlayerCreated(player: player)
+      plugin.onPlayerCreated(player: Weak(value: player))
     }
   }
   

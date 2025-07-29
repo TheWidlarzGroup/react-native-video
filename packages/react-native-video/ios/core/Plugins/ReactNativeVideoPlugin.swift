@@ -8,14 +8,22 @@
 import Foundation
 import AVFoundation
 
-public class ReactNativeVideoPlugin {
-  public func onPlayerCreated(player: Weak<NativeVideoPlayer>) { /* no-op */ }
-  public func onPlayerDestroyed(player: Weak<NativeVideoPlayer>) { /* no-op */ }
+open class ReactNativeVideoPlugin {
+  public init() {
+    PluginsRegistry.shared.register(plugin: self)
+  }
   
-  public func onVideoViewCreated(view: Weak<VideoComponentView>) { /* no-op */ }
-  public func onVideoViewDestroyed(view: Weak<VideoComponentView>) { /* no-op */ }
+  deinit {
+    PluginsRegistry.shared.unregister(plugin: self)
+  }
   
-  public func overrideSource(source: NativeVideoPlayerSource) async -> NativeVideoPlayerSource {
+  open func onPlayerCreated(player: Weak<NativeVideoPlayer>) { /* no-op */ }
+  open func onPlayerDestroyed(player: Weak<NativeVideoPlayer>) { /* no-op */ }
+  
+  open func onVideoViewCreated(view: Weak<VideoComponentView>) { /* no-op */ }
+  open func onVideoViewDestroyed(view: Weak<VideoComponentView>) { /* no-op */ }
+  
+  open func overrideSource(source: NativeVideoPlayerSource) async -> NativeVideoPlayerSource {
     return source
   }
 }
