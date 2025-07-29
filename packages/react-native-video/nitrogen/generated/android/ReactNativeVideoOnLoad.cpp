@@ -29,6 +29,7 @@
 #include "JFunc_void_TimedMetadata.hpp"
 #include "JFunc_void_std__vector_std__string_.hpp"
 #include "JFunc_void_std__optional_TextTrack_.hpp"
+#include "JFunc_void_onVolumeChangeData.hpp"
 #include "JFunc_void_VideoPlayerStatus.hpp"
 #include "JHybridVideoPlayerSourceSpec.hpp"
 #include "JHybridVideoPlayerSourceFactorySpec.hpp"
@@ -60,6 +61,7 @@ int initialize(JavaVM* vm) {
     margelo::nitro::video::JFunc_void_TimedMetadata_cxx::registerNatives();
     margelo::nitro::video::JFunc_void_std__vector_std__string__cxx::registerNatives();
     margelo::nitro::video::JFunc_void_std__optional_TextTrack__cxx::registerNatives();
+    margelo::nitro::video::JFunc_void_onVolumeChangeData_cxx::registerNatives();
     margelo::nitro::video::JFunc_void_VideoPlayerStatus_cxx::registerNatives();
     margelo::nitro::video::JHybridVideoPlayerSourceSpec::registerNatives();
     margelo::nitro::video::JHybridVideoPlayerSourceFactorySpec::registerNatives();

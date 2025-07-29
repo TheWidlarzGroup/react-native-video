@@ -275,13 +275,13 @@ abstract class HybridVideoPlayerEventEmitterSpec: HybridObject() {
       onTrackChange = value
     }
   
-  abstract var onVolumeChange: (volume: Double) -> Unit
+  abstract var onVolumeChange: (data: onVolumeChangeData) -> Unit
   
-  private var onVolumeChange_cxx: Func_void_double
+  private var onVolumeChange_cxx: Func_void_onVolumeChangeData
     @Keep
     @DoNotStrip
     get() {
-      return Func_void_double_java(onVolumeChange)
+      return Func_void_onVolumeChangeData_java(onVolumeChange)
     }
     @Keep
     @DoNotStrip

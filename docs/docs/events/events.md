@@ -41,30 +41,31 @@ const MyVideoComponent = () => {
 
 The `VideoPlayer` class, through `VideoPlayerEvents`, supports the following events. You can subscribe to these by assigning a callback function to the corresponding property on the `VideoPlayer` instance.
 
-| Event                      | Description                                                                                                | Callback Data Example                                 |
-|----------------------------|------------------------------------------------------------------------------------------------------------|-------------------------------------------------------|
-| `onAudioBecomingNoisy`     | Fired when audio is about to become noisy (e.g., headphones unplugged).                                      |                                                       |
-| `onAudioFocusChange`       | Fired when the audio focus changes (e.g., another app starts playing audio).                               |                                                       |
-| `onBandwidthUpdate`        | Fired with an estimate of the available bandwidth.                                                         |                                                       |
-| `onBuffer`                 | Fired when the player starts or stops buffering data.                                                      | `{ isBuffering: boolean }`                            |
-| `onControlsVisibleChange`  | Fired when the visibility of native controls changes.                                                      |                                                       |
-| `onEnd`                    | Fired when the video playback reaches the end.                                                               |                                                       |
-| `onExternalPlaybackChange` | Fired when the external playback status changes (e.g., AirPlay).                                           |                                                       |
-| `onLoad`                   | Fired when the video has loaded and is ready to play.                                                    | [Video metadata (duration, naturalSize, etc.)](../api-reference/interfaces/onLoadData.md)          |
-| `onLoadStart`              | Fired when the video starts loading.                                                                       |                                                       |
-| `onPlaybackRateChange`     | Fired when the playback rate changes.                                                                      | `{ rate: number }`                                    |
-| `onPlaybackStateChange`    | Fired when the playback state changes (e.g., playing, paused, stopped).                                    | `{ status: VideoPlayerStatus }`                       |
-| `onProgress`               | Fired periodically during playback with the current time.                                                    | `{ currentTime: number, playableDuration: number, seekableDuration: number }` |
-| `onReadyToDisplay`         | Fired when the player is ready to display the first frame of the video.                                      |                                                       |
-| `onSeek`                   | Fired when a seek operation has completed.                                                                 | `{ seekTime: number }`                                |
-| `onStatusChange`           | Fired when the player status changes (detailed status updates).                                              |                                                       |
-| `onTextTrackDataChanged`   | Fired when text track data (e.g., subtitles) changes.                                                        |                                                       |
-| `onTimedMetadata`          | Fired when timed metadata is encountered in the video stream.                                                |                                                       |
-| `onVolumeChange`           | Fired when the volume changes.                                                                             | `{ volume: number }`                                  |
+| Event                      | Callback Signature                                      | Description                                                                                 |
+|----------------------------|--------------------------------------------------------|---------------------------------------------------------------------------------------------|
+| `onAudioBecomingNoisy`     | () => void                                           | Fired when audio is about to become noisy (e.g., headphones unplugged).                     |
+| `onAudioFocusChange`       | (hasAudioFocus: boolean) => void                     | Fired when the audio focus changes (e.g., another app starts playing audio).                |
+| `onBandwidthUpdate`        | (data: [BandwidthData](../api-reference/interfaces/BandwidthData.md)) => void                        | Fired with an estimate of the available bandwidth.                                          |
+| `onBuffer`                 | (buffering: boolean) => void                         | Fired when the player starts or stops buffering data.                                       |
+| `onControlsVisibleChange`  | (visible: boolean) => void                           | Fired when the visibility of native controls changes.                                       |
+| `onEnd`                    | () => void                                           | Fired when the video playback reaches the end.                                              |
+| `onExternalPlaybackChange` | (externalPlaybackActive: boolean) => void            | Fired when the external playback status changes (e.g., AirPlay).                            |
+| `onLoad`                   | (data: [onLoadData](../api-reference/interfaces/onLoadData.md)) => void                           | Fired when the video has loaded and is ready to play.                                       |
+| `onLoadStart`              | (data: [onLoadStartData](../api-reference/interfaces/onLoadStartData.md)) => void                      | Fired when the video starts loading.                                                        |
+| `onPlaybackRateChange`     | (rate: number) => void                               | Fired when the playback rate changes.                                                       |
+| `onPlaybackStateChange`    | (data: [onPlaybackStateChangeData](../api-reference/interfaces/onPlaybackStateChangeData.md)) => void            | Fired when the playback state changes (e.g., playing, paused, stopped).                     |
+| `onProgress`               | (data: [onProgressData](../api-reference/interfaces/onProgressData.md)) => void                       | Fired periodically during playback with the current time.                                   |
+| `onReadyToDisplay`         | () => void                                           | Fired when the player is ready to display the first frame of the video.                     |
+| `onSeek`                   | (seekTime: number) => void                           | Fired when a seek operation has completed.                                                  |
+| `onStatusChange`           | (status: [VideoPlayerStatus](../api-reference/type-aliases/VideoPlayerStatus.md)) => void                  | Fired when the player status changes (detailed status updates).                             |
+| `onTextTrackDataChanged`   | (texts: string[]) => void                            | Fired when text track data (e.g., subtitles) changes.                                       |
+| `onTimedMetadata`          | (metadata: [TimedMetadata](../api-reference/interfaces/TimedMetadata.md)) => void                    | Fired when timed metadata is encountered in the video stream.                               |
+| `onTrackChange`            | (track: [TextTrack](../api-reference/interfaces/TextTrack.md) \| null) => void                    | Fired when the selected text track changes.                                                 |
+| `onVolumeChange`           | (data: [onVolumeChangeData](../api-reference/interfaces/onVolumeChangeData.md)) => void     | Fired when the volume changes.                                                              |
 
 Additionally, the `VideoPlayer` instance itself has an `onError` property:
 
--   `onError`: Fired when a error occurs. The callback receives the `VideoRuntimeError` object.
+-   `onError: (error: ` [VideoRuntimeError](../api-reference/classes/VideoRuntimeError.md) `) => void` — Fired when an error occurs. The callback receives the `VideoRuntimeError` object.
 
 **Benefits of `useEvent`**:
 

@@ -26,7 +26,10 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
   }
   
   func onVolumeChanged(volume: Float) {
-    eventEmitter.onVolumeChange(Double(volume))
+    eventEmitter.onVolumeChange(onVolumeChangeData(
+      volume: Double(volume),
+      muted: muted
+    ))
   }
   
   func onPlaybackBufferEmpty() {

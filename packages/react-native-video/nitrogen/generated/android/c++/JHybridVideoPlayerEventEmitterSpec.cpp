@@ -29,6 +29,8 @@ namespace margelo::nitro::video { struct TimedMetadata; }
 namespace margelo::nitro::video { struct TimedMetadataObject; }
 // Forward declaration of `TextTrack` to properly resolve imports.
 namespace margelo::nitro::video { struct TextTrack; }
+// Forward declaration of `onVolumeChangeData` to properly resolve imports.
+namespace margelo::nitro::video { struct onVolumeChangeData; }
 // Forward declaration of `VideoPlayerStatus` to properly resolve imports.
 namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 
@@ -71,6 +73,9 @@ namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 #include "TextTrack.hpp"
 #include "JFunc_void_std__optional_TextTrack_.hpp"
 #include "JTextTrack.hpp"
+#include "onVolumeChangeData.hpp"
+#include "JFunc_void_onVolumeChangeData.hpp"
+#include "JonVolumeChangeData.hpp"
 #include "VideoPlayerStatus.hpp"
 #include "JFunc_void_VideoPlayerStatus.hpp"
 #include "JVideoPlayerStatus.hpp"
@@ -416,24 +421,24 @@ namespace margelo::nitro::video {
     static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_std__optional_TextTrack_::javaobject> /* onTrackChange */)>("setOnTrackChange_cxx");
     method(_javaPart, JFunc_void_std__optional_TextTrack__cxx::fromCpp(onTrackChange));
   }
-  std::function<void(double /* volume */)> JHybridVideoPlayerEventEmitterSpec::getOnVolumeChange() {
-    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JFunc_void_double::javaobject>()>("getOnVolumeChange_cxx");
+  std::function<void(const onVolumeChangeData& /* data */)> JHybridVideoPlayerEventEmitterSpec::getOnVolumeChange() {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JFunc_void_onVolumeChangeData::javaobject>()>("getOnVolumeChange_cxx");
     auto __result = method(_javaPart);
-    return [&]() -> std::function<void(double /* volume */)> {
-      if (__result->isInstanceOf(JFunc_void_double_cxx::javaClassStatic())) [[likely]] {
-        auto downcast = jni::static_ref_cast<JFunc_void_double_cxx::javaobject>(__result);
+    return [&]() -> std::function<void(const onVolumeChangeData& /* data */)> {
+      if (__result->isInstanceOf(JFunc_void_onVolumeChangeData_cxx::javaClassStatic())) [[likely]] {
+        auto downcast = jni::static_ref_cast<JFunc_void_onVolumeChangeData_cxx::javaobject>(__result);
         return downcast->cthis()->getFunction();
       } else {
         auto __resultRef = jni::make_global(__result);
-        return [__resultRef](double volume) -> void {
-          return __resultRef->invoke(volume);
+        return [__resultRef](onVolumeChangeData data) -> void {
+          return __resultRef->invoke(data);
         };
       }
     }();
   }
-  void JHybridVideoPlayerEventEmitterSpec::setOnVolumeChange(const std::function<void(double /* volume */)>& onVolumeChange) {
-    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_double::javaobject> /* onVolumeChange */)>("setOnVolumeChange_cxx");
-    method(_javaPart, JFunc_void_double_cxx::fromCpp(onVolumeChange));
+  void JHybridVideoPlayerEventEmitterSpec::setOnVolumeChange(const std::function<void(const onVolumeChangeData& /* data */)>& onVolumeChange) {
+    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_onVolumeChangeData::javaobject> /* onVolumeChange */)>("setOnVolumeChange_cxx");
+    method(_javaPart, JFunc_void_onVolumeChangeData_cxx::fromCpp(onVolumeChange));
   }
   std::function<void(VideoPlayerStatus /* status */)> JHybridVideoPlayerEventEmitterSpec::getOnStatusChange() {
     static const auto method = javaClassStatic()->getMethod<jni::local_ref<JFunc_void_VideoPlayerStatus::javaobject>()>("getOnStatusChange_cxx");

@@ -432,20 +432,20 @@ public class HybridVideoPlayerEventEmitterSpec_cxx {
     }
   }
   
-  public final var onVolumeChange: bridge.Func_void_double {
+  public final var onVolumeChange: bridge.Func_void_onVolumeChangeData {
     @inline(__always)
     get {
-      return { () -> bridge.Func_void_double in
-        let __closureWrapper = Func_void_double(self.__implementation.onVolumeChange)
-        return bridge.create_Func_void_double(__closureWrapper.toUnsafe())
+      return { () -> bridge.Func_void_onVolumeChangeData in
+        let __closureWrapper = Func_void_onVolumeChangeData(self.__implementation.onVolumeChange)
+        return bridge.create_Func_void_onVolumeChangeData(__closureWrapper.toUnsafe())
       }()
     }
     @inline(__always)
     set {
-      self.__implementation.onVolumeChange = { () -> (Double) -> Void in
-        let __wrappedFunction = bridge.wrap_Func_void_double(newValue)
-        return { (__volume: Double) -> Void in
-          __wrappedFunction.call(__volume)
+      self.__implementation.onVolumeChange = { () -> (onVolumeChangeData) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_onVolumeChangeData(newValue)
+        return { (__data: onVolumeChangeData) -> Void in
+          __wrappedFunction.call(__data)
         }
       }()
     }

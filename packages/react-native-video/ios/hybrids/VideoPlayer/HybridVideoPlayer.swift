@@ -106,6 +106,10 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
   var muted: Bool {
     set {
       playerPointer.isMuted = newValue
+      eventEmitter.onVolumeChange(onVolumeChangeData(
+        volume: Double(playerPointer.volume),
+        muted: muted
+      ))
     }
     get {
       return playerPointer.isMuted

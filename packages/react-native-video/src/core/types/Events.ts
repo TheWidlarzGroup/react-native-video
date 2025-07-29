@@ -85,7 +85,7 @@ export interface VideoPlayerEvents {
   /**
    * Called when the volume of the player changes.
    */
-  onVolumeChange: (volume: number) => void;
+  onVolumeChange: (data: onVolumeChangeData) => void;
   /**
    * Called when the player status changes.
    */
@@ -208,4 +208,15 @@ export interface TimedMetadata {
    * The timed metadata of the video.
    */
   metadata: Array<TimedMetadataObject>;
+}
+
+export interface onVolumeChangeData {
+  /**
+   * The volume of the player (0.0 = 0%, 1.0 = 100%).
+   */
+  volume: number;
+  /**
+   * Whether the player is muted.
+   */
+  muted: boolean;
 }

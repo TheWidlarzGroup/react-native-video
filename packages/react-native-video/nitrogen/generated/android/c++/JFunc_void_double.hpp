@@ -17,7 +17,7 @@ namespace margelo::nitro::video {
   using namespace facebook;
 
   /**
-   * Represents the Java/Kotlin callback `(volume: Double) -> Unit`.
+   * Represents the Java/Kotlin callback `(seekTime: Double) -> Unit`.
    * This can be passed around between C++ and Java/Kotlin.
    */
   struct JFunc_void_double: public jni::JavaClass<JFunc_void_double> {
@@ -28,9 +28,9 @@ namespace margelo::nitro::video {
     /**
      * Invokes the function this `JFunc_void_double` instance holds through JNI.
      */
-    void invoke(double volume) const {
-      static const auto method = javaClassStatic()->getMethod<void(double /* volume */)>("invoke");
-      method(self(), volume);
+    void invoke(double seekTime) const {
+      static const auto method = javaClassStatic()->getMethod<void(double /* seekTime */)>("invoke");
+      method(self(), seekTime);
     }
   };
 
@@ -39,7 +39,7 @@ namespace margelo::nitro::video {
    */
   struct JFunc_void_double_cxx final: public jni::HybridClass<JFunc_void_double_cxx, JFunc_void_double> {
   public:
-    static jni::local_ref<JFunc_void_double::javaobject> fromCpp(const std::function<void(double /* volume */)>& func) {
+    static jni::local_ref<JFunc_void_double::javaobject> fromCpp(const std::function<void(double /* seekTime */)>& func) {
       return JFunc_void_double_cxx::newObjectCxxArgs(func);
     }
 
@@ -47,13 +47,13 @@ namespace margelo::nitro::video {
     /**
      * Invokes the C++ `std::function<...>` this `JFunc_void_double_cxx` instance holds.
      */
-    void invoke_cxx(double volume) {
-      _func(volume);
+    void invoke_cxx(double seekTime) {
+      _func(seekTime);
     }
 
   public:
     [[nodiscard]]
-    inline const std::function<void(double /* volume */)>& getFunction() const {
+    inline const std::function<void(double /* seekTime */)>& getFunction() const {
       return _func;
     }
 
@@ -64,11 +64,11 @@ namespace margelo::nitro::video {
     }
 
   private:
-    explicit JFunc_void_double_cxx(const std::function<void(double /* volume */)>& func): _func(func) { }
+    explicit JFunc_void_double_cxx(const std::function<void(double /* seekTime */)>& func): _func(func) { }
 
   private:
     friend HybridBase;
-    std::function<void(double /* volume */)> _func;
+    std::function<void(double /* seekTime */)> _func;
   };
 
 } // namespace margelo::nitro::video

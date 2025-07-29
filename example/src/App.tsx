@@ -19,6 +19,7 @@ import {
   type MixAudioMode,
   type onLoadData,
   type onProgressData,
+  type onVolumeChangeData,
   type ResizeMode,
   type TextTrack,
   type VideoConfig,
@@ -153,6 +154,13 @@ const VideoDemo = () => {
     [addEvent]
   );
 
+  const handleVolumeChange = React.useCallback(
+    ({ muted, volume }: onVolumeChangeData) => {
+      addEvent(`Player: onVolumeChange ${volume.toFixed(2)} isMuted=${muted}`);
+    },
+    [addEvent]
+  );
+
   // Setup player
   const player = useVideoPlayer(
     {
@@ -176,6 +184,7 @@ const VideoDemo = () => {
   useEvent(player, 'onStatusChange', handlePlayerStatusChange);
   useEvent(player, 'onSeek', handlePlayerSeek);
   useEvent(player, 'onPlaybackStateChange', handlePlayerStateChange);
+  useEvent(player, 'onVolumeChange', handleVolumeChange);
 
   // Sync settings with player
   React.useEffect(() => {

@@ -27,6 +27,8 @@ namespace margelo::nitro::video { struct onProgressData; }
 namespace margelo::nitro::video { struct TimedMetadata; }
 // Forward declaration of `TextTrack` to properly resolve imports.
 namespace margelo::nitro::video { struct TextTrack; }
+// Forward declaration of `onVolumeChangeData` to properly resolve imports.
+namespace margelo::nitro::video { struct onVolumeChangeData; }
 // Forward declaration of `VideoPlayerStatus` to properly resolve imports.
 namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 
@@ -41,6 +43,7 @@ namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 #include <string>
 #include <optional>
 #include "TextTrack.hpp"
+#include "onVolumeChangeData.hpp"
 #include "VideoPlayerStatus.hpp"
 
 namespace margelo::nitro::video {
@@ -104,8 +107,8 @@ namespace margelo::nitro::video {
       virtual void setOnTextTrackDataChanged(const std::function<void(const std::vector<std::string>& /* texts */)>& onTextTrackDataChanged) = 0;
       virtual std::function<void(const std::optional<TextTrack>& /* track */)> getOnTrackChange() = 0;
       virtual void setOnTrackChange(const std::function<void(const std::optional<TextTrack>& /* track */)>& onTrackChange) = 0;
-      virtual std::function<void(double /* volume */)> getOnVolumeChange() = 0;
-      virtual void setOnVolumeChange(const std::function<void(double /* volume */)>& onVolumeChange) = 0;
+      virtual std::function<void(const onVolumeChangeData& /* data */)> getOnVolumeChange() = 0;
+      virtual void setOnVolumeChange(const std::function<void(const onVolumeChangeData& /* data */)>& onVolumeChange) = 0;
       virtual std::function<void(VideoPlayerStatus /* status */)> getOnStatusChange() = 0;
       virtual void setOnStatusChange(const std::function<void(VideoPlayerStatus /* status */)>& onStatusChange) = 0;
 
