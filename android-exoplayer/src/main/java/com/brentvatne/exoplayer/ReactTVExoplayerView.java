@@ -8,7 +8,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
-import android.support.v4.media.session.MediaSessionCompat;
 import android.text.TextUtils;
 import android.view.Choreographer;
 import android.view.KeyEvent;
@@ -42,7 +41,6 @@ import androidx.media3.exoplayer.mediacodec.MediaCodecRenderer;
 import androidx.media3.exoplayer.mediacodec.MediaCodecUtil;
 import androidx.media3.exoplayer.source.TrackGroupArray;
 import androidx.media3.exoplayer.trackselection.MappingTrackSelector;
-import androidx.media3.session.ext.MediaSessionConnector;
 
 import com.amazon.device.ads.aftv.AdBreakPattern;
 import com.amazon.device.ads.aftv.AmazonFireTVAdCallback;
@@ -81,7 +79,6 @@ import com.diceplatform.doris.entity.SourceBuilder;
 import com.diceplatform.doris.entity.TextTrack;
 import com.diceplatform.doris.entity.Track;
 import com.diceplatform.doris.entity.TracksPolicy;
-import com.diceplatform.doris.entity.VideoType;
 import com.diceplatform.doris.entity.YoSsaiProperties;
 import com.diceplatform.doris.ext.imacsailive.ExoDorisImaCsaiLivePlayer;
 import com.diceplatform.doris.internal.ResumePositionHandler;
@@ -341,10 +338,6 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     //Mux
     private Runnable initRunnable;
 
-    //MediaSession
-    private final MediaSessionCompat mediaSession;
-    private final MediaSessionConnector mediaSessionConnector;
-
     private final AudioManager.OnAudioFocusChangeListener audioFocusChangeListener = new AudioManager.OnAudioFocusChangeListener() {
         @Override
         public void onAudioFocusChange(int focusChange) {
@@ -386,9 +379,6 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
         clearResumePosition();
         setPausedModifier(false);
-
-        mediaSession = new MediaSessionCompat(getContext(), getContext().getPackageName());
-        mediaSessionConnector = new MediaSessionConnector(mediaSession);
 
         boolean isRTL = I18nUtil.getInstance().isRTL(getContext());
         ExoDorisPlayerTvControlView controller = exoDorisPlayerView.findViewById(R.id.exo_controller);
@@ -490,7 +480,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                 clearResumePosition();
                 player.getExoPlayer().seekToDefaultPosition();
             }
-            activateMediaSession();
+            player.activateMediaSession();
             setPlayWhenReady(true);
             fromBackground = true;
         }
@@ -503,8 +493,10 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         setPlayWhenReady(false);
         onStopPlayback();
         isInBackground = isInteractive();
-        deactivateMediaSession();
         dismissPopupWindow();
+        if (player != null) {
+            player.deactivateMediaSession();
+        }
     }
 
     private void dismissPopupWindow() {
@@ -588,8 +580,6 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             exoPlayer.setPlaybackParameters(params);
             exoPlayer.setVolume(isMuted ? 0 : 1);
             Log.d(TAG, "initialisePlayer() new instance: " + force);
-
-            activateMediaSession();
         }
         if (playerNeedsSource && src.getUrl() != null) {
 
@@ -823,47 +813,13 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         return playerInitTime - playerViewCreationTime;
     }
 
-    // MediaSession related functions.
-    private void activateMediaSession() {
-        Log.d(TAG, "activateMediaSession()");
-        mediaSessionConnector.setPlayer(player.getExoPlayer());
-        mediaSession.setActive(true);
-        mediaSession.setCallback(new MediaSessionCompat.Callback() {
-            @Override
-            public void onPlay() {
-                super.onPlay();
-                Log.d(TAG, "MediaSession onPlay()");
-                setPausedModifier(false);
-            }
-
-            @Override
-            public void onPause() {
-                super.onPause();
-                Log.d(TAG, "MediaSession onPause()");
-                if (player == null || !isLive || player.getCurrentVideoType() == VideoType.LIVE_WITH_DVR) {
-                    setPausedModifier(true);
-                }
-            }
-        });
-    }
-
-    private void deactivateMediaSession() {
-        Log.d(TAG, "deactivateMediaSession()");
-        mediaSessionConnector.setPlayer(null);
-        mediaSession.setActive(false);
-    }
-
-    private void releaseMediaSession() {
-        mediaSession.release();
-    }
-
     public void setMediaKeysListener(boolean visible) {
-        if (!visible) {
-            deactivateMediaSession();
+        if (!visible && player != null) {
+            player.deactivateMediaSession();
         }
 
-        if (visible && !isMediaKeysEnabled) {
-            activateMediaSession();
+        if (visible && !isMediaKeysEnabled && player != null) {
+            player.activateMediaSession();
         }
 
         isMediaKeysEnabled = visible;
@@ -877,8 +833,6 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
     private void releasePlayer() {
         Log.d(TAG, "releasePlayer()");
-        deactivateMediaSession();
-        releaseMediaSession();
         adTagParameters = null;
         isImaDaiStreamLoaded = false;
         isInBackground = false;
