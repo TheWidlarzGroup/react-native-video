@@ -22,7 +22,7 @@ class HybridVideoPlayerSource(): HybridVideoPlayerSourceSpec() {
   constructor(config: NativeVideoConfig) : this() {
     this.uri = config.uri
     this.config = config
-    this.mediaItem = createMediaItemFromVideoConfig(config)
+    this.mediaItem = createMediaItemFromVideoConfig(this)
 
     NitroModules.applicationContext?.let {
       this.mediaSource = buildMediaSource(it, this, mediaItem)
