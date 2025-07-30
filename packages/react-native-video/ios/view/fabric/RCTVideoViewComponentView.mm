@@ -62,6 +62,11 @@ using namespace facebook::react;
   [self onNitroIdChange:nitroId];
 }
 
++ (BOOL)shouldBeRecycled
+{
+  return NO;
+}
+
 // Event emitter convenience method
 - (void)onNitroIdChange:(int)nitroId {
   auto eventEmitter =

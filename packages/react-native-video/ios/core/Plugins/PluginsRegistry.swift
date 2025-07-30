@@ -70,7 +70,7 @@ public final class PluginsRegistry {
   
   internal func notifyPlayerDestroyed(player: NativeVideoPlayer) {
     for plugin in plugins.allObjects {
-      plugin.onPlayerCreated(player: Weak(value: player))
+      plugin.onPlayerDestroyed(player: Weak(value: player))
     }
   }
   
