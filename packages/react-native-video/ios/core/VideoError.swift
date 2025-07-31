@@ -11,11 +11,14 @@ import NitroModules
 // MARK: - LibraryError
 enum LibraryError: VideoError {
   case deallocated(objectName: String)
+  case DRMPluginNotFound
 
   var code: String {
     switch self {
     case .deallocated:
       return "library/deallocated"
+    case .DRMPluginNotFound:
+      return "library/drm-plugin-not-found"
     }
   }
 
@@ -23,6 +26,8 @@ enum LibraryError: VideoError {
     switch self {
     case let .deallocated(objectName: objectName):
       return "Object \(objectName) has been deallocated"
+    case .DRMPluginNotFound:
+      return "No DRM plugin have been found, please add one to the project"
     }
   }
 }
@@ -125,24 +130,6 @@ enum VideoViewError: VideoError {
       return "Attempt to access a view, but it has been deallocated (or not initialized)"
     case .pictureInPictureNotSupported:
       return "Picture in picture is not supported on this device"
-    }
-  }
-}
-
-enum PluginError: VideoError {
-  case drmManagerAlreadyRegistered
-
-  var code: String {
-    switch self {
-    case .drmManagerAlreadyRegistered:
-      return "plugin/drm-manager-already-registered"
-    }
-  }
-
-  var message: String {
-    switch self {
-    case .drmManagerAlreadyRegistered:
-      return "DRM manager is already registered"
     }
   }
 }
