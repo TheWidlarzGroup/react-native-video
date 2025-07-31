@@ -12,16 +12,18 @@ import com.video.BuildConfig
 import com.video.view.VideoView
 import java.lang.ref.WeakReference
 
+// Keep these types for platform compatibility
+// On iOS we cannot just export HybridVideoPlayer so we need to keep this typealias
 typealias NativeVideoPlayer = HybridVideoPlayer
 typealias NativeVideoPlayerSource = HybridVideoPlayerSource
 
-public final class PluginsRegistry {
+class PluginsRegistry {
   // Plugin ID -> ReactNativeVideoPluginSpec
   private val plugins: MutableMap<String, ReactNativeVideoPluginSpec> = mutableMapOf()
 
   companion object {
     val shared = PluginsRegistry()
-    private const val TAG = "PluginsRegistry"
+    private const val TAG = "ReactNativeVideoPluginsRegistry"
   }
 
   // Public methods
@@ -31,7 +33,7 @@ public final class PluginsRegistry {
       plugins.replace(plugin.id, plugin)
 
       if (BuildConfig.DEBUG) {
-        Log.d(TAG, "Updated plugin with ID: ${plugin.id}")
+        Log.d(TAG, "Replaced plugin ${plugin.name} (ID: ${plugin.id})")
       }
 
       return
@@ -40,14 +42,14 @@ public final class PluginsRegistry {
     plugins.put(plugin.id, plugin)
 
     if (BuildConfig.DEBUG) {
-      Log.d(TAG, "Registered plugin with ID: ${plugin.id}")
+      Log.d(TAG, "Registered plugin ${plugin.name} (ID: ${plugin.id})")
     }
   }
 
   fun unregister(plugin: ReactNativeVideoPluginSpec) {
     if (!hasPlugin(plugin)) {
       if (BuildConfig.DEBUG) {
-        Log.d(TAG, "Tried to unregister plugin with ID: ${plugin.id}, but it was not registered")
+        Log.d(TAG, "Tried to unregister plugin ${plugin.name} (ID: ${plugin.id}), but it was not registered")
       }
 
       return
@@ -56,7 +58,7 @@ public final class PluginsRegistry {
     plugins.remove(plugin.id)
 
     if (BuildConfig.DEBUG) {
-      Log.d(TAG, "Unregistered plugin with ID: ${plugin.id}")
+      Log.d(TAG, "Unregistered plugin ${plugin.name} (ID: ${plugin.id})")
     }
   }
 

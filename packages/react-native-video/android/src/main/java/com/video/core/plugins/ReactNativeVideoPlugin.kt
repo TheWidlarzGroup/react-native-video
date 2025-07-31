@@ -14,7 +14,10 @@ public interface ReactNativeVideoPluginSpec {
    */
   val id: String
 
-  // TODO: Make NativeVideoPlayer and NativeVideoPlayerSource type
+  /**
+   * The name of the plugin.
+   */
+  val name: String
 
   /**
    * Called when a player is created.
@@ -112,8 +115,8 @@ public interface ReactNativeVideoPluginSpec {
 }
 
 @Suppress("Unused")
-public open class ReactNativeVideoPlugin : ReactNativeVideoPluginSpec {
-  override val id = "RNV_Plugin_${UUID.randomUUID()}"
+public open class ReactNativeVideoPlugin(override val name: String) : ReactNativeVideoPluginSpec {
+  override val id = "RNV_Plugin_${name}}"
 
   init {
     // Automatically register the plugin when it is created
