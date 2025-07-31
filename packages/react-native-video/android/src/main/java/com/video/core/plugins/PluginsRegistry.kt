@@ -9,6 +9,7 @@ import androidx.media3.exoplayer.source.MediaSource
 import com.margelo.nitro.video.HybridVideoPlayer
 import com.margelo.nitro.video.HybridVideoPlayerSource
 import com.video.BuildConfig
+import com.video.core.LibraryError
 import com.video.view.VideoView
 import java.lang.ref.WeakReference
 
@@ -27,7 +28,6 @@ class PluginsRegistry {
   }
 
   // Public methods
-
   fun register(plugin: ReactNativeVideoPluginSpec) {
     if(hasPlugin(plugin)) {
       plugins.replace(plugin.id, plugin)
@@ -46,6 +46,7 @@ class PluginsRegistry {
     }
   }
 
+  @Suppress("unused")
   fun unregister(plugin: ReactNativeVideoPluginSpec) {
     if (!hasPlugin(plugin)) {
       if (BuildConfig.DEBUG) {
@@ -89,27 +90,17 @@ class PluginsRegistry {
   /**
    * Returns the DRM manager instance from the plugins.
    *
-   * @throws Exception If no DRM manager is found.
+   * @throws LibraryError.DRMPluginNotFound If no DRM manager is found.
    * @return Any
    */
-  internal fun getDRMManager(): Any {
-    var drmManager: Any? = null
-
+   internal fun getDRMManager(): Any {
     for (plugin in plugins.values) {
       val manager = plugin.getDRMManager()
 
-      if (manager != null) {
-        drmManager = manager
-        break
-      }
+      if (manager != null) return manager
     }
 
-    if (drmManager == null) {
-      // TODO: Create Exception For this
-      throw Exception("No DRM manager found")
-    }
-
-    return drmManager
+    throw LibraryError.DRMPluginNotFound
   }
 
   internal fun overrideMediaDataSourceFactory(

@@ -6,9 +6,8 @@ import androidx.media3.datasource.DataSource
 import androidx.media3.exoplayer.source.MediaSource
 import com.video.view.VideoView
 import java.lang.ref.WeakReference
-import java.util.UUID
 
-public interface ReactNativeVideoPluginSpec {
+interface ReactNativeVideoPluginSpec {
   /**
    * The ID of the plugin.
    */
@@ -72,7 +71,7 @@ public interface ReactNativeVideoPluginSpec {
    *
    * @param source The source instance.
    * @param mediaDataSourceFactory The media data source factory.
-   * @return The media data source factory.
+   * @return The media data source factory. If null is returned, the default factory will be used.
    */
   fun getMediaDataSourceFactory(
     source: NativeVideoPlayerSource,
@@ -85,7 +84,7 @@ public interface ReactNativeVideoPluginSpec {
    * @param source The source instance.
    * @param mediaSourceFactory The media source factory.
    * @param mediaDataSourceFactory The media data source factory.
-   * @return The media source factory.
+   * @return The media source factory. If null is returned, the default factory will be used.
    */
   fun getMediaSourceFactory(
     source: NativeVideoPlayerSource,
@@ -98,7 +97,7 @@ public interface ReactNativeVideoPluginSpec {
    *
    * @param source The source instance.
    * @param mediaItemBuilder The media item builder.
-   * @return The media item builder.
+   * @return The media item builder. If null is returned, the default builder will be used.
    */
   fun getMediaItemBuilder(
     source: NativeVideoPlayerSource,
@@ -115,7 +114,10 @@ public interface ReactNativeVideoPluginSpec {
 }
 
 @Suppress("Unused")
-public open class ReactNativeVideoPlugin(override val name: String) : ReactNativeVideoPluginSpec {
+/**
+ * A helper base implementation of the ReactNativeVideoPluginSpec interface.
+ */
+open class ReactNativeVideoPlugin(override val name: String) : ReactNativeVideoPluginSpec {
   override val id = "RNV_Plugin_${name}}"
 
   init {
