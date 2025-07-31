@@ -9,6 +9,7 @@ import com.margelo.nitro.core.Promise
 import com.video.core.LibraryError
 import com.video.core.player.buildMediaSource
 import com.video.core.player.createMediaItemFromVideoConfig
+import com.video.core.plugins.PluginsRegistry
 import com.video.core.utils.VideoInformationUtils
 
 @DoNotStrip
@@ -22,10 +23,16 @@ class HybridVideoPlayerSource(): HybridVideoPlayerSourceSpec() {
   constructor(config: NativeVideoConfig) : this() {
     this.uri = config.uri
     this.config = config
-    this.mediaItem = createMediaItemFromVideoConfig(this)
+    this.mediaItem = createMediaItemFromVideoConfig(
+      PluginsRegistry.shared.overrideSource(this)
+    )
 
     NitroModules.applicationContext?.let {
-      this.mediaSource = buildMediaSource(it, this, mediaItem)
+      this.mediaSource = buildMediaSource(
+        context = it,
+        source = PluginsRegistry.shared.overrideSource(this),
+        mediaItem
+      )
     } ?: run {
       throw LibraryError.ApplicationContextNotFound
     }

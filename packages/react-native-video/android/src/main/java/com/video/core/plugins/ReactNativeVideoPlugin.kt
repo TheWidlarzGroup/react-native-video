@@ -51,19 +51,20 @@ interface ReactNativeVideoPluginSpec {
   fun onVideoViewDestroyed(view: WeakReference<VideoView>)
   
   /**
-   * Called when a source is overridden.
+   * Called when a source is being used to create mediaItem or MediaSource.
+   * You can use it to modify the source before it is used.
    *
    * @param source The source instance.
    * @return The overridden source instance.
    */
-  fun overrideSource(source: Any): Any
+  fun overrideSource(source: NativeVideoPlayerSource): NativeVideoPlayerSource
 
   /**
    * Called when a DRM manager is requested.
    *
    * @return The DRM manager instance.
    */
-  fun getDRMManager(): Any? { return null }
+  fun getDRMManager(source: NativeVideoPlayerSource): Any?
 
 
   /**
@@ -118,7 +119,7 @@ interface ReactNativeVideoPluginSpec {
  * A helper base implementation of the ReactNativeVideoPluginSpec interface.
  */
 open class ReactNativeVideoPlugin(override val name: String) : ReactNativeVideoPluginSpec {
-  override val id = "RNV_Plugin_${name}}"
+  override val id = "RNV_Plugin_${name}"
 
   init {
     // Automatically register the plugin when it is created
@@ -137,7 +138,11 @@ open class ReactNativeVideoPlugin(override val name: String) : ReactNativeVideoP
   @UnstableApi
   override fun onVideoViewDestroyed(view: WeakReference<VideoView>) { /* NOOP */}
 
-  override fun overrideSource(source: Any): Any { return source }
+  override fun overrideSource(source: NativeVideoPlayerSource): NativeVideoPlayerSource {
+    return source
+  }
+
+  override fun getDRMManager(source: NativeVideoPlayerSource): Any? { return null }
 
   override fun getMediaDataSourceFactory(
     source: NativeVideoPlayerSource,
