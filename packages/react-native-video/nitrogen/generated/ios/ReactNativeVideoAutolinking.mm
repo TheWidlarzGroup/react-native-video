@@ -6,6 +6,7 @@
 ///
 
 #import <Foundation/Foundation.h>
+#import <AVFoundation/AVFoundation.h>
 #import <NitroModules/HybridObjectRegistry.hpp>
 #import "ReactNativeVideo-Swift-Cxx-Umbrella.hpp"
 #import <type_traits>

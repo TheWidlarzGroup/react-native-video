@@ -8,23 +8,27 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.C
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.util.UnstableApi
+import com.margelo.nitro.video.HybridVideoPlayerSource
 import com.margelo.nitro.video.NativeVideoConfig
 import com.margelo.nitro.video.SubtitleType
 import com.video.core.SourceError
 import com.video.core.extensions.toStringExtension
+import com.video.core.plugins.PluginsRegistry
 
 private const val TAG = "MediaItemUtils"
 
 @OptIn(UnstableApi::class)
 fun createMediaItemFromVideoConfig(
-  config: NativeVideoConfig
+  source: HybridVideoPlayerSource
 ): MediaItem {
   val mediaItemBuilder = MediaItem.Builder()
 
-  mediaItemBuilder.setUri(config.uri)
+  mediaItemBuilder.setUri(source.config.uri)
 
-  val mediaItem = mediaItemBuilder.build()
-  return mediaItem
+  return PluginsRegistry.shared.overrideMediaItemBuilder(
+    source,
+    mediaItemBuilder
+  ).build()
 }
 
 fun getSubtitlesConfiguration(

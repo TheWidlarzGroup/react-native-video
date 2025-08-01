@@ -9,7 +9,7 @@
 #endif
 
 @implementation RCTVideoViewComponentView {
-  VideoComponentView* _view;
+  VideoComponentView *_view;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame {
@@ -19,8 +19,9 @@
     _view = [[VideoComponentView alloc] initWithFrame:frame];
     _view.translatesAutoresizingMaskIntoConstraints = NO;
     [self addSubview:_view];
-    
-    // Set up constraints to make VideoComponentView fill RCTVideoViewComponentView
+
+    // Set up constraints to make VideoComponentView fill
+    // RCTVideoViewComponentView
     [NSLayoutConstraint activateConstraints:@[
       [_view.leadingAnchor constraintEqualToAnchor:self.leadingAnchor],
       [_view.trailingAnchor constraintEqualToAnchor:self.trailingAnchor],
@@ -37,7 +38,7 @@
 
   // Emit the onNitroIdChange event when nitroId is updated
   if (self.onNitroIdChange) {
-    self.onNitroIdChange(@{ @"nitroId": nitroId });
+    self.onNitroIdChange(@{@"nitroId" : nitroId});
   }
 }
 

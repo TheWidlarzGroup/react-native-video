@@ -9,7 +9,7 @@ import AVFoundation
 import Foundation
 import NitroModules
 
-class HybridVideoPlayer: HybridVideoPlayerSpec {
+class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   /**
    * This in general should not be used directly, use `playerPointer` instead. This should be set only from within the playerQueue.
    */
@@ -202,6 +202,8 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
       // Clear player observer
       self.playerObserver = nil
       status = .idle
+      
+      VideoManager.shared.unregister(player: self)
     }
   }
 
@@ -337,22 +339,21 @@ class HybridVideoPlayer: HybridVideoPlayerSpec {
     return initializedItem!
   }
 
-  private func initializePlayerItem() async throws -> AVPlayerItem {
-    guard let _source = source as? HybridVideoPlayerSource else {
+  func initializePlayerItem() async throws -> AVPlayerItem {
+    // Ensure the source is a valid HybridVideoPlayerSource
+    guard let _hybridSource = source as? HybridVideoPlayerSource else {
       status = .error
       throw PlayerError.invalidSource.error()
     }
+    
+    // (maybe) Override source with plugins
+    let _source = await PluginsRegistry.shared.overrideSource(source: _hybridSource)
 
     let isNetworkSource = _source.url.isFileURL == false
     eventEmitter.onLoadStart(
       .init(sourceType: isNetworkSource ? .network : .local, source: _source))
-
-    try await _source.initializeAsset()
-
-    guard let asset = _source.asset else {
-      status = .error
-      throw SourceError.failedToInitializeAsset.error()
-    }
+    
+    let asset = try await _source.getAsset()
 
     let playerItem: AVPlayerItem
 

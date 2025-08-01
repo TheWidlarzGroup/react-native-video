@@ -11,11 +11,14 @@ import NitroModules
 // MARK: - LibraryError
 enum LibraryError: VideoError {
   case deallocated(objectName: String)
+  case DRMPluginNotFound
 
   var code: String {
     switch self {
     case .deallocated:
       return "library/deallocated"
+    case .DRMPluginNotFound:
+      return "library/drm-plugin-not-found"
     }
   }
 
@@ -23,6 +26,8 @@ enum LibraryError: VideoError {
     switch self {
     case let .deallocated(objectName: objectName):
       return "Object \(objectName) has been deallocated"
+    case .DRMPluginNotFound:
+      return "No DRM plugin have been found, please add one to the project"
     }
   }
 }

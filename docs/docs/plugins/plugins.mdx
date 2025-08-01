@@ -1,0 +1,102 @@
+---
+title: Plugins  
+description: Overview of the React Native Video plugin system
+sidebar_position: 6
+---
+
+# Plugins Overview
+
+The **React Native Video** library offers a robust plugin system to extend and customize video functionality on Android and iOS. With plugins, you can override source handling, implement custom DRM, modify media factories, and respond to player lifecycle events.
+
+:::tip Use in Third Party Library Guide
+If you are looking how to import React Native Video in your native code to use plugins, you can checkout [Use in Third Party Library](../use-in-third-party-library) page.
+:::
+
+## What Are Plugins?
+
+Plugins are modular extensions that hook into the video player's lifecycle and processing pipeline. They allow you to:
+
+-  **Customize video sources** before playback
+-  **Implement custom DRM** for protected content
+-  **Override media factories** (Android only)
+-  **React to player lifecycle events** for analytics, logging, or cleanup
+-  **Control caching behavior** for performance
+
+## Architecture
+
+The plugin system consists of three main components:
+
+| Component                    | Description                                                                                 |
+|:-----------------------------|:-------------------------------------------------------------------------------------------|
+| `PluginsRegistry`            | Singleton that manages plugin registration and coordinates plugin interactions              |
+| `ReactNativeVideoPluginSpec` | Interface/protocol defining the contract all plugins must implement                        |
+| `ReactNativeVideoPlugin`     | Base implementation with convenient defaults; override only the methods you care about     |
+
+:::tip
+Plugins are automatically registered when you instantiate a class that extends `ReactNativeVideoPlugin`.  
+:::
+
+## Core Concepts
+
+### Plugin Lifecycle
+
+Plugins receive notifications for key events:
+
+-  **Player creation/destruction** — react to player instance lifecycle
+-  **Video view creation/destruction** — handle UI component lifecycle
+-  **Source processing** — modify video sources before playback
+-  **DRM requests** — provide custom DRM handling
+-  **Media factory overrides** — customize ExoPlayer components (Android)
+
+:::caution
+All player and view references passed to plugins are **weak references** to prevent memory leaks.
+:::
+
+## Platform Differences
+
+| Feature                        | Android (Kotlin / ExoPlayer)                   | iOS (Swift / AVFoundation)         |
+|:-------------------------------|:-----------------------------------------------|:-----------------------------------|
+| Underlying player              | ExoPlayer                                      | AVFoundation                       |
+| Media factory customization    | Extensive                                      | Limited                            |
+| Cache control                  | Supported                                      | Limited                            |
+| Plugin method style            | Synchronous                                    | Async/await                        |
+| Memory management              | Manual cleanup                                 | Manual cleanup                     |
+
+## Getting Started
+
+### Example: Android Plugin
+
+```kotlin
+// Android
+class MyPlugin : ReactNativeVideoPlugin("MyPluginName") {
+    override fun onPlayerCreated(player: WeakReference<NativeVideoPlayer>) {
+        // Custom logic here
+    }
+}
+```
+
+### Example: iOS Plugin
+
+```swift
+// iOS
+class MyPlugin: ReactNativeVideoPlugin {
+    init() {
+        super.init(name: "MyPluginName")
+    }
+
+    override func onPlayerCreated(player: Weak<NativeVideoPlayer>) {
+        // Custom logic here
+    }
+}
+```
+
+
+
+## Next Steps
+
+-  [**Plugin Registry**](./registry) — Learn about plugin management and registration
+-  [**Plugin Interface**](./interface) — Complete API reference for plugin methods
+-  [**Usage Examples**](./examples) — Practical implementations and common patterns
+
+
+

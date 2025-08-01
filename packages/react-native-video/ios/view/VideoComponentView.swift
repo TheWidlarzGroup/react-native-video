@@ -163,9 +163,20 @@ import AVKit
     return nil
   }
   
+  public override func willMove(toSuperview newSuperview: UIView?) {
+    super.willMove(toSuperview: newSuperview)
+    
+    if newSuperview == nil {
+      PluginsRegistry.shared.notifyVideoViewDestroyed(view: self)
+    } else {
+      PluginsRegistry.shared.notifyVideoViewCreated(view: self)
+    }
+  }
+
+
   public override func layoutSubviews() {
     super.layoutSubviews()
-    
+
     // Update the frame of the playerViewController's view when the view's layout changes
     playerViewController?.view.frame = playerView?.bounds ?? .zero
     playerViewController?.contentOverlayView?.frame = playerView?.bounds ?? .zero

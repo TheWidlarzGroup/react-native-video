@@ -7,6 +7,7 @@ import com.facebook.react.bridge.LifecycleEventListener
 import com.margelo.nitro.NitroModules
 import com.margelo.nitro.video.HybridVideoPlayer
 import com.margelo.nitro.video.MixAudioMode
+import com.video.core.plugins.PluginsRegistry
 import com.video.view.VideoView
 import java.lang.ref.WeakReference
 
@@ -117,6 +118,7 @@ object VideoManager : LifecycleEventListener {
 
   fun registerView(view: VideoView) {
     views[view.nitroId] = WeakReference<VideoView>(view)
+    PluginsRegistry.shared.notifyVideoViewCreated(WeakReference(view))
   }
 
   fun unregisterView(view: VideoView) {
@@ -132,6 +134,7 @@ object VideoManager : LifecycleEventListener {
     }
 
     views.remove(view.nitroId)
+    PluginsRegistry.shared.notifyVideoViewDestroyed(WeakReference(view))
   }
 
   fun addViewToPlayer(view: VideoView, player: HybridVideoPlayer) {
@@ -163,11 +166,13 @@ object VideoManager : LifecycleEventListener {
     }
 
     audioFocusManager.registerPlayer(player)
+    PluginsRegistry.shared.notifyPlayerCreated(WeakReference(player))
   }
 
   fun unregisterPlayer(player: HybridVideoPlayer) {
     players.remove(player)
     audioFocusManager.unregisterPlayer(player)
+    PluginsRegistry.shared.notifyPlayerDestroyed(WeakReference(player))
   }
 
   fun getPlayerByNitroId(nitroId: Int): HybridVideoPlayer? {
