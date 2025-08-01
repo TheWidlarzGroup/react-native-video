@@ -20,22 +20,6 @@ class RCTVideoManager: RCTViewManager {
         return view
     }
     
-    //MARK: Differs (ios only)
-    @objc public func seekToNow(_ node: NSNumber) {
-        DispatchQueue.main.async {
-            let component = self.bridge.uiManager.view(forReactTag: node) as? NewPlayerView
-            component?.seekToNow()
-        }
-    }
-    
-    //MARK: Differs (ios only)
-    @objc public func seekToTimestamp(_ node: NSNumber, isoDate: String) {
-        DispatchQueue.main.async {
-            let component = self.bridge.uiManager.view(forReactTag: node) as? NewPlayerView
-            component?.seekToTimestamp(isoDate: isoDate)
-        }
-    }
-    
     @objc public func seekToPosition(_ node: NSNumber, position: Double) {
         DispatchQueue.main.async {
             let component = self.bridge.uiManager.view(forReactTag: node) as? NewPlayerView
@@ -66,22 +50,6 @@ class RCTVideoManager: RCTViewManager {
             component?.replaceAdTagParameters(adTagParameters: adTagParameters,
                                               validFrom: startDate,
                                               validUntil: endDate)
-        }
-    }
-    
-    @objc public func seekToResumePosition(_ node: NSNumber, position: Double) {
-        DispatchQueue.main.async {
-            let component = self.bridge.uiManager.view(forReactTag: node) as? NewPlayerView
-            component?.setInitialSeek(position: position)
-        }
-    }
-    
-    @objc public func limitSeekableRange(_ node: NSNumber, payload: NSDictionary) {
-        DispatchQueue.main.async {
-            let component = self.bridge.uiManager.view(forReactTag: node) as? NewPlayerView
-            if let limitedSeekbleRange = try? Source.LimitedSeekableRange(dict: payload) {
-                component?.setupLimitedSeekableRange(with: limitedSeekbleRange)
-            }
         }
     }
 

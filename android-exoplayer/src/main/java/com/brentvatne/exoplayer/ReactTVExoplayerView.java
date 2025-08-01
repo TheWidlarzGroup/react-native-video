@@ -621,8 +621,9 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             if (limitedSeekRange != null) {
                 sourceBuilder.setLimitedSeekRange(limitedSeekRange);
             } else {
-                sourceBuilder.setResumePosition(resumePosition);
+                sourceBuilder.setResumePosition(src.getResumePosition());
             }
+            clearResumePosition();
             source = sourceBuilder.build();
 
             playerInitTime = new Date().getTime();
@@ -1317,6 +1318,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             boolean apsTestFlag,
             Watermark watermark,
             LimitedSeekRange limitedSeekRange,
+            long resumePosition,
             boolean shouldSaveSubtitleSelection,
             String selectedSubtitleTrack,
             List<String> preferredAudioTracks,
@@ -1368,6 +1370,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     yoSsai,
                     amtSsai,
                     limitedSeekRange,
+                    resumePosition,
                     tracksPolicy,
                     dvrSeekForwardInterval,
                     dvrSeekBackwardInterval);

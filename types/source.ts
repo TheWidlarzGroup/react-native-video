@@ -85,4 +85,5 @@ export interface IVideoPlayerSource {
   plugins?: IPlugins;
   live?: boolean;
   isAudioOnly?: boolean;
+  resumePosition?: number
 }

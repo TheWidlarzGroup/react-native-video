@@ -177,13 +177,6 @@ class NewPlayerView: UIView, JSInputProtocol {
     var jsProps = JSProps()
     var jsPlayerView: RNDReactNativeDiceVideo.JSPlayerView?
     
-    func seekToNow() {
-        jsPlayerView?.seekNow()
-    }
-    
-    func seekToTimestamp(isoDate: String) {
-        jsPlayerView?.seek(isoDate)
-    }
     
     //TODO: pass this value as part of source
     func seekToPosition(position: Double) {
@@ -232,24 +225,6 @@ class NewPlayerView: UIView, JSInputProtocol {
         self.jsPlayerView = jsPlayerView
       
         self.jsProps.startAt = Dynamic(nil)
-    }
-    
-    //moved to source
-    func setInitialSeek(position: Double) {
-        jsProps.startAt.value = position
-    }
-    
-    //moved to source
-    func setupLimitedSeekableRange(with range: Source.LimitedSeekableRange?) {
-        let start = Date(timeIntervalSince1970InMilliseconds: range?.start)
-        let end = Date(timeIntervalSince1970InMilliseconds: range?.end)
-        
-        if let end = end, end > Date() {
-            //avoid finishing playback when ongoing live program reaches its end
-            jsPlayerView?.dorisGlue?.doris?.player.setLimitedSeekableRange(range: (start: start, end: nil))
-        } else {
-            jsPlayerView?.dorisGlue?.doris?.player.setLimitedSeekableRange(range: (start: start, end: end))
-        }
     }
     
     override func layoutSubviews() {

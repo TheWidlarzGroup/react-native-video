@@ -73,6 +73,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_SRC_APS_TEST_MODE = "testMode";
     private static final String PROP_SRC_METADATA = "metadata";
     private static final String PROP_SRC_LIMIT_RANGE = "limitedSeekableRange";
+    private static final String PROP_SRC_RESUME_POSITION = "resumePosition";
     private static final String PROP_SRC_SAVE_SUBTITLE_SELECTION = "shouldSaveSubtitleSelection";
     private static final String PROP_SRC_NOW_PLAYING = "nowPlaying";
     private static final String PROP_SRC_BIF_URL = "thumbnailsPreview";
@@ -260,6 +261,13 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         boolean apsTestMode = (aps != null && aps.hasKey(PROP_SRC_APS_TEST_MODE)) && aps.getBoolean(PROP_SRC_APS_TEST_MODE);
 
         LimitedSeekRange limitedSeekRange = generateRange(src.hasKey(PROP_SRC_LIMIT_RANGE) ? src.getMap(PROP_SRC_LIMIT_RANGE) : null);
+        long resumePosition = ResumePositionHandler.RESUME_UNSET;
+        if (src.hasKey(PROP_SRC_RESUME_POSITION) && !src.isNull(PROP_SRC_RESUME_POSITION)) {
+            long rawPosition = Math.round(src.getDouble(PROP_SRC_RESUME_POSITION));
+            if (rawPosition > 0) {
+                resumePosition = (videoView.isLive() ? rawPosition : rawPosition * 1000);
+            }
+        }
         boolean shouldSaveSubtitleSelection = src.hasKey(PROP_SRC_SAVE_SUBTITLE_SELECTION) && src.getBoolean(PROP_SRC_SAVE_SUBTITLE_SELECTION);
 
         if (src.hasKey(PROP_SRC_NOW_PLAYING)) {
@@ -322,10 +330,11 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
             ImaCsaiProperties imaCsai = (ImaCsaiProperties) adProperties[0];
             TracksPolicy tracksPolicy = ReactTVPropsParser.parseTracksPolicy(ReadableMapUtils.getMap(src, "tracksPolicy"));
 
-            Log.i(WebUtil.DEBUG, String.format("setSrc - id %s, title %s, mimeType %s, isYoSsai %b, isAmtSsai %b, " +
+            Log.i(WebUtil.DEBUG, String.format("setSrc - id %s, title %s, resumePosition %d, mimeType %s, isYoSsai %b, isAmtSsai %b, " +
                             "isImaDai %b, adTag %s, midRoll %s, license %s, url %s",
                     id,
                     channelName == null && muxData != null && muxData.hasKey("videoTitle") ? muxData.getString("videoTitle") : channelName,
+                    resumePosition,
                     mimeType,
                     adProperties[1] != null,
                     adProperties[2] != null,
@@ -360,6 +369,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                     apsTestMode,
                     Watermark.fromMap(metadata),
                     limitedSeekRange,
+                    resumePosition,
                     shouldSaveSubtitleSelection,
                     selectedSubtitleTrack,
                     preferredAudioTracks,
@@ -687,18 +697,10 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     @Override
     public Map<String, Integer> getCommandsMap() {
         return MapBuilder.of(
-                "seekToNow",
-                COMMAND_SEEK_TO_NOW,
-                "seekToTimestamp",
-                COMMAND_SEEK_TO_TIMESTAMP,
-                "seekToResumePosition",
-                COMMAND_SEEK_TO_RESUME_POSITION,
                 "seekToPosition",
                 COMMAND_SEEK_TO_POSITION,
                 "replaceAdTagParameters",
-                COMMAND_REPLACE_AD_TAG_PARAMETERS,
-                "limitSeekableRange",
-                COMMAND_LIMIT_SEEKABLE_RANGE
+                COMMAND_REPLACE_AD_TAG_PARAMETERS
         );
     }
 
@@ -706,23 +708,6 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     public void receiveCommand(final ReactTVExoplayerView root, int commandId, @Nullable ReadableArray args) {
         // This will be called whenever a command is sent from react-native.
         switch (commandId) {
-            case COMMAND_SEEK_TO_NOW:
-                Log.i(WebUtil.DEBUG, "resumeToNow");
-                root.resumeTo(C.TIME_UNSET);
-                break;
-            case COMMAND_SEEK_TO_TIMESTAMP:
-                String timestamp = args.getString(0);
-                Log.i(WebUtil.DEBUG, "resumeToTimeStamp " + timestamp);
-                long positionMs = root.parseTimestamp(timestamp);
-                if (positionMs != ResumePositionHandler.RESUME_UNSET) {
-                    root.resumeTo(positionMs);
-                }
-                break;
-            case COMMAND_SEEK_TO_RESUME_POSITION:
-                long resumeMs = args.getInt(0) * 1000;
-                Log.i(WebUtil.DEBUG, "resumeToPosition " + resumeMs);
-                root.resumeTo(resumeMs);
-                break;
             case COMMAND_SEEK_TO_POSITION:
                 long seekToMs = args.getInt(0) * 1000;
                 Log.i(WebUtil.DEBUG, "seekToPosition " + seekToMs);
@@ -730,9 +715,6 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
                 break;
             case COMMAND_REPLACE_AD_TAG_PARAMETERS:
                 root.replaceAdTagParameters(args.getMap(0) != null ? args.getMap(0).toHashMap() : null);
-                break;
-            case COMMAND_LIMIT_SEEKABLE_RANGE:
-                root.setLimitedSeekRange(generateRange(args.getMap(0)));
                 break;
         }
     }

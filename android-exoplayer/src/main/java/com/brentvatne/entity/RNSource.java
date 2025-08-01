@@ -42,6 +42,7 @@ public class RNSource {
     private final YoSsaiProperties yoSsai;
     private final AmtSsaiProperties amtSsai;
     private final LimitedSeekRange limitedSeekRange;
+    private final long resumePosition;
     private final TracksPolicy tracksPolicy;
     private final long dvrSeekForwardInterval;
     private final long dvrSeekBackwardInterval;
@@ -69,6 +70,7 @@ public class RNSource {
             @Nullable YoSsaiProperties yoSsai,
             @Nullable AmtSsaiProperties amtSsai,
             @Nullable LimitedSeekRange limitedSeekRange,
+            long resumePosition,
             TracksPolicy tracksPolicy,
             long dvrSeekForwardInterval,
             long dvrSeekBackwardInterval) {
@@ -95,6 +97,7 @@ public class RNSource {
         this.yoSsai = yoSsai;
         this.amtSsai = amtSsai;
         this.limitedSeekRange = limitedSeekRange;
+        this.resumePosition = resumePosition;
         this.tracksPolicy = tracksPolicy;
         this.dvrSeekForwardInterval = TimeUnit.SECONDS.toMillis(dvrSeekForwardInterval);
         this.dvrSeekBackwardInterval = TimeUnit.SECONDS.toMillis(dvrSeekBackwardInterval);
@@ -222,6 +225,10 @@ public class RNSource {
 
     public LimitedSeekRange getLimitedSeekRange() {
         return limitedSeekRange;
+    }
+
+    public long getResumePosition() {
+        return resumePosition;
     }
 
     public TracksPolicy getTracksPolicy() {

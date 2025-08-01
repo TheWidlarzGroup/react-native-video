@@ -36,6 +36,7 @@ struct Source: SuperCodable {
     let dvrSeekForwardInterval: Int?
     let dvrSeekBackwardInterval: Int?
     var plugins: JSPlugins?
+    let resumePosition: Int?
 }
 
 

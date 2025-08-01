@@ -64,11 +64,7 @@ RCT_EXPORT_VIEW_PROPERTY(onAnnotationsButtonClick, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onSubtitleTrackChanged, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onAudioTrackChanged, RCTBubblingEventBlock)
 
-RCT_EXTERN_METHOD(seekToNow:(nonnull NSNumber *)node)
-RCT_EXTERN_METHOD(seekToTimestamp:(nonnull NSNumber *)node isoDate:(NSString *)isoDate)
 RCT_EXTERN_METHOD(seekToPosition:(nonnull NSNumber *)node position:(double)position)
 RCT_EXTERN_METHOD(replaceAdTagParameters:(nonnull NSNumber *)node payload:(NSDictionary)payload)
-RCT_EXTERN_METHOD(seekToResumePosition:(nonnull NSNumber *)node position:(double)position)
-RCT_EXTERN_METHOD(limitSeekableRange:(nonnull NSNumber *)node payload:(NSDictionary)payload)
 
 @end

@@ -238,7 +238,7 @@ class PlayerViewProxy {
                 config: jsConfig,
                 imageUri: jsProps.metadata.value?.thumbnailUrl,
                 thumbnailsPreview: sourceValue.thumbnailsPreview,
-                resumePosition: jsProps.startAt.value,
+                resumePosition: sourceValue.resumePosition.map { Double($0) },
                 delay: nil,
                 ads: sourceValue.ads,
                 metadata: metadata,

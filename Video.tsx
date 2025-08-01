@@ -146,34 +146,6 @@ export default class Video extends React.PureComponent<IVideoPlayer, IState> {
   }
 
   /**
-   * seekToResume jumps to a certain position for vod and live content
-   * time parameter can be the following:
-   * string: unix timestamp (used for live annotation)
-   * number: seconds elapsed (used for vod annotation)
-   * now: for DVR content to jump back to current live time
-   */
-  seekToResume = (time: 'now' | string | number) => {
-    let command = SeekToCommand.SEEK_TO_NOW;
-    const args: Array<string | number> = [];
-
-    if (time !== 'now') {
-      command =
-        typeof time === 'string'
-          ? SeekToCommand.SEEK_TO_TIMESTAMP
-          : SeekToCommand.SEEK_TO_RESUME_POSITION;
-      args.push(time);
-    }
-
-    if (this.refPlayer) {
-      NativeModules.UIManager.dispatchViewManagerCommand(
-        findNodeHandle(this.refPlayer.current),
-        NativeModules.UIManager.RCTVideo.Commands[command],
-        args
-      );
-    }
-  };
-
-  /**
    * @description seeks to a specified time in the video
    * @param time video time in seconds
    */
