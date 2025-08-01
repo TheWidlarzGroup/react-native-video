@@ -75,10 +75,6 @@ open class ReactNativeVideoPlugin: ReactNativeVideoPluginSpec {
     PluginsRegistry.shared.register(plugin: self)
   }
 
-  deinit {
-    PluginsRegistry.shared.unregister(plugin: self)
-  }
-
   open func onPlayerCreated(player: Weak<NativeVideoPlayer>) { /* no-op */  }
   open func onPlayerDestroyed(player: Weak<NativeVideoPlayer>) { /* no-op */  }
 
