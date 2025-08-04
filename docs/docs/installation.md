@@ -51,6 +51,92 @@ npx react-native run-ios # run on iOS
 npx react-native run-android # run on Android
 ```
 
+## Patch for react-native < 0.80
+
+`react-native` < 0.80 have bug that prevents to properly handle errors by nitro modules on Android.
+We highly recommend to apply bellow patch for `react-native-nitro-modules` to fix this issue.
+You can apply it using `patch-package`.
+
+:::warning
+Without this patch you won't be able "recognize" errors, all will be thrown as unknown errors.
+:::
+
+<details>
+  <summary>For `react-native-nitro-modules` 0.26.X or lower</summary>
+
+  ```diff
+  diff --git a/node_modules/react-native-nitro-modules/cpp/core/HybridFunction.hpp b/node_modules/react-native-nitro-modules/cpp/core/HybridFunction.hpp
+  index aefd987..c2e06fb 100644
+  --- a/node_modules/react-native-nitro-modules/cpp/core/HybridFunction.hpp
+  +++ b/node_modules/react-native-nitro-modules/cpp/core/HybridFunction.hpp
+  @@ -23,6 +23,10 @@ struct JSIConverter;
+  #include <string>
+  #include <type_traits>
+  
+  +#ifdef ANDROID
+  +#include <fbjni/fbjni.h>
+  +#endif
+  +
+  namespace margelo::nitro {
+  
+  using namespace facebook;
+  @@ -118,6 +122,10 @@ public:
+          std::string funcName = getHybridFuncFullName<THybrid>(kind, name, hybridInstance.get());
+          std::string message = exception.what();
+          throw jsi::JSError(runtime, funcName + ": " + message);
+  +      } catch (const jni::JniException& exception) {
+  +        std::string funcName = getHybridFuncFullName<THybrid>(kind, name, hybridInstance.get());
+  +        std::string message = exception.what();
+  +        throw jsi::JSError(runtime, funcName + ": " + message);
+  #pragma clang diagnostic pop
+  #endif
+        } catch (...) {
+  ```
+
+  see [raw](https://github.com/TheWidlarzGroup/react-native-video/blob/v7/example/patches/react-native-nitro-modules%2B0.26.2.patch.old)
+</details>
+
+<details>
+  <summary>For `react-native-nitro-modules` 0.27.X or higher</summary>
+
+  ```diff
+  diff --git a/node_modules/react-native-nitro-modules/cpp/core/HybridFunction.hpp b/node_modules/react-native-nitro-modules/cpp/core/HybridFunction.hpp
+  index efcea05..ffad3f2 100644
+  --- a/node_modules/react-native-nitro-modules/cpp/core/HybridFunction.hpp
+  +++ b/node_modules/react-native-nitro-modules/cpp/core/HybridFunction.hpp
+  @@ -23,6 +23,10 @@ struct JSIConverter;
+  #include <string>
+  #include <type_traits>
+
+  +#ifdef ANDROID
+  +#include <fbjni/fbjni.h>
+  +#endif
+  +
+  namespace margelo::nitro {
+
+  using namespace facebook;
+  @@ -109,6 +113,15 @@ public:
+          std::string funcName = getHybridFuncFullName<THybrid>(kind, name, hybridInstance.get());
+          std::string message = exception.what();
+          throw jsi::JSError(runtime, funcName + ": " + message);
+  +#ifdef ANDROID
+  +#pragma clang diagnostic push
+  +#pragma clang diagnostic ignored "-Wexceptions"
+  +      } catch (const jni::JniException& exception) {
+  +        std::string funcName = getHybridFuncFullName<THybrid>(kind, name, hybridInstance.get());
+  +        std::string message = exception.what();
+  +        throw jsi::JSError(runtime, funcName + ": " + message);
+  +#pragma clang diagnostic pop
+  +#endif
+        } catch (...) {
+          // Some unknown exception was thrown - add method name information and re-throw as `JSError`.
+          std::string funcName = getHybridFuncFullName<THybrid>(kind, name, hybridInstance.get());
+  ```
+
+  see [raw](https://github.com/TheWidlarzGroup/react-native-video/blob/v7/example/patches/react-native-nitro-modules%2B0.27.2.patch)
+</details>
+
+
 ## Usage
 
 ```tsx title="App.tsx"

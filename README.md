@@ -78,34 +78,7 @@ You can apply it using `patch-package`.
 
 Without this patch you won't be able "recognize" errors, all will be thrown as unknown errors.
 
-```diff
-diff --git a/node_modules/react-native-nitro-modules/cpp/core/HybridFunction.hpp b/node_modules/react-native-nitro-modules/cpp/core/HybridFunction.hpp
-index aefd987..c2e06fb 100644
---- a/node_modules/react-native-nitro-modules/cpp/core/HybridFunction.hpp
-+++ b/node_modules/react-native-nitro-modules/cpp/core/HybridFunction.hpp
-@@ -23,6 +23,10 @@ struct JSIConverter;
- #include <string>
- #include <type_traits>
- 
-+#ifdef ANDROID
-+#include <fbjni/fbjni.h>
-+#endif
-+
- namespace margelo::nitro {
- 
- using namespace facebook;
-@@ -118,6 +122,10 @@ public:
-         std::string funcName = getHybridFuncFullName<THybrid>(kind, name, hybridInstance.get());
-         std::string message = exception.what();
-         throw jsi::JSError(runtime, funcName + ": " + message);
-+      } catch (const jni::JniException& exception) {
-+        std::string funcName = getHybridFuncFullName<THybrid>(kind, name, hybridInstance.get());
-+        std::string message = exception.what();
-+        throw jsi::JSError(runtime, funcName + ": " + message);
- #pragma clang diagnostic pop
- #endif
-       } catch (...) {
-```
+see [installation guide](https://docs.thewidlarzgroup.com/react-native-video/docs/v7/installation#patch-for-react-native--080)
 </details>
 
 ### Usage
