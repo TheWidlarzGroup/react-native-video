@@ -79,13 +79,13 @@
     "eslint": "^8.51.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.1",
-    "nitro-codegen": ">=0.26.0",
+    "nitro-codegen": "^0.27.0",
     "prettier": "^3.0.3",
     "react": "18.3.1",
     "react-native": "^0.77.0",
     "@react-native/eslint-config": "^0.77.0",
     "react-native-builder-bob": "^0.40.0",
-    "react-native-nitro-modules": ">=0.26.0",
+    "react-native-nitro-modules": "^0.27.0",
     "typescript": "^5.2.2"
   },
   "resolutions": {
