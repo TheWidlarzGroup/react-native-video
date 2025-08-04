@@ -22,6 +22,11 @@ sealed class LibraryError(code: String, message: String) : VideoError(code, mess
     "library/method-not-supported",
     "Method $methodName() is not supported on Android"
   )
+
+  object DRMPluginNotFound : LibraryError(
+    "library/drm-plugin-not-found",
+    "No DRM plugin have been found, please add one to the project",
+  )
 }
 
 // Player related errors

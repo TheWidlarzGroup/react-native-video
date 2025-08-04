@@ -75,10 +75,12 @@ class VideoManager {
   
   func register(player: HybridVideoPlayer) {
     players.add(player)
+    PluginsRegistry.shared.notifyPlayerCreated(player: player)
   }
   
   func unregister(player: HybridVideoPlayer) {
     players.remove(player)
+    PluginsRegistry.shared.notifyPlayerDestroyed(player: player)
   }
   
   func register(view: VideoComponentView) {

@@ -212,7 +212,7 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
   }
   
   // MARK: - AVPlayerItemLegibleOutputPushDelegate
-  func legibleOutput(_: AVPlayerItemLegibleOutput,
+  public func legibleOutput(_: AVPlayerItemLegibleOutput,
                      didOutputAttributedStrings strings: [NSAttributedString],
                      nativeSampleBuffers _: [Any],
                      forItemTime _: CMTime) {
@@ -220,7 +220,7 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
   }
   
   // MARK: - AVPlayerItemMetadataOutputPushDelegate
-  func metadataOutput(_: AVPlayerItemMetadataOutput, didOutputTimedMetadataGroups groups: [AVTimedMetadataGroup], from _: AVPlayerItemTrack?) {
+  public func metadataOutput(_: AVPlayerItemMetadataOutput, didOutputTimedMetadataGroups groups: [AVTimedMetadataGroup], from _: AVPlayerItemTrack?) {
     for metadataGroup in groups {
       delegate?.onTimedMetadataChanged(timedMetadata: metadataGroup.items)
     }

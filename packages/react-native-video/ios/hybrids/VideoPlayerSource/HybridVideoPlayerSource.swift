@@ -9,8 +9,8 @@ import Foundation
 import AVFoundation
 import NitroModules
 
-class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec {
-  public var asset: AVURLAsset?
+class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec, NativeVideoPlayerSourceSpec {
+  var asset: AVURLAsset?
   var uri: String
   var config: NativeVideoConfig
   
@@ -62,7 +62,7 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec {
     return promise
   }
   
-  public func initializeAsset() async throws {
+  func initializeAsset() async throws {
     guard asset == nil else {
       return
     }
@@ -85,7 +85,21 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec {
     _ = try? await asset.load(.duration, .preferredTransform, .isPlayable) as Any
   }
   
-  public func releaseAsset() {
+  func getAsset() async throws -> AVURLAsset {
+    if let asset {
+      return asset
+    }
+    
+    try await initializeAsset()
+    
+    guard let asset else {
+      throw SourceError.failedToInitializeAsset.error()
+    }
+    
+    return asset
+  }
+  
+  func releaseAsset() {
     asset = nil
   }
   
