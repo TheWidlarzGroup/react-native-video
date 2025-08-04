@@ -10,8 +10,8 @@
 #include <fbjni/fbjni.h>
 #include <functional>
 
-#include <functional>
 #include "onLoadStartData.hpp"
+#include <functional>
 #include "JonLoadStartData.hpp"
 #include "SourceType.hpp"
 #include "JSourceType.hpp"

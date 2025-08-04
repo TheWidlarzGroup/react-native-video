@@ -21,15 +21,15 @@ namespace margelo::nitro::video { enum class VideoOrientation; }
 #include <string>
 #include "NativeVideoConfig.hpp"
 #include "JNativeVideoConfig.hpp"
-#include <optional>
-#include <vector>
 #include "NativeExternalSubtitle.hpp"
+#include <vector>
+#include <optional>
 #include "JNativeExternalSubtitle.hpp"
 #include "SubtitleType.hpp"
 #include "JSubtitleType.hpp"
 #include <unordered_map>
-#include <NitroModules/Promise.hpp>
 #include "VideoInformation.hpp"
+#include <NitroModules/Promise.hpp>
 #include <NitroModules/JPromise.hpp>
 #include "JVideoInformation.hpp"
 #include "VideoOrientation.hpp"
@@ -50,6 +50,11 @@ namespace margelo::nitro::video {
   size_t JHybridVideoPlayerSourceSpec::getExternalMemorySize() noexcept {
     static const auto method = javaClassStatic()->getMethod<jlong()>("getMemorySize");
     return method(_javaPart);
+  }
+
+  void JHybridVideoPlayerSourceSpec::dispose() noexcept {
+    static const auto method = javaClassStatic()->getMethod<void()>("dispose");
+    method(_javaPart);
   }
 
   // Properties

@@ -10,8 +10,8 @@
 #include <fbjni/fbjni.h>
 #include <functional>
 
-#include <functional>
 #include "onPlaybackStateChangeData.hpp"
+#include <functional>
 #include "JonPlaybackStateChangeData.hpp"
 
 namespace margelo::nitro::video {

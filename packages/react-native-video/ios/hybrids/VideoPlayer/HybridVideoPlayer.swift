@@ -183,10 +183,6 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     return player?.rate != 0
   }
 
-  func clean() throws {
-    release()
-  }
-
   func release() {
     playerQueue.async { [weak self] in
       guard let self = self else { return }
@@ -494,6 +490,10 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   }
 
   // MARK: - Memory Management
+  
+  func dispose() {
+    release()
+  }
 
   var memorySize: Int {
     var size = 0

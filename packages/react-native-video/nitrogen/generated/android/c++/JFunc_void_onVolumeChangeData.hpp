@@ -10,8 +10,8 @@
 #include <fbjni/fbjni.h>
 #include <functional>
 
-#include <functional>
 #include "onVolumeChangeData.hpp"
+#include <functional>
 #include "JonVolumeChangeData.hpp"
 
 namespace margelo::nitro::video {

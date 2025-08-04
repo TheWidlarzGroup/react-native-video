@@ -17,9 +17,9 @@ namespace margelo::nitro::video { class HybridVideoPlayerSpec; }
 // Forward declaration of `ResizeMode` to properly resolve imports.
 namespace margelo::nitro::video { enum class ResizeMode; }
 
-#include <optional>
 #include <memory>
 #include "HybridVideoPlayerSpec.hpp"
+#include <optional>
 #include "ResizeMode.hpp"
 #include <functional>
 
@@ -51,9 +51,11 @@ namespace margelo::nitro::video {
     }
 
   public:
-    // Get memory pressure
     inline size_t getExternalMemorySize() noexcept override {
       return _swiftPart.getMemorySize();
+    }
+    void dispose() noexcept override {
+      _swiftPart.dispose();
     }
 
   public:

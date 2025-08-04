@@ -39,6 +39,7 @@ namespace margelo::nitro::video {
 
   public:
     size_t getExternalMemorySize() noexcept override;
+    void dispose() noexcept override;
 
   public:
     inline const jni::global_ref<JHybridVideoPlayerSourceSpec::javaobject>& getJavaPart() const noexcept {

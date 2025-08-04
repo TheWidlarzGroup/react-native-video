@@ -36,8 +36,9 @@ public protocol HybridVideoPlayerEventEmitterSpec_protocol: HybridObject {
 }
 
 /// See ``HybridVideoPlayerEventEmitterSpec``
-public class HybridVideoPlayerEventEmitterSpec_base {
+open class HybridVideoPlayerEventEmitterSpec_base {
   private weak var cxxWrapper: HybridVideoPlayerEventEmitterSpec_cxx? = nil
+  public init() { }
   public func getCxxWrapper() -> HybridVideoPlayerEventEmitterSpec_cxx {
   #if DEBUG
     guard self is HybridVideoPlayerEventEmitterSpec else {

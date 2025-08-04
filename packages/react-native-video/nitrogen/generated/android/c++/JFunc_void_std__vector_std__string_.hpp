@@ -10,9 +10,9 @@
 #include <fbjni/fbjni.h>
 #include <functional>
 
-#include <functional>
-#include <vector>
 #include <string>
+#include <vector>
+#include <functional>
 
 namespace margelo::nitro::video {
 

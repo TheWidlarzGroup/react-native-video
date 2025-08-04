@@ -31,7 +31,6 @@ public protocol HybridVideoPlayerSpec_protocol: HybridObject {
   func replaceSourceAsync(source: (any HybridVideoPlayerSourceSpec)?) throws -> Promise<Void>
   func getAvailableTextTracks() throws -> [TextTrack]
   func selectTextTrack(textTrack: TextTrack?) throws -> Void
-  func clean() throws -> Void
   func preload() throws -> Promise<Void>
   func play() throws -> Void
   func pause() throws -> Void
@@ -40,8 +39,9 @@ public protocol HybridVideoPlayerSpec_protocol: HybridObject {
 }
 
 /// See ``HybridVideoPlayerSpec``
-public class HybridVideoPlayerSpec_base {
+open class HybridVideoPlayerSpec_base {
   private weak var cxxWrapper: HybridVideoPlayerSpec_cxx? = nil
+  public init() { }
   public func getCxxWrapper() -> HybridVideoPlayerSpec_cxx {
   #if DEBUG
     guard self is HybridVideoPlayerSpec else {

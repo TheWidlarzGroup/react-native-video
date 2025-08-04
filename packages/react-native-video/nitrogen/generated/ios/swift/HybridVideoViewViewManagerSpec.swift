@@ -32,8 +32,9 @@ public protocol HybridVideoViewViewManagerSpec_protocol: HybridObject {
 }
 
 /// See ``HybridVideoViewViewManagerSpec``
-public class HybridVideoViewViewManagerSpec_base {
+open class HybridVideoViewViewManagerSpec_base {
   private weak var cxxWrapper: HybridVideoViewViewManagerSpec_cxx? = nil
+  public init() { }
   public func getCxxWrapper() -> HybridVideoViewViewManagerSpec_cxx {
   #if DEBUG
     guard self is HybridVideoViewViewManagerSpec else {

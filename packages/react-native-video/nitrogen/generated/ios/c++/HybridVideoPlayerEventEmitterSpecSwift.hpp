@@ -51,8 +51,8 @@ namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 #include "onPlaybackStateChangeData.hpp"
 #include "onProgressData.hpp"
 #include "TimedMetadata.hpp"
-#include <vector>
 #include "TimedMetadataObject.hpp"
+#include <vector>
 #include <string>
 #include "TextTrack.hpp"
 #include "onVolumeChangeData.hpp"
@@ -86,9 +86,11 @@ namespace margelo::nitro::video {
     }
 
   public:
-    // Get memory pressure
     inline size_t getExternalMemorySize() noexcept override {
       return _swiftPart.getMemorySize();
+    }
+    void dispose() noexcept override {
+      _swiftPart.dispose();
     }
 
   public:

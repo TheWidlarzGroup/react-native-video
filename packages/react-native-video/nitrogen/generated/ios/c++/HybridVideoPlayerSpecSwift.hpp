@@ -31,8 +31,8 @@ namespace margelo::nitro::video { struct TextTrack; }
 #include "VideoPlayerStatus.hpp"
 #include "MixAudioMode.hpp"
 #include "IgnoreSilentSwitchMode.hpp"
-#include <optional>
 #include "TextTrack.hpp"
+#include <optional>
 #include <string>
 #include <NitroModules/Promise.hpp>
 #include <vector>
@@ -65,9 +65,11 @@ namespace margelo::nitro::video {
     }
 
   public:
-    // Get memory pressure
     inline size_t getExternalMemorySize() noexcept override {
       return _swiftPart.getMemorySize();
+    }
+    void dispose() noexcept override {
+      _swiftPart.dispose();
     }
 
   public:
@@ -171,12 +173,6 @@ namespace margelo::nitro::video {
     }
     inline void selectTextTrack(const std::optional<TextTrack>& textTrack) override {
       auto __result = _swiftPart.selectTextTrack(textTrack);
-      if (__result.hasError()) [[unlikely]] {
-        std::rethrow_exception(__result.error());
-      }
-    }
-    inline void clean() override {
-      auto __result = _swiftPart.clean();
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

@@ -20,8 +20,8 @@ namespace margelo::nitro::video { struct VideoInformation; }
 
 #include <string>
 #include "NativeVideoConfig.hpp"
-#include <NitroModules/Promise.hpp>
 #include "VideoInformation.hpp"
+#include <NitroModules/Promise.hpp>
 
 namespace margelo::nitro::video {
 

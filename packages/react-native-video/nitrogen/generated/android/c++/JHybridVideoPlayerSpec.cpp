@@ -32,8 +32,8 @@ namespace margelo::nitro::video { struct TextTrack; }
 #include "JMixAudioMode.hpp"
 #include "IgnoreSilentSwitchMode.hpp"
 #include "JIgnoreSilentSwitchMode.hpp"
-#include <optional>
 #include "TextTrack.hpp"
+#include <optional>
 #include "JTextTrack.hpp"
 #include <string>
 #include <NitroModules/Promise.hpp>
@@ -55,6 +55,11 @@ namespace margelo::nitro::video {
   size_t JHybridVideoPlayerSpec::getExternalMemorySize() noexcept {
     static const auto method = javaClassStatic()->getMethod<jlong()>("getMemorySize");
     return method(_javaPart);
+  }
+
+  void JHybridVideoPlayerSpec::dispose() noexcept {
+    static const auto method = javaClassStatic()->getMethod<void()>("dispose");
+    method(_javaPart);
   }
 
   // Properties
@@ -203,10 +208,6 @@ namespace margelo::nitro::video {
   void JHybridVideoPlayerSpec::selectTextTrack(const std::optional<TextTrack>& textTrack) {
     static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JTextTrack> /* textTrack */)>("selectTextTrack");
     method(_javaPart, textTrack.has_value() ? JTextTrack::fromCpp(textTrack.value()) : nullptr);
-  }
-  void JHybridVideoPlayerSpec::clean() {
-    static const auto method = javaClassStatic()->getMethod<void()>("clean");
-    method(_javaPart);
   }
   std::shared_ptr<Promise<void>> JHybridVideoPlayerSpec::preload() {
     static const auto method = javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>()>("preload");
