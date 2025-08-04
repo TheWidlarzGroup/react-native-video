@@ -75,6 +75,7 @@
   },
   "devDependencies": {
     "@expo/config-plugins": "^10.0.2",
+    "@react-native/eslint-config": "^0.77.0",
     "@types/react": "^18.2.44",
     "del-cli": "^5.1.0",
     "eslint": "^8.51.0",
@@ -84,7 +85,7 @@
     "prettier": "^3.0.3",
     "react": "18.3.1",
     "react-native": "^0.77.0",
-    "@react-native/eslint-config": "^0.77.0",
+    "shaka-player": "^4.15.9",
     "react-native-builder-bob": "^0.40.0",
     "react-native-nitro-modules": "^0.30.0",
     "typescript": "^5.2.2"
@@ -149,5 +150,8 @@
     "type": "view-legacy",
     "languages": "kotlin-swift",
     "version": "0.41.2"
+  },
+  "optionalDependencies": {
+    "shaka-player": "^4.15.9"
   }
 }
