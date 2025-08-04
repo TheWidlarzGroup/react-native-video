@@ -51,11 +51,11 @@ The most battle-tested open-source video player component for React Native with 
 ### Requirements
 
 - React Native 0.75 or higher
-- `react-native-nitro-modules` (>=0.24.0) - Please see [nitro requirements](https://nitro.margelo.com/docs/minimum-requirements)
+- `react-native-nitro-modules` (>=0.27.2) - Please see [nitro requirements](https://nitro.margelo.com/docs/minimum-requirements)
 
 ### Install
 
-`react-native-video` requires `react-native-nitro-modules` (>=0.24.0) in your project.
+`react-native-video` requires `react-native-nitro-modules` (>=0.27.2) in your project.
 ```bash
 npm install react-native-nitro-modules
 ```
