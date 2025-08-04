@@ -10,8 +10,8 @@
 #include <fbjni/fbjni.h>
 #include <functional>
 
-#include <functional>
 #include "VideoPlayerStatus.hpp"
+#include <functional>
 #include "JVideoPlayerStatus.hpp"
 
 namespace margelo::nitro::video {

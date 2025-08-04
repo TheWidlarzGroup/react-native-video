@@ -10,8 +10,8 @@
 #include <fbjni/fbjni.h>
 #include <functional>
 
-#include <functional>
 #include "BandwidthData.hpp"
+#include <functional>
 #include "JBandwidthData.hpp"
 #include <optional>
 

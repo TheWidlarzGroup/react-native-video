@@ -32,8 +32,8 @@ namespace margelo::nitro::video { struct TextTrack; }
 #include "VideoPlayerStatus.hpp"
 #include "MixAudioMode.hpp"
 #include "IgnoreSilentSwitchMode.hpp"
-#include <optional>
 #include "TextTrack.hpp"
+#include <optional>
 #include <NitroModules/Promise.hpp>
 #include <vector>
 
@@ -94,7 +94,6 @@ namespace margelo::nitro::video {
       virtual std::shared_ptr<Promise<void>> replaceSourceAsync(const std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>>& source) = 0;
       virtual std::vector<TextTrack> getAvailableTextTracks() = 0;
       virtual void selectTextTrack(const std::optional<TextTrack>& textTrack) = 0;
-      virtual void clean() = 0;
       virtual std::shared_ptr<Promise<void>> preload() = 0;
       virtual void play() = 0;
       virtual void pause() = 0;
@@ -104,7 +103,6 @@ namespace margelo::nitro::video {
     protected:
       // Hybrid Setup
       void loadHybridMethods() override;
-      void dispose() override;
 
     protected:
       // Tag for logging

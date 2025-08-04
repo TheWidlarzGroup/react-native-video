@@ -25,9 +25,9 @@ namespace margelo::nitro::video { enum class SubtitleType; }
 #include "HybridVideoPlayerSourceSpec.hpp"
 #include <string>
 #include "NativeVideoConfig.hpp"
-#include <optional>
-#include <vector>
 #include "NativeExternalSubtitle.hpp"
+#include <vector>
+#include <optional>
 #include "SubtitleType.hpp"
 #include <unordered_map>
 
@@ -59,9 +59,11 @@ namespace margelo::nitro::video {
     }
 
   public:
-    // Get memory pressure
     inline size_t getExternalMemorySize() noexcept override {
       return _swiftPart.getMemorySize();
+    }
+    void dispose() noexcept override {
+      _swiftPart.dispose();
     }
 
   public:

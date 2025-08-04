@@ -39,10 +39,10 @@ namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 #include "onPlaybackStateChangeData.hpp"
 #include "onProgressData.hpp"
 #include "TimedMetadata.hpp"
-#include <vector>
 #include <string>
-#include <optional>
+#include <vector>
 #include "TextTrack.hpp"
+#include <optional>
 #include "onVolumeChangeData.hpp"
 #include "VideoPlayerStatus.hpp"
 

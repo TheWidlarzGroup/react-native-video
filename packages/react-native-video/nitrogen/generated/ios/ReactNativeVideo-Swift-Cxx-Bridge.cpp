@@ -26,11 +26,11 @@ namespace margelo::nitro::video::bridge::swift {
   }
   void* _Nonnull get_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_(std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_ cppType) {
     std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpecSwift> swiftWrapper = std::dynamic_pointer_cast<margelo::nitro::video::HybridVideoPlayerSourceSpecSwift>(cppType);
-  #ifdef NITRO_DEBUG
+    #ifdef NITRO_DEBUG
     if (swiftWrapper == nullptr) [[unlikely]] {
       throw std::runtime_error("Class \"HybridVideoPlayerSourceSpec\" is not implemented in Swift!");
     }
-  #endif
+    #endif
     ReactNativeVideo::HybridVideoPlayerSourceSpec_cxx& swiftPart = swiftWrapper->getSwiftPart();
     return swiftPart.toUnsafe();
   }
@@ -42,11 +42,11 @@ namespace margelo::nitro::video::bridge::swift {
   }
   void* _Nonnull get_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerEventEmitterSpec_(std__shared_ptr_margelo__nitro__video__HybridVideoPlayerEventEmitterSpec_ cppType) {
     std::shared_ptr<margelo::nitro::video::HybridVideoPlayerEventEmitterSpecSwift> swiftWrapper = std::dynamic_pointer_cast<margelo::nitro::video::HybridVideoPlayerEventEmitterSpecSwift>(cppType);
-  #ifdef NITRO_DEBUG
+    #ifdef NITRO_DEBUG
     if (swiftWrapper == nullptr) [[unlikely]] {
       throw std::runtime_error("Class \"HybridVideoPlayerEventEmitterSpec\" is not implemented in Swift!");
     }
-  #endif
+    #endif
     ReactNativeVideo::HybridVideoPlayerEventEmitterSpec_cxx& swiftPart = swiftWrapper->getSwiftPart();
     return swiftPart.toUnsafe();
   }
@@ -74,11 +74,11 @@ namespace margelo::nitro::video::bridge::swift {
   }
   void* _Nonnull get_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSpec_(std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSpec_ cppType) {
     std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpecSwift> swiftWrapper = std::dynamic_pointer_cast<margelo::nitro::video::HybridVideoPlayerSpecSwift>(cppType);
-  #ifdef NITRO_DEBUG
+    #ifdef NITRO_DEBUG
     if (swiftWrapper == nullptr) [[unlikely]] {
       throw std::runtime_error("Class \"HybridVideoPlayerSpec\" is not implemented in Swift!");
     }
-  #endif
+    #endif
     ReactNativeVideo::HybridVideoPlayerSpec_cxx& swiftPart = swiftWrapper->getSwiftPart();
     return swiftPart.toUnsafe();
   }
@@ -90,11 +90,11 @@ namespace margelo::nitro::video::bridge::swift {
   }
   void* _Nonnull get_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerFactorySpec_(std__shared_ptr_margelo__nitro__video__HybridVideoPlayerFactorySpec_ cppType) {
     std::shared_ptr<margelo::nitro::video::HybridVideoPlayerFactorySpecSwift> swiftWrapper = std::dynamic_pointer_cast<margelo::nitro::video::HybridVideoPlayerFactorySpecSwift>(cppType);
-  #ifdef NITRO_DEBUG
+    #ifdef NITRO_DEBUG
     if (swiftWrapper == nullptr) [[unlikely]] {
       throw std::runtime_error("Class \"HybridVideoPlayerFactorySpec\" is not implemented in Swift!");
     }
-  #endif
+    #endif
     ReactNativeVideo::HybridVideoPlayerFactorySpec_cxx& swiftPart = swiftWrapper->getSwiftPart();
     return swiftPart.toUnsafe();
   }
@@ -210,11 +210,11 @@ namespace margelo::nitro::video::bridge::swift {
   }
   void* _Nonnull get_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceFactorySpec_(std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceFactorySpec_ cppType) {
     std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceFactorySpecSwift> swiftWrapper = std::dynamic_pointer_cast<margelo::nitro::video::HybridVideoPlayerSourceFactorySpecSwift>(cppType);
-  #ifdef NITRO_DEBUG
+    #ifdef NITRO_DEBUG
     if (swiftWrapper == nullptr) [[unlikely]] {
       throw std::runtime_error("Class \"HybridVideoPlayerSourceFactorySpec\" is not implemented in Swift!");
     }
-  #endif
+    #endif
     ReactNativeVideo::HybridVideoPlayerSourceFactorySpec_cxx& swiftPart = swiftWrapper->getSwiftPart();
     return swiftPart.toUnsafe();
   }
@@ -226,11 +226,11 @@ namespace margelo::nitro::video::bridge::swift {
   }
   void* _Nonnull get_std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerSpec_(std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerSpec_ cppType) {
     std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerSpecSwift> swiftWrapper = std::dynamic_pointer_cast<margelo::nitro::video::HybridVideoViewViewManagerSpecSwift>(cppType);
-  #ifdef NITRO_DEBUG
+    #ifdef NITRO_DEBUG
     if (swiftWrapper == nullptr) [[unlikely]] {
       throw std::runtime_error("Class \"HybridVideoViewViewManagerSpec\" is not implemented in Swift!");
     }
-  #endif
+    #endif
     ReactNativeVideo::HybridVideoViewViewManagerSpec_cxx& swiftPart = swiftWrapper->getSwiftPart();
     return swiftPart.toUnsafe();
   }
@@ -242,11 +242,11 @@ namespace margelo::nitro::video::bridge::swift {
   }
   void* _Nonnull get_std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerFactorySpec_(std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerFactorySpec_ cppType) {
     std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerFactorySpecSwift> swiftWrapper = std::dynamic_pointer_cast<margelo::nitro::video::HybridVideoViewViewManagerFactorySpecSwift>(cppType);
-  #ifdef NITRO_DEBUG
+    #ifdef NITRO_DEBUG
     if (swiftWrapper == nullptr) [[unlikely]] {
       throw std::runtime_error("Class \"HybridVideoViewViewManagerFactorySpec\" is not implemented in Swift!");
     }
-  #endif
+    #endif
     ReactNativeVideo::HybridVideoViewViewManagerFactorySpec_cxx& swiftPart = swiftWrapper->getSwiftPart();
     return swiftPart.toUnsafe();
   }

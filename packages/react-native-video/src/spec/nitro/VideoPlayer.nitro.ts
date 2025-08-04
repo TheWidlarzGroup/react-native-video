@@ -26,12 +26,6 @@ export interface VideoPlayer
    * @param textTrack - Text track to select, or null to unselect current track
    */
   selectTextTrack(textTrack: TextTrack | null): void;
-
-  /**
-   * Release the player resources.
-   * It's shouldn't be called manually. You should use the `dispose` method instead.
-   */
-  clean(): void;
 }
 
 export interface VideoPlayerFactory

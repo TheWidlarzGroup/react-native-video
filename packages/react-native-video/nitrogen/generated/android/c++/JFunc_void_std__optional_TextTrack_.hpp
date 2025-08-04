@@ -10,9 +10,9 @@
 #include <fbjni/fbjni.h>
 #include <functional>
 
-#include <functional>
-#include <optional>
 #include "TextTrack.hpp"
+#include <optional>
+#include <functional>
 #include "JTextTrack.hpp"
 #include <string>
 

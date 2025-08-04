@@ -338,10 +338,6 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
     }
   }
 
-  override fun clean() {
-    release()
-  }
-
   fun movePlayerToVideoView(videoView: VideoView) {
     VideoManager.addViewToPlayer(videoView, this)
 
@@ -349,6 +345,10 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
       PlayerView.switchTargetView(playerPointer, currentPlayerView?.get(), videoView.playerView)
       currentPlayerView = WeakReference(videoView.playerView)
     }
+  }
+
+  override fun dispose() {
+    release()
   }
 
   override val memorySize: Long

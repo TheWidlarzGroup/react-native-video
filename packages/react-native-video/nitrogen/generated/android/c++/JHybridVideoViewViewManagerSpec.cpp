@@ -12,9 +12,9 @@ namespace margelo::nitro::video { class HybridVideoPlayerSpec; }
 // Forward declaration of `ResizeMode` to properly resolve imports.
 namespace margelo::nitro::video { enum class ResizeMode; }
 
-#include <optional>
 #include <memory>
 #include "HybridVideoPlayerSpec.hpp"
+#include <optional>
 #include "JHybridVideoPlayerSpec.hpp"
 #include <NitroModules/JNISharedPtr.hpp>
 #include "ResizeMode.hpp"
@@ -38,6 +38,11 @@ namespace margelo::nitro::video {
   size_t JHybridVideoViewViewManagerSpec::getExternalMemorySize() noexcept {
     static const auto method = javaClassStatic()->getMethod<jlong()>("getMemorySize");
     return method(_javaPart);
+  }
+
+  void JHybridVideoViewViewManagerSpec::dispose() noexcept {
+    static const auto method = javaClassStatic()->getMethod<void()>("dispose");
+    method(_javaPart);
   }
 
   // Properties

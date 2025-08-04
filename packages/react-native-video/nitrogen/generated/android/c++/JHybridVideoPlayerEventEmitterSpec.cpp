@@ -65,8 +65,8 @@ namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 #include "TimedMetadata.hpp"
 #include "JFunc_void_TimedMetadata.hpp"
 #include "JTimedMetadata.hpp"
-#include <vector>
 #include "TimedMetadataObject.hpp"
+#include <vector>
 #include "JTimedMetadataObject.hpp"
 #include <string>
 #include "JFunc_void_std__vector_std__string_.hpp"
@@ -95,6 +95,11 @@ namespace margelo::nitro::video {
   size_t JHybridVideoPlayerEventEmitterSpec::getExternalMemorySize() noexcept {
     static const auto method = javaClassStatic()->getMethod<jlong()>("getMemorySize");
     return method(_javaPart);
+  }
+
+  void JHybridVideoPlayerEventEmitterSpec::dispose() noexcept {
+    static const auto method = javaClassStatic()->getMethod<void()>("dispose");
+    method(_javaPart);
   }
 
   // Properties

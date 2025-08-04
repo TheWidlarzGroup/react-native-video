@@ -17,7 +17,7 @@ import NitroModules
  * - Other HybridObjects need to be wrapped/unwrapped from the Swift TCxx wrapper
  * - Throwing methods need to be wrapped with a Result<T, Error> type, as exceptions cannot be propagated to C++
  */
-public class HybridVideoPlayerSpec_cxx {
+open class HybridVideoPlayerSpec_cxx {
   /**
    * The Swift <> C++ bridge's namespace (`margelo::nitro::video::bridge::swift`)
    * from `ReactNativeVideo-Swift-Cxx-Bridge.hpp`.
@@ -94,6 +94,15 @@ public class HybridVideoPlayerSpec_cxx {
   @inline(__always)
   public var memorySize: Int {
     return MemoryHelper.getSizeOf(self.__implementation) + self.__implementation.memorySize
+  }
+
+  /**
+   * Call dispose() on the Swift class.
+   * This _may_ be called manually from JS.
+   */
+  @inline(__always)
+  public func dispose() {
+    self.__implementation.dispose()
   }
 
   // Properties
@@ -308,17 +317,6 @@ public class HybridVideoPlayerSpec_cxx {
           return nil
         }
       }())
-      return bridge.create_Result_void_()
-    } catch (let __error) {
-      let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_void_(__exceptionPtr)
-    }
-  }
-  
-  @inline(__always)
-  public final func clean() -> bridge.Result_void_ {
-    do {
-      try self.__implementation.clean()
       return bridge.create_Result_void_()
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()

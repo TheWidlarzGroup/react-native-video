@@ -41,7 +41,6 @@ namespace margelo::nitro::video {
       prototype.registerHybridMethod("replaceSourceAsync", &HybridVideoPlayerSpec::replaceSourceAsync);
       prototype.registerHybridMethod("getAvailableTextTracks", &HybridVideoPlayerSpec::getAvailableTextTracks);
       prototype.registerHybridMethod("selectTextTrack", &HybridVideoPlayerSpec::selectTextTrack);
-      prototype.registerHybridMethod("clean", &HybridVideoPlayerSpec::clean);
       prototype.registerHybridMethod("preload", &HybridVideoPlayerSpec::preload);
       prototype.registerHybridMethod("play", &HybridVideoPlayerSpec::play);
       prototype.registerHybridMethod("pause", &HybridVideoPlayerSpec::pause);
@@ -50,8 +49,4 @@ namespace margelo::nitro::video {
     });
   }
 
-  void HybridVideoPlayerSpec::dispose() {
-    clean();
-    HybridObject::dispose();
-  }
 } // namespace margelo::nitro::video

@@ -25,13 +25,13 @@ namespace margelo::nitro::video { enum class VideoOrientation; }
 
 #include <string>
 #include "NativeVideoConfig.hpp"
-#include <optional>
-#include <vector>
 #include "NativeExternalSubtitle.hpp"
+#include <vector>
+#include <optional>
 #include "SubtitleType.hpp"
 #include <unordered_map>
-#include <NitroModules/Promise.hpp>
 #include "VideoInformation.hpp"
+#include <NitroModules/Promise.hpp>
 #include "VideoOrientation.hpp"
 
 #include "ReactNativeVideo-Swift-Cxx-Umbrella.hpp"
@@ -62,9 +62,11 @@ namespace margelo::nitro::video {
     }
 
   public:
-    // Get memory pressure
     inline size_t getExternalMemorySize() noexcept override {
       return _swiftPart.getMemorySize();
+    }
+    void dispose() noexcept override {
+      _swiftPart.dispose();
     }
 
   public:

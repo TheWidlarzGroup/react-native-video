@@ -22,9 +22,9 @@
 namespace margelo::nitro::video { struct NativeExternalSubtitle; }
 
 #include <string>
-#include <optional>
-#include <vector>
 #include "NativeExternalSubtitle.hpp"
+#include <vector>
+#include <optional>
 #include <unordered_map>
 
 namespace margelo::nitro::video {

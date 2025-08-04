@@ -10,11 +10,11 @@
 #include <fbjni/fbjni.h>
 #include <functional>
 
-#include <functional>
 #include "TimedMetadata.hpp"
+#include <functional>
 #include "JTimedMetadata.hpp"
-#include <vector>
 #include "TimedMetadataObject.hpp"
+#include <vector>
 #include "JTimedMetadataObject.hpp"
 #include <string>
 

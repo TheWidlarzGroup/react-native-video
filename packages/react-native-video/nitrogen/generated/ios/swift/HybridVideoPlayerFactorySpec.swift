@@ -18,8 +18,9 @@ public protocol HybridVideoPlayerFactorySpec_protocol: HybridObject {
 }
 
 /// See ``HybridVideoPlayerFactorySpec``
-public class HybridVideoPlayerFactorySpec_base {
+open class HybridVideoPlayerFactorySpec_base {
   private weak var cxxWrapper: HybridVideoPlayerFactorySpec_cxx? = nil
+  public init() { }
   public func getCxxWrapper() -> HybridVideoPlayerFactorySpec_cxx {
   #if DEBUG
     guard self is HybridVideoPlayerFactorySpec else {

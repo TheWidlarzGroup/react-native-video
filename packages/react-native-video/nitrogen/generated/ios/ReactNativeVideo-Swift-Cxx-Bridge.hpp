@@ -155,13 +155,13 @@ namespace margelo::nitro::video::bridge::swift {
    */
   class Func_void_Wrapper final {
   public:
-    explicit Func_void_Wrapper(std::function<void()>&& func): _function(std::make_shared<std::function<void()>>(std::move(func))) {}
+    explicit Func_void_Wrapper(std::function<void()>&& func): _function(std::make_unique<std::function<void()>>(std::move(func))) {}
     inline void call() const {
       _function->operator()();
     }
   private:
-    std::shared_ptr<std::function<void()>> _function;
-  };
+    std::unique_ptr<std::function<void()>> _function;
+  } SWIFT_NONCOPYABLE;
   Func_void create_Func_void(void* _Nonnull swiftClosureWrapper);
   inline Func_void_Wrapper wrap_Func_void(Func_void value) {
     return Func_void_Wrapper(std::move(value));
@@ -177,13 +177,13 @@ namespace margelo::nitro::video::bridge::swift {
    */
   class Func_void_std__exception_ptr_Wrapper final {
   public:
-    explicit Func_void_std__exception_ptr_Wrapper(std::function<void(const std::exception_ptr& /* error */)>&& func): _function(std::make_shared<std::function<void(const std::exception_ptr& /* error */)>>(std::move(func))) {}
+    explicit Func_void_std__exception_ptr_Wrapper(std::function<void(const std::exception_ptr& /* error */)>&& func): _function(std::make_unique<std::function<void(const std::exception_ptr& /* error */)>>(std::move(func))) {}
     inline void call(std::exception_ptr error) const {
       _function->operator()(error);
     }
   private:
-    std::shared_ptr<std::function<void(const std::exception_ptr& /* error */)>> _function;
-  };
+    std::unique_ptr<std::function<void(const std::exception_ptr& /* error */)>> _function;
+  } SWIFT_NONCOPYABLE;
   Func_void_std__exception_ptr create_Func_void_std__exception_ptr(void* _Nonnull swiftClosureWrapper);
   inline Func_void_std__exception_ptr_Wrapper wrap_Func_void_std__exception_ptr(Func_void_std__exception_ptr value) {
     return Func_void_std__exception_ptr_Wrapper(std::move(value));
@@ -297,13 +297,13 @@ namespace margelo::nitro::video::bridge::swift {
    */
   class Func_void_bool_Wrapper final {
   public:
-    explicit Func_void_bool_Wrapper(std::function<void(bool /* hasAudioFocus */)>&& func): _function(std::make_shared<std::function<void(bool /* hasAudioFocus */)>>(std::move(func))) {}
+    explicit Func_void_bool_Wrapper(std::function<void(bool /* hasAudioFocus */)>&& func): _function(std::make_unique<std::function<void(bool /* hasAudioFocus */)>>(std::move(func))) {}
     inline void call(bool hasAudioFocus) const {
       _function->operator()(hasAudioFocus);
     }
   private:
-    std::shared_ptr<std::function<void(bool /* hasAudioFocus */)>> _function;
-  };
+    std::unique_ptr<std::function<void(bool /* hasAudioFocus */)>> _function;
+  } SWIFT_NONCOPYABLE;
   Func_void_bool create_Func_void_bool(void* _Nonnull swiftClosureWrapper);
   inline Func_void_bool_Wrapper wrap_Func_void_bool(Func_void_bool value) {
     return Func_void_bool_Wrapper(std::move(value));
@@ -328,13 +328,13 @@ namespace margelo::nitro::video::bridge::swift {
    */
   class Func_void_BandwidthData_Wrapper final {
   public:
-    explicit Func_void_BandwidthData_Wrapper(std::function<void(const BandwidthData& /* data */)>&& func): _function(std::make_shared<std::function<void(const BandwidthData& /* data */)>>(std::move(func))) {}
+    explicit Func_void_BandwidthData_Wrapper(std::function<void(const BandwidthData& /* data */)>&& func): _function(std::make_unique<std::function<void(const BandwidthData& /* data */)>>(std::move(func))) {}
     inline void call(BandwidthData data) const {
       _function->operator()(data);
     }
   private:
-    std::shared_ptr<std::function<void(const BandwidthData& /* data */)>> _function;
-  };
+    std::unique_ptr<std::function<void(const BandwidthData& /* data */)>> _function;
+  } SWIFT_NONCOPYABLE;
   Func_void_BandwidthData create_Func_void_BandwidthData(void* _Nonnull swiftClosureWrapper);
   inline Func_void_BandwidthData_Wrapper wrap_Func_void_BandwidthData(Func_void_BandwidthData value) {
     return Func_void_BandwidthData_Wrapper(std::move(value));
@@ -350,13 +350,13 @@ namespace margelo::nitro::video::bridge::swift {
    */
   class Func_void_onLoadData_Wrapper final {
   public:
-    explicit Func_void_onLoadData_Wrapper(std::function<void(const onLoadData& /* data */)>&& func): _function(std::make_shared<std::function<void(const onLoadData& /* data */)>>(std::move(func))) {}
+    explicit Func_void_onLoadData_Wrapper(std::function<void(const onLoadData& /* data */)>&& func): _function(std::make_unique<std::function<void(const onLoadData& /* data */)>>(std::move(func))) {}
     inline void call(onLoadData data) const {
       _function->operator()(data);
     }
   private:
-    std::shared_ptr<std::function<void(const onLoadData& /* data */)>> _function;
-  };
+    std::unique_ptr<std::function<void(const onLoadData& /* data */)>> _function;
+  } SWIFT_NONCOPYABLE;
   Func_void_onLoadData create_Func_void_onLoadData(void* _Nonnull swiftClosureWrapper);
   inline Func_void_onLoadData_Wrapper wrap_Func_void_onLoadData(Func_void_onLoadData value) {
     return Func_void_onLoadData_Wrapper(std::move(value));
@@ -372,13 +372,13 @@ namespace margelo::nitro::video::bridge::swift {
    */
   class Func_void_onLoadStartData_Wrapper final {
   public:
-    explicit Func_void_onLoadStartData_Wrapper(std::function<void(const onLoadStartData& /* data */)>&& func): _function(std::make_shared<std::function<void(const onLoadStartData& /* data */)>>(std::move(func))) {}
+    explicit Func_void_onLoadStartData_Wrapper(std::function<void(const onLoadStartData& /* data */)>&& func): _function(std::make_unique<std::function<void(const onLoadStartData& /* data */)>>(std::move(func))) {}
     inline void call(onLoadStartData data) const {
       _function->operator()(data);
     }
   private:
-    std::shared_ptr<std::function<void(const onLoadStartData& /* data */)>> _function;
-  };
+    std::unique_ptr<std::function<void(const onLoadStartData& /* data */)>> _function;
+  } SWIFT_NONCOPYABLE;
   Func_void_onLoadStartData create_Func_void_onLoadStartData(void* _Nonnull swiftClosureWrapper);
   inline Func_void_onLoadStartData_Wrapper wrap_Func_void_onLoadStartData(Func_void_onLoadStartData value) {
     return Func_void_onLoadStartData_Wrapper(std::move(value));
@@ -394,13 +394,13 @@ namespace margelo::nitro::video::bridge::swift {
    */
   class Func_void_onPlaybackStateChangeData_Wrapper final {
   public:
-    explicit Func_void_onPlaybackStateChangeData_Wrapper(std::function<void(const onPlaybackStateChangeData& /* data */)>&& func): _function(std::make_shared<std::function<void(const onPlaybackStateChangeData& /* data */)>>(std::move(func))) {}
+    explicit Func_void_onPlaybackStateChangeData_Wrapper(std::function<void(const onPlaybackStateChangeData& /* data */)>&& func): _function(std::make_unique<std::function<void(const onPlaybackStateChangeData& /* data */)>>(std::move(func))) {}
     inline void call(onPlaybackStateChangeData data) const {
       _function->operator()(data);
     }
   private:
-    std::shared_ptr<std::function<void(const onPlaybackStateChangeData& /* data */)>> _function;
-  };
+    std::unique_ptr<std::function<void(const onPlaybackStateChangeData& /* data */)>> _function;
+  } SWIFT_NONCOPYABLE;
   Func_void_onPlaybackStateChangeData create_Func_void_onPlaybackStateChangeData(void* _Nonnull swiftClosureWrapper);
   inline Func_void_onPlaybackStateChangeData_Wrapper wrap_Func_void_onPlaybackStateChangeData(Func_void_onPlaybackStateChangeData value) {
     return Func_void_onPlaybackStateChangeData_Wrapper(std::move(value));
@@ -416,13 +416,13 @@ namespace margelo::nitro::video::bridge::swift {
    */
   class Func_void_double_Wrapper final {
   public:
-    explicit Func_void_double_Wrapper(std::function<void(double /* rate */)>&& func): _function(std::make_shared<std::function<void(double /* rate */)>>(std::move(func))) {}
+    explicit Func_void_double_Wrapper(std::function<void(double /* rate */)>&& func): _function(std::make_unique<std::function<void(double /* rate */)>>(std::move(func))) {}
     inline void call(double rate) const {
       _function->operator()(rate);
     }
   private:
-    std::shared_ptr<std::function<void(double /* rate */)>> _function;
-  };
+    std::unique_ptr<std::function<void(double /* rate */)>> _function;
+  } SWIFT_NONCOPYABLE;
   Func_void_double create_Func_void_double(void* _Nonnull swiftClosureWrapper);
   inline Func_void_double_Wrapper wrap_Func_void_double(Func_void_double value) {
     return Func_void_double_Wrapper(std::move(value));
@@ -438,13 +438,13 @@ namespace margelo::nitro::video::bridge::swift {
    */
   class Func_void_onProgressData_Wrapper final {
   public:
-    explicit Func_void_onProgressData_Wrapper(std::function<void(const onProgressData& /* data */)>&& func): _function(std::make_shared<std::function<void(const onProgressData& /* data */)>>(std::move(func))) {}
+    explicit Func_void_onProgressData_Wrapper(std::function<void(const onProgressData& /* data */)>&& func): _function(std::make_unique<std::function<void(const onProgressData& /* data */)>>(std::move(func))) {}
     inline void call(onProgressData data) const {
       _function->operator()(data);
     }
   private:
-    std::shared_ptr<std::function<void(const onProgressData& /* data */)>> _function;
-  };
+    std::unique_ptr<std::function<void(const onProgressData& /* data */)>> _function;
+  } SWIFT_NONCOPYABLE;
   Func_void_onProgressData create_Func_void_onProgressData(void* _Nonnull swiftClosureWrapper);
   inline Func_void_onProgressData_Wrapper wrap_Func_void_onProgressData(Func_void_onProgressData value) {
     return Func_void_onProgressData_Wrapper(std::move(value));
@@ -471,13 +471,13 @@ namespace margelo::nitro::video::bridge::swift {
    */
   class Func_void_TimedMetadata_Wrapper final {
   public:
-    explicit Func_void_TimedMetadata_Wrapper(std::function<void(const TimedMetadata& /* metadata */)>&& func): _function(std::make_shared<std::function<void(const TimedMetadata& /* metadata */)>>(std::move(func))) {}
+    explicit Func_void_TimedMetadata_Wrapper(std::function<void(const TimedMetadata& /* metadata */)>&& func): _function(std::make_unique<std::function<void(const TimedMetadata& /* metadata */)>>(std::move(func))) {}
     inline void call(TimedMetadata metadata) const {
       _function->operator()(metadata);
     }
   private:
-    std::shared_ptr<std::function<void(const TimedMetadata& /* metadata */)>> _function;
-  };
+    std::unique_ptr<std::function<void(const TimedMetadata& /* metadata */)>> _function;
+  } SWIFT_NONCOPYABLE;
   Func_void_TimedMetadata create_Func_void_TimedMetadata(void* _Nonnull swiftClosureWrapper);
   inline Func_void_TimedMetadata_Wrapper wrap_Func_void_TimedMetadata(Func_void_TimedMetadata value) {
     return Func_void_TimedMetadata_Wrapper(std::move(value));
@@ -504,13 +504,13 @@ namespace margelo::nitro::video::bridge::swift {
    */
   class Func_void_std__vector_std__string__Wrapper final {
   public:
-    explicit Func_void_std__vector_std__string__Wrapper(std::function<void(const std::vector<std::string>& /* texts */)>&& func): _function(std::make_shared<std::function<void(const std::vector<std::string>& /* texts */)>>(std::move(func))) {}
+    explicit Func_void_std__vector_std__string__Wrapper(std::function<void(const std::vector<std::string>& /* texts */)>&& func): _function(std::make_unique<std::function<void(const std::vector<std::string>& /* texts */)>>(std::move(func))) {}
     inline void call(std::vector<std::string> texts) const {
       _function->operator()(texts);
     }
   private:
-    std::shared_ptr<std::function<void(const std::vector<std::string>& /* texts */)>> _function;
-  };
+    std::unique_ptr<std::function<void(const std::vector<std::string>& /* texts */)>> _function;
+  } SWIFT_NONCOPYABLE;
   Func_void_std__vector_std__string_ create_Func_void_std__vector_std__string_(void* _Nonnull swiftClosureWrapper);
   inline Func_void_std__vector_std__string__Wrapper wrap_Func_void_std__vector_std__string_(Func_void_std__vector_std__string_ value) {
     return Func_void_std__vector_std__string__Wrapper(std::move(value));
@@ -526,13 +526,13 @@ namespace margelo::nitro::video::bridge::swift {
    */
   class Func_void_std__optional_TextTrack__Wrapper final {
   public:
-    explicit Func_void_std__optional_TextTrack__Wrapper(std::function<void(const std::optional<TextTrack>& /* track */)>&& func): _function(std::make_shared<std::function<void(const std::optional<TextTrack>& /* track */)>>(std::move(func))) {}
+    explicit Func_void_std__optional_TextTrack__Wrapper(std::function<void(const std::optional<TextTrack>& /* track */)>&& func): _function(std::make_unique<std::function<void(const std::optional<TextTrack>& /* track */)>>(std::move(func))) {}
     inline void call(std::optional<TextTrack> track) const {
       _function->operator()(track);
     }
   private:
-    std::shared_ptr<std::function<void(const std::optional<TextTrack>& /* track */)>> _function;
-  };
+    std::unique_ptr<std::function<void(const std::optional<TextTrack>& /* track */)>> _function;
+  } SWIFT_NONCOPYABLE;
   Func_void_std__optional_TextTrack_ create_Func_void_std__optional_TextTrack_(void* _Nonnull swiftClosureWrapper);
   inline Func_void_std__optional_TextTrack__Wrapper wrap_Func_void_std__optional_TextTrack_(Func_void_std__optional_TextTrack_ value) {
     return Func_void_std__optional_TextTrack__Wrapper(std::move(value));
@@ -548,13 +548,13 @@ namespace margelo::nitro::video::bridge::swift {
    */
   class Func_void_onVolumeChangeData_Wrapper final {
   public:
-    explicit Func_void_onVolumeChangeData_Wrapper(std::function<void(const onVolumeChangeData& /* data */)>&& func): _function(std::make_shared<std::function<void(const onVolumeChangeData& /* data */)>>(std::move(func))) {}
+    explicit Func_void_onVolumeChangeData_Wrapper(std::function<void(const onVolumeChangeData& /* data */)>&& func): _function(std::make_unique<std::function<void(const onVolumeChangeData& /* data */)>>(std::move(func))) {}
     inline void call(onVolumeChangeData data) const {
       _function->operator()(data);
     }
   private:
-    std::shared_ptr<std::function<void(const onVolumeChangeData& /* data */)>> _function;
-  };
+    std::unique_ptr<std::function<void(const onVolumeChangeData& /* data */)>> _function;
+  } SWIFT_NONCOPYABLE;
   Func_void_onVolumeChangeData create_Func_void_onVolumeChangeData(void* _Nonnull swiftClosureWrapper);
   inline Func_void_onVolumeChangeData_Wrapper wrap_Func_void_onVolumeChangeData(Func_void_onVolumeChangeData value) {
     return Func_void_onVolumeChangeData_Wrapper(std::move(value));
@@ -570,13 +570,13 @@ namespace margelo::nitro::video::bridge::swift {
    */
   class Func_void_VideoPlayerStatus_Wrapper final {
   public:
-    explicit Func_void_VideoPlayerStatus_Wrapper(std::function<void(VideoPlayerStatus /* status */)>&& func): _function(std::make_shared<std::function<void(VideoPlayerStatus /* status */)>>(std::move(func))) {}
+    explicit Func_void_VideoPlayerStatus_Wrapper(std::function<void(VideoPlayerStatus /* status */)>&& func): _function(std::make_unique<std::function<void(VideoPlayerStatus /* status */)>>(std::move(func))) {}
     inline void call(int status) const {
       _function->operator()(static_cast<VideoPlayerStatus>(status));
     }
   private:
-    std::shared_ptr<std::function<void(VideoPlayerStatus /* status */)>> _function;
-  };
+    std::unique_ptr<std::function<void(VideoPlayerStatus /* status */)>> _function;
+  } SWIFT_NONCOPYABLE;
   Func_void_VideoPlayerStatus create_Func_void_VideoPlayerStatus(void* _Nonnull swiftClosureWrapper);
   inline Func_void_VideoPlayerStatus_Wrapper wrap_Func_void_VideoPlayerStatus(Func_void_VideoPlayerStatus value) {
     return Func_void_VideoPlayerStatus_Wrapper(std::move(value));
@@ -655,13 +655,13 @@ namespace margelo::nitro::video::bridge::swift {
    */
   class Func_void_VideoInformation_Wrapper final {
   public:
-    explicit Func_void_VideoInformation_Wrapper(std::function<void(const VideoInformation& /* result */)>&& func): _function(std::make_shared<std::function<void(const VideoInformation& /* result */)>>(std::move(func))) {}
+    explicit Func_void_VideoInformation_Wrapper(std::function<void(const VideoInformation& /* result */)>&& func): _function(std::make_unique<std::function<void(const VideoInformation& /* result */)>>(std::move(func))) {}
     inline void call(VideoInformation result) const {
       _function->operator()(result);
     }
   private:
-    std::shared_ptr<std::function<void(const VideoInformation& /* result */)>> _function;
-  };
+    std::unique_ptr<std::function<void(const VideoInformation& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
   Func_void_VideoInformation create_Func_void_VideoInformation(void* _Nonnull swiftClosureWrapper);
   inline Func_void_VideoInformation_Wrapper wrap_Func_void_VideoInformation(Func_void_VideoInformation value) {
     return Func_void_VideoInformation_Wrapper(std::move(value));

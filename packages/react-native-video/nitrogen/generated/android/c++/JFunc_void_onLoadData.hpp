@@ -10,8 +10,8 @@
 #include <fbjni/fbjni.h>
 #include <functional>
 
-#include <functional>
 #include "onLoadData.hpp"
+#include <functional>
 #include "JonLoadData.hpp"
 #include "VideoOrientation.hpp"
 #include "JVideoOrientation.hpp"

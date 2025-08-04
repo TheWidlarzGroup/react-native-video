@@ -10,8 +10,8 @@
 #include <fbjni/fbjni.h>
 #include <functional>
 
-#include <functional>
 #include "onProgressData.hpp"
+#include <functional>
 #include "JonProgressData.hpp"
 
 namespace margelo::nitro::video {

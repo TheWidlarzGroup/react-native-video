@@ -21,8 +21,8 @@
 // Forward declaration of `TimedMetadataObject` to properly resolve imports.
 namespace margelo::nitro::video { struct TimedMetadataObject; }
 
-#include <vector>
 #include "TimedMetadataObject.hpp"
+#include <vector>
 
 namespace margelo::nitro::video {
 
