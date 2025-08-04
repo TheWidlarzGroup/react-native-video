@@ -35,7 +35,9 @@ public final class PluginsRegistry {
   public func unregister(plugin: ReactNativeVideoPluginSpec) {
     #if DEBUG
       if !hasPlugin(plugin: plugin) {
-        print("[ReactNativeVideo] Plugin \(plugin.name) (ID: \(plugin.id)) is not registered - skipping.")
+        print(
+          "[ReactNativeVideo] Plugin \(plugin.name) (ID: \(plugin.id)) is not registered - skipping."
+        )
       } else {
         print("[ReactNativeVideo] Unregistering plugin \(plugin.name) (ID: \(plugin.id)).")
       }
@@ -57,7 +59,7 @@ public final class PluginsRegistry {
         return drmManager
       }
     }
-    
+
     throw LibraryError.DRMPluginNotFound.error()
   }
 
@@ -67,7 +69,7 @@ public final class PluginsRegistry {
     var overriddenSource = source
 
     for plugin in plugins.values {
-      overriddenSource = await plugin.overrideSource(source: source)
+      overriddenSource = await plugin.overrideSource(source: overriddenSource)
     }
 
     return overriddenSource

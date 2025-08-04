@@ -23,14 +23,17 @@ class HybridVideoPlayerSource(): HybridVideoPlayerSourceSpec() {
   constructor(config: NativeVideoConfig) : this() {
     this.uri = config.uri
     this.config = config
+
+    val overriddenSource = PluginsRegistry.shared.overrideSource(this)
+
     this.mediaItem = createMediaItemFromVideoConfig(
-      PluginsRegistry.shared.overrideSource(this)
+      overriddenSource
     )
 
     NitroModules.applicationContext?.let {
       this.mediaSource = buildMediaSource(
         context = it,
-        source = PluginsRegistry.shared.overrideSource(this),
+        source = overriddenSource,
         mediaItem
       )
     } ?: run {
