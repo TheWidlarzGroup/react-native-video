@@ -447,7 +447,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         if currentTimeSecs >= 0 {
             #if USE_GOOGLE_IMA
             // Pre-roll Ad
-            if !_didRequestAds && currentTimeSecs >= 0.0001 && currentTimeSecs < 10 && _source?.adParams.adTagUrl != nil {
+            if !_didRequestAds && !_paused && currentTimeSecs >= 0.0001 && currentTimeSecs < 10 && _source?.adParams.adTagUrl != nil {
                     _imaAdsManager.requestAds(type: .preRoll)
                     _didRequestAds = true
                 }
@@ -459,6 +459,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                    currentTimeSecs >= highestSkipped,
                    !_skippedAdPlayed,
                    !_pendingSeek,
+                   !_paused,
                    !_playedCuePoints.contains(highestSkipped) {
                     print("🔁 Playing highest skipped cue: \(highestSkipped)s")
                     _imaAdsManager.requestAds(type: .midRoll)
@@ -471,7 +472,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                    // Handle normal cue point (non-skipped, just reached naturally)
                    for cueTime in cuePoints.map({ $0.doubleValue }) {
                        let isAtCue = abs(currentTimeSecs - cueTime) < 0.5
-                       if isAtCue && !_pendingSeek && !_playedCuePoints.contains(cueTime) {
+                       if isAtCue && !_pendingSeek && !_paused && !_playedCuePoints.contains(cueTime) {
                            print("▶️ Playing normal cue: \(cueTime)s")
                            _imaAdsManager.requestAds(type: .midRoll)
                            _playedCuePoints.insert(cueTime)
@@ -485,6 +486,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
             // Post-roll Ad: Trigger 2 seconds before end
             if !_didRequestPostRollAd,
+                !_paused,
                _source?.adParams.postRollAdTagUrl != nil,
                duration - currentTimeSecs <= 1 {
                 print("Triggering post-roll ad 1 seconds before content ends.")
