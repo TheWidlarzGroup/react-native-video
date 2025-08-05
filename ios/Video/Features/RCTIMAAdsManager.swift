@@ -76,7 +76,7 @@
             }
 
             // Create an ad request with our ad tag, display container, and optional user context.
-            print("Requesting \(type) ad with tag URL: \(adTagUrl)")
+            print("Requesting \(type) ad with tag URL: \(tagUrl)")
             let request = IMAAdsRequest(
                 adTagUrl: tagUrl,
                 adDisplayContainer: adDisplayContainer,
@@ -165,7 +165,7 @@
 
                 switch event.type {
                 case .ALL_ADS_COMPLETED, .LOG, .AD_BREAK_FETCH_ERROR:
-                    esetAdsLoaderAndManager()
+                    resetAdsLoaderAndManager()
                 default:
                     break
                 }
