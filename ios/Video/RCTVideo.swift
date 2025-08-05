@@ -493,6 +493,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
             // Post-roll Ad: Trigger 2 seconds before end
             if !_didRequestPostRollAd,
+                !_paused,
                _source?.adParams.postRollAdTagUrl != nil,
                !_paused,
                duration - currentTimeSecs <= 1 {
