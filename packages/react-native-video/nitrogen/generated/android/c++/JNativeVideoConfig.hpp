@@ -10,10 +10,18 @@
 #include <fbjni/fbjni.h>
 #include "NativeVideoConfig.hpp"
 
+#include "JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload.hpp"
+#include "JNativeDrmParams.hpp"
 #include "JNativeExternalSubtitle.hpp"
+#include "JOnGetLicensePayload.hpp"
 #include "JSubtitleType.hpp"
+#include "NativeDrmParams.hpp"
 #include "NativeExternalSubtitle.hpp"
+#include "OnGetLicensePayload.hpp"
 #include "SubtitleType.hpp"
+#include <NitroModules/JPromise.hpp>
+#include <NitroModules/Promise.hpp>
+#include <functional>
 #include <optional>
 #include <string>
 #include <unordered_map>
@@ -42,6 +50,8 @@ namespace margelo::nitro::video {
       jni::local_ref<jni::JString> uri = this->getFieldValue(fieldUri);
       static const auto fieldExternalSubtitles = clazz->getField<jni::JArrayClass<JNativeExternalSubtitle>>("externalSubtitles");
       jni::local_ref<jni::JArrayClass<JNativeExternalSubtitle>> externalSubtitles = this->getFieldValue(fieldExternalSubtitles);
+      static const auto fieldDrm = clazz->getField<JNativeDrmParams>("drm");
+      jni::local_ref<JNativeDrmParams> drm = this->getFieldValue(fieldDrm);
       static const auto fieldHeaders = clazz->getField<jni::JMap<jni::JString, jni::JString>>("headers");
       jni::local_ref<jni::JMap<jni::JString, jni::JString>> headers = this->getFieldValue(fieldHeaders);
       return NativeVideoConfig(
@@ -56,6 +66,7 @@ namespace margelo::nitro::video {
           }
           return __vector;
         }()) : std::nullopt,
+        drm != nullptr ? std::make_optional(drm->toCpp()) : std::nullopt,
         headers != nullptr ? std::make_optional([&]() {
           std::unordered_map<std::string, std::string> __map;
           __map.reserve(headers->size());
@@ -84,6 +95,7 @@ namespace margelo::nitro::video {
           }
           return __array;
         }() : nullptr,
+        value.drm.has_value() ? JNativeDrmParams::fromCpp(value.drm.value()) : nullptr,
         value.headers.has_value() ? [&]() -> jni::local_ref<jni::JMap<jni::JString, jni::JString>> {
           auto __map = jni::JHashMap<jni::JString, jni::JString>::create(value.headers.value().size());
           for (const auto& __entry : value.headers.value()) {

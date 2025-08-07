@@ -24,8 +24,12 @@ namespace margelo::nitro::video { class HybridVideoPlayerSpec; }
 namespace margelo::nitro::video { class HybridVideoViewViewManagerFactorySpec; }
 // Forward declaration of `HybridVideoViewViewManagerSpec` to properly resolve imports.
 namespace margelo::nitro::video { class HybridVideoViewViewManagerSpec; }
+// Forward declaration of `NativeDrmParams` to properly resolve imports.
+namespace margelo::nitro::video { struct NativeDrmParams; }
 // Forward declaration of `NativeExternalSubtitle` to properly resolve imports.
 namespace margelo::nitro::video { struct NativeExternalSubtitle; }
+// Forward declaration of `OnGetLicensePayload` to properly resolve imports.
+namespace margelo::nitro::video { struct OnGetLicensePayload; }
 // Forward declaration of `SourceType` to properly resolve imports.
 namespace margelo::nitro::video { enum class SourceType; }
 // Forward declaration of `SubtitleType` to properly resolve imports.
@@ -78,7 +82,9 @@ namespace ReactNativeVideo { class HybridVideoViewViewManagerSpec_cxx; }
 #include "HybridVideoPlayerSpec.hpp"
 #include "HybridVideoViewViewManagerFactorySpec.hpp"
 #include "HybridVideoViewViewManagerSpec.hpp"
+#include "NativeDrmParams.hpp"
 #include "NativeExternalSubtitle.hpp"
+#include "OnGetLicensePayload.hpp"
 #include "SourceType.hpp"
 #include "SubtitleType.hpp"
 #include "TextTrack.hpp"
@@ -600,6 +606,124 @@ namespace margelo::nitro::video::bridge::swift {
   using std__optional_std__vector_NativeExternalSubtitle__ = std::optional<std::vector<NativeExternalSubtitle>>;
   inline std::optional<std::vector<NativeExternalSubtitle>> create_std__optional_std__vector_NativeExternalSubtitle__(const std::vector<NativeExternalSubtitle>& value) {
     return std::optional<std::vector<NativeExternalSubtitle>>(value);
+  }
+  
+  // pragma MARK: std::optional<bool>
+  /**
+   * Specialized version of `std::optional<bool>`.
+   */
+  using std__optional_bool_ = std::optional<bool>;
+  inline std::optional<bool> create_std__optional_bool_(const bool& value) {
+    return std::optional<bool>(value);
+  }
+  
+  // pragma MARK: std::shared_ptr<Promise<std::string>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<std::string>>`.
+   */
+  using std__shared_ptr_Promise_std__string__ = std::shared_ptr<Promise<std::string>>;
+  inline std::shared_ptr<Promise<std::string>> create_std__shared_ptr_Promise_std__string__() {
+    return Promise<std::string>::create();
+  }
+  inline PromiseHolder<std::string> wrap_std__shared_ptr_Promise_std__string__(std::shared_ptr<Promise<std::string>> promise) {
+    return PromiseHolder<std::string>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(const std::string& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const std::string&)>`.
+   */
+  using Func_void_std__string = std::function<void(const std::string& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const std::string& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_std__string_Wrapper final {
+  public:
+    explicit Func_void_std__string_Wrapper(std::function<void(const std::string& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::string& /* result */)>>(std::move(func))) {}
+    inline void call(std::string result) const {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const std::string& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_std__string create_Func_void_std__string(void* _Nonnull swiftClosureWrapper);
+  inline Func_void_std__string_Wrapper wrap_Func_void_std__string(Func_void_std__string value) {
+    return Func_void_std__string_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::function<std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(const OnGetLicensePayload& /* payload */)>
+  /**
+   * Specialized version of `std::function<std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(const OnGetLicensePayload&)>`.
+   */
+  using Func_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload = std::function<std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(const OnGetLicensePayload& /* payload */)>;
+  /**
+   * Wrapper class for a `std::function<std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(const OnGetLicensePayload& / * payload * /)>`, this can be used from Swift.
+   */
+  class Func_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload_Wrapper final {
+  public:
+    explicit Func_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload_Wrapper(std::function<std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(const OnGetLicensePayload& /* payload */)>&& func): _function(std::make_unique<std::function<std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(const OnGetLicensePayload& /* payload */)>>(std::move(func))) {}
+    inline std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>> call(OnGetLicensePayload payload) const {
+      auto __result = _function->operator()(payload);
+      return __result;
+    }
+  private:
+    std::unique_ptr<std::function<std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(const OnGetLicensePayload& /* payload */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload create_Func_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload(void* _Nonnull swiftClosureWrapper);
+  inline Func_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload_Wrapper wrap_Func_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload(Func_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload value) {
+    return Func_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>`.
+   */
+  using std__shared_ptr_Promise_std__shared_ptr_Promise_std__string____ = std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>;
+  inline std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>> create_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string____() {
+    return Promise<std::shared_ptr<Promise<std::string>>>::create();
+  }
+  inline PromiseHolder<std::shared_ptr<Promise<std::string>>> wrap_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string____(std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>> promise) {
+    return PromiseHolder<std::shared_ptr<Promise<std::string>>>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(const std::shared_ptr<Promise<std::string>>& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const std::shared_ptr<Promise<std::string>>&)>`.
+   */
+  using Func_void_std__shared_ptr_Promise_std__string__ = std::function<void(const std::shared_ptr<Promise<std::string>>& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const std::shared_ptr<Promise<std::string>>& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_std__shared_ptr_Promise_std__string___Wrapper final {
+  public:
+    explicit Func_void_std__shared_ptr_Promise_std__string___Wrapper(std::function<void(const std::shared_ptr<Promise<std::string>>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::shared_ptr<Promise<std::string>>& /* result */)>>(std::move(func))) {}
+    inline void call(std::shared_ptr<Promise<std::string>> result) const {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const std::shared_ptr<Promise<std::string>>& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_std__shared_ptr_Promise_std__string__ create_Func_void_std__shared_ptr_Promise_std__string__(void* _Nonnull swiftClosureWrapper);
+  inline Func_void_std__shared_ptr_Promise_std__string___Wrapper wrap_Func_void_std__shared_ptr_Promise_std__string__(Func_void_std__shared_ptr_Promise_std__string__ value) {
+    return Func_void_std__shared_ptr_Promise_std__string___Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::optional<std::function<std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(const OnGetLicensePayload& /* payload */)>>
+  /**
+   * Specialized version of `std::optional<std::function<std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(const OnGetLicensePayload& / * payload * /)>>`.
+   */
+  using std__optional_std__function_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____const_OnGetLicensePayload_____payload______ = std::optional<std::function<std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(const OnGetLicensePayload& /* payload */)>>;
+  inline std::optional<std::function<std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(const OnGetLicensePayload& /* payload */)>> create_std__optional_std__function_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____const_OnGetLicensePayload_____payload______(const std::function<std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(const OnGetLicensePayload& /* payload */)>& value) {
+    return std::optional<std::function<std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(const OnGetLicensePayload& /* payload */)>>(value);
+  }
+  
+  // pragma MARK: std::optional<NativeDrmParams>
+  /**
+   * Specialized version of `std::optional<NativeDrmParams>`.
+   */
+  using std__optional_NativeDrmParams_ = std::optional<NativeDrmParams>;
+  inline std::optional<NativeDrmParams> create_std__optional_NativeDrmParams_(const NativeDrmParams& value) {
+    return std::optional<NativeDrmParams>(value);
   }
   
   // pragma MARK: std::unordered_map<std::string, std::string>

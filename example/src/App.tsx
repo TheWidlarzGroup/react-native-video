@@ -171,6 +171,13 @@ const VideoDemo = () => {
           label: 'External',
         },
       ],
+      drm: {
+        certificateUrl: 'https://example.com/path/to/certificate',
+        licenseUrl: 'https://example.com/path/to/license',
+        getLicense(_payload) {
+          return Promise.resolve('license');
+        },
+      },
     },
     (_player) => {
       // Setup player

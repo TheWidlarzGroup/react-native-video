@@ -11,10 +11,12 @@ import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.dash.DashMediaSource
+import androidx.media3.exoplayer.drm.DrmSessionManager
 import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.MergingMediaSource
 import com.margelo.nitro.video.HybridVideoPlayerSource
+import com.video.core.LibraryError
 import com.video.core.SourceError
 import com.video.core.plugins.PluginsRegistry
 
@@ -52,6 +54,14 @@ fun buildMediaSource(context: Context, source: HybridVideoPlayerSource, mediaIte
     }
   }
 
+  if (source.config.drm != null) {
+    source.drmManager = PluginsRegistry.shared.getDRMManager(source)
+
+    mediaSourceFactory.setDrmSessionManagerProvider {
+      source.drmManager as DrmSessionManager
+    }
+  }
+
   return PluginsRegistry.shared.overrideMediaSourceFactory(
     source,
     mediaSourceFactory,
@@ -66,23 +76,36 @@ fun buildExternalSubtitlesMediaSource(context: Context, source: HybridVideoPlaye
     buildBaseDataSourceFactory(context, source)
   )
 
-  val mediaItemBuilder = MediaItem.Builder()
+  val mediaItemBuilderWithSubtitles = MediaItem.Builder()
     .setUri(source.uri.toUri())
     .setSubtitleConfigurations(getSubtitlesConfiguration(source.config))
 
-  val mediaItem = PluginsRegistry.shared.overrideMediaItemBuilder(
+  val mediaItemBuilder = PluginsRegistry.shared.overrideMediaItemBuilder(
     source,
-    mediaItemBuilder
-  ).build()
+    mediaItemBuilderWithSubtitles
+  )
 
   val mediaSourceFactory = DefaultMediaSourceFactory(context)
     .setDataSourceFactory(dataSourceFactory)
+
+  if (source.config.drm != null) {
+    if (source.drmManager == null)  {
+      throw LibraryError.DRMPluginNotFound
+    }
+
+    mediaSourceFactory.setDrmSessionManagerProvider {
+      source.drmManager as DrmSessionManager
+    }
+
+    val drmConfiguration = source.drmManager!!.getDRMConfiguration(source.config.drm!!)
+    mediaItemBuilder.setDrmConfiguration(drmConfiguration)
+  }
 
   return PluginsRegistry.shared.overrideMediaSourceFactory(
     source,
     mediaSourceFactory,
     dataSourceFactory
-  ).createMediaSource(mediaItem)
+  ).createMediaSource(mediaItemBuilder.build())
 }
 
 

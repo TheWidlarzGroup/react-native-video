@@ -15,6 +15,10 @@ namespace margelo::nitro::video { struct NativeVideoConfig; }
 namespace margelo::nitro::video { struct NativeExternalSubtitle; }
 // Forward declaration of `SubtitleType` to properly resolve imports.
 namespace margelo::nitro::video { enum class SubtitleType; }
+// Forward declaration of `NativeDrmParams` to properly resolve imports.
+namespace margelo::nitro::video { struct NativeDrmParams; }
+// Forward declaration of `OnGetLicensePayload` to properly resolve imports.
+namespace margelo::nitro::video { struct OnGetLicensePayload; }
 
 #include <memory>
 #include "HybridVideoPlayerSourceSpec.hpp"
@@ -29,6 +33,14 @@ namespace margelo::nitro::video { enum class SubtitleType; }
 #include "JNativeExternalSubtitle.hpp"
 #include "SubtitleType.hpp"
 #include "JSubtitleType.hpp"
+#include "NativeDrmParams.hpp"
+#include "JNativeDrmParams.hpp"
+#include <NitroModules/Promise.hpp>
+#include "OnGetLicensePayload.hpp"
+#include <functional>
+#include "JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload.hpp"
+#include <NitroModules/JPromise.hpp>
+#include "JOnGetLicensePayload.hpp"
 #include <unordered_map>
 
 namespace margelo::nitro::video {

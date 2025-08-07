@@ -32,6 +32,7 @@
 #include "JFunc_void_onVolumeChangeData.hpp"
 #include "JFunc_void_VideoPlayerStatus.hpp"
 #include "JHybridVideoPlayerSourceSpec.hpp"
+#include "JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload.hpp"
 #include "JHybridVideoPlayerSourceFactorySpec.hpp"
 #include "JHybridVideoViewViewManagerSpec.hpp"
 #include "JHybridVideoViewViewManagerFactorySpec.hpp"
@@ -64,6 +65,7 @@ int initialize(JavaVM* vm) {
     margelo::nitro::video::JFunc_void_onVolumeChangeData_cxx::registerNatives();
     margelo::nitro::video::JFunc_void_VideoPlayerStatus_cxx::registerNatives();
     margelo::nitro::video::JHybridVideoPlayerSourceSpec::registerNatives();
+    margelo::nitro::video::JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload_cxx::registerNatives();
     margelo::nitro::video::JHybridVideoPlayerSourceFactorySpec::registerNatives();
     margelo::nitro::video::JHybridVideoViewViewManagerSpec::registerNatives();
     margelo::nitro::video::JHybridVideoViewViewManagerFactorySpec::registerNatives();

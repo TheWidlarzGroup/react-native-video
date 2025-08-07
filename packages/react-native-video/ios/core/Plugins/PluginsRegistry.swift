@@ -52,10 +52,9 @@ public final class PluginsRegistry {
     return plugins.contains { $0.value.id == plugin.id }
   }
 
-  // TODO: Replace `Any` with a specific DRM manager type when created
-  internal func getDrmManager(source: NativeVideoPlayerSource) async throws -> Any? {
+  internal func getDrmManager(source: NativeVideoPlayerSource) throws -> DRMManagerSpec? {
     for plugin in plugins.values {
-      if let drmManager = await plugin.getDRMManager(source: source) {
+      if let drmManager = plugin.getDRMManager(source: source) {
         return drmManager
       }
     }

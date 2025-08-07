@@ -18,7 +18,7 @@ public extension NativeVideoConfig {
   /**
    * Create a new instance of `NativeVideoConfig`.
    */
-  init(uri: String, externalSubtitles: [NativeExternalSubtitle]?, headers: Dictionary<String, String>?) {
+  init(uri: String, externalSubtitles: [NativeExternalSubtitle]?, drm: NativeDrmParams?, headers: Dictionary<String, String>?) {
     self.init(std.string(uri), { () -> bridge.std__optional_std__vector_NativeExternalSubtitle__ in
       if let __unwrappedValue = externalSubtitles {
         return bridge.create_std__optional_std__vector_NativeExternalSubtitle__({ () -> bridge.std__vector_NativeExternalSubtitle_ in
@@ -28,6 +28,12 @@ public extension NativeVideoConfig {
           }
           return __vector
         }())
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_NativeDrmParams_ in
+      if let __unwrappedValue = drm {
+        return bridge.create_std__optional_NativeDrmParams_(__unwrappedValue)
       } else {
         return .init()
       }
@@ -79,6 +85,29 @@ public extension NativeVideoConfig {
             }
             return __vector
           }())
+        } else {
+          return .init()
+        }
+      }()
+    }
+  }
+  
+  var drm: NativeDrmParams? {
+    @inline(__always)
+    get {
+      return { () -> NativeDrmParams? in
+        if let __unwrapped = self.__drm.value {
+          return __unwrapped
+        } else {
+          return nil
+        }
+      }()
+    }
+    @inline(__always)
+    set {
+      self.__drm = { () -> bridge.std__optional_NativeDrmParams_ in
+        if let __unwrappedValue = newValue {
+          return bridge.create_std__optional_NativeDrmParams_(__unwrappedValue)
         } else {
           return .init()
         }
