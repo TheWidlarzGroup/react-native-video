@@ -35,7 +35,7 @@ Pod::Spec.new do |s|
       Pod::UI.puts "RNVideo: enable IMA SDK"
 
       ss.ios.dependency 'GoogleAds-IMA-iOS-SDK', '~> 3.22.1'
-      ss.tvos.dependency 'GoogleAds-IMA-tvOS-SDK', '~> 4.2'
+      ss.tvos.dependency 'GoogleAds-IMA-tvOS-SDK', '~> 4.15.1'
       ss.pod_target_xcconfig = {
         'OTHER_SWIFT_FLAGS' => '$(inherited) -D USE_GOOGLE_IMA'
       }
