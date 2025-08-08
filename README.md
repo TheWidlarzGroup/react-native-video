@@ -70,18 +70,35 @@ export default () => (
 
 ### 1 · 📥 Offline SDK
 
-Enable offline streaming with full control over downloads, license lifecycle, secure storage, and media access.
+#### Need Offline Video Playback in React Native?
 
-- Track selection (bitrate, audio, subtitles)
-- Pause / resume & background queueing
-- Expiration & auto-cleanup
-- Built for Android & iOS
-- → [Read the SDK Docs](https://docs.thewidlarzgroup.com/offline-video-sdk?utm_source=rnv&utm_medium=readme&utm_id=modules-sdk-text)
+If you're building a video-first app and need to **download HLS streams for offline playback**, you're in the right place.
+
+#### 👉 [Check Offline Video SDK for React Native](https://www.thewidlarzgroup.com/offline-video-sdk?utm_source=rnv&utm_medium=readme&utm_id=check-offline-video-sdk)
+
+This SDK supports:
+- 🎞 Offline HLS playback
+- 🎧 Multi-language audio track downloads
+- 💬 Subtitles support
+- 🔐 DRM license handling
+- 📊 Analytics & state tracking
+
+---
+
+#### 🔑 How to get access?
+
+- Get a **14-day free trial** (no credit card required)
+- Use our [starter project](https://github.com/TheWidlarzGroup/react-native-offline-video-starter) to see it in action
+- Integrates with both `v6` and `v7` versions
+
+👉 **[Start Free Trial on the SDK Platform →](https://sdk.thewidlarzgroup.com/signup?utm_source=rnv&utm_medium=readme&utm_id=start-trial-offline-video-sdk)**
+
+---
 
 ### 2 · 🧪 Architecture
 
 Write your own plugins to extend library logic, attach analytics or add custom workflows - **without forking** the core SDK.  
-→ [Plugin documentation](https://docs.thewidlarzgroup.com/react-native-video/other/plugin)
+→ [Plugin documentation](https://docs.thewidlarzgroup.com/react-native-video/other/plugin?utm_source=rnv&utm_medium=readme&utm_id=plugin-text)
 
 ---
 
