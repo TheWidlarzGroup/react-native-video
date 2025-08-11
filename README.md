@@ -87,7 +87,7 @@ This SDK supports:
 
 #### 🔑 How to get access?
 
-- Get a **14-day free trial** (no credit card required)
+- Get a **free trial** (no credit card required)
 - Use our [starter project](https://github.com/TheWidlarzGroup/react-native-offline-video-starter) to see it in action
 - Integrates with both `v6` and `v7` versions
 
