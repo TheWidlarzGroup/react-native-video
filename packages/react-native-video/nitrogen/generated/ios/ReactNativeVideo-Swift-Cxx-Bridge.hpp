@@ -608,6 +608,37 @@ namespace margelo::nitro::video::bridge::swift {
     return std::optional<std::vector<NativeExternalSubtitle>>(value);
   }
   
+  // pragma MARK: std::unordered_map<std::string, std::string>
+  /**
+   * Specialized version of `std::unordered_map<std::string, std::string>`.
+   */
+  using std__unordered_map_std__string__std__string_ = std::unordered_map<std::string, std::string>;
+  inline std::unordered_map<std::string, std::string> create_std__unordered_map_std__string__std__string_(size_t size) {
+    std::unordered_map<std::string, std::string> map;
+    map.reserve(size);
+    return map;
+  }
+  inline std::vector<std::string> get_std__unordered_map_std__string__std__string__keys(const std__unordered_map_std__string__std__string_& map) {
+    std::vector<std::string> keys;
+    keys.reserve(map.size());
+    for (const auto& entry : map) {
+      keys.push_back(entry.first);
+    }
+    return keys;
+  }
+  inline void emplace_std__unordered_map_std__string__std__string_(std__unordered_map_std__string__std__string_& map, const std::string& key, const std::string& value) {
+    map.emplace(key, value);
+  }
+  
+  // pragma MARK: std::optional<std::unordered_map<std::string, std::string>>
+  /**
+   * Specialized version of `std::optional<std::unordered_map<std::string, std::string>>`.
+   */
+  using std__optional_std__unordered_map_std__string__std__string__ = std::optional<std::unordered_map<std::string, std::string>>;
+  inline std::optional<std::unordered_map<std::string, std::string>> create_std__optional_std__unordered_map_std__string__std__string__(const std::unordered_map<std::string, std::string>& value) {
+    return std::optional<std::unordered_map<std::string, std::string>>(value);
+  }
+  
   // pragma MARK: std::optional<bool>
   /**
    * Specialized version of `std::optional<bool>`.
@@ -724,37 +755,6 @@ namespace margelo::nitro::video::bridge::swift {
   using std__optional_NativeDrmParams_ = std::optional<NativeDrmParams>;
   inline std::optional<NativeDrmParams> create_std__optional_NativeDrmParams_(const NativeDrmParams& value) {
     return std::optional<NativeDrmParams>(value);
-  }
-  
-  // pragma MARK: std::unordered_map<std::string, std::string>
-  /**
-   * Specialized version of `std::unordered_map<std::string, std::string>`.
-   */
-  using std__unordered_map_std__string__std__string_ = std::unordered_map<std::string, std::string>;
-  inline std::unordered_map<std::string, std::string> create_std__unordered_map_std__string__std__string_(size_t size) {
-    std::unordered_map<std::string, std::string> map;
-    map.reserve(size);
-    return map;
-  }
-  inline std::vector<std::string> get_std__unordered_map_std__string__std__string__keys(const std__unordered_map_std__string__std__string_& map) {
-    std::vector<std::string> keys;
-    keys.reserve(map.size());
-    for (const auto& entry : map) {
-      keys.push_back(entry.first);
-    }
-    return keys;
-  }
-  inline void emplace_std__unordered_map_std__string__std__string_(std__unordered_map_std__string__std__string_& map, const std::string& key, const std::string& value) {
-    map.emplace(key, value);
-  }
-  
-  // pragma MARK: std::optional<std::unordered_map<std::string, std::string>>
-  /**
-   * Specialized version of `std::optional<std::unordered_map<std::string, std::string>>`.
-   */
-  using std__optional_std__unordered_map_std__string__std__string__ = std::optional<std::unordered_map<std::string, std::string>>;
-  inline std::optional<std::unordered_map<std::string, std::string>> create_std__optional_std__unordered_map_std__string__std__string__(const std::unordered_map<std::string, std::string>& value) {
-    return std::optional<std::unordered_map<std::string, std::string>>(value);
   }
   
   // pragma MARK: std::shared_ptr<Promise<VideoInformation>>

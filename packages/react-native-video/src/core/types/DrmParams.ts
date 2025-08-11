@@ -27,7 +27,7 @@ export interface DrmParams {
    * The headers to send with the DRM license request.
    * @platform Android, iOS, visionOS
    */
-  //licenseHeaders?: Record<string, string>;
+  licenseHeaders?: Record<string, string>;
   /**
    * Whether to allow multiple sessions for the DRM license request.
    * @platform Android

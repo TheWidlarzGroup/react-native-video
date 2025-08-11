@@ -18,6 +18,7 @@
 #include <functional>
 #include <optional>
 #include <string>
+#include <unordered_map>
 
 namespace margelo::nitro::video {
 
@@ -46,6 +47,8 @@ namespace margelo::nitro::video {
       jni::local_ref<jni::JString> certificateUrl = this->getFieldValue(fieldCertificateUrl);
       static const auto fieldContentId = clazz->getField<jni::JString>("contentId");
       jni::local_ref<jni::JString> contentId = this->getFieldValue(fieldContentId);
+      static const auto fieldLicenseHeaders = clazz->getField<jni::JMap<jni::JString, jni::JString>>("licenseHeaders");
+      jni::local_ref<jni::JMap<jni::JString, jni::JString>> licenseHeaders = this->getFieldValue(fieldLicenseHeaders);
       static const auto fieldMultiSession = clazz->getField<jni::JBoolean>("multiSession");
       jni::local_ref<jni::JBoolean> multiSession = this->getFieldValue(fieldMultiSession);
       static const auto fieldGetLicense = clazz->getField<JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload::javaobject>("getLicense");
@@ -55,6 +58,14 @@ namespace margelo::nitro::video {
         licenseUrl != nullptr ? std::make_optional(licenseUrl->toStdString()) : std::nullopt,
         certificateUrl != nullptr ? std::make_optional(certificateUrl->toStdString()) : std::nullopt,
         contentId != nullptr ? std::make_optional(contentId->toStdString()) : std::nullopt,
+        licenseHeaders != nullptr ? std::make_optional([&]() {
+          std::unordered_map<std::string, std::string> __map;
+          __map.reserve(licenseHeaders->size());
+          for (const auto& __entry : *licenseHeaders) {
+            __map.emplace(__entry.first->toStdString(), __entry.second->toStdString());
+          }
+          return __map;
+        }()) : std::nullopt,
         multiSession != nullptr ? std::make_optional(static_cast<bool>(multiSession->value())) : std::nullopt,
         getLicense != nullptr ? std::make_optional([&]() -> std::function<std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(const OnGetLicensePayload& /* payload */)> {
           if (getLicense->isInstanceOf(JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload_cxx::javaClassStatic())) [[likely]] {
@@ -81,6 +92,13 @@ namespace margelo::nitro::video {
         value.licenseUrl.has_value() ? jni::make_jstring(value.licenseUrl.value()) : nullptr,
         value.certificateUrl.has_value() ? jni::make_jstring(value.certificateUrl.value()) : nullptr,
         value.contentId.has_value() ? jni::make_jstring(value.contentId.value()) : nullptr,
+        value.licenseHeaders.has_value() ? [&]() -> jni::local_ref<jni::JMap<jni::JString, jni::JString>> {
+          auto __map = jni::JHashMap<jni::JString, jni::JString>::create(value.licenseHeaders.value().size());
+          for (const auto& __entry : value.licenseHeaders.value()) {
+            __map->put(jni::make_jstring(__entry.first), jni::make_jstring(__entry.second));
+          }
+          return __map;
+        }() : nullptr,
         value.multiSession.has_value() ? jni::JBoolean::valueOf(value.multiSession.value()) : nullptr,
         value.getLicense.has_value() ? JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload_cxx::fromCpp(value.getLicense.value()) : nullptr
       );

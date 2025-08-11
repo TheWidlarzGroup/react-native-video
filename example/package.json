@@ -14,7 +14,8 @@
     "react": "18.3.1",
     "react-native": "^0.77.0",
     "react-native-nitro-modules": "^0.27.0",
-    "react-native-video": "*"
+    "react-native-video": "*",
+    "@twg/react-native-video-drm": "*"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
@@ -28,10 +29,8 @@
     "@react-native/metro-config": "^0.77.0",
     "@react-native/typescript-config": "^0.77.0",
     "@types/react": "^18.2.44",
-    "@types/react-test-renderer": "^18.0.0",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
-    "react-test-renderer": "18.3.1",
     "typescript": "^5.2.2"
   },
   "engines": {

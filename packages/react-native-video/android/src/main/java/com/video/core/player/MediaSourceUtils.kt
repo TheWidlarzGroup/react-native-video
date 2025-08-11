@@ -54,12 +54,9 @@ fun buildMediaSource(context: Context, source: HybridVideoPlayerSource, mediaIte
     }
   }
 
-  if (source.config.drm != null) {
-    source.drmManager = PluginsRegistry.shared.getDRMManager(source)
-
-    mediaSourceFactory.setDrmSessionManagerProvider {
-      source.drmManager as DrmSessionManager
-    }
+  source.config.drm?.let {
+    val drmSessionManager = source.drmSessionManager ?: throw LibraryError.DRMPluginNotFound
+    mediaSourceFactory.setDrmSessionManagerProvider { drmSessionManager }
   }
 
   return PluginsRegistry.shared.overrideMediaSourceFactory(

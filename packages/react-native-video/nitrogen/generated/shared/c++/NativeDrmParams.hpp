@@ -23,6 +23,7 @@ namespace margelo::nitro::video { struct OnGetLicensePayload; }
 
 #include <string>
 #include <optional>
+#include <unordered_map>
 #include <NitroModules/Promise.hpp>
 #include "OnGetLicensePayload.hpp"
 #include <functional>
@@ -38,12 +39,13 @@ namespace margelo::nitro::video {
     std::optional<std::string> licenseUrl     SWIFT_PRIVATE;
     std::optional<std::string> certificateUrl     SWIFT_PRIVATE;
     std::optional<std::string> contentId     SWIFT_PRIVATE;
+    std::optional<std::unordered_map<std::string, std::string>> licenseHeaders     SWIFT_PRIVATE;
     std::optional<bool> multiSession     SWIFT_PRIVATE;
     std::optional<std::function<std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(const OnGetLicensePayload& /* payload */)>> getLicense     SWIFT_PRIVATE;
 
   public:
     NativeDrmParams() = default;
-    explicit NativeDrmParams(std::optional<std::string> type, std::optional<std::string> licenseUrl, std::optional<std::string> certificateUrl, std::optional<std::string> contentId, std::optional<bool> multiSession, std::optional<std::function<std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(const OnGetLicensePayload& /* payload */)>> getLicense): type(type), licenseUrl(licenseUrl), certificateUrl(certificateUrl), contentId(contentId), multiSession(multiSession), getLicense(getLicense) {}
+    explicit NativeDrmParams(std::optional<std::string> type, std::optional<std::string> licenseUrl, std::optional<std::string> certificateUrl, std::optional<std::string> contentId, std::optional<std::unordered_map<std::string, std::string>> licenseHeaders, std::optional<bool> multiSession, std::optional<std::function<std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(const OnGetLicensePayload& /* payload */)>> getLicense): type(type), licenseUrl(licenseUrl), certificateUrl(certificateUrl), contentId(contentId), licenseHeaders(licenseHeaders), multiSession(multiSession), getLicense(getLicense) {}
   };
 
 } // namespace margelo::nitro::video
@@ -62,6 +64,7 @@ namespace margelo::nitro {
         JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, "licenseUrl")),
         JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, "certificateUrl")),
         JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, "contentId")),
+        JSIConverter<std::optional<std::unordered_map<std::string, std::string>>>::fromJSI(runtime, obj.getProperty(runtime, "licenseHeaders")),
         JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, "multiSession")),
         JSIConverter<std::optional<std::function<std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(const OnGetLicensePayload& /* payload */)>>>::fromJSI(runtime, obj.getProperty(runtime, "getLicense"))
       );
@@ -72,6 +75,7 @@ namespace margelo::nitro {
       obj.setProperty(runtime, "licenseUrl", JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.licenseUrl));
       obj.setProperty(runtime, "certificateUrl", JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.certificateUrl));
       obj.setProperty(runtime, "contentId", JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.contentId));
+      obj.setProperty(runtime, "licenseHeaders", JSIConverter<std::optional<std::unordered_map<std::string, std::string>>>::toJSI(runtime, arg.licenseHeaders));
       obj.setProperty(runtime, "multiSession", JSIConverter<std::optional<bool>>::toJSI(runtime, arg.multiSession));
       obj.setProperty(runtime, "getLicense", JSIConverter<std::optional<std::function<std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(const OnGetLicensePayload& /* payload */)>>>::toJSI(runtime, arg.getLicense));
       return obj;
@@ -85,6 +89,7 @@ namespace margelo::nitro {
       if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, "licenseUrl"))) return false;
       if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, "certificateUrl"))) return false;
       if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, "contentId"))) return false;
+      if (!JSIConverter<std::optional<std::unordered_map<std::string, std::string>>>::canConvert(runtime, obj.getProperty(runtime, "licenseHeaders"))) return false;
       if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, "multiSession"))) return false;
       if (!JSIConverter<std::optional<std::function<std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(const OnGetLicensePayload& /* payload */)>>>::canConvert(runtime, obj.getProperty(runtime, "getLicense"))) return false;
       return true;

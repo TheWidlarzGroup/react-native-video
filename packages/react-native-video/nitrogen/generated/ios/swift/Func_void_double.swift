@@ -9,21 +9,21 @@ import NitroModules
 
 
 /**
- * Wraps a Swift `(_ seekTime: Double) -> Void` as a class.
+ * Wraps a Swift `(_ rate: Double) -> Void` as a class.
  * This class can be used from C++, e.g. to wrap the Swift closure as a `std::function`.
  */
 public final class Func_void_double {
   public typealias bridge = margelo.nitro.video.bridge.swift
 
-  private let closure: (_ seekTime: Double) -> Void
+  private let closure: (_ rate: Double) -> Void
 
-  public init(_ closure: @escaping (_ seekTime: Double) -> Void) {
+  public init(_ closure: @escaping (_ rate: Double) -> Void) {
     self.closure = closure
   }
 
   @inline(__always)
-  public func call(seekTime: Double) -> Void {
-    self.closure(seekTime)
+  public func call(rate: Double) -> Void {
+    self.closure(rate)
   }
 
   /**

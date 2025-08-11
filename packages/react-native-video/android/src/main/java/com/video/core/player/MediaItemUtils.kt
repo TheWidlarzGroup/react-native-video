@@ -27,12 +27,9 @@ fun createMediaItemFromVideoConfig(
 
   mediaItemBuilder.setUri(source.config.uri)
 
-  if (source.config.drm != null) {
-    if (source.drmManager == null)  {
-      throw LibraryError.DRMPluginNotFound
-    }
-
-    val drmConfiguration = source.drmManager!!.getDRMConfiguration(source.config.drm!!)
+  source.config.drm?.let { drmParams ->
+    val drmManager = source.drmManager ?: throw LibraryError.DRMPluginNotFound
+    val drmConfiguration = drmManager.getDRMConfiguration(drmParams)
     mediaItemBuilder.setDrmConfiguration(drmConfiguration)
   }
 

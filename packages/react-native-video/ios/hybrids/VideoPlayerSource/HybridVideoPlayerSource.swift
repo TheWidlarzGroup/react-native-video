@@ -31,7 +31,9 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec, NativeVideoPlayerSou
     super.init()
     
     if config.drm != nil {
-      drmManager = try PluginsRegistry.shared.getDrmManager(source: self)
+      // Try to get the DRM manager
+      // If no DRM manager is found, it will throw an error
+      _ = try PluginsRegistry.shared.getDrmManager(source: self)
     }
   }
   
@@ -89,13 +91,17 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec, NativeVideoPlayerSou
     }
     
     if let drmParams = config.drm {
-      drmManager = try await PluginsRegistry.shared.getDrmManager(source: self)
+      drmManager = try PluginsRegistry.shared.getDrmManager(source: self)
       
       guard let drmManager else {
         throw LibraryError.DRMPluginNotFound.error()
       }
       
-      try drmManager.createContentKeyRequest(for: asset, drmParams: drmParams)
+      do {
+        try drmManager.createContentKeyRequest(for: asset, drmParams: drmParams)
+      } catch {
+        print("[ReactNativeVideo] Failed to create content key request for DRM: \(drmParams)")
+      }
     }
     
     // Code browned from expo-video https://github.com/expo/expo/blob/ea17c9b1ce5111e1454b089ba381f3feb93f33cc/packages/expo-video/ios/VideoPlayerItem.swift#L40C30-L40C73

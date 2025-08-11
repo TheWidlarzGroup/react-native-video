@@ -9,21 +9,21 @@ import NitroModules
 
 
 /**
- * Wraps a Swift `(_ fullscreen: Bool) -> Void` as a class.
+ * Wraps a Swift `(_ isInPictureInPicture: Bool) -> Void` as a class.
  * This class can be used from C++, e.g. to wrap the Swift closure as a `std::function`.
  */
 public final class Func_void_bool {
   public typealias bridge = margelo.nitro.video.bridge.swift
 
-  private let closure: (_ fullscreen: Bool) -> Void
+  private let closure: (_ isInPictureInPicture: Bool) -> Void
 
-  public init(_ closure: @escaping (_ fullscreen: Bool) -> Void) {
+  public init(_ closure: @escaping (_ isInPictureInPicture: Bool) -> Void) {
     self.closure = closure
   }
 
   @inline(__always)
-  public func call(fullscreen: Bool) -> Void {
-    self.closure(fullscreen)
+  public func call(isInPictureInPicture: Bool) -> Void {
+    self.closure(isInPictureInPicture)
   }
 
   /**

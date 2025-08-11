@@ -25,12 +25,13 @@ data class NativeDrmParams
     val licenseUrl: String?,
     val certificateUrl: String?,
     val contentId: String?,
+    val licenseHeaders: Map<String, String>?,
     val multiSession: Boolean?,
     val getLicense: ((payload: OnGetLicensePayload) -> Promise<Promise<String>>)?
   ) {
   @DoNotStrip
   @Keep
   @Suppress("unused")
-  private constructor(type: String?, licenseUrl: String?, certificateUrl: String?, contentId: String?, multiSession: Boolean?, getLicense: Func_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload?)
-               : this(type, licenseUrl, certificateUrl, contentId, multiSession, getLicense?.let { it } as ((payload: OnGetLicensePayload) -> Promise<Promise<String>>)?)
+  private constructor(type: String?, licenseUrl: String?, certificateUrl: String?, contentId: String?, licenseHeaders: Map<String, String>?, multiSession: Boolean?, getLicense: Func_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload?)
+               : this(type, licenseUrl, certificateUrl, contentId, licenseHeaders, multiSession, getLicense?.let { it } as ((payload: OnGetLicensePayload) -> Promise<Promise<String>>)?)
 }

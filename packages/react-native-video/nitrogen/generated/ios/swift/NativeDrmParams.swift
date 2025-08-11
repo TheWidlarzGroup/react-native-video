@@ -18,7 +18,7 @@ public extension NativeDrmParams {
   /**
    * Create a new instance of `NativeDrmParams`.
    */
-  init(type: String?, licenseUrl: String?, certificateUrl: String?, contentId: String?, multiSession: Bool?, getLicense: ((_ payload: OnGetLicensePayload) -> Promise<Promise<String>>)?) {
+  init(type: String?, licenseUrl: String?, certificateUrl: String?, contentId: String?, licenseHeaders: Dictionary<String, String>?, multiSession: Bool?, getLicense: ((_ payload: OnGetLicensePayload) -> Promise<Promise<String>>)?) {
     self.init({ () -> bridge.std__optional_std__string_ in
       if let __unwrappedValue = type {
         return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
@@ -40,6 +40,18 @@ public extension NativeDrmParams {
     }(), { () -> bridge.std__optional_std__string_ in
       if let __unwrappedValue = contentId {
         return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_std__unordered_map_std__string__std__string__ in
+      if let __unwrappedValue = licenseHeaders {
+        return bridge.create_std__optional_std__unordered_map_std__string__std__string__({ () -> bridge.std__unordered_map_std__string__std__string_ in
+          var __map = bridge.create_std__unordered_map_std__string__std__string_(__unwrappedValue.count)
+          for (__k, __v) in __unwrappedValue {
+            bridge.emplace_std__unordered_map_std__string__std__string_(&__map, std.string(__k), std.string(__v))
+          }
+          return __map
+        }())
       } else {
         return .init()
       }
@@ -146,6 +158,43 @@ public extension NativeDrmParams {
       self.__contentId = { () -> bridge.std__optional_std__string_ in
         if let __unwrappedValue = newValue {
           return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
+        } else {
+          return .init()
+        }
+      }()
+    }
+  }
+  
+  var licenseHeaders: Dictionary<String, String>? {
+    @inline(__always)
+    get {
+      return { () -> Dictionary<String, String>? in
+        if let __unwrapped = self.__licenseHeaders.value {
+          return { () -> Dictionary<String, String> in
+            var __dictionary = Dictionary<String, String>(minimumCapacity: __unwrapped.size())
+            let __keys = bridge.get_std__unordered_map_std__string__std__string__keys(__unwrapped)
+            for __key in __keys {
+              let __value = __unwrapped[__key]!
+              __dictionary[String(__key)] = String(__value)
+            }
+            return __dictionary
+          }()
+        } else {
+          return nil
+        }
+      }()
+    }
+    @inline(__always)
+    set {
+      self.__licenseHeaders = { () -> bridge.std__optional_std__unordered_map_std__string__std__string__ in
+        if let __unwrappedValue = newValue {
+          return bridge.create_std__optional_std__unordered_map_std__string__std__string__({ () -> bridge.std__unordered_map_std__string__std__string_ in
+            var __map = bridge.create_std__unordered_map_std__string__std__string_(__unwrappedValue.count)
+            for (__k, __v) in __unwrappedValue {
+              bridge.emplace_std__unordered_map_std__string__std__string_(&__map, std.string(__k), std.string(__v))
+            }
+            return __map
+          }())
         } else {
           return .init()
         }
