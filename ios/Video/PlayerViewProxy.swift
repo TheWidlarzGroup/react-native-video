@@ -93,6 +93,7 @@ class PlayerViewProxy {
         dorisTranslationsViewModel.off = translations.off
         dorisTranslationsViewModel.audioOnlyBadge = translations.audioOnlyBadge
         dorisTranslationsViewModel.schedule = translations.tvPlayerEPG
+        dorisTranslationsViewModel.unknown = translations.unknown
         return dorisTranslationsViewModel
     }
 

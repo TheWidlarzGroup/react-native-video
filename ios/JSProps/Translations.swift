@@ -33,4 +33,5 @@ struct Translations: SuperCodable {
     var skipCredits: String?
     var off: String?
     var audioOnlyBadge: String?
+    var unknown: String?
 }
