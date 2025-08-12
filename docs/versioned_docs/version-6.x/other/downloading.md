@@ -5,41 +5,63 @@ description: React Native Video Integration with Offline Video SDK
 ---
 # Offline Video SDK
 
-## What is the Offline Video SDK?
+## Add Offline Playback to Your React Native App — Fast
 
-The [Offline Video SDK](https://www.thewidlarzgroup.com/offline-video-sdk/?utm_source=rnv&utm_medium=docs&utm_campaign=downloading&utm_id=offline-video-sdk-link) extends `react-native-video` (v6 or v7) with the ability to download and store video content for offline playback. It also supports DRM-protected content. The SDK manages background tasks—such as queuing, pausing, resuming, and tracking progress or errors—without requiring major changes to your existing setup.
+The [Offline Video SDK](https://www.thewidlarzgroup.com/offline-video-sdk/?utm_source=rnv&utm_medium=docs&utm_campaign=downloading&utm_id=offline-video-sdk-link) is a commercial add-on for `react-native-video` (v6 and v7) that enables secure **offline playback** of HLS streams — including support for **DRM**, **multi-audio**, and **subtitles**.
 
-### Key Features
+It’s built for teams who need a production-ready solution without spending months on in-house development.  
+Try it free today and ship faster.
+
+➡️ [Start Free Trial](https://sdk.thewidlarzgroup.com/signup?utm_source=rnv&utm_medium=docs&utm_id=downloading_start-trial-offline-video-sdk-1)
+
+---
+
+## 🚀 Key Features
 
 - **Stream Downloading**  
-  The SDK allows you to download streams and store them for offline playback. It also includes an asset manager to manage downloaded files on the device.
+  Download and store HLS content for offline playback, including full control over asset management.
 
 - **Offline DRM**  
-  Securely plays DRM-protected content offline while ensuring content protection and rights management.
-
-### Additional Capabilities
+  Seamlessly supports offline playback of DRM-protected content, with proper rights enforcement and license handling.
 
 - **Multiple Audio Tracks & Subtitles**  
-  Supports downloading various audio and subtitle tracks, including optional subtitle exclusion or inclusion.
+  Choose which tracks to download (e.g. language, subtitles) — ideal for localized content.
 
 - **Selective Downloads**  
-  Only the selected tracks (resolution, language, etc.) is downloaded by default to optimize storage usage.
+  Only selected tracks are downloaded by default to optimize storage.
 
 - **DRM License Optimization**  
-  If your DRM provider issues persistent tokens, they can be stored and updated only upon expiration, reducing licensing costs.
+  Works efficiently with persistent licenses — no need to re-fetch unless expired.
+
+- **Background Download Management**  
+  Handles queuing, progress tracking, retries, pausing/resuming – all out of the box.
 
 - **Pluggable Architecture**  
-  Designed for offline capabilities without restricting additional video player features. Future `react-native-video` (v7+) updates will further simplify plugin integrations.
+  Compatible with your existing player setup — doesn’t interfere with other plugins or custom features.
 
-### Implementation & Support
+---
 
-- **Integration Options**  
-  You can integrate the SDK yourself or get assistance from our team. We also offer commercial collaboration for stalled projects. [Contact us](mailto:hi@thewidlarzgroup.com) for support.
+## ⚙️ Compatibility & Requirements
 
-- **Basic Requirements**
-  1. `react-native-video` version **6** or **7**.
-  2. Actual stream downloads are required for offline playback. A content ID or persistent key alone is not sufficient.
+- Supports `react-native-video` **v6** and **v7**
 
-### Licensing & Inquiries
+---
 
-For licensing, trials, or further assistance, [contact us](mailto:hi@thewidlarzgroup.com). We’d be happy to discuss your needs and answer any questions.
+## 🤝 Integration & Support
+
+You can integrate the SDK yourself using our documentation and [Offline Video Starter Project](https://github.com/TheWidlarzGroup/react-native-offline-video-starter?utm_source=rnv&utm_medium=docs&utm_id=downloading_offline-video-sdk-starter), which includes a ready-to-run example app demonstrating offline playback, multi-audio, subtitles, and DRM setup.  
+Alternatively, work with our team to accelerate your roadmap.
+
+- 💬 [Contact us for support](mailto:sdk@thewidlarzgroup.com)  
+- 🧪 [Try the SDK – Free Trial](https://sdk.thewidlarzgroup.com/signup?utm_source=rnv&utm_medium=docs&utm_id=downloading_start-trial-offline-video-sdk-2)  
+- 🔗 [Learn more about features](https://www.thewidlarzgroup.com/offline-video-sdk?utm_source=rnv&utm_medium=docs&utm_id=downloading_learn-more-offline-video-sdk)
+
+---
+
+## 📄 Licensing & Trials
+
+The Offline Video SDK is distributed under a commercial license.  
+You can evaluate it for free for 14 days — no credit card required.
+
+Have questions or need help?  
+📬 [sdk@thewidlarzgroup.com](mailto:sdk@thewidlarzgroup.com)
