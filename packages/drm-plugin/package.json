@@ -38,8 +38,9 @@
     "typecheck": "tsc",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
-    "prepare": "bob build",
-    "nitrogen": "nitro-codegen",
+    "prepare": "bun run build",
+    "build": "bob build",
+    "specs": "nitro-codegen",
     "release": "release-it --only-version"
   },
   "keywords": [

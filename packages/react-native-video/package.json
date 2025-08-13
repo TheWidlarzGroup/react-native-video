@@ -51,7 +51,7 @@
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
     "prepare": "bun run build",
     "build": "bob build",
-    "nitrogen": "nitro-codegen",
+    "specs": "nitro-codegen",
     "release": "release-it --preRelease alpha --npm.tag=next"
   },
   "keywords": [

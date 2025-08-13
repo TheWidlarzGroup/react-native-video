@@ -1,5 +1,5 @@
 {
-  "name": "@react-native-video",
+  "name": "react-native-video-monorepo",
   "packageManager": "bun@1.1.42",
   "version": "7.0.0-alpha.3",
   "private": true,
@@ -12,11 +12,13 @@
     "docs"
   ],
   "scripts": {
-    "build": "bun react-native-video build",
+    "build": "bun --filter=\"./packages/**\" run build",
+    "specs": "bun --filter=\"./packages/**\" specs",
     "lint": "bun --filter=\"**\" lint",
     "typecheck": "bun --filter=\"**\" typecheck",
     "clean": "git clean -xdf",
     "react-native-video": "bun run --cwd packages/react-native-video",
+    "drm-plugin": "bun run --cwd packages/drm-plugin",
     "example": "bun run --cwd example",
     "postinstall": "patch-package --patch-dir example/patches",
     "release:github": "release-it --preRelease alpha",
