@@ -7,7 +7,7 @@
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "typecheck": "tsc",
-    "start": "react-native start --reset-cache --client-logs"
+    "start": "react-native start --client-logs"
   },
   "dependencies": {
     "@react-native-community/slider": "^4.5.6",
