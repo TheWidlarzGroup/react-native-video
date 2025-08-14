@@ -13,12 +13,12 @@
 
 namespace margelo::nitro::videodrm::bridge::swift {
 
-  // pragma MARK: std::shared_ptr<margelo::nitro::videodrm::HybridPluginManagerSpec>
-  std::shared_ptr<margelo::nitro::videodrm::HybridPluginManagerSpec> create_std__shared_ptr_margelo__nitro__videodrm__HybridPluginManagerSpec_(void* _Nonnull swiftUnsafePointer) {
+  // pragma MARK: std::shared_ptr<HybridPluginManagerSpec>
+  std::shared_ptr<HybridPluginManagerSpec> create_std__shared_ptr_HybridPluginManagerSpec_(void* _Nonnull swiftUnsafePointer) {
     ReactNativeVideoDrm::HybridPluginManagerSpec_cxx swiftPart = ReactNativeVideoDrm::HybridPluginManagerSpec_cxx::fromUnsafe(swiftUnsafePointer);
     return std::make_shared<margelo::nitro::videodrm::HybridPluginManagerSpecSwift>(swiftPart);
   }
-  void* _Nonnull get_std__shared_ptr_margelo__nitro__videodrm__HybridPluginManagerSpec_(std__shared_ptr_margelo__nitro__videodrm__HybridPluginManagerSpec_ cppType) {
+  void* _Nonnull get_std__shared_ptr_HybridPluginManagerSpec_(std__shared_ptr_HybridPluginManagerSpec_ cppType) {
     std::shared_ptr<margelo::nitro::videodrm::HybridPluginManagerSpecSwift> swiftWrapper = std::dynamic_pointer_cast<margelo::nitro::videodrm::HybridPluginManagerSpecSwift>(cppType);
     #ifdef NITRO_DEBUG
     if (swiftWrapper == nullptr) [[unlikely]] {

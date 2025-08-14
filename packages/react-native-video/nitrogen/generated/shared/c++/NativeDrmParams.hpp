@@ -52,24 +52,22 @@ namespace margelo::nitro::video {
 
 namespace margelo::nitro {
 
-  using namespace margelo::nitro::video;
-
   // C++ NativeDrmParams <> JS NativeDrmParams (object)
   template <>
-  struct JSIConverter<NativeDrmParams> final {
-    static inline NativeDrmParams fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
+  struct JSIConverter<margelo::nitro::video::NativeDrmParams> final {
+    static inline margelo::nitro::video::NativeDrmParams fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
-      return NativeDrmParams(
+      return margelo::nitro::video::NativeDrmParams(
         JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, "type")),
         JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, "licenseUrl")),
         JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, "certificateUrl")),
         JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, "contentId")),
         JSIConverter<std::optional<std::unordered_map<std::string, std::string>>>::fromJSI(runtime, obj.getProperty(runtime, "licenseHeaders")),
         JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, "multiSession")),
-        JSIConverter<std::optional<std::function<std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(const OnGetLicensePayload& /* payload */)>>>::fromJSI(runtime, obj.getProperty(runtime, "getLicense"))
+        JSIConverter<std::optional<std::function<std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(const margelo::nitro::video::OnGetLicensePayload&)>>>::fromJSI(runtime, obj.getProperty(runtime, "getLicense"))
       );
     }
-    static inline jsi::Value toJSI(jsi::Runtime& runtime, const NativeDrmParams& arg) {
+    static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::video::NativeDrmParams& arg) {
       jsi::Object obj(runtime);
       obj.setProperty(runtime, "type", JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.type));
       obj.setProperty(runtime, "licenseUrl", JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.licenseUrl));
@@ -77,7 +75,7 @@ namespace margelo::nitro {
       obj.setProperty(runtime, "contentId", JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.contentId));
       obj.setProperty(runtime, "licenseHeaders", JSIConverter<std::optional<std::unordered_map<std::string, std::string>>>::toJSI(runtime, arg.licenseHeaders));
       obj.setProperty(runtime, "multiSession", JSIConverter<std::optional<bool>>::toJSI(runtime, arg.multiSession));
-      obj.setProperty(runtime, "getLicense", JSIConverter<std::optional<std::function<std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(const OnGetLicensePayload& /* payload */)>>>::toJSI(runtime, arg.getLicense));
+      obj.setProperty(runtime, "getLicense", JSIConverter<std::optional<std::function<std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(const margelo::nitro::video::OnGetLicensePayload&)>>>::toJSI(runtime, arg.getLicense));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -91,7 +89,7 @@ namespace margelo::nitro {
       if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, "contentId"))) return false;
       if (!JSIConverter<std::optional<std::unordered_map<std::string, std::string>>>::canConvert(runtime, obj.getProperty(runtime, "licenseHeaders"))) return false;
       if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, "multiSession"))) return false;
-      if (!JSIConverter<std::optional<std::function<std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(const OnGetLicensePayload& /* payload */)>>>::canConvert(runtime, obj.getProperty(runtime, "getLicense"))) return false;
+      if (!JSIConverter<std::optional<std::function<std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(const margelo::nitro::video::OnGetLicensePayload&)>>>::canConvert(runtime, obj.getProperty(runtime, "getLicense"))) return false;
       return true;
     }
   };

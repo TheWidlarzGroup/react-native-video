@@ -40,7 +40,7 @@ namespace margelo::nitro::video {
   
 
   // Methods
-  std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerSpec> JHybridVideoViewViewManagerFactorySpec::createViewManager(double nitroId) {
+  std::shared_ptr<HybridVideoViewViewManagerSpec> JHybridVideoViewViewManagerFactorySpec::createViewManager(double nitroId) {
     static const auto method = javaClassStatic()->getMethod<jni::local_ref<JHybridVideoViewViewManagerSpec::javaobject>(double /* nitroId */)>("createViewManager");
     auto __result = method(_javaPart, nitroId);
     return __result->cthis()->shared_cast<JHybridVideoViewViewManagerSpec>();

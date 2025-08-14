@@ -27,17 +27,17 @@ namespace ReactNativeVideoDrm { class HybridPluginManagerSpec_cxx; }
  */
 namespace margelo::nitro::videodrm::bridge::swift {
 
-  // pragma MARK: std::shared_ptr<margelo::nitro::videodrm::HybridPluginManagerSpec>
+  // pragma MARK: std::shared_ptr<HybridPluginManagerSpec>
   /**
-   * Specialized version of `std::shared_ptr<margelo::nitro::videodrm::HybridPluginManagerSpec>`.
+   * Specialized version of `std::shared_ptr<HybridPluginManagerSpec>`.
    */
-  using std__shared_ptr_margelo__nitro__videodrm__HybridPluginManagerSpec_ = std::shared_ptr<margelo::nitro::videodrm::HybridPluginManagerSpec>;
-  std::shared_ptr<margelo::nitro::videodrm::HybridPluginManagerSpec> create_std__shared_ptr_margelo__nitro__videodrm__HybridPluginManagerSpec_(void* _Nonnull swiftUnsafePointer);
-  void* _Nonnull get_std__shared_ptr_margelo__nitro__videodrm__HybridPluginManagerSpec_(std__shared_ptr_margelo__nitro__videodrm__HybridPluginManagerSpec_ cppType);
+  using std__shared_ptr_HybridPluginManagerSpec_ = std::shared_ptr<HybridPluginManagerSpec>;
+  std::shared_ptr<HybridPluginManagerSpec> create_std__shared_ptr_HybridPluginManagerSpec_(void* _Nonnull swiftUnsafePointer);
+  void* _Nonnull get_std__shared_ptr_HybridPluginManagerSpec_(std__shared_ptr_HybridPluginManagerSpec_ cppType);
   
-  // pragma MARK: std::weak_ptr<margelo::nitro::videodrm::HybridPluginManagerSpec>
-  using std__weak_ptr_margelo__nitro__videodrm__HybridPluginManagerSpec_ = std::weak_ptr<margelo::nitro::videodrm::HybridPluginManagerSpec>;
-  inline std__weak_ptr_margelo__nitro__videodrm__HybridPluginManagerSpec_ weakify_std__shared_ptr_margelo__nitro__videodrm__HybridPluginManagerSpec_(const std::shared_ptr<margelo::nitro::videodrm::HybridPluginManagerSpec>& strong) { return strong; }
+  // pragma MARK: std::weak_ptr<HybridPluginManagerSpec>
+  using std__weak_ptr_HybridPluginManagerSpec_ = std::weak_ptr<HybridPluginManagerSpec>;
+  inline std__weak_ptr_HybridPluginManagerSpec_ weakify_std__shared_ptr_HybridPluginManagerSpec_(const std::shared_ptr<HybridPluginManagerSpec>& strong) { return strong; }
   
   // pragma MARK: Result<void>
   using Result_void_ = Result<void>;

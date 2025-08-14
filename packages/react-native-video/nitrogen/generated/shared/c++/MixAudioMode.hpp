@@ -39,28 +39,26 @@ namespace margelo::nitro::video {
 
 namespace margelo::nitro {
 
-  using namespace margelo::nitro::video;
-
   // C++ MixAudioMode <> JS MixAudioMode (union)
   template <>
-  struct JSIConverter<MixAudioMode> final {
-    static inline MixAudioMode fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
+  struct JSIConverter<margelo::nitro::video::MixAudioMode> final {
+    static inline margelo::nitro::video::MixAudioMode fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       std::string unionValue = JSIConverter<std::string>::fromJSI(runtime, arg);
       switch (hashString(unionValue.c_str(), unionValue.size())) {
-        case hashString("mixWithOthers"): return MixAudioMode::MIXWITHOTHERS;
-        case hashString("doNotMix"): return MixAudioMode::DONOTMIX;
-        case hashString("duckOthers"): return MixAudioMode::DUCKOTHERS;
-        case hashString("auto"): return MixAudioMode::AUTO;
+        case hashString("mixWithOthers"): return margelo::nitro::video::MixAudioMode::MIXWITHOTHERS;
+        case hashString("doNotMix"): return margelo::nitro::video::MixAudioMode::DONOTMIX;
+        case hashString("duckOthers"): return margelo::nitro::video::MixAudioMode::DUCKOTHERS;
+        case hashString("auto"): return margelo::nitro::video::MixAudioMode::AUTO;
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert \"" + unionValue + "\" to enum MixAudioMode - invalid value!");
       }
     }
-    static inline jsi::Value toJSI(jsi::Runtime& runtime, MixAudioMode arg) {
+    static inline jsi::Value toJSI(jsi::Runtime& runtime, margelo::nitro::video::MixAudioMode arg) {
       switch (arg) {
-        case MixAudioMode::MIXWITHOTHERS: return JSIConverter<std::string>::toJSI(runtime, "mixWithOthers");
-        case MixAudioMode::DONOTMIX: return JSIConverter<std::string>::toJSI(runtime, "doNotMix");
-        case MixAudioMode::DUCKOTHERS: return JSIConverter<std::string>::toJSI(runtime, "duckOthers");
-        case MixAudioMode::AUTO: return JSIConverter<std::string>::toJSI(runtime, "auto");
+        case margelo::nitro::video::MixAudioMode::MIXWITHOTHERS: return JSIConverter<std::string>::toJSI(runtime, "mixWithOthers");
+        case margelo::nitro::video::MixAudioMode::DONOTMIX: return JSIConverter<std::string>::toJSI(runtime, "doNotMix");
+        case margelo::nitro::video::MixAudioMode::DUCKOTHERS: return JSIConverter<std::string>::toJSI(runtime, "duckOthers");
+        case margelo::nitro::video::MixAudioMode::AUTO: return JSIConverter<std::string>::toJSI(runtime, "auto");
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert MixAudioMode to JS - invalid value: "
                                     + std::to_string(static_cast<int>(arg)) + "!");

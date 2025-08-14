@@ -68,12 +68,12 @@ namespace margelo::nitro::video {
   
 
   // Methods
-  std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec> JHybridVideoPlayerSourceFactorySpec::fromUri(const std::string& uri) {
+  std::shared_ptr<HybridVideoPlayerSourceSpec> JHybridVideoPlayerSourceFactorySpec::fromUri(const std::string& uri) {
     static const auto method = javaClassStatic()->getMethod<jni::local_ref<JHybridVideoPlayerSourceSpec::javaobject>(jni::alias_ref<jni::JString> /* uri */)>("fromUri");
     auto __result = method(_javaPart, jni::make_jstring(uri));
     return __result->cthis()->shared_cast<JHybridVideoPlayerSourceSpec>();
   }
-  std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec> JHybridVideoPlayerSourceFactorySpec::fromVideoConfig(const NativeVideoConfig& config) {
+  std::shared_ptr<HybridVideoPlayerSourceSpec> JHybridVideoPlayerSourceFactorySpec::fromVideoConfig(const NativeVideoConfig& config) {
     static const auto method = javaClassStatic()->getMethod<jni::local_ref<JHybridVideoPlayerSourceSpec::javaobject>(jni::alias_ref<JNativeVideoConfig> /* config */)>("fromVideoConfig");
     auto __result = method(_javaPart, JNativeVideoConfig::fromCpp(config));
     return __result->cthis()->shared_cast<JHybridVideoPlayerSourceSpec>();

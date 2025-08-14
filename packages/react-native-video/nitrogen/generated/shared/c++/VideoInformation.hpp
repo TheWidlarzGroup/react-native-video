@@ -48,14 +48,12 @@ namespace margelo::nitro::video {
 
 namespace margelo::nitro {
 
-  using namespace margelo::nitro::video;
-
   // C++ VideoInformation <> JS VideoInformation (object)
   template <>
-  struct JSIConverter<VideoInformation> final {
-    static inline VideoInformation fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
+  struct JSIConverter<margelo::nitro::video::VideoInformation> final {
+    static inline margelo::nitro::video::VideoInformation fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
-      return VideoInformation(
+      return margelo::nitro::video::VideoInformation(
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, "bitrate")),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, "width")),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, "height")),
@@ -63,10 +61,10 @@ namespace margelo::nitro {
         JSIConverter<int64_t>::fromJSI(runtime, obj.getProperty(runtime, "fileSize")),
         JSIConverter<bool>::fromJSI(runtime, obj.getProperty(runtime, "isHDR")),
         JSIConverter<bool>::fromJSI(runtime, obj.getProperty(runtime, "isLive")),
-        JSIConverter<VideoOrientation>::fromJSI(runtime, obj.getProperty(runtime, "orientation"))
+        JSIConverter<margelo::nitro::video::VideoOrientation>::fromJSI(runtime, obj.getProperty(runtime, "orientation"))
       );
     }
-    static inline jsi::Value toJSI(jsi::Runtime& runtime, const VideoInformation& arg) {
+    static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::video::VideoInformation& arg) {
       jsi::Object obj(runtime);
       obj.setProperty(runtime, "bitrate", JSIConverter<double>::toJSI(runtime, arg.bitrate));
       obj.setProperty(runtime, "width", JSIConverter<double>::toJSI(runtime, arg.width));
@@ -75,7 +73,7 @@ namespace margelo::nitro {
       obj.setProperty(runtime, "fileSize", JSIConverter<int64_t>::toJSI(runtime, arg.fileSize));
       obj.setProperty(runtime, "isHDR", JSIConverter<bool>::toJSI(runtime, arg.isHDR));
       obj.setProperty(runtime, "isLive", JSIConverter<bool>::toJSI(runtime, arg.isLive));
-      obj.setProperty(runtime, "orientation", JSIConverter<VideoOrientation>::toJSI(runtime, arg.orientation));
+      obj.setProperty(runtime, "orientation", JSIConverter<margelo::nitro::video::VideoOrientation>::toJSI(runtime, arg.orientation));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -90,7 +88,7 @@ namespace margelo::nitro {
       if (!JSIConverter<int64_t>::canConvert(runtime, obj.getProperty(runtime, "fileSize"))) return false;
       if (!JSIConverter<bool>::canConvert(runtime, obj.getProperty(runtime, "isHDR"))) return false;
       if (!JSIConverter<bool>::canConvert(runtime, obj.getProperty(runtime, "isLive"))) return false;
-      if (!JSIConverter<VideoOrientation>::canConvert(runtime, obj.getProperty(runtime, "orientation"))) return false;
+      if (!JSIConverter<margelo::nitro::video::VideoOrientation>::canConvert(runtime, obj.getProperty(runtime, "orientation"))) return false;
       return true;
     }
   };

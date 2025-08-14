@@ -43,21 +43,19 @@ namespace margelo::nitro::video {
 
 namespace margelo::nitro {
 
-  using namespace margelo::nitro::video;
-
   // C++ OnGetLicensePayload <> JS OnGetLicensePayload (object)
   template <>
-  struct JSIConverter<OnGetLicensePayload> final {
-    static inline OnGetLicensePayload fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
+  struct JSIConverter<margelo::nitro::video::OnGetLicensePayload> final {
+    static inline margelo::nitro::video::OnGetLicensePayload fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
-      return OnGetLicensePayload(
+      return margelo::nitro::video::OnGetLicensePayload(
         JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, "contentId")),
         JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, "licenseUrl")),
         JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, "keyUrl")),
         JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, "spc"))
       );
     }
-    static inline jsi::Value toJSI(jsi::Runtime& runtime, const OnGetLicensePayload& arg) {
+    static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::video::OnGetLicensePayload& arg) {
       jsi::Object obj(runtime);
       obj.setProperty(runtime, "contentId", JSIConverter<std::string>::toJSI(runtime, arg.contentId));
       obj.setProperty(runtime, "licenseUrl", JSIConverter<std::string>::toJSI(runtime, arg.licenseUrl));

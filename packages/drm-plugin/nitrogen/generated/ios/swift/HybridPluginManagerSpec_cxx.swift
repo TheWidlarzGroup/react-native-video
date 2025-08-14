@@ -33,7 +33,7 @@ open class HybridPluginManagerSpec_cxx {
   /**
    * Holds a weak pointer to the C++ class that wraps the Swift class.
    */
-  private var __cxxPart: bridge.std__weak_ptr_margelo__nitro__videodrm__HybridPluginManagerSpec_
+  private var __cxxPart: bridge.std__weak_ptr_HybridPluginManagerSpec_
 
   /**
    * Create a new `HybridPluginManagerSpec_cxx` that wraps the given `HybridPluginManagerSpec`.
@@ -72,15 +72,15 @@ open class HybridPluginManagerSpec_cxx {
 
   /**
    * Gets (or creates) the C++ part of this Hybrid Object.
-   * The C++ part is a `std::shared_ptr<margelo::nitro::videodrm::HybridPluginManagerSpec>`.
+   * The C++ part is a `std::shared_ptr<HybridPluginManagerSpec>`.
    */
-  public func getCxxPart() -> bridge.std__shared_ptr_margelo__nitro__videodrm__HybridPluginManagerSpec_ {
+  public func getCxxPart() -> bridge.std__shared_ptr_HybridPluginManagerSpec_ {
     let cachedCxxPart = self.__cxxPart.lock()
     if cachedCxxPart.__convertToBool() {
       return cachedCxxPart
     } else {
-      let newCxxPart = bridge.create_std__shared_ptr_margelo__nitro__videodrm__HybridPluginManagerSpec_(self.toUnsafe())
-      __cxxPart = bridge.weakify_std__shared_ptr_margelo__nitro__videodrm__HybridPluginManagerSpec_(newCxxPart)
+      let newCxxPart = bridge.create_std__shared_ptr_HybridPluginManagerSpec_(self.toUnsafe())
+      __cxxPart = bridge.weakify_std__shared_ptr_HybridPluginManagerSpec_(newCxxPart)
       return newCxxPart
     }
   }

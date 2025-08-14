@@ -80,7 +80,7 @@ namespace margelo::nitro::video {
 
   public:
     // Methods
-    inline std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec> fromUri(const std::string& uri) override {
+    inline std::shared_ptr<HybridVideoPlayerSourceSpec> fromUri(const std::string& uri) override {
       auto __result = _swiftPart.fromUri(uri);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
@@ -88,7 +88,7 @@ namespace margelo::nitro::video {
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec> fromVideoConfig(const NativeVideoConfig& config) override {
+    inline std::shared_ptr<HybridVideoPlayerSourceSpec> fromVideoConfig(const NativeVideoConfig& config) override {
       auto __result = _swiftPart.fromVideoConfig(config);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());

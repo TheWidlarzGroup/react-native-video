@@ -53,7 +53,7 @@ namespace margelo::nitro::video {
 
   public:
     // Methods
-    std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec> createPlayer(const std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>& source) override;
+    std::shared_ptr<HybridVideoPlayerSpec> createPlayer(const std::shared_ptr<HybridVideoPlayerSourceSpec>& source) override;
 
   private:
     friend HybridBase;

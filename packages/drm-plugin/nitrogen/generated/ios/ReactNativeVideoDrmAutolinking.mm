@@ -24,7 +24,7 @@
   HybridObjectRegistry::registerHybridObjectConstructor(
     "PluginManager",
     []() -> std::shared_ptr<HybridObject> {
-      std::shared_ptr<margelo::nitro::videodrm::HybridPluginManagerSpec> hybridObject = ReactNativeVideoDrm::ReactNativeVideoDrmAutolinking::createPluginManager();
+      std::shared_ptr<HybridPluginManagerSpec> hybridObject = ReactNativeVideoDrm::ReactNativeVideoDrmAutolinking::createPluginManager();
       return hybridObject;
     }
   );

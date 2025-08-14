@@ -62,12 +62,12 @@ namespace margelo::nitro::video {
   }
 
   // Properties
-  std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec> JHybridVideoPlayerSpec::getSource() {
+  std::shared_ptr<HybridVideoPlayerSourceSpec> JHybridVideoPlayerSpec::getSource() {
     static const auto method = javaClassStatic()->getMethod<jni::local_ref<JHybridVideoPlayerSourceSpec::javaobject>()>("getSource");
     auto __result = method(_javaPart);
     return __result->cthis()->shared_cast<JHybridVideoPlayerSourceSpec>();
   }
-  std::shared_ptr<margelo::nitro::video::HybridVideoPlayerEventEmitterSpec> JHybridVideoPlayerSpec::getEventEmitter() {
+  std::shared_ptr<HybridVideoPlayerEventEmitterSpec> JHybridVideoPlayerSpec::getEventEmitter() {
     static const auto method = javaClassStatic()->getMethod<jni::local_ref<JHybridVideoPlayerEventEmitterSpec::javaobject>()>("getEventEmitter");
     auto __result = method(_javaPart);
     return __result->cthis()->shared_cast<JHybridVideoPlayerEventEmitterSpec>();
@@ -175,7 +175,7 @@ namespace margelo::nitro::video {
   }
 
   // Methods
-  std::shared_ptr<Promise<void>> JHybridVideoPlayerSpec::replaceSourceAsync(const std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>>& source) {
+  std::shared_ptr<Promise<void>> JHybridVideoPlayerSpec::replaceSourceAsync(const std::optional<std::shared_ptr<HybridVideoPlayerSourceSpec>>& source) {
     static const auto method = javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<JHybridVideoPlayerSourceSpec::javaobject> /* source */)>("replaceSourceAsync");
     auto __result = method(_javaPart, source.has_value() ? std::dynamic_pointer_cast<JHybridVideoPlayerSourceSpec>(source.value())->getJavaPart() : nullptr);
     return [&]() {

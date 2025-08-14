@@ -45,12 +45,12 @@ namespace margelo::nitro::video {
   }
 
   // Properties
-  std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>> JHybridVideoViewViewManagerSpec::getPlayer() {
+  std::optional<std::shared_ptr<HybridVideoPlayerSpec>> JHybridVideoViewViewManagerSpec::getPlayer() {
     static const auto method = javaClassStatic()->getMethod<jni::local_ref<JHybridVideoPlayerSpec::javaobject>()>("getPlayer");
     auto __result = method(_javaPart);
     return __result != nullptr ? std::make_optional(__result->cthis()->shared_cast<JHybridVideoPlayerSpec>()) : std::nullopt;
   }
-  void JHybridVideoViewViewManagerSpec::setPlayer(const std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>>& player) {
+  void JHybridVideoViewViewManagerSpec::setPlayer(const std::optional<std::shared_ptr<HybridVideoPlayerSpec>>& player) {
     static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JHybridVideoPlayerSpec::javaobject> /* player */)>("setPlayer");
     method(_javaPart, player.has_value() ? std::dynamic_pointer_cast<JHybridVideoPlayerSpec>(player.value())->getJavaPart() : nullptr);
   }

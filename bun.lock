@@ -57,7 +57,7 @@
         "@twg/react-native-video-drm": "*",
         "react": "18.3.1",
         "react-native": "^0.77.0",
-        "react-native-nitro-modules": "^0.27.0",
+        "react-native-nitro-modules": "^0.28.0",
         "react-native-video": "*",
       },
       "devDependencies": {
@@ -88,12 +88,12 @@
         "eslint": "^8.51.0",
         "eslint-config-prettier": "9.0.0",
         "eslint-plugin-prettier": "^5.0.1",
-        "nitro-codegen": "^0.27.6",
+        "nitro-codegen": "^0.28.0",
         "prettier": "^3.0.3",
         "react": "18.3.1",
         "react-native": "^0.77.0",
         "react-native-builder-bob": "^0.40.13",
-        "react-native-nitro-modules": "^0.27.6",
+        "react-native-nitro-modules": "^0.28.0",
         "react-native-video": "*",
         "release-it": "^17.10.0",
         "typescript": "^5.8.3",
@@ -116,12 +116,12 @@
         "eslint": "^8.51.0",
         "eslint-config-prettier": "^9.0.0",
         "eslint-plugin-prettier": "^5.0.1",
-        "nitro-codegen": "^0.27.6",
+        "nitro-codegen": "^0.28.0",
         "prettier": "^3.0.3",
         "react": "18.3.1",
         "react-native": "^0.77.0",
         "react-native-builder-bob": "^0.40.0",
-        "react-native-nitro-modules": "^0.27.6",
+        "react-native-nitro-modules": "^0.28.0",
         "typescript": "^5.2.2",
       },
       "peerDependencies": {
@@ -2708,7 +2708,7 @@
 
     "new-github-release-url": ["new-github-release-url@2.0.0", "", { "dependencies": { "type-fest": "^2.5.1" } }, "sha512-NHDDGYudnvRutt/VhKFlX26IotXe1w0cmkDm6JGquh5bz/bDTw0LufSmH/GxTjEdpHEO+bVKFTwdrcGa/9XlKQ=="],
 
-    "nitro-codegen": ["nitro-codegen@0.27.6", "", { "dependencies": { "chalk": "^5.3.0", "react-native-nitro-modules": "^0.27.6", "ts-morph": "^25.0.0", "yargs": "^17.7.2", "zod": "^4.0.5" }, "bin": { "nitro-codegen": "lib/index.js" } }, "sha512-pjl52qgXZo7KMzFR3QBdCuR2IOdCouWsEus+bkGE3xsMaS66sydcAVGrHj4gYb4UFlG1+KPOwRaA0uot58ke/w=="],
+    "nitro-codegen": ["nitro-codegen@0.28.0", "", { "dependencies": { "chalk": "^5.3.0", "react-native-nitro-modules": "^0.28.0", "ts-morph": "^25.0.0", "yargs": "^17.7.2", "zod": "^4.0.5" }, "bin": { "nitro-codegen": "lib/index.js" } }, "sha512-sFvLbQQXGKyy3Xer9Oz4J6+KXe4VeKGPzIy893tG65Dfn43rrez849ZG/o/Y3iD2M637ROZeCtGFqQM8mIIo6w=="],
 
     "no-case": ["no-case@3.0.4", "", { "dependencies": { "lower-case": "^2.0.2", "tslib": "^2.0.3" } }, "sha512-fgAN3jGAh+RoxUGZHTSOLJIqUc2wmoBwGR4tbpNAKmmovFoWq0OdRkb0VkldReO2a2iBT/OEulG9XSUc10r3zg=="],
 
@@ -3090,7 +3090,7 @@
 
     "react-native-monorepo-config": ["react-native-monorepo-config@0.1.9", "", { "dependencies": { "escape-string-regexp": "^5.0.0", "fast-glob": "^3.3.3" } }, "sha512-GLFYMEEcbltxZw7oUbbh/p0oXqA52lSirXt7o/N1qD6CFTvku84OVL6teeQ1Ef92pq+bepq4x0Qz+d6lapVbuQ=="],
 
-    "react-native-nitro-modules": ["react-native-nitro-modules@0.27.6", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-g8v+4njjOcS5t19dsVMveODsZ0CifIvYO3WMt/XUykta4sRlMYmM4rlHAykgIYWPOIrwWmz/GE8iK22PlbDFIA=="],
+    "react-native-nitro-modules": ["react-native-nitro-modules@0.28.0", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-SR5fpEOxuzqObowLzwrAU7Pv9Kq+AcxKBTCprMcsaiNlURhex2R8T8moSU/hpZO8Vuf3iomdkzEVEIO8udSZ/w=="],
 
     "react-native-video": ["react-native-video@workspace:packages/react-native-video"],
 

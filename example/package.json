@@ -13,7 +13,7 @@
     "@react-native-community/slider": "^4.5.6",
     "react": "18.3.1",
     "react-native": "^0.77.0",
-    "react-native-nitro-modules": "^0.27.0",
+    "react-native-nitro-modules": "^0.28.0",
     "react-native-video": "*",
     "@twg/react-native-video-drm": "*"
   },
