@@ -89,9 +89,6 @@
     "react-native-nitro-modules": "^0.27.6",
     "typescript": "^5.2.2"
   },
-  "resolutions": {
-    "@types/react": "^18.2.44"
-  },
   "peerDependencies": {
     "react": "*",
     "react-native": "*",
