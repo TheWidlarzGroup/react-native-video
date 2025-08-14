@@ -29,6 +29,7 @@ namespace margelo::nitro::videodrm {
     // C++ constructor (called from Java via `initHybrid()`)
     explicit JHybridPluginManagerSpec(jni::alias_ref<jhybridobject> jThis) :
       HybridObject(HybridPluginManagerSpec::TAG),
+      HybridBase(jThis),
       _javaPart(jni::make_global(jThis)) {}
 
   public:

@@ -23,7 +23,6 @@ namespace margelo::nitro::video { struct TextTrack; }
 #include <memory>
 #include "HybridVideoPlayerSourceSpec.hpp"
 #include "JHybridVideoPlayerSourceSpec.hpp"
-#include <NitroModules/JNISharedPtr.hpp>
 #include "HybridVideoPlayerEventEmitterSpec.hpp"
 #include "JHybridVideoPlayerEventEmitterSpec.hpp"
 #include "VideoPlayerStatus.hpp"
@@ -66,12 +65,12 @@ namespace margelo::nitro::video {
   std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec> JHybridVideoPlayerSpec::getSource() {
     static const auto method = javaClassStatic()->getMethod<jni::local_ref<JHybridVideoPlayerSourceSpec::javaobject>()>("getSource");
     auto __result = method(_javaPart);
-    return JNISharedPtr::make_shared_from_jni<JHybridVideoPlayerSourceSpec>(jni::make_global(__result));
+    return __result->cthis()->shared_cast<JHybridVideoPlayerSourceSpec>();
   }
   std::shared_ptr<margelo::nitro::video::HybridVideoPlayerEventEmitterSpec> JHybridVideoPlayerSpec::getEventEmitter() {
     static const auto method = javaClassStatic()->getMethod<jni::local_ref<JHybridVideoPlayerEventEmitterSpec::javaobject>()>("getEventEmitter");
     auto __result = method(_javaPart);
-    return JNISharedPtr::make_shared_from_jni<JHybridVideoPlayerEventEmitterSpec>(jni::make_global(__result));
+    return __result->cthis()->shared_cast<JHybridVideoPlayerEventEmitterSpec>();
   }
   VideoPlayerStatus JHybridVideoPlayerSpec::getStatus() {
     static const auto method = javaClassStatic()->getMethod<jni::local_ref<JVideoPlayerStatus>()>("getStatus");

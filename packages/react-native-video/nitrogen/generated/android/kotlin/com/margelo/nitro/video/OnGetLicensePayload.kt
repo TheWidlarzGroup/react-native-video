@@ -21,9 +21,17 @@ data class OnGetLicensePayload
   @DoNotStrip
   @Keep
   constructor(
+    @DoNotStrip
+    @Keep
     val contentId: String,
+    @DoNotStrip
+    @Keep
     val licenseUrl: String,
+    @DoNotStrip
+    @Keep
     val keyUrl: String,
+    @DoNotStrip
+    @Keep
     val spc: String
   ) {
   /* main constructor */

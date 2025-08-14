@@ -21,17 +21,31 @@ data class NativeDrmParams
   @DoNotStrip
   @Keep
   constructor(
+    @DoNotStrip
+    @Keep
     val type: String?,
+    @DoNotStrip
+    @Keep
     val licenseUrl: String?,
+    @DoNotStrip
+    @Keep
     val certificateUrl: String?,
+    @DoNotStrip
+    @Keep
     val contentId: String?,
+    @DoNotStrip
+    @Keep
     val licenseHeaders: Map<String, String>?,
+    @DoNotStrip
+    @Keep
     val multiSession: Boolean?,
-    val getLicense: ((payload: OnGetLicensePayload) -> Promise<Promise<String>>)?
+    @DoNotStrip
+    @Keep
+    val getLicense: Func_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload?
   ) {
-  @DoNotStrip
-  @Keep
-  @Suppress("unused")
-  private constructor(type: String?, licenseUrl: String?, certificateUrl: String?, contentId: String?, licenseHeaders: Map<String, String>?, multiSession: Boolean?, getLicense: Func_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload?)
-               : this(type, licenseUrl, certificateUrl, contentId, licenseHeaders, multiSession, getLicense?.let { it } as ((payload: OnGetLicensePayload) -> Promise<Promise<String>>)?)
+  /**
+   * Initialize a new instance of `NativeDrmParams` from Kotlin.
+   */
+  constructor(type: String?, licenseUrl: String?, certificateUrl: String?, contentId: String?, licenseHeaders: Map<String, String>?, multiSession: Boolean?, getLicense: ((payload: OnGetLicensePayload) -> Promise<Promise<String>>)?)
+       : this(type, licenseUrl, certificateUrl, contentId, licenseHeaders, multiSession, getLicense?.let { Func_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload_java(it) })
 }

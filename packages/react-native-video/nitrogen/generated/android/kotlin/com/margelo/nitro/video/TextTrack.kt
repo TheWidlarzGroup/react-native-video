@@ -21,9 +21,17 @@ data class TextTrack
   @DoNotStrip
   @Keep
   constructor(
+    @DoNotStrip
+    @Keep
     val id: String,
+    @DoNotStrip
+    @Keep
     val label: String,
+    @DoNotStrip
+    @Keep
     val language: String?,
+    @DoNotStrip
+    @Keep
     val selected: Boolean
   ) {
   /* main constructor */

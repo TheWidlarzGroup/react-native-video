@@ -16,7 +16,6 @@ namespace margelo::nitro::video { enum class ResizeMode; }
 #include "HybridVideoPlayerSpec.hpp"
 #include <optional>
 #include "JHybridVideoPlayerSpec.hpp"
-#include <NitroModules/JNISharedPtr.hpp>
 #include "ResizeMode.hpp"
 #include "JResizeMode.hpp"
 #include <functional>
@@ -49,7 +48,7 @@ namespace margelo::nitro::video {
   std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>> JHybridVideoViewViewManagerSpec::getPlayer() {
     static const auto method = javaClassStatic()->getMethod<jni::local_ref<JHybridVideoPlayerSpec::javaobject>()>("getPlayer");
     auto __result = method(_javaPart);
-    return __result != nullptr ? std::make_optional(JNISharedPtr::make_shared_from_jni<JHybridVideoPlayerSpec>(jni::make_global(__result))) : std::nullopt;
+    return __result != nullptr ? std::make_optional(__result->cthis()->shared_cast<JHybridVideoPlayerSpec>()) : std::nullopt;
   }
   void JHybridVideoViewViewManagerSpec::setPlayer(const std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>>& player) {
     static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JHybridVideoPlayerSpec::javaobject> /* player */)>("setPlayer");

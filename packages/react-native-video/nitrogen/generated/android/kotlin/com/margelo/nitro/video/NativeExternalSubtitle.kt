@@ -21,9 +21,17 @@ data class NativeExternalSubtitle
   @DoNotStrip
   @Keep
   constructor(
+    @DoNotStrip
+    @Keep
     val uri: String,
+    @DoNotStrip
+    @Keep
     val label: String,
+    @DoNotStrip
+    @Keep
     val type: SubtitleType,
+    @DoNotStrip
+    @Keep
     val language: String
   ) {
   /* main constructor */

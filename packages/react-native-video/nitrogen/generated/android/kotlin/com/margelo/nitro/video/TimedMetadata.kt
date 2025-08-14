@@ -21,6 +21,8 @@ data class TimedMetadata
   @DoNotStrip
   @Keep
   constructor(
+    @DoNotStrip
+    @Keep
     val metadata: Array<TimedMetadataObject>
   ) {
   /* main constructor */

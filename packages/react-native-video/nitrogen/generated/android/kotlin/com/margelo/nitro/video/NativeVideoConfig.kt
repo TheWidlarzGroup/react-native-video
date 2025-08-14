@@ -21,9 +21,17 @@ data class NativeVideoConfig
   @DoNotStrip
   @Keep
   constructor(
+    @DoNotStrip
+    @Keep
     val uri: String,
+    @DoNotStrip
+    @Keep
     val externalSubtitles: Array<NativeExternalSubtitle>?,
+    @DoNotStrip
+    @Keep
     val drm: NativeDrmParams?,
+    @DoNotStrip
+    @Keep
     val headers: Map<String, String>?
   ) {
   /* main constructor */

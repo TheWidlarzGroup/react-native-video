@@ -21,7 +21,11 @@ data class onProgressData
   @DoNotStrip
   @Keep
   constructor(
+    @DoNotStrip
+    @Keep
     val currentTime: Double,
+    @DoNotStrip
+    @Keep
     val bufferDuration: Double
   ) {
   /* main constructor */

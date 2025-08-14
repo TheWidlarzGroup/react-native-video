@@ -626,6 +626,9 @@ namespace margelo::nitro::video::bridge::swift {
     }
     return keys;
   }
+  inline std::string get_std__unordered_map_std__string__std__string__value(const std__unordered_map_std__string__std__string_& map, const std::string& key) {
+    return map.at(key);
+  }
   inline void emplace_std__unordered_map_std__string__std__string_(std__unordered_map_std__string__std__string_& map, const std::string& key, const std::string& value) {
     map.emplace(key, value);
   }

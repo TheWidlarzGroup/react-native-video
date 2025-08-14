@@ -174,7 +174,7 @@ public extension NativeDrmParams {
             var __dictionary = Dictionary<String, String>(minimumCapacity: __unwrapped.size())
             let __keys = bridge.get_std__unordered_map_std__string__std__string__keys(__unwrapped)
             for __key in __keys {
-              let __value = __unwrapped[__key]!
+              let __value = bridge.get_std__unordered_map_std__string__std__string__value(__unwrapped, __key)
               __dictionary[String(__key)] = String(__value)
             }
             return __dictionary

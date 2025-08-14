@@ -21,7 +21,11 @@ data class TimedMetadataObject
   @DoNotStrip
   @Keep
   constructor(
+    @DoNotStrip
+    @Keep
     val value: String,
+    @DoNotStrip
+    @Keep
     val identifier: String
   ) {
   /* main constructor */
