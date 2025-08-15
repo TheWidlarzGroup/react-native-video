@@ -1,5 +1,5 @@
 ---
-sidebar_position: 3
+sidebar_position: 1
 sidebar_label: Player
 ---
 
@@ -80,9 +80,18 @@ The `VideoPlayer` class offers a comprehensive set of methods and properties to 
 | `playInBackground` | Read/Write | `boolean` | Whether playback should continue when the app goes to the background. |
 | `playWhenInactive` | Read/Write | `boolean` | Whether playback should continue when the app is inactive (e.g., during a phone call). |
 | `isPlaying` | Read-only | `boolean` | Returns `true` if the video is currently playing. |
+| `selectedTrack` | Read-only | `TextTrack \| undefined` | Currently selected text track, or `undefined` when no track is selected. |
 
 ### Error Handling
 
 | Property | Type | Description |
 |----------|------|-------------|
 | `onError?` | `(error: VideoRuntimeError) => void` | A callback function that is invoked when a runtime error occurs in the player. You can use this to catch and handle errors gracefully. |
+
+## DRM
+
+Protected content is supported via a plugin. See the full DRM guide: [DRM](./drm.md).
+
+Quick notes:
+- Install and enable the official plugin `@twg/react-native-video-drm` and call `enable()` at app startup before creating players.
+- Pass DRM configuration on the source using the `drm` property of `VideoConfig` (see the DRM guide for platform specifics and `getLicense` examples).

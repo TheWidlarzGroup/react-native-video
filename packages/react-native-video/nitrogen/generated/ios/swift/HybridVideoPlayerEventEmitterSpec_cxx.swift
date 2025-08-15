@@ -33,7 +33,7 @@ open class HybridVideoPlayerEventEmitterSpec_cxx {
   /**
    * Holds a weak pointer to the C++ class that wraps the Swift class.
    */
-  private var __cxxPart: bridge.std__weak_ptr_margelo__nitro__video__HybridVideoPlayerEventEmitterSpec_
+  private var __cxxPart: bridge.std__weak_ptr_HybridVideoPlayerEventEmitterSpec_
 
   /**
    * Create a new `HybridVideoPlayerEventEmitterSpec_cxx` that wraps the given `HybridVideoPlayerEventEmitterSpec`.
@@ -72,15 +72,15 @@ open class HybridVideoPlayerEventEmitterSpec_cxx {
 
   /**
    * Gets (or creates) the C++ part of this Hybrid Object.
-   * The C++ part is a `std::shared_ptr<margelo::nitro::video::HybridVideoPlayerEventEmitterSpec>`.
+   * The C++ part is a `std::shared_ptr<HybridVideoPlayerEventEmitterSpec>`.
    */
-  public func getCxxPart() -> bridge.std__shared_ptr_margelo__nitro__video__HybridVideoPlayerEventEmitterSpec_ {
+  public func getCxxPart() -> bridge.std__shared_ptr_HybridVideoPlayerEventEmitterSpec_ {
     let cachedCxxPart = self.__cxxPart.lock()
     if cachedCxxPart.__convertToBool() {
       return cachedCxxPart
     } else {
-      let newCxxPart = bridge.create_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerEventEmitterSpec_(self.toUnsafe())
-      __cxxPart = bridge.weakify_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerEventEmitterSpec_(newCxxPart)
+      let newCxxPart = bridge.create_std__shared_ptr_HybridVideoPlayerEventEmitterSpec_(self.toUnsafe())
+      __cxxPart = bridge.weakify_std__shared_ptr_HybridVideoPlayerEventEmitterSpec_(newCxxPart)
       return newCxxPart
     }
   }

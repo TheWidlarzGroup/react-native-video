@@ -34,37 +34,32 @@ enum ExternalSubtitlesUtils {
       let textTracks =
         subtitlesAssets?.flatMap { $0.tracks(withMediaType: .text) } ?? []
 
-      guard
-        let videoTrack = mainVideoTracks.first(where: { $0.mediaType == .video }
-        ),
-        let audioTrack = mainAudioTracks.first(where: { $0.mediaType == .audio }
-        )
-      else {
-        throw PlayerError.invalidSource.error()
-      }
-
       let composition = AVMutableComposition()
 
-      if let compositionVideoTrack = composition.addMutableTrack(
-        withMediaType: .video,
-        preferredTrackID: kCMPersistentTrackID_Invalid
-      ) {
-        try compositionVideoTrack.insertTimeRange(
-          CMTimeRange(start: .zero, duration: videoTrack.timeRange.duration),
-          of: videoTrack,
-          at: .zero
-        )
+      if let videoTrack = mainVideoTracks.first(where: { $0.mediaType == .video }){
+        if let compositionVideoTrack = composition.addMutableTrack(
+          withMediaType: .video,
+          preferredTrackID: kCMPersistentTrackID_Invalid
+        ) {
+          try compositionVideoTrack.insertTimeRange(
+            CMTimeRange(start: .zero, duration: videoTrack.timeRange.duration),
+            of: videoTrack,
+            at: .zero
+          )
+        }
       }
 
-      if let compositionAudioTrack = composition.addMutableTrack(
-        withMediaType: .audio,
-        preferredTrackID: kCMPersistentTrackID_Invalid
-      ) {
-        try compositionAudioTrack.insertTimeRange(
-          CMTimeRange(start: .zero, duration: audioTrack.timeRange.duration),
-          of: audioTrack,
-          at: .zero
-        )
+      if let audioTrack = mainAudioTracks.first(where: { $0.mediaType == .audio }) {
+        if let compositionAudioTrack = composition.addMutableTrack(
+          withMediaType: .audio,
+          preferredTrackID: kCMPersistentTrackID_Invalid
+        ) {
+          try compositionAudioTrack.insertTimeRange(
+            CMTimeRange(start: .zero, duration: audioTrack.timeRange.duration),
+            of: audioTrack,
+            at: .zero
+          )
+        }
       }
 
       for textTrack in textTracks {
@@ -73,7 +68,7 @@ enum ExternalSubtitlesUtils {
           preferredTrackID: kCMPersistentTrackID_Invalid
         ) {
           try compositionTextTrack.insertTimeRange(
-            CMTimeRange(start: .zero, duration: videoTrack.timeRange.duration),
+            CMTimeRange(start: .zero, duration: textTrack.timeRange.duration),
             of: textTrack,
             at: .zero
           )

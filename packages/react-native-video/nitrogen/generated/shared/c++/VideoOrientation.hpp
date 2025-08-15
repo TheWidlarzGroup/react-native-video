@@ -42,34 +42,32 @@ namespace margelo::nitro::video {
 
 namespace margelo::nitro {
 
-  using namespace margelo::nitro::video;
-
   // C++ VideoOrientation <> JS VideoOrientation (union)
   template <>
-  struct JSIConverter<VideoOrientation> final {
-    static inline VideoOrientation fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
+  struct JSIConverter<margelo::nitro::video::VideoOrientation> final {
+    static inline margelo::nitro::video::VideoOrientation fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       std::string unionValue = JSIConverter<std::string>::fromJSI(runtime, arg);
       switch (hashString(unionValue.c_str(), unionValue.size())) {
-        case hashString("portrait"): return VideoOrientation::PORTRAIT;
-        case hashString("landscape"): return VideoOrientation::LANDSCAPE;
-        case hashString("portrait-upside-down"): return VideoOrientation::PORTRAIT_UPSIDE_DOWN;
-        case hashString("landscape-left"): return VideoOrientation::LANDSCAPE_LEFT;
-        case hashString("landscape-right"): return VideoOrientation::LANDSCAPE_RIGHT;
-        case hashString("square"): return VideoOrientation::SQUARE;
-        case hashString("unknown"): return VideoOrientation::UNKNOWN;
+        case hashString("portrait"): return margelo::nitro::video::VideoOrientation::PORTRAIT;
+        case hashString("landscape"): return margelo::nitro::video::VideoOrientation::LANDSCAPE;
+        case hashString("portrait-upside-down"): return margelo::nitro::video::VideoOrientation::PORTRAIT_UPSIDE_DOWN;
+        case hashString("landscape-left"): return margelo::nitro::video::VideoOrientation::LANDSCAPE_LEFT;
+        case hashString("landscape-right"): return margelo::nitro::video::VideoOrientation::LANDSCAPE_RIGHT;
+        case hashString("square"): return margelo::nitro::video::VideoOrientation::SQUARE;
+        case hashString("unknown"): return margelo::nitro::video::VideoOrientation::UNKNOWN;
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert \"" + unionValue + "\" to enum VideoOrientation - invalid value!");
       }
     }
-    static inline jsi::Value toJSI(jsi::Runtime& runtime, VideoOrientation arg) {
+    static inline jsi::Value toJSI(jsi::Runtime& runtime, margelo::nitro::video::VideoOrientation arg) {
       switch (arg) {
-        case VideoOrientation::PORTRAIT: return JSIConverter<std::string>::toJSI(runtime, "portrait");
-        case VideoOrientation::LANDSCAPE: return JSIConverter<std::string>::toJSI(runtime, "landscape");
-        case VideoOrientation::PORTRAIT_UPSIDE_DOWN: return JSIConverter<std::string>::toJSI(runtime, "portrait-upside-down");
-        case VideoOrientation::LANDSCAPE_LEFT: return JSIConverter<std::string>::toJSI(runtime, "landscape-left");
-        case VideoOrientation::LANDSCAPE_RIGHT: return JSIConverter<std::string>::toJSI(runtime, "landscape-right");
-        case VideoOrientation::SQUARE: return JSIConverter<std::string>::toJSI(runtime, "square");
-        case VideoOrientation::UNKNOWN: return JSIConverter<std::string>::toJSI(runtime, "unknown");
+        case margelo::nitro::video::VideoOrientation::PORTRAIT: return JSIConverter<std::string>::toJSI(runtime, "portrait");
+        case margelo::nitro::video::VideoOrientation::LANDSCAPE: return JSIConverter<std::string>::toJSI(runtime, "landscape");
+        case margelo::nitro::video::VideoOrientation::PORTRAIT_UPSIDE_DOWN: return JSIConverter<std::string>::toJSI(runtime, "portrait-upside-down");
+        case margelo::nitro::video::VideoOrientation::LANDSCAPE_LEFT: return JSIConverter<std::string>::toJSI(runtime, "landscape-left");
+        case margelo::nitro::video::VideoOrientation::LANDSCAPE_RIGHT: return JSIConverter<std::string>::toJSI(runtime, "landscape-right");
+        case margelo::nitro::video::VideoOrientation::SQUARE: return JSIConverter<std::string>::toJSI(runtime, "square");
+        case margelo::nitro::video::VideoOrientation::UNKNOWN: return JSIConverter<std::string>::toJSI(runtime, "unknown");
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert VideoOrientation to JS - invalid value: "
                                     + std::to_string(static_cast<int>(arg)) + "!");

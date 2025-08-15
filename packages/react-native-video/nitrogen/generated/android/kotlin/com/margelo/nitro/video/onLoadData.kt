@@ -21,10 +21,20 @@ data class onLoadData
   @DoNotStrip
   @Keep
   constructor(
+    @DoNotStrip
+    @Keep
     val currentTime: Double,
+    @DoNotStrip
+    @Keep
     val duration: Double,
+    @DoNotStrip
+    @Keep
     val height: Double,
+    @DoNotStrip
+    @Keep
     val width: Double,
+    @DoNotStrip
+    @Keep
     val orientation: VideoOrientation
   ) {
   /* main constructor */

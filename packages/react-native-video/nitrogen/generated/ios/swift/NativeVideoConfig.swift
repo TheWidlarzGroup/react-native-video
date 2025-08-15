@@ -18,7 +18,7 @@ public extension NativeVideoConfig {
   /**
    * Create a new instance of `NativeVideoConfig`.
    */
-  init(uri: String, externalSubtitles: [NativeExternalSubtitle]?, headers: Dictionary<String, String>?) {
+  init(uri: String, externalSubtitles: [NativeExternalSubtitle]?, drm: NativeDrmParams?, headers: Dictionary<String, String>?) {
     self.init(std.string(uri), { () -> bridge.std__optional_std__vector_NativeExternalSubtitle__ in
       if let __unwrappedValue = externalSubtitles {
         return bridge.create_std__optional_std__vector_NativeExternalSubtitle__({ () -> bridge.std__vector_NativeExternalSubtitle_ in
@@ -28,6 +28,12 @@ public extension NativeVideoConfig {
           }
           return __vector
         }())
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_NativeDrmParams_ in
+      if let __unwrappedValue = drm {
+        return bridge.create_std__optional_NativeDrmParams_(__unwrappedValue)
       } else {
         return .init()
       }
@@ -86,6 +92,29 @@ public extension NativeVideoConfig {
     }
   }
   
+  var drm: NativeDrmParams? {
+    @inline(__always)
+    get {
+      return { () -> NativeDrmParams? in
+        if let __unwrapped = self.__drm.value {
+          return __unwrapped
+        } else {
+          return nil
+        }
+      }()
+    }
+    @inline(__always)
+    set {
+      self.__drm = { () -> bridge.std__optional_NativeDrmParams_ in
+        if let __unwrappedValue = newValue {
+          return bridge.create_std__optional_NativeDrmParams_(__unwrappedValue)
+        } else {
+          return .init()
+        }
+      }()
+    }
+  }
+  
   var headers: Dictionary<String, String>? {
     @inline(__always)
     get {
@@ -95,7 +124,7 @@ public extension NativeVideoConfig {
             var __dictionary = Dictionary<String, String>(minimumCapacity: __unwrapped.size())
             let __keys = bridge.get_std__unordered_map_std__string__std__string__keys(__unwrapped)
             for __key in __keys {
-              let __value = __unwrapped[__key]!
+              let __value = bridge.get_std__unordered_map_std__string__std__string__value(__unwrapped, __key)
               __dictionary[String(__key)] = String(__value)
             }
             return __dictionary

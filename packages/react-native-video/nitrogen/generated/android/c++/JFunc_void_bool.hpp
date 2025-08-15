@@ -17,7 +17,7 @@ namespace margelo::nitro::video {
   using namespace facebook;
 
   /**
-   * Represents the Java/Kotlin callback `(fullscreen: Boolean) -> Unit`.
+   * Represents the Java/Kotlin callback `(isInPictureInPicture: Boolean) -> Unit`.
    * This can be passed around between C++ and Java/Kotlin.
    */
   struct JFunc_void_bool: public jni::JavaClass<JFunc_void_bool> {
@@ -28,9 +28,9 @@ namespace margelo::nitro::video {
     /**
      * Invokes the function this `JFunc_void_bool` instance holds through JNI.
      */
-    void invoke(bool fullscreen) const {
-      static const auto method = javaClassStatic()->getMethod<void(jboolean /* fullscreen */)>("invoke");
-      method(self(), fullscreen);
+    void invoke(bool isInPictureInPicture) const {
+      static const auto method = javaClassStatic()->getMethod<void(jboolean /* isInPictureInPicture */)>("invoke");
+      method(self(), isInPictureInPicture);
     }
   };
 
@@ -39,7 +39,7 @@ namespace margelo::nitro::video {
    */
   struct JFunc_void_bool_cxx final: public jni::HybridClass<JFunc_void_bool_cxx, JFunc_void_bool> {
   public:
-    static jni::local_ref<JFunc_void_bool::javaobject> fromCpp(const std::function<void(bool /* fullscreen */)>& func) {
+    static jni::local_ref<JFunc_void_bool::javaobject> fromCpp(const std::function<void(bool /* isInPictureInPicture */)>& func) {
       return JFunc_void_bool_cxx::newObjectCxxArgs(func);
     }
 
@@ -47,13 +47,13 @@ namespace margelo::nitro::video {
     /**
      * Invokes the C++ `std::function<...>` this `JFunc_void_bool_cxx` instance holds.
      */
-    void invoke_cxx(jboolean fullscreen) {
-      _func(static_cast<bool>(fullscreen));
+    void invoke_cxx(jboolean isInPictureInPicture) {
+      _func(static_cast<bool>(isInPictureInPicture));
     }
 
   public:
     [[nodiscard]]
-    inline const std::function<void(bool /* fullscreen */)>& getFunction() const {
+    inline const std::function<void(bool /* isInPictureInPicture */)>& getFunction() const {
       return _func;
     }
 
@@ -64,11 +64,11 @@ namespace margelo::nitro::video {
     }
 
   private:
-    explicit JFunc_void_bool_cxx(const std::function<void(bool /* fullscreen */)>& func): _func(func) { }
+    explicit JFunc_void_bool_cxx(const std::function<void(bool /* isInPictureInPicture */)>& func): _func(func) { }
 
   private:
     friend HybridBase;
-    std::function<void(bool /* fullscreen */)> _func;
+    std::function<void(bool /* isInPictureInPicture */)> _func;
   };
 
 } // namespace margelo::nitro::video

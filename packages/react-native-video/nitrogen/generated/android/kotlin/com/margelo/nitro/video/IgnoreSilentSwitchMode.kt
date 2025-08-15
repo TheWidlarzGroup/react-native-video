@@ -15,12 +15,8 @@ import com.facebook.proguard.annotations.DoNotStrip
  */
 @DoNotStrip
 @Keep
-enum class IgnoreSilentSwitchMode {
-  AUTO,
-  IGNORE,
-  OBEY;
-
-  @DoNotStrip
-  @Keep
-  private val _ordinal = ordinal
+enum class IgnoreSilentSwitchMode(@DoNotStrip @Keep val value: Int) {
+  AUTO(0),
+  IGNORE(1),
+  OBEY(2);
 }

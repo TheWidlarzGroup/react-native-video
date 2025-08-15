@@ -41,19 +41,17 @@ namespace margelo::nitro::video {
 
 namespace margelo::nitro {
 
-  using namespace margelo::nitro::video;
-
   // C++ onProgressData <> JS onProgressData (object)
   template <>
-  struct JSIConverter<onProgressData> final {
-    static inline onProgressData fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
+  struct JSIConverter<margelo::nitro::video::onProgressData> final {
+    static inline margelo::nitro::video::onProgressData fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
-      return onProgressData(
+      return margelo::nitro::video::onProgressData(
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, "currentTime")),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, "bufferDuration"))
       );
     }
-    static inline jsi::Value toJSI(jsi::Runtime& runtime, const onProgressData& arg) {
+    static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::video::onProgressData& arg) {
       jsi::Object obj(runtime);
       obj.setProperty(runtime, "currentTime", JSIConverter<double>::toJSI(runtime, arg.currentTime));
       obj.setProperty(runtime, "bufferDuration", JSIConverter<double>::toJSI(runtime, arg.bufferDuration));

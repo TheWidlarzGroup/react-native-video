@@ -42,20 +42,18 @@ namespace margelo::nitro::video {
 
 namespace margelo::nitro {
 
-  using namespace margelo::nitro::video;
-
   // C++ TimedMetadata <> JS TimedMetadata (object)
   template <>
-  struct JSIConverter<TimedMetadata> final {
-    static inline TimedMetadata fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
+  struct JSIConverter<margelo::nitro::video::TimedMetadata> final {
+    static inline margelo::nitro::video::TimedMetadata fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
-      return TimedMetadata(
-        JSIConverter<std::vector<TimedMetadataObject>>::fromJSI(runtime, obj.getProperty(runtime, "metadata"))
+      return margelo::nitro::video::TimedMetadata(
+        JSIConverter<std::vector<margelo::nitro::video::TimedMetadataObject>>::fromJSI(runtime, obj.getProperty(runtime, "metadata"))
       );
     }
-    static inline jsi::Value toJSI(jsi::Runtime& runtime, const TimedMetadata& arg) {
+    static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::video::TimedMetadata& arg) {
       jsi::Object obj(runtime);
-      obj.setProperty(runtime, "metadata", JSIConverter<std::vector<TimedMetadataObject>>::toJSI(runtime, arg.metadata));
+      obj.setProperty(runtime, "metadata", JSIConverter<std::vector<margelo::nitro::video::TimedMetadataObject>>::toJSI(runtime, arg.metadata));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -63,7 +61,7 @@ namespace margelo::nitro {
         return false;
       }
       jsi::Object obj = value.getObject(runtime);
-      if (!JSIConverter<std::vector<TimedMetadataObject>>::canConvert(runtime, obj.getProperty(runtime, "metadata"))) return false;
+      if (!JSIConverter<std::vector<margelo::nitro::video::TimedMetadataObject>>::canConvert(runtime, obj.getProperty(runtime, "metadata"))) return false;
       return true;
     }
   };

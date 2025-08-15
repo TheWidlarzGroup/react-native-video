@@ -45,25 +45,23 @@ namespace margelo::nitro::video {
 
 namespace margelo::nitro {
 
-  using namespace margelo::nitro::video;
-
   // C++ NativeExternalSubtitle <> JS NativeExternalSubtitle (object)
   template <>
-  struct JSIConverter<NativeExternalSubtitle> final {
-    static inline NativeExternalSubtitle fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
+  struct JSIConverter<margelo::nitro::video::NativeExternalSubtitle> final {
+    static inline margelo::nitro::video::NativeExternalSubtitle fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
-      return NativeExternalSubtitle(
+      return margelo::nitro::video::NativeExternalSubtitle(
         JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, "uri")),
         JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, "label")),
-        JSIConverter<SubtitleType>::fromJSI(runtime, obj.getProperty(runtime, "type")),
+        JSIConverter<margelo::nitro::video::SubtitleType>::fromJSI(runtime, obj.getProperty(runtime, "type")),
         JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, "language"))
       );
     }
-    static inline jsi::Value toJSI(jsi::Runtime& runtime, const NativeExternalSubtitle& arg) {
+    static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::video::NativeExternalSubtitle& arg) {
       jsi::Object obj(runtime);
       obj.setProperty(runtime, "uri", JSIConverter<std::string>::toJSI(runtime, arg.uri));
       obj.setProperty(runtime, "label", JSIConverter<std::string>::toJSI(runtime, arg.label));
-      obj.setProperty(runtime, "type", JSIConverter<SubtitleType>::toJSI(runtime, arg.type));
+      obj.setProperty(runtime, "type", JSIConverter<margelo::nitro::video::SubtitleType>::toJSI(runtime, arg.type));
       obj.setProperty(runtime, "language", JSIConverter<std::string>::toJSI(runtime, arg.language));
       return obj;
     }
@@ -74,7 +72,7 @@ namespace margelo::nitro {
       jsi::Object obj = value.getObject(runtime);
       if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, "uri"))) return false;
       if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, "label"))) return false;
-      if (!JSIConverter<SubtitleType>::canConvert(runtime, obj.getProperty(runtime, "type"))) return false;
+      if (!JSIConverter<margelo::nitro::video::SubtitleType>::canConvert(runtime, obj.getProperty(runtime, "type"))) return false;
       if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, "language"))) return false;
       return true;
     }

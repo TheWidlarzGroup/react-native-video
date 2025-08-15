@@ -62,7 +62,7 @@ namespace margelo::nitro::video {
 
   public:
     // Methods
-    inline std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec> createPlayer(const std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>& source) override {
+    inline std::shared_ptr<HybridVideoPlayerSpec> createPlayer(const std::shared_ptr<HybridVideoPlayerSourceSpec>& source) override {
       auto __result = _swiftPart.createPlayer(source);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());

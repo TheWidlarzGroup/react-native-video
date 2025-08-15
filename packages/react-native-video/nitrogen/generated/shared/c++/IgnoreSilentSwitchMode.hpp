@@ -38,26 +38,24 @@ namespace margelo::nitro::video {
 
 namespace margelo::nitro {
 
-  using namespace margelo::nitro::video;
-
   // C++ IgnoreSilentSwitchMode <> JS IgnoreSilentSwitchMode (union)
   template <>
-  struct JSIConverter<IgnoreSilentSwitchMode> final {
-    static inline IgnoreSilentSwitchMode fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
+  struct JSIConverter<margelo::nitro::video::IgnoreSilentSwitchMode> final {
+    static inline margelo::nitro::video::IgnoreSilentSwitchMode fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       std::string unionValue = JSIConverter<std::string>::fromJSI(runtime, arg);
       switch (hashString(unionValue.c_str(), unionValue.size())) {
-        case hashString("auto"): return IgnoreSilentSwitchMode::AUTO;
-        case hashString("ignore"): return IgnoreSilentSwitchMode::IGNORE;
-        case hashString("obey"): return IgnoreSilentSwitchMode::OBEY;
+        case hashString("auto"): return margelo::nitro::video::IgnoreSilentSwitchMode::AUTO;
+        case hashString("ignore"): return margelo::nitro::video::IgnoreSilentSwitchMode::IGNORE;
+        case hashString("obey"): return margelo::nitro::video::IgnoreSilentSwitchMode::OBEY;
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert \"" + unionValue + "\" to enum IgnoreSilentSwitchMode - invalid value!");
       }
     }
-    static inline jsi::Value toJSI(jsi::Runtime& runtime, IgnoreSilentSwitchMode arg) {
+    static inline jsi::Value toJSI(jsi::Runtime& runtime, margelo::nitro::video::IgnoreSilentSwitchMode arg) {
       switch (arg) {
-        case IgnoreSilentSwitchMode::AUTO: return JSIConverter<std::string>::toJSI(runtime, "auto");
-        case IgnoreSilentSwitchMode::IGNORE: return JSIConverter<std::string>::toJSI(runtime, "ignore");
-        case IgnoreSilentSwitchMode::OBEY: return JSIConverter<std::string>::toJSI(runtime, "obey");
+        case margelo::nitro::video::IgnoreSilentSwitchMode::AUTO: return JSIConverter<std::string>::toJSI(runtime, "auto");
+        case margelo::nitro::video::IgnoreSilentSwitchMode::IGNORE: return JSIConverter<std::string>::toJSI(runtime, "ignore");
+        case margelo::nitro::video::IgnoreSilentSwitchMode::OBEY: return JSIConverter<std::string>::toJSI(runtime, "obey");
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert IgnoreSilentSwitchMode to JS - invalid value: "
                                     + std::to_string(static_cast<int>(arg)) + "!");

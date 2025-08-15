@@ -15,14 +15,10 @@ import com.facebook.proguard.annotations.DoNotStrip
  */
 @DoNotStrip
 @Keep
-enum class SubtitleType {
-  AUTO,
-  VTT,
-  SRT,
-  SSA,
-  ASS;
-
-  @DoNotStrip
-  @Keep
-  private val _ordinal = ordinal
+enum class SubtitleType(@DoNotStrip @Keep val value: Int) {
+  AUTO(0),
+  VTT(1),
+  SRT(2),
+  SSA(3),
+  ASS(4);
 }

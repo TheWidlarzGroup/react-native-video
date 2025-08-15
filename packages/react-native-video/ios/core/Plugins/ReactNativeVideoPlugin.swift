@@ -61,7 +61,7 @@ public protocol ReactNativeVideoPluginSpec {
    * @param source The source instance.
    * @return The DRM manager instance.
    */
-  func getDRMManager(source: NativeVideoPlayerSource) async -> Any?
+  func getDRMManager(source: NativeVideoPlayerSource) -> DRMManagerSpec?
 }
 
 open class ReactNativeVideoPlugin: ReactNativeVideoPluginSpec {
@@ -85,7 +85,7 @@ open class ReactNativeVideoPlugin: ReactNativeVideoPluginSpec {
     return source
   }
 
-  open func getDRMManager(source: NativeVideoPlayerSource) async -> Any? {
+  open func getDRMManager(source: NativeVideoPlayerSource) -> DRMManagerSpec? {
     return nil
   }
 }

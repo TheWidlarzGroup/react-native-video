@@ -21,8 +21,14 @@ data class BandwidthData
   @DoNotStrip
   @Keep
   constructor(
+    @DoNotStrip
+    @Keep
     val bitrate: Double,
+    @DoNotStrip
+    @Keep
     val width: Double?,
+    @DoNotStrip
+    @Keep
     val height: Double?
   ) {
   /* main constructor */

@@ -54,7 +54,6 @@ namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 #include <memory>
 #include "HybridVideoPlayerSourceSpec.hpp"
 #include "JHybridVideoPlayerSourceSpec.hpp"
-#include <NitroModules/JNISharedPtr.hpp>
 #include "onPlaybackStateChangeData.hpp"
 #include "JFunc_void_onPlaybackStateChangeData.hpp"
 #include "JonPlaybackStateChangeData.hpp"

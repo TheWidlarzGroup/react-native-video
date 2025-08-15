@@ -60,11 +60,11 @@ namespace margelo::nitro::video {
 
   public:
     // Properties
-    inline std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>> getPlayer() noexcept override {
+    inline std::optional<std::shared_ptr<HybridVideoPlayerSpec>> getPlayer() noexcept override {
       auto __result = _swiftPart.getPlayer();
       return __result;
     }
-    inline void setPlayer(const std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>>& player) noexcept override {
+    inline void setPlayer(const std::optional<std::shared_ptr<HybridVideoPlayerSpec>>& player) noexcept override {
       _swiftPart.setPlayer(player);
     }
     inline bool getControls() noexcept override {

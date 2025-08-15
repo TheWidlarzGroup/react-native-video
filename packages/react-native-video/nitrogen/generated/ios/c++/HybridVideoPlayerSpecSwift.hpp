@@ -74,11 +74,11 @@ namespace margelo::nitro::video {
 
   public:
     // Properties
-    inline std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec> getSource() noexcept override {
+    inline std::shared_ptr<HybridVideoPlayerSourceSpec> getSource() noexcept override {
       auto __result = _swiftPart.getSource();
       return __result;
     }
-    inline std::shared_ptr<margelo::nitro::video::HybridVideoPlayerEventEmitterSpec> getEventEmitter() noexcept override {
+    inline std::shared_ptr<HybridVideoPlayerEventEmitterSpec> getEventEmitter() noexcept override {
       auto __result = _swiftPart.getEventEmitter();
       return __result;
     }
@@ -155,7 +155,7 @@ namespace margelo::nitro::video {
 
   public:
     // Methods
-    inline std::shared_ptr<Promise<void>> replaceSourceAsync(const std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>>& source) override {
+    inline std::shared_ptr<Promise<void>> replaceSourceAsync(const std::optional<std::shared_ptr<HybridVideoPlayerSourceSpec>>& source) override {
       auto __result = _swiftPart.replaceSourceAsync(source);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());

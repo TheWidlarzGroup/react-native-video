@@ -33,7 +33,7 @@ open class HybridVideoPlayerFactorySpec_cxx {
   /**
    * Holds a weak pointer to the C++ class that wraps the Swift class.
    */
-  private var __cxxPart: bridge.std__weak_ptr_margelo__nitro__video__HybridVideoPlayerFactorySpec_
+  private var __cxxPart: bridge.std__weak_ptr_HybridVideoPlayerFactorySpec_
 
   /**
    * Create a new `HybridVideoPlayerFactorySpec_cxx` that wraps the given `HybridVideoPlayerFactorySpec`.
@@ -72,15 +72,15 @@ open class HybridVideoPlayerFactorySpec_cxx {
 
   /**
    * Gets (or creates) the C++ part of this Hybrid Object.
-   * The C++ part is a `std::shared_ptr<margelo::nitro::video::HybridVideoPlayerFactorySpec>`.
+   * The C++ part is a `std::shared_ptr<HybridVideoPlayerFactorySpec>`.
    */
-  public func getCxxPart() -> bridge.std__shared_ptr_margelo__nitro__video__HybridVideoPlayerFactorySpec_ {
+  public func getCxxPart() -> bridge.std__shared_ptr_HybridVideoPlayerFactorySpec_ {
     let cachedCxxPart = self.__cxxPart.lock()
     if cachedCxxPart.__convertToBool() {
       return cachedCxxPart
     } else {
-      let newCxxPart = bridge.create_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerFactorySpec_(self.toUnsafe())
-      __cxxPart = bridge.weakify_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerFactorySpec_(newCxxPart)
+      let newCxxPart = bridge.create_std__shared_ptr_HybridVideoPlayerFactorySpec_(self.toUnsafe())
+      __cxxPart = bridge.weakify_std__shared_ptr_HybridVideoPlayerFactorySpec_(newCxxPart)
       return newCxxPart
     }
   }
@@ -110,21 +110,21 @@ open class HybridVideoPlayerFactorySpec_cxx {
 
   // Methods
   @inline(__always)
-  public final func createPlayer(source: bridge.std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_) -> bridge.Result_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSpec__ {
+  public final func createPlayer(source: bridge.std__shared_ptr_HybridVideoPlayerSourceSpec_) -> bridge.Result_std__shared_ptr_HybridVideoPlayerSpec__ {
     do {
       let __result = try self.__implementation.createPlayer(source: { () -> HybridVideoPlayerSourceSpec in
-        let __unsafePointer = bridge.get_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_(source)
+        let __unsafePointer = bridge.get_std__shared_ptr_HybridVideoPlayerSourceSpec_(source)
         let __instance = HybridVideoPlayerSourceSpec_cxx.fromUnsafe(__unsafePointer)
         return __instance.getHybridVideoPlayerSourceSpec()
       }())
-      let __resultCpp = { () -> bridge.std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSpec_ in
+      let __resultCpp = { () -> bridge.std__shared_ptr_HybridVideoPlayerSpec_ in
         let __cxxWrapped = __result.getCxxWrapper()
         return __cxxWrapped.getCxxPart()
       }()
-      return bridge.create_Result_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSpec__(__resultCpp)
+      return bridge.create_Result_std__shared_ptr_HybridVideoPlayerSpec__(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSpec__(__exceptionPtr)
+      return bridge.create_Result_std__shared_ptr_HybridVideoPlayerSpec__(__exceptionPtr)
     }
   }
 }

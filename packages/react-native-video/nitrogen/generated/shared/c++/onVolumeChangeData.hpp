@@ -41,19 +41,17 @@ namespace margelo::nitro::video {
 
 namespace margelo::nitro {
 
-  using namespace margelo::nitro::video;
-
   // C++ onVolumeChangeData <> JS onVolumeChangeData (object)
   template <>
-  struct JSIConverter<onVolumeChangeData> final {
-    static inline onVolumeChangeData fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
+  struct JSIConverter<margelo::nitro::video::onVolumeChangeData> final {
+    static inline margelo::nitro::video::onVolumeChangeData fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
-      return onVolumeChangeData(
+      return margelo::nitro::video::onVolumeChangeData(
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, "volume")),
         JSIConverter<bool>::fromJSI(runtime, obj.getProperty(runtime, "muted"))
       );
     }
-    static inline jsi::Value toJSI(jsi::Runtime& runtime, const onVolumeChangeData& arg) {
+    static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::video::onVolumeChangeData& arg) {
       jsi::Object obj(runtime);
       obj.setProperty(runtime, "volume", JSIConverter<double>::toJSI(runtime, arg.volume));
       obj.setProperty(runtime, "muted", JSIConverter<bool>::toJSI(runtime, arg.muted));

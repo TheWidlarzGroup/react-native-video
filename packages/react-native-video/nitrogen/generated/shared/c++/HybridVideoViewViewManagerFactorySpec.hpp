@@ -50,7 +50,7 @@ namespace margelo::nitro::video {
 
     public:
       // Methods
-      virtual std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerSpec> createViewManager(double nitroId) = 0;
+      virtual std::shared_ptr<HybridVideoViewViewManagerSpec> createViewManager(double nitroId) = 0;
 
     protected:
       // Hybrid Setup

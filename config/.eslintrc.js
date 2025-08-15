@@ -10,7 +10,7 @@ module.exports = {
     '**/babel.config.js',
     '**/metro.config.js',
     '**/react-native.config.js',
-    '**/tsconfig.json'
+    '**/tsconfig.json',
   ],
   plugins: ['@typescript-eslint', 'prettier'],
   parser: '@typescript-eslint/parser',
@@ -33,6 +33,12 @@ module.exports = {
         trailingComma: 'es5',
         useTabs: false,
       },
-    ]
+    ],
+    quotes: [
+      'error',
+      'single',
+      { avoidEscape: true, allowTemplateLiterals: true },
+    ],
+    '@react-native/no-deep-imports': 'off',
   },
-}
+};

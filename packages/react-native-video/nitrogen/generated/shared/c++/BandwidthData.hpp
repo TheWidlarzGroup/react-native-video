@@ -42,20 +42,18 @@ namespace margelo::nitro::video {
 
 namespace margelo::nitro {
 
-  using namespace margelo::nitro::video;
-
   // C++ BandwidthData <> JS BandwidthData (object)
   template <>
-  struct JSIConverter<BandwidthData> final {
-    static inline BandwidthData fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
+  struct JSIConverter<margelo::nitro::video::BandwidthData> final {
+    static inline margelo::nitro::video::BandwidthData fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
-      return BandwidthData(
+      return margelo::nitro::video::BandwidthData(
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, "bitrate")),
         JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, "width")),
         JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, "height"))
       );
     }
-    static inline jsi::Value toJSI(jsi::Runtime& runtime, const BandwidthData& arg) {
+    static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::video::BandwidthData& arg) {
       jsi::Object obj(runtime);
       obj.setProperty(runtime, "bitrate", JSIConverter<double>::toJSI(runtime, arg.bitrate));
       obj.setProperty(runtime, "width", JSIConverter<std::optional<double>>::toJSI(runtime, arg.width));

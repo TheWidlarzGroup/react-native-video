@@ -1,0 +1,17 @@
+{
+  "cxxNamespace": ["videodrm"],
+  "ios": {
+    "iosModuleName": "ReactNativeVideoDrm"
+  },
+  "android": {
+    "androidNamespace": ["videodrm"],
+    "androidCxxLibName": "ReactNativeVideoDrm"
+  },
+  "autolinking": {
+    "PluginManager": {
+      "swift": "PluginManager",
+      "kotlin": "PluginManager"
+    }
+  },
+  "ignorePaths": ["node_modules"]
+}

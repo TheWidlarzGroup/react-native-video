@@ -29,6 +29,7 @@ namespace margelo::nitro::video {
     // C++ constructor (called from Java via `initHybrid()`)
     explicit JHybridVideoPlayerSourceSpec(jni::alias_ref<jhybridobject> jThis) :
       HybridObject(HybridVideoPlayerSourceSpec::TAG),
+      HybridBase(jThis),
       _javaPart(jni::make_global(jThis)) {}
 
   public:

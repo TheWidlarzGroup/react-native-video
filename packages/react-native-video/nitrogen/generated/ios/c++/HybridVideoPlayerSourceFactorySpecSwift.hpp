@@ -20,6 +20,10 @@ namespace margelo::nitro::video { struct NativeVideoConfig; }
 namespace margelo::nitro::video { struct NativeExternalSubtitle; }
 // Forward declaration of `SubtitleType` to properly resolve imports.
 namespace margelo::nitro::video { enum class SubtitleType; }
+// Forward declaration of `NativeDrmParams` to properly resolve imports.
+namespace margelo::nitro::video { struct NativeDrmParams; }
+// Forward declaration of `OnGetLicensePayload` to properly resolve imports.
+namespace margelo::nitro::video { struct OnGetLicensePayload; }
 
 #include <memory>
 #include "HybridVideoPlayerSourceSpec.hpp"
@@ -29,7 +33,11 @@ namespace margelo::nitro::video { enum class SubtitleType; }
 #include <vector>
 #include <optional>
 #include "SubtitleType.hpp"
+#include "NativeDrmParams.hpp"
 #include <unordered_map>
+#include <NitroModules/Promise.hpp>
+#include "OnGetLicensePayload.hpp"
+#include <functional>
 
 #include "ReactNativeVideo-Swift-Cxx-Umbrella.hpp"
 
@@ -72,7 +80,7 @@ namespace margelo::nitro::video {
 
   public:
     // Methods
-    inline std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec> fromUri(const std::string& uri) override {
+    inline std::shared_ptr<HybridVideoPlayerSourceSpec> fromUri(const std::string& uri) override {
       auto __result = _swiftPart.fromUri(uri);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
@@ -80,7 +88,7 @@ namespace margelo::nitro::video {
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec> fromVideoConfig(const NativeVideoConfig& config) override {
+    inline std::shared_ptr<HybridVideoPlayerSourceSpec> fromVideoConfig(const NativeVideoConfig& config) override {
       auto __result = _swiftPart.fromVideoConfig(config);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());

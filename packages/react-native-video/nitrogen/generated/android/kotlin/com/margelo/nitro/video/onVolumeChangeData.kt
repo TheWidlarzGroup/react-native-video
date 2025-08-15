@@ -21,7 +21,11 @@ data class onVolumeChangeData
   @DoNotStrip
   @Keep
   constructor(
+    @DoNotStrip
+    @Keep
     val volume: Double,
+    @DoNotStrip
+    @Keep
     val muted: Boolean
   ) {
   /* main constructor */

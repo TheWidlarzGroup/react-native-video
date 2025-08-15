@@ -18,7 +18,6 @@
 #include <memory>
 #include "HybridVideoPlayerSourceSpec.hpp"
 #include "JHybridVideoPlayerSourceSpec.hpp"
-#include <NitroModules/JNISharedPtr.hpp>
 
 namespace margelo::nitro::video {
 

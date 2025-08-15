@@ -10,6 +10,7 @@ import com.margelo.nitro.video.HybridVideoPlayer
 import com.margelo.nitro.video.HybridVideoPlayerSource
 import com.video.BuildConfig
 import com.video.core.LibraryError
+import com.video.core.player.DRMManagerSpec
 import com.video.view.VideoView
 import java.lang.ref.WeakReference
 
@@ -108,14 +109,13 @@ class PluginsRegistry {
     return overriddenSource
   }
 
-  // TODO: Update type once DRM will be implemented
   /**
    * Returns the DRM manager instance from the plugins.
    *
    * @throws LibraryError.DRMPluginNotFound If no DRM manager is found.
    * @return Any
    */
-   internal fun getDRMManager(source: NativeVideoPlayerSource): Any {
+   internal fun getDRMManager(source: NativeVideoPlayerSource): DRMManagerSpec {
     for (plugin in plugins.values) {
       val manager = plugin.getDRMManager(source)
 

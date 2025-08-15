@@ -54,8 +54,8 @@ namespace margelo::nitro::video {
 
     public:
       // Methods
-      virtual std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec> fromUri(const std::string& uri) = 0;
-      virtual std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec> fromVideoConfig(const NativeVideoConfig& config) = 0;
+      virtual std::shared_ptr<HybridVideoPlayerSourceSpec> fromUri(const std::string& uri) = 0;
+      virtual std::shared_ptr<HybridVideoPlayerSourceSpec> fromVideoConfig(const NativeVideoConfig& config) = 0;
 
     protected:
       // Hybrid Setup

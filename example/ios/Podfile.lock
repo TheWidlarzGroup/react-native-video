@@ -8,7 +8,7 @@ PODS:
   - hermes-engine (0.77.2):
     - hermes-engine/Pre-built (= 0.77.2)
   - hermes-engine/Pre-built (0.77.2)
-  - NitroModules (0.27.2):
+  - NitroModules (0.28.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1565,7 +1565,7 @@ PODS:
     - React-logger (= 0.77.2)
     - React-perflogger (= 0.77.2)
     - React-utils (= 0.77.2)
-  - ReactNativeVideo (7.0.0-alpha.2):
+  - ReactNativeVideo (7.0.0-alpha.3):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1586,6 +1586,31 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
+    - Yoga
+  - ReactNativeVideoDrm (0.1.0):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - NitroModules
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-callinvoker
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeVideo
     - Yoga
   - SocketRocket (0.7.1)
   - Yoga (0.0.0)
@@ -1661,6 +1686,7 @@ DEPENDENCIES:
   - ReactCodegen (from `build/generated/ios`)
   - ReactCommon/turbomodule/core (from `../../node_modules/react-native/ReactCommon`)
   - ReactNativeVideo (from `../../node_modules/react-native-video`)
+  - "ReactNativeVideoDrm (from `../../node_modules/@twg/react-native-video-drm`)"
   - Yoga (from `../../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -1805,6 +1831,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/react-native/ReactCommon"
   ReactNativeVideo:
     :path: "../../node_modules/react-native-video"
+  ReactNativeVideoDrm:
+    :path: "../../node_modules/@twg/react-native-video-drm"
   Yoga:
     :path: "../../node_modules/react-native/ReactCommon/yoga"
 
@@ -1816,7 +1844,7 @@ SPEC CHECKSUMS:
   fmt: a40bb5bd0294ea969aaaba240a927bd33d878cdd
   glog: eb93e2f488219332457c3c4eafd2738ddc7e80b8
   hermes-engine: 8eb265241fa1d7095d3a40d51fd90f7dce68217c
-  NitroModules: 7ed5fd8f6f1e814810b9df26830b78f3355690bf
+  NitroModules: 1e4150c3e3676e05209234a8a5e0e8886fc0311a
   RCT-Folly: e78785aa9ba2ed998ea4151e314036f6c49e6d82
   RCTDeprecation: 85b72250b63cfb54f29ca96ceb108cb9ef3c2079
   RCTRequired: 567cb8f5d42b990331bfd93faad1d8999b1c1736
@@ -1876,7 +1904,8 @@ SPEC CHECKSUMS:
   ReactAppDependencyProvider: f334cebc0beed0a72490492e978007082c03d533
   ReactCodegen: 474fbb3e4bb0f1ee6c255d1955db76e13d509269
   ReactCommon: 7763e59534d58e15f8f22121cdfe319040e08888
-  ReactNativeVideo: db800650d21aab71c457ea1408c4f46e853b5886
+  ReactNativeVideo: 213235288864ce876c68a64cc1481fe8a3eae5d5
+  ReactNativeVideoDrm: 62840ae0e184f711a2e6495c18e342a74cb598f8
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: 31a098f74c16780569aebd614a0f37a907de0189
 

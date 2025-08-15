@@ -39,28 +39,26 @@ namespace margelo::nitro::video {
 
 namespace margelo::nitro {
 
-  using namespace margelo::nitro::video;
-
   // C++ ResizeMode <> JS ResizeMode (union)
   template <>
-  struct JSIConverter<ResizeMode> final {
-    static inline ResizeMode fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
+  struct JSIConverter<margelo::nitro::video::ResizeMode> final {
+    static inline margelo::nitro::video::ResizeMode fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       std::string unionValue = JSIConverter<std::string>::fromJSI(runtime, arg);
       switch (hashString(unionValue.c_str(), unionValue.size())) {
-        case hashString("contain"): return ResizeMode::CONTAIN;
-        case hashString("cover"): return ResizeMode::COVER;
-        case hashString("stretch"): return ResizeMode::STRETCH;
-        case hashString("none"): return ResizeMode::NONE;
+        case hashString("contain"): return margelo::nitro::video::ResizeMode::CONTAIN;
+        case hashString("cover"): return margelo::nitro::video::ResizeMode::COVER;
+        case hashString("stretch"): return margelo::nitro::video::ResizeMode::STRETCH;
+        case hashString("none"): return margelo::nitro::video::ResizeMode::NONE;
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert \"" + unionValue + "\" to enum ResizeMode - invalid value!");
       }
     }
-    static inline jsi::Value toJSI(jsi::Runtime& runtime, ResizeMode arg) {
+    static inline jsi::Value toJSI(jsi::Runtime& runtime, margelo::nitro::video::ResizeMode arg) {
       switch (arg) {
-        case ResizeMode::CONTAIN: return JSIConverter<std::string>::toJSI(runtime, "contain");
-        case ResizeMode::COVER: return JSIConverter<std::string>::toJSI(runtime, "cover");
-        case ResizeMode::STRETCH: return JSIConverter<std::string>::toJSI(runtime, "stretch");
-        case ResizeMode::NONE: return JSIConverter<std::string>::toJSI(runtime, "none");
+        case margelo::nitro::video::ResizeMode::CONTAIN: return JSIConverter<std::string>::toJSI(runtime, "contain");
+        case margelo::nitro::video::ResizeMode::COVER: return JSIConverter<std::string>::toJSI(runtime, "cover");
+        case margelo::nitro::video::ResizeMode::STRETCH: return JSIConverter<std::string>::toJSI(runtime, "stretch");
+        case margelo::nitro::video::ResizeMode::NONE: return JSIConverter<std::string>::toJSI(runtime, "none");
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert ResizeMode to JS - invalid value: "
                                     + std::to_string(static_cast<int>(arg)) + "!");

@@ -15,13 +15,9 @@ import com.facebook.proguard.annotations.DoNotStrip
  */
 @DoNotStrip
 @Keep
-enum class MixAudioMode {
-  MIXWITHOTHERS,
-  DONOTMIX,
-  DUCKOTHERS,
-  AUTO;
-
-  @DoNotStrip
-  @Keep
-  private val _ordinal = ordinal
+enum class MixAudioMode(@DoNotStrip @Keep val value: Int) {
+  MIXWITHOTHERS(0),
+  DONOTMIX(1),
+  DUCKOTHERS(2),
+  AUTO(3);
 }

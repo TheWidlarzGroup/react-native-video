@@ -15,13 +15,9 @@ import com.facebook.proguard.annotations.DoNotStrip
  */
 @DoNotStrip
 @Keep
-enum class VideoPlayerStatus {
-  IDLE,
-  LOADING,
-  READYTOPLAY,
-  ERROR;
-
-  @DoNotStrip
-  @Keep
-  private val _ordinal = ordinal
+enum class VideoPlayerStatus(@DoNotStrip @Keep val value: Int) {
+  IDLE(0),
+  LOADING(1),
+  READYTOPLAY(2),
+  ERROR(3);
 }

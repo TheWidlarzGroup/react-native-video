@@ -28,10 +28,14 @@ namespace margelo::nitro::video { class HybridVideoViewViewManagerSpec; }
 namespace margelo::nitro::video { enum class IgnoreSilentSwitchMode; }
 // Forward declaration of `MixAudioMode` to properly resolve imports.
 namespace margelo::nitro::video { enum class MixAudioMode; }
+// Forward declaration of `NativeDrmParams` to properly resolve imports.
+namespace margelo::nitro::video { struct NativeDrmParams; }
 // Forward declaration of `NativeExternalSubtitle` to properly resolve imports.
 namespace margelo::nitro::video { struct NativeExternalSubtitle; }
 // Forward declaration of `NativeVideoConfig` to properly resolve imports.
 namespace margelo::nitro::video { struct NativeVideoConfig; }
+// Forward declaration of `OnGetLicensePayload` to properly resolve imports.
+namespace margelo::nitro::video { struct OnGetLicensePayload; }
 // Forward declaration of `ResizeMode` to properly resolve imports.
 namespace margelo::nitro::video { enum class ResizeMode; }
 // Forward declaration of `SourceType` to properly resolve imports.
@@ -72,8 +76,10 @@ namespace margelo::nitro::video { struct onVolumeChangeData; }
 #include "HybridVideoViewViewManagerSpec.hpp"
 #include "IgnoreSilentSwitchMode.hpp"
 #include "MixAudioMode.hpp"
+#include "NativeDrmParams.hpp"
 #include "NativeExternalSubtitle.hpp"
 #include "NativeVideoConfig.hpp"
+#include "OnGetLicensePayload.hpp"
 #include "ResizeMode.hpp"
 #include "SourceType.hpp"
 #include "SubtitleType.hpp"
