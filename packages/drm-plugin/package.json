@@ -102,20 +102,10 @@
     "github": {
       "release": false
     },
-    "plugins": {
-      "@release-it/conventional-changelog": {
-        "preset": {
-          "name": "angular"
-        }
-      }
+    "hooks": {
+      "before:init": "bun typecheck && bun lint",
+      "after:bump": "bun run build && cp ../../LICENSE ./LICENSE"
     }
-  },
-  "prettier": {
-    "quoteProps": "consistent",
-    "singleQuote": true,
-    "tabWidth": 2,
-    "trailingComma": "es5",
-    "useTabs": false
   },
   "react-native-builder-bob": {
     "source": "src",
