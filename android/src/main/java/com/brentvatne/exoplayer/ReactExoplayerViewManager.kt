@@ -276,4 +276,10 @@ class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) : View
         videoView.setPictureInPictureResizeModeModifier(mode)
     }
 
+    @ReactProp(name = PROP_CONTROLS_STYLES)
+    fun setControlsStyles(videoView: ReactExoplayerView, controlsStyles: ReadableMap?) {
+        val controlsConfig = ControlsConfig.parse(controlsStyles)
+        videoView.setControlsStyles(controlsConfig)
+    }
+
 }
