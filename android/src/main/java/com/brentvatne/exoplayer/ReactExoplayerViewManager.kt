@@ -58,6 +58,7 @@ class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) : View
         private const val PROP_SHOW_NOTIFICATION_CONTROLS = "showNotificationControls"
         private const val PROP_DEBUG = "debug"
         private const val PROP_CONTROLS_STYLES = "controlsStyles"
+        private const val PROP_PICTURE_IN_PICTURE_RESIZE_MODE = "pictureInPictureResizeMode"
     }
 
     override fun getName(): String = REACT_CLASS
@@ -258,9 +259,21 @@ class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) : View
         videoView.setDebug(enableDebug)
     }
 
-    @ReactProp(name = PROP_CONTROLS_STYLES)
-    fun setControlsStyles(videoView: ReactExoplayerView, controlsStyles: ReadableMap?) {
-        val controlsConfig = ControlsConfig.parse(controlsStyles)
-        videoView.setControlsStyles(controlsConfig)
+    @ReactProp(name = PROP_PICTURE_IN_PICTURE_RESIZE_MODE)
+    fun setPictureInPictureResizeMode(videoView: ReactExoplayerView, resizeMode: String?) {
+        val mode = when (resizeMode) {
+            "none", "contain" -> ResizeMode.RESIZE_MODE_FIT
+            "cover" -> ResizeMode.RESIZE_MODE_CENTER_CROP
+            "stretch" -> ResizeMode.RESIZE_MODE_FILL
+            else -> {
+                if (resizeMode != null) {
+                    DebugLog.w(TAG, "Unsupported PiP resize mode: $resizeMode - falling back to fit")
+                }
+                ResizeMode.RESIZE_MODE_FIT
+            }
+        }
+
+        videoView.setPictureInPictureResizeModeModifier(mode)
     }
+
 }
