@@ -67,5 +67,5 @@
         "!**/*.tsbuildinfo",
         "!docs",
         "!examples"
-    ],
+    ]
 }
