@@ -15,13 +15,13 @@ import androidx.media3.common.util.Log;
 import androidx.media3.datasource.RawResourceDataSource;
 import androidx.media3.exoplayer.DefaultLoadControl;
 
+import com.brentvatne.entity.ProgramInfo;
 import com.brentvatne.entity.RelatedVideo;
 import com.brentvatne.entity.Watermark;
 import com.brentvatne.react.BuildConfig;
 import com.brentvatne.react.R;
 import com.brentvatne.util.ReadableMapUtils;
 import com.dice.shield.drm.entity.ActionToken;
-import com.diceplatform.doris.custom.ui.entity.program.ProgramInfo;
 import com.diceplatform.doris.entity.AmtSsaiProperties;
 import com.diceplatform.doris.entity.ImaCsaiProperties;
 import com.diceplatform.doris.entity.TracksPolicy;
@@ -87,13 +87,9 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
 
     // Metadata properties
     private static final String PROP_METADATA = "metadata";
-    private static final String PROP_METADATA_CHANNEL_LOGO_URL = "channelLogoUrl";
-    private static final String PROP_METADATA_DESCRIPTION = "description";
     private static final String PROP_METADATA_THUMBNAIL_URL = "thumbnailUrl";
     private static final String PROP_METADATA_DURATION = "duration";
     private static final String PROP_METADATA_TITLE = "title";
-    private static final String PROP_METADATA_TYPE = "type";
-    private static final String PROP_METADATA_EPISODE_INFO = "episodeInfo";
 
     // Theme
     private static final String PROP_THEME = "theme";
@@ -112,11 +108,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_RESIZE_MODE = "resizeMode";
     private static final String PROP_REPEAT = "repeat";
     private static final String PROP_SELECTED_AUDIO_TRACK = "selectedAudioTrack";
-    private static final String PROP_SELECTED_AUDIO_TRACK_TYPE = "type";
-    private static final String PROP_SELECTED_AUDIO_TRACK_VALUE = "value";
     private static final String PROP_SELECTED_TEXT_TRACK = "selectedTextTrack";
-    private static final String PROP_SELECTED_TEXT_TRACK_TYPE = "type";
-    private static final String PROP_SELECTED_TEXT_TRACK_VALUE = "value";
     private static final String PROP_PAUSED = "paused";
     private static final String PROP_MUTED = "muted";
     private static final String PROP_MEDIA_KEYS = "mediaKeys";
@@ -132,7 +124,6 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_PLAY_IN_BACKGROUND = "playInBackground";
     private static final String PROP_DISABLE_FOCUS = "disableFocus";
     private static final String PROP_USE_TEXTURE_VIEW = "useTextureView";
-    private static final String PROP_COLOR_PROGRESS_BAR = "colorProgressBar";
     private static final String PROP_LIVE = "live";
     private static final String PROP_EPG = "hasEpg";
     private static final String PROP_STATS = "hasStats";
@@ -146,7 +137,6 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_STATE_MIDDLE_CORE_CONTROLS = "stateMiddleCoreControls";
     private static final String PROP_STATE_PROGRESS_BAR = "stateProgressBar";
     private static final String PROP_TRANSLATIONS = "translations";
-    private static final String PROP_LABEL_FONT_NAME = "labelFontName";
     private static final String PROP_RELATED_VIDEOS = "relatedVideos";
     private static final String PROP_RELATED_VIDEOS_ITEMS = "items";
     private static final String PROP_RELATED_VIDEOS_HEAD_INDEX = "headIndex";
@@ -157,12 +147,8 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_SUBTITLE_HORIZONTAL_PADDING = "subtitleHorizontalPadding";
     private static final String PROP_LOCALE = "locale";
 
-    private static final int COMMAND_SEEK_TO_NOW = 1;
-    private static final int COMMAND_SEEK_TO_TIMESTAMP = 2;
-    private static final int COMMAND_SEEK_TO_RESUME_POSITION = 3;
     private static final int COMMAND_SEEK_TO_POSITION = 4;
     private static final int COMMAND_REPLACE_AD_TAG_PARAMETERS = 5;
-    private static final int COMMAND_LIMIT_SEEKABLE_RANGE = 6;
 
     private final ReactApplicationContext reactApplicationContext;
     private final LruCache<Integer, String> currentSrcUrls;

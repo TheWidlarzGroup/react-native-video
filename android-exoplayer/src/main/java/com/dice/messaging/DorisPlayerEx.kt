@@ -75,8 +75,10 @@ internal fun Group.filterFormatIndexed(predicate: (Int, Format) -> Boolean): Lis
 internal fun createOffTextTrack(isSelected: Boolean = true): Track = createOffTrack(TRACK_TYPE_TEXT, isSelected)
 internal fun createOffAudioTrack(isSelected: Boolean = true): Track = createOffTrack(TRACK_TYPE_AUDIO, isSelected)
 
+internal const val ID_OFF = "-999"
 internal const val OFF_TRACK_NAME = "OFF"
 internal fun createOffTrack(trackType: Int, isSelected: Boolean = true): Track = Track(
+    /* id = */ ID_OFF,
     /* trackType = */ trackType,
     /* name = */ OFF_TRACK_NAME,
     /* language = */ "",

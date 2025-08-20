@@ -1,7 +1,5 @@
 package com.brentvatne.exoplayer;
 
-import static androidx.media3.common.util.Assertions.checkNotNull;
-
 import android.content.Context;
 
 import androidx.annotation.NonNull;
@@ -11,18 +9,9 @@ import androidx.media3.exoplayer.trackselection.DefaultTrackSelector.Parameters;
 
 import com.diceplatform.doris.ExoDoris;
 import com.diceplatform.doris.ExoDorisBuilder;
-import com.diceplatform.doris.common.ad.AdGlobalSettings;
 import com.diceplatform.doris.common.ad.ui.AdChoicesClickViewRenderer;
-import com.diceplatform.doris.entity.DorisAdEvent.AdType;
+import com.diceplatform.doris.entity.AdType;
 import com.diceplatform.doris.entity.TracksPolicy;
-import com.diceplatform.doris.ext.imacsai.ExoDorisImaCsaiBuilder;
-import com.diceplatform.doris.ext.imacsailive.ExoDorisImaCsaiLiveBuilder;
-import com.diceplatform.doris.ext.imadai.ExoDorisImaDaiBuilder;
-import com.diceplatform.doris.ext.mediatailor.ssai.ExoDorisAmtSsaiBuilder;
-import com.diceplatform.doris.ext.yossai.ExoDorisYoSsaiBuilder;
-import com.diceplatform.doris.plugin.Plugin;
-
-import java.util.List;
 
 public final class ReactTVExoDorisFactory {
 
@@ -34,7 +23,6 @@ public final class ReactTVExoDorisFactory {
             long rewindIncrementMs,
             @Nullable AdViewProvider adViewProvider,
             @Nullable AdChoicesClickViewRenderer adChoicesClickViewRenderer,
-            AdGlobalSettings adGlobalSettings,
             TracksPolicy tracksPolicy) {
         return createPlayer(
                 context,
@@ -45,10 +33,8 @@ public final class ReactTVExoDorisFactory {
                 forwardIncrementMs,
                 rewindIncrementMs,
                 null,
-                null,
                 adViewProvider,
                 adChoicesClickViewRenderer,
-                adGlobalSettings,
                 tracksPolicy);
     }
 
@@ -60,42 +46,21 @@ public final class ReactTVExoDorisFactory {
             int loadBufferMs,
             long forwardIncrementMs,
             long rewindIncrementMs,
-            @Nullable List<Plugin> plugins,
             @Nullable Parameters.Builder parametersBuilder,
             @Nullable AdViewProvider adViewProvider,
             @Nullable AdChoicesClickViewRenderer adChoicesClickViewRenderer,
-            AdGlobalSettings adGlobalSettings,
             @Nullable TracksPolicy tracksPolicy) {
-        final ExoDorisBuilder builder;
-        if (adType == AdType.YO_SSAI) {
-            builder = new ExoDorisYoSsaiBuilder(context)
-                .setAdViewProvider(checkNotNull(adViewProvider))
-                .setAdChoicesClickViewRenderer(adChoicesClickViewRenderer)
-                .setAdGlobalSettings(adGlobalSettings);
-        } else if (adType == AdType.AMT_SSAI) {
-            builder = new ExoDorisAmtSsaiBuilder(context)
-                .setAdViewProvider(checkNotNull(adViewProvider))
-                .setAdChoicesClickViewRenderer(adChoicesClickViewRenderer)
-                .setAdGlobalSettings(adGlobalSettings);
-        } else if (adType == AdType.IMA_DAI) {
-            builder = new ExoDorisImaDaiBuilder(context).setAdViewProvider(checkNotNull(adViewProvider));
-        } else if (adType == AdType.IMA_CSAI_LIVE) {
-            builder = new ExoDorisImaCsaiLiveBuilder(context).setAdViewProvider(checkNotNull(adViewProvider));
-        } else if (adType == AdType.IMA_CSAI) {
-            builder = new ExoDorisImaCsaiBuilder(context).setAdViewProvider(checkNotNull(adViewProvider));
-        } else {
-            builder = new ExoDorisBuilder(context);
-        }
 
-        return builder
+        return new ExoDorisBuilder(context)
+                .setEnableManifestScte35(adType == AdType.IMA_CSAI_LIVE)
                 .setPlayWhenReady(playWhenReady)
                 .setUserAgent(userAgent)
                 .setLoadBufferMs(loadBufferMs)
                 .setForwardIncrementMs(forwardIncrementMs)
                 .setRewindIncrementMs(rewindIncrementMs)
-                .setPlugins(plugins)
                 .setParamsBuilder(parametersBuilder)
                 .setTracksPolicy(tracksPolicy)
+                .setPlayerExtensionProvider(new ReactTVExoDorisExtensionFactory(adViewProvider, adChoicesClickViewRenderer))
                 .build();
     }
 }

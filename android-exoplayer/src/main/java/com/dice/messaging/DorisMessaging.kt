@@ -20,9 +20,9 @@ import com.dice.dicemessaging.PlayerSeekInfo
 import com.dice.dicemessaging.PlayerState
 import com.dice.dicemessaging.PlayerTextTracksInfo
 import com.dice.dicemessaging.StreamType
+import com.dice.messaging.LiveEdgeUtils.isOnLiveEdge
 import com.diceplatform.doris.Constants
 import com.diceplatform.doris.ExoDoris
-import com.diceplatform.doris.custom.utils.LiveEdgeUtils.isOnLiveEdge
 import com.diceplatform.doris.entity.Source
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.MainScope

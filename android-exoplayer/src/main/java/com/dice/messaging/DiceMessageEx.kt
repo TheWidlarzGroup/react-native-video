@@ -67,6 +67,7 @@ internal fun Format.toMessagingTextTrack(src: String?) = PlayerTextTracksInfo.Te
 internal fun Format.toMediaTextTrack(selected: Boolean) = toMediaTrack(TRACK_TYPE_TEXT, selected)
 
 internal fun Format.toMediaTrack(type: Int, selected: Boolean) = Track(
+    id,
     type,
     label,
     language,
