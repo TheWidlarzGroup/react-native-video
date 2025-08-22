@@ -10,6 +10,7 @@ import React
 import RNDReactNativeDiceVideo
 
 class RNVJSOverlayBuilder: OverlayBuilderProtocol {
+
     private let bridge: RCTBridge
     
     init(bridge: RCTBridge) {
@@ -30,8 +31,8 @@ class RNVJSOverlayBuilder: OverlayBuilderProtocol {
                 height: config.height,
                 width: config.width)
     }
-    
-    func buildOverlay(from config: JSOverlayConfig?, tvxManager: TvxManagerProtocol?) -> (type: OverlayType,
+  
+  func buildOverlay(from config: RNDReactNativeDiceVideo.JSOverlayConfig?) -> (type: OverlayType,
                                                                                           button: String?,
                                                                                           setupAction: (() -> Void)?,
                                                                                           cleanupAction: (() -> Void)?) {
