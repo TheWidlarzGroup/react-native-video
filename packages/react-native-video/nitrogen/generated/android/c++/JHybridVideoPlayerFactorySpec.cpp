@@ -15,7 +15,6 @@ namespace margelo::nitro::video { class HybridVideoPlayerSourceSpec; }
 #include <memory>
 #include "HybridVideoPlayerSpec.hpp"
 #include "JHybridVideoPlayerSpec.hpp"
-#include <NitroModules/JNISharedPtr.hpp>
 #include "HybridVideoPlayerSourceSpec.hpp"
 #include "JHybridVideoPlayerSourceSpec.hpp"
 
@@ -45,10 +44,10 @@ namespace margelo::nitro::video {
   
 
   // Methods
-  std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec> JHybridVideoPlayerFactorySpec::createPlayer(const std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>& source) {
+  std::shared_ptr<HybridVideoPlayerSpec> JHybridVideoPlayerFactorySpec::createPlayer(const std::shared_ptr<HybridVideoPlayerSourceSpec>& source) {
     static const auto method = javaClassStatic()->getMethod<jni::local_ref<JHybridVideoPlayerSpec::javaobject>(jni::alias_ref<JHybridVideoPlayerSourceSpec::javaobject> /* source */)>("createPlayer");
     auto __result = method(_javaPart, std::dynamic_pointer_cast<JHybridVideoPlayerSourceSpec>(source)->getJavaPart());
-    return JNISharedPtr::make_shared_from_jni<JHybridVideoPlayerSpec>(jni::make_global(__result));
+    return __result->cthis()->shared_cast<JHybridVideoPlayerSpec>();
   }
 
 } // namespace margelo::nitro::video

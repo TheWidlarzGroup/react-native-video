@@ -32,10 +32,10 @@
 #include "JFunc_void_onVolumeChangeData.hpp"
 #include "JFunc_void_VideoPlayerStatus.hpp"
 #include "JHybridVideoPlayerSourceSpec.hpp"
+#include "JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload.hpp"
 #include "JHybridVideoPlayerSourceFactorySpec.hpp"
 #include "JHybridVideoViewViewManagerSpec.hpp"
 #include "JHybridVideoViewViewManagerFactorySpec.hpp"
-#include <NitroModules/JNISharedPtr.hpp>
 #include <NitroModules/DefaultConstructableObject.hpp>
 
 namespace margelo::nitro::video {
@@ -64,6 +64,7 @@ int initialize(JavaVM* vm) {
     margelo::nitro::video::JFunc_void_onVolumeChangeData_cxx::registerNatives();
     margelo::nitro::video::JFunc_void_VideoPlayerStatus_cxx::registerNatives();
     margelo::nitro::video::JHybridVideoPlayerSourceSpec::registerNatives();
+    margelo::nitro::video::JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload_cxx::registerNatives();
     margelo::nitro::video::JHybridVideoPlayerSourceFactorySpec::registerNatives();
     margelo::nitro::video::JHybridVideoViewViewManagerSpec::registerNatives();
     margelo::nitro::video::JHybridVideoViewViewManagerFactorySpec::registerNatives();
@@ -75,7 +76,7 @@ int initialize(JavaVM* vm) {
         static DefaultConstructableObject<JHybridVideoPlayerFactorySpec::javaobject> object("com/margelo/nitro/video/HybridVideoPlayerFactory");
         auto instance = object.create();
         auto globalRef = jni::make_global(instance);
-        return JNISharedPtr::make_shared_from_jni<JHybridVideoPlayerFactorySpec>(globalRef);
+        return globalRef->cthis()->shared();
       }
     );
     HybridObjectRegistry::registerHybridObjectConstructor(
@@ -84,7 +85,7 @@ int initialize(JavaVM* vm) {
         static DefaultConstructableObject<JHybridVideoPlayerSourceFactorySpec::javaobject> object("com/margelo/nitro/video/HybridVideoPlayerSourceFactory");
         auto instance = object.create();
         auto globalRef = jni::make_global(instance);
-        return JNISharedPtr::make_shared_from_jni<JHybridVideoPlayerSourceFactorySpec>(globalRef);
+        return globalRef->cthis()->shared();
       }
     );
     HybridObjectRegistry::registerHybridObjectConstructor(
@@ -93,7 +94,7 @@ int initialize(JavaVM* vm) {
         static DefaultConstructableObject<JHybridVideoViewViewManagerFactorySpec::javaobject> object("com/margelo/nitro/video/HybridVideoViewViewManagerFactory");
         auto instance = object.create();
         auto globalRef = jni::make_global(instance);
-        return JNISharedPtr::make_shared_from_jni<JHybridVideoViewViewManagerFactorySpec>(globalRef);
+        return globalRef->cthis()->shared();
       }
     );
   });

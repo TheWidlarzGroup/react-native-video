@@ -40,30 +40,28 @@ namespace margelo::nitro::video {
 
 namespace margelo::nitro {
 
-  using namespace margelo::nitro::video;
-
   // C++ SubtitleType <> JS SubtitleType (union)
   template <>
-  struct JSIConverter<SubtitleType> final {
-    static inline SubtitleType fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
+  struct JSIConverter<margelo::nitro::video::SubtitleType> final {
+    static inline margelo::nitro::video::SubtitleType fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       std::string unionValue = JSIConverter<std::string>::fromJSI(runtime, arg);
       switch (hashString(unionValue.c_str(), unionValue.size())) {
-        case hashString("auto"): return SubtitleType::AUTO;
-        case hashString("vtt"): return SubtitleType::VTT;
-        case hashString("srt"): return SubtitleType::SRT;
-        case hashString("ssa"): return SubtitleType::SSA;
-        case hashString("ass"): return SubtitleType::ASS;
+        case hashString("auto"): return margelo::nitro::video::SubtitleType::AUTO;
+        case hashString("vtt"): return margelo::nitro::video::SubtitleType::VTT;
+        case hashString("srt"): return margelo::nitro::video::SubtitleType::SRT;
+        case hashString("ssa"): return margelo::nitro::video::SubtitleType::SSA;
+        case hashString("ass"): return margelo::nitro::video::SubtitleType::ASS;
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert \"" + unionValue + "\" to enum SubtitleType - invalid value!");
       }
     }
-    static inline jsi::Value toJSI(jsi::Runtime& runtime, SubtitleType arg) {
+    static inline jsi::Value toJSI(jsi::Runtime& runtime, margelo::nitro::video::SubtitleType arg) {
       switch (arg) {
-        case SubtitleType::AUTO: return JSIConverter<std::string>::toJSI(runtime, "auto");
-        case SubtitleType::VTT: return JSIConverter<std::string>::toJSI(runtime, "vtt");
-        case SubtitleType::SRT: return JSIConverter<std::string>::toJSI(runtime, "srt");
-        case SubtitleType::SSA: return JSIConverter<std::string>::toJSI(runtime, "ssa");
-        case SubtitleType::ASS: return JSIConverter<std::string>::toJSI(runtime, "ass");
+        case margelo::nitro::video::SubtitleType::AUTO: return JSIConverter<std::string>::toJSI(runtime, "auto");
+        case margelo::nitro::video::SubtitleType::VTT: return JSIConverter<std::string>::toJSI(runtime, "vtt");
+        case margelo::nitro::video::SubtitleType::SRT: return JSIConverter<std::string>::toJSI(runtime, "srt");
+        case margelo::nitro::video::SubtitleType::SSA: return JSIConverter<std::string>::toJSI(runtime, "ssa");
+        case margelo::nitro::video::SubtitleType::ASS: return JSIConverter<std::string>::toJSI(runtime, "ass");
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert SubtitleType to JS - invalid value: "
                                     + std::to_string(static_cast<int>(arg)) + "!");

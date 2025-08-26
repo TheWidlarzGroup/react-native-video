@@ -19,12 +19,12 @@
 
 namespace margelo::nitro::video::bridge::swift {
 
-  // pragma MARK: std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>
-  std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec> create_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_(void* _Nonnull swiftUnsafePointer) {
+  // pragma MARK: std::shared_ptr<HybridVideoPlayerSourceSpec>
+  std::shared_ptr<HybridVideoPlayerSourceSpec> create_std__shared_ptr_HybridVideoPlayerSourceSpec_(void* _Nonnull swiftUnsafePointer) {
     ReactNativeVideo::HybridVideoPlayerSourceSpec_cxx swiftPart = ReactNativeVideo::HybridVideoPlayerSourceSpec_cxx::fromUnsafe(swiftUnsafePointer);
     return std::make_shared<margelo::nitro::video::HybridVideoPlayerSourceSpecSwift>(swiftPart);
   }
-  void* _Nonnull get_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_(std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_ cppType) {
+  void* _Nonnull get_std__shared_ptr_HybridVideoPlayerSourceSpec_(std__shared_ptr_HybridVideoPlayerSourceSpec_ cppType) {
     std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpecSwift> swiftWrapper = std::dynamic_pointer_cast<margelo::nitro::video::HybridVideoPlayerSourceSpecSwift>(cppType);
     #ifdef NITRO_DEBUG
     if (swiftWrapper == nullptr) [[unlikely]] {
@@ -35,12 +35,12 @@ namespace margelo::nitro::video::bridge::swift {
     return swiftPart.toUnsafe();
   }
   
-  // pragma MARK: std::shared_ptr<margelo::nitro::video::HybridVideoPlayerEventEmitterSpec>
-  std::shared_ptr<margelo::nitro::video::HybridVideoPlayerEventEmitterSpec> create_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerEventEmitterSpec_(void* _Nonnull swiftUnsafePointer) {
+  // pragma MARK: std::shared_ptr<HybridVideoPlayerEventEmitterSpec>
+  std::shared_ptr<HybridVideoPlayerEventEmitterSpec> create_std__shared_ptr_HybridVideoPlayerEventEmitterSpec_(void* _Nonnull swiftUnsafePointer) {
     ReactNativeVideo::HybridVideoPlayerEventEmitterSpec_cxx swiftPart = ReactNativeVideo::HybridVideoPlayerEventEmitterSpec_cxx::fromUnsafe(swiftUnsafePointer);
     return std::make_shared<margelo::nitro::video::HybridVideoPlayerEventEmitterSpecSwift>(swiftPart);
   }
-  void* _Nonnull get_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerEventEmitterSpec_(std__shared_ptr_margelo__nitro__video__HybridVideoPlayerEventEmitterSpec_ cppType) {
+  void* _Nonnull get_std__shared_ptr_HybridVideoPlayerEventEmitterSpec_(std__shared_ptr_HybridVideoPlayerEventEmitterSpec_ cppType) {
     std::shared_ptr<margelo::nitro::video::HybridVideoPlayerEventEmitterSpecSwift> swiftWrapper = std::dynamic_pointer_cast<margelo::nitro::video::HybridVideoPlayerEventEmitterSpecSwift>(cppType);
     #ifdef NITRO_DEBUG
     if (swiftWrapper == nullptr) [[unlikely]] {
@@ -67,12 +67,12 @@ namespace margelo::nitro::video::bridge::swift {
     };
   }
   
-  // pragma MARK: std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>
-  std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec> create_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSpec_(void* _Nonnull swiftUnsafePointer) {
+  // pragma MARK: std::shared_ptr<HybridVideoPlayerSpec>
+  std::shared_ptr<HybridVideoPlayerSpec> create_std__shared_ptr_HybridVideoPlayerSpec_(void* _Nonnull swiftUnsafePointer) {
     ReactNativeVideo::HybridVideoPlayerSpec_cxx swiftPart = ReactNativeVideo::HybridVideoPlayerSpec_cxx::fromUnsafe(swiftUnsafePointer);
     return std::make_shared<margelo::nitro::video::HybridVideoPlayerSpecSwift>(swiftPart);
   }
-  void* _Nonnull get_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSpec_(std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSpec_ cppType) {
+  void* _Nonnull get_std__shared_ptr_HybridVideoPlayerSpec_(std__shared_ptr_HybridVideoPlayerSpec_ cppType) {
     std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpecSwift> swiftWrapper = std::dynamic_pointer_cast<margelo::nitro::video::HybridVideoPlayerSpecSwift>(cppType);
     #ifdef NITRO_DEBUG
     if (swiftWrapper == nullptr) [[unlikely]] {
@@ -83,12 +83,12 @@ namespace margelo::nitro::video::bridge::swift {
     return swiftPart.toUnsafe();
   }
   
-  // pragma MARK: std::shared_ptr<margelo::nitro::video::HybridVideoPlayerFactorySpec>
-  std::shared_ptr<margelo::nitro::video::HybridVideoPlayerFactorySpec> create_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerFactorySpec_(void* _Nonnull swiftUnsafePointer) {
+  // pragma MARK: std::shared_ptr<HybridVideoPlayerFactorySpec>
+  std::shared_ptr<HybridVideoPlayerFactorySpec> create_std__shared_ptr_HybridVideoPlayerFactorySpec_(void* _Nonnull swiftUnsafePointer) {
     ReactNativeVideo::HybridVideoPlayerFactorySpec_cxx swiftPart = ReactNativeVideo::HybridVideoPlayerFactorySpec_cxx::fromUnsafe(swiftUnsafePointer);
     return std::make_shared<margelo::nitro::video::HybridVideoPlayerFactorySpecSwift>(swiftPart);
   }
-  void* _Nonnull get_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerFactorySpec_(std__shared_ptr_margelo__nitro__video__HybridVideoPlayerFactorySpec_ cppType) {
+  void* _Nonnull get_std__shared_ptr_HybridVideoPlayerFactorySpec_(std__shared_ptr_HybridVideoPlayerFactorySpec_ cppType) {
     std::shared_ptr<margelo::nitro::video::HybridVideoPlayerFactorySpecSwift> swiftWrapper = std::dynamic_pointer_cast<margelo::nitro::video::HybridVideoPlayerFactorySpecSwift>(cppType);
     #ifdef NITRO_DEBUG
     if (swiftWrapper == nullptr) [[unlikely]] {
@@ -195,6 +195,31 @@ namespace margelo::nitro::video::bridge::swift {
     };
   }
   
+  // pragma MARK: std::function<void(const std::string& /* result */)>
+  Func_void_std__string create_Func_void_std__string(void* _Nonnull swiftClosureWrapper) {
+    auto swiftClosure = ReactNativeVideo::Func_void_std__string::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const std::string& result) mutable -> void {
+      swiftClosure.call(result);
+    };
+  }
+  
+  // pragma MARK: std::function<std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(const OnGetLicensePayload& /* payload */)>
+  Func_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload create_Func_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload(void* _Nonnull swiftClosureWrapper) {
+    auto swiftClosure = ReactNativeVideo::Func_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const OnGetLicensePayload& payload) mutable -> std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>> {
+      auto __result = swiftClosure.call(payload);
+      return __result;
+    };
+  }
+  
+  // pragma MARK: std::function<void(const std::shared_ptr<Promise<std::string>>& /* result */)>
+  Func_void_std__shared_ptr_Promise_std__string__ create_Func_void_std__shared_ptr_Promise_std__string__(void* _Nonnull swiftClosureWrapper) {
+    auto swiftClosure = ReactNativeVideo::Func_void_std__shared_ptr_Promise_std__string__::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const std::shared_ptr<Promise<std::string>>& result) mutable -> void {
+      swiftClosure.call(result);
+    };
+  }
+  
   // pragma MARK: std::function<void(const VideoInformation& /* result */)>
   Func_void_VideoInformation create_Func_void_VideoInformation(void* _Nonnull swiftClosureWrapper) {
     auto swiftClosure = ReactNativeVideo::Func_void_VideoInformation::fromUnsafe(swiftClosureWrapper);
@@ -203,12 +228,12 @@ namespace margelo::nitro::video::bridge::swift {
     };
   }
   
-  // pragma MARK: std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceFactorySpec>
-  std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceFactorySpec> create_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceFactorySpec_(void* _Nonnull swiftUnsafePointer) {
+  // pragma MARK: std::shared_ptr<HybridVideoPlayerSourceFactorySpec>
+  std::shared_ptr<HybridVideoPlayerSourceFactorySpec> create_std__shared_ptr_HybridVideoPlayerSourceFactorySpec_(void* _Nonnull swiftUnsafePointer) {
     ReactNativeVideo::HybridVideoPlayerSourceFactorySpec_cxx swiftPart = ReactNativeVideo::HybridVideoPlayerSourceFactorySpec_cxx::fromUnsafe(swiftUnsafePointer);
     return std::make_shared<margelo::nitro::video::HybridVideoPlayerSourceFactorySpecSwift>(swiftPart);
   }
-  void* _Nonnull get_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceFactorySpec_(std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceFactorySpec_ cppType) {
+  void* _Nonnull get_std__shared_ptr_HybridVideoPlayerSourceFactorySpec_(std__shared_ptr_HybridVideoPlayerSourceFactorySpec_ cppType) {
     std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceFactorySpecSwift> swiftWrapper = std::dynamic_pointer_cast<margelo::nitro::video::HybridVideoPlayerSourceFactorySpecSwift>(cppType);
     #ifdef NITRO_DEBUG
     if (swiftWrapper == nullptr) [[unlikely]] {
@@ -219,12 +244,12 @@ namespace margelo::nitro::video::bridge::swift {
     return swiftPart.toUnsafe();
   }
   
-  // pragma MARK: std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerSpec>
-  std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerSpec> create_std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerSpec_(void* _Nonnull swiftUnsafePointer) {
+  // pragma MARK: std::shared_ptr<HybridVideoViewViewManagerSpec>
+  std::shared_ptr<HybridVideoViewViewManagerSpec> create_std__shared_ptr_HybridVideoViewViewManagerSpec_(void* _Nonnull swiftUnsafePointer) {
     ReactNativeVideo::HybridVideoViewViewManagerSpec_cxx swiftPart = ReactNativeVideo::HybridVideoViewViewManagerSpec_cxx::fromUnsafe(swiftUnsafePointer);
     return std::make_shared<margelo::nitro::video::HybridVideoViewViewManagerSpecSwift>(swiftPart);
   }
-  void* _Nonnull get_std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerSpec_(std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerSpec_ cppType) {
+  void* _Nonnull get_std__shared_ptr_HybridVideoViewViewManagerSpec_(std__shared_ptr_HybridVideoViewViewManagerSpec_ cppType) {
     std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerSpecSwift> swiftWrapper = std::dynamic_pointer_cast<margelo::nitro::video::HybridVideoViewViewManagerSpecSwift>(cppType);
     #ifdef NITRO_DEBUG
     if (swiftWrapper == nullptr) [[unlikely]] {
@@ -235,12 +260,12 @@ namespace margelo::nitro::video::bridge::swift {
     return swiftPart.toUnsafe();
   }
   
-  // pragma MARK: std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerFactorySpec>
-  std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerFactorySpec> create_std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerFactorySpec_(void* _Nonnull swiftUnsafePointer) {
+  // pragma MARK: std::shared_ptr<HybridVideoViewViewManagerFactorySpec>
+  std::shared_ptr<HybridVideoViewViewManagerFactorySpec> create_std__shared_ptr_HybridVideoViewViewManagerFactorySpec_(void* _Nonnull swiftUnsafePointer) {
     ReactNativeVideo::HybridVideoViewViewManagerFactorySpec_cxx swiftPart = ReactNativeVideo::HybridVideoViewViewManagerFactorySpec_cxx::fromUnsafe(swiftUnsafePointer);
     return std::make_shared<margelo::nitro::video::HybridVideoViewViewManagerFactorySpecSwift>(swiftPart);
   }
-  void* _Nonnull get_std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerFactorySpec_(std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerFactorySpec_ cppType) {
+  void* _Nonnull get_std__shared_ptr_HybridVideoViewViewManagerFactorySpec_(std__shared_ptr_HybridVideoViewViewManagerFactorySpec_ cppType) {
     std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerFactorySpecSwift> swiftWrapper = std::dynamic_pointer_cast<margelo::nitro::video::HybridVideoViewViewManagerFactorySpecSwift>(cppType);
     #ifdef NITRO_DEBUG
     if (swiftWrapper == nullptr) [[unlikely]] {

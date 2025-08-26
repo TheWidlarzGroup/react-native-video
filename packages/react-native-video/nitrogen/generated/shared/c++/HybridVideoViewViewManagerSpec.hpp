@@ -51,8 +51,8 @@ namespace margelo::nitro::video {
 
     public:
       // Properties
-      virtual std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>> getPlayer() = 0;
-      virtual void setPlayer(const std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>>& player) = 0;
+      virtual std::optional<std::shared_ptr<HybridVideoPlayerSpec>> getPlayer() = 0;
+      virtual void setPlayer(const std::optional<std::shared_ptr<HybridVideoPlayerSpec>>& player) = 0;
       virtual bool getControls() = 0;
       virtual void setControls(bool controls) = 0;
       virtual bool getPictureInPicture() = 0;

@@ -33,7 +33,7 @@ open class HybridVideoPlayerSourceFactorySpec_cxx {
   /**
    * Holds a weak pointer to the C++ class that wraps the Swift class.
    */
-  private var __cxxPart: bridge.std__weak_ptr_margelo__nitro__video__HybridVideoPlayerSourceFactorySpec_
+  private var __cxxPart: bridge.std__weak_ptr_HybridVideoPlayerSourceFactorySpec_
 
   /**
    * Create a new `HybridVideoPlayerSourceFactorySpec_cxx` that wraps the given `HybridVideoPlayerSourceFactorySpec`.
@@ -72,15 +72,15 @@ open class HybridVideoPlayerSourceFactorySpec_cxx {
 
   /**
    * Gets (or creates) the C++ part of this Hybrid Object.
-   * The C++ part is a `std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceFactorySpec>`.
+   * The C++ part is a `std::shared_ptr<HybridVideoPlayerSourceFactorySpec>`.
    */
-  public func getCxxPart() -> bridge.std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceFactorySpec_ {
+  public func getCxxPart() -> bridge.std__shared_ptr_HybridVideoPlayerSourceFactorySpec_ {
     let cachedCxxPart = self.__cxxPart.lock()
     if cachedCxxPart.__convertToBool() {
       return cachedCxxPart
     } else {
-      let newCxxPart = bridge.create_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceFactorySpec_(self.toUnsafe())
-      __cxxPart = bridge.weakify_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceFactorySpec_(newCxxPart)
+      let newCxxPart = bridge.create_std__shared_ptr_HybridVideoPlayerSourceFactorySpec_(self.toUnsafe())
+      __cxxPart = bridge.weakify_std__shared_ptr_HybridVideoPlayerSourceFactorySpec_(newCxxPart)
       return newCxxPart
     }
   }
@@ -110,32 +110,32 @@ open class HybridVideoPlayerSourceFactorySpec_cxx {
 
   // Methods
   @inline(__always)
-  public final func fromUri(uri: std.string) -> bridge.Result_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec__ {
+  public final func fromUri(uri: std.string) -> bridge.Result_std__shared_ptr_HybridVideoPlayerSourceSpec__ {
     do {
       let __result = try self.__implementation.fromUri(uri: String(uri))
-      let __resultCpp = { () -> bridge.std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_ in
+      let __resultCpp = { () -> bridge.std__shared_ptr_HybridVideoPlayerSourceSpec_ in
         let __cxxWrapped = __result.getCxxWrapper()
         return __cxxWrapped.getCxxPart()
       }()
-      return bridge.create_Result_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec__(__resultCpp)
+      return bridge.create_Result_std__shared_ptr_HybridVideoPlayerSourceSpec__(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec__(__exceptionPtr)
+      return bridge.create_Result_std__shared_ptr_HybridVideoPlayerSourceSpec__(__exceptionPtr)
     }
   }
   
   @inline(__always)
-  public final func fromVideoConfig(config: NativeVideoConfig) -> bridge.Result_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec__ {
+  public final func fromVideoConfig(config: NativeVideoConfig) -> bridge.Result_std__shared_ptr_HybridVideoPlayerSourceSpec__ {
     do {
       let __result = try self.__implementation.fromVideoConfig(config: config)
-      let __resultCpp = { () -> bridge.std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_ in
+      let __resultCpp = { () -> bridge.std__shared_ptr_HybridVideoPlayerSourceSpec_ in
         let __cxxWrapped = __result.getCxxWrapper()
         return __cxxWrapped.getCxxPart()
       }()
-      return bridge.create_Result_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec__(__resultCpp)
+      return bridge.create_Result_std__shared_ptr_HybridVideoPlayerSourceSpec__(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec__(__exceptionPtr)
+      return bridge.create_Result_std__shared_ptr_HybridVideoPlayerSourceSpec__(__exceptionPtr)
     }
   }
 }

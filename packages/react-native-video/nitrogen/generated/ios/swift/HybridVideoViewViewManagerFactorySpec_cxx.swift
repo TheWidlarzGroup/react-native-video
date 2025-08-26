@@ -33,7 +33,7 @@ open class HybridVideoViewViewManagerFactorySpec_cxx {
   /**
    * Holds a weak pointer to the C++ class that wraps the Swift class.
    */
-  private var __cxxPart: bridge.std__weak_ptr_margelo__nitro__video__HybridVideoViewViewManagerFactorySpec_
+  private var __cxxPart: bridge.std__weak_ptr_HybridVideoViewViewManagerFactorySpec_
 
   /**
    * Create a new `HybridVideoViewViewManagerFactorySpec_cxx` that wraps the given `HybridVideoViewViewManagerFactorySpec`.
@@ -72,15 +72,15 @@ open class HybridVideoViewViewManagerFactorySpec_cxx {
 
   /**
    * Gets (or creates) the C++ part of this Hybrid Object.
-   * The C++ part is a `std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerFactorySpec>`.
+   * The C++ part is a `std::shared_ptr<HybridVideoViewViewManagerFactorySpec>`.
    */
-  public func getCxxPart() -> bridge.std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerFactorySpec_ {
+  public func getCxxPart() -> bridge.std__shared_ptr_HybridVideoViewViewManagerFactorySpec_ {
     let cachedCxxPart = self.__cxxPart.lock()
     if cachedCxxPart.__convertToBool() {
       return cachedCxxPart
     } else {
-      let newCxxPart = bridge.create_std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerFactorySpec_(self.toUnsafe())
-      __cxxPart = bridge.weakify_std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerFactorySpec_(newCxxPart)
+      let newCxxPart = bridge.create_std__shared_ptr_HybridVideoViewViewManagerFactorySpec_(self.toUnsafe())
+      __cxxPart = bridge.weakify_std__shared_ptr_HybridVideoViewViewManagerFactorySpec_(newCxxPart)
       return newCxxPart
     }
   }
@@ -110,17 +110,17 @@ open class HybridVideoViewViewManagerFactorySpec_cxx {
 
   // Methods
   @inline(__always)
-  public final func createViewManager(nitroId: Double) -> bridge.Result_std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerSpec__ {
+  public final func createViewManager(nitroId: Double) -> bridge.Result_std__shared_ptr_HybridVideoViewViewManagerSpec__ {
     do {
       let __result = try self.__implementation.createViewManager(nitroId: nitroId)
-      let __resultCpp = { () -> bridge.std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerSpec_ in
+      let __resultCpp = { () -> bridge.std__shared_ptr_HybridVideoViewViewManagerSpec_ in
         let __cxxWrapped = __result.getCxxWrapper()
         return __cxxWrapped.getCxxPart()
       }()
-      return bridge.create_Result_std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerSpec__(__resultCpp)
+      return bridge.create_Result_std__shared_ptr_HybridVideoViewViewManagerSpec__(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerSpec__(__exceptionPtr)
+      return bridge.create_Result_std__shared_ptr_HybridVideoViewViewManagerSpec__(__exceptionPtr)
     }
   }
 }

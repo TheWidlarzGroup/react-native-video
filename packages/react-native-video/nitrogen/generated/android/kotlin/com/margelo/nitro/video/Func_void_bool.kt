@@ -15,7 +15,7 @@ import dalvik.annotation.optimization.FastNative
 
 
 /**
- * Represents the JavaScript callback `(fullscreen: boolean) => void`.
+ * Represents the JavaScript callback `(isInPictureInPicture: boolean) => void`.
  * This can be either implemented in C++ (in which case it might be a callback coming from JS),
  * or in Kotlin/Java (in which case it is a native callback).
  */
@@ -29,11 +29,11 @@ fun interface Func_void_bool: (Boolean) -> Unit {
    */
   @DoNotStrip
   @Keep
-  override fun invoke(fullscreen: Boolean): Unit
+  override fun invoke(isInPictureInPicture: Boolean): Unit
 }
 
 /**
- * Represents the JavaScript callback `(fullscreen: boolean) => void`.
+ * Represents the JavaScript callback `(isInPictureInPicture: boolean) => void`.
  * This is implemented in C++, via a `std::function<...>`.
  * The callback might be coming from JS.
  */
@@ -57,15 +57,15 @@ class Func_void_bool_cxx: Func_void_bool {
 
   @DoNotStrip
   @Keep
-  override fun invoke(fullscreen: Boolean): Unit
-    = invoke_cxx(fullscreen)
+  override fun invoke(isInPictureInPicture: Boolean): Unit
+    = invoke_cxx(isInPictureInPicture)
 
   @FastNative
-  private external fun invoke_cxx(fullscreen: Boolean): Unit
+  private external fun invoke_cxx(isInPictureInPicture: Boolean): Unit
 }
 
 /**
- * Represents the JavaScript callback `(fullscreen: boolean) => void`.
+ * Represents the JavaScript callback `(isInPictureInPicture: boolean) => void`.
  * This is implemented in Java/Kotlin, via a `(Boolean) -> Unit`.
  * The callback is always coming from native.
  */
@@ -75,7 +75,7 @@ class Func_void_bool_cxx: Func_void_bool {
 class Func_void_bool_java(private val function: (Boolean) -> Unit): Func_void_bool {
   @DoNotStrip
   @Keep
-  override fun invoke(fullscreen: Boolean): Unit {
-    return this.function(fullscreen)
+  override fun invoke(isInPictureInPicture: Boolean): Unit {
+    return this.function(isInPictureInPicture)
   }
 }

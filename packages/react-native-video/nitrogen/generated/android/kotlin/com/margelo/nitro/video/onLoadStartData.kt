@@ -21,7 +21,11 @@ data class onLoadStartData
   @DoNotStrip
   @Keep
   constructor(
+    @DoNotStrip
+    @Keep
     val sourceType: SourceType,
+    @DoNotStrip
+    @Keep
     val source: HybridVideoPlayerSourceSpec
   ) {
   /* main constructor */

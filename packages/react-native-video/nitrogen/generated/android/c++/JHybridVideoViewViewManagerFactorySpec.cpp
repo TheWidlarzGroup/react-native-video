@@ -13,7 +13,6 @@ namespace margelo::nitro::video { class HybridVideoViewViewManagerSpec; }
 #include <memory>
 #include "HybridVideoViewViewManagerSpec.hpp"
 #include "JHybridVideoViewViewManagerSpec.hpp"
-#include <NitroModules/JNISharedPtr.hpp>
 
 namespace margelo::nitro::video {
 
@@ -41,10 +40,10 @@ namespace margelo::nitro::video {
   
 
   // Methods
-  std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerSpec> JHybridVideoViewViewManagerFactorySpec::createViewManager(double nitroId) {
+  std::shared_ptr<HybridVideoViewViewManagerSpec> JHybridVideoViewViewManagerFactorySpec::createViewManager(double nitroId) {
     static const auto method = javaClassStatic()->getMethod<jni::local_ref<JHybridVideoViewViewManagerSpec::javaobject>(double /* nitroId */)>("createViewManager");
     auto __result = method(_javaPart, nitroId);
-    return JNISharedPtr::make_shared_from_jni<JHybridVideoViewViewManagerSpec>(jni::make_global(__result));
+    return __result->cthis()->shared_cast<JHybridVideoViewViewManagerSpec>();
   }
 
 } // namespace margelo::nitro::video

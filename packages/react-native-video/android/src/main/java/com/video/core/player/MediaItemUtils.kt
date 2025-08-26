@@ -9,8 +9,10 @@ import androidx.media3.common.C
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.util.UnstableApi
 import com.margelo.nitro.video.HybridVideoPlayerSource
+import com.margelo.nitro.video.NativeDrmParams
 import com.margelo.nitro.video.NativeVideoConfig
 import com.margelo.nitro.video.SubtitleType
+import com.video.core.LibraryError
 import com.video.core.SourceError
 import com.video.core.extensions.toStringExtension
 import com.video.core.plugins.PluginsRegistry
@@ -24,6 +26,12 @@ fun createMediaItemFromVideoConfig(
   val mediaItemBuilder = MediaItem.Builder()
 
   mediaItemBuilder.setUri(source.config.uri)
+
+  source.config.drm?.let { drmParams ->
+    val drmManager = source.drmManager ?: throw LibraryError.DRMPluginNotFound
+    val drmConfiguration = drmManager.getDRMConfiguration(drmParams)
+    mediaItemBuilder.setDrmConfiguration(drmConfiguration)
+  }
 
   return PluginsRegistry.shared.overrideMediaItemBuilder(
     source,

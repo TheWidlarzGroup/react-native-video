@@ -29,6 +29,7 @@ namespace margelo::nitro::video {
     // C++ constructor (called from Java via `initHybrid()`)
     explicit JHybridVideoPlayerFactorySpec(jni::alias_ref<jhybridobject> jThis) :
       HybridObject(HybridVideoPlayerFactorySpec::TAG),
+      HybridBase(jThis),
       _javaPart(jni::make_global(jThis)) {}
 
   public:
@@ -52,7 +53,7 @@ namespace margelo::nitro::video {
 
   public:
     // Methods
-    std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec> createPlayer(const std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>& source) override;
+    std::shared_ptr<HybridVideoPlayerSpec> createPlayer(const std::shared_ptr<HybridVideoPlayerSourceSpec>& source) override;
 
   private:
     friend HybridBase;

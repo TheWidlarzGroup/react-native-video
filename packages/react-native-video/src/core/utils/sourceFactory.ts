@@ -1,4 +1,4 @@
-import { Image } from 'react-native';
+import { Image, Platform } from 'react-native';
 import { NitroModules } from 'react-native-nitro-modules';
 import type {
   VideoPlayerSource,
@@ -54,6 +54,22 @@ export const createSourceFromVideoConfig = (
 ) => {
   if (config.externalSubtitles) {
     config.externalSubtitles = parseExternalSubtitles(config.externalSubtitles);
+  }
+
+  // Ensure platform-based default for DRM type if DRM is provided without a type
+  if (config.drm && config.drm.type === undefined) {
+    const defaultDrmType = Platform.select({
+      android: 'widevine',
+      ios: 'fairplay',
+      default: undefined,
+    });
+
+    if (defaultDrmType) {
+      config.drm = {
+        ...config.drm,
+        type: defaultDrmType,
+      };
+    }
   }
 
   try {

@@ -21,13 +21,29 @@ data class VideoInformation
   @DoNotStrip
   @Keep
   constructor(
+    @DoNotStrip
+    @Keep
     val bitrate: Double,
+    @DoNotStrip
+    @Keep
     val width: Double,
+    @DoNotStrip
+    @Keep
     val height: Double,
+    @DoNotStrip
+    @Keep
     val duration: Long,
+    @DoNotStrip
+    @Keep
     val fileSize: Long,
+    @DoNotStrip
+    @Keep
     val isHDR: Boolean,
+    @DoNotStrip
+    @Keep
     val isLive: Boolean,
+    @DoNotStrip
+    @Keep
     val orientation: VideoOrientation
   ) {
   /* main constructor */

@@ -1,5 +1,5 @@
 {
-  "name": "@react-native-video",
+  "name": "react-native-video-monorepo",
   "packageManager": "bun@1.1.42",
   "version": "7.0.0-alpha.3",
   "private": true,
@@ -7,41 +7,44 @@
   "author": "TheWidlarzGroup <hi@thewidlarzgroup.com> (https://github.com/TheWidlarzGroup)",
   "workspaces": [
     "packages/react-native-video",
+    "packages/drm-plugin",
     "example",
     "docs"
   ],
   "scripts": {
-    "build": "bun react-native-video build",
+    "build": "bun --filter=\"./packages/**\" run build",
+    "specs": "bun --filter=\"./packages/**\" specs",
     "lint": "bun --filter=\"**\" lint",
     "typecheck": "bun --filter=\"**\" typecheck",
     "clean": "git clean -xdf",
     "react-native-video": "bun run --cwd packages/react-native-video",
+    "drm-plugin": "bun run --cwd packages/drm-plugin",
     "example": "bun run --cwd example",
     "postinstall": "patch-package --patch-dir example/patches",
     "release:github": "release-it --preRelease alpha",
     "release": "./scripts/release.sh"
   },
   "devDependencies": {
-    "@eslint/js": "^9.10.0",
-    "@react-native/eslint-config": "^0.77.0",
     "@commitlint/config-conventional": "^17.0.2",
+    "@eslint/js": "^9.10.0",
     "@evilmartians/lefthook": "^1.5.0",
-    "commitlint": "^17.0.2",
+    "@react-native/eslint-config": "^0.77.0",
     "@release-it-plugins/workspaces": "^4.2.0",
     "@release-it/bumper": "^6.0.1",
     "@release-it/conventional-changelog": "^8.0.2",
     "@tsconfig/react-native": "^2.0.2",
     "@types/eslint__js": "^8.42.3",
     "@types/react": "^18.2.44",
+    "commitlint": "^17.0.2",
     "eslint": "^8.51.0",
     "eslint-plugin-prettier": "^5.0.1",
+    "patch-package": "^8.0.0",
     "prettier": "^3.0.3",
     "react": "18.3.1",
     "react-native": "^0.77.0",
     "release-it": "^17.10.0",
     "typescript": "^5.2.2",
-    "typescript-eslint": "^8.13.0",
-    "patch-package": "^8.0.0"
+    "typescript-eslint": "^8.13.0"
   },
   "commitlint": {
     "extends": [

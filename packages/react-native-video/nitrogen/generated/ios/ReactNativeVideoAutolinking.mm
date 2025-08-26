@@ -26,21 +26,21 @@
   HybridObjectRegistry::registerHybridObjectConstructor(
     "VideoPlayerFactory",
     []() -> std::shared_ptr<HybridObject> {
-      std::shared_ptr<margelo::nitro::video::HybridVideoPlayerFactorySpec> hybridObject = ReactNativeVideo::ReactNativeVideoAutolinking::createVideoPlayerFactory();
+      std::shared_ptr<HybridVideoPlayerFactorySpec> hybridObject = ReactNativeVideo::ReactNativeVideoAutolinking::createVideoPlayerFactory();
       return hybridObject;
     }
   );
   HybridObjectRegistry::registerHybridObjectConstructor(
     "VideoPlayerSourceFactory",
     []() -> std::shared_ptr<HybridObject> {
-      std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceFactorySpec> hybridObject = ReactNativeVideo::ReactNativeVideoAutolinking::createVideoPlayerSourceFactory();
+      std::shared_ptr<HybridVideoPlayerSourceFactorySpec> hybridObject = ReactNativeVideo::ReactNativeVideoAutolinking::createVideoPlayerSourceFactory();
       return hybridObject;
     }
   );
   HybridObjectRegistry::registerHybridObjectConstructor(
     "VideoViewViewManagerFactory",
     []() -> std::shared_ptr<HybridObject> {
-      std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerFactorySpec> hybridObject = ReactNativeVideo::ReactNativeVideoAutolinking::createVideoViewViewManagerFactory();
+      std::shared_ptr<HybridVideoViewViewManagerFactorySpec> hybridObject = ReactNativeVideo::ReactNativeVideoAutolinking::createVideoViewViewManagerFactory();
       return hybridObject;
     }
   );

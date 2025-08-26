@@ -29,6 +29,7 @@ namespace margelo::nitro::video {
     // C++ constructor (called from Java via `initHybrid()`)
     explicit JHybridVideoPlayerSpec(jni::alias_ref<jhybridobject> jThis) :
       HybridObject(HybridVideoPlayerSpec::TAG),
+      HybridBase(jThis),
       _javaPart(jni::make_global(jThis)) {}
 
   public:
@@ -48,8 +49,8 @@ namespace margelo::nitro::video {
 
   public:
     // Properties
-    std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec> getSource() override;
-    std::shared_ptr<margelo::nitro::video::HybridVideoPlayerEventEmitterSpec> getEventEmitter() override;
+    std::shared_ptr<HybridVideoPlayerSourceSpec> getSource() override;
+    std::shared_ptr<HybridVideoPlayerEventEmitterSpec> getEventEmitter() override;
     VideoPlayerStatus getStatus() override;
     double getDuration() override;
     double getVolume() override;
@@ -75,7 +76,7 @@ namespace margelo::nitro::video {
 
   public:
     // Methods
-    std::shared_ptr<Promise<void>> replaceSourceAsync(const std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>>& source) override;
+    std::shared_ptr<Promise<void>> replaceSourceAsync(const std::optional<std::shared_ptr<HybridVideoPlayerSourceSpec>>& source) override;
     std::vector<TextTrack> getAvailableTextTracks() override;
     void selectTextTrack(const std::optional<TextTrack>& textTrack) override;
     std::shared_ptr<Promise<void>> preload() override;

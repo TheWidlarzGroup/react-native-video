@@ -4,6 +4,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSource
 import androidx.media3.exoplayer.source.MediaSource
+import com.video.core.player.DRMManagerSpec
 import com.video.view.VideoView
 import java.lang.ref.WeakReference
 
@@ -64,7 +65,7 @@ interface ReactNativeVideoPluginSpec {
    *
    * @return The DRM manager instance.
    */
-  fun getDRMManager(source: NativeVideoPlayerSource): Any?
+  fun getDRMManager(source: NativeVideoPlayerSource): DRMManagerSpec?
 
 
   /**
@@ -142,7 +143,7 @@ open class ReactNativeVideoPlugin(override val name: String) : ReactNativeVideoP
     return source
   }
 
-  override fun getDRMManager(source: NativeVideoPlayerSource): Any? { return null }
+  override fun getDRMManager(source: NativeVideoPlayerSource): DRMManagerSpec? { return null }
 
   override fun getMediaDataSourceFactory(
     source: NativeVideoPlayerSource,

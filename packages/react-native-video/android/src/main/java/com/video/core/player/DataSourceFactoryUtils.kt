@@ -10,7 +10,6 @@ import com.facebook.react.bridge.ReactContext
 import com.facebook.react.modules.network.CookieJarContainer
 import com.facebook.react.modules.network.ForwardingCookieHandler
 import com.facebook.react.modules.network.OkHttpClientProvider
-import com.margelo.nitro.video.HybridVideoPlayerSource
 import com.margelo.nitro.video.HybridVideoPlayerSourceSpec
 import okhttp3.JavaNetCookieJar
 

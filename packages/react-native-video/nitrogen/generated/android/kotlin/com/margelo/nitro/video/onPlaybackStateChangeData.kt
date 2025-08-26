@@ -21,7 +21,11 @@ data class onPlaybackStateChangeData
   @DoNotStrip
   @Keep
   constructor(
+    @DoNotStrip
+    @Keep
     val isPlaying: Boolean,
+    @DoNotStrip
+    @Keep
     val isBuffering: Boolean
   ) {
   /* main constructor */

@@ -16,6 +16,11 @@ cd packages/react-native-video
 bun run release $@
 cd ../..
 
+echo "[DRM Plugin] Publishing drm plugin"
+cd packages/drm-plugin
+bun run release $@
+cd ../..
+
 echo "[React Native Video] Making Github Release"
 bun run release:github $@
 
