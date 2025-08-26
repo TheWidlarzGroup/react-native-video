@@ -9,6 +9,11 @@ class AudioSessionManager {
     private var remoteControlEventsActive = false
 
     private var isAudioSessionManagementDisabled: Bool {
+        // If no views are registered, disable audio session management
+        if videoViews.allObjects.isEmpty {
+            return true
+        }
+
         return videoViews.allObjects.contains { view in
             return view._disableAudioSessionManagement == true
         }
