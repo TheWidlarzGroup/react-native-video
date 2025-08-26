@@ -59,7 +59,7 @@ class DRMManager(val source: NativeVideoPlayerSource) : DRMManagerSpec {
   ): DrmSessionManager {
     try {
       val uuid = drmUuid ?: throw Error("DRM UUID is not set")
-      val mediaDrm = FrameworkMediaDrm.newInstance(drmUuid)
+      val mediaDrm = FrameworkMediaDrm.newInstance(uuid)
       val mediaDrmCallback = HttpMediaDrmCallback(
         drmParams.licenseUrl,
         getHttpDataSourceFactory(),
