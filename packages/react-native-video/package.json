@@ -137,7 +137,7 @@
     "type": "components",
     "jsSrcsDir": "src/spec/fabric",
     "android": {
-      "javaPackageName": "com.video.react"
+      "javaPackageName": "com.twg.video.react"
     },
     "ios": {
       "componentProvider": {

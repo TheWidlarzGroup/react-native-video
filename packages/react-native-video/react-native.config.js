@@ -11,7 +11,7 @@ module.exports = {
        * @type {import('@react-native-community/cli-types').AndroidDependencyParams}
        */
       android: {
-        packageImportPath: "import com.video.react.VideoPackage;",
+        packageImportPath: "import com.twg.video.react.VideoPackage;",
         componentDescriptors: ["RNCVideoViewComponentDescriptor"],
       },
     },
