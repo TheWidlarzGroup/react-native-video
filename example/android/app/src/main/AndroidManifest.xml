@@ -28,7 +28,7 @@
         </intent-filter>
       </activity>
       <service
-      android:name="com.video.core.services.playback.VideoPlaybackService"
+      android:name="com.twg.video.core.services.playback.VideoPlaybackService"
       android:exported="false"
       android:foregroundServiceType="mediaPlayback">
       <intent-filter>

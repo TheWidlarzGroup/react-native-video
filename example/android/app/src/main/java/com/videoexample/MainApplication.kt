@@ -1,4 +1,4 @@
-package com.videoexample
+package com.twg.videoexample
 
 import android.app.Application
 import com.facebook.react.PackageList

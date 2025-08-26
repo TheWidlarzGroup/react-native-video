@@ -2,7 +2,7 @@ package com.margelo.nitro.videodrm
   
 import com.facebook.proguard.annotations.DoNotStrip
 import com.twg.videodrm.DRMPlugin
-import com.video.core.plugins.PluginsRegistry
+import com.twg.video.core.plugins.PluginsRegistry
 
 @DoNotStrip
 class PluginManager : HybridPluginManagerSpec() {

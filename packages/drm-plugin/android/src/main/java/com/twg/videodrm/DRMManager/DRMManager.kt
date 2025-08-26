@@ -11,11 +11,11 @@ import androidx.media3.exoplayer.drm.DrmSessionManager
 import androidx.media3.exoplayer.drm.FrameworkMediaDrm
 import androidx.media3.exoplayer.drm.HttpMediaDrmCallback
 import androidx.media3.exoplayer.drm.MediaDrmCallback
-import com.video.core.player.DRMManagerSpec
+import com.twg.video.core.player.DRMManagerSpec
 import com.margelo.nitro.NitroModules
 import com.margelo.nitro.video.NativeDrmParams
-import com.video.core.player.buildHttpDataSourceFactory
-import com.video.core.plugins.NativeVideoPlayerSource
+import com.twg.video.core.player.buildHttpDataSourceFactory
+import com.twg.video.core.plugins.NativeVideoPlayerSource
 import java.util.UUID
 
 class DRMManager(val source: NativeVideoPlayerSource) : DRMManagerSpec {

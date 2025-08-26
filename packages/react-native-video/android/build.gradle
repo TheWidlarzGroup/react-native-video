@@ -97,7 +97,7 @@ ExoplayerDependenciesList.each { propertyName ->
 
 android {
   if (supportsNamespace()) {
-    namespace "com.video"
+    namespace "com.twg.video"
 
     sourceSets {
       main {
@@ -244,7 +244,7 @@ if (isNewArchitectureEnabled()) {
   react {
     jsRootDir = file("../src/spec/fabric")
     libraryName = "RNCVideoView"
-    codegenJavaPackageName = "com.video"
+    codegenJavaPackageName = "com.twg.video"
   }
 }
 
