@@ -2474,6 +2474,7 @@ public class ReactExoplayerView extends FrameLayout implements
                     rootView.getChildAt(i).setVisibility(rootViewChildrenOriginalVisibility.get(i));
                 }
                 addView(exoPlayerView, 0, layoutParams);
+                reLayoutControls();
             }
         }
     }
