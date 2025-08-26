@@ -37,7 +37,7 @@ class PluginManager : HybridPluginManagerSpec() {
 
   private fun destroyPlugin() {
     plugin?.let {
-      PluginsRegistry.shared.register(it)
+      PluginsRegistry.shared.unregister(it)
     } ?: throw Error("Plugin is not initialized!")
 
     plugin = null
