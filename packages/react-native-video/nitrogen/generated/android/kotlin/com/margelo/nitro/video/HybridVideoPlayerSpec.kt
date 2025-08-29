@@ -130,6 +130,10 @@ abstract class HybridVideoPlayerSpec: HybridObject() {
   
   @DoNotStrip
   @Keep
+  abstract fun initialize(): Promise<Unit>
+  
+  @DoNotStrip
+  @Keep
   abstract fun preload(): Promise<Unit>
   
   @DoNotStrip

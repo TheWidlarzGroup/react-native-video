@@ -177,6 +177,14 @@ namespace margelo::nitro::video {
         std::rethrow_exception(__result.error());
       }
     }
+    inline std::shared_ptr<Promise<void>> initialize() override {
+      auto __result = _swiftPart.initialize();
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
     inline std::shared_ptr<Promise<void>> preload() override {
       auto __result = _swiftPart.preload();
       if (__result.hasError()) [[unlikely]] {

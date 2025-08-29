@@ -94,6 +94,7 @@ namespace margelo::nitro::video {
       virtual std::shared_ptr<Promise<void>> replaceSourceAsync(const std::optional<std::shared_ptr<HybridVideoPlayerSourceSpec>>& source) = 0;
       virtual std::vector<TextTrack> getAvailableTextTracks() = 0;
       virtual void selectTextTrack(const std::optional<TextTrack>& textTrack) = 0;
+      virtual std::shared_ptr<Promise<void>> initialize() = 0;
       virtual std::shared_ptr<Promise<void>> preload() = 0;
       virtual void play() = 0;
       virtual void pause() = 0;

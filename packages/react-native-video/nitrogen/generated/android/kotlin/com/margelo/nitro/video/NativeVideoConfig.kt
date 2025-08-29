@@ -32,7 +32,10 @@ data class NativeVideoConfig
     val drm: NativeDrmParams?,
     @DoNotStrip
     @Keep
-    val headers: Map<String, String>?
+    val headers: Map<String, String>?,
+    @DoNotStrip
+    @Keep
+    val initializeOnCreation: Boolean?
   ) {
   /* main constructor */
 }

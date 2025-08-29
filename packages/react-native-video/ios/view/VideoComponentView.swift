@@ -14,7 +14,7 @@ import AVKit
   public weak var player: HybridVideoPlayerSpec? = nil {
     didSet {
       guard let player = player as? HybridVideoPlayer else { return }
-      configureAVPlayerViewController(with: player.playerPointer)
+      configureAVPlayerViewController(with: player.player)
     }
   }
   

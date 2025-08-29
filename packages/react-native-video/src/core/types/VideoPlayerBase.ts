@@ -4,6 +4,9 @@ import type { TextTrack } from './TextTrack';
 import type { VideoPlayerSourceBase } from './VideoPlayerSourceBase';
 import type { VideoPlayerStatus } from './VideoPlayerStatus';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import type { VideoConfig } from './VideoConfig';
+
 export interface VideoPlayerBase {
   /**
    * The source of the video.
@@ -104,6 +107,11 @@ export interface VideoPlayerBase {
    * @note To pause/resume the player, you need to use {@link play} and {@link pause} methods.
    */
   readonly isPlaying: boolean;
+
+  /**
+   * Manually initialize the player. You don't need to call this method manually, unless you set `initializeOnCreation` to false in {@link VideoConfig}
+   */
+  initialize(): Promise<void>;
 
   /**
    * Preload the video.

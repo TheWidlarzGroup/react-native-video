@@ -64,7 +64,8 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
     throw LibraryError.ApplicationContextNotFound
   }
 
-  var player: ExoPlayer? = null
+  lateinit var player: ExoPlayer
+  var loadedWithSource = false
   private var currentPlayerView: WeakReference<PlayerView>? = null
 
   var wasAutoPaused = false
@@ -100,84 +101,62 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
       field = value
     }
 
-  var playerPointer: ExoPlayer
-    get() {
-      if (player == null) {
-        runOnMainThreadSync {
-          initializePlayer()
-
-          if (player == null) {
-            throw PlayerError.NotInitialized
-          }
-
-          if (player!!.playbackState == Player.STATE_IDLE) {
-            player!!.prepare()
-          }
-        }
-      }
-
-      return player!!
-    }
-    private set(value) {
-      player = value
-    }
-
   // Player Properties
   override var currentTime: Double by mainThreadProperty(
-    get = { playerPointer.currentPosition.toDouble() / 1000.0 },
-    set = { value -> runOnMainThread { playerPointer.seekTo((value * 1000).toLong()) } }
+    get = { player.currentPosition.toDouble() / 1000.0 },
+    set = { value -> runOnMainThread { player.seekTo((value * 1000).toLong()) } }
   )
 
   // volume defined by user
   var userVolume: Double = 1.0
 
   override var volume: Double by mainThreadProperty(
-    get = { playerPointer.volume.toDouble() },
+    get = { player.volume.toDouble() },
     set = { value ->
       userVolume = value
-      playerPointer.volume = value.toFloat()
+      player.volume = value.toFloat()
     }
   )
 
   override val duration: Double by mainThreadProperty(
     get = {
-      val duration = playerPointer.duration
+      val duration = player.duration
       return@mainThreadProperty if (duration == C.TIME_UNSET) Double.NaN else duration.toDouble() / 1000.0
     }
   )
 
   override var loop: Boolean by mainThreadProperty(
     get = {
-      playerPointer.repeatMode == Player.REPEAT_MODE_ONE
+      player.repeatMode == Player.REPEAT_MODE_ONE
     },
     set = { value ->
-      playerPointer.repeatMode = if (value) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
+      player.repeatMode = if (value) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
     }
   )
 
   override var muted: Boolean by mainThreadProperty(
     get = {
-      val playerVolume = playerPointer.volume.toDouble()
+      val playerVolume = player.volume.toDouble()
       return@mainThreadProperty playerVolume == 0.0
     },
     set = { value ->
       if (value) {
         userVolume = volume
-        playerPointer.volume = 0f
+        player.volume = 0f
       } else {
-        playerPointer.volume = userVolume.toFloat()
+        player.volume = userVolume.toFloat()
       }
       eventEmitter.onVolumeChange(onVolumeChangeData(
-        volume = playerPointer.volume.toDouble(),
+        volume = player.volume.toDouble(),
         muted = muted
       ))
     }
   )
 
   override var rate: Double by mainThreadProperty(
-    get = { playerPointer.playbackParameters.speed.toDouble() },
+    get = { player.playbackParameters.speed.toDouble() },
     set = { value ->
-      playerPointer.playbackParameters = playerPointer.playbackParameters.withSpeed(value.toFloat())
+      player.playbackParameters = player.playbackParameters.withSpeed(value.toFloat())
     }
   )
 
@@ -207,7 +186,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
   override var playWhenInactive: Boolean = false
 
   override var isPlaying: Boolean by mainThreadProperty(
-    get = { player?.isPlaying == true }
+    get = { player.isPlaying == true }
   )
 
   private fun initializePlayer() {
@@ -238,15 +217,17 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
       .setEnableDecoderFallback(true)
 
     // Build the player with the LoadControl
-    playerPointer = ExoPlayer.Builder(NitroModules.applicationContext!!)
+    player = ExoPlayer.Builder(NitroModules.applicationContext!!)
       .setLoadControl(loadControl)
       .setLooper(Looper.getMainLooper())
       .setRenderersFactory(renderersFactory)
       .build()
 
-    playerPointer.addListener(playerListener)
-    playerPointer.addAnalyticsListener(analyticsListener)
-    playerPointer.setMediaSource(hybridSource.mediaSource)
+    loadedWithSource = true
+
+    player.addListener(playerListener)
+    player.addAnalyticsListener(analyticsListener)
+    player.setMediaSource(hybridSource.mediaSource)
 
     // Emit onLoadStart
     val sourceType = if (hybridSource.uri.startsWith("http")) SourceType.NETWORK else SourceType.LOCAL
@@ -255,20 +236,39 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
     startProgressUpdates()
   }
 
+  override fun initialize(): Promise<Unit> {
+    return Promise.async {
+      return@async runOnMainThreadSync {
+        initializePlayer()
+        player.prepare()
+      }
+    }
+  }
+
   constructor(source: HybridVideoPlayerSource) : this() {
     this.source = source
+
+    runOnMainThread {
+      if (source.config.initializeOnCreation == true) {
+        initializePlayer()
+        player.prepare()
+      } else {
+        player = ExoPlayer.Builder(context).build()
+      }
+    }
+
     VideoManager.registerPlayer(this)
   }
 
   override fun play() {
     runOnMainThread {
-      playerPointer.play()
+      player.play()
     }
   }
 
   override fun pause() {
     runOnMainThread {
-      playerPointer.pause()
+      player.pause()
     }
   }
 
@@ -292,10 +292,10 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
       runOnMainThreadSync {
         // Update source
         this.source = source
-        playerPointer.setMediaSource(hybridSource.mediaSource)
+        player.setMediaSource(hybridSource.mediaSource)
 
         // Prepare player
-        playerPointer.prepare()
+        player.prepare()
       }
     }
   }
@@ -303,15 +303,15 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
   override fun preload(): Promise<Unit> {
     return Promise.async {
       runOnMainThreadSync {
-        if (player == null) {
+        if (!loadedWithSource) {
           initializePlayer()
         }
 
-        if (player != null && player?.playbackState != Player.STATE_IDLE) {
+        if (player.playbackState != Player.STATE_IDLE) {
           return@runOnMainThreadSync
         }
 
-        player?.prepare()
+        player.prepare()
       }
     }
   }
@@ -323,11 +323,11 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
 
     VideoManager.unregisterPlayer(this)
     stopProgressUpdates()
+    loadedWithSource = false
     runOnMainThread {
-      player?.removeListener(playerListener)
-      player?.removeAnalyticsListener(analyticsListener)
-      player?.release() // Release player
-      player = null // Nullify the player
+      player.removeListener(playerListener)
+      player.removeAnalyticsListener(analyticsListener)
+      player.release() // Release player
 
       // Clean Listeners
       audioFocusChangedListener.removeEventEmitter()
@@ -342,7 +342,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
     VideoManager.addViewToPlayer(videoView, this)
 
     runOnMainThreadSync {
-      PlayerView.switchTargetView(playerPointer, currentPlayerView?.get(), videoView.playerView)
+      PlayerView.switchTargetView(player, currentPlayerView?.get(), videoView.playerView)
       currentPlayerView = WeakReference(videoView.playerView)
     }
   }
@@ -358,9 +358,9 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
     stopProgressUpdates() // Ensure no multiple runnables
     progressRunnable = object : Runnable {
       override fun run() {
-        if (playerPointer.playbackState != Player.STATE_IDLE && playerPointer.playbackState != Player.STATE_ENDED) {
-          val currentTimeSeconds = playerPointer.currentPosition / 1000.0
-          val bufferedDurationSeconds = playerPointer.bufferedPosition / 1000.0
+        if (player.playbackState != Player.STATE_IDLE && player.playbackState != Player.STATE_ENDED) {
+          val currentTimeSeconds = player.currentPosition / 1000.0
+          val bufferedDurationSeconds = player.bufferedPosition / 1000.0
           // bufferDuration is the time from current time that is buffered.
           val playableDurationFromNow = max(0.0, bufferedDurationSeconds - currentTimeSeconds)
 
@@ -389,7 +389,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
       totalBytesLoaded: Long,
       bitrateEstimate: Long
     ) {
-      val videoFormat = playerPointer.videoFormat
+      val videoFormat = player.videoFormat
       eventEmitter.onBandwidthUpdate(
         BandwidthData(
           bitrate = bitrateEstimate.toDouble(),
@@ -402,7 +402,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
 
   private val playerListener = object : Player.Listener {
     override fun onPlaybackStateChanged(playbackState: Int) {
-      val isPlayingUpdate = playerPointer.isPlaying
+      val isPlayingUpdate = player.isPlaying
       val isBufferingUpdate = playbackState == Player.STATE_BUFFERING
 
       eventEmitter.onPlaybackStateChange(
@@ -425,8 +425,8 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
           status = VideoPlayerStatus.READYTOPLAY
           eventEmitter.onBuffer(false)
 
-          val generalVideoFormat = playerPointer.videoFormat
-          val currentTracks = playerPointer.currentTracks
+          val generalVideoFormat = player.videoFormat
+          val currentTracks = player.currentTracks
 
           val selectedVideoTrackGroup = currentTracks.groups.find { group -> group.type == C.TRACK_TYPE_VIDEO && group.isSelected }
           val selectedVideoTrackFormat = if (selectedVideoTrackGroup != null && selectedVideoTrackGroup.length > 0) {
@@ -441,15 +441,15 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
 
           eventEmitter.onLoad(
             onLoadData(
-              currentTime = playerPointer.currentPosition / 1000.0,
-              duration = if (playerPointer.duration == C.TIME_UNSET) Double.NaN else playerPointer.duration / 1000.0,
+              currentTime = player.currentPosition / 1000.0,
+              duration = if (player.duration == C.TIME_UNSET) Double.NaN else player.duration / 1000.0,
               width = width.toDouble(),
               height = height.toDouble(),
               orientation = VideoOrientationUtils.fromWHR(width, height, rotationDegrees)
             )
           )
           // If player becomes ready and is set to play, start progress updates
-          if (playerPointer.playWhenReady) {
+          if (player.playWhenReady) {
             startProgressUpdates()
           }
 
@@ -469,14 +469,14 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
       eventEmitter.onPlaybackStateChange(
         onPlaybackStateChangeData(
           isPlaying = isPlaying,
-          isBuffering = playerPointer.playbackState == Player.STATE_BUFFERING
+          isBuffering = player.playbackState == Player.STATE_BUFFERING
         )
       )
       if (isPlaying) {
         VideoManager.setLastPlayedPlayer(this@HybridVideoPlayer)
         startProgressUpdates()
       } else {
-        if (playerPointer.playbackState == Player.STATE_ENDED || playerPointer.playbackState == Player.STATE_IDLE) {
+        if (player.playbackState == Player.STATE_ENDED || player.playbackState == Player.STATE_IDLE) {
           stopProgressUpdates()
         }
       }
@@ -497,7 +497,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
       }
       // Update progress immediately after a discontinuity if needed by your logic
        val currentTimeSeconds = newPosition.positionMs / 1000.0
-       val bufferedDurationSeconds = playerPointer.bufferedPosition / 1000.0
+       val bufferedDurationSeconds = player.bufferedPosition / 1000.0
        eventEmitter.onProgress(
          onProgressData(
            currentTime = currentTimeSeconds,
@@ -564,12 +564,12 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
   // MARK: - Text Track Management
 
   override fun getAvailableTextTracks(): Array<TextTrack> {
-    return TextTrackUtils.getAvailableTextTracks(playerPointer, source)
+    return TextTrackUtils.getAvailableTextTracks(player, source)
   }
 
   override fun selectTextTrack(textTrack: TextTrack?) {
     selectedExternalTrackIndex = TextTrackUtils.selectTextTrack(
-      player = playerPointer,
+      player = player,
       textTrack = textTrack,
       source = source,
       onTrackChange = { track -> eventEmitter.onTrackChange(track) }
@@ -577,5 +577,5 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
   }
 
   override val selectedTrack: TextTrack?
-    get() = TextTrackUtils.getSelectedTrack(playerPointer, source)
+    get() = TextTrackUtils.getSelectedTrack(player, source)
 }

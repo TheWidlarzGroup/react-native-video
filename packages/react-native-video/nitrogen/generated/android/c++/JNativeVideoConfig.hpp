@@ -54,6 +54,8 @@ namespace margelo::nitro::video {
       jni::local_ref<JNativeDrmParams> drm = this->getFieldValue(fieldDrm);
       static const auto fieldHeaders = clazz->getField<jni::JMap<jni::JString, jni::JString>>("headers");
       jni::local_ref<jni::JMap<jni::JString, jni::JString>> headers = this->getFieldValue(fieldHeaders);
+      static const auto fieldInitializeOnCreation = clazz->getField<jni::JBoolean>("initializeOnCreation");
+      jni::local_ref<jni::JBoolean> initializeOnCreation = this->getFieldValue(fieldInitializeOnCreation);
       return NativeVideoConfig(
         uri->toStdString(),
         externalSubtitles != nullptr ? std::make_optional([&]() {
@@ -74,7 +76,8 @@ namespace margelo::nitro::video {
             __map.emplace(__entry.first->toStdString(), __entry.second->toStdString());
           }
           return __map;
-        }()) : std::nullopt
+        }()) : std::nullopt,
+        initializeOnCreation != nullptr ? std::make_optional(static_cast<bool>(initializeOnCreation->value())) : std::nullopt
       );
     }
 
@@ -102,7 +105,8 @@ namespace margelo::nitro::video {
             __map->put(jni::make_jstring(__entry.first), jni::make_jstring(__entry.second));
           }
           return __map;
-        }() : nullptr
+        }() : nullptr,
+        value.initializeOnCreation.has_value() ? jni::JBoolean::valueOf(value.initializeOnCreation.value()) : nullptr
       );
     }
   };
