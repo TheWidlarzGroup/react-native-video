@@ -1565,7 +1565,7 @@ PODS:
     - React-logger (= 0.77.2)
     - React-perflogger (= 0.77.2)
     - React-utils (= 0.77.2)
-  - ReactNativeVideo (7.0.0-alpha.3):
+  - ReactNativeVideo (7.0.0-alpha.4):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1904,7 +1904,7 @@ SPEC CHECKSUMS:
   ReactAppDependencyProvider: f334cebc0beed0a72490492e978007082c03d533
   ReactCodegen: 474fbb3e4bb0f1ee6c255d1955db76e13d509269
   ReactCommon: 7763e59534d58e15f8f22121cdfe319040e08888
-  ReactNativeVideo: 213235288864ce876c68a64cc1481fe8a3eae5d5
+  ReactNativeVideo: f365bc4f1a57ab50ddb655cda2f47bc06698a53b
   ReactNativeVideoDrm: 62840ae0e184f711a2e6495c18e342a74cb598f8
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: 31a098f74c16780569aebd614a0f37a907de0189

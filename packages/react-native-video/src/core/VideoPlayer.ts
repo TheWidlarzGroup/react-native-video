@@ -185,6 +185,12 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     return this.player.isPlaying;
   }
 
+  async initialize(): Promise<void> {
+    await this.wrapPromise(this.player.initialize());
+
+    NitroModules.updateMemorySize(this.player);
+  }
+
   async preload(): Promise<void> {
     await this.wrapPromise(this.player.preload());
 

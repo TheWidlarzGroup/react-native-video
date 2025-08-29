@@ -13,7 +13,7 @@ class HybridVideoPlayerSourceFactory: HybridVideoPlayerSourceFactorySpec {
   }
   
   func fromUri(uri: String) throws -> HybridVideoPlayerSourceSpec {
-    let config = NativeVideoConfig(uri: uri, externalSubtitles: nil, drm: nil, headers: nil)
+    let config = NativeVideoConfig(uri: uri, externalSubtitles: nil, drm: nil, headers: nil, initializeOnCreation: true)
     return try HybridVideoPlayerSource(config: config)
   }
 }
