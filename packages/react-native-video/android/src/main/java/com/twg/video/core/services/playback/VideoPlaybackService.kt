@@ -60,7 +60,7 @@ class VideoPlaybackService : MediaSessionService() {
     }
     sourceActivity = from
 
-    val mediaSession = MediaSession.Builder(this, player.playerPointer)
+    val mediaSession = MediaSession.Builder(this, player.player)
       .setId("RNVideoPlaybackService_" + player.hashCode())
       .setCallback(VideoPlaybackCallback())
       .setCustomLayout(immutableListOf(seekBackwardBtn, seekForwardBtn))
@@ -75,7 +75,7 @@ class VideoPlaybackService : MediaSessionService() {
   }
 
   fun unregisterPlayer(player: HybridVideoPlayer) {
-    hidePlayerNotification(player.playerPointer)
+    hidePlayerNotification(player.player)
     val session = mediaSessionsList.remove(player)
     session?.release()
     if (mediaSessionsList.isEmpty()) {

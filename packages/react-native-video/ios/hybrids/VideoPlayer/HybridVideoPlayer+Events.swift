@@ -44,7 +44,7 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
   
   func onPlaybackLikelyToKeepUp() {
     isCurrentlyBuffering = false
-    if playerPointer.timeControlStatus == .playing {
+    if player.timeControlStatus == .playing {
       status = .readytoplay
     }
     updateAndEmitPlaybackState()
@@ -55,7 +55,7 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
   }
   
   func onTimeControlStatusChanged(status: AVPlayer.TimeControlStatus) {
-    if playerPointer.status == .failed || playerItem?.status == .failed {
+    if player.status == .failed || playerItem?.status == .failed {
       self.status = .error
       isCurrentlyBuffering = false
       eventEmitter.onPlaybackStateChange(.init(isPlaying: false, isBuffering: false))
@@ -175,7 +175,7 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
   }
   
   func updateAndEmitPlaybackState() {
-    let isPlaying = (player?.rate ?? 0) > 0 && !isCurrentlyBuffering
+    let isPlaying = player.rate > 0 && !isCurrentlyBuffering
     
     eventEmitter.onPlaybackStateChange(.init(isPlaying: isPlaying, isBuffering: isCurrentlyBuffering))
     eventEmitter.onBuffer(isCurrentlyBuffering)

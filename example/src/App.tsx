@@ -134,11 +134,13 @@ const VideoDemo = () => {
   useEvent(player, 'onVolumeChange', handleVolumeChange);
 
   React.useEffect(() => {
-    if (!settings.show) return;
-
     player.volume = settings.volume;
     player.muted = settings.muted;
-    player.rate = settings.rate;
+
+    if (player.isPlaying) {
+      player.rate = settings.rate;
+    }
+
     player.loop = settings.loop;
     player.playInBackground = settings.playInBackground;
     player.playWhenInactive = settings.playWhenInactive;
@@ -179,18 +181,14 @@ const VideoDemo = () => {
           <Slider
             style={styles.progressSlider}
             minimumValue={0}
-            maximumValue={
-              settings.show ? (isNaN(player.duration) ? 1 : player.duration) : 0
-            }
+            maximumValue={isNaN(player.duration) ? 1 : player.duration}
             value={progress}
             onSlidingComplete={handleSeek}
             minimumTrackTintColor="#007aff"
             maximumTrackTintColor="#e1e1e1"
             thumbTintColor="#007aff"
           />
-          <Text style={styles.timeText}>
-            {formatTime(settings.show ? player.duration : 0)}
-          </Text>
+          <Text style={styles.timeText}>{formatTime(player.duration)}</Text>
         </View>
       </View>
 

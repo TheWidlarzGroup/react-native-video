@@ -126,7 +126,7 @@ class VideoManager {
   
   private func updateAudioSessionConfiguration() {
     let isAnyPlayerPlaying = players.allObjects.contains { hybridPlayer in
-      hybridPlayer.player?.isMuted == false && hybridPlayer.player?.rate != 0
+      hybridPlayer.player.isMuted == false && hybridPlayer.player.rate != 0
     }
     
     let anyPlayerNeedsNotMixWithOthers = players.allObjects.contains { player in
@@ -230,9 +230,9 @@ class VideoManager {
       if backgroundPlayback {
         players.allObjects.forEach { player in
           if player.playInBackground {
-            player.player?.audiovisualBackgroundPlaybackPolicy = .continuesIfPossible
+            player.player.audiovisualBackgroundPlaybackPolicy = .continuesIfPossible
           } else {
-            player.player?.audiovisualBackgroundPlaybackPolicy = .pauses
+            player.player.audiovisualBackgroundPlaybackPolicy = .pauses
           }
         }
       }
@@ -261,7 +261,7 @@ class VideoManager {
   
   func determineAudioMixingMode() -> MixAudioMode {
     let activePlayers = players.allObjects.filter { player in
-      player.isPlaying && player.player?.isMuted != true
+      player.isPlaying && player.player.isMuted != true
     }
     
     if activePlayers.isEmpty {
@@ -351,7 +351,7 @@ class VideoManager {
   @objc func applicationWillResignActive(notification: Notification) {
     // Pause all players when the app is about to become inactive
     for player in players.allObjects {
-      if player.playInBackground || player.playWhenInactive || !player.isPlaying || player.player?.isExternalPlaybackActive == true {
+      if player.playInBackground || player.playWhenInactive || !player.isPlaying || player.player.isExternalPlaybackActive == true {
         continue
       }
       
@@ -373,7 +373,7 @@ class VideoManager {
   @objc func applicationDidEnterBackground(notification: Notification) {
     // Pause all players when the app enters background
     for player in players.allObjects {
-      if player.playInBackground || player.player?.isExternalPlaybackActive == true || !player.isPlaying {
+      if player.playInBackground || player.player.isExternalPlaybackActive == true || !player.isPlaying {
         continue
       }
       

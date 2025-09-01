@@ -9,7 +9,7 @@ The `VideoPlayer` class is the primary way to control video playback. It provide
 
 ## Initialization
 
-To use the `VideoPlayer`, you first need to create an instance of it with a video source. There are two ways to do this:
+To use the `VideoPlayer`, you first need to create an instance of it with a video source. There are two ways to do this. By default the native media item is initialized asynchronously right after creation (unless you opt out with `initializeOnCreation: false`).
 
 using `useVideoPlayer` hook
 ```tsx
@@ -60,7 +60,8 @@ The `VideoPlayer` class offers a comprehensive set of methods and properties to 
 | `seekBy(time: number)` | Seeks the video forward or backward by the specified number of seconds. |
 | `seekTo(time: number)` | Seeks the video to a specific time in seconds. |
 | `replaceSourceAsync(source: VideoSource \| VideoConfig \| null)` | Replaces the current video source with a new one. Pass `null` to release the current source without replacing it. |
-| `preload()` | Preloads the video content without starting playback. This can help improve the startup time when `play()` is called. |
+| `initialize()` | Manually initialize the underlying native player item when `initializeOnCreation` was set to `false`. No-op if already initialized. |
+| `preload()` | Ensures the media source is set and prepared (buffering started) without starting playback. If not yet initialized it will initialize first. |
 | `release()` | Releases the player's native resources. The player is no longer usable after calling this method. **Note:** If you intend to reuse the player instance with a different source, use `replaceSourceAsync(null)` to clear resources instead of `release()`. |
 
 ### Properties
@@ -69,7 +70,7 @@ The `VideoPlayer` class offers a comprehensive set of methods and properties to 
 |----------|--------|------|-------------|
 | `source` | Read-only | `VideoPlayerSource` | Gets the current `VideoPlayerSource` object. |
 | `status` | Read-only | `VideoPlayerStatus` | Gets the current status (e.g., `playing`, `paused`, `buffering`). |
-| `duration` | Read-only | `number` | Gets the total duration of the video in seconds. |
+| `duration` | Read-only | `number` | Gets the total duration of the video in seconds. Returns `NaN` until metadata is loaded. |
 | `volume` | Read/Write | `number` | Gets or sets the player volume (0.0 to 1.0). |
 | `currentTime` | Read/Write | `number` | Gets or sets the current playback time in seconds. |
 | `muted` | Read/Write | `boolean` | Gets or sets whether the video is muted. |
@@ -95,3 +96,4 @@ Protected content is supported via a plugin. See the full DRM guide: [DRM](./drm
 Quick notes:
 - Install and enable the official plugin `@twg/react-native-video-drm` and call `enable()` at app startup before creating players.
 - Pass DRM configuration on the source using the `drm` property of `VideoConfig` (see the DRM guide for platform specifics and `getLicense` examples).
+- If you defer initialization (`initializeOnCreation: false`), be sure to call `await player.initialize()` (or `preload()`) before expecting DRM license acquisition events.

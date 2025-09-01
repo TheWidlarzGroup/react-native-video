@@ -72,6 +72,11 @@ export const createSourceFromVideoConfig = (
     }
   }
 
+  // Set default value for initializeOnCreation (true)
+  if (config.initializeOnCreation === undefined) {
+    config.initializeOnCreation = true;
+  }
+
   try {
     return VideoPlayerSourceFactory.fromVideoConfig(
       config as NativeVideoConfig

@@ -74,6 +74,10 @@ Additionally, the `VideoPlayer` instance itself has an `onError` property:
 
 This hook is recommended for managing event subscriptions in a declarative React style. 
 
+### Initialization Timing and Events
+
+`onLoadStart` / `onLoad` will fire automatically after construction when `initializeOnCreation` (default `true`) is enabled. If you set `initializeOnCreation: false`, these events will not fire until you call `initialize()` or `preload()`. Attach your event handlers before invoking those methods to avoid missing early events.
+
 ## Subscribing to Events
 
 You can subscribe to an event by assigning a function to the player instance's corresponding property:
