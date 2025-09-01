@@ -1,6 +1,5 @@
 package com.margelo.nitro.video
 
-import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -11,7 +10,6 @@ import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
 import androidx.media3.common.Tracks
 import androidx.media3.common.text.CueGroup
-import androidx.media3.common.TrackSelectionOverride
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.DefaultRenderersFactory
@@ -28,9 +26,13 @@ import com.margelo.nitro.core.Promise
 import com.twg.video.core.LibraryError
 import com.twg.video.core.PlayerError
 import com.twg.video.core.VideoManager
+import com.twg.video.core.extensions.startService
+import com.twg.video.core.extensions.stopService
 import com.twg.video.core.player.OnAudioFocusChangedListener
 import com.twg.video.core.recivers.AudioBecomingNoisyReceiver
 import com.twg.video.core.services.playback.VideoPlaybackService
+import com.twg.video.core.services.playback.VideoPlaybackServiceConnection
+import com.twg.video.core.utils.TextTrackUtils
 import com.twg.video.core.utils.Threading.mainThreadProperty
 import com.twg.video.core.utils.Threading.runOnMainThread
 import com.twg.video.core.utils.Threading.runOnMainThreadSync
@@ -38,10 +40,6 @@ import com.twg.video.core.utils.VideoOrientationUtils
 import com.twg.video.view.VideoView
 import java.lang.ref.WeakReference
 import kotlin.math.max
-import com.twg.video.core.extensions.startService
-import com.twg.video.core.extensions.stopService
-import com.twg.video.core.services.playback.VideoPlaybackServiceConnection
-import com.twg.video.core.utils.TextTrackUtils
 
 @UnstableApi
 @DoNotStrip
@@ -57,9 +55,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
     }
 
   private var allocator: DefaultAllocator? = null
-  private var context: Context = NitroModules.applicationContext
-    ?.currentActivity
-    ?.applicationContext
+  private var context = NitroModules.applicationContext
     ?: run {
     throw LibraryError.ApplicationContextNotFound
   }
@@ -195,7 +191,6 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
     }
 
     val hybridSource = source as? HybridVideoPlayerSource ?: throw PlayerError.InvalidSource
-    val appContext = NitroModules.applicationContext!!
 
     // Initialize the allocator
     allocator = DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE)
@@ -212,12 +207,12 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
       )
       .build()
 
-    val renderersFactory = DefaultRenderersFactory(appContext)
+    val renderersFactory = DefaultRenderersFactory(context)
       .forceEnableMediaCodecAsynchronousQueueing()
       .setEnableDecoderFallback(true)
 
     // Build the player with the LoadControl
-    player = ExoPlayer.Builder(NitroModules.applicationContext!!)
+    player = ExoPlayer.Builder(context)
       .setLoadControl(loadControl)
       .setLooper(Looper.getMainLooper())
       .setRenderersFactory(renderersFactory)

@@ -221,9 +221,9 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     player.pause()
   }
 
-  func seekBy(time: Double) {
+  func seekBy(time: Double) throws {
     guard let currentItem = player.currentItem else {
-      return
+      throw PlayerError.notInitialized.error()
     }
 
     let currentItemTime = currentItem.currentTime()
@@ -354,9 +354,9 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     return tracks
   }
 
-  func selectTextTrack(textTrack: TextTrack?) {
+  func selectTextTrack(textTrack: TextTrack?) throws {
     guard let currentItem = player.currentItem else {
-      return
+      throw PlayerError.notInitialized.error()
     }
 
     guard
@@ -367,6 +367,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       return
     }
 
+    // If textTrack is nil, deselect any selected track
     guard let textTrack = textTrack else {
       currentItem.select(nil, in: mediaSelection)
       selectedExternalTrackIndex = nil
@@ -374,6 +375,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       return
     }
 
+    // If textTrack id is empty, deselect any selected track
     if textTrack.id.isEmpty {
       currentItem.select(nil, in: mediaSelection)
       selectedExternalTrackIndex = nil
