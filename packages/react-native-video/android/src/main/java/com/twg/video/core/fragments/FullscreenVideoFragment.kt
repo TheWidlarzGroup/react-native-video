@@ -56,6 +56,14 @@ class FullscreenVideoFragment(private val videoView: VideoView) : Fragment() {
     return this.container
   }
 
+  override fun onResume() {
+    super.onResume()
+
+    // System UI is re-enabled when user have exited app and go back
+    // We need to hide it again
+    hideSystemUI()
+  }
+
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
