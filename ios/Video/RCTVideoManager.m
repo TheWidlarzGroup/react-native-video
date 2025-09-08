@@ -63,6 +63,7 @@ RCT_EXPORT_VIEW_PROPERTY(onEpgIconClick, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onAnnotationsButtonClick, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onSubtitleTrackChanged, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onAudioTrackChanged, RCTBubblingEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(onSkipMarkerButton, RCTBubblingEventBlock);
 
 RCT_EXTERN_METHOD(seekToPosition:(nonnull NSNumber *)node position:(double)position)
 RCT_EXTERN_METHOD(replaceAdTagParameters:(nonnull NSNumber *)node payload:(NSDictionary)payload)

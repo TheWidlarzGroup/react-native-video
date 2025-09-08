@@ -125,6 +125,10 @@ export default class Video extends React.PureComponent<IVideoPlayer, IState> {
     this.props.onWatchlistButtonClick?.(event.nativeEvent);
   };
 
+  onSkipMarkerButton = (event) => {
+    this.props.onSkipMarkerButton?.(event.nativeEvent);
+  };
+
   replaceAdTagParameters = (payload: IVideoReplaceAdTagParametersPayload) => {
     let command = 'replaceAdTagParameters';
 
@@ -198,6 +202,7 @@ export default class Video extends React.PureComponent<IVideoPlayer, IState> {
       onWatchlistButtonClick: this.onWatchlistButtonClick,
       onReloadCurrentSource: this.onReloadCurrentSource,
       onBehindLiveWindowError: this.onBehindLiveWindowError,
+      onSkipMarkerButton: this.onSkipMarkerButton,
     };
   };
 

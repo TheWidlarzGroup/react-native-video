@@ -26,4 +26,5 @@ export interface IVideoPlayerCallbacks {
   onBehindLiveWindowError?: (e: any) => void;
   onAudioTrackChanged?: ({ language } : { language: string }) => void;
   onSubtitleTrackChanged?: ({ language } : { language: string }) => void;
+  onSkipMarkerButton?: (e: any) => void;
 }
