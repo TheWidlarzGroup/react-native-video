@@ -2476,6 +2476,12 @@ public class ReactExoplayerView extends FrameLayout implements
                 }
                 addView(exoPlayerView, 0, layoutParams);
             }
+            if (exoPlayerView != null) {
+                exoPlayerView.post(() -> {
+                    exoPlayerView.requestLayout();
+                    reLayout(exoPlayerView);
+                });
+            }
         }
     }
 
