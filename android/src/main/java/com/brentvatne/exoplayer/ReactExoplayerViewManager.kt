@@ -281,5 +281,4 @@ class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) : View
         val controlsConfig = ControlsConfig.parse(controlsStyles)
         videoView.setControlsStyles(controlsConfig)
     }
-
 }
