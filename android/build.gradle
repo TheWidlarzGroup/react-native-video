@@ -142,6 +142,11 @@ android {
         buildConfigField "boolean", "USE_EXOPLAYER_DASH", ExoplayerDependencies["useExoplayerDash"].toString()
         buildConfigField "boolean", "USE_EXOPLAYER_HLS", ExoplayerDependencies["useExoplayerHls"].toString()
         buildConfigField "boolean", "USE_EXOPLAYER_RTSP", ExoplayerDependencies["useExoplayerRtsp"].toString()
+        externalNativeBuild {
+            cmake {
+                arguments "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
+            }
+        }
 
         ndk {
             abiFilters(*reactNativeArchitectures())
