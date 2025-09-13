@@ -89,6 +89,57 @@ The `VideoPlayer` class offers a comprehensive set of methods and properties to 
 |----------|------|-------------|
 | `onError?` | `(error: VideoRuntimeError) => void` | A callback function that is invoked when a runtime error occurs in the player. You can use this to catch and handle errors gracefully. |
 
+### Buffer Config
+
+You can fine‑tune buffering via `bufferConfig` on the `VideoConfig` you pass to `useVideoPlayer`/`VideoPlayer`. This controls how much data is buffered, live latency targets, and iOS network constraints.
+
+Example
+
+```ts
+const player = useVideoPlayer({
+  source: {
+    uri: 'https://example.com/stream.m3u8',
+    bufferConfig: {
+      // Android
+      minBufferMs: 5000,
+      maxBufferMs: 10000,
+      // iOS
+      preferredForwardBufferDurationMs: 3000,
+      // Live (cross‑platform target)
+      livePlayback: { targetOffsetMs: 500 },
+    },
+  },
+});
+```
+
+#### Android
+Properties below are Android‑only
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `minBufferMs` | `number` | Minimum media duration the player attempts to keep buffered (ms). Default: 5000. |
+| `maxBufferMs` | `number` | Maximum media duration the player attempts to buffer (ms). Default: 10000. |
+| `bufferForPlaybackMs` | `number` | Media that must be buffered before playback can start or resume after user action (ms). Default: 1000. |
+| `bufferForPlaybackAfterRebufferMs` | `number` | Media that must be buffered to resume after a rebuffer (ms). Default: 2000. |
+| `backBufferDurationMs` | `number` | Duration kept behind the current position to allow instant rewind without rebuffer (ms). |
+| `livePlayback.minPlaybackSpeed` | `number` | Minimum playback speed used to maintain target live offset. |
+| `livePlayback.maxPlaybackSpeed` | `number` | Maximum playback speed used to catch up to target live offset. |
+| `livePlayback.minOffsetMs` | `number` | Minimum allowed live offset (ms). |
+| `livePlayback.maxOffsetMs` | `number` | Maximum allowed live offset (ms). |
+| `livePlayback.targetOffsetMs` | `number` | Target live offset the player tries to maintain (ms). |
+
+#### iOS, visionOS, tvOS
+Properties below are Apple platforms‑only
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `preferredForwardBufferDurationMs` | `number` | Preferred duration the player attempts to retain ahead of the playhead (ms). |
+| `preferredPeakBitRate` | `number` | Desired limit of network bandwidth for loading the current item (bits per second). |
+| `preferredMaximumResolution` | `{ width: number; height: number }` | Preferred maximum video resolution. |
+| `preferredPeakBitRateForExpensiveNetworks` | `number` | Bandwidth limit for expensive networks (e.g., cellular), in bits per second. |
+| `preferredMaximumResolutionForExpensiveNetworks` | `{ width: number; height: number }` | Preferred maximum resolution on expensive networks. |
+| `livePlayback.targetOffsetMs` | `number` | Target live offset (ms) the player will try to maintain. |
+
 ## DRM
 
 Protected content is supported via a plugin. See the full DRM guide: [DRM](./drm.md).
