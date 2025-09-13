@@ -51,23 +51,23 @@ export interface BufferConfig {
    * @platform android
    */
   maxBufferMs?: number;
-  /** Duration (ms) of media that must be buffered for playback to start or resume following a user action such as a seek.
+  /**
+   * Duration (ms) of media that must be buffered for playback to start or resume following a user action such as a seek.
    * @default 1000
    * @platform android
    */
   bufferForPlaybackMs?: number;
-  /** Duration (ms) of media that must be buffered for playback to resume after a rebuffer.
+  /**
+   * Duration (ms) of media that must be buffered for playback to resume after a rebuffer.
    * @default 2000
    * @platform android
    */
   bufferForPlaybackAfterRebufferMs?: number;
-  /** Duration (ms) of media that must be buffered before it can be played from the back buffer.
+  /**
+   * Duration (ms) of media that must be buffered before it can be played from the back buffer.
    * @platform android
    */
   backBufferDurationMs?: number;
-  /** The preferred duration (ms) of media that the player will attempt to retain in the buffer.
-   * @platform ios, visionOS, tvOS
-   */
 
   // -------- iOS specific options --------
 
