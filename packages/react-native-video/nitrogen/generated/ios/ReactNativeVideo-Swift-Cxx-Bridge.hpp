@@ -10,6 +10,8 @@
 // Forward declarations of C++ defined types
 // Forward declaration of `BandwidthData` to properly resolve imports.
 namespace margelo::nitro::video { struct BandwidthData; }
+// Forward declaration of `BufferConfig` to properly resolve imports.
+namespace margelo::nitro::video { struct BufferConfig; }
 // Forward declaration of `HybridVideoPlayerEventEmitterSpec` to properly resolve imports.
 namespace margelo::nitro::video { class HybridVideoPlayerEventEmitterSpec; }
 // Forward declaration of `HybridVideoPlayerFactorySpec` to properly resolve imports.
@@ -24,12 +26,16 @@ namespace margelo::nitro::video { class HybridVideoPlayerSpec; }
 namespace margelo::nitro::video { class HybridVideoViewViewManagerFactorySpec; }
 // Forward declaration of `HybridVideoViewViewManagerSpec` to properly resolve imports.
 namespace margelo::nitro::video { class HybridVideoViewViewManagerSpec; }
+// Forward declaration of `LivePlaybackParams` to properly resolve imports.
+namespace margelo::nitro::video { struct LivePlaybackParams; }
 // Forward declaration of `NativeDrmParams` to properly resolve imports.
 namespace margelo::nitro::video { struct NativeDrmParams; }
 // Forward declaration of `NativeExternalSubtitle` to properly resolve imports.
 namespace margelo::nitro::video { struct NativeExternalSubtitle; }
 // Forward declaration of `OnGetLicensePayload` to properly resolve imports.
 namespace margelo::nitro::video { struct OnGetLicensePayload; }
+// Forward declaration of `Resolution` to properly resolve imports.
+namespace margelo::nitro::video { struct Resolution; }
 // Forward declaration of `SourceType` to properly resolve imports.
 namespace margelo::nitro::video { enum class SourceType; }
 // Forward declaration of `SubtitleType` to properly resolve imports.
@@ -75,6 +81,7 @@ namespace ReactNativeVideo { class HybridVideoViewViewManagerSpec_cxx; }
 
 // Include C++ defined types
 #include "BandwidthData.hpp"
+#include "BufferConfig.hpp"
 #include "HybridVideoPlayerEventEmitterSpec.hpp"
 #include "HybridVideoPlayerFactorySpec.hpp"
 #include "HybridVideoPlayerSourceFactorySpec.hpp"
@@ -82,9 +89,11 @@ namespace ReactNativeVideo { class HybridVideoViewViewManagerSpec_cxx; }
 #include "HybridVideoPlayerSpec.hpp"
 #include "HybridVideoViewViewManagerFactorySpec.hpp"
 #include "HybridVideoViewViewManagerSpec.hpp"
+#include "LivePlaybackParams.hpp"
 #include "NativeDrmParams.hpp"
 #include "NativeExternalSubtitle.hpp"
 #include "OnGetLicensePayload.hpp"
+#include "Resolution.hpp"
 #include "SourceType.hpp"
 #include "SubtitleType.hpp"
 #include "TextTrack.hpp"
@@ -758,6 +767,33 @@ namespace margelo::nitro::video::bridge::swift {
   using std__optional_NativeDrmParams_ = std::optional<NativeDrmParams>;
   inline std::optional<NativeDrmParams> create_std__optional_NativeDrmParams_(const NativeDrmParams& value) {
     return std::optional<NativeDrmParams>(value);
+  }
+  
+  // pragma MARK: std::optional<LivePlaybackParams>
+  /**
+   * Specialized version of `std::optional<LivePlaybackParams>`.
+   */
+  using std__optional_LivePlaybackParams_ = std::optional<LivePlaybackParams>;
+  inline std::optional<LivePlaybackParams> create_std__optional_LivePlaybackParams_(const LivePlaybackParams& value) {
+    return std::optional<LivePlaybackParams>(value);
+  }
+  
+  // pragma MARK: std::optional<Resolution>
+  /**
+   * Specialized version of `std::optional<Resolution>`.
+   */
+  using std__optional_Resolution_ = std::optional<Resolution>;
+  inline std::optional<Resolution> create_std__optional_Resolution_(const Resolution& value) {
+    return std::optional<Resolution>(value);
+  }
+  
+  // pragma MARK: std::optional<BufferConfig>
+  /**
+   * Specialized version of `std::optional<BufferConfig>`.
+   */
+  using std__optional_BufferConfig_ = std::optional<BufferConfig>;
+  inline std::optional<BufferConfig> create_std__optional_BufferConfig_(const BufferConfig& value) {
+    return std::optional<BufferConfig>(value);
   }
   
   // pragma MARK: std::shared_ptr<Promise<VideoInformation>>

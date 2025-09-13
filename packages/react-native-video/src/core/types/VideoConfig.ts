@@ -1,3 +1,4 @@
+import type { BufferConfig } from './BufferConfig';
 import type { DrmParams } from './DrmParams';
 
 export type VideoSource = number | string;
@@ -21,6 +22,10 @@ export type VideoConfig = {
    * The DRM parameters to be used.
    */
   drm?: DrmParams;
+  /**
+   * The player buffer configuration.
+   */
+  bufferConfig?: BufferConfig;
   /**
    * The external subtitles to be used.
    * @note on iOS, only WebVTT (.vtt) subtitles are supported (for HLS streams and MP4 files).

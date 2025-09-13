@@ -66,6 +66,10 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
 
   var wasAutoPaused = false
 
+  // Buffer Config
+  private var bufferConfig: BufferConfig? = null
+    get() = source.config.bufferConfig
+
   // Time updates
   private val progressHandler = Handler(Looper.getMainLooper())
   private var progressRunnable: Runnable? = null
@@ -83,10 +87,11 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
   private companion object {
     const val PROGRESS_UPDATE_INTERVAL_MS = 250L
     private const val TAG = "HybridVideoPlayer"
-    private const val MIN_BUFFER_DURATION_MS = 5000
-    private const val MAX_BUFFER_DURATION_MS = 10000
-    private const val BUFFER_FOR_PLAYBACK_DURATION_MS = 1000
-    private const val BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_DURATION_MS = 2000
+    private const val DEFAULT_MIN_BUFFER_DURATION_MS = 5000
+    private const val DEFAULT_MAX_BUFFER_DURATION_MS = 10000
+    private const val DEFAULT_BUFFER_FOR_PLAYBACK_DURATION_MS = 1000
+    private const val DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_DURATION_MS = 2000
+    private const val DEFAULT_BACK_BUFFER_DURATION_MS = 0
   }
 
   override var status: VideoPlayerStatus = VideoPlayerStatus.IDLE
@@ -198,12 +203,18 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
     // Create a LoadControl with the allocator
     val loadControl = DefaultLoadControl.Builder()
       .setAllocator(allocator!!)
-      //TODO: Add buffer config to source
       .setBufferDurationsMs(
-        MIN_BUFFER_DURATION_MS,  // minBufferMs
-        MAX_BUFFER_DURATION_MS, // maxBufferMs
-        BUFFER_FOR_PLAYBACK_DURATION_MS,  // bufferForPlaybackMs
-        BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_DURATION_MS   // bufferForPlaybackAfterRebufferMs
+        bufferConfig?.minBufferMs?.toInt() ?: DEFAULT_MIN_BUFFER_DURATION_MS, // minBufferMs
+        bufferConfig?.maxBufferMs?.toInt() ?: DEFAULT_MAX_BUFFER_DURATION_MS, // maxBufferMs
+        bufferConfig?.bufferForPlaybackMs?.toInt()
+          ?: DEFAULT_BUFFER_FOR_PLAYBACK_DURATION_MS, // bufferForPlaybackMs
+        bufferConfig?.bufferForPlaybackAfterRebufferMs?.toInt()
+          ?: DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_DURATION_MS // bufferForPlaybackAfterRebufferMs
+      )
+      .setBackBuffer(
+        bufferConfig?.backBufferDurationMs?.toInt()
+          ?: DEFAULT_BACK_BUFFER_DURATION_MS, // backBufferDurationMs,
+        false // retainBackBufferFromKeyframe
       )
       .build()
 
