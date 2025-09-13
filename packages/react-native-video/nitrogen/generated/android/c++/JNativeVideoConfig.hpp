@@ -10,14 +10,20 @@
 #include <fbjni/fbjni.h>
 #include "NativeVideoConfig.hpp"
 
+#include "BufferConfig.hpp"
+#include "JBufferConfig.hpp"
 #include "JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload.hpp"
+#include "JLivePlaybackParams.hpp"
 #include "JNativeDrmParams.hpp"
 #include "JNativeExternalSubtitle.hpp"
 #include "JOnGetLicensePayload.hpp"
+#include "JResolution.hpp"
 #include "JSubtitleType.hpp"
+#include "LivePlaybackParams.hpp"
 #include "NativeDrmParams.hpp"
 #include "NativeExternalSubtitle.hpp"
 #include "OnGetLicensePayload.hpp"
+#include "Resolution.hpp"
 #include "SubtitleType.hpp"
 #include <NitroModules/JPromise.hpp>
 #include <NitroModules/Promise.hpp>
@@ -54,6 +60,8 @@ namespace margelo::nitro::video {
       jni::local_ref<JNativeDrmParams> drm = this->getFieldValue(fieldDrm);
       static const auto fieldHeaders = clazz->getField<jni::JMap<jni::JString, jni::JString>>("headers");
       jni::local_ref<jni::JMap<jni::JString, jni::JString>> headers = this->getFieldValue(fieldHeaders);
+      static const auto fieldBufferConfig = clazz->getField<JBufferConfig>("bufferConfig");
+      jni::local_ref<JBufferConfig> bufferConfig = this->getFieldValue(fieldBufferConfig);
       static const auto fieldInitializeOnCreation = clazz->getField<jni::JBoolean>("initializeOnCreation");
       jni::local_ref<jni::JBoolean> initializeOnCreation = this->getFieldValue(fieldInitializeOnCreation);
       return NativeVideoConfig(
@@ -77,6 +85,7 @@ namespace margelo::nitro::video {
           }
           return __map;
         }()) : std::nullopt,
+        bufferConfig != nullptr ? std::make_optional(bufferConfig->toCpp()) : std::nullopt,
         initializeOnCreation != nullptr ? std::make_optional(static_cast<bool>(initializeOnCreation->value())) : std::nullopt
       );
     }
@@ -106,6 +115,7 @@ namespace margelo::nitro::video {
           }
           return __map;
         }() : nullptr,
+        value.bufferConfig.has_value() ? JBufferConfig::fromCpp(value.bufferConfig.value()) : nullptr,
         value.initializeOnCreation.has_value() ? jni::JBoolean::valueOf(value.initializeOnCreation.value()) : nullptr
       );
     }

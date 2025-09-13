@@ -8,7 +8,9 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.C
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.util.UnstableApi
+import com.margelo.nitro.video.BufferConfig
 import com.margelo.nitro.video.HybridVideoPlayerSource
+import com.margelo.nitro.video.LivePlaybackParams
 import com.margelo.nitro.video.NativeDrmParams
 import com.margelo.nitro.video.NativeVideoConfig
 import com.margelo.nitro.video.SubtitleType
@@ -31,6 +33,10 @@ fun createMediaItemFromVideoConfig(
     val drmManager = source.drmManager ?: throw LibraryError.DRMPluginNotFound
     val drmConfiguration = drmManager.getDRMConfiguration(drmParams)
     mediaItemBuilder.setDrmConfiguration(drmConfiguration)
+  }
+
+  source.config.bufferConfig?.livePlayback?.let { livePlaybackParams ->
+    mediaItemBuilder.setLiveConfiguration(getLiveConfiguration(livePlaybackParams))
   }
 
   return PluginsRegistry.shared.overrideMediaItemBuilder(
@@ -77,4 +83,42 @@ fun getSubtitlesConfiguration(
     }
   }
   return subtitlesConfiguration
+}
+
+fun getLiveConfiguration(
+  livePlaybackParams: LivePlaybackParams
+): MediaItem.LiveConfiguration {
+  val liveConfiguration = MediaItem.LiveConfiguration.Builder()
+
+  livePlaybackParams.maxOffsetMs?.let {
+    if (it >= 0) {
+      liveConfiguration.setMaxOffsetMs(it.toLong())
+    }
+  }
+
+  livePlaybackParams.minOffsetMs?.let {
+    if (it >= 0) {
+      liveConfiguration.setMinOffsetMs(it.toLong())
+    }
+  }
+
+  livePlaybackParams.targetOffsetMs?.let {
+    if (it >= 0) {
+      liveConfiguration.setTargetOffsetMs(it.toLong())
+    }
+  }
+
+  livePlaybackParams.maxPlaybackSpeed?.let {
+    if (it >= 0) {
+      liveConfiguration.setMaxPlaybackSpeed(it.toFloat())
+    }
+  }
+
+  livePlaybackParams.minPlaybackSpeed?.let {
+    if (it >= 0) {
+      liveConfiguration.setMinPlaybackSpeed(it.toFloat())
+    }
+  }
+
+  return liveConfiguration.build()
 }

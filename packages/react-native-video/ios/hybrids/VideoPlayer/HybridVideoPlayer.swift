@@ -22,7 +22,13 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     }
   }
 
-  var playerItem: AVPlayerItem?
+  var playerItem: AVPlayerItem? {
+    didSet {
+      if let bufferConfig = source.config.bufferConfig {
+        playerItem?.setBufferConfig(config: bufferConfig)
+      }
+    }
+  }
   var playerObserver: VideoPlayerObserver?
 
   init(source: (any HybridVideoPlayerSourceSpec)) throws {
