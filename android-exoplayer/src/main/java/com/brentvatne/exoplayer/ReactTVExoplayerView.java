@@ -1645,7 +1645,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             if (!exoDorisPlayerView.getUseController()) {
                 exoDorisPlayerView.setUseController(true);
             }
-            exoDorisPlayerView.requestFocus();
+            post(() -> exoDorisPlayerView.requestFocus());
         } else {
             exoDorisPlayerView.hideController();
         }
@@ -1870,6 +1870,10 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         exoDorisPlayerView.setSkipMarkList(skipMarkers);
     }
 
+    public void setIs4K(boolean is4K) {
+        exoDorisPlayerView.setIs4K(is4K);
+    }
+
     private boolean isUnauthorizedAdError(Exception error) {
         return error.getMessage().contains("HTTP status code: 403");
     }
@@ -1975,9 +1979,9 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             } else if (playerEvent instanceof DorisPlayerEvent.PositionChanged) {
                 DorisPlayerEvent.PositionChanged event = (DorisPlayerEvent.PositionChanged) playerEvent;
                 dorisMessaging.onProgressChanged(
-                    event.getCurrentPosition(),
-                    event.getDuration(),
-                    event.getWindowStartTimeMs()
+                        event.getCurrentPosition(),
+                        event.getDuration(),
+                        event.getWindowStartTimeMs()
                 );
             } else if (playerEvent instanceof DorisPlayerEvent.TrackInfoChanged) {
                 if (selectUserPreferredTrack) {
@@ -2017,7 +2021,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             }
             if (adEvent instanceof DorisAdEvent.AdBreakStarted) {
                 if (areControlsAllowed) {
-                  setControls(false);
+                    setControls(false);
                 }
             } else if (adEvent instanceof DorisAdEvent.AdBreakEnded) {
                 // PlayerView does not expose SurfaceView, we should call setVisibility() and setPlayer().

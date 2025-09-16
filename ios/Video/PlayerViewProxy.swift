@@ -94,6 +94,8 @@ class PlayerViewProxy {
         dorisTranslationsViewModel.audioOnlyBadge = translations.audioOnlyBadge
         dorisTranslationsViewModel.schedule = translations.tvPlayerEPG
         dorisTranslationsViewModel.unknown = translations.unknown
+        dorisTranslationsViewModel.seconds = translations.seconds
+        dorisTranslationsViewModel.seekSpeedTooltip = translations.seekSpeedTooltip
         return dorisTranslationsViewModel
     }
 
@@ -232,7 +234,7 @@ class PlayerViewProxy {
                 drm: rndvJSDrm,
                 progressUpdateInterval: sourceValue.progressUpdateInterval ?? 6,
                 type: sourceValue.type,
-                title: sourceValue.title ?? sourceValue.nowPlaying?.title ?? "",
+                title: sourceValue.nowPlaying?.title ?? jsProps.metadata.value?.title ?? sourceValue.title ?? "",
                 description: jsProps.metadata.value?.description, //tvos new
                 live: sourceValue.live,
                 partialVideoInformation: jsPartialVideoInformation,
@@ -251,7 +253,8 @@ class PlayerViewProxy {
                 bandwidthPolicy: nil,
                 nowPlaying: jsNowPlaying,
                 preferredAudioTracks: sourceValue.preferredAudioTracks,
-                watchContext: nil) //tvos new
+                watchContext: nil,
+                is4K: sourceValue.is4K)
         }
 
         let jsTranslations = PlayerViewProxy.convertRNVideoTranslationsToRNDV(translations: jsProps.translations.value)

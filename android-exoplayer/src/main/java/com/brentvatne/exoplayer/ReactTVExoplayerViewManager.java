@@ -146,6 +146,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_SKIP_MARKERS = "skipMarkers";
     private static final String PROP_SUBTITLE_HORIZONTAL_PADDING = "subtitleHorizontalPadding";
     private static final String PROP_LOCALE = "locale";
+    private static final String PROP_IS4K = "is4K";
 
     private static final int COMMAND_SEEK_TO_POSITION = 4;
     private static final int COMMAND_REPLACE_AD_TAG_PARAMETERS = 5;
@@ -264,6 +265,9 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
         }
         if (src.hasKey(PROP_SKIP_MARKERS)) {
             videoView.setSkipMarkers(parseSkipMarkers(ReadableMapUtils.getArray(src, PROP_SKIP_MARKERS)));
+        }
+        if (src.hasKey(PROP_IS4K)) {
+            videoView.setIs4K(ReadableMapUtils.getBoolean(src, PROP_IS4K));
         }
         if (src.hasKey(PROP_SRC_PLUGINS)) {
             ReadableMap bottomPlugin = ReadableMapUtils.getMap(src.getMap(PROP_SRC_PLUGINS), "bottom");

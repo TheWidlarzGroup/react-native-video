@@ -37,6 +37,7 @@ struct Source: SuperCodable {
     let dvrSeekBackwardInterval: Int?
     var plugins: JSPlugins?
     let resumePosition: Double?
+    let is4K: Bool?
 }
 
 
@@ -132,8 +133,8 @@ extension Source {
 
 extension SkipMarker {
     init(jsSkipMarker: Source.RNSkipMarker) {
-        self.init(start: Float(jsSkipMarker.startTime),
-                  stop: Float(jsSkipMarker.stopTime),
+        self.init(start: jsSkipMarker.startTime,
+                  stop: jsSkipMarker.stopTime,
                   type: SkipMarkerType(stringValue: jsSkipMarker.type.rawValue))
     }
 }

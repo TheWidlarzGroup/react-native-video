@@ -34,4 +34,6 @@ struct Translations: SuperCodable {
     var off: String?
     var audioOnlyBadge: String?
     var unknown: String?
+    var seconds: String?
+    var seekSpeedTooltip: String?
 }
