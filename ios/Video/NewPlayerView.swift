@@ -145,6 +145,12 @@ class NewPlayerView: UIView, JSInputProtocol {
             jsProps.locale.value = locale
         }
     }
+
+    @objc var isPlayPauseEnabled: Bool = true {
+        didSet {
+            jsProps.isPlayPauseEnabled.value = isPlayPauseEnabled
+        }
+    }
     
     //FIXME: review unused variables
     @objc var selectedTextTrack: NSDictionary?
