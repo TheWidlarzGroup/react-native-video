@@ -180,6 +180,17 @@ open class HybridVideoViewViewManagerSpec_cxx {
     }
   }
   
+  public final var keepScreenAwake: Bool {
+    @inline(__always)
+    get {
+      return self.__implementation.keepScreenAwake
+    }
+    @inline(__always)
+    set {
+      self.__implementation.keepScreenAwake = newValue
+    }
+  }
+  
   public final var onPictureInPictureChange: bridge.std__optional_std__function_void_bool____isInPictureInPicture______ {
     @inline(__always)
     get {

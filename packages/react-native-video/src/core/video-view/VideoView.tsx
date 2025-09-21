@@ -40,6 +40,10 @@ export interface VideoViewProps extends Partial<VideoViewEvents>, ViewProps {
    * - 'none': Do not resize the video
    */
   resizeMode?: ResizeMode;
+  /**
+   * Whether to keep the screen awake while the video view is mounted. Defaults to true.
+   */
+  keepScreenAwake?: boolean;
 }
 
 export interface VideoViewRef {
@@ -99,6 +103,7 @@ const updateProps = (manager: VideoViewViewManager, props: VideoViewProps) => {
   manager.willExitFullscreen = props.willExitFullscreen;
   manager.willEnterPictureInPicture = props.willEnterPictureInPicture;
   manager.willExitPictureInPicture = props.willExitPictureInPicture;
+  manager.keepScreenAwake = props.keepScreenAwake ?? true;
 };
 
 /**

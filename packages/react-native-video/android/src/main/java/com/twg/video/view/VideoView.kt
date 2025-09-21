@@ -98,6 +98,12 @@ class VideoView @JvmOverloads constructor(
       }
     }
 
+  var keepScreenAwake: Boolean
+    get() = playerView.keepScreenOn
+    set(value) {
+      playerView.keepScreenOn = value
+    }
+
   var events = object : VideoViewEvents {
     override var onPictureInPictureChange: ((Boolean) -> Unit)? = {}
     override var onFullscreenChange: ((Boolean) -> Unit)? = {}

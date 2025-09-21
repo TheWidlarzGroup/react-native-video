@@ -92,6 +92,12 @@ namespace margelo::nitro::video {
     inline void setResizeMode(ResizeMode resizeMode) noexcept override {
       _swiftPart.setResizeMode(static_cast<int>(resizeMode));
     }
+    inline bool getKeepScreenAwake() noexcept override {
+      return _swiftPart.getKeepScreenAwake();
+    }
+    inline void setKeepScreenAwake(bool keepScreenAwake) noexcept override {
+      _swiftPart.setKeepScreenAwake(std::forward<decltype(keepScreenAwake)>(keepScreenAwake));
+    }
     inline std::optional<std::function<void(bool /* isInPictureInPicture */)>> getOnPictureInPictureChange() noexcept override {
       auto __result = _swiftPart.getOnPictureInPictureChange();
       return __result;

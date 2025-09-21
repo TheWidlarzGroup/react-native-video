@@ -59,6 +59,8 @@ namespace margelo::nitro::video {
     void setAutoEnterPictureInPicture(bool autoEnterPictureInPicture) override;
     ResizeMode getResizeMode() override;
     void setResizeMode(ResizeMode resizeMode) override;
+    bool getKeepScreenAwake() override;
+    void setKeepScreenAwake(bool keepScreenAwake) override;
     std::optional<std::function<void(bool /* isInPictureInPicture */)>> getOnPictureInPictureChange() override;
     void setOnPictureInPictureChange(const std::optional<std::function<void(bool /* isInPictureInPicture */)>>& onPictureInPictureChange) override;
     std::optional<std::function<void(bool /* fullscreen */)>> getOnFullscreenChange() override;

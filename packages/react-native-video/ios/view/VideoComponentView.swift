@@ -28,6 +28,19 @@ import AVKit
     }
   }
   
+  private var _keepScreenAwake: Bool = false
+  var keepScreenAwake: Bool {
+    get {
+      guard let player = player as? HybridVideoPlayer else { return false }
+      return player.player.preventsDisplaySleepDuringVideoPlayback
+    }
+    set {
+      guard let player = player as? HybridVideoPlayer else { return }
+      player.player.preventsDisplaySleepDuringVideoPlayback = newValue
+      _keepScreenAwake = newValue
+    }
+  }
+  
   var playerViewController: AVPlayerViewController? {
     didSet {
       guard let observer, let playerViewController else { return }
@@ -168,8 +181,18 @@ import AVKit
     
     if newSuperview == nil {
       PluginsRegistry.shared.notifyVideoViewDestroyed(view: self)
+      
+      // We want to disable this when view is about to unmount
+      if keepScreenAwake {
+        keepScreenAwake = false
+      }
     } else {
       PluginsRegistry.shared.notifyVideoViewCreated(view: self)
+      
+      // We want to restore keepScreenAwake after compontet remount
+      if _keepScreenAwake {
+        keepScreenAwake = true
+      }
     }
   }
 

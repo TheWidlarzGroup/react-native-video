@@ -24,6 +24,8 @@ namespace margelo::nitro::video {
       prototype.registerHybridSetter("autoEnterPictureInPicture", &HybridVideoViewViewManagerSpec::setAutoEnterPictureInPicture);
       prototype.registerHybridGetter("resizeMode", &HybridVideoViewViewManagerSpec::getResizeMode);
       prototype.registerHybridSetter("resizeMode", &HybridVideoViewViewManagerSpec::setResizeMode);
+      prototype.registerHybridGetter("keepScreenAwake", &HybridVideoViewViewManagerSpec::getKeepScreenAwake);
+      prototype.registerHybridSetter("keepScreenAwake", &HybridVideoViewViewManagerSpec::setKeepScreenAwake);
       prototype.registerHybridGetter("onPictureInPictureChange", &HybridVideoViewViewManagerSpec::getOnPictureInPictureChange);
       prototype.registerHybridSetter("onPictureInPictureChange", &HybridVideoViewViewManagerSpec::setOnPictureInPictureChange);
       prototype.registerHybridGetter("onFullscreenChange", &HybridVideoViewViewManagerSpec::getOnFullscreenChange);

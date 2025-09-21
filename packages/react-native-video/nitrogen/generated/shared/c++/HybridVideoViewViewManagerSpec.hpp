@@ -61,6 +61,8 @@ namespace margelo::nitro::video {
       virtual void setAutoEnterPictureInPicture(bool autoEnterPictureInPicture) = 0;
       virtual ResizeMode getResizeMode() = 0;
       virtual void setResizeMode(ResizeMode resizeMode) = 0;
+      virtual bool getKeepScreenAwake() = 0;
+      virtual void setKeepScreenAwake(bool keepScreenAwake) = 0;
       virtual std::optional<std::function<void(bool /* isInPictureInPicture */)>> getOnPictureInPictureChange() = 0;
       virtual void setOnPictureInPictureChange(const std::optional<std::function<void(bool /* isInPictureInPicture */)>>& onPictureInPictureChange) = 0;
       virtual std::optional<std::function<void(bool /* fullscreen */)>> getOnFullscreenChange() = 0;

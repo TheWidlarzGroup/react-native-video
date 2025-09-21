@@ -119,6 +119,25 @@ class HybridVideoViewViewManager: HybridVideoViewViewManagerSpec {
     }
   }
   
+  var keepScreenAwake: Bool {
+    get {
+      guard let view else {
+        print(DEALOCATED_WARNING)
+        return false
+      }
+      
+      return view.keepScreenAwake
+    }
+    set {
+      guard let view else {
+        print(DEALOCATED_WARNING)
+        return
+      }
+      
+      view.keepScreenAwake = newValue
+    }
+  }
+  
   func enterFullscreen() throws {
     guard let view else {
       throw VideoViewError.viewIsDeallocated.error()
