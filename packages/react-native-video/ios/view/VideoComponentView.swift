@@ -189,7 +189,7 @@ import AVKit
     } else {
       PluginsRegistry.shared.notifyVideoViewCreated(view: self)
       
-      // We want to restore keepScreenAwake after compontet remount
+      // We want to restore keepScreenAwake after component remount
       if _keepScreenAwake {
         keepScreenAwake = true
       }
