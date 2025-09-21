@@ -90,6 +90,15 @@ namespace margelo::nitro::video {
     static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JResizeMode> /* resizeMode */)>("setResizeMode");
     method(_javaPart, JResizeMode::fromCpp(resizeMode));
   }
+  bool JHybridVideoViewViewManagerSpec::getKeepScreenAwake() {
+    static const auto method = javaClassStatic()->getMethod<jboolean()>("getKeepScreenAwake");
+    auto __result = method(_javaPart);
+    return static_cast<bool>(__result);
+  }
+  void JHybridVideoViewViewManagerSpec::setKeepScreenAwake(bool keepScreenAwake) {
+    static const auto method = javaClassStatic()->getMethod<void(jboolean /* keepScreenAwake */)>("setKeepScreenAwake");
+    method(_javaPart, keepScreenAwake);
+  }
   std::optional<std::function<void(bool /* isInPictureInPicture */)>> JHybridVideoViewViewManagerSpec::getOnPictureInPictureChange() {
     static const auto method = javaClassStatic()->getMethod<jni::local_ref<JFunc_void_bool::javaobject>()>("getOnPictureInPictureChange_cxx");
     auto __result = method(_javaPart);

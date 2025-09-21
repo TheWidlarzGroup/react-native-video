@@ -17,6 +17,7 @@ export interface VideoViewViewManager
   enterPictureInPicture(): void;
   exitPictureInPicture(): void;
   canEnterPictureInPicture(): boolean;
+  keepScreenAwake: boolean;
 }
 
 // @internal

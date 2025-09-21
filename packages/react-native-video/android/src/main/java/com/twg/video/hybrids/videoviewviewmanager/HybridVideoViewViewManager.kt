@@ -72,6 +72,12 @@ class HybridVideoViewViewManager(nitroId: Int): HybridVideoViewViewManagerSpec()
       videoView.get()?.resizeMode = value
     }
 
+  override var keepScreenAwake: Boolean
+    get() = videoView.get()?.keepScreenAwake == true
+    set(value) {
+      videoView.get()?.keepScreenAwake = value
+    }
+
   // View callbacks
   override var onPictureInPictureChange: ((Boolean) -> Unit)? = null
     set(value) {
