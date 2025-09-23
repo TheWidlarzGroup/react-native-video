@@ -205,6 +205,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private boolean hasStats;
     private boolean hideAdUiElements;
     private boolean isWhyThisAdIconEnabled;
+    private boolean isPlayPauseEnabled = true;
     private float jsProgressUpdateInterval = 250.0f;
     // \ End props
 
@@ -557,6 +558,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     exoDorisPlayerView,
                     src.getTracksPolicy());
 
+            player.setMediaSessionPlayPauseEnabled(isPlayPauseEnabled);
             player.setOutput(dorisListener);
             trackSelector = player.getTrackSelector();
             ExoPlayer exoPlayer = player.getExoPlayer();
@@ -1872,6 +1874,11 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
 
     public void setIs4K(boolean is4K) {
         exoDorisPlayerView.setIs4K(is4K);
+    }
+
+    public void setPlayPauseEnabled(boolean playPauseEnabled) {
+        isPlayPauseEnabled = playPauseEnabled;
+        exoDorisPlayerView.setPlayPauseEnabled(playPauseEnabled);
     }
 
     private boolean isUnauthorizedAdError(Exception error) {

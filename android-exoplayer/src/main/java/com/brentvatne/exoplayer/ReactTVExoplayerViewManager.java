@@ -147,6 +147,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_SUBTITLE_HORIZONTAL_PADDING = "subtitleHorizontalPadding";
     private static final String PROP_LOCALE = "locale";
     private static final String PROP_IS4K = "is4K";
+    private static final String PROP_IS_PLAY_PAUSE_ENABLED = "isPlayPauseEnabled";
 
     private static final int COMMAND_SEEK_TO_POSITION = 4;
     private static final int COMMAND_REPLACE_AD_TAG_PARAMETERS = 5;
@@ -636,6 +637,11 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     @ReactProp(name = PROP_LOCALE)
     public void setLocale(final ReactTVExoplayerView videoView, final String locale) {
         videoView.setAppLanguageLocale(locale);
+    }
+
+    @ReactProp(name = PROP_IS_PLAY_PAUSE_ENABLED)
+    public void setIsPlayPauseEnabled(final ReactTVExoplayerView videoView, boolean isPlayPauseEnabled) {
+        videoView.setPlayPauseEnabled(isPlayPauseEnabled);
     }
 
     private boolean startsWithValidScheme(String uriString) {
