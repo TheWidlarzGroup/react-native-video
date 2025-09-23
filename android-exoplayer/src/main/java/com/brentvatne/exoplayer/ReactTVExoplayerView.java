@@ -1912,6 +1912,11 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     }
 
     @Override
+    public void onSkipMarkerClicked(SkipMarker skipMarker) {
+        eventEmitter.skipMarkerClick(skipMarker);
+    }
+
+    @Override
     public void onEpgButtonClicked() {
         eventEmitter.epgIconClick();
     }

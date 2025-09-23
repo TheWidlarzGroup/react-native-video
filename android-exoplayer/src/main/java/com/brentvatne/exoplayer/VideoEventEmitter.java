@@ -7,6 +7,7 @@ import androidx.media3.common.Metadata;
 import androidx.media3.extractor.metadata.id3.Id3Frame;
 import androidx.media3.extractor.metadata.id3.TextInformationFrame;
 
+import com.diceplatform.doris.ui.skipmarker.SkipMarker;
 import com.facebook.react.ReactApplication;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
@@ -63,6 +64,7 @@ class VideoEventEmitter {
     private static final String EVENT_ANNOTATIONS_BUTTON_CLICK = "onAnnotationsButtonClick";
     private static final String EVENT_SUBTITLE_TRACK_CHANGED = "onSubtitleTrackChanged";
     private static final String EVENT_AUDIO_TRACK_CHANGED = "onAudioTrackChanged";
+    private static final String EVENT_SKIP_MARKER = "onSkipMarkerButton";
 
     static final String[] Events = {
             EVENT_LOAD_START,
@@ -100,7 +102,8 @@ class VideoEventEmitter {
             EVENT_AUDIO_TRACK_CHANGED,
             EVENT_REQUIRE_AD_PARAMETERS,
             EVENT_RELOAD_CURRENT_SOURCE,
-            EVENT_BEHIND_LIVE_WINDOW_ERROR
+            EVENT_BEHIND_LIVE_WINDOW_ERROR,
+            EVENT_SKIP_MARKER
     };
 
     @Retention(RetentionPolicy.SOURCE)
@@ -140,7 +143,8 @@ class VideoEventEmitter {
             EVENT_AUDIO_TRACK_CHANGED,
             EVENT_REQUIRE_AD_PARAMETERS,
             EVENT_RELOAD_CURRENT_SOURCE,
-            EVENT_BEHIND_LIVE_WINDOW_ERROR
+            EVENT_BEHIND_LIVE_WINDOW_ERROR,
+            EVENT_SKIP_MARKER
     })
     @interface VideoEvents {
     }
@@ -178,6 +182,7 @@ class VideoEventEmitter {
     private static final String EVENT_PROP_DATE = "date";
     private static final String EVENT_PROP_IS_BLOCKING = "isBlocking";
     private static final String EVENT_PROP_LANGUAGE = "language";
+    private static final String EVENT_PROP_TARGET = "target";
 
     private static final String EVENT_PROP_ERROR = "error";
     private static final String EVENT_PROP_ERROR_STRING = "errorString";
@@ -400,6 +405,13 @@ class VideoEventEmitter {
 
     void watchlistButtonClick() {
         receiveEvent(EVENT_WATCHLIST_BUTTON_CLICK, null);
+    }
+
+    void skipMarkerClick(SkipMarker skipMarker) {
+        WritableMap map = Arguments.createMap();
+        map.putString(EVENT_PROP_TYPE, skipMarker.skipMarkerType.name().toLowerCase());
+        map.putLong(EVENT_PROP_TARGET, skipMarker.endTimeMs);
+        receiveEvent(EVENT_SKIP_MARKER, map);
     }
 
     void annotationsButtonClick() {
