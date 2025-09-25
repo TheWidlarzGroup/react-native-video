@@ -50,6 +50,16 @@ class PictureInPictureHelperFragment(private val videoView: VideoView) : Fragmen
       }
       
       if (currentPipVideo == videoView) {
+        // If we're currently in fullscreen, exit it first to prevent parent conflicts
+        if (videoView.isInFullscreen) {
+          try {
+            videoView.exitFullscreen()
+          } catch (e: Exception) {
+            Log.w("ReactNativeVideo", "Failed to exit fullscreen before entering PiP for nitroId: ${videoView.nitroId}", e)
+          }
+        }
+
+        // Now move the PlayerView to the root for PiP and hide content
         videoView.hideRootContentViews()
         videoView.isInPictureInPicture = true
       }
