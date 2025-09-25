@@ -335,9 +335,9 @@ class VideoView @JvmOverloads constructor(
     playerView.setBackgroundColor(Color.BLACK)
     playerView.setShutterBackgroundColor(Color.BLACK)
 
-    (playerView.parent as? ViewGroup)?.removeView(playerView)
-
     if (movedToRootForPiP) {
+      (playerView.parent as? ViewGroup)?.removeView(playerView)
+
       val currentActivity = applicationContent.currentActivity ?: return
       val rootContent = currentActivity.window.decorView.findViewById<ViewGroup>(android.R.id.content)
 
