@@ -136,6 +136,7 @@ class VideoView @JvmOverloads constructor(
   private var rootContentViews: List<View> = listOf()
   private var pictureInPictureHelperTag: String? = null
   private var fullscreenFragmentTag: String? = null
+  private var movedToRootForPiP: Boolean = false
 
   val applicationContent: ReactApplicationContext
     get() {
@@ -298,6 +299,14 @@ class VideoView @JvmOverloads constructor(
     playerView.setBackgroundColor(Color.BLACK)
     playerView.setShutterBackgroundColor(Color.BLACK)
 
+    // If we're already in fullscreen, the PlayerView is inside the fullscreen container
+    // and root content is already hidden. Avoid moving the PlayerView again.
+    if (isInFullscreen) {
+      Log.d("ReactNativeVideo", "PiP entered while in fullscreen - skipping reparent to root for nitroId: $nitroId")
+      movedToRootForPiP = false
+      return
+    }
+
     (playerView.parent as? ViewGroup)?.removeView(playerView)
 
     val currentActivity = applicationContent.currentActivity ?: return
@@ -306,13 +315,13 @@ class VideoView @JvmOverloads constructor(
       .map { rootContent.getChildAt(it) }
       .filter { it.isVisible }
 
-    rootContentViews.forEach { view ->
-      view.visibility = GONE
-    }
+    rootContentViews.forEach { view -> view.visibility = GONE }
 
-    rootContent.addView(playerView,
+    rootContent.addView(
+      playerView,
       LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
     )
+    movedToRootForPiP = true
     
     Log.d("ReactNativeVideo", "Successfully moved player view to root content for PiP nitroId: $nitroId")
   }
@@ -326,16 +335,24 @@ class VideoView @JvmOverloads constructor(
     playerView.setBackgroundColor(Color.BLACK)
     playerView.setShutterBackgroundColor(Color.BLACK)
 
-    val currentActivity = applicationContent.currentActivity ?: return
-    val rootContent = currentActivity.window.decorView.findViewById<ViewGroup>(android.R.id.content)
-    rootContent.removeView(playerView)
+    (playerView.parent as? ViewGroup)?.removeView(playerView)
 
-    // Restore root content views
-    rootContentViews.forEach { it.visibility = View.VISIBLE }
-    rootContentViews = listOf()
+    if (movedToRootForPiP) {
+      val currentActivity = applicationContent.currentActivity ?: return
+      val rootContent = currentActivity.window.decorView.findViewById<ViewGroup>(android.R.id.content)
 
-    // Add PlayerView back to VideoView
-    addView(playerView)
+      rootContent.removeView(playerView)
+
+      // Restore root content views
+      rootContentViews.forEach { it.visibility = View.VISIBLE }
+      rootContentViews = listOf()
+      movedToRootForPiP = false
+    }
+
+    // Add PlayerView back to this VideoView only if not already attached
+    if (playerView.parent != this) {
+      addView(playerView)
+    }
     
     Log.d("ReactNativeVideo", "Successfully restored root content views for video nitroId: $nitroId")
   }
@@ -396,20 +413,24 @@ class VideoView @JvmOverloads constructor(
   }
 
   fun exitPictureInPicture() {
-    if (!isInPictureInPicture || isInFullscreen) {
-      return
-    }
-    
+    if (!isInPictureInPicture) return
+
     VideoManager.notifyPictureInPictureExited(this)
-    
+
     events.willExitPictureInPicture?.let { it() }
-    restoreRootContentViews()
+
+    if (movedToRootForPiP) {
+      restoreRootContentViews()
+    } else {
+      Log.d("ReactNativeVideo", "Exiting PiP while in fullscreen - no reparent needed for nitroId: $nitroId")
+    }
+
     isInPictureInPicture = false
   }
 
   internal fun forceExitPictureInPicture() {
-    if (!isInPictureInPicture || isInFullscreen) {
-      Log.d("ReactNativeVideo", "Force exit PiP skipped for nitroId: $nitroId (not in PiP or in fullscreen)")
+    if (!isInPictureInPicture) {
+      Log.d("ReactNativeVideo", "Force exit PiP skipped for nitroId: $nitroId (not in PiP)")
       return
     }
 
@@ -422,7 +443,11 @@ class VideoView @JvmOverloads constructor(
       }
       
       events.willExitPictureInPicture?.let { it() }
-      restoreRootContentViews()
+      if (movedToRootForPiP) {
+        restoreRootContentViews()
+      } else {
+        Log.d("ReactNativeVideo", "Force exit PiP while in fullscreen - no reparent needed for nitroId: $nitroId")
+      }
       isInPictureInPicture = false
       
       VideoManager.notifyPictureInPictureExited(this)

@@ -205,8 +205,8 @@ class FullscreenVideoFragment(private val videoView: VideoView) : Fragment() {
     videoView.playerView.setBackgroundColor(android.graphics.Color.BLACK)
     videoView.playerView.setShutterBackgroundColor(android.graphics.Color.BLACK)
 
-    // Remove PlayerView from our container
-    container?.removeView(videoView.playerView)
+  // Remove PlayerView from our container
+  container?.removeView(videoView.playerView)
 
     // Remove our container from root
     val currentActivity = requireActivity()
@@ -222,8 +222,10 @@ class FullscreenVideoFragment(private val videoView: VideoView) : Fragment() {
     val currentParent = videoView.playerView.parent as? ViewGroup
     currentParent?.removeView(videoView.playerView)
 
-    // Now add it back to the original parent
-    originalPlayerParent?.addView(videoView.playerView, originalPlayerLayoutParams)
+    // Now add it back to the original parent if it's not already the parent
+    if (videoView.playerView.parent != originalPlayerParent) {
+      originalPlayerParent?.addView(videoView.playerView, originalPlayerLayoutParams)
+    }
 
     // Remove this fragment
     parentFragmentManager.beginTransaction()
