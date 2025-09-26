@@ -410,7 +410,7 @@ class VideoEventEmitter {
     void skipMarkerClick(SkipMarker skipMarker) {
         WritableMap map = Arguments.createMap();
         map.putString(EVENT_PROP_TYPE, skipMarker.skipMarkerType.name().toLowerCase());
-        map.putLong(EVENT_PROP_TARGET, skipMarker.endTimeMs);
+        map.putDouble(EVENT_PROP_TARGET, skipMarker.endTimeMs);
         receiveEvent(EVENT_SKIP_MARKER, map);
     }
 

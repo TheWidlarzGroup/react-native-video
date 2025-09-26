@@ -558,7 +558,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     exoDorisPlayerView,
                     src.getTracksPolicy());
 
-            player.setMediaSessionPlayPauseEnabled(isPlayPauseEnabled);
+            player.setMediaSessionControlsEnabled(isPlayPauseEnabled);
             player.setOutput(dorisListener);
             trackSelector = player.getTrackSelector();
             ExoPlayer exoPlayer = player.getExoPlayer();
