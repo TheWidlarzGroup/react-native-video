@@ -1,5 +1,6 @@
 import type { VideoPlayerSource } from '../../spec/nitro/VideoPlayerSource.nitro';
 import type { TextTrack } from './TextTrack';
+import type { VideoRuntimeError } from './VideoError';
 import type { VideoOrientation } from './VideoOrientation';
 import type { VideoPlayerStatus } from './VideoPlayerStatus';
 
@@ -91,6 +92,11 @@ export interface VideoPlayerEvents {
    */
   onStatusChange: (status: VideoPlayerStatus) => void;
 }
+
+export interface AllPlayerEvents extends VideoPlayerEvents {
+  onError: (error: VideoRuntimeError) => void;
+}
+
 
 export interface VideoViewEvents {
   /**

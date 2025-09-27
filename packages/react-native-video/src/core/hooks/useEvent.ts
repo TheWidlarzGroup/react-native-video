@@ -1,19 +1,6 @@
 import { useEffect } from 'react';
 import { VideoPlayer } from '../VideoPlayer';
-import { type VideoPlayerEvents } from '../types/Events';
-
-// Omit undefined from events
-type NonUndefined<T> = T extends undefined ? never : T;
-
-// Valid events names
-type Events = keyof VideoPlayerEvents | 'onError';
-
-// Valid events params
-type EventsParams<T extends Events> = T extends keyof VideoPlayerEvents
-  ? // (Native) Events from VideoPlayerEvents
-    Parameters<VideoPlayerEvents[T]>
-  : // (JS) Events from Video Player
-    Parameters<NonUndefined<VideoPlayer[T]>>;
+import { type AllPlayerEvents } from '../types/Events';
 
 /**
  * Attaches an event listener to a `VideoPlayer` instance for a specified event.
@@ -22,22 +9,15 @@ type EventsParams<T extends Events> = T extends keyof VideoPlayerEvents
  * @param event - The name of the event to attach the callback to
  * @param callback - The callback for the event
  */
-export const useEvent = <T extends Events>(
+export const useEvent = <T extends keyof AllPlayerEvents>(
   player: VideoPlayer,
   event: T,
-  callback: (...args: EventsParams<T>) => void
+  callback: AllPlayerEvents[T]
 ) => {
   useEffect(() => {
-    // @ts-expect-error we narrow the type of the event
-    player[event] = callback;
+    player.addEventListener(event, callback);
 
-    return () => {
-      if (event === 'onError') {
-        // onError is not native event, so we can set it to undefined
-        player.onError = undefined;
-      } else {
-        player.clearEvent(event);
-      }
-    };
+    return () => player.removeEventListener(event, callback);
+    ;
   }, [player, event, callback]);
 };

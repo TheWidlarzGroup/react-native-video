@@ -20,8 +20,6 @@ import { VideoPlayerEvents } from './VideoPlayerEvents';
 class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   protected player: VideoPlayerImpl;
 
-  public onError?: (error: VideoRuntimeError) => void = undefined;
-
   constructor(source: VideoSource | VideoConfig | VideoPlayerSource) {
     const hybridSource = createSource(source);
     const player = createPlayer(hybridSource);
@@ -57,8 +55,10 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   private throwError(error: unknown) {
     const parsedError = tryParseNativeVideoError(error);
 
-    if (parsedError instanceof VideoRuntimeError && this.onError) {
-      this.onError(parsedError);
+    if (
+      parsedError instanceof VideoRuntimeError
+      && this.triggerEvent('onError', parsedError)
+    ) {
       // We don't throw errors if onError is provided
       return;
     }
