@@ -50,7 +50,10 @@
         "check-ios": "scripts/swift-format.sh && scripts/swift-lint.sh && scripts/clang-format.sh",
         "check-android": "scripts/kotlin-lint.sh",
         "check-all": "yarn check-android; yarn check-ios; yarn lint",
-        "codegen": "node ./node_modules/react-native/scripts/generate-codegen-artifacts.js --path ./ ./output"
+        "codegen": "node ./node_modules/react-native/scripts/generate-codegen-artifacts.js --path ./ ./output",
+        "dev:android": "bash scripts/dev-android.sh",
+        "dev:android:clean": "bash scripts/dev-android.sh --clean",
+        "dev:android:reinstall": "bash scripts/dev-android.sh --reinstall --clean"
     },
     "files": [
         "android",
