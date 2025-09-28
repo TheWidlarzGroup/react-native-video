@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import { VideoPlayer } from '../VideoPlayer';
-import { type AllPlayerEvents } from '../types/Events';
+import type { AllPlayerEvents } from '../types/Events';
+import type { VideoPlayer } from '../VideoPlayer';
 
 /**
  * Attaches an event listener to a `VideoPlayer` instance for a specified event.
