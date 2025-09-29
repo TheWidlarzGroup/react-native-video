@@ -14,7 +14,8 @@ class ReactVideoPackage(private val config: ReactExoplayerConfig? = null) : Reac
     override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> =
         listOf(
             VideoDecoderInfoModule(reactContext),
-            VideoManagerModule(reactContext)
+            VideoManagerModule(reactContext),
+            RNDatazoomModule(reactContext)
         )
 
     // Deprecated RN 0.47

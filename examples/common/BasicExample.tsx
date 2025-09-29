@@ -3,6 +3,7 @@ import React, {useCallback, useRef, useState, useEffect} from 'react';
 import {Platform, TouchableOpacity, View, StatusBar} from 'react-native';
 
 import Video, {
+  Datazoom,
   SelectedVideoTrackType,
   BufferingStrategyType,
   SelectedTrackType,
@@ -296,8 +297,21 @@ const BasicExample = () => {
   };
 
   useEffect(() => {
-    videoRef.current?.setSource({...currentSrc, bufferConfig: _bufferConfig});
+    videoRef.current?.setSource({...currentSrc, bufferConfig: _bufferConfig});    
   }, [currentSrc]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        await Datazoom.initialize({
+          apiKey: 'YOUR_DATAZOOM_KEY'
+        });
+        console.log('✅ Datazoom SDK initialized successfully');
+      } catch (e) {
+        console.error('❌ Failed to initialize Datazoom', e);
+      }
+    })();
+  }, []); 
 
   return (
     <View style={styles.container}>
