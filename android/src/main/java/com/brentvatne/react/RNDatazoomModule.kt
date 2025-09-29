@@ -3,6 +3,7 @@ package com.brentvatne.react
 import android.content.pm.PackageManager
 import android.util.Log
 import com.facebook.react.bridge.*
+import com.brentvatne.datazoom.DatazoomManager
 
 private object InitGuard {
   @Volatile private var initialized = false
@@ -21,8 +22,7 @@ private object InitGuard {
       // JS overrides
       val apiKey = opts?.getString("apiKey") ?: ""
 
-      // TODO: replace with your real SDK call, e.g.:
-      // DatazoomSdk.initialize(app, apiKey, endpoint, debug)
+      DatazoomManager.init(apiKey)
       Log.i("RNDatazoom", "Initialized: key=${if (apiKey.isEmpty()) "Why its empty" else "***"}")
 
       initialized = true

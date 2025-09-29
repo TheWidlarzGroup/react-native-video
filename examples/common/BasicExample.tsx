@@ -304,7 +304,7 @@ const BasicExample = () => {
     (async () => {
       try {
         await Datazoom.initialize({
-          apiKey: 'YOUR_DATAZOOM_KEY'
+          apiKey: '65e464b9-a7ce-4e15-a060-6e23d732d05e'
         });
         console.log('✅ Datazoom SDK initialized successfully');
       } catch (e) {

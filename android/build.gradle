@@ -232,6 +232,7 @@ dependencies {
 
     implementation "androidx.core:core-ktx:$androidxCore_version"
     implementation "androidx.activity:activity-ktx:$androidxActivity_version"
+    implementation "io.datazoom.sdk:media3:0.0.15"
 
     // For media playback using ExoPlayer
     if (media3_buildFromSource) {
