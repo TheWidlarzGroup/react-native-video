@@ -1,6 +1,4 @@
-import { Platform } from 'react-native';
-import { NitroModules } from 'react-native-nitro-modules';
-import { type VideoPlayer as VideoPlayerImpl } from '../spec/nitro/VideoPlayer.nitro';
+import shaka from 'shaka-player';
 import type { VideoPlayerSource } from '../spec/nitro/VideoPlayerSource.nitro';
 import type { IgnoreSilentSwitchMode } from './types/IgnoreSilentSwitchMode';
 import type { MixAudioMode } from './types/MixAudioMode';
@@ -13,20 +11,14 @@ import {
 } from './types/VideoError';
 import type { VideoPlayerBase } from './types/VideoPlayerBase';
 import type { VideoPlayerStatus } from './types/VideoPlayerStatus';
-import { createPlayer } from './utils/playerFactory';
-import { createSource } from './utils/sourceFactory';
 import { VideoPlayerEvents } from './VideoPlayerEvents';
 
 class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
-  protected player: VideoPlayerImpl;
+  protected player = new shaka.Player();
 
   constructor(source: VideoSource | VideoConfig | VideoPlayerSource) {
-    const hybridSource = createSource(source);
-    const player = createPlayer(hybridSource);
-
     // Initialize events
     super(player.eventEmitter);
-    this.player = player;
   }
 
   /**
@@ -35,8 +27,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
    * @internal
    */
   __destroy() {
-    this.clearAllEvents();
-    this.player.dispose();
+    this.player.destroy();
   }
 
   /**
@@ -153,12 +144,11 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   }
 
   set ignoreSilentSwitchMode(value: IgnoreSilentSwitchMode) {
-    if (__DEV__ && !['ios'].includes(Platform.OS)) {
+    if (__DEV__) {
       console.warn(
         'ignoreSilentSwitchMode is not supported on this platform, it wont have any effect'
       );
     }
-
     this.player.ignoreSilentSwitchMode = value;
   }
 
