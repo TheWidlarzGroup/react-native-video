@@ -17,7 +17,6 @@ import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerView
 import com.brentvatne.common.api.ResizeMode
 import com.brentvatne.common.api.SubtitleStyle
-import com.brentvatne.datazoom.DatazoomManager
 
 @UnstableApi
 class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
@@ -81,8 +80,6 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
                 playerView.resizeMode = resizeMode
             }
         }
-
-        DatazoomManager.createContext(player ?: return)
     }
 
     fun getPlayerView(): PlayerView = playerView

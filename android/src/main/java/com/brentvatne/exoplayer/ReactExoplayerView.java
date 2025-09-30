@@ -135,6 +135,8 @@ import com.google.ads.interactivemedia.v3.api.AdEvent;
 import com.google.ads.interactivemedia.v3.api.ImaSdkFactory;
 import com.google.ads.interactivemedia.v3.api.ImaSdkSettings;
 import com.google.common.collect.ImmutableList;
+import io.datazoom.sdk.DzAdapter;
+import com.brentvatne.datazoom.DatazoomManager;
 
 import java.net.CookieHandler;
 import java.net.CookieManager;
@@ -268,6 +270,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private final String instanceId = String.valueOf(UUID.randomUUID());
 
     private CmcdConfiguration.Factory cmcdConfigurationFactory;
+    private DzAdapter dzContext;
 
     public void setCmcdConfigurationFactory(CmcdConfiguration.Factory factory) {
         this.cmcdConfigurationFactory = factory;
@@ -877,6 +880,15 @@ public class ReactExoplayerView extends FrameLayout implements
         loadVideoStarted = true;
 
         finishPlayerInitialization();
+        initDatazoomPlayer();
+    }
+
+    private void initDatazoomPlayer() {
+        if (player == null) {
+            return;
+        }
+
+      dzContext = DatazoomManager.createContext(player);
     }
 
     private DrmSessionManager initializePlayerDrm() {
@@ -1232,6 +1244,15 @@ public class ReactExoplayerView extends FrameLayout implements
         if (mainHandler != null && mainRunnable != null) {
             mainHandler.removeCallbacks(mainRunnable);
             mainRunnable = null;
+        }
+
+        clearDatazoomPlayer();
+    }
+
+    private void clearDatazoomPlayer() {
+        if (dzContext != null) {
+            DatazoomManager.releaseContext(dzContext);
+            dzContext = null;
         }
     }
 
