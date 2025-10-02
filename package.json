@@ -1,7 +1,7 @@
 {
   "name": "react-native-video-monorepo",
   "packageManager": "bun@1.1.42",
-  "version": "7.0.0-alpha.4",
+  "version": "7.0.0-alpha.5",
   "private": true,
   "repository": "https://github.com/TheWidlarzGroup/react-native-video",
   "author": "TheWidlarzGroup <hi@thewidlarzgroup.com> (https://github.com/TheWidlarzGroup)",
