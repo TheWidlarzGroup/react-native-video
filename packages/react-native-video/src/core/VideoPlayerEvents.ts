@@ -1,35 +1,21 @@
 import type { VideoPlayerEventEmitter } from '../spec/nitro/VideoPlayerEventEmitter.nitro';
-import type { AllPlayerEvents as PlayerEvents } from './types/Events';
+import {
+  ALL_PLAYER_EVENTS,
+  type AllPlayerEvents as PlayerEvents,
+} from './types/Events';
 
 export class VideoPlayerEvents {
   protected eventEmitter: VideoPlayerEventEmitter;
-  protected eventListeners: Partial<Record<keyof PlayerEvents, Set<(...params: any[]) => void>>> = {};
+  protected eventListeners: Partial<
+    Record<keyof PlayerEvents, Set<(...params: any[]) => void>>
+  > = {};
 
-  protected readonly supportedEvents: (keyof PlayerEvents)[] = [
-    'onAudioBecomingNoisy',
-    'onAudioFocusChange',
-    'onBandwidthUpdate',
-    'onBuffer',
-    'onControlsVisibleChange',
-    'onEnd',
-    'onExternalPlaybackChange',
-    'onLoad',
-    'onLoadStart',
-    'onPlaybackRateChange',
-    'onPlaybackStateChange',
-    'onProgress',
-    'onReadyToDisplay',
-    'onSeek',
-    'onStatusChange',
-    'onTextTrackDataChanged',
-    'onTimedMetadata',
-    'onTrackChange',
-    'onVolumeChange',
-  ];
+  protected readonly supportedEvents: (keyof PlayerEvents)[] =
+    ALL_PLAYER_EVENTS;
 
   constructor(eventEmitter: VideoPlayerEventEmitter) {
     this.eventEmitter = eventEmitter;
-    for (let event of this.supportedEvents){
+    for (let event of this.supportedEvents) {
       // @ts-expect-error we narrow the type of the event
       this.eventEmitter[event] = this.triggerEvent.bind(this, event);
     }
@@ -39,8 +25,7 @@ export class VideoPlayerEvents {
     event: Event,
     ...params: Parameters<PlayerEvents[Event]>
   ): boolean {
-    if (!this.eventListeners[event]?.size)
-      return false;
+    if (!this.eventListeners[event]?.size) return false;
     for (let fn of this.eventListeners[event]) {
       fn(...params);
     }
@@ -59,7 +44,7 @@ export class VideoPlayerEvents {
     event: Event,
     callback: PlayerEvents[Event]
   ) {
-    this.eventListeners[event]!.delete(callback);
+    this.eventListeners[event]?.delete(callback);
   }
 
   /**

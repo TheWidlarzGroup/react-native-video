@@ -56,8 +56,8 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     const parsedError = tryParseNativeVideoError(error);
 
     if (
-      parsedError instanceof VideoRuntimeError
-      && this.triggerEvent('onError', parsedError)
+      parsedError instanceof VideoRuntimeError &&
+      this.triggerEvent('onError', parsedError)
     ) {
       // We don't throw errors if onError is provided
       return;

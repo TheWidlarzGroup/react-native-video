@@ -18,6 +18,5 @@ export const useEvent = <T extends keyof AllPlayerEvents>(
     player.addEventListener(event, callback);
 
     return () => player.removeEventListener(event, callback);
-    ;
   }, [player, event, callback]);
 };
