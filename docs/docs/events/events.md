@@ -87,17 +87,17 @@ import { VideoPlayer } from 'react-native-video';
 
 const player = new VideoPlayer('https://example.com/video.mp4');
 
-player.onLoad = (data) => {
+player.addEventListener('onLoad', (data) => {
   console.log('Video loaded! Duration:', data.duration);
-};
+});
 
-player.onProgress = (data) => {
+player.addEventListener('onProgress', (data) => {
   console.log('Current time:', data.currentTime);
-};
+});
 
-player.onError = (error) => {
+player.addEventListener('onError', (error) => {
   console.error('Player Error:', error.code, error.message);
-};
+});
 
 player.play();
 ```
