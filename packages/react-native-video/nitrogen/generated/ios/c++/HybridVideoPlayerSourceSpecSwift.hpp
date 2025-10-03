@@ -92,8 +92,7 @@ namespace margelo::nitro::video {
       return __result;
     }
     inline NativeVideoConfig getConfig() noexcept override {
-      auto __result = _swiftPart.getConfig();
-      return __result;
+      return _swiftPart.getConfig();
     }
 
   public:

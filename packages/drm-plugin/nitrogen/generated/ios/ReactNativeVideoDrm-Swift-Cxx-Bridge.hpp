@@ -32,19 +32,19 @@ namespace margelo::nitro::videodrm::bridge::swift {
    * Specialized version of `std::shared_ptr<HybridPluginManagerSpec>`.
    */
   using std__shared_ptr_HybridPluginManagerSpec_ = std::shared_ptr<HybridPluginManagerSpec>;
-  std::shared_ptr<HybridPluginManagerSpec> create_std__shared_ptr_HybridPluginManagerSpec_(void* _Nonnull swiftUnsafePointer);
-  void* _Nonnull get_std__shared_ptr_HybridPluginManagerSpec_(std__shared_ptr_HybridPluginManagerSpec_ cppType);
+  std::shared_ptr<HybridPluginManagerSpec> create_std__shared_ptr_HybridPluginManagerSpec_(void* NON_NULL swiftUnsafePointer) noexcept;
+  void* NON_NULL get_std__shared_ptr_HybridPluginManagerSpec_(std__shared_ptr_HybridPluginManagerSpec_ cppType) noexcept;
   
   // pragma MARK: std::weak_ptr<HybridPluginManagerSpec>
   using std__weak_ptr_HybridPluginManagerSpec_ = std::weak_ptr<HybridPluginManagerSpec>;
-  inline std__weak_ptr_HybridPluginManagerSpec_ weakify_std__shared_ptr_HybridPluginManagerSpec_(const std::shared_ptr<HybridPluginManagerSpec>& strong) { return strong; }
+  inline std__weak_ptr_HybridPluginManagerSpec_ weakify_std__shared_ptr_HybridPluginManagerSpec_(const std::shared_ptr<HybridPluginManagerSpec>& strong) noexcept { return strong; }
   
   // pragma MARK: Result<void>
   using Result_void_ = Result<void>;
-  inline Result_void_ create_Result_void_() {
+  inline Result_void_ create_Result_void_() noexcept {
     return Result<void>::withValue();
   }
-  inline Result_void_ create_Result_void_(const std::exception_ptr& error) {
+  inline Result_void_ create_Result_void_(const std::exception_ptr& error) noexcept {
     return Result<void>::withError(error);
   }
 

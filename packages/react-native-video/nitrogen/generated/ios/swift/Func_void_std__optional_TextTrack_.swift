@@ -23,13 +23,7 @@ public final class Func_void_std__optional_TextTrack_ {
 
   @inline(__always)
   public func call(track: bridge.std__optional_TextTrack_) -> Void {
-    self.closure({ () -> TextTrack? in
-      if let __unwrapped = track.value {
-        return __unwrapped
-      } else {
-        return nil
-      }
-    }())
+    self.closure(track.value)
   }
 
   /**
