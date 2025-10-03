@@ -12,14 +12,16 @@ import {
 import type { VideoPlayerBase } from "./types/VideoPlayerBase";
 import type { VideoPlayerStatus } from "./types/VideoPlayerStatus";
 import { VideoPlayerEvents } from "./VideoPlayerEvents";
+import { WebEventEmiter } from "./WebEventEmiter";
 
 class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   protected player = new shaka.Player();
-  protected video = document.createElement("video");
+  protected video: HTMLVideoElement;
 
   constructor(source: VideoSource | VideoConfig | VideoPlayerSource) {
-    // Initialize events
-    super(player.eventEmitter);
+    const video = document.createElement("video");
+    super(new WebEventEmiter(video));
+    this.video = video;
     this.player.attach(this.video);
   }
 

@@ -1,7 +1,7 @@
-import type { VideoPlayerSource } from '../../spec/nitro/VideoPlayerSource.nitro';
 import type { TextTrack } from './TextTrack';
 import type { VideoRuntimeError } from './VideoError';
 import type { VideoOrientation } from './VideoOrientation';
+import type { VideoPlayerSourceBase } from './VideoPlayerSourceBase';
 import type { VideoPlayerStatus } from './VideoPlayerStatus';
 
 export interface VideoPlayerEvents {
@@ -28,6 +28,7 @@ export interface VideoPlayerEvents {
   /**
    * Called when the video view's controls visibility changes.
    * @param visible Whether the video view's controls are visible.
+   * @platform Android, Ios
    */
   onControlsVisibleChange: (visible: boolean) => void;
   /**
@@ -72,15 +73,18 @@ export interface VideoPlayerEvents {
   onSeek: (seekTime: number) => void;
   /**
    * Called when player receives timed metadata.
+   * @platform Android, Ios
    */
   onTimedMetadata: (metadata: TimedMetadata) => void;
   /**
    * Called when the text track (currently displayed subtitle) data changes.
+   * @platform Android, Ios
    */
   onTextTrackDataChanged: (texts: string[]) => void;
   /**
    * Called when the selected text track changes.
    * @param track - The newly selected text track, or null if no track is selected
+   * @platform Android, Ios
    */
   onTrackChange: (track: TextTrack | null) => void;
   /**
@@ -178,7 +182,7 @@ export interface onLoadStartData {
   /**
    * The source of the video.
    */
-  source: VideoPlayerSource;
+  source: VideoPlayerSourceBase;
 }
 
 export interface onPlaybackStateChangeData {
