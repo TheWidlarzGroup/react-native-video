@@ -91,13 +91,7 @@ public extension BufferConfig {
   var livePlayback: LivePlaybackParams? {
     @inline(__always)
     get {
-      return { () -> LivePlaybackParams? in
-        if let __unwrapped = self.__livePlayback.value {
-          return __unwrapped
-        } else {
-          return nil
-        }
-      }()
+      return self.__livePlayback.value
     }
     @inline(__always)
     set {
@@ -233,13 +227,7 @@ public extension BufferConfig {
   var preferredMaximumResolution: Resolution? {
     @inline(__always)
     get {
-      return { () -> Resolution? in
-        if let __unwrapped = self.__preferredMaximumResolution.value {
-          return __unwrapped
-        } else {
-          return nil
-        }
-      }()
+      return self.__preferredMaximumResolution.value
     }
     @inline(__always)
     set {
@@ -273,13 +261,7 @@ public extension BufferConfig {
   var preferredMaximumResolutionForExpensiveNetworks: Resolution? {
     @inline(__always)
     get {
-      return { () -> Resolution? in
-        if let __unwrapped = self.__preferredMaximumResolutionForExpensiveNetworks.value {
-          return __unwrapped
-        } else {
-          return nil
-        }
-      }()
+      return self.__preferredMaximumResolutionForExpensiveNetworks.value
     }
     @inline(__always)
     set {

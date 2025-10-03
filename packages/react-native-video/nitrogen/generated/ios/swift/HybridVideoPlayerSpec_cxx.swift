@@ -264,7 +264,8 @@ open class HybridVideoPlayerSpec_cxx {
   public final func replaceSourceAsync(source: bridge.std__optional_std__shared_ptr_HybridVideoPlayerSourceSpec__) -> bridge.Result_std__shared_ptr_Promise_void___ {
     do {
       let __result = try self.__implementation.replaceSourceAsync(source: { () -> (any HybridVideoPlayerSourceSpec)? in
-        if let __unwrapped = source.value {
+        if bridge.has_value_std__optional_std__shared_ptr_HybridVideoPlayerSourceSpec__(source) {
+          let __unwrapped = bridge.get_std__optional_std__shared_ptr_HybridVideoPlayerSourceSpec__(source)
           return { () -> HybridVideoPlayerSourceSpec in
             let __unsafePointer = bridge.get_std__shared_ptr_HybridVideoPlayerSourceSpec_(__unwrapped)
             let __instance = HybridVideoPlayerSourceSpec_cxx.fromUnsafe(__unsafePointer)
@@ -293,13 +294,9 @@ open class HybridVideoPlayerSpec_cxx {
   public final func getAvailableTextTracks() -> bridge.Result_std__vector_TextTrack__ {
     do {
       let __result = try self.__implementation.getAvailableTextTracks()
-      let __resultCpp = { () -> bridge.std__vector_TextTrack_ in
-        var __vector = bridge.create_std__vector_TextTrack_(__result.count)
-        for __item in __result {
-          __vector.push_back(__item)
-        }
-        return __vector
-      }()
+      let __resultCpp = __result.withUnsafeBufferPointer { __pointer -> bridge.std__vector_TextTrack_ in
+        return bridge.copy_std__vector_TextTrack_(__pointer.baseAddress!, __result.count)
+      }
       return bridge.create_Result_std__vector_TextTrack__(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
@@ -310,13 +307,7 @@ open class HybridVideoPlayerSpec_cxx {
   @inline(__always)
   public final func selectTextTrack(textTrack: bridge.std__optional_TextTrack_) -> bridge.Result_void_ {
     do {
-      try self.__implementation.selectTextTrack(textTrack: { () -> TextTrack? in
-        if let __unwrapped = textTrack.value {
-          return __unwrapped
-        } else {
-          return nil
-        }
-      }())
+      try self.__implementation.selectTextTrack(textTrack: textTrack.value)
       return bridge.create_Result_void_()
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()

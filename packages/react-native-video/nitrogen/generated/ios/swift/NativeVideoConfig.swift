@@ -21,13 +21,9 @@ public extension NativeVideoConfig {
   init(uri: String, externalSubtitles: [NativeExternalSubtitle]?, drm: NativeDrmParams?, headers: Dictionary<String, String>?, bufferConfig: BufferConfig?, initializeOnCreation: Bool?) {
     self.init(std.string(uri), { () -> bridge.std__optional_std__vector_NativeExternalSubtitle__ in
       if let __unwrappedValue = externalSubtitles {
-        return bridge.create_std__optional_std__vector_NativeExternalSubtitle__({ () -> bridge.std__vector_NativeExternalSubtitle_ in
-          var __vector = bridge.create_std__vector_NativeExternalSubtitle_(__unwrappedValue.count)
-          for __item in __unwrappedValue {
-            __vector.push_back(__item)
-          }
-          return __vector
-        }())
+        return bridge.create_std__optional_std__vector_NativeExternalSubtitle__(__unwrappedValue.withUnsafeBufferPointer { __pointer -> bridge.std__vector_NativeExternalSubtitle_ in
+          return bridge.copy_std__vector_NativeExternalSubtitle_(__pointer.baseAddress!, __unwrappedValue.count)
+        })
       } else {
         return .init()
       }
@@ -79,8 +75,13 @@ public extension NativeVideoConfig {
     @inline(__always)
     get {
       return { () -> [NativeExternalSubtitle]? in
-        if let __unwrapped = self.__externalSubtitles.value {
-          return __unwrapped.map({ __item in __item })
+        if bridge.has_value_std__optional_std__vector_NativeExternalSubtitle__(self.__externalSubtitles) {
+          let __unwrapped = bridge.get_std__optional_std__vector_NativeExternalSubtitle__(self.__externalSubtitles)
+          return { () -> [NativeExternalSubtitle] in
+            let __data = bridge.get_data_std__vector_NativeExternalSubtitle_(__unwrapped)
+            let __size = __unwrapped.size()
+            return Array(UnsafeBufferPointer(start: __data, count: __size))
+          }()
         } else {
           return nil
         }
@@ -90,13 +91,9 @@ public extension NativeVideoConfig {
     set {
       self.__externalSubtitles = { () -> bridge.std__optional_std__vector_NativeExternalSubtitle__ in
         if let __unwrappedValue = newValue {
-          return bridge.create_std__optional_std__vector_NativeExternalSubtitle__({ () -> bridge.std__vector_NativeExternalSubtitle_ in
-            var __vector = bridge.create_std__vector_NativeExternalSubtitle_(__unwrappedValue.count)
-            for __item in __unwrappedValue {
-              __vector.push_back(__item)
-            }
-            return __vector
-          }())
+          return bridge.create_std__optional_std__vector_NativeExternalSubtitle__(__unwrappedValue.withUnsafeBufferPointer { __pointer -> bridge.std__vector_NativeExternalSubtitle_ in
+            return bridge.copy_std__vector_NativeExternalSubtitle_(__pointer.baseAddress!, __unwrappedValue.count)
+          })
         } else {
           return .init()
         }
@@ -107,13 +104,7 @@ public extension NativeVideoConfig {
   var drm: NativeDrmParams? {
     @inline(__always)
     get {
-      return { () -> NativeDrmParams? in
-        if let __unwrapped = self.__drm.value {
-          return __unwrapped
-        } else {
-          return nil
-        }
-      }()
+      return self.__drm.value
     }
     @inline(__always)
     set {
@@ -131,7 +122,8 @@ public extension NativeVideoConfig {
     @inline(__always)
     get {
       return { () -> Dictionary<String, String>? in
-        if let __unwrapped = self.__headers.value {
+        if bridge.has_value_std__optional_std__unordered_map_std__string__std__string__(self.__headers) {
+          let __unwrapped = bridge.get_std__optional_std__unordered_map_std__string__std__string__(self.__headers)
           return { () -> Dictionary<String, String> in
             var __dictionary = Dictionary<String, String>(minimumCapacity: __unwrapped.size())
             let __keys = bridge.get_std__unordered_map_std__string__std__string__keys(__unwrapped)
@@ -167,13 +159,7 @@ public extension NativeVideoConfig {
   var bufferConfig: BufferConfig? {
     @inline(__always)
     get {
-      return { () -> BufferConfig? in
-        if let __unwrapped = self.__bufferConfig.value {
-          return __unwrapped
-        } else {
-          return nil
-        }
-      }()
+      return self.__bufferConfig.value
     }
     @inline(__always)
     set {

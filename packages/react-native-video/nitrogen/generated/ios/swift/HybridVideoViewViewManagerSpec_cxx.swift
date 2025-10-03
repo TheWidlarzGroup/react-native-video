@@ -123,7 +123,8 @@ open class HybridVideoViewViewManagerSpec_cxx {
     @inline(__always)
     set {
       self.__implementation.player = { () -> (any HybridVideoPlayerSpec)? in
-        if let __unwrapped = newValue.value {
+        if bridge.has_value_std__optional_std__shared_ptr_HybridVideoPlayerSpec__(newValue) {
+          let __unwrapped = bridge.get_std__optional_std__shared_ptr_HybridVideoPlayerSpec__(newValue)
           return { () -> HybridVideoPlayerSpec in
             let __unsafePointer = bridge.get_std__shared_ptr_HybridVideoPlayerSpec_(__unwrapped)
             let __instance = HybridVideoPlayerSpec_cxx.fromUnsafe(__unsafePointer)
@@ -219,7 +220,8 @@ open class HybridVideoViewViewManagerSpec_cxx {
     @inline(__always)
     set {
       self.__implementation.onPictureInPictureChange = { () -> ((_ isInPictureInPicture: Bool) -> Void)? in
-        if let __unwrapped = newValue.value {
+        if bridge.has_value_std__optional_std__function_void_bool____isInPictureInPicture______(newValue) {
+          let __unwrapped = bridge.get_std__optional_std__function_void_bool____isInPictureInPicture______(newValue)
           return { () -> (Bool) -> Void in
             let __wrappedFunction = bridge.wrap_Func_void_bool(__unwrapped)
             return { (__isInPictureInPicture: Bool) -> Void in
@@ -250,7 +252,8 @@ open class HybridVideoViewViewManagerSpec_cxx {
     @inline(__always)
     set {
       self.__implementation.onFullscreenChange = { () -> ((_ fullscreen: Bool) -> Void)? in
-        if let __unwrapped = newValue.value {
+        if bridge.has_value_std__optional_std__function_void_bool____fullscreen______(newValue) {
+          let __unwrapped = bridge.get_std__optional_std__function_void_bool____fullscreen______(newValue)
           return { () -> (Bool) -> Void in
             let __wrappedFunction = bridge.wrap_Func_void_bool(__unwrapped)
             return { (__fullscreen: Bool) -> Void in
@@ -281,7 +284,8 @@ open class HybridVideoViewViewManagerSpec_cxx {
     @inline(__always)
     set {
       self.__implementation.willEnterFullscreen = { () -> (() -> Void)? in
-        if let __unwrapped = newValue.value {
+        if bridge.has_value_std__optional_std__function_void____(newValue) {
+          let __unwrapped = bridge.get_std__optional_std__function_void____(newValue)
           return { () -> () -> Void in
             let __wrappedFunction = bridge.wrap_Func_void(__unwrapped)
             return { () -> Void in
@@ -312,7 +316,8 @@ open class HybridVideoViewViewManagerSpec_cxx {
     @inline(__always)
     set {
       self.__implementation.willExitFullscreen = { () -> (() -> Void)? in
-        if let __unwrapped = newValue.value {
+        if bridge.has_value_std__optional_std__function_void____(newValue) {
+          let __unwrapped = bridge.get_std__optional_std__function_void____(newValue)
           return { () -> () -> Void in
             let __wrappedFunction = bridge.wrap_Func_void(__unwrapped)
             return { () -> Void in
@@ -343,7 +348,8 @@ open class HybridVideoViewViewManagerSpec_cxx {
     @inline(__always)
     set {
       self.__implementation.willEnterPictureInPicture = { () -> (() -> Void)? in
-        if let __unwrapped = newValue.value {
+        if bridge.has_value_std__optional_std__function_void____(newValue) {
+          let __unwrapped = bridge.get_std__optional_std__function_void____(newValue)
           return { () -> () -> Void in
             let __wrappedFunction = bridge.wrap_Func_void(__unwrapped)
             return { () -> Void in
@@ -374,7 +380,8 @@ open class HybridVideoViewViewManagerSpec_cxx {
     @inline(__always)
     set {
       self.__implementation.willExitPictureInPicture = { () -> (() -> Void)? in
-        if let __unwrapped = newValue.value {
+        if bridge.has_value_std__optional_std__function_void____(newValue) {
+          let __unwrapped = bridge.get_std__optional_std__function_void____(newValue)
           return { () -> () -> Void in
             let __wrappedFunction = bridge.wrap_Func_void(__unwrapped)
             return { () -> Void in

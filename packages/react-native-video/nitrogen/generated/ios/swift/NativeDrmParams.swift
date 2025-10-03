@@ -77,7 +77,8 @@ public extension NativeDrmParams {
     @inline(__always)
     get {
       return { () -> String? in
-        if let __unwrapped = self.__type.value {
+        if bridge.has_value_std__optional_std__string_(self.__type) {
+          let __unwrapped = bridge.get_std__optional_std__string_(self.__type)
           return String(__unwrapped)
         } else {
           return nil
@@ -100,7 +101,8 @@ public extension NativeDrmParams {
     @inline(__always)
     get {
       return { () -> String? in
-        if let __unwrapped = self.__licenseUrl.value {
+        if bridge.has_value_std__optional_std__string_(self.__licenseUrl) {
+          let __unwrapped = bridge.get_std__optional_std__string_(self.__licenseUrl)
           return String(__unwrapped)
         } else {
           return nil
@@ -123,7 +125,8 @@ public extension NativeDrmParams {
     @inline(__always)
     get {
       return { () -> String? in
-        if let __unwrapped = self.__certificateUrl.value {
+        if bridge.has_value_std__optional_std__string_(self.__certificateUrl) {
+          let __unwrapped = bridge.get_std__optional_std__string_(self.__certificateUrl)
           return String(__unwrapped)
         } else {
           return nil
@@ -146,7 +149,8 @@ public extension NativeDrmParams {
     @inline(__always)
     get {
       return { () -> String? in
-        if let __unwrapped = self.__contentId.value {
+        if bridge.has_value_std__optional_std__string_(self.__contentId) {
+          let __unwrapped = bridge.get_std__optional_std__string_(self.__contentId)
           return String(__unwrapped)
         } else {
           return nil
@@ -169,7 +173,8 @@ public extension NativeDrmParams {
     @inline(__always)
     get {
       return { () -> Dictionary<String, String>? in
-        if let __unwrapped = self.__licenseHeaders.value {
+        if bridge.has_value_std__optional_std__unordered_map_std__string__std__string__(self.__licenseHeaders) {
+          let __unwrapped = bridge.get_std__optional_std__unordered_map_std__string__std__string__(self.__licenseHeaders)
           return { () -> Dictionary<String, String> in
             var __dictionary = Dictionary<String, String>(minimumCapacity: __unwrapped.size())
             let __keys = bridge.get_std__unordered_map_std__string__std__string__keys(__unwrapped)
@@ -223,7 +228,8 @@ public extension NativeDrmParams {
     @inline(__always)
     get {
       return { () -> ((_ payload: OnGetLicensePayload) -> Promise<Promise<String>>)? in
-        if let __unwrapped = self.__getLicense.value {
+        if bridge.has_value_std__optional_std__function_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____const_OnGetLicensePayload_____payload______(self.__getLicense) {
+          let __unwrapped = bridge.get_std__optional_std__function_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____const_OnGetLicensePayload_____payload______(self.__getLicense)
           return { () -> (OnGetLicensePayload) -> Promise<Promise<String>> in
             let __wrappedFunction = bridge.wrap_Func_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload(__unwrapped)
             return { (__payload: OnGetLicensePayload) -> Promise<Promise<String>> in

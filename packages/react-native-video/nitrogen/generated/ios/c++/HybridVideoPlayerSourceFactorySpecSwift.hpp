@@ -98,7 +98,7 @@ namespace margelo::nitro::video {
       return __value;
     }
     inline std::shared_ptr<HybridVideoPlayerSourceSpec> fromVideoConfig(const NativeVideoConfig& config) override {
-      auto __result = _swiftPart.fromVideoConfig(config);
+      auto __result = _swiftPart.fromVideoConfig(std::forward<decltype(config)>(config));
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }
