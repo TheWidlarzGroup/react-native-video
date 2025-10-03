@@ -78,6 +78,12 @@ class HybridVideoViewViewManager(nitroId: Int): HybridVideoViewViewManagerSpec()
       videoView.get()?.keepScreenAwake = value
     }
 
+  override var surfaceType: SurfaceType
+    get() = videoView.get()?.surfaceType ?: SurfaceType.SURFACE
+    set(value) {
+      videoView.get()?.surfaceType = value
+    }
+
   // View callbacks
   override var onPictureInPictureChange: ((Boolean) -> Unit)? = null
     set(value) {

@@ -191,6 +191,17 @@ open class HybridVideoViewViewManagerSpec_cxx {
     }
   }
   
+  public final var surfaceType: Int32 {
+    @inline(__always)
+    get {
+      return self.__implementation.surfaceType.rawValue
+    }
+    @inline(__always)
+    set {
+      self.__implementation.surfaceType = margelo.nitro.video.SurfaceType(rawValue: newValue)!
+    }
+  }
+  
   public final var onPictureInPictureChange: bridge.std__optional_std__function_void_bool____isInPictureInPicture______ {
     @inline(__always)
     get {

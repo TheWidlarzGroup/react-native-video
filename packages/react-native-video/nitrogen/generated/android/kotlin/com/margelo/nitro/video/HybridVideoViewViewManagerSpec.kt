@@ -73,6 +73,12 @@ abstract class HybridVideoViewViewManagerSpec: HybridObject() {
   @set:Keep
   abstract var keepScreenAwake: Boolean
   
+  @get:DoNotStrip
+  @get:Keep
+  @set:DoNotStrip
+  @set:Keep
+  abstract var surfaceType: SurfaceType
+  
   abstract var onPictureInPictureChange: ((isInPictureInPicture: Boolean) -> Unit)?
   
   private var onPictureInPictureChange_cxx: Func_void_bool?

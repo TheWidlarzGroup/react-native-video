@@ -17,6 +17,7 @@ public protocol HybridVideoViewViewManagerSpec_protocol: HybridObject {
   var autoEnterPictureInPicture: Bool { get set }
   var resizeMode: ResizeMode { get set }
   var keepScreenAwake: Bool { get set }
+  var surfaceType: SurfaceType { get set }
   var onPictureInPictureChange: ((_ isInPictureInPicture: Bool) -> Void)? { get set }
   var onFullscreenChange: ((_ fullscreen: Bool) -> Void)? { get set }
   var willEnterFullscreen: (() -> Void)? { get set }

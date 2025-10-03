@@ -8,6 +8,7 @@ import android.os.Build
 import android.util.AttributeSet
 import android.util.DisplayMetrics
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -22,6 +23,7 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.margelo.nitro.NitroModules
 import com.margelo.nitro.video.HybridVideoPlayer
 import com.margelo.nitro.video.ResizeMode
+import com.margelo.nitro.video.SurfaceType
 import com.margelo.nitro.video.VideoViewEvents
 import com.twg.video.core.LibraryError
 import com.twg.video.core.VideoManager
@@ -36,6 +38,8 @@ import com.twg.video.core.extensions.toAspectRatioFrameLayout
 import com.twg.video.core.utils.PictureInPictureUtils
 import com.twg.video.core.utils.PictureInPictureUtils.createDisabledPictureInPictureParams
 import com.twg.video.core.utils.SmallVideoPlayerOptimizer
+import com.twg.video.R.layout.player_view_surface
+import com.twg.video.R.layout.player_view_texture
 
 @UnstableApi
 class VideoView @JvmOverloads constructor(
@@ -90,6 +94,20 @@ class VideoView @JvmOverloads constructor(
 
   var pictureInPictureEnabled: Boolean = false
 
+  var surfaceType: SurfaceType = SurfaceType.SURFACE
+    set(value) {
+      if (field == value) return
+      field = value
+
+      runOnMainThread {
+        removeView(playerView)
+        playerView.player = null
+        playerView = createPlayerView()
+        playerView.player = hybridPlayer?.player
+        addView(playerView)
+      }
+    }
+
   var resizeMode: ResizeMode = ResizeMode.NONE
     set(value) {
       field = value
@@ -101,7 +119,9 @@ class VideoView @JvmOverloads constructor(
   var keepScreenAwake: Boolean
     get() = playerView.keepScreenOn
     set(value) {
-      playerView.keepScreenOn = value
+      runOnMainThread {
+        playerView.keepScreenOn = value
+      }
     }
 
   var events = object : VideoViewEvents {
@@ -114,15 +134,7 @@ class VideoView @JvmOverloads constructor(
   }
 
   var onNitroIdChange: ((Int?) -> Unit)? = null
-  var playerView = PlayerView(context).apply {
-    layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
-    setShutterBackgroundColor(Color.TRANSPARENT)
-    setShowSubtitleButton(true)
-    useController = false
-
-    // Apply optimizations based on video player size if needed
-    configureForSmallPlayer()
-  }
+  var playerView = createPlayerView()
   var isInFullscreen: Boolean = false
     set(value) {
       field = value
@@ -151,6 +163,22 @@ class VideoView @JvmOverloads constructor(
 
   private fun applyResizeMode() {
     playerView.resizeMode = resizeMode.toAspectRatioFrameLayout()
+  }
+
+  @SuppressLint("InflateParams")
+  private fun createPlayerView(): PlayerView {
+    return when (surfaceType) {
+      SurfaceType.SURFACE -> LayoutInflater.from(context).inflate(player_view_surface, null) as PlayerView
+      SurfaceType.TEXTURE -> LayoutInflater.from(context).inflate(player_view_texture, null) as PlayerView
+    }.apply {
+      layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+      setShutterBackgroundColor(Color.TRANSPARENT)
+      setShowSubtitleButton(true)
+      useController = false
+
+      // Apply optimizations based on video player size if needed
+      configureForSmallPlayer()
+    }
   }
 
   private val layoutRunnable = Runnable {

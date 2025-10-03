@@ -11,6 +11,8 @@
 namespace margelo::nitro::video { class HybridVideoPlayerSpec; }
 // Forward declaration of `ResizeMode` to properly resolve imports.
 namespace margelo::nitro::video { enum class ResizeMode; }
+// Forward declaration of `SurfaceType` to properly resolve imports.
+namespace margelo::nitro::video { enum class SurfaceType; }
 
 #include <memory>
 #include "HybridVideoPlayerSpec.hpp"
@@ -18,6 +20,8 @@ namespace margelo::nitro::video { enum class ResizeMode; }
 #include "JHybridVideoPlayerSpec.hpp"
 #include "ResizeMode.hpp"
 #include "JResizeMode.hpp"
+#include "SurfaceType.hpp"
+#include "JSurfaceType.hpp"
 #include <functional>
 #include "JFunc_void_bool.hpp"
 #include "JFunc_void.hpp"
@@ -98,6 +102,15 @@ namespace margelo::nitro::video {
   void JHybridVideoViewViewManagerSpec::setKeepScreenAwake(bool keepScreenAwake) {
     static const auto method = javaClassStatic()->getMethod<void(jboolean /* keepScreenAwake */)>("setKeepScreenAwake");
     method(_javaPart, keepScreenAwake);
+  }
+  SurfaceType JHybridVideoViewViewManagerSpec::getSurfaceType() {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JSurfaceType>()>("getSurfaceType");
+    auto __result = method(_javaPart);
+    return __result->toCpp();
+  }
+  void JHybridVideoViewViewManagerSpec::setSurfaceType(SurfaceType surfaceType) {
+    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JSurfaceType> /* surfaceType */)>("setSurfaceType");
+    method(_javaPart, JSurfaceType::fromCpp(surfaceType));
   }
   std::optional<std::function<void(bool /* isInPictureInPicture */)>> JHybridVideoViewViewManagerSpec::getOnPictureInPictureChange() {
     static const auto method = javaClassStatic()->getMethod<jni::local_ref<JFunc_void_bool::javaobject>()>("getOnPictureInPictureChange_cxx");
