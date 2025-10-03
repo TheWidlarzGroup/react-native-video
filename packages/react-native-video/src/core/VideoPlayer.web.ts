@@ -1,24 +1,26 @@
-import shaka from 'shaka-player';
-import type { VideoPlayerSource } from '../spec/nitro/VideoPlayerSource.nitro';
-import type { IgnoreSilentSwitchMode } from './types/IgnoreSilentSwitchMode';
-import type { MixAudioMode } from './types/MixAudioMode';
-import type { TextTrack } from './types/TextTrack';
-import type { NoAutocomplete } from './types/Utils';
-import type { VideoConfig, VideoSource } from './types/VideoConfig';
+import shaka from "shaka-player";
+import type { VideoPlayerSource } from "../spec/nitro/VideoPlayerSource.nitro";
+import type { IgnoreSilentSwitchMode } from "./types/IgnoreSilentSwitchMode";
+import type { MixAudioMode } from "./types/MixAudioMode";
+import type { TextTrack } from "./types/TextTrack";
+import type { NoAutocomplete } from "./types/Utils";
+import type { VideoConfig, VideoSource } from "./types/VideoConfig";
 import {
   tryParseNativeVideoError,
   VideoRuntimeError,
-} from './types/VideoError';
-import type { VideoPlayerBase } from './types/VideoPlayerBase';
-import type { VideoPlayerStatus } from './types/VideoPlayerStatus';
-import { VideoPlayerEvents } from './VideoPlayerEvents';
+} from "./types/VideoError";
+import type { VideoPlayerBase } from "./types/VideoPlayerBase";
+import type { VideoPlayerStatus } from "./types/VideoPlayerStatus";
+import { VideoPlayerEvents } from "./VideoPlayerEvents";
 
 class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   protected player = new shaka.Player();
+  protected video = document.createElement("video");
 
   constructor(source: VideoSource | VideoConfig | VideoPlayerSource) {
     // Initialize events
     super(player.eventEmitter);
+    this.player.attach(this.video);
   }
 
   /**
@@ -30,13 +32,8 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     this.player.destroy();
   }
 
-  /**
-   * Returns the native (hybrid) player instance.
-   * Should not be used outside of the module.
-   * @internal
-   */
-  __getNativePlayer() {
-    return this.player;
+  __getNativeRef() {
+    return this.video;
   }
 
   /**
@@ -47,26 +44,14 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     const parsedError = tryParseNativeVideoError(error);
 
     if (
-      parsedError instanceof VideoRuntimeError
-      && this.triggerEvent('onError', parsedError)
+      parsedError instanceof VideoRuntimeError &&
+      this.triggerEvent("onError", parsedError)
     ) {
       // We don't throw errors if onError is provided
       return;
     }
 
     throw parsedError;
-  }
-
-  /**
-   * Wraps a promise to try parsing native errors to VideoRuntimeError
-   * @internal
-   */
-  private wrapPromise<T>(promise: Promise<T>) {
-    return new Promise<T>((resolve, reject) => {
-      promise.then(resolve).catch((error) => {
-        reject(this.throwError(error));
-      });
-    });
   }
 
   // Source
@@ -76,85 +61,95 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
 
   // Status
   get status(): VideoPlayerStatus {
-    return this.player.status;
+    if (this.video.error) return "error";
+    if (this.video.readyState === HTMLMediaElement.HAVE_NOTHING) return "idle";
+    if (
+      this.video.readyState === HTMLMediaElement.HAVE_ENOUGH_DATA ||
+      this.video.readyState === HTMLMediaElement.HAVE_FUTURE_DATA
+    )
+      return "readyToPlay";
+    return "loading";
   }
 
   // Duration
   get duration(): number {
-    return this.player.duration;
+    return this.video.duration;
   }
 
   // Volume
   get volume(): number {
-    return this.player.volume;
+    return this.video.volume;
   }
 
   set volume(value: number) {
-    this.player.volume = value;
+    this.video.volume = value;
   }
 
   // Current Time
   get currentTime(): number {
-    return this.player.currentTime;
+    return this.video.currentTime;
   }
 
   set currentTime(value: number) {
-    this.player.currentTime = value;
+    this.video.currentTime = value;
   }
 
   // Muted
   get muted(): boolean {
-    return this.player.muted;
+    return this.video.muted;
   }
 
   set muted(value: boolean) {
-    this.player.muted = value;
+    this.video.muted = value;
   }
 
   // Loop
   get loop(): boolean {
-    return this.player.loop;
+    return this.video.loop;
   }
 
   set loop(value: boolean) {
-    this.player.loop = value;
+    this.video.loop = value;
   }
 
   // Rate
   get rate(): number {
-    return this.player.rate;
+    return this.video.playbackRate;
   }
 
   set rate(value: number) {
-    this.player.rate = value;
+    this.video.playbackRate = value;
   }
 
   // Mix Audio Mode
   get mixAudioMode(): MixAudioMode {
-    return this.player.mixAudioMode;
+    return "auto";
   }
 
-  set mixAudioMode(value: MixAudioMode) {
-    this.player.mixAudioMode = value;
+  set mixAudioMode(_: MixAudioMode) {
+    if (__DEV__) {
+      console.warn(
+        "mixAudioMode is not supported on this platform, it wont have any effect",
+      );
+    }
   }
 
   // Ignore Silent Switch Mode
   get ignoreSilentSwitchMode(): IgnoreSilentSwitchMode {
-    return this.player.ignoreSilentSwitchMode;
+    return "auto";
   }
 
-  set ignoreSilentSwitchMode(value: IgnoreSilentSwitchMode) {
+  set ignoreSilentSwitchMode(_: IgnoreSilentSwitchMode) {
     if (__DEV__) {
       console.warn(
-        'ignoreSilentSwitchMode is not supported on this platform, it wont have any effect'
+        "ignoreSilentSwitchMode is not supported on this platform, it wont have any effect",
       );
     }
-    this.player.ignoreSilentSwitchMode = value;
   }
 
   // Play In Background
   get playInBackground(): boolean {
-    return this.player.playInBackground;
+    return true;
   }
 
   set playInBackground(value: boolean) {
@@ -177,14 +172,10 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
 
   async initialize(): Promise<void> {
     await this.wrapPromise(this.player.initialize());
-
-    NitroModules.updateMemorySize(this.player);
   }
 
   async preload(): Promise<void> {
-    await this.wrapPromise(this.player.preload());
-
-    NitroModules.updateMemorySize(this.player);
+    this.player.load(this.media, this.startTime);
   }
 
   /**
@@ -199,7 +190,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
 
   play(): void {
     try {
-      this.player.play();
+      this.video.play();
     } catch (error) {
       this.throwError(error);
     }
@@ -207,7 +198,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
 
   pause(): void {
     try {
-      this.player.pause();
+      this.video.pause();
     } catch (error) {
       this.throwError(error);
     }
@@ -215,7 +206,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
 
   seekBy(time: number): void {
     try {
-      this.player.seekBy(time);
+      this.video.currentTime += time;
     } catch (error) {
       this.throwError(error);
     }
@@ -223,22 +214,24 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
 
   seekTo(time: number): void {
     try {
-      this.player.seekTo(time);
+      this.video.currentTime = time;
     } catch (error) {
       this.throwError(error);
     }
   }
 
   async replaceSourceAsync(
-    source: VideoSource | VideoConfig | NoAutocomplete<VideoPlayerSource> | null
+    source:
+      | VideoSource
+      | VideoConfig
+      | NoAutocomplete<VideoPlayerSource>
+      | null,
   ): Promise<void> {
     await this.wrapPromise(
       this.player.replaceSourceAsync(
-        source === null ? null : createSource(source)
-      )
+        source === null ? null : createSource(source),
+      ),
     );
-
-    NitroModules.updateMemorySize(this.player);
   }
 
   // Text Track Management

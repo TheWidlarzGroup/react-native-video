@@ -1,20 +1,14 @@
 import {
-	forwardRef,
-	type HTMLProps,
-	memo,
-	useEffect,
-	useImperativeHandle,
-	useRef,
+  forwardRef,
+  memo,
+  useEffect,
+  useImperativeHandle,
+  useRef,
 } from "react";
-import type { ViewProps, ViewStyle } from "react-native";
-import { unstable_createElement } from "react-native-web";
+import { View, type ViewStyle } from "react-native";
 import { VideoError } from "../types/VideoError";
 import type { VideoPlayer } from "../VideoPlayer.web";
 import type { VideoViewProps, VideoViewRef } from "./ViewViewProps";
-
-const Video = (
-	props: Omit<HTMLProps<HTMLVideoElement>, keyof ViewProps> & ViewProps,
-) => unstable_createElement("video", props);
 
 /**
  * VideoView is a component that allows you to display a video from a {@link VideoPlayer}.
@@ -28,58 +22,62 @@ const Video = (
  * @param resizeMode - How the video should be resized to fit the view. Defaults to 'none'.
  */
 const VideoView = forwardRef<VideoViewRef, VideoViewProps>(
-	(
-		{
-			player,
-			controls = false,
-			resizeMode = "none",
-			style,
-			// auto pip is unsupported
-			pictureInPicture = false,
-			autoEnterPictureInPicture = false,
-			keepScreenAwake = true,
-			...props
-		},
-		ref,
-	) => {
-		const vRef = useRef<HTMLVideoElement>(null);
-		useEffect(() => {
-			const webPlayer = player as unknown as VideoPlayer;
-			if (vRef.current) webPlayer.__getNativePlayer().attach(vRef.current);
-		}, [player]);
+  (
+    {
+      player: nPlayer,
+      controls = false,
+      resizeMode = "none",
+      // auto pip is unsupported
+      pictureInPicture = false,
+      autoEnterPictureInPicture = false,
+      keepScreenAwake = true,
+      ...props
+    },
+    ref,
+  ) => {
+    const player = nPlayer as unknown as VideoPlayer;
+    const vRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+      const videoElement = player.__getNativeRef();
+      vRef.current?.appendChild(videoElement);
+      return () => {
+        vRef.current?.removeChild(videoElement);
+      };
+    }, [player]);
 
-		useImperativeHandle(
-			ref,
-			() => ({
-				enterFullscreen: () => {
-					vRef.current?.requestFullscreen({ navigationUI: "hide" });
-				},
-				exitFullscreen: () => {
-					document.exitFullscreen();
-				},
-				enterPictureInPicture: () => {
-					vRef.current?.requestPictureInPicture();
-				},
-				exitPictureInPicture: () => {
-					document.exitPictureInPicture();
-				},
-				canEnterPictureInPicture: () => document.pictureInPictureEnabled,
-			}),
-			[],
-		);
+    useImperativeHandle(
+      ref,
+      () => ({
+        enterFullscreen: () => {
+          player.__getNativeRef().requestFullscreen({ navigationUI: "hide" });
+        },
+        exitFullscreen: () => {
+          document.exitFullscreen();
+        },
+        enterPictureInPicture: () => {
+          player.__getNativeRef().requestPictureInPicture();
+        },
+        exitPictureInPicture: () => {
+          document.exitPictureInPicture();
+        },
+        canEnterPictureInPicture: () => document.pictureInPictureEnabled,
+      }),
+      [player],
+    );
 
-		return (
-			<Video
-				ref={vRef}
-				controls={controls}
-				style={[
-					style,
-					{ objectFit: resizeMode === "stretch" ? "fill" : resizeMode },
-				]}
-				{...props}
-			/>
-		);
-	},
+    useEffect(() => {
+      player.__getNativeRef().controls = controls;
+    }, [player, controls]);
+
+    return (
+      <View {...props}>
+        <div
+          ref={vRef}
+          style={{ objectFit: resizeMode === "stretch" ? "fill" : resizeMode }}
+        />
+      </View>
+    );
+  },
 );
 
 VideoView.displayName = "VideoView";
