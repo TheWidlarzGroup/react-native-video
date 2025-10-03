@@ -48,6 +48,8 @@ namespace margelo::nitro::video { struct Resolution; }
 namespace margelo::nitro::video { enum class SourceType; }
 // Forward declaration of `SubtitleType` to properly resolve imports.
 namespace margelo::nitro::video { enum class SubtitleType; }
+// Forward declaration of `SurfaceType` to properly resolve imports.
+namespace margelo::nitro::video { enum class SurfaceType; }
 // Forward declaration of `TextTrack` to properly resolve imports.
 namespace margelo::nitro::video { struct TextTrack; }
 // Forward declaration of `TimedMetadataObject` to properly resolve imports.
@@ -92,6 +94,7 @@ namespace margelo::nitro::video { struct onVolumeChangeData; }
 #include "Resolution.hpp"
 #include "SourceType.hpp"
 #include "SubtitleType.hpp"
+#include "SurfaceType.hpp"
 #include "TextTrack.hpp"
 #include "TimedMetadata.hpp"
 #include "TimedMetadataObject.hpp"

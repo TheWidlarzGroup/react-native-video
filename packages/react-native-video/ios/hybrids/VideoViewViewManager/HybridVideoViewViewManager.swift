@@ -138,6 +138,9 @@ class HybridVideoViewViewManager: HybridVideoViewViewManagerSpec {
     }
   }
   
+  // Android only - no-op on iOS
+  var surfaceType: SurfaceType = .surface
+  
   func enterFullscreen() throws {
     guard let view else {
       throw VideoViewError.viewIsDeallocated.error()

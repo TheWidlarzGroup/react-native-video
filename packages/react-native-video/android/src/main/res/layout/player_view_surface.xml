@@ -1,0 +1,7 @@
+<androidx.media3.ui.PlayerView 
+  android:id="@+id/player_view_surface"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  app:surface_type="surface_view" />

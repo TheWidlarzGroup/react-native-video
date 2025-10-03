@@ -16,11 +16,14 @@ namespace ReactNativeVideo { class HybridVideoViewViewManagerSpec_cxx; }
 namespace margelo::nitro::video { class HybridVideoPlayerSpec; }
 // Forward declaration of `ResizeMode` to properly resolve imports.
 namespace margelo::nitro::video { enum class ResizeMode; }
+// Forward declaration of `SurfaceType` to properly resolve imports.
+namespace margelo::nitro::video { enum class SurfaceType; }
 
 #include <memory>
 #include "HybridVideoPlayerSpec.hpp"
 #include <optional>
 #include "ResizeMode.hpp"
+#include "SurfaceType.hpp"
 #include <functional>
 
 #include "ReactNativeVideo-Swift-Cxx-Umbrella.hpp"
@@ -97,6 +100,13 @@ namespace margelo::nitro::video {
     }
     inline void setKeepScreenAwake(bool keepScreenAwake) noexcept override {
       _swiftPart.setKeepScreenAwake(std::forward<decltype(keepScreenAwake)>(keepScreenAwake));
+    }
+    inline SurfaceType getSurfaceType() noexcept override {
+      auto __result = _swiftPart.getSurfaceType();
+      return static_cast<SurfaceType>(__result);
+    }
+    inline void setSurfaceType(SurfaceType surfaceType) noexcept override {
+      _swiftPart.setSurfaceType(static_cast<int>(surfaceType));
     }
     inline std::optional<std::function<void(bool /* isInPictureInPicture */)>> getOnPictureInPictureChange() noexcept override {
       auto __result = _swiftPart.getOnPictureInPictureChange();

@@ -61,6 +61,8 @@ namespace margelo::nitro::video {
     void setResizeMode(ResizeMode resizeMode) override;
     bool getKeepScreenAwake() override;
     void setKeepScreenAwake(bool keepScreenAwake) override;
+    SurfaceType getSurfaceType() override;
+    void setSurfaceType(SurfaceType surfaceType) override;
     std::optional<std::function<void(bool /* isInPictureInPicture */)>> getOnPictureInPictureChange() override;
     void setOnPictureInPictureChange(const std::optional<std::function<void(bool /* isInPictureInPicture */)>>& onPictureInPictureChange) override;
     std::optional<std::function<void(bool /* fullscreen */)>> getOnFullscreenChange() override;
