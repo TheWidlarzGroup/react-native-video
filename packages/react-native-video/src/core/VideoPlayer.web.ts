@@ -23,6 +23,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     super(new WebEventEmiter(video));
     this.video = video;
     this.player.attach(this.video);
+    this.replaceSourceAsync(source);
   }
 
   /**
@@ -229,11 +230,10 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
       | NoAutocomplete<VideoPlayerSource>
       | null,
   ): Promise<void> {
-    await this.wrapPromise(
-      this.player.replaceSourceAsync(
-        source === null ? null : createSource(source),
-      ),
-    );
+    this.video.src =
+      typeof source === "object" && "uri" in source
+        ? source.uri
+        : source;
   }
 
   // Text Track Management
