@@ -152,7 +152,6 @@
     "version": "0.41.2"
   },
   "optionalDependencies": {
-    "react-native-web": "^0.21.1",
     "shaka-player": "^4.15.9"
   },
   "dependencies": {
