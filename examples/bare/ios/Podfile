@@ -26,6 +26,22 @@ if ENV['RNV_SAMPLE_VIDEO_CACHING']
   apply_modular_headers_for_swift_dependencies()
 end
 
+source 'https://cdn.cocoapods.org/'
+source 'https://gitlab.com/datazoom/pod-specs.git'
+# DzAVPlayerAdapter is now included in react-native-video podspec
+
+# Add SocketRocket dependency to fix React Native dependency issue
+pod 'SocketRocket', '~> 0.7.0'
+
 workspace 'BareExample.xcworkspace'
 
-use_test_app!
+use_test_app!(
+  post_install: proc do |installer|
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
+      end
+    end
+  end
+)
+

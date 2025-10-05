@@ -22,7 +22,7 @@ class RNDatazoom: NSObject {
     // TODO: real SDK call:
     // DatazoomSDK.start(apiKey: apiKey, endpoint: endpoint, debug: debug)
 
-    NSLog("[RNDatazoom] Initialized: key=\(apiKey.isEmpty ? "<empty>" : "***")")
+    NSLog("[RNDatazoom] Initialized: key=\(apiKey?.isEmpty == true ? "<empty>" : "***")")
   }
 
   @objc(initialize:resolver:rejecter:)

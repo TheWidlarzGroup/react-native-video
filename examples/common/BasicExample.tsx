@@ -2,6 +2,17 @@ import React, {useCallback, useRef, useState, useEffect} from 'react';
 
 import {Platform, TouchableOpacity, View, StatusBar} from 'react-native';
 
+// Import logging utilities - create simple inline logger for now
+const logger = {
+  log: (...args: any[]) => console.log('[LOG]', ...args),
+  info: (...args: any[]) => console.info('[INFO]', ...args),
+  warn: (...args: any[]) => console.warn('[WARN]', ...args),
+  error: (...args: any[]) => console.error('[ERROR]', ...args),
+  debug: (...args: any[]) => console.log('[DEBUG]', ...args),
+  videoEvent: (event: string, data?: any) => console.log(`[VIDEO] ${event}`, data || ''),
+  datazoom: (action: string, data?: any) => console.log(`[DATAZOOM] ${action}`, data || ''),
+};
+
 import Video, {
   Datazoom,
   SelectedVideoTrackType,
@@ -213,6 +224,19 @@ const BasicExample = () => {
   };
 
   const onLoad = (data: OnLoadData) => {
+    // Enhanced logging for video load
+    logger.videoEvent('onLoad', {
+      duration: data.duration,
+      naturalSize: data.naturalSize,
+      canPlayFastForward: data.canPlayFastForward,
+      canPlayReverse: data.canPlayReverse,
+      canStepForward: data.canStepForward,
+      canStepBackward: data.canStepBackward,
+      audioTracks: data.audioTracks?.length || 0,
+      textTracks: data.textTracks?.length || 0,
+      videoTracks: data.videoTracks?.length || 0,
+    });
+    
     setDuration(data.duration);
     onAudioTracks(data);
     onTextTracks(data);
@@ -220,6 +244,15 @@ const BasicExample = () => {
   };
 
   const onProgress = (data: OnProgressData) => {
+    // Log progress every 10 seconds to avoid spam
+    if (Math.floor(data.currentTime) % 10 === 0 && Math.floor(data.currentTime) !== Math.floor(currentTime)) {
+      logger.videoEvent('onProgress', {
+        currentTime: data.currentTime,
+        playableDuration: data.playableDuration,
+        seekableDuration: data.seekableDuration,
+        progressPercent: ((data.currentTime / duration) * 100).toFixed(1),
+      });
+    }
     setCurrentTime(data.currentTime);
   };
 
@@ -229,6 +262,11 @@ const BasicExample = () => {
   };
 
   const onVideoLoadStart = () => {
+    logger.videoEvent('onLoadStart', {
+      uri: currentSrc.uri,
+      isNetwork: currentSrc.uri?.startsWith('http'),
+      timestamp: new Date().toISOString(),
+    });
     console.log('onVideoLoadStart');
     setIsLoading(true);
   };
@@ -243,6 +281,11 @@ const BasicExample = () => {
   };
 
   const onVideoBuffer = (param: OnBufferData) => {
+    logger.videoEvent('onBuffer', {
+      isBuffering: param.isBuffering,
+      currentTime: currentTime,
+      timestamp: new Date().toISOString(),
+    });
     console.log('onVideoBuffer');
     setIsLoading(param.isBuffering);
   };
@@ -261,11 +304,24 @@ const BasicExample = () => {
   };
 
   const onError = (err: OnVideoErrorData) => {
+    logger.error('Video Error:', {
+      errorString: err.errorString,
+      errorException: err.errorException,
+      errorStackTrace: err.errorStackTrace,
+      errorCode: err.errorCode,
+      timestamp: new Date().toISOString(),
+      videoSrc: currentSrc.uri,
+    });
     console.log(JSON.stringify(err));
     toast(true, 'error: ' + JSON.stringify(err));
   };
 
   const onEnd = () => {
+    logger.videoEvent('onEnd', {
+      currentTime,
+      duration,
+      timestamp: new Date().toISOString(),
+    });
     if (!repeat) {
       channelUp();
     }
@@ -303,15 +359,62 @@ const BasicExample = () => {
   useEffect(() => {
     (async () => {
       try {
-        await Datazoom.initialize({
+        const config = {
           apiKey: '65e464b9-a7ce-4e15-a060-6e23d732d05e'
+        };
+        
+        logger.datazoom('initialize_start', {
+          config,
+          timestamp: new Date().toISOString(),
+        });
+        
+        await Datazoom.initialize(config);
+        
+        logger.datazoom('initialize_success', {
+          timestamp: new Date().toISOString(),
         });
         console.log('✅ Datazoom SDK initialized successfully');
       } catch (e) {
+        logger.datazoom('initialize_error', {
+          error: e,
+          timestamp: new Date().toISOString(),
+        });
         console.error('❌ Failed to initialize Datazoom', e);
       }
     })();
   }, []); 
+
+  // Add state change logging
+  const logVideoState = useCallback((action: string) => {
+    logger.debug('Video State Change', {
+      action,
+      paused,
+      currentTime,
+      duration,
+      rate,
+      volume,
+      muted,
+      resizeMode,
+      fullscreen,
+      isLoading,
+      selectedAudioTrack: selectedAudioTrack?.value,
+      selectedTextTrack: selectedTextTrack?.value,
+      timestamp: new Date().toISOString(),
+    });
+  }, [paused, currentTime, duration, rate, volume, muted, resizeMode, fullscreen, isLoading, selectedAudioTrack, selectedTextTrack]);
+
+  // Log state changes when important properties change
+  useEffect(() => {
+    logVideoState('paused_changed');
+  }, [paused, logVideoState]);
+
+  useEffect(() => {
+    logVideoState('rate_changed');
+  }, [rate, logVideoState]);
+
+  useEffect(() => {
+    logVideoState('volume_changed');
+  }, [volume, logVideoState]); 
 
   return (
     <View style={styles.container}>
