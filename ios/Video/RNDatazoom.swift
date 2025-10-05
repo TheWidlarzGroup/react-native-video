@@ -1,6 +1,9 @@
 import Foundation
 import UIKit
-// import DatazoomSDK // <-- your real SDK import
+#if USE_DZ_ADAPTERS
+    import DzAVPlayerAdapter
+    import DzBase
+#endif
 
 @objc(RNDatazoom)
 class RNDatazoom: NSObject {
@@ -10,19 +13,37 @@ class RNDatazoom: NSObject {
 
   override init() {
     super.init()
-    Self.initIfNeeded(options: nil)
   }
 
   private static func initIfNeeded(options: NSDictionary?) {
     guard !initialized else { return }
     initialized = true
 
-    let apiKey = options?["apiKey"] as? String
-
-    // TODO: real SDK call:
-    // DatazoomSDK.start(apiKey: apiKey, endpoint: endpoint, debug: debug)
-
-    NSLog("[RNDatazoom] Initialized: key=\(apiKey?.isEmpty == true ? "<empty>" : "***")")
+    let configId = options?["apiKey"] as? String
+    
+    guard let configId = configId, !configId.isEmpty else {
+      print("Initializing Datazoom failed due to no configid provided")
+     return
+    }
+    
+    let isProduction = true
+    
+    debugPrint("🎯 Initializing Datazoom with settings:")
+    debugPrint("   - configId: \(configId)")
+    debugPrint("   - isProduction: \(isProduction)")
+    
+    let configBuilder = Config.Builder(configurationId: configId)
+    configBuilder.logLevel(logLevel: LogLevel.verbose)
+    configBuilder.isProduction(isProduction: isProduction)
+    
+    Datazoom.shared.doInit(config: configBuilder.build())
+    
+    Datazoom.shared.sdkEvents.watch { event in
+      guard let eventDescription = event?.description as? String else { return }
+      if eventDescription.contains("SdkInit") {
+        debugPrint("✅ DZ initialized successfully with settings")
+      }
+    }
   }
 
   @objc(initialize:resolver:rejecter:)

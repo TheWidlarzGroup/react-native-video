@@ -360,7 +360,7 @@ const BasicExample = () => {
     (async () => {
       try {
         const config = {
-          apiKey: '65e464b9-a7ce-4e15-a060-6e23d732d05e'
+          apiKey: 'f4864053-3ed0-4b94-bc19-1d130d624704'
         };
         
         logger.datazoom('initialize_start', {
