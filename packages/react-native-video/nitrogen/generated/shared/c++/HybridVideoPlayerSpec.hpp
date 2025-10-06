@@ -66,6 +66,8 @@ namespace margelo::nitro::video {
       // Properties
       virtual std::shared_ptr<HybridVideoPlayerSourceSpec> getSource() = 0;
       virtual std::shared_ptr<HybridVideoPlayerEventEmitterSpec> getEventEmitter() = 0;
+      virtual bool getShowNotificationControls() = 0;
+      virtual void setShowNotificationControls(bool showNotificationControls) = 0;
       virtual VideoPlayerStatus getStatus() = 0;
       virtual double getDuration() = 0;
       virtual double getVolume() = 0;

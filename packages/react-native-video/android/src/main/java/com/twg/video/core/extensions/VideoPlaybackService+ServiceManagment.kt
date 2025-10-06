@@ -42,7 +42,11 @@ fun VideoPlaybackService.Companion.stopService(
   serviceConnection: VideoPlaybackServiceConnection
 ) {
   try {
-    NitroModules.applicationContext?.currentActivity?.unbindService(serviceConnection)
+    // Unregister the player first; this might stop the service if no players remain
     serviceConnection.unregisterPlayer(player)
+    // Ask service (if still connected) to stop when idle
+    try { serviceConnection.serviceBinder?.service?.stopIfNoPlayers() } catch (_: Exception) {}
+    // Then unbind
+    NitroModules.applicationContext?.currentActivity?.unbindService(serviceConnection)
   } catch (_: Exception) {}
 }

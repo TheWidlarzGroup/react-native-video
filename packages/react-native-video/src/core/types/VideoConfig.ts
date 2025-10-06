@@ -27,6 +27,11 @@ export type VideoConfig = {
    */
   bufferConfig?: BufferConfig;
   /**
+   * The custom metadata to be associated with the video.
+   * This metadata can be used by the native player to show information about the video.
+   */
+  metadata?: CustomVideoMetadata;
+  /**
    * The external subtitles to be used.
    * @note on iOS, only WebVTT (.vtt) subtitles are supported (for HLS streams and MP4 files).
    * @note on iOS, `label` can be overridden by player and there is no way to get around it.
@@ -134,4 +139,12 @@ interface NativeExternalSubtitle {
 
 interface NativeDrmParams extends DrmParams {
   type?: string;
+}
+
+interface CustomVideoMetadata {
+  title?: string;
+  subtitle?: string;
+  description?: string;
+  artist?: string;
+  imageUri?: string;
 }

@@ -6,9 +6,11 @@ import androidx.annotation.OptIn
 import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.C
+import androidx.media3.common.MediaMetadata
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.util.UnstableApi
 import com.margelo.nitro.video.BufferConfig
+import com.margelo.nitro.video.CustomVideoMetadata
 import com.margelo.nitro.video.HybridVideoPlayerSource
 import com.margelo.nitro.video.LivePlaybackParams
 import com.margelo.nitro.video.NativeDrmParams
@@ -37,6 +39,10 @@ fun createMediaItemFromVideoConfig(
 
   source.config.bufferConfig?.livePlayback?.let { livePlaybackParams ->
     mediaItemBuilder.setLiveConfiguration(getLiveConfiguration(livePlaybackParams))
+  }
+
+  source.config.metadata?.let { metadata ->
+    mediaItemBuilder.setMediaMetadata(getCustomMetadata(metadata))
   }
 
   return PluginsRegistry.shared.overrideMediaItemBuilder(
@@ -121,4 +127,15 @@ fun getLiveConfiguration(
   }
 
   return liveConfiguration.build()
+}
+
+fun getCustomMetadata(metadata: CustomVideoMetadata): MediaMetadata {
+  return MediaMetadata.Builder()
+    .setDisplayTitle(metadata.title)
+    .setTitle(metadata.title)
+    .setSubtitle(metadata.subtitle)
+    .setDescription(metadata.description)
+    .setArtist(metadata.artist)
+    .setArtworkUri(metadata.imageUri?.toUri())
+    .build()
 }

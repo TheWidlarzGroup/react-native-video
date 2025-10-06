@@ -95,6 +95,16 @@ class VideoManager {
     updateAudioSessionConfiguration()
   }
   
+  // MARK: - Remote Control Events
+  func setRemoteControlEventsActive(_ active: Bool) {
+    if isAudioSessionManagementDisabled || remoteControlEventsActive == active {
+      return
+    }
+    
+    remoteControlEventsActive = active
+    requestAudioSessionUpdate()
+  }
+  
   // MARK: - Audio Session Management
   private func activateAudioSession() {
     if isAudioSessionActive {
@@ -133,7 +143,11 @@ class VideoManager {
       player.mixAudioMode == .donotmix
     }
     
-    if isAnyPlayerPlaying || anyPlayerNeedsNotMixWithOthers {
+    let anyPlayerNeedsNotificationControls = players.allObjects.contains { player in
+      player.showNotificationControls
+    }
+    
+    if isAnyPlayerPlaying || anyPlayerNeedsNotMixWithOthers || anyPlayerNeedsNotificationControls || remoteControlEventsActive {
       activateAudioSession()
     } else {
       deactivateAudioSession()
@@ -162,6 +176,10 @@ class VideoManager {
       player.playInBackground
     }
     
+    let anyPlayerNeedsNotificationControls = players.allObjects.contains { player in
+      player.showNotificationControls
+    }
+    
     if isAudioSessionManagementDisabled {
       return
     }
@@ -172,7 +190,7 @@ class VideoManager {
       earpiece: false, // TODO: Pass actual value after we add prop
       pip: anyViewNeedsPictureInPicture,
       backgroundPlayback: anyPlayerNeedsBackgroundPlayback,
-      notificationControls: false // TODO: Pass actual value after we add prop
+      notificationControls: anyPlayerNeedsNotificationControls
     )
     
     let audioMixingMode = determineAudioMixingMode()

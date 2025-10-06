@@ -102,6 +102,23 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
       field = value
     }
 
+  override var showNotificationControls: Boolean = false
+    set(value) {
+      val wasRunning = (field || playInBackground)
+      val shouldRun = (value || playInBackground)
+
+      if (shouldRun && !wasRunning) {
+        VideoPlaybackService.startService(context, videoPlaybackServiceConnection)
+      }
+      if (!shouldRun && wasRunning) {
+        VideoPlaybackService.stopService(this, videoPlaybackServiceConnection)
+      }
+
+      field = value
+      // Inform service to refresh notification/session layout
+      try { videoPlaybackServiceConnection.serviceBinder?.service?.updatePlayerPreferences(this) } catch (_: Exception) {}
+    }
+
   // Player Properties
   override var currentTime: Double by mainThreadProperty(
     get = { player.currentPosition.toDouble() / 1000.0 },
@@ -172,16 +189,18 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
 
   override var playInBackground: Boolean = false
     set(value) {
-      // playback in background was disabled and is now enabled
-      if (value == true && field == false) {
+      val shouldRun = (value || showNotificationControls)
+      val wasRunning = (field || showNotificationControls)
+
+      if (shouldRun && !wasRunning) {
         VideoPlaybackService.startService(context, videoPlaybackServiceConnection)
-        field = true
       }
-      // playback in background was enabled and is now disabled
-      else if (field == true) {
+      if (!shouldRun && wasRunning) {
         VideoPlaybackService.stopService(this, videoPlaybackServiceConnection)
-        field = false
       }
+      field = value
+      // Update preferences to refresh notifications/registration
+      try { videoPlaybackServiceConnection.serviceBinder?.service?.updatePlayerPreferences(this) } catch (_: Exception) {}
     }
 
   override var playWhenInactive: Boolean = false
@@ -323,7 +342,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
   }
 
   private fun release() {
-    if (playInBackground) {
+    if (playInBackground || showNotificationControls) {
       VideoPlaybackService.stopService(this, videoPlaybackServiceConnection)
     }
 

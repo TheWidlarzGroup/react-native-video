@@ -146,6 +146,7 @@ const VideoDemo = () => {
     player.playWhenInactive = settings.playWhenInactive;
     player.mixAudioMode = settings.mixAudioMode;
     player.ignoreSilentSwitchMode = settings.ignoreSilentSwitchMode;
+    player.showNotificationControls = settings.showNotificationControls;
   }, [settings, player]);
 
   const handleSeek = (val: number) => {
@@ -314,6 +315,13 @@ const VideoDemo = () => {
             label="Play When Inactive"
             value={settings.playWhenInactive}
             onValueChange={(value) => updateSetting('playWhenInactive', value)}
+          />
+          <SwitchControl
+            label="Notification Controls"
+            value={settings.showNotificationControls}
+            onValueChange={(value) =>
+              updateSetting('showNotificationControls', value)
+            }
           />
         </View>
       </View>

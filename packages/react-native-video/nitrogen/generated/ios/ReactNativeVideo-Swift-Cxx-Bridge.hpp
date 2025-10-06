@@ -12,6 +12,8 @@
 namespace margelo::nitro::video { struct BandwidthData; }
 // Forward declaration of `BufferConfig` to properly resolve imports.
 namespace margelo::nitro::video { struct BufferConfig; }
+// Forward declaration of `CustomVideoMetadata` to properly resolve imports.
+namespace margelo::nitro::video { struct CustomVideoMetadata; }
 // Forward declaration of `HybridVideoPlayerEventEmitterSpec` to properly resolve imports.
 namespace margelo::nitro::video { class HybridVideoPlayerEventEmitterSpec; }
 // Forward declaration of `HybridVideoPlayerFactorySpec` to properly resolve imports.
@@ -82,6 +84,7 @@ namespace ReactNativeVideo { class HybridVideoViewViewManagerSpec_cxx; }
 // Include C++ defined types
 #include "BandwidthData.hpp"
 #include "BufferConfig.hpp"
+#include "CustomVideoMetadata.hpp"
 #include "HybridVideoPlayerEventEmitterSpec.hpp"
 #include "HybridVideoPlayerFactorySpec.hpp"
 #include "HybridVideoPlayerSourceFactorySpec.hpp"
@@ -870,6 +873,15 @@ namespace margelo::nitro::video::bridge::swift {
   }
   inline BufferConfig get_std__optional_BufferConfig_(const std::optional<BufferConfig>& optional) noexcept {
     return *optional;
+  }
+  
+  // pragma MARK: std::optional<CustomVideoMetadata>
+  /**
+   * Specialized version of `std::optional<CustomVideoMetadata>`.
+   */
+  using std__optional_CustomVideoMetadata_ = std::optional<CustomVideoMetadata>;
+  inline std::optional<CustomVideoMetadata> create_std__optional_CustomVideoMetadata_(const CustomVideoMetadata& value) {
+    return std::optional<CustomVideoMetadata>(value);
   }
   
   // pragma MARK: std::shared_ptr<Promise<VideoInformation>>

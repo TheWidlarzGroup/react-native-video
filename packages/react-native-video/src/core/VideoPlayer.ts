@@ -185,6 +185,14 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     return this.player.isPlaying;
   }
 
+  get showNotificationControls(): boolean {
+    return this.player.showNotificationControls;
+  }
+
+  set showNotificationControls(value: boolean) {
+    this.player.showNotificationControls = value;
+  }
+
   async initialize(): Promise<void> {
     await this.wrapPromise(this.player.initialize());
 

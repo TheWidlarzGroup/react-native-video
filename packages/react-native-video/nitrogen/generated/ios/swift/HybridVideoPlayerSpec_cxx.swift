@@ -126,6 +126,17 @@ open class HybridVideoPlayerSpec_cxx {
     }
   }
   
+  public final var showNotificationControls: Bool {
+    @inline(__always)
+    get {
+      return self.__implementation.showNotificationControls
+    }
+    @inline(__always)
+    set {
+      self.__implementation.showNotificationControls = newValue
+    }
+  }
+  
   public final var status: Int32 {
     @inline(__always)
     get {
