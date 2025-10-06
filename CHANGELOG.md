@@ -1,5 +1,23 @@
 
 
+# [6.17.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.16.1...v6.17.0) (2025-10-06)
+
+
+### Bug Fixes
+
+* android control option is not work when init video ([#4698](https://github.com/TheWidlarzGroup/react-native-video/issues/4698)) ([5074ca5](https://github.com/TheWidlarzGroup/react-native-video/commit/5074ca5a1b1ae687255f3509fd75cc847ace0dca))
+* **android:** catch errors from `activity.packageManager` ([5b59b06](https://github.com/TheWidlarzGroup/react-native-video/commit/5b59b06d1e19f138a98648d06a931ab4c634cb75))
+* **ios:** add audiovisualBackgroundPlaybackPolicy ([#4570](https://github.com/TheWidlarzGroup/react-native-video/issues/4570)) ([bf81038](https://github.com/TheWidlarzGroup/react-native-video/commit/bf810386b9ee1aed579b24adffb02f4acfa413db))
+* **ios:** disable audio session management when no views ([#4666](https://github.com/TheWidlarzGroup/react-native-video/issues/4666)) ([d2c92a1](https://github.com/TheWidlarzGroup/react-native-video/commit/d2c92a1f3f6579aa6607389de8e51e4b75012f3b))
+* **player:** trigger relayout after exiting pip ([#4665](https://github.com/TheWidlarzGroup/react-native-video/issues/4665)) ([4b996fc](https://github.com/TheWidlarzGroup/react-native-video/commit/4b996fc514b015dfb848dd2a0226cda4b0c527fb))
+
+
+### Features
+
+* **android:** enable flexible page sizes in native build configuration ([#4691](https://github.com/TheWidlarzGroup/react-native-video/issues/4691)) ([7d233f4](https://github.com/TheWidlarzGroup/react-native-video/commit/7d233f414f8a00734d3991f2e1d148bbadae0f0e))
+* **android:** report full native stack trace on error ([#4651](https://github.com/TheWidlarzGroup/react-native-video/issues/4651)) ([724f639](https://github.com/TheWidlarzGroup/react-native-video/commit/724f63930d2de3c81b9d9316ae70bbb9e1dcae49))
+* **examples:** add offline-video-starter as submodule ([#4644](https://github.com/TheWidlarzGroup/react-native-video/issues/4644)) ([60baecd](https://github.com/TheWidlarzGroup/react-native-video/commit/60baecdf739baa3ce9a84b3a02cd4e5b9060275f))
+
 ## [6.16.1](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.16.0...v6.16.1) (2025-07-08)
 
 # [6.16.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.15.0...v6.16.0) (2025-07-02)
