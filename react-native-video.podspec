@@ -31,11 +31,17 @@ Pod::Spec.new do |s|
       ss.dependency "react-native-video/Fabric"
     end
 
-    # Add DzAVPlayerAdapter dependency
-    ss.dependency 'DzAVPlayerAdapter', '1.7.0'
+    # Initialize Swift flags array
+    swift_flags = ['$(inherited)']
 
-    # Build Swift flags array
-    swift_flags = ['$(inherited)', '-D USE_DZ_ADAPTERS']
+    Pod::UI.puts "RNVideo: Checking DzAdapters - defined: #{defined?($RNVideoUseDzAdapters)}, value: #{$RNVideoUseDzAdapters}"
+    
+    if defined?($RNVideoUseDzAdapters) && $RNVideoUseDzAdapters
+      Pod::UI.puts "RNVideo: enable DataZoom Adapters"
+      # Add DzAVPlayerAdapter dependency
+      ss.dependency 'DzAVPlayerAdapter', '1.7.0'
+      swift_flags << '-D USE_DZ_ADAPTERS'
+    end
 
     if defined?($RNVideoUseGoogleIMA)
       Pod::UI.puts "RNVideo: enable IMA SDK"

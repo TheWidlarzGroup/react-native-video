@@ -264,7 +264,7 @@ const BasicExample = () => {
   const onVideoLoadStart = () => {
     logger.videoEvent('onLoadStart', {
       uri: currentSrc.uri,
-      isNetwork: currentSrc.uri?.startsWith('http'),
+      isNetwork: currentSrc.uri && typeof currentSrc.uri === 'string' ? currentSrc.uri.startsWith('http') : false,
       timestamp: new Date().toISOString(),
     });
     console.log('onVideoLoadStart');

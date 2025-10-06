@@ -15,6 +15,7 @@ class RNDatazoom: NSObject {
     super.init()
   }
 
+#if USE_DZ_ADAPTERS
   private static func initIfNeeded(options: NSDictionary?) {
     guard !initialized else { return }
     initialized = true
@@ -45,12 +46,15 @@ class RNDatazoom: NSObject {
       }
     }
   }
+#endif
 
   @objc(initialize:resolver:rejecter:)
   func initialize(options: NSDictionary?,
                   resolve: @escaping RCTPromiseResolveBlock,
                   reject: @escaping RCTPromiseRejectBlock) {
+#if USE_DZ_ADAPTERS
     RNDatazoom.initIfNeeded(options: options)
+#endif
     resolve(nil)
   }
 }
