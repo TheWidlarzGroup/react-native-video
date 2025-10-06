@@ -103,5 +103,13 @@ export const getVideoSource = (type: VideoType): VideoConfig => {
         type: 'vtt',
       },
     ],
+    metadata: {
+      title: 'Big Buck Bunny',
+      artist: 'Blender Foundation',
+      album: 'Big Buck Bunny',
+      genre: 'Animation',
+      imageUri:
+        'https://peach.blender.org/wp-content/uploads/title_anouncement.jpg',
+    },
   } as VideoConfig;
 };
