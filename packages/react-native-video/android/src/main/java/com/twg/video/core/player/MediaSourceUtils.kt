@@ -77,6 +77,10 @@ fun buildExternalSubtitlesMediaSource(context: Context, source: HybridVideoPlaye
     .setUri(source.uri.toUri())
     .setSubtitleConfigurations(getSubtitlesConfiguration(source.config))
 
+  source.config.metadata?.let { metadata ->
+    mediaItemBuilderWithSubtitles.setMediaMetadata(getCustomMetadata(metadata))
+  }
+
   val mediaItemBuilder = PluginsRegistry.shared.overrideMediaItemBuilder(
     source,
     mediaItemBuilderWithSubtitles
