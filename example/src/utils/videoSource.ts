@@ -106,10 +106,11 @@ export const getVideoSource = (type: VideoType): VideoConfig => {
     metadata: {
       title: 'Big Buck Bunny',
       artist: 'Blender Foundation',
-      album: 'Big Buck Bunny',
-      genre: 'Animation',
       imageUri:
         'https://peach.blender.org/wp-content/uploads/title_anouncement.jpg',
+      subtitle: 'By the Blender Institute',
+      description:
+        'Big Buck Bunny is a short computer-animated comedy film by the Blender Institute, part of the Blender Foundation. It was made using Blender, a free and open-source 3D creation suite.',
     },
   } as VideoConfig;
 };

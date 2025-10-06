@@ -22,9 +22,9 @@ class NowPlayingInfoCenterManager {
 
   private let remoteCommandCenter = MPRemoteCommandCenter.shared()
 
-  var receivingRemoveControlEvents = false {
+  var receivingRemoteControlEvents = false {
     didSet {
-      if receivingRemoveControlEvents {
+      if receivingRemoteControlEvents {
         DispatchQueue.main.async {
           VideoManager.shared.setRemoteControlEventsActive(true)
           UIApplication.shared.beginReceivingRemoteControlEvents()
@@ -47,8 +47,8 @@ class NowPlayingInfoCenterManager {
       return
     }
 
-    if receivingRemoveControlEvents == false {
-      receivingRemoveControlEvents = true
+    if receivingRemoteControlEvents == false {
+      receivingRemoteControlEvents = true
     }
 
     if let oldObserver = observers[player.hashValue] {
@@ -96,7 +96,7 @@ class NowPlayingInfoCenterManager {
     invalidateCommandTargets()
 
     MPNowPlayingInfoCenter.default().nowPlayingInfo = [:]
-    receivingRemoveControlEvents = false
+    receivingRemoteControlEvents = false
   }
 
   private func setCurrentPlayer(player: AVPlayer) {
@@ -300,7 +300,7 @@ class NowPlayingInfoCenterManager {
       }
 
       // case where currentPlayer was paused
-      // In this case event is triggeret by currentPlayer
+      // In this case event is triggered by currentPlayer
       if rate == 0 && self.currentPlayer == player {
         self.findNewCurrentPlayer()
       }
