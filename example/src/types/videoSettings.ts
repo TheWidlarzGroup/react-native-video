@@ -17,6 +17,7 @@ export interface VideoSettings {
   ignoreSilentSwitchMode: IgnoreSilentSwitchMode;
   playInBackground: boolean;
   playWhenInactive: boolean;
+  showNotificationControls: boolean;
 }
 
 export const defaultSettings: VideoSettings = {
@@ -32,4 +33,5 @@ export const defaultSettings: VideoSettings = {
   ignoreSilentSwitchMode: 'auto',
   playInBackground: true,
   playWhenInactive: false,
+  showNotificationControls: true,
 };

@@ -82,6 +82,12 @@ namespace margelo::nitro::video {
       auto __result = _swiftPart.getEventEmitter();
       return __result;
     }
+    inline bool getShowNotificationControls() noexcept override {
+      return _swiftPart.getShowNotificationControls();
+    }
+    inline void setShowNotificationControls(bool showNotificationControls) noexcept override {
+      _swiftPart.setShowNotificationControls(std::forward<decltype(showNotificationControls)>(showNotificationControls));
+    }
     inline VideoPlayerStatus getStatus() noexcept override {
       auto __result = _swiftPart.getStatus();
       return static_cast<VideoPlayerStatus>(__result);

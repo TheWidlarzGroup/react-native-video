@@ -11,7 +11,9 @@
 #include "NativeVideoConfig.hpp"
 
 #include "BufferConfig.hpp"
+#include "CustomVideoMetadata.hpp"
 #include "JBufferConfig.hpp"
+#include "JCustomVideoMetadata.hpp"
 #include "JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload.hpp"
 #include "JLivePlaybackParams.hpp"
 #include "JNativeDrmParams.hpp"
@@ -62,6 +64,8 @@ namespace margelo::nitro::video {
       jni::local_ref<jni::JMap<jni::JString, jni::JString>> headers = this->getFieldValue(fieldHeaders);
       static const auto fieldBufferConfig = clazz->getField<JBufferConfig>("bufferConfig");
       jni::local_ref<JBufferConfig> bufferConfig = this->getFieldValue(fieldBufferConfig);
+      static const auto fieldMetadata = clazz->getField<JCustomVideoMetadata>("metadata");
+      jni::local_ref<JCustomVideoMetadata> metadata = this->getFieldValue(fieldMetadata);
       static const auto fieldInitializeOnCreation = clazz->getField<jni::JBoolean>("initializeOnCreation");
       jni::local_ref<jni::JBoolean> initializeOnCreation = this->getFieldValue(fieldInitializeOnCreation);
       return NativeVideoConfig(
@@ -86,6 +90,7 @@ namespace margelo::nitro::video {
           return __map;
         }()) : std::nullopt,
         bufferConfig != nullptr ? std::make_optional(bufferConfig->toCpp()) : std::nullopt,
+        metadata != nullptr ? std::make_optional(metadata->toCpp()) : std::nullopt,
         initializeOnCreation != nullptr ? std::make_optional(static_cast<bool>(initializeOnCreation->value())) : std::nullopt
       );
     }
@@ -116,6 +121,7 @@ namespace margelo::nitro::video {
           return __map;
         }() : nullptr,
         value.bufferConfig.has_value() ? JBufferConfig::fromCpp(value.bufferConfig.value()) : nullptr,
+        value.metadata.has_value() ? JCustomVideoMetadata::fromCpp(value.metadata.value()) : nullptr,
         value.initializeOnCreation.has_value() ? jni::JBoolean::valueOf(value.initializeOnCreation.value()) : nullptr
       );
     }

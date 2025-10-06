@@ -6,6 +6,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.Build
@@ -23,6 +24,7 @@ import androidx.media3.session.MediaSessionService
 import androidx.media3.session.MediaStyleNotificationHelper
 import androidx.media3.session.SessionCommand
 import androidx.media3.ui.R
+import com.margelo.nitro.NitroModules
 import com.margelo.nitro.video.HybridVideoPlayer
 import okhttp3.internal.immutableListOf
 
@@ -60,11 +62,16 @@ class VideoPlaybackService : MediaSessionService() {
     }
     sourceActivity = from
 
-    val mediaSession = MediaSession.Builder(this, player.player)
+    val builder = MediaSession.Builder(this, player.player)
       .setId("RNVideoPlaybackService_" + player.hashCode())
       .setCallback(VideoPlaybackCallback())
-      .setCustomLayout(immutableListOf(seekBackwardBtn, seekForwardBtn))
-      .build()
+
+    // Only expose custom layout controls when requested
+    if (player.showNotificationControls) {
+      builder.setCustomLayout(immutableListOf(seekBackwardBtn, seekForwardBtn))
+    }
+
+    val mediaSession = builder.build()
 
     mediaSessionsList[player] = mediaSession
     addSession(mediaSession)
@@ -78,10 +85,39 @@ class VideoPlaybackService : MediaSessionService() {
     hidePlayerNotification(player.player)
     val session = mediaSessionsList.remove(player)
     session?.release()
-    if (mediaSessionsList.isEmpty()) {
-      cleanup()
-      stopSelf()
+    stopIfNoPlayers()
+  }
+
+  // Allow updating runtime flags that impact notification/controls
+  fun updatePlayerPreferences(player: HybridVideoPlayer) {
+    val session = mediaSessionsList[player]
+    if (session == null) {
+      // If not registered but now needs it, register
+      if (player.playInBackground || player.showNotificationControls) {
+        val activity = try { NitroModules.applicationContext?.currentActivity } catch (_: Exception) { null }
+        if (activity != null) registerPlayer(player, activity.javaClass)
+      }
+      return
     }
+
+    // If no longer needs registration, unregister and possibly stop service
+    if (!player.playInBackground && !player.showNotificationControls) {
+      unregisterPlayer(player)
+      stopIfNoPlayers()
+      return
+    }
+
+    // Update custom layout controls depending on the flag (for Android 13+ custom command buttons)
+    try {
+      if (player.showNotificationControls) {
+        session.setCustomLayout(immutableListOf(seekBackwardBtn, seekForwardBtn))
+      } else {
+        session.setCustomLayout(emptyList())
+      }
+    } catch (_: Exception) {}
+
+    // Rebuild notification to reflect showNotificationControls changes
+    onUpdateNotification(session, false)
   }
 
   // Callbacks
@@ -93,8 +129,8 @@ class VideoPlaybackService : MediaSessionService() {
     return binder
   }
 
-    override fun onUpdateNotification(session: MediaSession, startInForegroundRequired: Boolean) {
-    val notification = buildNotification(session)
+  override fun onUpdateNotification(session: MediaSession, startInForegroundRequired: Boolean) {
+  val notification = buildNotification(session)
     val notificationId = session.player.hashCode()
     val notificationManager: NotificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
@@ -127,11 +163,13 @@ class VideoPlaybackService : MediaSessionService() {
   }
 
   override fun onTaskRemoved(rootIntent: Intent?) {
+    stopForegroundSafely()
     cleanup()
     stopSelf()
   }
 
   override fun onDestroy() {
+    stopForegroundSafely()
     cleanup()
     val notificationManager: NotificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -140,7 +178,17 @@ class VideoPlaybackService : MediaSessionService() {
     super.onDestroy()
   }
 
+  private fun stopForegroundSafely() {
+    try {
+      stopForeground(STOP_FOREGROUND_REMOVE)
+    } catch (_: Exception) {}
+  }
+
   private fun buildNotification(session: MediaSession): Notification {
+    // Determine whether we should show full media controls or a simple background notification
+    val hybridPlayer = mediaSessionsList.entries.find { it.value == session }?.key
+    val showControls = hybridPlayer?.showNotificationControls == true
+
     val returnToPlayer = Intent(this, sourceActivity ?: this.javaClass).apply {
       flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
     }
@@ -150,74 +198,94 @@ class VideoPlaybackService : MediaSessionService() {
      * On Android 12 and bellow we need to add controls manually
      */
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-      NotificationCompat.Builder(this, NOTIFICATION_CHANEL_ID)
-        .setSmallIcon(androidx.media3.session.R.drawable.media3_icon_circular_play)
-        .setStyle(MediaStyleNotificationHelper.MediaStyle(session))
-        .setContentIntent(PendingIntent.getActivity(this, 0, returnToPlayer, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
-        .build()
+      if (showControls) {
+        NotificationCompat.Builder(this, NOTIFICATION_CHANEL_ID)
+          .setSmallIcon(androidx.media3.session.R.drawable.media3_icon_circular_play)
+          .setStyle(MediaStyleNotificationHelper.MediaStyle(session))
+          .setContentIntent(PendingIntent.getActivity(this, 0, returnToPlayer, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
+          .build()
+      } else {
+        // Simple background notification without media controls
+        NotificationCompat.Builder(this, NOTIFICATION_CHANEL_ID)
+          .setSmallIcon(androidx.media3.session.R.drawable.media3_icon_circular_play)
+          .setContentTitle("${getAppName()} is playing in background")
+          .setOngoing(true)
+          .setContentIntent(PendingIntent.getActivity(this, 0, returnToPlayer, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
+          .build()
+      }
     } else {
       val playerId = session.player.hashCode()
 
-      // Action for COMMAND.SEEK_BACKWARD
-      val seekBackwardIntent = Intent(this, VideoPlaybackService::class.java).apply {
-        putExtra("PLAYER_ID", playerId)
-        putExtra("ACTION", COMMAND.SEEK_BACKWARD.stringValue)
-      }
-      val seekBackwardPendingIntent = PendingIntent.getService(
-        this,
-        playerId * 10,
-        seekBackwardIntent,
-        PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-      )
+      if (showControls) {
+        // Action for COMMAND.SEEK_BACKWARD
+        val seekBackwardIntent = Intent(this, VideoPlaybackService::class.java).apply {
+          putExtra("PLAYER_ID", playerId)
+          putExtra("ACTION", COMMAND.SEEK_BACKWARD.stringValue)
+        }
+        val seekBackwardPendingIntent = PendingIntent.getService(
+          this,
+          playerId * 10,
+          seekBackwardIntent,
+          PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
 
-      // ACTION FOR COMMAND.TOGGLE_PLAY
-      val togglePlayIntent = Intent(this, VideoPlaybackService::class.java).apply {
-        putExtra("PLAYER_ID", playerId)
-        putExtra("ACTION", COMMAND.TOGGLE_PLAY.stringValue)
-      }
-      val togglePlayPendingIntent = PendingIntent.getService(
-        this,
-        playerId * 10 + 1,
-        togglePlayIntent,
-        PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-      )
+        // ACTION FOR COMMAND.TOGGLE_PLAY
+        val togglePlayIntent = Intent(this, VideoPlaybackService::class.java).apply {
+          putExtra("PLAYER_ID", playerId)
+          putExtra("ACTION", COMMAND.TOGGLE_PLAY.stringValue)
+        }
+        val togglePlayPendingIntent = PendingIntent.getService(
+          this,
+          playerId * 10 + 1,
+          togglePlayIntent,
+          PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
 
-      // ACTION FOR COMMAND.SEEK_FORWARD
-      val seekForwardIntent = Intent(this, VideoPlaybackService::class.java).apply {
-        putExtra("PLAYER_ID", playerId)
-        putExtra("ACTION", COMMAND.SEEK_FORWARD.stringValue)
-      }
-      val seekForwardPendingIntent = PendingIntent.getService(
-        this,
-        playerId * 10 + 2,
-        seekForwardIntent,
-        PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-      )
+        // ACTION FOR COMMAND.SEEK_FORWARD
+        val seekForwardIntent = Intent(this, VideoPlaybackService::class.java).apply {
+          putExtra("PLAYER_ID", playerId)
+          putExtra("ACTION", COMMAND.SEEK_FORWARD.stringValue)
+        }
+        val seekForwardPendingIntent = PendingIntent.getService(
+          this,
+          playerId * 10 + 2,
+          seekForwardIntent,
+          PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
 
-      NotificationCompat.Builder(this, NOTIFICATION_CHANEL_ID)
-        // Show controls on lock screen even when user hides sensitive content.
-        .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-        .setSmallIcon(androidx.media3.session.R.drawable.media3_icon_circular_play)
-        // Add media control buttons that invoke intents in your media service
-        .addAction(androidx.media3.session.R.drawable.media3_icon_rewind, "Seek Backward", seekBackwardPendingIntent) // #0
-        .addAction(
-          if (session.player.isPlaying) {
-            androidx.media3.session.R.drawable.media3_icon_pause
-          } else {
-            androidx.media3.session.R.drawable.media3_icon_play
-          },
-          "Toggle Play",
-          togglePlayPendingIntent
-        ) // #1
-        .addAction(androidx.media3.session.R.drawable.media3_icon_fast_forward, "Seek Forward", seekForwardPendingIntent) // #2
-        // Apply the media style template
-        .setStyle(MediaStyleNotificationHelper.MediaStyle(session).setShowActionsInCompactView(0, 1, 2))
-        .setContentTitle(session.player.mediaMetadata.title)
-        .setContentText(session.player.mediaMetadata.description)
-        .setContentIntent(PendingIntent.getActivity(this, 0, returnToPlayer, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
-        .setLargeIcon(session.player.mediaMetadata.artworkUri?.let { session.bitmapLoader.loadBitmap(it).get() })
-        .setOngoing(true)
-        .build()
+        NotificationCompat.Builder(this, NOTIFICATION_CHANEL_ID)
+          // Show controls on lock screen even when user hides sensitive content.
+          .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+          .setSmallIcon(androidx.media3.session.R.drawable.media3_icon_circular_play)
+          // Add media control buttons that invoke intents in your media service
+          .addAction(androidx.media3.session.R.drawable.media3_icon_rewind, "Seek Backward", seekBackwardPendingIntent) // #0
+          .addAction(
+            if (session.player.isPlaying) {
+              androidx.media3.session.R.drawable.media3_icon_pause
+            } else {
+              androidx.media3.session.R.drawable.media3_icon_play
+            },
+            "Toggle Play",
+            togglePlayPendingIntent
+          ) // #1
+          .addAction(androidx.media3.session.R.drawable.media3_icon_fast_forward, "Seek Forward", seekForwardPendingIntent) // #2
+          // Apply the media style template
+          .setStyle(MediaStyleNotificationHelper.MediaStyle(session).setShowActionsInCompactView(0, 1, 2))
+          .setContentTitle(session.player.mediaMetadata.title)
+          .setContentText(session.player.mediaMetadata.description)
+          .setContentIntent(PendingIntent.getActivity(this, 0, returnToPlayer, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
+          .setLargeIcon(session.player.mediaMetadata.artworkUri?.let { session.bitmapLoader.loadBitmap(it).get() })
+          .setOngoing(true)
+          .build()
+      } else {
+        // Simple background notification without action controls
+        NotificationCompat.Builder(this, NOTIFICATION_CHANEL_ID)
+          .setSmallIcon(androidx.media3.session.R.drawable.media3_icon_circular_play)
+          .setContentTitle("${getAppName()} is playing in background")
+          .setOngoing(true)
+          .setContentIntent(PendingIntent.getActivity(this, 0, returnToPlayer, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
+          .build()
+      }
     }
   }
 
@@ -232,12 +300,21 @@ class VideoPlaybackService : MediaSessionService() {
   }
 
   private fun cleanup() {
+    stopForegroundSafely()
+    stopSelf()
     hideAllNotifications()
     mediaSessionsList.forEach { (_, session) ->
       session.release()
     }
     mediaSessionsList.clear()
     placeholderCanceled = false
+  }
+
+  // Stop the service if there are no active media sessions (no players need it)
+  fun stopIfNoPlayers() {
+    if (mediaSessionsList.isEmpty()) {
+      cleanup()
+    }
   }
 
   private fun createPlaceholderNotification(): Notification {
@@ -282,7 +359,8 @@ class VideoPlaybackService : MediaSessionService() {
 
       handleCommand(commandFromString(actionCommand), session)
     }
-    return super.onStartCommand(intent, flags, startId)
+
+    return START_NOT_STICKY
   }
 
   companion object {
@@ -322,6 +400,16 @@ class VideoPlaybackService : MediaSessionService() {
         COMMAND.PAUSE -> session.player.pause()
         else -> Log.w(TAG, "Received COMMAND.NONE - was there an error?")
       }
+    }
+  }
+
+  private fun getAppName(): String {
+    return try {
+      val pm = packageManager
+      val label = pm.getApplicationLabel(applicationInfo)
+      label.toString()
+    } catch (e: Exception) {
+      applicationInfo.packageName
     }
   }
 }

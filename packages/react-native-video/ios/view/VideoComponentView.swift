@@ -148,6 +148,9 @@ import AVKit
       controller.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
       controller.view.backgroundColor = .clear
       
+      // We manage this manually in NowPlayingInfoCenterManager
+      controller.updatesNowPlayingInfoCenter = false
+      
       if #available(iOS 16.0, *) {
         if let initialSpeed = controller.speeds.first(where: { $0.rate == player.rate }) {
           controller.selectSpeed(initialSpeed)

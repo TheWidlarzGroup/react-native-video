@@ -25,7 +25,10 @@ class VideoPlaybackServiceConnection (private val player: WeakReference<HybridVi
       }
 
       serviceBinder = binder as? VideoPlaybackServiceBinder
-      serviceBinder?.service?.registerPlayer(player, activity.javaClass)
+      // Only register when the player actually needs background service/notification
+      if (player.playInBackground || player.showNotificationControls) {
+        serviceBinder?.service?.registerPlayer(player, activity.javaClass)
+      }
     } catch (err: Exception) {
       Log.e("VideoPlaybackServiceConnection", "Could not bind to playback service", err)
     }

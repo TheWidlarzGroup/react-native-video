@@ -25,6 +25,8 @@ namespace margelo::nitro::video { struct BufferConfig; }
 namespace margelo::nitro::video { struct LivePlaybackParams; }
 // Forward declaration of `Resolution` to properly resolve imports.
 namespace margelo::nitro::video { struct Resolution; }
+// Forward declaration of `CustomVideoMetadata` to properly resolve imports.
+namespace margelo::nitro::video { struct CustomVideoMetadata; }
 
 #include <memory>
 #include "HybridVideoPlayerSourceSpec.hpp"
@@ -53,6 +55,8 @@ namespace margelo::nitro::video { struct Resolution; }
 #include "JLivePlaybackParams.hpp"
 #include "Resolution.hpp"
 #include "JResolution.hpp"
+#include "CustomVideoMetadata.hpp"
+#include "JCustomVideoMetadata.hpp"
 
 namespace margelo::nitro::video {
 

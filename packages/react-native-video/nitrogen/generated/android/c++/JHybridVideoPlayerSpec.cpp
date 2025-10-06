@@ -72,6 +72,15 @@ namespace margelo::nitro::video {
     auto __result = method(_javaPart);
     return __result->cthis()->shared_cast<JHybridVideoPlayerEventEmitterSpec>();
   }
+  bool JHybridVideoPlayerSpec::getShowNotificationControls() {
+    static const auto method = javaClassStatic()->getMethod<jboolean()>("getShowNotificationControls");
+    auto __result = method(_javaPart);
+    return static_cast<bool>(__result);
+  }
+  void JHybridVideoPlayerSpec::setShowNotificationControls(bool showNotificationControls) {
+    static const auto method = javaClassStatic()->getMethod<void(jboolean /* showNotificationControls */)>("setShowNotificationControls");
+    method(_javaPart, showNotificationControls);
+  }
   VideoPlayerStatus JHybridVideoPlayerSpec::getStatus() {
     static const auto method = javaClassStatic()->getMethod<jni::local_ref<JVideoPlayerStatus>()>("getStatus");
     auto __result = method(_javaPart);

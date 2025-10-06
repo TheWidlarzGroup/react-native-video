@@ -18,7 +18,7 @@ public extension NativeVideoConfig {
   /**
    * Create a new instance of `NativeVideoConfig`.
    */
-  init(uri: String, externalSubtitles: [NativeExternalSubtitle]?, drm: NativeDrmParams?, headers: Dictionary<String, String>?, bufferConfig: BufferConfig?, initializeOnCreation: Bool?) {
+  init(uri: String, externalSubtitles: [NativeExternalSubtitle]?, drm: NativeDrmParams?, headers: Dictionary<String, String>?, bufferConfig: BufferConfig?, metadata: CustomVideoMetadata?, initializeOnCreation: Bool?) {
     self.init(std.string(uri), { () -> bridge.std__optional_std__vector_NativeExternalSubtitle__ in
       if let __unwrappedValue = externalSubtitles {
         return bridge.create_std__optional_std__vector_NativeExternalSubtitle__({ () -> bridge.std__vector_NativeExternalSubtitle_ in
@@ -52,6 +52,12 @@ public extension NativeVideoConfig {
     }(), { () -> bridge.std__optional_BufferConfig_ in
       if let __unwrappedValue = bufferConfig {
         return bridge.create_std__optional_BufferConfig_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_CustomVideoMetadata_ in
+      if let __unwrappedValue = metadata {
+        return bridge.create_std__optional_CustomVideoMetadata_(__unwrappedValue)
       } else {
         return .init()
       }
@@ -180,6 +186,29 @@ public extension NativeVideoConfig {
       self.__bufferConfig = { () -> bridge.std__optional_BufferConfig_ in
         if let __unwrappedValue = newValue {
           return bridge.create_std__optional_BufferConfig_(__unwrappedValue)
+        } else {
+          return .init()
+        }
+      }()
+    }
+  }
+  
+  var metadata: CustomVideoMetadata? {
+    @inline(__always)
+    get {
+      return { () -> CustomVideoMetadata? in
+        if let __unwrapped = self.__metadata.value {
+          return __unwrapped
+        } else {
+          return nil
+        }
+      }()
+    }
+    @inline(__always)
+    set {
+      self.__metadata = { () -> bridge.std__optional_CustomVideoMetadata_ in
+        if let __unwrappedValue = newValue {
+          return bridge.create_std__optional_CustomVideoMetadata_(__unwrappedValue)
         } else {
           return .init()
         }

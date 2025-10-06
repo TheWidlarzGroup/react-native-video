@@ -158,6 +158,16 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     return player.rate != 0
   }
   
+  var showNotificationControls: Bool = false {
+    didSet {
+      if showNotificationControls {
+        NowPlayingInfoCenterManager.shared.registerPlayer(player: player)
+      } else {
+        NowPlayingInfoCenterManager.shared.removePlayer(player: player)
+      }
+    }
+  }
+  
   func initialize() throws -> Promise<Void> {
     return Promise.async { [weak self] in
       guard let self else {
@@ -174,6 +184,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   }
 
   func release() {
+    NowPlayingInfoCenterManager.shared.removePlayer(player: player)
     self.player.replaceCurrentItem(with: nil)
     self.playerItem = nil
 
@@ -270,6 +281,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       self.source = source
       self.playerItem = try await self.initializePlayerItem()
       self.player.replaceCurrentItem(with: self.playerItem)
+      NowPlayingInfoCenterManager.shared.updateNowPlayingInfo()
       promise.resolve(withResult: ())
     }
 
