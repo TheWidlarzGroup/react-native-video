@@ -17,12 +17,16 @@ import { WebEventEmiter } from "./WebEventEmiter";
 class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   protected player = new shaka.Player();
   protected video: HTMLVideoElement;
+  protected headers: Record<string, string> = {};
 
   constructor(source: VideoSource | VideoConfig | VideoPlayerSource) {
     const video = document.createElement("video");
     super(new WebEventEmiter(video));
     this.video = video;
     this.player.attach(this.video);
+    this.player.getNetworkingEngine()!.registerRequestFilter((_type, request) => {
+      request.headers = this.headers;
+    });
     this.replaceSourceAsync(source);
   }
 
@@ -59,7 +63,10 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
 
   // Source
   get source(): VideoPlayerSource {
-    return this.player.source;
+    return {
+      uri: this.player.getAssetUri()!,
+      config: {},
+    };
   }
 
   // Status
@@ -155,30 +162,38 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     return true;
   }
 
-  set playInBackground(value: boolean) {
-    this.player.playInBackground = value;
+  set playInBackground(_: boolean) {
+    if (__DEV__) {
+      console.warn(
+        "playInBackground is not supported on this platform, it wont have any effect",
+      );
+    }
   }
 
   // Play When Inactive
   get playWhenInactive(): boolean {
-    return this.player.playWhenInactive;
+    return true;
   }
 
-  set playWhenInactive(value: boolean) {
-    this.player.playWhenInactive = value;
+  set playWhenInactive(_: boolean) {
+    if (__DEV__) {
+      console.warn(
+        "playWhenInactive is not supported on this platform, it wont have any effect",
+      );
+    }
   }
 
   // Is Playing
   get isPlaying(): boolean {
-    return this.player.isPlaying;
+    return this.status === "readyToPlay" && !this.video.paused;
   }
 
   async initialize(): Promise<void> {
-    await this.wrapPromise(this.player.initialize());
+    // noop on web
   }
 
   async preload(): Promise<void> {
-    this.player.load(this.media, this.startTime);
+    // we start loading when initializing the source.
   }
 
   /**
@@ -230,33 +245,49 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
       | NoAutocomplete<VideoPlayerSource>
       | null,
   ): Promise<void> {
-    this.video.src =
-      typeof source === "object" && "uri" in source
+    const src =
+      typeof source === "object" && source && "uri" in source
         ? source.uri
         : source;
+    if (typeof src === "number") {
+      console.error("A source uri must be a string. Numbers are only supported on native.");
+      return;
+    }
+    // TODO: handle start time
+    this.player.load(src)
+    if (typeof source !== "object") return;
+
+    this.headers = source?.headers ?? {};
+		// this.player.configure({
+		//     drm: undefined,
+		//     streaming: {
+		//       bufferingGoal: source?.bufferConfig?.maxBufferMs,
+		//     },
+		// } satisfies Partial<shaka.extern.PlayerConfiguration>);
   }
 
   // Text Track Management
   getAvailableTextTracks(): TextTrack[] {
-    try {
-      return this.player.getAvailableTextTracks();
-    } catch (error) {
-      this.throwError(error);
-      return [];
-    }
+    return this.player.getTextTracks().map(x => ({
+      id: x.id.toString(),
+      label: x.label ?? "",
+      language: x.language,
+      selected: x.active,
+    }));
   }
 
   selectTextTrack(textTrack: TextTrack | null): void {
-    try {
-      this.player.selectTextTrack(textTrack);
-    } catch (error) {
-      this.throwError(error);
-    }
+    this.player.setTextTrackVisibility(textTrack !== null)
+    if (!textTrack) return;
+    const track = this.player
+      .getTextTracks()
+      .find((x) => x.id === Number(textTrack.id));
+    if (track) this.player.selectTextTrack(track);
   }
 
   // Selected Text Track
   get selectedTrack(): TextTrack | undefined {
-    return this.player.selectedTrack;
+    return this.getAvailableTextTracks().find(x => x.selected);
   }
 }
 

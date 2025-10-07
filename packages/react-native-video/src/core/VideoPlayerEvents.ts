@@ -1,11 +1,10 @@
-import type { VideoPlayerEventEmitter } from '../spec/nitro/VideoPlayerEventEmitter.nitro';
 import {
   ALL_PLAYER_EVENTS,
   type AllPlayerEvents as PlayerEvents,
 } from './types/Events';
 
 export class VideoPlayerEvents {
-  protected eventEmitter: VideoPlayerEventEmitter;
+  protected eventEmitter: PlayerEvents;
   protected eventListeners: Partial<
     Record<keyof PlayerEvents, Set<(...params: any[]) => void>>
   > = {};
