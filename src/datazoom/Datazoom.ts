@@ -7,10 +7,6 @@ const LINKING_ERROR =
   `• Names must match: NativeModules.RNDatazoom.\n` +
   `• If using Expo Go, use a custom dev client.`;
 
-console.log('🔍 Checking for RNDatazoom module...');
-console.log('🔍 NativeModules.RNDatazoom:', NativeModules.RNDatazoom);
-console.log('🔍 Available modules:', Object.keys(NativeModules).filter(key => key.includes('RN') || key.includes('Datazoom')));
-
 const Native = NativeModules?.RNDatazoom ?? null;
 
 export type InitOptions = {
