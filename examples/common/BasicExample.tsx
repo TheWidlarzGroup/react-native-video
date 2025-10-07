@@ -213,7 +213,6 @@ const BasicExample = () => {
   };
 
   const onLoad = (data: OnLoadData) => {
-    console.log('onLoad', data);
     
     setDuration(data.duration);
     onAudioTracks(data);
@@ -263,13 +262,11 @@ const BasicExample = () => {
   };
 
   const onError = (err: OnVideoErrorData) => {
-    console.error('Video Error:', err);
     console.log(JSON.stringify(err));
     toast(true, 'error: ' + JSON.stringify(err));
   };
 
   const onEnd = () => {
-    console.log('onEnd');
     if (!repeat) {
       channelUp();
     }
@@ -321,37 +318,6 @@ const BasicExample = () => {
       }
     })();
   }, []); 
-
-  // Add state change logging
-  const logVideoState = useCallback((action: string) => {
-    console.log('Video State Change', {
-      action,
-      paused,
-      currentTime,
-      duration,
-      rate,
-      volume,
-      muted,
-      resizeMode,
-      fullscreen,
-      isLoading,
-      selectedAudioTrack: selectedAudioTrack?.value,
-      selectedTextTrack: selectedTextTrack?.value,
-    });
-  }, [paused, currentTime, duration, rate, volume, muted, resizeMode, fullscreen, isLoading, selectedAudioTrack, selectedTextTrack]);
-
-  // Log state changes when important properties change
-  useEffect(() => {
-    logVideoState('paused_changed');
-  }, [paused, logVideoState]);
-
-  useEffect(() => {
-    logVideoState('rate_changed');
-  }, [rate, logVideoState]);
-
-  useEffect(() => {
-    logVideoState('volume_changed');
-  }, [volume, logVideoState]); 
 
   return (
     <View style={styles.container}>
