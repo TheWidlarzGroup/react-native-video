@@ -18,14 +18,9 @@ cd ../..
 
 echo "[DRM Plugin] Publishing drm plugin"
 
-read -p "[DRM Plugin] Do you want to release the DRM plugin? (y/n): " confirm
-if [[ $confirm == "y" || $confirm == "Y" ]]; then
-  cd packages/drm-plugin
-  bun run release $@
-  cd ../..
-else
-  echo "[DRM Plugin] Skipping DRM plugin release."
-fi
+cd packages/drm-plugin
+bun run release $@
+cd ../..
 
 echo "[React Native Video] Making Github Release"
 bun run release:github $@
