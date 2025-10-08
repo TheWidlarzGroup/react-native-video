@@ -7,7 +7,9 @@
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "typecheck": "tsc",
-    "start": "react-native start --client-logs"
+    "start": "react-native start --client-logs",
+    "bundle-install": "bundle install",
+    "pods": "cd ios && pod install && cd .."
   },
   "dependencies": {
     "@react-native-community/slider": "^4.5.6",
