@@ -39,7 +39,7 @@ Pod::Spec.new do |s|
     if defined?($RNVideoUseDzAdapters) && $RNVideoUseDzAdapters
       Pod::UI.puts "RNVideo: enable DataZoom Adapters"
       # Add DzAVPlayerAdapter dependency
-      ss.dependency 'DzAVPlayerAdapter', '1.7.0'
+      ss.dependency 'DzAVPlayerAdapter', '1.8.0'
       swift_flags << '-D USE_DZ_ADAPTERS'
     end
 

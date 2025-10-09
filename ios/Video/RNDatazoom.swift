@@ -1,7 +1,6 @@
 import Foundation
 import UIKit
 #if USE_DZ_ADAPTERS
-    import DzAVPlayerAdapter
     import DzBase
 #endif
 

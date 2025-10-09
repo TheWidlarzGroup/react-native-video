@@ -22,6 +22,18 @@ export const isAndroid = Platform.OS === 'android';
 
 export const srcAllPlatformList = [
   {
+    description: 'Apple Sample Video (HLS)',
+    uri: 'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8',
+  },
+  {
+    description: 'Apple Sample Video (MP4)',
+    uri: 'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8',
+  },
+  {
+    description: 'Test MP4 Video',
+    uri: 'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4',
+  },
+  {
     description: 'local file landscape',
     uri: localeVideo.broadchurch,
   },

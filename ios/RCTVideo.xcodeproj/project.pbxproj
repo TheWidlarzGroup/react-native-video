@@ -13,6 +13,7 @@
 		0177D39D27170A7A00F5BE18 /* RCTVideoPlayerViewControllerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0177D39627170A7A00F5BE18 /* RCTVideoPlayerViewControllerDelegate.swift */; };
 		0177D39E27170A7A00F5BE18 /* RCTVideoManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 0177D39727170A7A00F5BE18 /* RCTVideoManager.m */; };
 		0177D39F27170A7A00F5BE18 /* RCTVideo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0177D39927170A7A00F5BE18 /* RCTVideo.swift */; };
+		8A07B89D2E9838CD00594DBF /* DzAVPlayerAdapter in Frameworks */ = {isa = PBXBuildFile; productRef = 8A07B89C2E9838CD00594DBF /* DzAVPlayerAdapter */; };
 		8A79BEC52E9061C90086BDFB /* DzAVPlayerAdapter in Frameworks */ = {isa = PBXBuildFile; productRef = 8A79BEC42E9061C90086BDFB /* DzAVPlayerAdapter */; };
 /* End PBXBuildFile section */
 
@@ -65,6 +66,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8A07B89D2E9838CD00594DBF /* DzAVPlayerAdapter in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -426,6 +428,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		8A07B89C2E9838CD00594DBF /* DzAVPlayerAdapter */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8A79BEC32E9061C90086BDFB /* XCRemoteSwiftPackageReference "apple_dz_avplayer_adapter" */;
+			productName = DzAVPlayerAdapter;
+		};
 		8A79BEC42E9061C90086BDFB /* DzAVPlayerAdapter */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 8A79BEC32E9061C90086BDFB /* XCRemoteSwiftPackageReference "apple_dz_avplayer_adapter" */;

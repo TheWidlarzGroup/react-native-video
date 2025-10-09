@@ -1,7 +1,7 @@
 PODS:
   - boost (1.84.0)
   - DoubleConversion (1.1.6)
-  - DzAVPlayerAdapter (1.7.0)
+  - DzAVPlayerAdapter (1.8.0)
   - fast_float (6.1.4)
   - FBLazyVector (0.78.3)
   - fmt (11.0.2)
@@ -1233,7 +1233,7 @@ PODS:
     - Yoga
   - react-native-video/Video (6.16.1):
     - DoubleConversion
-    - DzAVPlayerAdapter (= 1.7.0)
+    - DzAVPlayerAdapter (= 1.8.0)
     - glog
     - RCT-Folly (= 2024.11.18.00)
     - RCTRequired
@@ -1778,7 +1778,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   boost: 7e761d76ca2ce687f7cc98e698152abd03a18f90
   DoubleConversion: cb417026b2400c8f53ae97020b2be961b59470cb
-  DzAVPlayerAdapter: 24369f5d59d2d9a57ab08563f7114d3f0cb5fe4f
+  DzAVPlayerAdapter: 17b58a61ebb828b2b860473bd7649f46b5b104d5
   fast_float: 06eeec4fe712a76acc9376682e4808b05ce978b6
   FBLazyVector: e053802577a711add20e45bbbf5dd1180b6ca62e
   fmt: a40bb5bd0294ea969aaaba240a927bd33d878cdd
@@ -1813,7 +1813,7 @@ SPEC CHECKSUMS:
   React-logger: 8d00d3d794041a77bd890158353361e2709b04c1
   React-Mapbuffer: b0debf83f1eecbb29ae07e0b22ca2483f1550685
   React-microtasksnativemodule: f45abf988fb2e50384b34e5667baf4a540ecc2e9
-  react-native-video: c68f1ef8be715ba99d04b8157812a68625b96f7a
+  react-native-video: 318c33464379cc63bd9d93aca02b41676cac5781
   React-NativeModulesApple: 9875a39624f69678425f9dc281afe5144ae698f6
   React-perflogger: d06f0fd0727356651a5535f6d717130187aeb667
   React-performancetimeline: 7afc2307ffc4047cef95eb711ea39a12fd90d533
