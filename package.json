@@ -1,6 +1,6 @@
 {
     "name": "react-native-video",
-    "version": "7.12.14",
+    "version": "7.12.15",
     "dorisAndroidVersion": "5.2.15-hotfix",
     "messagingAndroidVersion": "1.1.0",
     "description": "A <Video /> element for react-native",
