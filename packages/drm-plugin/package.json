@@ -1,6 +1,6 @@
 {
   "name": "@react-native-video/drm",
-  "version": "7.0.0-alpha.5",
+  "version": "7.0.0-alpha.6",
   "description": "DRM plugin for react-native-video",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
@@ -61,7 +61,8 @@
   },
   "homepage": "https://github.com/TheWidlarzGroup/react-native-video#readme",
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
   },
   "devDependencies": {
     "@react-native/babel-preset": "0.79.2",
@@ -97,7 +98,8 @@
   "release-it": {
     "git": false,
     "npm": {
-      "publish": true
+      "publish": true,
+      "publishArgs": "--access public"
     },
     "github": {
       "release": false
