@@ -1,4 +1,4 @@
-# @twg/react-native-video-drm
+# @react-native-video/drm
 
 DRM plugin for react-native-video. It adds Widevine (Android) and FairPlay (iOS, visionOS) playback support via the react-native-video plugin system.
 
@@ -10,7 +10,7 @@ DRM plugin for react-native-video. It adds Widevine (Android) and FairPlay (iOS,
 ## Installation
 
 ```sh
-npm install @twg/react-native-video-drm react-native-video react-native-nitro-modules
+npm install @react-native-video/drm react-native-video react-native-nitro-modules
 # then for iOS
 npx pod-install
 ```
@@ -27,7 +27,7 @@ Enable the plugin once at app start, then pass DRM params on your video source.
 import React from 'react';
 import { Platform } from 'react-native';
 import { VideoView, useVideoPlayer } from 'react-native-video';
-import { enable, isEnabled } from '@twg/react-native-video-drm';
+import { enable, isEnabled } from '@react-native-video/drm';
 
 // Enable at startup (required on Android; safe on iOS)
 enable();
@@ -59,7 +59,7 @@ export default function Player() {
 
 ## API
 
-From `@twg/react-native-video-drm`:
+From `@react-native-video/drm`:
 
 - `enable(): void` — registers the plugin. Call once during app startup (Android requires it; iOS tries to auto-enable, but calling is safe).
 - `disable(): void` — unregisters the plugin.

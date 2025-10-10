@@ -4,7 +4,7 @@ import {
   enable as enableDRMPlugin,
   disable as disableDRMPlugin,
   isEnabled as isDRMPluginEnabled,
-} from '@twg/react-native-video-drm';
+} from '@react-native-video/drm';
 
 const getDRMSource = (): VideoConfig => {
   const HLS =

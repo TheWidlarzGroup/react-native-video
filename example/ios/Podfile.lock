@@ -1587,7 +1587,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - ReactNativeVideoDrm (0.1.0):
+  - ReactNativeVideoDrm (7.0.0-alpha.5):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1686,7 +1686,7 @@ DEPENDENCIES:
   - ReactCodegen (from `build/generated/ios`)
   - ReactCommon/turbomodule/core (from `../../node_modules/react-native/ReactCommon`)
   - ReactNativeVideo (from `../../node_modules/react-native-video`)
-  - "ReactNativeVideoDrm (from `../../node_modules/@twg/react-native-video-drm`)"
+  - "ReactNativeVideoDrm (from `../../node_modules/@react-native-video/drm`)"
   - Yoga (from `../../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -1832,7 +1832,7 @@ EXTERNAL SOURCES:
   ReactNativeVideo:
     :path: "../../node_modules/react-native-video"
   ReactNativeVideoDrm:
-    :path: "../../node_modules/@twg/react-native-video-drm"
+    :path: "../../node_modules/@react-native-video/drm"
   Yoga:
     :path: "../../node_modules/react-native/ReactCommon/yoga"
 
@@ -1905,7 +1905,7 @@ SPEC CHECKSUMS:
   ReactCodegen: 474fbb3e4bb0f1ee6c255d1955db76e13d509269
   ReactCommon: 7763e59534d58e15f8f22121cdfe319040e08888
   ReactNativeVideo: 705a2a90d9f04afff9afd90d4ef194e1bc1135d5
-  ReactNativeVideoDrm: 62840ae0e184f711a2e6495c18e342a74cb598f8
+  ReactNativeVideoDrm: 2e0844e18cd8024078da2762a749420c5268cf18
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: 31a098f74c16780569aebd614a0f37a907de0189
 

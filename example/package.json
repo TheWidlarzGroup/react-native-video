@@ -17,7 +17,7 @@
     "react-native": "^0.77.0",
     "react-native-nitro-modules": "^0.29.0",
     "react-native-video": "*",
-    "@twg/react-native-video-drm": "*"
+    "@react-native-video/drm": "*"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

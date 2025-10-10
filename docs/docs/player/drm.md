@@ -17,20 +17,20 @@ This page explains how to play DRM‑protected content with React Native Video u
 ## Install and enable the DRM plugin
 
 :::tip Pluginable Architecture
-React Native Video uses a plugin architecture. DRM support is provided by the `@twg/react-native-video-drm` plugin and is not built into the core package.
+React Native Video uses a plugin architecture. DRM support is provided by the `@react-native-video/drm` plugin and is not built into the core package.
 :::
 
 1) Install dependencies in your app:
 
 ```sh
-npm install @twg/react-native-video-drm
+npm install @react-native-video/drm
 ```
 
 2) Enable the plugin at app startup (before creating any players):
 
 ```ts
 // App.tsx (or any place you want to initialize the plugin)
-import { enable } from '@twg/react-native-video-drm';
+import { enable } from '@react-native-video/drm';
 
 enable();
 ```
@@ -185,7 +185,7 @@ If you are looking for implementing offline playback with DRM, make sure to chec
 
 ## Troubleshooting
 
-- DRMPluginNotFound: Ensure you installed `@twg/react-native-video-drm`, imported it, and called `enable()` before creating any players.
+- DRMPluginNotFound: Ensure you installed `@react-native-video/drm`, imported it, and called `enable()` before creating any players.
 - iOS headers: The default FairPlay flow uses `source.headers` for license requests; `drm.licenseHeaders` are not used on iOS.
 - Invalid CKC: `getLicense` must return a base64 string. Returning raw bytes or JSON will fail.
 - 403/415 from license server: Verify required auth headers, content type, and whether the server expects raw SPC bytes vs base64.

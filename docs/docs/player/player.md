@@ -145,6 +145,6 @@ Properties below are Apple platforms‑only
 Protected content is supported via a plugin. See the full DRM guide: [DRM](./drm.md).
 
 Quick notes:
-- Install and enable the official plugin `@twg/react-native-video-drm` and call `enable()` at app startup before creating players.
+- Install and enable the official plugin `@react-native-video/drm` and call `enable()` at app startup before creating players.
 - Pass DRM configuration on the source using the `drm` property of `VideoConfig` (see the DRM guide for platform specifics and `getLicense` examples).
 - If you defer initialization (`initializeOnCreation: false`), be sure to call `await player.initialize()` (or `preload()`) before expecting DRM license acquisition events.
