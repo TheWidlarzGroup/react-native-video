@@ -2,7 +2,6 @@ import * as React from 'react';
 import type { ViewStyle } from 'react-native';
 import { NitroModules } from 'react-native-nitro-modules';
 import type {
-  SurfaceType,
   VideoViewViewManager,
   VideoViewViewManagerFactory,
 } from '../../spec/nitro/VideoViewViewManager.nitro';

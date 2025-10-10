@@ -6,7 +6,6 @@ import {
   useRef,
 } from "react";
 import { View, type ViewStyle } from "react-native";
-import { VideoError } from "../types/VideoError";
 import type { VideoPlayer } from "../VideoPlayer.web";
 import type { VideoViewProps, VideoViewRef } from "./ViewViewProps";
 

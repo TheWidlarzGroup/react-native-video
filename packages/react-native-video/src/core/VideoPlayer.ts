@@ -1,6 +1,6 @@
 import { Platform } from 'react-native';
 import { NitroModules } from 'react-native-nitro-modules';
-import { type VideoPlayer as VideoPlayerImpl } from '../spec/nitro/VideoPlayer.nitro';
+import type { VideoPlayer as VideoPlayerImpl } from '../spec/nitro/VideoPlayer.nitro';
 import type { VideoPlayerSource } from '../spec/nitro/VideoPlayerSource.nitro';
 import type { IgnoreSilentSwitchMode } from './types/IgnoreSilentSwitchMode';
 import type { MixAudioMode } from './types/MixAudioMode';

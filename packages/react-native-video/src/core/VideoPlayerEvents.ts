@@ -1,10 +1,11 @@
 import {
   ALL_PLAYER_EVENTS,
+  type VideoPlayerEvents as NativePlayerEvents,
   type AllPlayerEvents as PlayerEvents,
-} from './types/Events';
+} from "./types/Events";
 
 export class VideoPlayerEvents {
-  protected eventEmitter: PlayerEvents;
+  protected eventEmitter: NativePlayerEvents;
   protected eventListeners: Partial<
     Record<keyof PlayerEvents, Set<(...params: any[]) => void>>
   > = {};
@@ -12,7 +13,7 @@ export class VideoPlayerEvents {
   protected readonly supportedEvents: (keyof PlayerEvents)[] =
     ALL_PLAYER_EVENTS;
 
-  constructor(eventEmitter: PlayerEvents) {
+  constructor(eventEmitter: NativePlayerEvents) {
     this.eventEmitter = eventEmitter;
     for (const event of this.supportedEvents) {
       // @ts-expect-error we narrow the type of the event

@@ -1,4 +1,5 @@
 import type { ViewProps, ViewStyle } from "react-native";
+import type { SurfaceType } from "../../spec/nitro/VideoViewViewManager.nitro";
 import type { VideoViewEvents } from "../types/Events";
 import type { ResizeMode } from "../types/ResizeMode";
 import type { VideoPlayer } from "../VideoPlayer";

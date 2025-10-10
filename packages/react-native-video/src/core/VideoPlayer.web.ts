@@ -63,10 +63,11 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
 
   // Source
   get source(): VideoPlayerSource {
+    // TODO: properly implement this
     return {
       uri: this.player.getAssetUri()!,
       config: {},
-    };
+    } as any;
   }
 
   // Status
