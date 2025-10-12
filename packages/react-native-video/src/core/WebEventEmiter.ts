@@ -19,38 +19,51 @@ export class WebEventEmiter implements PlayerEvents {
     // TODO: add `onBandwithUpdate`
 
     // on buffer
+    this._onCanPlay = this._onCanPlay.bind(this);
+    this._onWaiting = this._onWaiting.bind(this);
     this.video.addEventListener("canplay", this._onCanPlay);
     this.video.addEventListener("waiting", this._onWaiting);
 
     // on end
+    this._onEnded = this._onEnded.bind(this);
     this.video.addEventListener("ended", this._onEnded);
 
     // on load
+    this._onDurationChange = this._onDurationChange.bind(this);
     this.video.addEventListener("durationchange", this._onDurationChange);
 
     // on load start
+    this._onLoadStart = this._onLoadStart.bind(this);
     this.video.addEventListener("loadstart", this._onLoadStart);
 
     // on playback state change
+    this._onPlay = this._onPlay.bind(this);
+    this._onPause = this._onPause.bind(this);
     this.video.addEventListener("play", this._onPlay);
     this.video.addEventListener("pause", this._onPause);
 
     // on playback rate change
+    this._onRateChange = this._onRateChange.bind(this);
     this.video.addEventListener("ratechange", this._onRateChange);
 
     // on progress
+    this._onTimeUpdate = this._onTimeUpdate.bind(this);
     this.video.addEventListener("timeupdate", this._onTimeUpdate);
 
     // on ready to play
+    this._onLoadedData = this._onLoadedData.bind(this);
     this.video.addEventListener("loadeddata", this._onLoadedData);
 
     // on seek
+    this._onSeeked = this._onSeeked.bind(this);
     this.video.addEventListener("seeked", this._onSeeked);
 
     // on volume change
+    this._onVolumeChange = this._onVolumeChange.bind(this);
     this.video.addEventListener("volumechange", this._onVolumeChange);
 
     // on status change
+    this._onError = this._onError.bind(this);
     this.video.addEventListener("error", this._onError);
   }
 
