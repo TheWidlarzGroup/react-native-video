@@ -4,6 +4,7 @@ import {
   useEffect,
   useImperativeHandle,
   useRef,
+  type CSSProperties,
 } from "react";
 import { View, type ViewStyle } from "react-native";
 import type { VideoPlayer } from "../VideoPlayer.web";
@@ -39,22 +40,20 @@ const VideoView = forwardRef<VideoViewRef, VideoViewProps>(
     useEffect(() => {
       const videoElement = player.__getNativeRef();
       vRef.current?.appendChild(videoElement);
-      return () => {
-        vRef.current?.removeChild(videoElement);
-      };
+      return () => vRef.current?.replaceChildren();
     }, [player]);
 
     useImperativeHandle(
       ref,
       () => ({
         enterFullscreen: () => {
-          player.__getNativeRef().requestFullscreen({ navigationUI: "hide" });
+          player.player.requestFullscreen({ navigationUI: "hide" });
         },
         exitFullscreen: () => {
           document.exitFullscreen();
         },
         enterPictureInPicture: () => {
-          player.__getNativeRef().requestPictureInPicture();
+          player.player.requestPictureInPicture();
         },
         exitPictureInPicture: () => {
           document.exitPictureInPicture();
@@ -65,14 +64,24 @@ const VideoView = forwardRef<VideoViewRef, VideoViewProps>(
     );
 
     useEffect(() => {
-      player.__getNativeRef().controls = controls;
+      player.player.controls(controls);
     }, [player, controls]);
+
+    useEffect(() => {
+      const vid = player.__getNativeRef();
+      const objectFit: CSSProperties["objectFit"] =
+        resizeMode === "stretch" ? "fill" : resizeMode;
+      vid.style = `position: absolute; inset: 0; width: 100%; height: 100%; object-fit: ${objectFit}`;
+    }, [player, resizeMode]);
 
     return (
       <View {...props}>
         <div
           ref={vRef}
-          style={{ objectFit: resizeMode === "stretch" ? "fill" : resizeMode }}
+          style={{
+            position: "absolute",
+            inset: 0
+          }}
         />
       </View>
     );

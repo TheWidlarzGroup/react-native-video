@@ -1,4 +1,3 @@
-import shaka from "shaka-player";
 import type { VideoPlayerSource } from "../spec/nitro/VideoPlayerSource.nitro";
 import type { IgnoreSilentSwitchMode } from "./types/IgnoreSilentSwitchMode";
 import type { MixAudioMode } from "./types/MixAudioMode";
@@ -13,20 +12,37 @@ import type { VideoPlayerBase } from "./types/VideoPlayerBase";
 import type { VideoPlayerStatus } from "./types/VideoPlayerStatus";
 import { VideoPlayerEvents } from "./VideoPlayerEvents";
 import { WebEventEmiter } from "./WebEventEmiter";
+import videojs from "video.js";
+
+type VideoJsPlayer = ReturnType<typeof videojs>;
+
+// declared https://github.com/videojs/video.js/blob/main/src/js/tracks/track-list.js#L58
+type VideoJsTextTracks = {
+  length: number;
+  [i: number]: {
+    // declared: https://github.com/videojs/video.js/blob/main/src/js/tracks/track.js
+    id: string;
+    label: string;
+    language: string;
+    // declared https://github.com/videojs/video.js/blob/20f8d76cd24325a97ccedf0b013cd1a90ad0bcd7/src/js/tracks/text-track.js
+    default: boolean;
+    mode: "showing" | "disabled" | "hidden";
+  };
+};
 
 class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
-  protected player = new shaka.Player();
   protected video: HTMLVideoElement;
-  protected headers: Record<string, string> = {};
+  public player: VideoJsPlayer;
 
   constructor(source: VideoSource | VideoConfig | VideoPlayerSource) {
     const video = document.createElement("video");
-    super(new WebEventEmiter(video));
+    const player = videojs(video);
+
+    super(new WebEventEmiter(player));
+
     this.video = video;
-    this.player.attach(this.video);
-    this.player.getNetworkingEngine()!.registerRequestFilter((_type, request) => {
-      request.headers = this.headers;
-    });
+    this.player = player;
+
     this.replaceSourceAsync(source);
   }
 
@@ -36,7 +52,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
    * @internal
    */
   __destroy() {
-    this.player.destroy();
+    this.player.dispose();
   }
 
   __getNativeRef() {
@@ -65,7 +81,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   get source(): VideoPlayerSource {
     // TODO: properly implement this
     return {
-      uri: this.player.getAssetUri()!,
+      uri: this.player.src(undefined),
       config: {},
     } as any;
   }
@@ -84,52 +100,52 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
 
   // Duration
   get duration(): number {
-    return this.video.duration;
+    return this.player.duration() ?? NaN;
   }
 
   // Volume
   get volume(): number {
-    return this.video.volume;
+    return this.player.volume() ?? 1;
   }
 
   set volume(value: number) {
-    this.video.volume = value;
+    this.player.volume(value);
   }
 
   // Current Time
   get currentTime(): number {
-    return this.video.currentTime;
+    return this.player.currentTime() ?? NaN;
   }
 
   set currentTime(value: number) {
-    this.video.currentTime = value;
+    this.player.currentTime(value);
   }
 
   // Muted
   get muted(): boolean {
-    return this.video.muted;
+    return this.player.muted() ?? false;
   }
 
   set muted(value: boolean) {
-    this.video.muted = value;
+    this.player.muted(value);
   }
 
   // Loop
   get loop(): boolean {
-    return this.video.loop;
+    return this.player.loop() ?? false;
   }
 
   set loop(value: boolean) {
-    this.video.loop = value;
+    this.player.loop(value);
   }
 
   // Rate
   get rate(): number {
-    return this.video.playbackRate;
+    return this.player.playbackRate() ?? 1;
   }
 
   set rate(value: number) {
-    this.video.playbackRate = value;
+    this.player.playbackRate(value);
   }
 
   // Mix Audio Mode
@@ -137,56 +153,32 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     return "auto";
   }
 
-  set mixAudioMode(_: MixAudioMode) {
-    if (__DEV__) {
-      console.warn(
-        "mixAudioMode is not supported on this platform, it wont have any effect",
-      );
-    }
-  }
+  set mixAudioMode(_: MixAudioMode) { }
 
   // Ignore Silent Switch Mode
   get ignoreSilentSwitchMode(): IgnoreSilentSwitchMode {
     return "auto";
   }
 
-  set ignoreSilentSwitchMode(_: IgnoreSilentSwitchMode) {
-    if (__DEV__) {
-      console.warn(
-        "ignoreSilentSwitchMode is not supported on this platform, it wont have any effect",
-      );
-    }
-  }
+  set ignoreSilentSwitchMode(_: IgnoreSilentSwitchMode) { }
 
   // Play In Background
   get playInBackground(): boolean {
     return true;
   }
 
-  set playInBackground(_: boolean) {
-    if (__DEV__) {
-      console.warn(
-        "playInBackground is not supported on this platform, it wont have any effect",
-      );
-    }
-  }
+  set playInBackground(_: boolean) { }
 
   // Play When Inactive
   get playWhenInactive(): boolean {
     return true;
   }
 
-  set playWhenInactive(_: boolean) {
-    if (__DEV__) {
-      console.warn(
-        "playWhenInactive is not supported on this platform, it wont have any effect",
-      );
-    }
-  }
+  set playWhenInactive(_: boolean) { }
 
   // Is Playing
   get isPlaying(): boolean {
-    return this.status === "readyToPlay" && !this.video.paused;
+    return !this.player.paused();
   }
 
   async initialize(): Promise<void> {
@@ -194,7 +186,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   }
 
   async preload(): Promise<void> {
-    // we start loading when initializing the source.
+    this.player.load()
   }
 
   /**
@@ -208,35 +200,20 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   }
 
   play(): void {
-    try {
-      this.video.play();
-    } catch (error) {
-      this.throwError(error);
-    }
+    this.player.play()?.catch(this.throwError);
   }
 
   pause(): void {
-    try {
-      this.video.pause();
-    } catch (error) {
-      this.throwError(error);
-    }
+    this.player.pause();
   }
 
   seekBy(time: number): void {
-    try {
-      this.video.currentTime += time;
-    } catch (error) {
-      this.throwError(error);
-    }
+    const now = this.player.currentTime() ?? 0;
+    this.player.currentTime(now + time);
   }
 
   seekTo(time: number): void {
-    try {
-      this.video.currentTime = time;
-    } catch (error) {
-      this.throwError(error);
-    }
+    this.player.currentTime(time);
   }
 
   async replaceSourceAsync(
@@ -251,44 +228,43 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
         ? source.uri
         : source;
     if (typeof src === "number") {
-      console.error("A source uri must be a string. Numbers are only supported on native.");
+      console.error(
+        "A source uri must be a string. Numbers are only supported on native.",
+      );
       return;
     }
     // TODO: handle start time
-    this.player.load(src)
+    this.player.src(src);
     if (typeof source !== "object") return;
-
-    this.headers = source?.headers ?? {};
-		// this.player.configure({
-		//     drm: undefined,
-		//     streaming: {
-		//       bufferingGoal: source?.bufferConfig?.maxBufferMs,
-		//     },
-		// } satisfies Partial<shaka.extern.PlayerConfiguration>);
   }
 
   // Text Track Management
+
   getAvailableTextTracks(): TextTrack[] {
-    return this.player.getTextTracks().map(x => ({
-      id: x.id.toString(),
-      label: x.label ?? "",
-      language: x.language,
-      selected: x.active,
+    // @ts-expect-error they define length & index properties via prototype
+    const tracks: VideoJsTextTracks = this.player.textTracks();
+
+    return [...Array(tracks.length)].map((_, i) => ({
+      id: tracks[i]!.id,
+      label: tracks[i]!.label,
+      language: tracks[i]!.language,
+      selected: tracks[i]!.mode === "showing",
     }));
   }
 
   selectTextTrack(textTrack: TextTrack | null): void {
-    this.player.setTextTrackVisibility(textTrack !== null)
-    if (!textTrack) return;
-    const track = this.player
-      .getTextTracks()
-      .find((x) => x.id === Number(textTrack.id));
-    if (track) this.player.selectTextTrack(track);
+    // @ts-expect-error they define length & index properties via prototype
+    const tracks: VideoJsTextTracks = this.player.textTracks();
+
+    for (let i = 0; i < tracks.length; i++) {
+      if (tracks[i]!.mode === "showing") tracks[i]!.mode = "disabled";
+      if (tracks[i]!.id === textTrack?.id) tracks[i]!.mode = "showing";
+    }
   }
 
   // Selected Text Track
   get selectedTrack(): TextTrack | undefined {
-    return this.getAvailableTextTracks().find(x => x.selected);
+    return this.getAvailableTextTracks().find((x) => x.selected);
   }
 }
 

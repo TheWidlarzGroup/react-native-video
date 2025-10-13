@@ -1,3 +1,4 @@
+import type videojs from "video.js";
 import type {
   BandwidthData,
   onLoadData,
@@ -12,91 +13,91 @@ import type { TextTrack } from "./types/TextTrack";
 import type { VideoRuntimeError } from "./types/VideoError";
 import type { VideoPlayerStatus } from "./types/VideoPlayerStatus";
 
+type VideoJsPlayer = ReturnType<typeof videojs>;
+
 export class WebEventEmiter implements PlayerEvents {
   private _isBuferring = false;
 
-  constructor(private video: HTMLVideoElement) {
+  constructor(private player: VideoJsPlayer) {
     // TODO: add `onBandwithUpdate`
 
     // on buffer
     this._onCanPlay = this._onCanPlay.bind(this);
     this._onWaiting = this._onWaiting.bind(this);
-    this.video.addEventListener("canplay", this._onCanPlay);
-    this.video.addEventListener("waiting", this._onWaiting);
+    this.player.on("canplay", this._onCanPlay);
+    this.player.on("waiting", this._onWaiting);
 
     // on end
     this._onEnded = this._onEnded.bind(this);
-    this.video.addEventListener("ended", this._onEnded);
+    this.player.on("ended", this._onEnded);
 
     // on load
     this._onDurationChange = this._onDurationChange.bind(this);
-    this.video.addEventListener("durationchange", this._onDurationChange);
+    this.player.on("durationchange", this._onDurationChange);
 
     // on load start
     this._onLoadStart = this._onLoadStart.bind(this);
-    this.video.addEventListener("loadstart", this._onLoadStart);
+    this.player.on("loadstart", this._onLoadStart);
 
     // on playback state change
     this._onPlay = this._onPlay.bind(this);
     this._onPause = this._onPause.bind(this);
-    this.video.addEventListener("play", this._onPlay);
-    this.video.addEventListener("pause", this._onPause);
+    this.player.on("play", this._onPlay);
+    this.player.on("pause", this._onPause);
 
     // on playback rate change
     this._onRateChange = this._onRateChange.bind(this);
-    this.video.addEventListener("ratechange", this._onRateChange);
+    this.player.on("ratechange", this._onRateChange);
 
     // on progress
     this._onTimeUpdate = this._onTimeUpdate.bind(this);
-    this.video.addEventListener("timeupdate", this._onTimeUpdate);
+    this.player.on("timeupdate", this._onTimeUpdate);
 
     // on ready to play
     this._onLoadedData = this._onLoadedData.bind(this);
-    this.video.addEventListener("loadeddata", this._onLoadedData);
+    this.player.on("loadeddata", this._onLoadedData);
 
     // on seek
     this._onSeeked = this._onSeeked.bind(this);
-    this.video.addEventListener("seeked", this._onSeeked);
+    this.player.on("seeked", this._onSeeked);
 
     // on volume change
     this._onVolumeChange = this._onVolumeChange.bind(this);
-    this.video.addEventListener("volumechange", this._onVolumeChange);
+    this.player.on("volumechange", this._onVolumeChange);
 
     // on status change
     this._onError = this._onError.bind(this);
-    this.video.addEventListener("error", this._onError);
+    this.player.on("error", this._onError);
   }
 
   destroy() {
-    this.video.removeEventListener("canplay", this._onCanPlay);
-    this.video.removeEventListener("waiting", this._onWaiting);
+    this.player.off("canplay", this._onCanPlay);
+    this.player.off("waiting", this._onWaiting);
 
-    this.video.removeEventListener("ended", this._onEnded);
+    this.player.off("ended", this._onEnded);
 
-    this.video.removeEventListener("durationchange", this._onDurationChange);
+    this.player.off("durationchange", this._onDurationChange);
 
-    this.video.removeEventListener("play", this._onPlay);
-    this.video.removeEventListener("pause", this._onPause);
+    this.player.off("play", this._onPlay);
+    this.player.off("pause", this._onPause);
 
-    this.video.removeEventListener("ratechange", this._onRateChange);
+    this.player.off("ratechange", this._onRateChange);
 
-    this.video.removeEventListener("timeupdate", this._onTimeUpdate);
+    this.player.off("timeupdate", this._onTimeUpdate);
 
-    this.video.removeEventListener("loadeddata", this._onLoadedData);
+    this.player.off("loadeddata", this._onLoadedData);
 
-    this.video.removeEventListener("seeked", this._onSeeked);
+    this.player.off("seeked", this._onSeeked);
 
-    this.video.removeEventListener("volumechange", this._onVolumeChange);
+    this.player.off("volumechange", this._onVolumeChange);
 
-    this.video.removeEventListener("error", this._onError);
+    this.player.off("error", this._onError);
   }
 
   _onTimeUpdate() {
     this.onProgress({
-      currentTime: this.video.currentTime,
-      bufferDuration: this.video.buffered.length
-        ? this.video.buffered.end(this.video.buffered.length - 1)
-        : 0,
+      currentTime: this.player.currentTime() ?? 0,
+      bufferDuration: this.player.bufferedEnd(),
     });
   }
 
@@ -113,10 +114,10 @@ export class WebEventEmiter implements PlayerEvents {
 
   _onDurationChange() {
     this.onLoad({
-      currentTime: this.video.currentTime,
-      duration: this.video.duration,
-      width: this.video.width,
-      height: this.video.height,
+      currentTime: this.player.currentTime() ?? 0,
+      duration: this.player.duration() ?? NaN,
+      width: this.player.width() ?? NaN,
+      height: this.player.height() ?? NaN,
       orientation: "unknown",
     });
   }
@@ -130,16 +131,16 @@ export class WebEventEmiter implements PlayerEvents {
     this.onLoadStart({
       sourceType: "network",
       source: {
-        uri: this.video.currentSrc,
+        uri: this.player.src(undefined)!,
         config: {
-          uri: this.video.currentSrc,
+          uri: this.player.src(undefined)!,
           externalSubtitles: [],
         },
         getAssetInformationAsync: async () => {
           return {
-            duration: BigInt(this.video.duration),
-            height: this.video.height,
-            width: this.video.width,
+            duration: BigInt(this.player.duration() ?? NaN),
+            height: this.player.height() ?? NaN,
+            width: this.player.width() ?? NaN,
             orientation: "unknown",
             bitrate: NaN,
             fileSize: BigInt(NaN),
@@ -166,7 +167,7 @@ export class WebEventEmiter implements PlayerEvents {
   }
 
   _onRateChange() {
-    this.onPlaybackRateChange(this.video.playbackRate);
+    this.onPlaybackRateChange(this.player.playbackRate() ?? 1);
   }
 
   _onLoadedData() {
@@ -174,11 +175,14 @@ export class WebEventEmiter implements PlayerEvents {
   }
 
   _onSeeked() {
-    this.onSeek(this.video.currentTime);
+    this.onSeek(this.player.currentTime() ?? 0);
   }
 
   _onVolumeChange() {
-    this.onVolumeChange({ muted: this.video.muted, volume: this.video.volume });
+    this.onVolumeChange({
+      muted: this.player.muted() ?? false,
+      volume: this.player.volume() ?? 1,
+    });
   }
 
   _onError() {
