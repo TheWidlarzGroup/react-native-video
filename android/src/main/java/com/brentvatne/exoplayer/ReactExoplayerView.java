@@ -55,6 +55,7 @@ import androidx.media3.common.text.CueGroup;
 import androidx.media3.common.util.Util;
 import androidx.media3.datasource.DataSource;
 import androidx.media3.datasource.DataSpec;
+import androidx.media3.datasource.DefaultDataSource;
 import androidx.media3.datasource.HttpDataSource;
 import androidx.media3.exoplayer.DefaultLoadControl;
 import androidx.media3.exoplayer.DefaultRenderersFactory;
@@ -76,6 +77,8 @@ import androidx.media3.exoplayer.drm.HttpMediaDrmCallback;
 import androidx.media3.exoplayer.drm.UnsupportedDrmException;
 import androidx.media3.exoplayer.hls.HlsMediaSource;
 import androidx.media3.exoplayer.ima.ImaAdsLoader;
+import androidx.media3.exoplayer.ima.ImaServerSideAdInsertionMediaSource;
+import androidx.media3.exoplayer.ima.ImaServerSideAdInsertionUriBuilder;
 import androidx.media3.exoplayer.mediacodec.MediaCodecInfo;
 import androidx.media3.exoplayer.mediacodec.MediaCodecUtil;
 import androidx.media3.exoplayer.rtsp.RtspMediaSource;
@@ -125,9 +128,11 @@ import com.brentvatne.react.ReactNativeVideoManager;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
 import com.brentvatne.receiver.PictureInPictureReceiver;
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.UiThreadUtil;
+import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.google.ads.interactivemedia.v3.api.AdError;
 import com.google.ads.interactivemedia.v3.api.AdErrorEvent;
@@ -182,6 +187,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private ExoPlayerView exoPlayerView;
     private FullScreenPlayerView fullScreenPlayerView;
     private ImaAdsLoader adsLoader;
+    private ImaServerSideAdInsertionMediaSource.AdsLoader daiAdsLoader;
 
     private DataSource.Factory mediaDataSourceFactory;
     private ExoPlayer player;
@@ -621,7 +627,6 @@ public class ReactExoplayerView extends FrameLayout implements
 
     private void initializePlayer() {
         disableCache = ReactNativeVideoManager.Companion.getInstance().shouldDisableCache(source);
-
         ReactExoplayerView self = this;
         Activity activity = themedReactContext.getCurrentActivity();
         // This ensures all props have been settled, to avoid async racing conditions.
@@ -631,7 +636,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 return;
             }
             try {
-                if (runningSource.getUri() == null) {
+                if (runningSource.getUri() == null && !isDaiRequest(runningSource)) {
                     return;
                 }
 
@@ -730,12 +735,19 @@ public class ReactExoplayerView extends FrameLayout implements
                         .setEnableDecoderFallback(true)
                         .forceEnableMediaCodecAsynchronousQueueing();
 
-        DefaultMediaSourceFactory mediaSourceFactory = new DefaultMediaSourceFactory(mediaDataSourceFactory);
+        DefaultMediaSourceFactory mediaSourceFactory;
+        
+        if (isDaiRequest(source)) {
+            mediaSourceFactory = createDaiMediaSourceFactory();
+        } else {
+            mediaSourceFactory = new DefaultMediaSourceFactory(mediaDataSourceFactory);
+
+            mediaSourceFactory.setLocalAdInsertionComponents(unusedAdTagUri -> adsLoader, exoPlayerView.getPlayerView());
+        }
+
         if (useCache && !disableCache) {
             mediaSourceFactory.setDataSourceFactory(RNVSimpleCache.INSTANCE.getCacheFactory(buildHttpDataSourceFactory(true)));
         }
-
-        mediaSourceFactory.setLocalAdInsertionComponents(unusedAdTagUri -> adsLoader, exoPlayerView.getPlayerView());
 
         player = new ExoPlayer.Builder(getContext(), renderersFactory)
                 .setTrackSelector(self.trackSelector)
@@ -830,6 +842,11 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     private void initializePlayerSource(Source runningSource) {
+        if (isDaiRequest(runningSource)) {
+            initializeDaiSource(runningSource);
+            return;
+        }
+        
         if (runningSource.getUri() == null) {
             return;
         }
@@ -1224,6 +1241,12 @@ public class ReactExoplayerView extends FrameLayout implements
             adsLoader.release();
             adsLoader = null;
         }
+
+        if (daiAdsLoader != null) {
+            daiAdsLoader.release();
+            daiAdsLoader = null;
+        }
+
         progressHandler.removeMessages(SHOW_PROGRESS);
         audioBecomingNoisyReceiver.removeListener();
         pictureInPictureReceiver.removeListener();
@@ -2007,7 +2030,7 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     public void setSrc(Source source) {
-        if (source.getUri() != null) {
+        if (source.getUri() != null || isDaiRequest(source)) {
             clearResumePosition();
             boolean isSourceEqual = source.isEquals(this.source);
             hasDrmFailed = false;
@@ -2732,10 +2755,193 @@ public class ReactExoplayerView extends FrameLayout implements
                 "type", String.valueOf(error.getErrorType())
         );
         eventEmitter.onReceiveAdEvent.invoke("ERROR", errMap);
+        
+        handleDaiBackupStream();
     }
 
     public void setControlsStyles(ControlsConfig controlsStyles) {
         controlsConfig = controlsStyles;
         refreshControlsStyles();
+    }
+    
+    /**
+     * Checks if the source is a DAI (Dynamic Ad Insertion) request.
+     *
+     * A DAI request is identified by either:
+     * - VOD: both contentSourceId and videoId are present
+     * - Live: assetKey is present
+     *
+     * @param source The source to check
+     * @return true if the source is a DAI request, false otherwise
+     */
+    private boolean isDaiRequest(Source source) {
+        if (source == null || source.getDaiProps() == null) {
+            return false;
+        }
+        
+        boolean hasContentSourceId = source.getDaiProps().getContentSourceId() != null;
+        boolean hasVideoId = source.getDaiProps().getVideoId() != null;
+        boolean hasAssetKey = source.getDaiProps().getAssetKey() != null;
+        
+        return (hasContentSourceId && hasVideoId) || hasAssetKey;
+    }
+
+    /**
+     * Creates and configures a server-side ad insertion (SSAI) AdsLoader for DAI.
+     *
+     * @return The configured IMA server-side ad insertion AdsLoader
+     */
+    private ImaServerSideAdInsertionMediaSource.AdsLoader createAdsLoader() {
+        ImaServerSideAdInsertionMediaSource.AdsLoader.Builder adsLoaderBuilder =
+                new ImaServerSideAdInsertionMediaSource.AdsLoader.Builder(getContext(), exoPlayerView.getPlayerView())
+                        .setAdEventListener(this)
+                        .setAdErrorListener(this);
+
+        return adsLoaderBuilder.build();
+    }
+
+    /**
+     * Creates and configures a media source factory for DAI playback.
+     *
+     * @return The configured DefaultMediaSourceFactory with DAI support
+     */
+    private DefaultMediaSourceFactory createDaiMediaSourceFactory() {
+        daiAdsLoader = createAdsLoader();
+
+        DataSource.Factory dataSourceFactory = new DefaultDataSource.Factory(getContext());
+        DefaultMediaSourceFactory mediaSourceFactory = new DefaultMediaSourceFactory(dataSourceFactory);
+
+        ImaServerSideAdInsertionMediaSource.Factory adsMediaSourceFactory =
+                new ImaServerSideAdInsertionMediaSource.Factory(daiAdsLoader, mediaSourceFactory);
+
+        mediaSourceFactory.setServerSideAdInsertionMediaSourceFactory(adsMediaSourceFactory);
+        
+        return mediaSourceFactory;
+    }
+
+    /**
+     * Initializes the player for DAI source.
+     *
+     * Waits for the player to be set, requests the DAI stream, and completes player initialization.
+     *
+     * @param runningSource The source containing DAI properties
+     */
+    private void initializeDaiSource(Source runningSource) {
+        while (player == null) {
+            try {
+                wait();
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                DebugLog.e(TAG, ex.toString());
+            }
+        }
+
+        requestDaiStream(
+                runningSource.getDaiProps().getContentSourceId(),
+                runningSource.getDaiProps().getVideoId(),
+                runningSource.getDaiProps().getAssetKey(),
+                runningSource.getDaiProps().getAdTagParameters()
+        );
+
+        player.prepare();
+        playerNeedsSource = false;
+
+        eventEmitter.onVideoLoadStart.invoke();
+        loadVideoStarted = true;
+
+        finishPlayerInitialization();
+    }
+
+    /**
+     * Requests a DAI stream from Google IMA using the ExoPlayer IMA extension.
+     *
+     * Builds an SSAI URI based on the provided parameters and sets it on the player.
+     * Supports both VOD (contentSourceId + videoId) and Live (assetKey) streams.
+     *
+     * @param contentSourceId The content source ID for VOD requests
+     * @param videoId The video ID for VOD requests
+     * @param assetKey The asset key for Live requests
+     * @param adTagParameters Optional ad tag parameters to include as query parameters
+     */
+    private void requestDaiStream(String contentSourceId, String videoId, String assetKey, Map<String, String> adTagParameters) {
+        if (daiAdsLoader == null) {
+            eventEmitter.onVideoError.invoke("DaiAdsLoader is null", null, "DAI_ADS_LOADER_NULL_ERROR");
+            return;
+        }
+        
+        daiAdsLoader.setPlayer(player);
+        
+        try {
+            Uri.Builder uriBuilder;
+            
+            if (assetKey != null) {
+                uriBuilder = new ImaServerSideAdInsertionUriBuilder()
+                        .setAssetKey(assetKey)
+                        .setFormat(CONTENT_TYPE_HLS)
+                        .build()
+                        .buildUpon();
+            } else if (contentSourceId != null && videoId != null) {
+                uriBuilder = new ImaServerSideAdInsertionUriBuilder()
+                        .setContentSourceId(contentSourceId)
+                        .setVideoId(videoId)
+                        .setFormat(CONTENT_TYPE_HLS)
+                        .build()
+                        .buildUpon();
+            } else {
+                throw new IllegalArgumentException("Either assetKey (for live) or contentSourceId+videoId (for VOD) must be provided");
+            }
+            
+            if (adTagParameters != null && !adTagParameters.isEmpty()) {
+                for (Map.Entry<String, String> entry : adTagParameters.entrySet()) {
+                    uriBuilder.appendQueryParameter(entry.getKey(), entry.getValue());
+                }
+            }
+            
+            Uri ssaiUri = uriBuilder.build();
+            MediaItem ssaiMediaItem = MediaItem.fromUri(ssaiUri);
+            
+            player.setMediaItem(ssaiMediaItem);
+        } catch (Exception e) {
+            eventEmitter.onVideoError.invoke("DAI stream request failed: " + e.getMessage(), e, "DAI_REQUEST_ERROR");
+            handleDaiBackupStream();
+        }
+    }
+
+    /**
+     * Handles fallback to backup stream when DAI stream fails.
+     *
+     * If a backup stream URI is available in the DAI properties, it cleans up DAI resources
+     * and switches to the backup stream.
+     *
+     * @return true if backup stream was successfully used, false otherwise
+     */
+    private boolean handleDaiBackupStream() {
+        if (source == null || source.getDaiProps() == null) {
+            return false;
+        }
+        
+        String backupStreamUri = source.getDaiProps().getBackupStreamUri();
+        if (backupStreamUri == null || backupStreamUri.isEmpty()) {
+            return false;
+        }
+        
+        DebugLog.d(TAG, "DAI stream error occurred, falling back to backup stream URI: " + backupStreamUri);
+        
+        WritableMap backupSourceMap = Arguments.createMap();
+        backupSourceMap.putString("uri", backupStreamUri);
+        backupSourceMap.putBoolean("isNetwork", true);
+        
+        Source backupSource = Source.parse(backupSourceMap, themedReactContext);
+        if (backupSource == null || backupSource.getUri() == null) {
+            return false;
+        }
+        
+        if (daiAdsLoader != null) {
+            daiAdsLoader.setPlayer(null);
+        }
+        
+        setSrc(backupSource);
+        
+        return true;
     }
 }

@@ -40,6 +40,7 @@ export type ReactVideoSourceProperties = {
   textTracksAllowChunklessPreparation?: boolean;
   textTracks?: TextTracks;
   ad?: AdConfig;
+  dai?: DaiConfig;
   minLoadRetryCount?: number; // Android
   bufferConfig?: BufferConfig;
 };
@@ -81,6 +82,27 @@ export type AdConfig = Readonly<{
   adTagUrl?: string;
   adLanguage?: ISO639_1;
 }>;
+
+type DaiConfigShared = Readonly<{
+  adTagParameters?: Record<string, string>;
+  backupStreamUri?: string;
+}>;
+
+export type DaiConfigLive = DaiConfigShared &
+  Readonly<{
+    assetKey: string;
+    contentSourceId?: never;
+    videoId?: never;
+  }>;
+
+export type DaiConfigVod = DaiConfigShared &
+  Readonly<{
+    contentSourceId: string;
+    videoId: string;
+    assetKey?: never;
+  }>;
+
+export type DaiConfig = DaiConfigLive | DaiConfigVod;
 
 export type Drm = Readonly<{
   type?: DRMType;

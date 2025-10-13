@@ -166,7 +166,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         if (uri && uri.match(/^\//)) {
           uri = `file://${uri}`;
         }
-        if (!uri) {
+        if (!uri && !_source.dai) {
           console.log('Trying to load empty source');
         }
         const isNetwork = !!(uri && uri.match(/^(rtp|rtsp|http|https):/));
@@ -228,6 +228,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
             ? {adTagUrl: adTagUrl, adLanguage: adLanguage}
             : undefined);
 
+        const _dai = _source.dai || undefined;
+
         const _minLoadRetryCount =
           _source.minLoadRetryCount || minLoadRetryCount;
 
@@ -249,6 +251,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           metadata: resolvedSource.metadata,
           drm: _drm,
           ad: _ad,
+          dai: _dai,
           cmcd: _cmcd,
           textTracks: _textTracks,
           textTracksAllowChunklessPreparation:

@@ -93,6 +93,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         private var _imaAdsManager: RCTIMAAdsManager!
         /* Playhead used by the SDK to track content video progress and insert mid-rolls. */
         private var _contentPlayhead: IMAAVPlayerContentPlayhead?
+        /* The reference of your video player for the IMA DAI SDK to monitor playback and handle timed metadata */
+        private var _imaVideoDisplay: IMAAVPlayerVideoDisplay?
     #endif
     private var _didRequestAds = false
     private var _adPlaying = false
@@ -516,7 +518,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             applyNextSource()
             throw NSError(domain: "", code: 0, userInfo: nil)
         }
-
         if let startPosition = _source?.startPosition {
             _startPosition = startPosition / 1000
         }
@@ -644,6 +645,13 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         let initializeSource = {
             self._source = VideoSource(source)
+
+            #if USE_GOOGLE_IMA
+                if self.isDaiSource() {
+                    self.handleDaiSource()
+                    return
+                }
+            #endif
             if self._source?.uri == nil || self._source?.uri == "" {
                 self._player?.replaceCurrentItem(with: nil)
                 self.isSetSourceOngoing = false
@@ -1166,10 +1174,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func usePlayerViewController() {
-        guard let _player, let _playerItem else { return }
+        guard let _player else { return }
 
         if _playerViewController == nil {
-            _playerViewController = createPlayerViewController(player: _player, withPlayerItem: _playerItem)
+            _playerViewController = createPlayerViewController(player: _player)
         }
         // to prevent video from being animated when resizeMode is 'cover'
         // resize mode must be set before subview is added
@@ -1193,7 +1201,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _playerObserver.playerViewController = _playerViewController
     }
 
-    func createPlayerViewController(player: AVPlayer, withPlayerItem _: AVPlayerItem) -> RCTVideoPlayerViewController {
+    func createPlayerViewController(player: AVPlayer) -> RCTVideoPlayerViewController {
         let viewController = RCTVideoPlayerViewController()
         viewController.showsPlaybackControls = self._controls
         #if !os(tvOS)
@@ -1354,6 +1362,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     func getAdTagUrl() -> String? {
         return _source?.adParams.adTagUrl
+    }
+
+    func getPip() -> RCTPictureInPicture? {
+        initPictureinPicture()
+        return _pip
     }
 
     #if USE_GOOGLE_IMA
@@ -1843,7 +1856,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc
     func exitPictureInPicture() {
         guard isPictureInPictureActive() else { return }
-
         _pip?.exitPictureInPicture()
         if _enterPictureInPictureOnLeave {
             initPictureinPicture()
@@ -1862,3 +1874,191 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc
     func setOnClick(_: Any) {}
 }
+
+// MARK: - DAI Support
+
+#if USE_GOOGLE_IMA
+    extension RCTVideo: IMAAVPlayerVideoDisplayDelegate {
+        /// Checks if the current source is a DAI (Dynamic Ad Insertion) request.
+        ///
+        /// Returns `true` if either:
+        /// - VOD request: both `contentSourceId` and `videoId` are present
+        /// - Live request: `assetKey` is present
+        func isDaiSource() -> Bool {
+            guard let daiParams = _source?.daiParams else {
+                return false
+            }
+
+            let isVodRequest = daiParams.contentSourceId != nil && daiParams.videoId != nil
+            let isLiveRequest = daiParams.assetKey != nil
+
+            return isVodRequest || isLiveRequest
+        }
+
+        /// Returns the content source ID for DAI VOD requests.
+        func getContentSourceId() -> String? {
+            return _source?.daiParams.contentSourceId
+        }
+
+        /// Returns the asset key for DAI Live requests.
+        func getAssetKey() -> String? {
+            return _source?.daiParams.assetKey
+        }
+
+        /// Returns the video ID for DAI VOD requests.
+        func getVideoId() -> String? {
+            return _source?.daiParams.videoId
+        }
+
+        /// Returns the ad tag parameters for DAI requests.
+        func getAdTagParameters() -> [String: String]? {
+            return _source?.daiParams.adTagParameters
+        }
+
+        /// Returns the backup stream URI for DAI requests.
+        func getBackupStreamUri() -> String? {
+            return _source?.daiParams.backupStreamUri
+        }
+
+        /// Returns the IMA video display instance used for DAI playback.
+        func getIMAVideoDisplay() -> IMAVideoDisplay? {
+            return _imaVideoDisplay
+        }
+
+        /// Sets up DAI (Dynamic Ad Insertion) by preparing the player, setting up the DAI loader, and requesting the stream.
+        /// This method must be called on the main thread as it performs UI operations.
+        func handleDaiSource() {
+            DispatchQueue.main.sync {
+                removePlayerLayer()
+
+                _playerObserver.player = nil
+                _playerObserver.playerItem = nil
+                _drmManager = nil
+
+                preparePlayerForDai()
+
+                _imaVideoDisplay = IMAAVPlayerVideoDisplay(avPlayer: _player!)
+                _imaVideoDisplay?.playerVideoDisplayDelegate = self
+
+                if _controls {
+                    usePlayerViewController()
+                } else {
+                    usePlayerLayer()
+                }
+
+                _imaAdsManager.setupDaiLoader()
+                _imaAdsManager.requestDaiStream()
+
+                _videoLoadStarted = true
+            }
+        }
+
+        /// Prepares the AVPlayer for DAI playback by initializing or resetting the player configuration.
+        func preparePlayerForDai() {
+            if !isSetSourceOngoing {
+                DebugLog("setSrc has been canceled last step")
+                return
+            }
+
+            if _player == nil {
+                _player = AVPlayer()
+                ReactNativeVideoManager.shared.onInstanceCreated(id: instanceId, player: _player as Any)
+            }
+
+            _player!.pause()
+            _player!.replaceCurrentItem(with: nil)
+            _player!.actionAtItemEnd = .none
+
+            if #available(iOS 10.0, *) {
+                _player!.automaticallyWaitsToMinimizeStalling = _automaticallyWaitsToMinimizeStalling
+            }
+
+            if #available(iOS 15.0, *) {
+                if _playInBackground {
+                    _player!.audiovisualBackgroundPlaybackPolicy = .continuesIfPossible
+                } else {
+                    _player!.audiovisualBackgroundPlaybackPolicy = .automatic
+                }
+            }
+
+            _playerObserver.player = _player
+        }
+
+        /// Sets up the player item with all item-specific configurations for DAI playback.
+        ///
+        /// This method should be called after `preparePlayerForDai()` when a player item becomes available.
+        ///
+        /// - Parameter playerItem: The AVPlayerItem to configure and set on the player
+        func setupDaiPlayerItem(_ playerItem: AVPlayerItem) async throws {
+            if !isSetSourceOngoing {
+                DebugLog("setSrc has been canceled last step")
+                return
+            }
+
+            guard let _player else {
+                throw NSError(domain: "RCTVideo", code: -1, userInfo: [NSLocalizedDescriptionKey: "Player not initialized. Call preparePlayerForDai() first."])
+            }
+
+            _playerItem = playerItem
+            _playerObserver.playerItem = _playerItem
+
+            setPreferredForwardBufferDuration(_preferredForwardBufferDuration)
+            setPlaybackRange(playerItem, withCropStart: _source?.cropStart, withCropEnd: _source?.cropEnd)
+            setFilter(_filterName)
+            if let maxBitRate = _maxBitRate {
+                _playerItem?.preferredPeakBitRate = Double(maxBitRate)
+            }
+
+            _player.replaceCurrentItem(with: playerItem)
+
+            #if !os(tvOS) && !os(visionOS)
+                if #available(iOS 16.0, macCatalyst 18.0, *) {
+                    self._playerViewController?.allowsVideoFrameAnalysis = false
+                    self._playerViewController?.allowsVideoFrameAnalysis = true
+                }
+            #endif
+
+            if _showNotificationControls {
+                NowPlayingInfoCenterManager.shared.registerPlayer(player: _player)
+            } else {
+                NowPlayingInfoCenterManager.shared.updateNowPlayingInfo()
+            }
+
+            applyModifiers()
+
+            isSetSourceOngoing = false
+            applyNextSource()
+        }
+
+        /// Called when the IMA video display loads a player item for DAI playback.
+        ///
+        /// This delegate method is invoked by the IMA SDK when the DAI stream player item is ready.
+        /// It sets up the player item and applies all necessary modifiers.
+        ///
+        /// - Parameters:
+        ///   - playerVideoDisplay: The IMA video display instance
+        ///   - playerItem: The AVPlayerItem loaded by the IMA SDK
+        func playerVideoDisplay(_: IMAAVPlayerVideoDisplay,
+                                didLoad playerItem: AVPlayerItem) {
+            RCTVideoUtils.delay { [weak self] in
+                do {
+                    guard let self else { throw NSError(domain: "", code: 0, userInfo: nil) }
+
+                    try await self.setupDaiPlayerItem(playerItem)
+                } catch {
+                    DebugLog("An error occurred: \(error.localizedDescription)")
+
+                    if let self {
+                        self.onVideoError?(["error": error.localizedDescription])
+                        self.isSetSourceOngoing = false
+                        self.applyNextSource()
+
+                        if let player = self._player {
+                            NowPlayingInfoCenterManager.shared.removePlayer(player: player)
+                        }
+                    }
+                }
+            }
+        }
+    }
+#endif

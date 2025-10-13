@@ -80,6 +80,11 @@ class Source {
      */
     var adsProps: AdsProps? = null
 
+    /**
+     * DAI (Dynamic Ad Insertion) properties
+     */
+    var daiProps: DaiProps? = null
+
     /*
      * buffering configuration
      */
@@ -106,6 +111,7 @@ class Source {
                 cmcdProps == other.cmcdProps &&
                 sideLoadedTextTracks == other.sideLoadedTextTracks &&
                 adsProps == other.adsProps &&
+                daiProps == other.daiProps &&
                 minLoadRetryCount == other.minLoadRetryCount &&
                 isLocalAssetFile == other.isLocalAssetFile &&
                 isAsset == other.isAsset &&
@@ -177,6 +183,7 @@ class Source {
         private const val PROP_SRC_DRM = "drm"
         private const val PROP_SRC_CMCD = "cmcd"
         private const val PROP_SRC_ADS = "ad"
+        private const val PROP_SRC_DAI = "dai"
         private const val PROP_SRC_TEXT_TRACKS_ALLOW_CHUNKLESS_PREPARATION = "textTracksAllowChunklessPreparation"
         private const val PROP_SRC_TEXT_TRACKS = "textTracks"
         private const val PROP_SRC_MIN_LOAD_RETRY_COUNT = "minLoadRetryCount"
@@ -214,25 +221,19 @@ class Source {
 
             if (src != null) {
                 val uriString = safeGetString(src, PROP_SRC_URI, null)
-                if (uriString == null || TextUtils.isEmpty(uriString)) {
-                    DebugLog.d(TAG, "isEmpty uri:$uriString")
-                    return source
-                }
-                var uri = Uri.parse(uriString)
-                if (uri == null) {
-                    // return an empty source
-                    DebugLog.d(TAG, "Invalid uri:$uriString")
-                    return source
-                } else if (!isValidScheme(uri.scheme)) {
-                    uri = getUriFromAssetId(context, uriString)
+                if (uriString != null && !TextUtils.isEmpty(uriString)) {
+                    var uri = Uri.parse(uriString)
                     if (uri == null) {
-                        // cannot find identifier of content
-                        DebugLog.d(TAG, "cannot find identifier")
                         return source
+                    } else if (!isValidScheme(uri.scheme)) {
+                        uri = getUriFromAssetId(context, uriString)
+                        if (uri == null) {
+                            return source
+                        }
                     }
+                    source.uriString = uriString
+                    source.uri = uri
                 }
-                source.uriString = uriString
-                source.uri = uri
                 source.isLocalAssetFile = safeGetBool(src, PROP_SRC_IS_LOCAL_ASSET_FILE, false)
                 source.isAsset = safeGetBool(src, PROP_SRC_IS_ASSET, false)
                 source.startPositionMs = safeGetInt(src, PROP_SRC_START_POSITION, -1)
@@ -244,6 +245,7 @@ class Source {
                 source.cmcdProps = CMCDProps.parse(safeGetMap(src, PROP_SRC_CMCD))
                 if (BuildConfig.USE_EXOPLAYER_IMA) {
                     source.adsProps = AdsProps.parse(safeGetMap(src, PROP_SRC_ADS))
+                    source.daiProps = DaiProps.parse(safeGetMap(src, PROP_SRC_DAI))
                 }
                 source.textTracksAllowChunklessPreparation = safeGetBool(src, PROP_SRC_TEXT_TRACKS_ALLOW_CHUNKLESS_PREPARATION, true)
                 source.sideLoadedTextTracks = SideLoadedTextTrackList.parse(safeGetArray(src, PROP_SRC_TEXT_TRACKS))
