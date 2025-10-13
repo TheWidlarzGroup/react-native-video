@@ -1,6 +1,7 @@
 public struct VideoSource {
-    let type: String?
-    let uri: String?
+    var type: String?
+    var uri: String?
+    let isLive: Bool
     let isNetwork: Bool
     let isAsset: Bool
     let shouldCache: Bool
@@ -21,6 +22,7 @@ public struct VideoSource {
             self.json = nil
             self.type = nil
             self.uri = nil
+            self.isLive = false
             self.isNetwork = false
             self.isAsset = false
             self.shouldCache = false
@@ -36,6 +38,7 @@ public struct VideoSource {
         self.json = json
         self.type = json["type"] as? String
         self.uri = json["uri"] as? String
+        self.isLive = json["isLive"] as?  Bool ?? false
         self.isNetwork = json["isNetwork"] as? Bool ?? false
         self.isAsset = json["isAsset"] as? Bool ?? false
         self.shouldCache = json["shouldCache"] as? Bool ?? false

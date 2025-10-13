@@ -85,7 +85,6 @@
             )
 
             adsLoader.requestAds(with: request)
-            adsLoader.requestAds(with: request)
         }
 
         func releaseAds() {

@@ -39,6 +39,8 @@ Pod::Spec.new do |s|
       ss.pod_target_xcconfig = {
         'OTHER_SWIFT_FLAGS' => '$(inherited) -D USE_GOOGLE_IMA'
       }
+      ss.ios.dependency 'DzAVPlayerAdapter'
+      ss.ios.dependency 'DzMediaTailorAdapter'
     end
     if defined?($RNVideoUseVideoCaching)
       Pod::UI.puts "RNVideo: enable Video caching"
