@@ -17,6 +17,13 @@
             case midRoll
             case postRoll
         }
+        private var _hasSetUpIMA: Bool = false
+
+        enum AdType {
+            case preRoll
+            case midRoll
+            case postRoll
+        }
 
         init(video: RCTVideo!, isPictureInPictureActive: @escaping () -> Bool) {
             _video = video
@@ -49,10 +56,25 @@
         }
 
         func requestAds(type: AdType) {
+        private func resetAdsLoaderAndManager() {
+            // Destroy existing manager if any
+            adsManager?.destroy()
+            adsManager = nil
+
+            // Reset loader
+            adsLoader?.delegate = nil
+            adsLoader = nil
+
+            // Re-initialize loader
+            setUpAdsLoader()
+        }
+
+        func requestAds(type: AdType) {
             guard let _video else { return }
             // fixes RCTVideo --> RCTIMAAdsManager --> IMAAdsLoader --> IMAAdDisplayContainer --> RCTVideo memory leak.
             let adContainerView = UIView(frame: _video.bounds)
             adContainerView.backgroundColor = .clear
+            adContainerView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
             adContainerView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
             _video.addSubview(adContainerView)
 
@@ -60,6 +82,29 @@
             let adDisplayContainer = IMAAdDisplayContainer(adContainer: adContainerView, viewController: _video.reactViewController())
             let contentPlayhead = _video.getContentPlayhead()
 
+            var adTagUrl: String?
+
+            switch type {
+            case .preRoll:
+                adTagUrl = _video.getAdTagUrl()
+            case .midRoll:
+                adTagUrl = _video.getMidrollAdTagUrl()
+            case .postRoll:
+                adTagUrl = _video.getPostrollAdTagUrl()
+            }
+
+            guard let tagUrl = adTagUrl, !tagUrl.isEmpty, contentPlayhead != nil else {
+                return
+            }
+
+            // Create an ad request with our ad tag, display container, and optional user context.
+            print("Requesting \(type) ad with tag URL: \(tagUrl)")
+            let request = IMAAdsRequest(
+                adTagUrl: tagUrl,
+                adDisplayContainer: adDisplayContainer,
+                contentPlayhead: contentPlayhead,
+                userContext: nil
+            )
             var adTagUrl: String?
 
             switch type {
@@ -170,6 +215,13 @@
                 default:
                     break
                 }
+
+                switch event.type {
+                case .ALL_ADS_COMPLETED, .LOG, .AD_BREAK_FETCH_ERROR:
+                    resetAdsLoaderAndManager()
+                default:
+                    break
+                }
             }
         }
 
@@ -190,6 +242,13 @@
                     ],
                     "target": _video.reactTag!,
                 ])
+
+                switch error.type {
+                case .adLoadingFailed, .adUnknownErrorType, .adPlayingFailed:
+                       resetAdsLoaderAndManager()
+                   default:
+                       break
+                   }
 
                 switch error.type {
                 case .adLoadingFailed, .adUnknownErrorType, .adPlayingFailed:
