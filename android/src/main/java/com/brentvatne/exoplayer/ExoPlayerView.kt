@@ -5,7 +5,6 @@ import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.view.View
-import android.view.View.MeasureSpec
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.media3.common.Player

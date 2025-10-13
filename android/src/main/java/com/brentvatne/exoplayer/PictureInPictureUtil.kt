@@ -180,14 +180,10 @@ object PictureInPictureUtil {
     private fun checkIsSystemSupportPIP(context: ThemedReactContext): Boolean {
         val activity = context.findActivity() ?: return false
 
-        val isActivitySupportPip = try {
-            val activityInfo = activity.packageManager.getActivityInfo(activity.componentName, PackageManager.GET_META_DATA)
-            // detect current activity's android:supportsPictureInPicture value defined within AndroidManifest.xml
-            // https://cs.android.com/android/platform/superproject/+/master:frameworks/base/core/java/android/content/pm/ActivityInfo.java;l=1090-1093;drc=7651f0a4c059a98f32b0ba30cd64500bf135385f
-            activityInfo.flags and FLAG_SUPPORTS_PICTURE_IN_PICTURE != 0
-        } catch (e: kotlin.Exception) {
-            false
-        }
+        val activityInfo = activity.packageManager.getActivityInfo(activity.componentName, PackageManager.GET_META_DATA)
+        // detect current activity's android:supportsPictureInPicture value defined within AndroidManifest.xml
+        // https://cs.android.com/android/platform/superproject/+/master:frameworks/base/core/java/android/content/pm/ActivityInfo.java;l=1090-1093;drc=7651f0a4c059a98f32b0ba30cd64500bf135385f
+        val isActivitySupportPip = activityInfo.flags and FLAG_SUPPORTS_PICTURE_IN_PICTURE != 0
 
         // PIP might be disabled on devices that have low RAM.
         val isPipAvailable = activity.packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)

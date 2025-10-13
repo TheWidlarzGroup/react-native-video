@@ -19,6 +19,7 @@ export type AdsConfig = Readonly<{
 }>;
 export type VideoSrc = Readonly<{
     uri?: string;
+    isLive?: boolean;
     isNetwork?: boolean;
     isAsset?: boolean;
     isLocalAssetFile?: boolean;

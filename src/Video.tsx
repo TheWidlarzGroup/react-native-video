@@ -236,6 +236,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           uri,
           isNetwork,
           isAsset,
+          isLive: _source?.isLive || false,
           isLocalAssetFile,
           shouldCache: resolvedSource.shouldCache || false,
           type: resolvedSource.type || '',

@@ -9,6 +9,7 @@ export type Headers = Record<string, string>;
 export type EnumValues<T extends string | number> = T extends string ? `${T}` | T : T;
 export type ReactVideoSourceProperties = {
     uri?: string;
+    isLive?: boolean;
     isNetwork?: boolean;
     isAsset?: boolean;
     isLocalAssetFile?: boolean;

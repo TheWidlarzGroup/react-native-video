@@ -36,6 +36,7 @@ export type AdsConfig = Readonly<{
 
 export type VideoSrc = Readonly<{
   uri?: string;
+  isLive?: boolean;
   isNetwork?: boolean;
   isAsset?: boolean;
   isLocalAssetFile?: boolean;
@@ -301,7 +302,6 @@ export type OnVideoErrorData = Readonly<{
     localizedRecoverySuggestion?: string; // ios
     domain?: string; // ios
   }>;
-  cause?: object; // React Native convertThrowableToJSError/convertNSExceptionToJSError
   target?: Int32; // ios
 }>;
 

@@ -22,6 +22,7 @@ export type EnumValues<T extends string | number> = T extends string
 
 export type ReactVideoSourceProperties = {
   uri?: string;
+  isLive?: boolean;
   isNetwork?: boolean;
   isAsset?: boolean;
   isLocalAssetFile?: boolean;
