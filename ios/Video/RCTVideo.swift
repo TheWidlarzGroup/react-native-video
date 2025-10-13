@@ -466,6 +466,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                    currentTimeSecs >= highestSkipped,
                    !_skippedAdPlayed,
                    !_pendingSeek,
+                   !_paused,
                    !_playedCuePoints.contains(highestSkipped) {
                     print("🔁 Playing highest skipped cue: \(highestSkipped)s")
                     _imaAdsManager.requestAds(type: .midRoll)
@@ -478,7 +479,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                    // Handle normal cue point (non-skipped, just reached naturally)
                    for cueTime in cuePoints.map({ $0.doubleValue }) {
                        let isAtCue = abs(currentTimeSecs - cueTime) < 0.5
-                       if isAtCue && !_pendingSeek && !_playedCuePoints.contains(cueTime) {
+                       if isAtCue && !_pendingSeek && !_paused && !_playedCuePoints.contains(cueTime) {
                            print("▶️ Playing normal cue: \(cueTime)s")
                            _imaAdsManager.requestAds(type: .midRoll)
                            _playedCuePoints.insert(cueTime)
