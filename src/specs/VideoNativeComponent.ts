@@ -301,6 +301,7 @@ export type OnVideoErrorData = Readonly<{
     localizedRecoverySuggestion?: string; // ios
     domain?: string; // ios
   }>;
+  cause?: object; // React Native convertThrowableToJSError/convertNSExceptionToJSError
   target?: Int32; // ios
 }>;
 
