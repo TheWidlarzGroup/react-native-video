@@ -8,10 +8,10 @@ import type {
   onVolumeChangeData,
   AllPlayerEvents as PlayerEvents,
   TimedMetadata,
-} from "./types/Events";
-import type { TextTrack } from "./types/TextTrack";
-import type { VideoRuntimeError } from "./types/VideoError";
-import type { VideoPlayerStatus } from "./types/VideoPlayerStatus";
+} from "../types/Events";
+import type { TextTrack } from "../types/TextTrack";
+import type { VideoRuntimeError } from "../types/VideoError";
+import type { VideoPlayerStatus } from "../types/VideoPlayerStatus";
 
 type VideoJsPlayer = ReturnType<typeof videojs>;
 

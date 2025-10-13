@@ -141,7 +141,7 @@ interface NativeDrmParams extends DrmParams {
   type?: string;
 }
 
-interface CustomVideoMetadata {
+export interface CustomVideoMetadata {
   title?: string;
   subtitle?: string;
   description?: string;

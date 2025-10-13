@@ -11,7 +11,8 @@ import {
 import type { VideoPlayerBase } from "./types/VideoPlayerBase";
 import type { VideoPlayerStatus } from "./types/VideoPlayerStatus";
 import { VideoPlayerEvents } from "./VideoPlayerEvents";
-import { WebEventEmiter } from "./WebEventEmiter";
+import { MediaSessionHandler } from "./web/MediaSession";
+import { WebEventEmiter } from "./web/WebEventEmiter";
 import videojs from "video.js";
 
 type VideoJsPlayer = ReturnType<typeof videojs>;
@@ -33,6 +34,7 @@ type VideoJsTextTracks = {
 class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   protected video: HTMLVideoElement;
   public player: VideoJsPlayer;
+  private mediaSession: MediaSessionHandler;
 
   constructor(source: VideoSource | VideoConfig | VideoPlayerSource) {
     const video = document.createElement("video");
@@ -42,6 +44,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
 
     this.video = video;
     this.player = player;
+    this.mediaSession = new MediaSessionHandler(this.player);
 
     this.replaceSourceAsync(source);
   }
@@ -153,32 +156,40 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     return "auto";
   }
 
-  set mixAudioMode(_: MixAudioMode) { }
+  set mixAudioMode(_: MixAudioMode) {}
 
   // Ignore Silent Switch Mode
   get ignoreSilentSwitchMode(): IgnoreSilentSwitchMode {
     return "auto";
   }
 
-  set ignoreSilentSwitchMode(_: IgnoreSilentSwitchMode) { }
+  set ignoreSilentSwitchMode(_: IgnoreSilentSwitchMode) {}
 
   // Play In Background
   get playInBackground(): boolean {
     return true;
   }
 
-  set playInBackground(_: boolean) { }
+  set playInBackground(_: boolean) {}
 
   // Play When Inactive
   get playWhenInactive(): boolean {
     return true;
   }
 
-  set playWhenInactive(_: boolean) { }
+  set playWhenInactive(_: boolean) {}
 
-  // Is Playing
   get isPlaying(): boolean {
     return !this.player.paused();
+  }
+
+  get showNotificationControls(): boolean {
+    return this.mediaSession.enabled;
+  }
+
+  set showNotificationControls(value: boolean) {
+    if (value) this.mediaSession.enable();
+    else this.mediaSession.disable();
   }
 
   async initialize(): Promise<void> {
@@ -186,7 +197,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   }
 
   async preload(): Promise<void> {
-    this.player.load()
+    this.player.load();
   }
 
   /**
