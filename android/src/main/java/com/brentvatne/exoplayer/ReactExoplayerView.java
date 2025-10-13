@@ -25,13 +25,11 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -55,6 +53,8 @@ import androidx.media3.common.text.CueGroup;
 import androidx.media3.common.util.Util;
 import androidx.media3.datasource.DataSource;
 import androidx.media3.datasource.DataSpec;
+import androidx.media3.datasource.DefaultDataSource;
+import androidx.media3.datasource.DefaultHttpDataSource;
 import androidx.media3.datasource.HttpDataSource;
 import androidx.media3.exoplayer.DefaultLoadControl;
 import androidx.media3.exoplayer.DefaultRenderersFactory;
@@ -66,13 +66,10 @@ import androidx.media3.exoplayer.dash.manifest.AdaptationSet;
 import androidx.media3.exoplayer.dash.manifest.DashManifest;
 import androidx.media3.exoplayer.dash.manifest.Period;
 import androidx.media3.exoplayer.dash.manifest.Representation;
-import androidx.media3.exoplayer.drm.DefaultDrmSessionManager;
 import androidx.media3.exoplayer.drm.DefaultDrmSessionManagerProvider;
 import androidx.media3.exoplayer.drm.DrmSessionEventListener;
 import androidx.media3.exoplayer.drm.DrmSessionManager;
 import androidx.media3.exoplayer.drm.DrmSessionManagerProvider;
-import androidx.media3.exoplayer.drm.FrameworkMediaDrm;
-import androidx.media3.exoplayer.drm.HttpMediaDrmCallback;
 import androidx.media3.exoplayer.drm.UnsupportedDrmException;
 import androidx.media3.exoplayer.hls.HlsMediaSource;
 import androidx.media3.exoplayer.ima.ImaAdsLoader;
@@ -84,7 +81,6 @@ import androidx.media3.exoplayer.smoothstreaming.SsMediaSource;
 import androidx.media3.exoplayer.source.ClippingMediaSource;
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
 import androidx.media3.exoplayer.source.MediaSource;
-import androidx.media3.exoplayer.source.MergingMediaSource;
 import androidx.media3.exoplayer.source.ProgressiveMediaSource;
 import androidx.media3.exoplayer.source.TrackGroupArray;
 import androidx.media3.exoplayer.source.ads.AdsMediaSource;
@@ -104,6 +100,16 @@ import androidx.media3.extractor.metadata.id3.Id3Frame;
 import androidx.media3.extractor.metadata.id3.TextInformationFrame;
 import androidx.media3.session.MediaSessionService;
 
+import com.amazon.mediatailorsdk.AdData;
+import com.amazon.mediatailorsdk.MediaTailor;
+import com.amazon.mediatailorsdk.PalConsentSettings;
+import com.amazon.mediatailorsdk.PalNonceRequestParams;
+import com.amazon.mediatailorsdk.Session;
+import com.amazon.mediatailorsdk.SessionConfiguration;
+import com.amazon.mediatailorsdk.SessionError;
+import com.amazon.mediatailorsdk.SessionUiEvent;
+import com.amazon.mediatailorsdk.SessionUiEventData;
+import com.amazon.mediatailorsdk.logs.LogLevel;
 import com.brentvatne.common.api.AdsProps;
 import com.brentvatne.common.api.BufferConfig;
 import com.brentvatne.common.api.BufferingStrategy;
@@ -140,6 +146,7 @@ import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -150,6 +157,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import kotlin.Unit;
+import kotlin.jvm.functions.Function2;
 
 @SuppressLint("ViewConstructor")
 public class ReactExoplayerView extends FrameLayout implements
@@ -220,6 +231,12 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean disableCache = false;
     private ControlsConfig controlsConfig = new ControlsConfig();
     private ArrayList<Integer> rootViewChildrenOriginalVisibility = new ArrayList<Integer>();
+    private ViewGroup exoPlayerOriginalParent = null;
+    private int exoPlayerOriginalIndex = -1;
+
+    // Lists of views that were hidden and their original visibilities
+    private final ArrayList<View> rootViewHiddenViews = new ArrayList<>();
+    private final ArrayList<Integer> rootViewHiddenVisibilities = new ArrayList<>();
 
     /*
      * When user is seeking first called is on onPositionDiscontinuity -> DISCONTINUITY_REASON_SEEK
@@ -246,6 +263,8 @@ public class ReactExoplayerView extends FrameLayout implements
     protected boolean playInBackground = false;
     private boolean mReportBandwidth = false;
     private boolean controls = false;
+    private Session currentSession = null;
+    private final Object sessionLock = new Object();
 
     private boolean showNotificationControls = false;
     // \ End props
@@ -456,7 +475,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private void updateControllerVisibility() {
         if (exoPlayerView == null) return;
             
-        exoPlayerView.setUseController(controls && !controlsConfig.getHideFullscreen());
+        exoPlayerView.setUseController(!controlsConfig.getHideFullscreen());
     }
 
     private void openSettings() {
@@ -673,7 +692,14 @@ public class ReactExoplayerView extends FrameLayout implements
                             }
                             try {
                                 // Source initialization must run on the main thread
-                                initializePlayerSource(runningSource);
+                                Log.i("MediaTailorSDK", "🔍 isLive value from runningSource: " + runningSource.isLive());
+                                if(Boolean.TRUE.equals(runningSource.isLive())) {
+                                    Log.i("MediaTailorSDK", "initializing MediaTailorSDK");
+                                    startMediaTailorSession(runningSource);
+                                } else {
+                                    initializePlayerSource(runningSource);
+                                }
+
                             } catch (Exception ex) {
                                 self.playerNeedsSource = true;
                                 DebugLog.e(TAG, "Failed to initialize Player! 1");
@@ -684,7 +710,12 @@ public class ReactExoplayerView extends FrameLayout implements
                         });
                     });
                 } else if (runningSource == source) {
-                    initializePlayerSource(runningSource);
+                    if(Boolean.TRUE.equals(runningSource.isLive())) {
+                         startMediaTailorSession(runningSource);
+                    } else {
+                        initializePlayerSource(runningSource);
+                    }
+
                 }
             } catch (Exception ex) {
                 self.playerNeedsSource = true;
@@ -745,6 +776,17 @@ public class ReactExoplayerView extends FrameLayout implements
                 .build();
         ReactNativeVideoManager.Companion.getInstance().onInstanceCreated(instanceId, player);
         refreshDebugState();
+
+        DatazoomHelper.INSTANCE.initializeDatazoom(player);
+        MediaTailor.INSTANCE.setLogLevel(LogLevel.DEBUG);
+
+        PalConsentSettings palConsentSettings = new PalConsentSettings.Builder()
+                .allowStorage(true) // or from stored user consent
+                .directedForChildOrUnknownAge(false)
+                .build();
+
+        MediaTailor.INSTANCE.initPal(getContext().getApplicationContext(), palConsentSettings);
+
         player.addListener(self);
         player.setVolume(muted ? 0.f : audioVolume * 1);
         exoPlayerView.setPlayer(player);
@@ -829,6 +871,205 @@ public class ReactExoplayerView extends FrameLayout implements
         }
     }
 
+    private void sendAdEvent(SessionUiEvent event, SessionUiEventData eventData) {
+        Log.d("MediaTailorSDK", "📢 Ad Event: " + event + " | data: " + eventData);
+        Map<String, String> dataMap = new HashMap<>();
+
+        if (eventData != null && eventData.getAdObject() != null) {
+            AdData adData = eventData.getAdObject().getAdData();
+            if (adData.getAdId() != null) dataMap.put("adId", adData.getAdId());
+            if (adData.getAdTitle() != null) dataMap.put("title", adData.getAdTitle());
+            if (adData.getVideoClickThrough() != null) dataMap.put("url", adData.getVideoClickThrough());
+            if (adData.getDuration() > 0) dataMap.put("duration", String.valueOf(adData.getDuration()));
+        }
+
+        eventEmitter.onReceiveAdEvent.invoke(event.toString(), dataMap);
+    }
+
+    private void onSessionCreationOK(Session session) {
+
+        Log.i("MediaTailorSDK", "MediaTailor session created successfully");
+        Log.i("MediaTailorSDK", "playbackUrl: " + session.getPlaybackUrl());
+        Log.i("MediaTailorSDK", "trackingUrl: " + session.getTrackingUrl());
+
+        String playbackUrl = session.getPlaybackUrl();
+        String trackingUrl = session.getTrackingUrl();
+
+        if (playbackUrl == null || playbackUrl.isEmpty()) {
+            Log.e("MediaTailorSDK", "MediaTailor playbackUrl is empty!");
+            eventEmitter.onVideoError.invoke("MediaTailor playbackUrl is empty!", new Exception("Empty playback URL"), "1002");
+            return;
+        }
+
+        Uri playbackUri = Uri.parse(playbackUrl);
+
+        // ---- DRM setup ----
+        DrmSessionManager drmSessionManager = initializePlayerDrm();
+        if (drmSessionManager == null && source.getDrmProps() != null &&
+                source.getDrmProps().getDrmType() != null) {
+            Log.e(TAG, "Failed to initialize DRM Session Manager Framework!");
+            eventEmitter.onVideoError.invoke("Failed to initialize DRM!", new Exception("DRM failure"), "1003");
+            return;
+        }
+
+        // ---- Ad Event listeners ----
+        SessionUiEvent[] adEvents = {
+                SessionUiEvent.AD_START,
+                SessionUiEvent.AD_END,
+                SessionUiEvent.AD_PROGRESS,
+                SessionUiEvent.AD_CLICK,
+                SessionUiEvent.AD_INCOMING,
+                SessionUiEvent.NONLINEAR_AD_START,
+                SessionUiEvent.NONLINEAR_AD_END,
+                SessionUiEvent.AD_CAN_SKIP,
+                SessionUiEvent.AD_TRACKING_INFO_RESPONSE
+        };
+
+        for (SessionUiEvent event : adEvents) {
+            session.addUiEventListener(event, new Function2<SessionUiEvent, SessionUiEventData, Unit>() {
+                @Override
+                public Unit invoke(SessionUiEvent e, SessionUiEventData eventData) {
+                    try {
+                        sendAdEvent(e, eventData);
+
+                        if (!trackingUrl.isEmpty() && e.equals(SessionUiEvent.AD_TRACKING_INFO_RESPONSE)) {
+                            // MediaTailorTracker.Companion.getInstance().startPolling(trackingUrl);
+                            Log.i("MediaTailorSDK", "Started tracking polling after first ad event: " + e.name());
+                        }
+
+                        if(e.equals(SessionUiEvent.AD_END) || e.equals(SessionUiEvent.NONLINEAR_AD_END)) {
+                            MediaTailorTracker.Companion.getInstance().stopPolling();
+                        }
+
+
+                    } catch (Exception ex) {
+                        Log.e("MediaTailorSDK", "Error in sendAdEvent: " + ex.getMessage(), ex);
+                        eventEmitter.onVideoError.invoke("Ad event processing failed", ex, "1006");
+                        MediaTailorTracker.Companion.getInstance().stopPolling();
+
+                    }
+                    return Unit.INSTANCE;
+                }
+            });
+        }
+
+        // ---- Always build media source from MT playback URL ----
+        MediaSource mediaSource = buildMediaSource(
+                playbackUri,
+                source.getExtension(),
+                drmSessionManager,
+                source.getCropStartMs(),
+                source.getCropEndMs()
+        );
+
+        while (player == null) {
+            try {
+                wait();
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                DebugLog.e(TAG, ex.toString());
+            }
+        }
+
+        boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
+        if (haveResumePosition) {
+            player.seekTo(resumeWindow, resumePosition);
+            assert mediaSource != null;
+            player.setMediaSource(mediaSource, false);
+        } else if (source.getStartPositionMs() > 0) {
+            assert mediaSource != null;
+            player.setMediaSource(mediaSource, source.getStartPositionMs());
+        } else {
+            assert mediaSource != null;
+            player.setMediaSource(mediaSource, true);
+        }
+        player.prepare();
+        playerNeedsSource = false;
+
+        // ---- Datazoom setup ----
+        Handler main = new Handler(Looper.getMainLooper());
+        main.post(() -> {
+            try {
+                DatazoomHelper.INSTANCE.setupAdSession(session, exoPlayerView.getPlayerView(), playbackUrl);
+                Log.i("MediaTailorSDK", "setupAdSession completed successfully");
+            } catch (Exception e) {
+                Log.e("MediaTailorSDK", "setupAdSession failed: " + e.getMessage(), e);
+            }
+        });
+
+        reLayoutControls();
+
+        eventEmitter.onVideoLoadStart.invoke();
+        loadVideoStarted = true;
+
+        finishPlayerInitialization();
+    }
+
+    private void onSessionCreationError(SessionError error) {
+        Log.e("MediaTailorSDK", "❌ MediaTailor session creation failed");
+        if (error != null) {
+            Log.e("MediaTailorSDK", "Error code: " + error.getCode());
+            Log.e("MediaTailorSDK", "Error message: " + error.getMessage());
+        }
+        initializePlayerSource(source);
+    }
+
+    private void startMediaTailorSession(Source runningSource) {
+        synchronized (sessionLock) {
+            if (currentSession != null) {
+                Log.w("MediaTailorSDK", "MediaTailor session already exists, skipping. Session ID: " + currentSession.hashCode());
+                return;
+            }
+
+            Log.i("MediaTailorSDK", "Starting session");
+            String sessionInitUrl = String.valueOf(runningSource.getUri());
+            Map<String, String> sourceHeaders = runningSource.getHeaders();
+            Log.i("MediaTailorSDK", "sessionInitUrl: " + sessionInitUrl);
+
+            Map<String, String> sessionHeaders = sourceHeaders.entrySet().stream()
+                    .filter(entry -> "User-Agent".equals(entry.getKey()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+            Log.d("MediaTailorSDK", "sessionHeaders: " + sessionHeaders);
+
+            Log.i("MediaTailorSDK", "sessionInitUrl: " + sessionInitUrl);
+
+            SessionConfiguration.Builder configBuilder = new SessionConfiguration.Builder()
+                    .sessionInitUrl(sessionInitUrl)
+                    .sessionInitHeaders(sessionHeaders)
+                    .incomingAdCountdownInterval(10);
+
+            PalNonceRequestParams palParams = new PalNonceRequestParams.Builder()
+                    .adWillAutoPlay(true)
+                    .adWillPlayMuted(false)
+                    .continuousPlayback(true)
+                    .iconsSupported(true)
+                    .playerType("Media3")
+                    .playerVersion("1.7.1")
+                    .videoHeight(480)
+                    .videoWidth(640)
+                    .omidPartnerName("amazon2")
+                    .omidPartnerVersion("1.0.0")
+                    .build();
+            configBuilder.palNonceRequestParams(palParams);
+
+            MediaTailor.INSTANCE.createSession(configBuilder.build(), (session, error) -> {
+                synchronized (sessionLock) {
+                    if (error == null) {
+                        Log.i("MediaTailorSDK", "📡 MediaTailor SDK: Session creation callback received. Session ID: " + session.hashCode());
+                        currentSession = session;
+                        onSessionCreationOK(session);
+                    } else {
+                        Log.e("MediaTailorSDK", "📡 MediaTailor SDK: Session creation error: " + error.getMessage());
+                        currentSession = null;
+                        onSessionCreationError(error);
+                    }
+                    return null;
+                }
+            });
+        }
+    }
+
     private void initializePlayerSource(Source runningSource) {
         if (runningSource.getUri() == null) {
             return;
@@ -840,6 +1081,7 @@ public class ReactExoplayerView extends FrameLayout implements
             DebugLog.e(TAG, "Failed to initialize DRM Session Manager Framework!");
             return;
         }
+
         // init source to manage ads (external text tracks are now handled in MediaItem)
         MediaSource videoSource = buildMediaSource(runningSource.getUri(),
                 runningSource.getExtension(),
@@ -987,161 +1229,174 @@ public class ReactExoplayerView extends FrameLayout implements
         if (uri == null) {
             throw new IllegalStateException("Invalid video uri");
         }
-        int type;
-        if ("rtsp".equals(overrideExtension)) {
-            type = CONTENT_TYPE_RTSP;
-        } else {
-            type = Util.inferContentType(!TextUtils.isEmpty(overrideExtension) ? "." + overrideExtension
-                    : uri.getLastPathSegment());
-        }
-        config.setDisableDisconnectError(this.disableDisconnectError);
-
-        MediaItem.Builder mediaItemBuilder = new MediaItem.Builder()
-                .setUri(uri);
-
-        // refresh custom Metadata
-        MediaMetadata customMetadata = ConfigurationUtils.buildCustomMetadata(source.getMetadata());
-        if (customMetadata != null) {
-            mediaItemBuilder.setMediaMetadata(customMetadata);
-        }
-        
-        // Add external subtitles to MediaItem
-        List<MediaItem.SubtitleConfiguration> subtitleConfigurations = buildSubtitleConfigurations();
-        if (subtitleConfigurations != null) {
-            mediaItemBuilder.setSubtitleConfigurations(subtitleConfigurations);
-        }
-        
-        if (source.getAdsProps() != null) {
-            Uri adTagUrl = source.getAdsProps().getAdTagUrl();
-            if (adTagUrl != null) {
-                mediaItemBuilder.setAdsConfiguration(
-                        new MediaItem.AdsConfiguration.Builder(adTagUrl).build()
+        try {
+            if (mediaDataSourceFactory == null) {
+                mediaDataSourceFactory = new DefaultDataSource.Factory(
+                        getContext(),
+                        new DefaultHttpDataSource.Factory().setUserAgent(Util.getUserAgent(getContext(), "ReactNativeVideo"))
                 );
+                Log.i("MediaTailorSDK", "Initialized mediaDataSourceFactory");
             }
-        }
+            int type;
+            if ("rtsp".equals(overrideExtension)) {
+                type = CONTENT_TYPE_RTSP;
+            } else {
+                type = Util.inferContentType(!TextUtils.isEmpty(overrideExtension) ? "." + overrideExtension
+                        : uri.getLastPathSegment());
+            }
+            config.setDisableDisconnectError(this.disableDisconnectError);
 
-        MediaItem.LiveConfiguration.Builder liveConfiguration = ConfigurationUtils.getLiveConfiguration(source.getBufferConfig());
-        mediaItemBuilder.setLiveConfiguration(liveConfiguration.build());
+            MediaItem.Builder mediaItemBuilder = new MediaItem.Builder()
+                    .setUri(uri);
 
-        MediaSource.Factory mediaSourceFactory;
-        DrmSessionManagerProvider drmProvider;
-        List<StreamKey> streamKeys = new ArrayList<>();
-        if (drmSessionManager != null) {
-            drmProvider = ((_mediaItem) -> drmSessionManager);
-        } else {
-            drmProvider = new DefaultDrmSessionManagerProvider();
-        }
+            // refresh custom Metadata
+            MediaMetadata customMetadata = ConfigurationUtils.buildCustomMetadata(source.getMetadata());
+            if (customMetadata != null) {
+                mediaItemBuilder.setMediaMetadata(customMetadata);
+            }
 
+            // Add external subtitles to MediaItem
+            List<MediaItem.SubtitleConfiguration> subtitleConfigurations = buildSubtitleConfigurations();
+            if (subtitleConfigurations != null) {
+                mediaItemBuilder.setSubtitleConfigurations(subtitleConfigurations);
+            }
 
-        switch (type) {
-            case CONTENT_TYPE_SS:
-                if(!BuildConfig.USE_EXOPLAYER_SMOOTH_STREAMING) {
-                    DebugLog.e("Exo Player Exception", "Smooth Streaming is not enabled!");
-                    throw new IllegalStateException("Smooth Streaming is not enabled!");
+            if (source.getAdsProps() != null) {
+                Uri adTagUrl = source.getAdsProps().getAdTagUrl();
+                if (adTagUrl != null) {
+                    mediaItemBuilder.setAdsConfiguration(
+                            new MediaItem.AdsConfiguration.Builder(adTagUrl).build()
+                    );
                 }
+            }
 
-                mediaSourceFactory = new SsMediaSource.Factory(
-                        new DefaultSsChunkSource.Factory(mediaDataSourceFactory),
-                        buildDataSourceFactory(false)
-                );
-                break;
-            case CONTENT_TYPE_DASH:
-                if(!BuildConfig.USE_EXOPLAYER_DASH) {
-                    DebugLog.e("Exo Player Exception", "DASH is not enabled!");
-                    throw new IllegalStateException("DASH is not enabled!");
-                }
+            MediaItem.LiveConfiguration.Builder liveConfiguration = ConfigurationUtils.getLiveConfiguration(source.getBufferConfig());
+            mediaItemBuilder.setLiveConfiguration(liveConfiguration.build());
 
-                mediaSourceFactory = new DashMediaSource.Factory(
-                        new DefaultDashChunkSource.Factory(mediaDataSourceFactory),
-                        buildDataSourceFactory(false)
-                );
-                break;
-            case CONTENT_TYPE_HLS:
-                if (!BuildConfig.USE_EXOPLAYER_HLS) {
-                    DebugLog.e("Exo Player Exception", "HLS is not enabled!");
-                    throw new IllegalStateException("HLS is not enabled!");
-                }
+            MediaSource.Factory mediaSourceFactory;
+            DrmSessionManagerProvider drmProvider;
+            List<StreamKey> streamKeys = new ArrayList<>();
+            if (drmSessionManager != null) {
+                drmProvider = ((_mediaItem) -> drmSessionManager);
+            } else {
+                drmProvider = new DefaultDrmSessionManagerProvider();
+            }
 
-                DataSource.Factory dataSourceFactory = mediaDataSourceFactory;
 
-                if (useCache && !disableCache) {
-                    dataSourceFactory = RNVSimpleCache.INSTANCE.getCacheFactory(buildHttpDataSourceFactory(true));
-                }
-
-                mediaSourceFactory = new HlsMediaSource.Factory(
-                        dataSourceFactory
-                ).setAllowChunklessPreparation(source.getTextTracksAllowChunklessPreparation());
-                break;
-            case CONTENT_TYPE_OTHER:
-                if ("asset".equals(uri.getScheme())) {
-                    try {
-                        DataSource.Factory assetDataSourceFactory = DataSourceUtil.buildAssetDataSourceFactory(themedReactContext, uri);
-                        mediaSourceFactory = new ProgressiveMediaSource.Factory(assetDataSourceFactory);
-                    } catch (Exception e) {
-                        throw new IllegalStateException("cannot open input file:" + uri);
+            switch (type) {
+                case CONTENT_TYPE_SS:
+                    if(!BuildConfig.USE_EXOPLAYER_SMOOTH_STREAMING) {
+                        DebugLog.e("Exo Player Exception", "Smooth Streaming is not enabled!");
+                        throw new IllegalStateException("Smooth Streaming is not enabled!");
                     }
-                } else if ("file".equals(uri.getScheme()) ||
-                        !useCache) {
-                    mediaSourceFactory = new ProgressiveMediaSource.Factory(
-                            mediaDataSourceFactory
-                    );
-                } else {
-                    mediaSourceFactory = new ProgressiveMediaSource.Factory(
-                            RNVSimpleCache.INSTANCE.getCacheFactory(buildHttpDataSourceFactory(true))
-                    );
 
-                }
-                break;
-            case CONTENT_TYPE_RTSP:
-                if (!BuildConfig.USE_EXOPLAYER_RTSP) {
-                    DebugLog.e("Exo Player Exception", "RTSP is not enabled!");
-                    throw new IllegalStateException("RTSP is not enabled!");
-                }
+                    mediaSourceFactory = new SsMediaSource.Factory(
+                            new DefaultSsChunkSource.Factory(mediaDataSourceFactory),
+                            buildDataSourceFactory(false)
+                    );
+                    break;
+                case CONTENT_TYPE_DASH:
+                    if(!BuildConfig.USE_EXOPLAYER_DASH) {
+                        DebugLog.e("Exo Player Exception", "DASH is not enabled!");
+                        throw new IllegalStateException("DASH is not enabled!");
+                    }
 
-                mediaSourceFactory = new RtspMediaSource.Factory();
-                break;
-            default: {
-                throw new IllegalStateException("Unsupported type: " + type);
+                    mediaSourceFactory = new DashMediaSource.Factory(
+                            new DefaultDashChunkSource.Factory(mediaDataSourceFactory),
+                            buildDataSourceFactory(false)
+                    );
+                    break;
+                case CONTENT_TYPE_HLS:
+                    if (!BuildConfig.USE_EXOPLAYER_HLS) {
+                        DebugLog.e("Exo Player Exception", "HLS is not enabled!");
+                        throw new IllegalStateException("HLS is not enabled!");
+                    }
+
+                    DataSource.Factory dataSourceFactory = mediaDataSourceFactory;
+
+                    if (useCache && !disableCache) {
+                        dataSourceFactory = RNVSimpleCache.INSTANCE.getCacheFactory(buildHttpDataSourceFactory(true));
+                    }
+
+                    mediaSourceFactory = new HlsMediaSource.Factory(
+                            dataSourceFactory
+                    ).setAllowChunklessPreparation(source.getTextTracksAllowChunklessPreparation());
+                    break;
+                case CONTENT_TYPE_OTHER:
+                    if ("asset".equals(uri.getScheme())) {
+                        try {
+                            DataSource.Factory assetDataSourceFactory = DataSourceUtil.buildAssetDataSourceFactory(themedReactContext, uri);
+                            mediaSourceFactory = new ProgressiveMediaSource.Factory(assetDataSourceFactory);
+                        } catch (Exception e) {
+                            throw new IllegalStateException("cannot open input file:" + uri);
+                        }
+                    } else if ("file".equals(uri.getScheme()) ||
+                            !useCache) {
+                        mediaSourceFactory = new ProgressiveMediaSource.Factory(
+                                mediaDataSourceFactory
+                        );
+                    } else {
+                        mediaSourceFactory = new ProgressiveMediaSource.Factory(
+                                RNVSimpleCache.INSTANCE.getCacheFactory(buildHttpDataSourceFactory(true))
+                        );
+
+                    }
+                    break;
+                case CONTENT_TYPE_RTSP:
+                    if (!BuildConfig.USE_EXOPLAYER_RTSP) {
+                        DebugLog.e("Exo Player Exception", "RTSP is not enabled!");
+                        throw new IllegalStateException("RTSP is not enabled!");
+                    }
+
+                    mediaSourceFactory = new RtspMediaSource.Factory();
+                    break;
+                default: {
+                    throw new IllegalStateException("Unsupported type: " + type);
+                }
             }
-        }
 
-        if (cmcdConfigurationFactory != null) {
-            mediaSourceFactory = mediaSourceFactory.setCmcdConfigurationFactory(
-                    cmcdConfigurationFactory::createCmcdConfiguration
+            if (cmcdConfigurationFactory != null) {
+                mediaSourceFactory = mediaSourceFactory.setCmcdConfigurationFactory(
+                        cmcdConfigurationFactory::createCmcdConfiguration
+                );
+            }
+
+            mediaSourceFactory = Objects.requireNonNullElse(
+                    ReactNativeVideoManager.Companion.getInstance()
+                            .overrideMediaSourceFactory(source, mediaSourceFactory, mediaDataSourceFactory),
+                    mediaSourceFactory
             );
+
+            mediaItemBuilder.setStreamKeys(streamKeys);
+
+            @Nullable
+            final MediaItem.Builder overridenMediaItemBuilder = ReactNativeVideoManager.Companion.getInstance().overrideMediaItemBuilder(source, mediaItemBuilder);
+
+            MediaItem mediaItem = overridenMediaItemBuilder != null
+                    ? overridenMediaItemBuilder.build()
+                    : mediaItemBuilder.build();
+
+            MediaSource mediaSource = mediaSourceFactory
+                    .setDrmSessionManagerProvider(drmProvider)
+                    .setLoadErrorHandlingPolicy(
+                            config.buildLoadErrorHandlingPolicy(source.getMinLoadRetryCount())
+                    )
+                    .createMediaSource(mediaItem);
+
+            if (cropStartMs >= 0 && cropEndMs >= 0) {
+                return new ClippingMediaSource(mediaSource, cropStartMs * 1000, cropEndMs * 1000);
+            } else if (cropStartMs >= 0) {
+                return new ClippingMediaSource(mediaSource, cropStartMs * 1000, TIME_END_OF_SOURCE);
+            } else if (cropEndMs >= 0) {
+                return new ClippingMediaSource(mediaSource, 0, cropEndMs * 1000);
+            }
+
+            return mediaSource;
+        } catch (Exception e) {
+            Log.e("MediaTailorSDK", "Failed to build media source: " + e.getMessage(), e);
+            eventEmitter.onVideoError.invoke("Failed to build media source", e, "1005");
+            return null;
         }
-
-        mediaSourceFactory = Objects.requireNonNullElse(
-                ReactNativeVideoManager.Companion.getInstance()
-                        .overrideMediaSourceFactory(source, mediaSourceFactory, mediaDataSourceFactory),
-                mediaSourceFactory
-        );
-
-        mediaItemBuilder.setStreamKeys(streamKeys);
-
-        @Nullable
-        final MediaItem.Builder overridenMediaItemBuilder = ReactNativeVideoManager.Companion.getInstance().overrideMediaItemBuilder(source, mediaItemBuilder);
-
-        MediaItem mediaItem = overridenMediaItemBuilder != null
-                ? overridenMediaItemBuilder.build()
-                : mediaItemBuilder.build();
-
-        MediaSource mediaSource = mediaSourceFactory
-                .setDrmSessionManagerProvider(drmProvider)
-                .setLoadErrorHandlingPolicy(
-                        config.buildLoadErrorHandlingPolicy(source.getMinLoadRetryCount())
-                )
-                .createMediaSource(mediaItem);
-
-        if (cropStartMs >= 0 && cropEndMs >= 0) {
-            return new ClippingMediaSource(mediaSource, cropStartMs * 1000, cropEndMs * 1000);
-        } else if (cropStartMs >= 0) {
-            return new ClippingMediaSource(mediaSource, cropStartMs * 1000, TIME_END_OF_SOURCE);
-        } else if (cropEndMs >= 0) {
-            return new ClippingMediaSource(mediaSource, 0, cropEndMs * 1000);
-        }
-
-        return mediaSource;
     }
 
     @Nullable
@@ -1201,6 +1456,12 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     private void releasePlayer() {
+        synchronized (sessionLock) {
+            if (currentSession != null) {
+                Log.i("MediaTailorSDK", "Releasing MediaTailor session: " + currentSession.hashCode());
+                currentSession = null;
+            }
+        }
         if (player != null) {
             if(playbackServiceBinder != null) {
                 playbackServiceBinder.getService().unregisterPlayer(player);
@@ -1224,6 +1485,7 @@ public class ReactExoplayerView extends FrameLayout implements
             adsLoader.release();
             adsLoader = null;
         }
+        MediaTailorTracker.Companion.getInstance().stopPolling();
         progressHandler.removeMessages(SHOW_PROGRESS);
         audioBecomingNoisyReceiver.removeListener();
         pictureInPictureReceiver.removeListener();
@@ -2456,28 +2718,82 @@ public class ReactExoplayerView extends FrameLayout implements
                 LayoutParams.MATCH_PARENT);
 
         if (isInPictureInPicture) {
-            ViewGroup parent = (ViewGroup)exoPlayerView.getParent();
+            // Save original parent & index of exoPlayerView
+            ViewGroup parent = (ViewGroup) exoPlayerView.getParent();
             if (parent != null) {
+                exoPlayerOriginalParent = parent;
+                exoPlayerOriginalIndex = parent.indexOfChild(exoPlayerView);
                 parent.removeView(exoPlayerView);
+            } else {
+                exoPlayerOriginalParent = null;
+                exoPlayerOriginalIndex = -1;
             }
+
+            // Hide and record other rootView children (store view refs + visibilities)
+            rootViewHiddenViews.clear();
+            rootViewHiddenVisibilities.clear();
             for (int i = 0; i < rootView.getChildCount(); i++) {
-                if (rootView.getChildAt(i) != exoPlayerView) {
-                    rootViewChildrenOriginalVisibility.add(rootView.getChildAt(i).getVisibility());
-                    rootView.getChildAt(i).setVisibility(View.GONE);
+                View child = rootView.getChildAt(i);
+                if (child == exoPlayerView) continue;
+                rootViewHiddenViews.add(child);
+                rootViewHiddenVisibilities.add(child.getVisibility());
+                child.setVisibility(View.GONE);
+            }
+
+            // Add player to root view for PiP (avoid duplicate add)
+            if (exoPlayerView.getParent() != rootView) {
+                rootView.addView(exoPlayerView, layoutParams);
+            }
+        } else {
+            // Exiting PiP: remove player from root view if present
+            if (exoPlayerView.getParent() == rootView) {
+                rootView.removeView(exoPlayerView);
+            }
+
+            // Restore visibilities for the exact views we previously hid
+            for (int i = 0; i < rootViewHiddenViews.size(); i++) {
+                View v = rootViewHiddenViews.get(i);
+                Integer vis = rootViewHiddenVisibilities.get(i);
+                if (v != null && vis != null) {
+                    try {
+                        v.setVisibility(vis);
+                    } catch (Exception ignored) {
+                        // Defensive: view might have been detached / changed — ignore to avoid crash
+                    }
                 }
             }
-            rootView.addView(exoPlayerView, layoutParams);
-        } else {
-            rootView.removeView(exoPlayerView);
-            if (!rootViewChildrenOriginalVisibility.isEmpty()) {
-                for (int i = 0; i < rootView.getChildCount(); i++) {
-                    rootView.getChildAt(i).setVisibility(rootViewChildrenOriginalVisibility.get(i));
+            // Clear lists after restoring
+            rootViewHiddenViews.clear();
+            rootViewHiddenVisibilities.clear();
+
+            // Restore player view to its original parent/index if available
+            if (exoPlayerOriginalParent != null) {
+                try {
+                    int targetIndex = exoPlayerOriginalIndex;
+                    int childCount = exoPlayerOriginalParent.getChildCount();
+                    if (targetIndex < 0 || targetIndex > childCount) {
+                        exoPlayerOriginalParent.addView(exoPlayerView);
+                    } else {
+                        exoPlayerOriginalParent.addView(exoPlayerView, targetIndex, layoutParams);
+                    }
+                } catch (Exception e) {
+                    // Fallback: try to add it without index to avoid crashing
+                    try {
+                        exoPlayerOriginalParent.addView(exoPlayerView);
+                    } catch (Exception ignored) { }
+                } finally {
+                    exoPlayerOriginalParent = null;
+                    exoPlayerOriginalIndex = -1;
                 }
-                addView(exoPlayerView, 0, layoutParams);
-                reLayoutControls();
+            } else {
+                // No original parent known — attempt to add it back to this view's container
+                try {
+                    addView(exoPlayerView, 0, layoutParams);
+                } catch (Exception ignored) { }
             }
         }
     }
+
 
     public void enterPictureInPictureMode() {
         PictureInPictureParams _pipParams = null;

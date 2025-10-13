@@ -142,11 +142,6 @@ android {
         buildConfigField "boolean", "USE_EXOPLAYER_DASH", ExoplayerDependencies["useExoplayerDash"].toString()
         buildConfigField "boolean", "USE_EXOPLAYER_HLS", ExoplayerDependencies["useExoplayerHls"].toString()
         buildConfigField "boolean", "USE_EXOPLAYER_RTSP", ExoplayerDependencies["useExoplayerRtsp"].toString()
-        externalNativeBuild {
-            cmake {
-                arguments "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
-            }
-        }
 
         ndk {
             abiFilters(*reactNativeArchitectures())
@@ -223,6 +218,8 @@ repositories {
 def media3_version = safeExtGet('media3Version')
 def androidxCore_version = safeExtGet('androidxCoreVersion')
 def androidxActivity_version = safeExtGet('androidxActivityVersion')
+def mediatailor_version = safeExtGet('mediatailorVersion')
+def datazoomMedia3_version = safeExtGet('datazoomMedia3Version')
 
 dependencies {
     // For < 0.71, this will be from the local maven repo
@@ -238,6 +235,8 @@ dependencies {
         implementation(project(":media-lib-exoplayer"))
     } else {
         implementation "androidx.media3:media3-exoplayer:$media3_version"
+        implementation "io.datazoom.sdk:mediatailor:$mediatailor_version"
+        implementation "io.datazoom.sdk:media3:$datazoomMedia3_version"
     }
 
     if (ExoplayerDependencies["useExoplayerSmoothStreaming"]) {

@@ -30,6 +30,9 @@ class Source {
     /** Parsed value of source to playback */
     var uri: Uri? = null
 
+    /** True if source is a isLive content for mediaTailor sdk */
+    var isLive: Boolean? = false
+
     /** True if source is a local JS asset */
     var isLocalAssetFile: Boolean = false
 
@@ -109,6 +112,7 @@ class Source {
                 minLoadRetryCount == other.minLoadRetryCount &&
                 isLocalAssetFile == other.isLocalAssetFile &&
                 isAsset == other.isAsset &&
+                isLive == other.isLive &&
                 bufferConfig == other.bufferConfig
             )
     }
@@ -167,6 +171,7 @@ class Source {
         private const val PROP_SRC_URI = "uri"
         private const val PROP_SRC_IS_LOCAL_ASSET_FILE = "isLocalAssetFile"
         private const val PROP_SRC_IS_ASSET = "isAsset"
+        private const val PROP_SRC_IS_LIVE = "isLive"
         private const val PROP_SRC_START_POSITION = "startPosition"
         private const val PROP_SRC_CROP_START = "cropStart"
         private const val PROP_SRC_CROP_END = "cropEnd"
@@ -235,6 +240,7 @@ class Source {
                 source.uri = uri
                 source.isLocalAssetFile = safeGetBool(src, PROP_SRC_IS_LOCAL_ASSET_FILE, false)
                 source.isAsset = safeGetBool(src, PROP_SRC_IS_ASSET, false)
+                source.isLive = safeGetBool(src, PROP_SRC_IS_LIVE, false)
                 source.startPositionMs = safeGetInt(src, PROP_SRC_START_POSITION, -1)
                 source.cropStartMs = safeGetInt(src, PROP_SRC_CROP_START, -1)
                 source.cropEndMs = safeGetInt(src, PROP_SRC_CROP_END, -1)
@@ -246,7 +252,8 @@ class Source {
                     source.adsProps = AdsProps.parse(safeGetMap(src, PROP_SRC_ADS))
                 }
                 source.textTracksAllowChunklessPreparation = safeGetBool(src, PROP_SRC_TEXT_TRACKS_ALLOW_CHUNKLESS_PREPARATION, true)
-                source.sideLoadedTextTracks = SideLoadedTextTrackList.parse(safeGetArray(src, PROP_SRC_TEXT_TRACKS))
+                source.sideLoadedTextTracks =
+                    SideLoadedTextTrackList.parse(safeGetArray(src, PROP_SRC_TEXT_TRACKS))
                 source.minLoadRetryCount = safeGetInt(src, PROP_SRC_MIN_LOAD_RETRY_COUNT, 3)
                 source.bufferConfig = BufferConfig.parse(safeGetMap(src, PROP_SRC_BUFFER_CONFIG))
 

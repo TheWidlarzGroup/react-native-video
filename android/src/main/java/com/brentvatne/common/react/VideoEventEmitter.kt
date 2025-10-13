@@ -140,30 +140,6 @@ class VideoEventEmitter {
                             putString("errorException", exception.toString())
                             putString("errorCode", errorCode)
                             putString("errorStackTrace", stackTrace)
-
-                            // https://github.com/facebook/react-native/blob/v0.80.2/packages/react-native/ReactCommon/react/nativemodule/core/platform/android/ReactCommon/JavaTurboModule.cpp#L465
-                            putMap(
-                                "cause",
-                                Arguments.createMap().apply {
-                                    putString("name", exception.javaClass.simpleName)
-                                    exception.message?.let { putString("message", it) }
-                                    putArray(
-                                        "stackElements",
-                                        Arguments.createArray().apply {
-                                            exception.stackTrace.forEach { element ->
-                                                pushMap(
-                                                    Arguments.createMap().apply {
-                                                        putString("className", element.className)
-                                                        putString("fileName", element.fileName)
-                                                        putInt("lineNumber", element.lineNumber)
-                                                        putString("methodName", element.methodName)
-                                                    }
-                                                )
-                                            }
-                                        }
-                                    )
-                                }
-                            )
                         }
                     )
                 }
