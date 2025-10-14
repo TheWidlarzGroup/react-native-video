@@ -234,19 +234,27 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
       | NoAutocomplete<VideoPlayerSource>
       | null,
   ): Promise<void> {
-    const src =
-      typeof source === "object" && source && "uri" in source
-        ? source.uri
-        : source;
-    if (typeof src === "number") {
+    if (!source) {
+      this.player.src([]);
+      this.player.reset();
+      return;
+    }
+
+    if (typeof source === "number") {
       console.error(
         "A source uri must be a string. Numbers are only supported on native.",
       );
       return;
     }
+    if (typeof source === "string") {
+      source = { uri: source };
+    }
     // TODO: handle start time
-    this.player.src(src);
-    if (typeof source !== "object") return;
+    this.player.src({
+      src: source.uri,
+      type: source.mimeType,
+    });
+    if (source.initializeOnCreation) await this.preload();
   }
 
   // Text Track Management
