@@ -17,43 +17,51 @@ import com.margelo.nitro.core.*
  */
 @DoNotStrip
 @Keep
-data class BufferConfig
+data class BufferConfig(
   @DoNotStrip
   @Keep
-  constructor(
+  val livePlayback: LivePlaybackParams?,
+  @DoNotStrip
+  @Keep
+  val minBufferMs: Double?,
+  @DoNotStrip
+  @Keep
+  val maxBufferMs: Double?,
+  @DoNotStrip
+  @Keep
+  val bufferForPlaybackMs: Double?,
+  @DoNotStrip
+  @Keep
+  val bufferForPlaybackAfterRebufferMs: Double?,
+  @DoNotStrip
+  @Keep
+  val backBufferDurationMs: Double?,
+  @DoNotStrip
+  @Keep
+  val preferredForwardBufferDurationMs: Double?,
+  @DoNotStrip
+  @Keep
+  val preferredPeakBitRate: Double?,
+  @DoNotStrip
+  @Keep
+  val preferredMaximumResolution: Resolution?,
+  @DoNotStrip
+  @Keep
+  val preferredPeakBitRateForExpensiveNetworks: Double?,
+  @DoNotStrip
+  @Keep
+  val preferredMaximumResolutionForExpensiveNetworks: Resolution?
+) {
+  private companion object {
+    /**
+     * Constructor called from C++
+     */
     @DoNotStrip
     @Keep
-    val livePlayback: LivePlaybackParams?,
-    @DoNotStrip
-    @Keep
-    val minBufferMs: Double?,
-    @DoNotStrip
-    @Keep
-    val maxBufferMs: Double?,
-    @DoNotStrip
-    @Keep
-    val bufferForPlaybackMs: Double?,
-    @DoNotStrip
-    @Keep
-    val bufferForPlaybackAfterRebufferMs: Double?,
-    @DoNotStrip
-    @Keep
-    val backBufferDurationMs: Double?,
-    @DoNotStrip
-    @Keep
-    val preferredForwardBufferDurationMs: Double?,
-    @DoNotStrip
-    @Keep
-    val preferredPeakBitRate: Double?,
-    @DoNotStrip
-    @Keep
-    val preferredMaximumResolution: Resolution?,
-    @DoNotStrip
-    @Keep
-    val preferredPeakBitRateForExpensiveNetworks: Double?,
-    @DoNotStrip
-    @Keep
-    val preferredMaximumResolutionForExpensiveNetworks: Resolution?
-  ) {
-  /* main constructor */
+    @Suppress("unused")
+    @JvmStatic
+    private fun fromCpp(livePlayback: LivePlaybackParams?, minBufferMs: Double?, maxBufferMs: Double?, bufferForPlaybackMs: Double?, bufferForPlaybackAfterRebufferMs: Double?, backBufferDurationMs: Double?, preferredForwardBufferDurationMs: Double?, preferredPeakBitRate: Double?, preferredMaximumResolution: Resolution?, preferredPeakBitRateForExpensiveNetworks: Double?, preferredMaximumResolutionForExpensiveNetworks: Resolution?): BufferConfig {
+      return BufferConfig(livePlayback, minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs, backBufferDurationMs, preferredForwardBufferDurationMs, preferredPeakBitRate, preferredMaximumResolution, preferredPeakBitRateForExpensiveNetworks, preferredMaximumResolutionForExpensiveNetworks)
+    }
+  }
 }

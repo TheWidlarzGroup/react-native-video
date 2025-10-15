@@ -309,6 +309,6 @@ abstract class HybridVideoPlayerEventEmitterSpec: HybridObject() {
   private external fun initHybrid(): HybridData
 
   companion object {
-    private const val TAG = "HybridVideoPlayerEventEmitterSpec"
+    protected const val TAG = "HybridVideoPlayerEventEmitterSpec"
   }
 }

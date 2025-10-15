@@ -50,7 +50,11 @@ namespace margelo::nitro::video {
      */
     [[maybe_unused]]
     static jni::local_ref<JBandwidthData::javaobject> fromCpp(const BandwidthData& value) {
-      return newInstance(
+      using JSignature = JBandwidthData(double, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>);
+      static const auto clazz = javaClassStatic();
+      static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
+      return create(
+        clazz,
         value.bitrate,
         value.width.has_value() ? jni::JDouble::valueOf(value.width.value()) : nullptr,
         value.height.has_value() ? jni::JDouble::valueOf(value.height.value()) : nullptr

@@ -56,7 +56,11 @@ namespace margelo::nitro::video {
      */
     [[maybe_unused]]
     static jni::local_ref<JLivePlaybackParams::javaobject> fromCpp(const LivePlaybackParams& value) {
-      return newInstance(
+      using JSignature = JLivePlaybackParams(jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>);
+      static const auto clazz = javaClassStatic();
+      static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
+      return create(
+        clazz,
         value.minPlaybackSpeed.has_value() ? jni::JDouble::valueOf(value.minPlaybackSpeed.value()) : nullptr,
         value.maxPlaybackSpeed.has_value() ? jni::JDouble::valueOf(value.maxPlaybackSpeed.value()) : nullptr,
         value.maxOffsetMs.has_value() ? jni::JDouble::valueOf(value.maxOffsetMs.value()) : nullptr,

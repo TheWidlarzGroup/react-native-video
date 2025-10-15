@@ -33,7 +33,7 @@ namespace margelo::nitro::videodrm::bridge::swift {
    */
   using std__shared_ptr_HybridPluginManagerSpec_ = std::shared_ptr<HybridPluginManagerSpec>;
   std::shared_ptr<HybridPluginManagerSpec> create_std__shared_ptr_HybridPluginManagerSpec_(void* NON_NULL swiftUnsafePointer) noexcept;
-  void* NON_NULL get_std__shared_ptr_HybridPluginManagerSpec_(std__shared_ptr_HybridPluginManagerSpec_ cppType) noexcept;
+  void* NON_NULL get_std__shared_ptr_HybridPluginManagerSpec_(std__shared_ptr_HybridPluginManagerSpec_ cppType);
   
   // pragma MARK: std::weak_ptr<HybridPluginManagerSpec>
   using std__weak_ptr_HybridPluginManagerSpec_ = std::weak_ptr<HybridPluginManagerSpec>;

@@ -53,7 +53,11 @@ namespace margelo::nitro::video {
      */
     [[maybe_unused]]
     static jni::local_ref<JOnGetLicensePayload::javaobject> fromCpp(const OnGetLicensePayload& value) {
-      return newInstance(
+      using JSignature = JOnGetLicensePayload(jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>);
+      static const auto clazz = javaClassStatic();
+      static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
+      return create(
+        clazz,
         jni::make_jstring(value.contentId),
         jni::make_jstring(value.licenseUrl),
         jni::make_jstring(value.keyUrl),

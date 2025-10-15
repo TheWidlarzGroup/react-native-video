@@ -17,16 +17,24 @@ import com.margelo.nitro.core.*
  */
 @DoNotStrip
 @Keep
-data class onLoadStartData
+data class onLoadStartData(
   @DoNotStrip
   @Keep
-  constructor(
+  val sourceType: SourceType,
+  @DoNotStrip
+  @Keep
+  val source: HybridVideoPlayerSourceSpec
+) {
+  private companion object {
+    /**
+     * Constructor called from C++
+     */
     @DoNotStrip
     @Keep
-    val sourceType: SourceType,
-    @DoNotStrip
-    @Keep
-    val source: HybridVideoPlayerSourceSpec
-  ) {
-  /* main constructor */
+    @Suppress("unused")
+    @JvmStatic
+    private fun fromCpp(sourceType: SourceType, source: HybridVideoPlayerSourceSpec): onLoadStartData {
+      return onLoadStartData(sourceType, source)
+    }
+  }
 }

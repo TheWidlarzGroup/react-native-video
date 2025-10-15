@@ -47,7 +47,11 @@ namespace margelo::nitro::video {
      */
     [[maybe_unused]]
     static jni::local_ref<JonVolumeChangeData::javaobject> fromCpp(const onVolumeChangeData& value) {
-      return newInstance(
+      using JSignature = JonVolumeChangeData(double, jboolean);
+      static const auto clazz = javaClassStatic();
+      static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
+      return create(
+        clazz,
         value.volume,
         value.muted
       );

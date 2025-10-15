@@ -17,22 +17,30 @@ import com.margelo.nitro.core.*
  */
 @DoNotStrip
 @Keep
-data class OnGetLicensePayload
+data class OnGetLicensePayload(
   @DoNotStrip
   @Keep
-  constructor(
+  val contentId: String,
+  @DoNotStrip
+  @Keep
+  val licenseUrl: String,
+  @DoNotStrip
+  @Keep
+  val keyUrl: String,
+  @DoNotStrip
+  @Keep
+  val spc: String
+) {
+  private companion object {
+    /**
+     * Constructor called from C++
+     */
     @DoNotStrip
     @Keep
-    val contentId: String,
-    @DoNotStrip
-    @Keep
-    val licenseUrl: String,
-    @DoNotStrip
-    @Keep
-    val keyUrl: String,
-    @DoNotStrip
-    @Keep
-    val spc: String
-  ) {
-  /* main constructor */
+    @Suppress("unused")
+    @JvmStatic
+    private fun fromCpp(contentId: String, licenseUrl: String, keyUrl: String, spc: String): OnGetLicensePayload {
+      return OnGetLicensePayload(contentId, licenseUrl, keyUrl, spc)
+    }
+  }
 }

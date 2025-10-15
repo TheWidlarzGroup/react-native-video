@@ -47,7 +47,11 @@ namespace margelo::nitro::video {
      */
     [[maybe_unused]]
     static jni::local_ref<JonPlaybackStateChangeData::javaobject> fromCpp(const onPlaybackStateChangeData& value) {
-      return newInstance(
+      using JSignature = JonPlaybackStateChangeData(jboolean, jboolean);
+      static const auto clazz = javaClassStatic();
+      static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
+      return create(
+        clazz,
         value.isPlaying,
         value.isBuffering
       );

@@ -19,25 +19,29 @@ public extension TimedMetadata {
    * Create a new instance of `TimedMetadata`.
    */
   init(metadata: [TimedMetadataObject]) {
-    self.init(metadata.withUnsafeBufferPointer { __pointer -> bridge.std__vector_TimedMetadataObject_ in
-      return bridge.copy_std__vector_TimedMetadataObject_(__pointer.baseAddress!, metadata.count)
-    })
+    self.init({ () -> bridge.std__vector_TimedMetadataObject_ in
+      var __vector = bridge.create_std__vector_TimedMetadataObject_(metadata.count)
+      for __item in metadata {
+        __vector.push_back(__item)
+      }
+      return __vector
+    }())
   }
 
   var metadata: [TimedMetadataObject] {
     @inline(__always)
     get {
-      return { () -> [TimedMetadataObject] in
-        let __data = bridge.get_data_std__vector_TimedMetadataObject_(self.__metadata)
-        let __size = self.__metadata.size()
-        return Array(UnsafeBufferPointer(start: __data, count: __size))
-      }()
+      return self.__metadata.map({ __item in __item })
     }
     @inline(__always)
     set {
-      self.__metadata = newValue.withUnsafeBufferPointer { __pointer -> bridge.std__vector_TimedMetadataObject_ in
-        return bridge.copy_std__vector_TimedMetadataObject_(__pointer.baseAddress!, newValue.count)
-      }
+      self.__metadata = { () -> bridge.std__vector_TimedMetadataObject_ in
+        var __vector = bridge.create_std__vector_TimedMetadataObject_(newValue.count)
+        for __item in newValue {
+          __vector.push_back(__item)
+        }
+        return __vector
+      }()
     }
   }
 }

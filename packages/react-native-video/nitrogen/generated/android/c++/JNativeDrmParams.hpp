@@ -87,7 +87,11 @@ namespace margelo::nitro::video {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeDrmParams::javaobject> fromCpp(const NativeDrmParams& value) {
-      return newInstance(
+      using JSignature = JNativeDrmParams(jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JMap<jni::JString, jni::JString>>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload::javaobject>);
+      static const auto clazz = javaClassStatic();
+      static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
+      return create(
+        clazz,
         value.type.has_value() ? jni::make_jstring(value.type.value()) : nullptr,
         value.licenseUrl.has_value() ? jni::make_jstring(value.licenseUrl.value()) : nullptr,
         value.certificateUrl.has_value() ? jni::make_jstring(value.certificateUrl.value()) : nullptr,

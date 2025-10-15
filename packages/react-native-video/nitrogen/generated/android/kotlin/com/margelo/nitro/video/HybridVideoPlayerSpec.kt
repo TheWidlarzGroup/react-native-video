@@ -161,6 +161,6 @@ abstract class HybridVideoPlayerSpec: HybridObject() {
   private external fun initHybrid(): HybridData
 
   companion object {
-    private const val TAG = "HybridVideoPlayerSpec"
+    protected const val TAG = "HybridVideoPlayerSpec"
   }
 }

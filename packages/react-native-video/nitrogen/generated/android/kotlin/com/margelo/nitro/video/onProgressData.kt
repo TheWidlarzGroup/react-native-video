@@ -17,16 +17,24 @@ import com.margelo.nitro.core.*
  */
 @DoNotStrip
 @Keep
-data class onProgressData
+data class onProgressData(
   @DoNotStrip
   @Keep
-  constructor(
+  val currentTime: Double,
+  @DoNotStrip
+  @Keep
+  val bufferDuration: Double
+) {
+  private companion object {
+    /**
+     * Constructor called from C++
+     */
     @DoNotStrip
     @Keep
-    val currentTime: Double,
-    @DoNotStrip
-    @Keep
-    val bufferDuration: Double
-  ) {
-  /* main constructor */
+    @Suppress("unused")
+    @JvmStatic
+    private fun fromCpp(currentTime: Double, bufferDuration: Double): onProgressData {
+      return onProgressData(currentTime, bufferDuration)
+    }
+  }
 }

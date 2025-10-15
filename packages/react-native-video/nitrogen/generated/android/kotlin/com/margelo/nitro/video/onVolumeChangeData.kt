@@ -17,16 +17,24 @@ import com.margelo.nitro.core.*
  */
 @DoNotStrip
 @Keep
-data class onVolumeChangeData
+data class onVolumeChangeData(
   @DoNotStrip
   @Keep
-  constructor(
+  val volume: Double,
+  @DoNotStrip
+  @Keep
+  val muted: Boolean
+) {
+  private companion object {
+    /**
+     * Constructor called from C++
+     */
     @DoNotStrip
     @Keep
-    val volume: Double,
-    @DoNotStrip
-    @Keep
-    val muted: Boolean
-  ) {
-  /* main constructor */
+    @Suppress("unused")
+    @JvmStatic
+    private fun fromCpp(volume: Double, muted: Boolean): onVolumeChangeData {
+      return onVolumeChangeData(volume, muted)
+    }
+  }
 }

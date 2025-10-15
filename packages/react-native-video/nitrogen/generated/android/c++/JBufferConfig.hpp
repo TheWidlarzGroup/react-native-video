@@ -78,7 +78,11 @@ namespace margelo::nitro::video {
      */
     [[maybe_unused]]
     static jni::local_ref<JBufferConfig::javaobject> fromCpp(const BufferConfig& value) {
-      return newInstance(
+      using JSignature = JBufferConfig(jni::alias_ref<JLivePlaybackParams>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<JResolution>, jni::alias_ref<jni::JDouble>, jni::alias_ref<JResolution>);
+      static const auto clazz = javaClassStatic();
+      static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
+      return create(
+        clazz,
         value.livePlayback.has_value() ? JLivePlaybackParams::fromCpp(value.livePlayback.value()) : nullptr,
         value.minBufferMs.has_value() ? jni::JDouble::valueOf(value.minBufferMs.value()) : nullptr,
         value.maxBufferMs.has_value() ? jni::JDouble::valueOf(value.maxBufferMs.value()) : nullptr,

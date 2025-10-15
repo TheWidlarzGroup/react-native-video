@@ -53,6 +53,6 @@ abstract class HybridPluginManagerSpec: HybridObject() {
   private external fun initHybrid(): HybridData
 
   companion object {
-    private const val TAG = "HybridPluginManagerSpec"
+    protected const val TAG = "HybridPluginManagerSpec"
   }
 }

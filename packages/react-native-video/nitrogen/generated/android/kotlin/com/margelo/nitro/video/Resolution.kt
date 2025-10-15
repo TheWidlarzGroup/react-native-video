@@ -17,16 +17,24 @@ import com.margelo.nitro.core.*
  */
 @DoNotStrip
 @Keep
-data class Resolution
+data class Resolution(
   @DoNotStrip
   @Keep
-  constructor(
+  val width: Double,
+  @DoNotStrip
+  @Keep
+  val height: Double
+) {
+  private companion object {
+    /**
+     * Constructor called from C++
+     */
     @DoNotStrip
     @Keep
-    val width: Double,
-    @DoNotStrip
-    @Keep
-    val height: Double
-  ) {
-  /* main constructor */
+    @Suppress("unused")
+    @JvmStatic
+    private fun fromCpp(width: Double, height: Double): Resolution {
+      return Resolution(width, height)
+    }
+  }
 }

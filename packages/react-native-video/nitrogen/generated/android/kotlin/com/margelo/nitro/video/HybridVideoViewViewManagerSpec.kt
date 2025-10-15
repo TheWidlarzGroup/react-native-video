@@ -187,6 +187,6 @@ abstract class HybridVideoViewViewManagerSpec: HybridObject() {
   private external fun initHybrid(): HybridData
 
   companion object {
-    private const val TAG = "HybridVideoViewViewManagerSpec"
+    protected const val TAG = "HybridVideoViewViewManagerSpec"
   }
 }

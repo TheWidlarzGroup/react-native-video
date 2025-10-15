@@ -17,35 +17,39 @@ import com.margelo.nitro.core.*
  */
 @DoNotStrip
 @Keep
-data class NativeDrmParams
+data class NativeDrmParams(
   @DoNotStrip
   @Keep
-  constructor(
+  val type: String?,
+  @DoNotStrip
+  @Keep
+  val licenseUrl: String?,
+  @DoNotStrip
+  @Keep
+  val certificateUrl: String?,
+  @DoNotStrip
+  @Keep
+  val contentId: String?,
+  @DoNotStrip
+  @Keep
+  val licenseHeaders: Map<String, String>?,
+  @DoNotStrip
+  @Keep
+  val multiSession: Boolean?,
+  @DoNotStrip
+  @Keep
+  val getLicense: ((payload: OnGetLicensePayload) -> Promise<Promise<String>>)?
+) {
+  private companion object {
+    /**
+     * Constructor called from C++
+     */
     @DoNotStrip
     @Keep
-    val type: String?,
-    @DoNotStrip
-    @Keep
-    val licenseUrl: String?,
-    @DoNotStrip
-    @Keep
-    val certificateUrl: String?,
-    @DoNotStrip
-    @Keep
-    val contentId: String?,
-    @DoNotStrip
-    @Keep
-    val licenseHeaders: Map<String, String>?,
-    @DoNotStrip
-    @Keep
-    val multiSession: Boolean?,
-    @DoNotStrip
-    @Keep
-    val getLicense: Func_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload?
-  ) {
-  /**
-   * Initialize a new instance of `NativeDrmParams` from Kotlin.
-   */
-  constructor(type: String?, licenseUrl: String?, certificateUrl: String?, contentId: String?, licenseHeaders: Map<String, String>?, multiSession: Boolean?, getLicense: ((payload: OnGetLicensePayload) -> Promise<Promise<String>>)?)
-       : this(type, licenseUrl, certificateUrl, contentId, licenseHeaders, multiSession, getLicense?.let { Func_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload_java(it) })
+    @Suppress("unused")
+    @JvmStatic
+    private fun fromCpp(type: String?, licenseUrl: String?, certificateUrl: String?, contentId: String?, licenseHeaders: Map<String, String>?, multiSession: Boolean?, getLicense: Func_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload?): NativeDrmParams {
+      return NativeDrmParams(type, licenseUrl, certificateUrl, contentId, licenseHeaders, multiSession, getLicense?.let { it })
+    }
+  }
 }

@@ -17,34 +17,42 @@ import com.margelo.nitro.core.*
  */
 @DoNotStrip
 @Keep
-data class VideoInformation
+data class VideoInformation(
   @DoNotStrip
   @Keep
-  constructor(
+  val bitrate: Double,
+  @DoNotStrip
+  @Keep
+  val width: Double,
+  @DoNotStrip
+  @Keep
+  val height: Double,
+  @DoNotStrip
+  @Keep
+  val duration: Long,
+  @DoNotStrip
+  @Keep
+  val fileSize: Long,
+  @DoNotStrip
+  @Keep
+  val isHDR: Boolean,
+  @DoNotStrip
+  @Keep
+  val isLive: Boolean,
+  @DoNotStrip
+  @Keep
+  val orientation: VideoOrientation
+) {
+  private companion object {
+    /**
+     * Constructor called from C++
+     */
     @DoNotStrip
     @Keep
-    val bitrate: Double,
-    @DoNotStrip
-    @Keep
-    val width: Double,
-    @DoNotStrip
-    @Keep
-    val height: Double,
-    @DoNotStrip
-    @Keep
-    val duration: Long,
-    @DoNotStrip
-    @Keep
-    val fileSize: Long,
-    @DoNotStrip
-    @Keep
-    val isHDR: Boolean,
-    @DoNotStrip
-    @Keep
-    val isLive: Boolean,
-    @DoNotStrip
-    @Keep
-    val orientation: VideoOrientation
-  ) {
-  /* main constructor */
+    @Suppress("unused")
+    @JvmStatic
+    private fun fromCpp(bitrate: Double, width: Double, height: Double, duration: Long, fileSize: Long, isHDR: Boolean, isLive: Boolean, orientation: VideoOrientation): VideoInformation {
+      return VideoInformation(bitrate, width, height, duration, fileSize, isHDR, isLive, orientation)
+    }
+  }
 }

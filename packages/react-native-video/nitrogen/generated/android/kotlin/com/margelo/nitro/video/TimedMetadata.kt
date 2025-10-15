@@ -17,13 +17,21 @@ import com.margelo.nitro.core.*
  */
 @DoNotStrip
 @Keep
-data class TimedMetadata
+data class TimedMetadata(
   @DoNotStrip
   @Keep
-  constructor(
+  val metadata: Array<TimedMetadataObject>
+) {
+  private companion object {
+    /**
+     * Constructor called from C++
+     */
     @DoNotStrip
     @Keep
-    val metadata: Array<TimedMetadataObject>
-  ) {
-  /* main constructor */
+    @Suppress("unused")
+    @JvmStatic
+    private fun fromCpp(metadata: Array<TimedMetadataObject>): TimedMetadata {
+      return TimedMetadata(metadata)
+    }
+  }
 }

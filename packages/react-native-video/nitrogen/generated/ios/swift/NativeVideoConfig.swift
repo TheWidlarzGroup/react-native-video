@@ -21,9 +21,13 @@ public extension NativeVideoConfig {
   init(uri: String, externalSubtitles: [NativeExternalSubtitle]?, drm: NativeDrmParams?, headers: Dictionary<String, String>?, bufferConfig: BufferConfig?, metadata: CustomVideoMetadata?, initializeOnCreation: Bool?) {
     self.init(std.string(uri), { () -> bridge.std__optional_std__vector_NativeExternalSubtitle__ in
       if let __unwrappedValue = externalSubtitles {
-        return bridge.create_std__optional_std__vector_NativeExternalSubtitle__(__unwrappedValue.withUnsafeBufferPointer { __pointer -> bridge.std__vector_NativeExternalSubtitle_ in
-          return bridge.copy_std__vector_NativeExternalSubtitle_(__pointer.baseAddress!, __unwrappedValue.count)
-        })
+        return bridge.create_std__optional_std__vector_NativeExternalSubtitle__({ () -> bridge.std__vector_NativeExternalSubtitle_ in
+          var __vector = bridge.create_std__vector_NativeExternalSubtitle_(__unwrappedValue.count)
+          for __item in __unwrappedValue {
+            __vector.push_back(__item)
+          }
+          return __vector
+        }())
       } else {
         return .init()
       }
@@ -83,11 +87,7 @@ public extension NativeVideoConfig {
       return { () -> [NativeExternalSubtitle]? in
         if bridge.has_value_std__optional_std__vector_NativeExternalSubtitle__(self.__externalSubtitles) {
           let __unwrapped = bridge.get_std__optional_std__vector_NativeExternalSubtitle__(self.__externalSubtitles)
-          return { () -> [NativeExternalSubtitle] in
-            let __data = bridge.get_data_std__vector_NativeExternalSubtitle_(__unwrapped)
-            let __size = __unwrapped.size()
-            return Array(UnsafeBufferPointer(start: __data, count: __size))
-          }()
+          return __unwrapped.map({ __item in __item })
         } else {
           return nil
         }
@@ -97,9 +97,13 @@ public extension NativeVideoConfig {
     set {
       self.__externalSubtitles = { () -> bridge.std__optional_std__vector_NativeExternalSubtitle__ in
         if let __unwrappedValue = newValue {
-          return bridge.create_std__optional_std__vector_NativeExternalSubtitle__(__unwrappedValue.withUnsafeBufferPointer { __pointer -> bridge.std__vector_NativeExternalSubtitle_ in
-            return bridge.copy_std__vector_NativeExternalSubtitle_(__pointer.baseAddress!, __unwrappedValue.count)
-          })
+          return bridge.create_std__optional_std__vector_NativeExternalSubtitle__({ () -> bridge.std__vector_NativeExternalSubtitle_ in
+            var __vector = bridge.create_std__vector_NativeExternalSubtitle_(__unwrappedValue.count)
+            for __item in __unwrappedValue {
+              __vector.push_back(__item)
+            }
+            return __vector
+          }())
         } else {
           return .init()
         }
@@ -182,13 +186,7 @@ public extension NativeVideoConfig {
   var metadata: CustomVideoMetadata? {
     @inline(__always)
     get {
-      return { () -> CustomVideoMetadata? in
-        if let __unwrapped = self.__metadata.value {
-          return __unwrapped
-        } else {
-          return nil
-        }
-      }()
+      return self.__metadata.value
     }
     @inline(__always)
     set {
@@ -205,7 +203,14 @@ public extension NativeVideoConfig {
   var initializeOnCreation: Bool? {
     @inline(__always)
     get {
-      return self.__initializeOnCreation.value
+      return { () -> Bool? in
+        if bridge.has_value_std__optional_bool_(self.__initializeOnCreation) {
+          let __unwrapped = bridge.get_std__optional_bool_(self.__initializeOnCreation)
+          return __unwrapped
+        } else {
+          return nil
+        }
+      }()
     }
     @inline(__always)
     set {

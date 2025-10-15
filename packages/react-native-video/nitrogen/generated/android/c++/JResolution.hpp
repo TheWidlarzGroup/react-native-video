@@ -47,7 +47,11 @@ namespace margelo::nitro::video {
      */
     [[maybe_unused]]
     static jni::local_ref<JResolution::javaobject> fromCpp(const Resolution& value) {
-      return newInstance(
+      using JSignature = JResolution(double, double);
+      static const auto clazz = javaClassStatic();
+      static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
+      return create(
+        clazz,
         value.width,
         value.height
       );

@@ -53,6 +53,6 @@ abstract class HybridVideoPlayerSourceSpec: HybridObject() {
   private external fun initHybrid(): HybridData
 
   companion object {
-    private const val TAG = "HybridVideoPlayerSourceSpec"
+    protected const val TAG = "HybridVideoPlayerSourceSpec"
   }
 }

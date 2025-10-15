@@ -17,25 +17,33 @@ import com.margelo.nitro.core.*
  */
 @DoNotStrip
 @Keep
-data class LivePlaybackParams
+data class LivePlaybackParams(
   @DoNotStrip
   @Keep
-  constructor(
+  val minPlaybackSpeed: Double?,
+  @DoNotStrip
+  @Keep
+  val maxPlaybackSpeed: Double?,
+  @DoNotStrip
+  @Keep
+  val maxOffsetMs: Double?,
+  @DoNotStrip
+  @Keep
+  val minOffsetMs: Double?,
+  @DoNotStrip
+  @Keep
+  val targetOffsetMs: Double?
+) {
+  private companion object {
+    /**
+     * Constructor called from C++
+     */
     @DoNotStrip
     @Keep
-    val minPlaybackSpeed: Double?,
-    @DoNotStrip
-    @Keep
-    val maxPlaybackSpeed: Double?,
-    @DoNotStrip
-    @Keep
-    val maxOffsetMs: Double?,
-    @DoNotStrip
-    @Keep
-    val minOffsetMs: Double?,
-    @DoNotStrip
-    @Keep
-    val targetOffsetMs: Double?
-  ) {
-  /* main constructor */
+    @Suppress("unused")
+    @JvmStatic
+    private fun fromCpp(minPlaybackSpeed: Double?, maxPlaybackSpeed: Double?, maxOffsetMs: Double?, minOffsetMs: Double?, targetOffsetMs: Double?): LivePlaybackParams {
+      return LivePlaybackParams(minPlaybackSpeed, maxPlaybackSpeed, maxOffsetMs, minOffsetMs, targetOffsetMs)
+    }
+  }
 }

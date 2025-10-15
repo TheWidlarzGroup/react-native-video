@@ -17,25 +17,33 @@ import com.margelo.nitro.core.*
  */
 @DoNotStrip
 @Keep
-data class onLoadData
+data class onLoadData(
   @DoNotStrip
   @Keep
-  constructor(
+  val currentTime: Double,
+  @DoNotStrip
+  @Keep
+  val duration: Double,
+  @DoNotStrip
+  @Keep
+  val height: Double,
+  @DoNotStrip
+  @Keep
+  val width: Double,
+  @DoNotStrip
+  @Keep
+  val orientation: VideoOrientation
+) {
+  private companion object {
+    /**
+     * Constructor called from C++
+     */
     @DoNotStrip
     @Keep
-    val currentTime: Double,
-    @DoNotStrip
-    @Keep
-    val duration: Double,
-    @DoNotStrip
-    @Keep
-    val height: Double,
-    @DoNotStrip
-    @Keep
-    val width: Double,
-    @DoNotStrip
-    @Keep
-    val orientation: VideoOrientation
-  ) {
-  /* main constructor */
+    @Suppress("unused")
+    @JvmStatic
+    private fun fromCpp(currentTime: Double, duration: Double, height: Double, width: Double, orientation: VideoOrientation): onLoadData {
+      return onLoadData(currentTime, duration, height, width, orientation)
+    }
+  }
 }

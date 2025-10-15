@@ -305,9 +305,13 @@ open class HybridVideoPlayerSpec_cxx {
   public final func getAvailableTextTracks() -> bridge.Result_std__vector_TextTrack__ {
     do {
       let __result = try self.__implementation.getAvailableTextTracks()
-      let __resultCpp = __result.withUnsafeBufferPointer { __pointer -> bridge.std__vector_TextTrack_ in
-        return bridge.copy_std__vector_TextTrack_(__pointer.baseAddress!, __result.count)
-      }
+      let __resultCpp = { () -> bridge.std__vector_TextTrack_ in
+        var __vector = bridge.create_std__vector_TextTrack_(__result.count)
+        for __item in __result {
+          __vector.push_back(__item)
+        }
+        return __vector
+      }()
       return bridge.create_Result_std__vector_TextTrack__(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()

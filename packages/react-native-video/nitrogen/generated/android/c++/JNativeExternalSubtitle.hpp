@@ -55,7 +55,11 @@ namespace margelo::nitro::video {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeExternalSubtitle::javaobject> fromCpp(const NativeExternalSubtitle& value) {
-      return newInstance(
+      using JSignature = JNativeExternalSubtitle(jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<JSubtitleType>, jni::alias_ref<jni::JString>);
+      static const auto clazz = javaClassStatic();
+      static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
+      return create(
+        clazz,
         jni::make_jstring(value.uri),
         jni::make_jstring(value.label),
         JSubtitleType::fromCpp(value.type),

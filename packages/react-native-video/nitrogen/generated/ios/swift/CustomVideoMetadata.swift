@@ -56,7 +56,8 @@ public extension CustomVideoMetadata {
     @inline(__always)
     get {
       return { () -> String? in
-        if let __unwrapped = self.__title.value {
+        if bridge.has_value_std__optional_std__string_(self.__title) {
+          let __unwrapped = bridge.get_std__optional_std__string_(self.__title)
           return String(__unwrapped)
         } else {
           return nil
@@ -79,7 +80,8 @@ public extension CustomVideoMetadata {
     @inline(__always)
     get {
       return { () -> String? in
-        if let __unwrapped = self.__subtitle.value {
+        if bridge.has_value_std__optional_std__string_(self.__subtitle) {
+          let __unwrapped = bridge.get_std__optional_std__string_(self.__subtitle)
           return String(__unwrapped)
         } else {
           return nil
@@ -102,7 +104,8 @@ public extension CustomVideoMetadata {
     @inline(__always)
     get {
       return { () -> String? in
-        if let __unwrapped = self.__description.value {
+        if bridge.has_value_std__optional_std__string_(self.__description) {
+          let __unwrapped = bridge.get_std__optional_std__string_(self.__description)
           return String(__unwrapped)
         } else {
           return nil
@@ -125,7 +128,8 @@ public extension CustomVideoMetadata {
     @inline(__always)
     get {
       return { () -> String? in
-        if let __unwrapped = self.__artist.value {
+        if bridge.has_value_std__optional_std__string_(self.__artist) {
+          let __unwrapped = bridge.get_std__optional_std__string_(self.__artist)
           return String(__unwrapped)
         } else {
           return nil
@@ -148,7 +152,8 @@ public extension CustomVideoMetadata {
     @inline(__always)
     get {
       return { () -> String? in
-        if let __unwrapped = self.__imageUri.value {
+        if bridge.has_value_std__optional_std__string_(self.__imageUri) {
+          let __unwrapped = bridge.get_std__optional_std__string_(self.__imageUri)
           return String(__unwrapped)
         } else {
           return nil

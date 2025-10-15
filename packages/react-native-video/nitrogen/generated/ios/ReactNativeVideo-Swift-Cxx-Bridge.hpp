@@ -134,7 +134,7 @@ namespace margelo::nitro::video::bridge::swift {
    */
   using std__shared_ptr_HybridVideoPlayerSourceSpec_ = std::shared_ptr<HybridVideoPlayerSourceSpec>;
   std::shared_ptr<HybridVideoPlayerSourceSpec> create_std__shared_ptr_HybridVideoPlayerSourceSpec_(void* NON_NULL swiftUnsafePointer) noexcept;
-  void* NON_NULL get_std__shared_ptr_HybridVideoPlayerSourceSpec_(std__shared_ptr_HybridVideoPlayerSourceSpec_ cppType) noexcept;
+  void* NON_NULL get_std__shared_ptr_HybridVideoPlayerSourceSpec_(std__shared_ptr_HybridVideoPlayerSourceSpec_ cppType);
   
   // pragma MARK: std::weak_ptr<HybridVideoPlayerSourceSpec>
   using std__weak_ptr_HybridVideoPlayerSourceSpec_ = std::weak_ptr<HybridVideoPlayerSourceSpec>;
@@ -146,7 +146,7 @@ namespace margelo::nitro::video::bridge::swift {
    */
   using std__shared_ptr_HybridVideoPlayerEventEmitterSpec_ = std::shared_ptr<HybridVideoPlayerEventEmitterSpec>;
   std::shared_ptr<HybridVideoPlayerEventEmitterSpec> create_std__shared_ptr_HybridVideoPlayerEventEmitterSpec_(void* NON_NULL swiftUnsafePointer) noexcept;
-  void* NON_NULL get_std__shared_ptr_HybridVideoPlayerEventEmitterSpec_(std__shared_ptr_HybridVideoPlayerEventEmitterSpec_ cppType) noexcept;
+  void* NON_NULL get_std__shared_ptr_HybridVideoPlayerEventEmitterSpec_(std__shared_ptr_HybridVideoPlayerEventEmitterSpec_ cppType);
   
   // pragma MARK: std::weak_ptr<HybridVideoPlayerEventEmitterSpec>
   using std__weak_ptr_HybridVideoPlayerEventEmitterSpec_ = std::weak_ptr<HybridVideoPlayerEventEmitterSpec>;
@@ -243,11 +243,10 @@ namespace margelo::nitro::video::bridge::swift {
    * Specialized version of `std::vector<TextTrack>`.
    */
   using std__vector_TextTrack_ = std::vector<TextTrack>;
-  inline std::vector<TextTrack> copy_std__vector_TextTrack_(const TextTrack* CONTIGUOUS_MEMORY NON_NULL data, size_t size) noexcept {
-    return margelo::nitro::FastVectorCopy<TextTrack>(data, size);
-  }
-  inline const TextTrack* CONTIGUOUS_MEMORY NON_NULL get_data_std__vector_TextTrack_(const std::vector<TextTrack>& vector) noexcept {
-    return vector.data();
+  inline std::vector<TextTrack> create_std__vector_TextTrack_(size_t size) noexcept {
+    std::vector<TextTrack> vector;
+    vector.reserve(size);
+    return vector;
   }
   
   // pragma MARK: std::optional<TextTrack>
@@ -271,7 +270,7 @@ namespace margelo::nitro::video::bridge::swift {
    */
   using std__shared_ptr_HybridVideoPlayerSpec_ = std::shared_ptr<HybridVideoPlayerSpec>;
   std::shared_ptr<HybridVideoPlayerSpec> create_std__shared_ptr_HybridVideoPlayerSpec_(void* NON_NULL swiftUnsafePointer) noexcept;
-  void* NON_NULL get_std__shared_ptr_HybridVideoPlayerSpec_(std__shared_ptr_HybridVideoPlayerSpec_ cppType) noexcept;
+  void* NON_NULL get_std__shared_ptr_HybridVideoPlayerSpec_(std__shared_ptr_HybridVideoPlayerSpec_ cppType);
   
   // pragma MARK: std::weak_ptr<HybridVideoPlayerSpec>
   using std__weak_ptr_HybridVideoPlayerSpec_ = std::weak_ptr<HybridVideoPlayerSpec>;
@@ -310,7 +309,7 @@ namespace margelo::nitro::video::bridge::swift {
    */
   using std__shared_ptr_HybridVideoPlayerFactorySpec_ = std::shared_ptr<HybridVideoPlayerFactorySpec>;
   std::shared_ptr<HybridVideoPlayerFactorySpec> create_std__shared_ptr_HybridVideoPlayerFactorySpec_(void* NON_NULL swiftUnsafePointer) noexcept;
-  void* NON_NULL get_std__shared_ptr_HybridVideoPlayerFactorySpec_(std__shared_ptr_HybridVideoPlayerFactorySpec_ cppType) noexcept;
+  void* NON_NULL get_std__shared_ptr_HybridVideoPlayerFactorySpec_(std__shared_ptr_HybridVideoPlayerFactorySpec_ cppType);
   
   // pragma MARK: std::weak_ptr<HybridVideoPlayerFactorySpec>
   using std__weak_ptr_HybridVideoPlayerFactorySpec_ = std::weak_ptr<HybridVideoPlayerFactorySpec>;
@@ -499,11 +498,10 @@ namespace margelo::nitro::video::bridge::swift {
    * Specialized version of `std::vector<TimedMetadataObject>`.
    */
   using std__vector_TimedMetadataObject_ = std::vector<TimedMetadataObject>;
-  inline std::vector<TimedMetadataObject> copy_std__vector_TimedMetadataObject_(const TimedMetadataObject* CONTIGUOUS_MEMORY NON_NULL data, size_t size) noexcept {
-    return margelo::nitro::FastVectorCopy<TimedMetadataObject>(data, size);
-  }
-  inline const TimedMetadataObject* CONTIGUOUS_MEMORY NON_NULL get_data_std__vector_TimedMetadataObject_(const std::vector<TimedMetadataObject>& vector) noexcept {
-    return vector.data();
+  inline std::vector<TimedMetadataObject> create_std__vector_TimedMetadataObject_(size_t size) noexcept {
+    std::vector<TimedMetadataObject> vector;
+    vector.reserve(size);
+    return vector;
   }
   
   // pragma MARK: std::function<void(const TimedMetadata& /* metadata */)>
@@ -632,11 +630,10 @@ namespace margelo::nitro::video::bridge::swift {
    * Specialized version of `std::vector<NativeExternalSubtitle>`.
    */
   using std__vector_NativeExternalSubtitle_ = std::vector<NativeExternalSubtitle>;
-  inline std::vector<NativeExternalSubtitle> copy_std__vector_NativeExternalSubtitle_(const NativeExternalSubtitle* CONTIGUOUS_MEMORY NON_NULL data, size_t size) noexcept {
-    return margelo::nitro::FastVectorCopy<NativeExternalSubtitle>(data, size);
-  }
-  inline const NativeExternalSubtitle* CONTIGUOUS_MEMORY NON_NULL get_data_std__vector_NativeExternalSubtitle_(const std::vector<NativeExternalSubtitle>& vector) noexcept {
-    return vector.data();
+  inline std::vector<NativeExternalSubtitle> create_std__vector_NativeExternalSubtitle_(size_t size) noexcept {
+    std::vector<NativeExternalSubtitle> vector;
+    vector.reserve(size);
+    return vector;
   }
   
   // pragma MARK: std::optional<std::vector<NativeExternalSubtitle>>
@@ -880,8 +877,14 @@ namespace margelo::nitro::video::bridge::swift {
    * Specialized version of `std::optional<CustomVideoMetadata>`.
    */
   using std__optional_CustomVideoMetadata_ = std::optional<CustomVideoMetadata>;
-  inline std::optional<CustomVideoMetadata> create_std__optional_CustomVideoMetadata_(const CustomVideoMetadata& value) {
+  inline std::optional<CustomVideoMetadata> create_std__optional_CustomVideoMetadata_(const CustomVideoMetadata& value) noexcept {
     return std::optional<CustomVideoMetadata>(value);
+  }
+  inline bool has_value_std__optional_CustomVideoMetadata_(const std::optional<CustomVideoMetadata>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline CustomVideoMetadata get_std__optional_CustomVideoMetadata_(const std::optional<CustomVideoMetadata>& optional) noexcept {
+    return *optional;
   }
   
   // pragma MARK: std::shared_ptr<Promise<VideoInformation>>
@@ -933,7 +936,7 @@ namespace margelo::nitro::video::bridge::swift {
    */
   using std__shared_ptr_HybridVideoPlayerSourceFactorySpec_ = std::shared_ptr<HybridVideoPlayerSourceFactorySpec>;
   std::shared_ptr<HybridVideoPlayerSourceFactorySpec> create_std__shared_ptr_HybridVideoPlayerSourceFactorySpec_(void* NON_NULL swiftUnsafePointer) noexcept;
-  void* NON_NULL get_std__shared_ptr_HybridVideoPlayerSourceFactorySpec_(std__shared_ptr_HybridVideoPlayerSourceFactorySpec_ cppType) noexcept;
+  void* NON_NULL get_std__shared_ptr_HybridVideoPlayerSourceFactorySpec_(std__shared_ptr_HybridVideoPlayerSourceFactorySpec_ cppType);
   
   // pragma MARK: std::weak_ptr<HybridVideoPlayerSourceFactorySpec>
   using std__weak_ptr_HybridVideoPlayerSourceFactorySpec_ = std::weak_ptr<HybridVideoPlayerSourceFactorySpec>;
@@ -1014,7 +1017,7 @@ namespace margelo::nitro::video::bridge::swift {
    */
   using std__shared_ptr_HybridVideoViewViewManagerSpec_ = std::shared_ptr<HybridVideoViewViewManagerSpec>;
   std::shared_ptr<HybridVideoViewViewManagerSpec> create_std__shared_ptr_HybridVideoViewViewManagerSpec_(void* NON_NULL swiftUnsafePointer) noexcept;
-  void* NON_NULL get_std__shared_ptr_HybridVideoViewViewManagerSpec_(std__shared_ptr_HybridVideoViewViewManagerSpec_ cppType) noexcept;
+  void* NON_NULL get_std__shared_ptr_HybridVideoViewViewManagerSpec_(std__shared_ptr_HybridVideoViewViewManagerSpec_ cppType);
   
   // pragma MARK: std::weak_ptr<HybridVideoViewViewManagerSpec>
   using std__weak_ptr_HybridVideoViewViewManagerSpec_ = std::weak_ptr<HybridVideoViewViewManagerSpec>;
@@ -1035,7 +1038,7 @@ namespace margelo::nitro::video::bridge::swift {
    */
   using std__shared_ptr_HybridVideoViewViewManagerFactorySpec_ = std::shared_ptr<HybridVideoViewViewManagerFactorySpec>;
   std::shared_ptr<HybridVideoViewViewManagerFactorySpec> create_std__shared_ptr_HybridVideoViewViewManagerFactorySpec_(void* NON_NULL swiftUnsafePointer) noexcept;
-  void* NON_NULL get_std__shared_ptr_HybridVideoViewViewManagerFactorySpec_(std__shared_ptr_HybridVideoViewViewManagerFactorySpec_ cppType) noexcept;
+  void* NON_NULL get_std__shared_ptr_HybridVideoViewViewManagerFactorySpec_(std__shared_ptr_HybridVideoViewViewManagerFactorySpec_ cppType);
   
   // pragma MARK: std::weak_ptr<HybridVideoViewViewManagerFactorySpec>
   using std__weak_ptr_HybridVideoViewViewManagerFactorySpec_ = std::weak_ptr<HybridVideoViewViewManagerFactorySpec>;

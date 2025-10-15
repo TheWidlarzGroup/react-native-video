@@ -17,25 +17,33 @@ import com.margelo.nitro.core.*
  */
 @DoNotStrip
 @Keep
-data class CustomVideoMetadata
+data class CustomVideoMetadata(
   @DoNotStrip
   @Keep
-  constructor(
+  val title: String?,
+  @DoNotStrip
+  @Keep
+  val subtitle: String?,
+  @DoNotStrip
+  @Keep
+  val description: String?,
+  @DoNotStrip
+  @Keep
+  val artist: String?,
+  @DoNotStrip
+  @Keep
+  val imageUri: String?
+) {
+  private companion object {
+    /**
+     * Constructor called from C++
+     */
     @DoNotStrip
     @Keep
-    val title: String?,
-    @DoNotStrip
-    @Keep
-    val subtitle: String?,
-    @DoNotStrip
-    @Keep
-    val description: String?,
-    @DoNotStrip
-    @Keep
-    val artist: String?,
-    @DoNotStrip
-    @Keep
-    val imageUri: String?
-  ) {
-  /* main constructor */
+    @Suppress("unused")
+    @JvmStatic
+    private fun fromCpp(title: String?, subtitle: String?, description: String?, artist: String?, imageUri: String?): CustomVideoMetadata {
+      return CustomVideoMetadata(title, subtitle, description, artist, imageUri)
+    }
+  }
 }
