@@ -45,7 +45,9 @@ class VideoPlaybackService : MediaSessionService() {
         startForeground(PLACEHOLDER_NOTIFICATION_ID, createPlaceholderNotification())
         isForeground = true
       }
-    } catch (_: Exception) {}
+    } catch (_: Exception) {
+      Log.e(TAG, "Failed to start foreground service!")
+    }
 
     return super.onStartCommand(intent, flags, startId)
   }
@@ -132,7 +134,9 @@ class VideoPlaybackService : MediaSessionService() {
   private fun stopForegroundSafely() {
     try {
       stopForeground(STOP_FOREGROUND_REMOVE)
-    } catch (_: Exception) {}
+    } catch (_: Exception) {
+      Log.e(TAG, "Failed to stop foreground service!")
+    }
   }
 
   private fun cleanup() {
@@ -153,12 +157,15 @@ class VideoPlaybackService : MediaSessionService() {
           stopForegroundSafely()
           isForeground = false
         }
-      } catch (_: Exception) {}
+      } catch (_: Exception) {
+        Log.e(TAG, "Failed to stop foreground service!")
+      }
       cleanup()
     }
   }
 
   companion object {
+    const val TAG = "VideoPlaybackService"
     const val VIDEO_PLAYBACK_SERVICE_INTERFACE = SERVICE_INTERFACE
     private const val PLACEHOLDER_NOTIFICATION_ID = 1729
     private const val NOTIFICATION_CHANNEL_ID = "twg_video_playback"
@@ -175,10 +182,12 @@ class VideoPlaybackService : MediaSessionService() {
         )
         channel.setShowBadge(false)
         nm.createNotificationChannel(channel)
-      } catch (_: Exception) {}
+      } catch (_: Exception) {
+        Log.e(TAG, "Failed to create notification channel!")
+      }
     }
 
-    val appName = try { applicationInfo.loadLabel(packageManager).toString() } catch (_: Exception) { "" }
+    val appName = try { applicationInfo.loadLabel(packageManager).toString() } catch (_: Exception) { "Media Playback" }
 
     return NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
       .setSmallIcon(android.R.drawable.ic_media_play)
