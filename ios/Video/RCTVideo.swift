@@ -363,7 +363,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc
     func applicationDidBecomeActive(notification _: NSNotification!) {
         let isExternalPlaybackActive = getIsExternalPlaybackActive()
-        if _playInBackground || _playWhenInactive || !_isPlaying || isExternalPlaybackActive { return }
+        if _playInBackground || _playWhenInactive || !_isPlaying || _paused || isExternalPlaybackActive { return }
 
         // Resume the player or any other tasks that should continue when the app becomes active.
         _player?.play()
@@ -528,7 +528,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     // MARK: - Player and source
 
     func preparePlayerItem() async throws -> AVPlayerItem {
-        guard let source = _source else {
+        guard let source = self._source else {
             DebugLog("The source not exist")
             isSetSourceOngoing = false
             applyNextSource()
@@ -538,9 +538,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         // Perform on next run loop, otherwise onVideoLoadStart is nil
         onVideoLoadStart?([
             "src": [
-                "uri": _source?.uri ?? NSNull() as Any,
-                "type": _source?.type ?? NSNull(),
-                "isNetwork": NSNumber(value: _source?.isNetwork ?? false),
+                "uri": source.uri ?? NSNull() as Any,
+                "type": source.type ?? NSNull(),
+                "isNetwork": NSNumber(value: source.isNetwork),
             ],
             "drm": source.drm.json ?? NSNull(),
             "target": reactTag as Any,
@@ -572,7 +572,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             throw NSError(domain: "", code: 0, userInfo: nil)
         }
 
-        if let startPosition = _source?.startPosition {
+        if let startPosition = source.startPosition {
             _startPosition = startPosition / 1000
         }
 
@@ -1866,12 +1866,19 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
     }
 
-    // Continue playing (or not if paused) after being paused due to hitting an unbuffered zone.
+    // Continue playing (or not if paused) after being paused due to hitting an unbered zone.
     func handlePlaybackLikelyToKeepUp(playerItem _: AVPlayerItem, change _: NSKeyValueObservedChange<Bool>) {
         if _isBuffering {
             _isBuffering = false
         }
+        
+        // Prevent auto-resume if user has manually paused the video
+        if _paused {
+            _player?.pause()
+            _player?.rate = 0.0
+        }
     }
+
 
     func handleTimeControlStatusChange(player: AVPlayer, change: NSKeyValueObservedChange<AVPlayer.TimeControlStatus>) {
         if player.timeControlStatus == change.oldValue && change.oldValue != nil {
@@ -1881,6 +1888,13 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             return
         }
         let isPlaying = player.timeControlStatus == .playing
+        
+        // If user has paused but player auto-resumed, pause it again
+        if isPlaying && _paused && !_isBuffering {
+            _player?.pause()
+            _player?.rate = 0.0
+            return
+        }
 
         guard _isPlaying != isPlaying else { return }
         _isPlaying = isPlaying
