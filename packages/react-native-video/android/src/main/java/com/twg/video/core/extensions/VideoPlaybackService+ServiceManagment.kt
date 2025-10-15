@@ -21,10 +21,17 @@ fun VideoPlaybackService.Companion.startService(
   val intent = Intent(context, VideoPlaybackService::class.java)
   intent.action = VIDEO_PLAYBACK_SERVICE_INTERFACE
 
+  // Use startForegroundService on O+ so the service has the opportunity to call
+  // startForeground(...) quickly and avoid ForegroundServiceDidNotStartInTimeException.
   if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-    reactContext.startForegroundService(intent);
+    try {
+      reactContext.startForegroundService(intent)
+    } catch (_: Exception) {
+      // Fall back to startService if anything goes wrong
+      try { reactContext.startService(intent) } catch (_: Exception) {}
+    }
   } else {
-    reactContext.startService(intent);
+    reactContext.startService(intent)
   }
 
   val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

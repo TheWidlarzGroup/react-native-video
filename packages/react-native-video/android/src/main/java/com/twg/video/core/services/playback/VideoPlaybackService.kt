@@ -13,6 +13,11 @@ import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.SimpleBitmapLoader
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.os.Build
+import androidx.core.app.NotificationCompat
 import com.margelo.nitro.NitroModules
 import com.margelo.nitro.video.HybridVideoPlayer
 import java.util.concurrent.ExecutorService
@@ -25,10 +30,24 @@ class VideoPlaybackService : MediaSessionService() {
   private var mediaSessionsList = mutableMapOf<HybridVideoPlayer, MediaSession>()
   private var binder = VideoPlaybackServiceBinder(this)
   private var sourceActivity: Class<Activity>? = null // retained for future deep-links; currently unused
+  private var isForeground = false
 
   override fun onCreate() {
     super.onCreate()
     setMediaNotificationProvider(CustomMediaNotificationProvider(this))
+  }
+
+  override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    // Ensure we call startForeground quickly on newer Android versions to avoid
+    // ForegroundServiceDidNotStartInTimeException when startForegroundService(...) was used.
+    try {
+      if (!isForeground && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        startForeground(PLACEHOLDER_NOTIFICATION_ID, createPlaceholderNotification())
+        isForeground = true
+      }
+    } catch (_: Exception) {}
+
+    return super.onStartCommand(intent, flags, startId)
   }
 
   // Player Registry
@@ -128,11 +147,45 @@ class VideoPlaybackService : MediaSessionService() {
   // Stop the service if there are no active media sessions (no players need it)
   fun stopIfNoPlayers() {
     if (mediaSessionsList.isEmpty()) {
+      // Remove placeholder notification and stop the service when no active players exist
+      try {
+        if (isForeground) {
+          stopForegroundSafely()
+          isForeground = false
+        }
+      } catch (_: Exception) {}
       cleanup()
     }
   }
 
   companion object {
     const val VIDEO_PLAYBACK_SERVICE_INTERFACE = SERVICE_INTERFACE
+    private const val PLACEHOLDER_NOTIFICATION_ID = 1729
+    private const val NOTIFICATION_CHANNEL_ID = "twg_video_playback"
+  }
+
+  private fun createPlaceholderNotification(): Notification {
+    val nm = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      try {
+        val channel = NotificationChannel(
+          NOTIFICATION_CHANNEL_ID,
+          "Media playback",
+          NotificationManager.IMPORTANCE_LOW
+        )
+        channel.setShowBadge(false)
+        nm.createNotificationChannel(channel)
+      } catch (_: Exception) {}
+    }
+
+    val appName = try { applicationInfo.loadLabel(packageManager).toString() } catch (_: Exception) { "" }
+
+    return NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+      .setSmallIcon(android.R.drawable.ic_media_play)
+      .setContentTitle(appName)
+      .setContentText("")
+      .setOngoing(true)
+      .setCategory(Notification.CATEGORY_SERVICE)
+      .build()
   }
 }
