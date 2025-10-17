@@ -410,7 +410,7 @@ class VideoEventEmitter {
     void skipMarkerClick(SkipMarker skipMarker) {
         WritableMap map = Arguments.createMap();
         map.putString(EVENT_PROP_TYPE, skipMarker.skipMarkerType.name().toLowerCase());
-        map.putDouble(EVENT_PROP_TARGET, (double)skipMarker.endTimeMs);
+        map.putDouble(EVENT_PROP_TARGET, (double) skipMarker.endTimeMs);
         receiveEvent(EVENT_SKIP_MARKER, map);
     }
 
@@ -419,8 +419,9 @@ class VideoEventEmitter {
     }
 
     void subtitleTrackChanged(String language) {
+        String lang = "OFF".equalsIgnoreCase(language) ? "" : language;
         WritableMap map = Arguments.createMap();
-        map.putString(EVENT_PROP_LANGUAGE, language);
+        map.putString(EVENT_PROP_LANGUAGE, lang);
         receiveEvent(EVENT_SUBTITLE_TRACK_CHANGED, map);
     }
 
