@@ -72,10 +72,9 @@ class AudioSessionManager {
         }
 
         if isAnyPlayerPlaying || remoteControlEventsActive {
+            configureAudioSession()
             activateAudioSession()
         }
-
-        configureAudioSession()
     }
 
     // Handle remote control events from NowPlayingInfoCenterManager
