@@ -5,7 +5,7 @@
 export interface DrmParams {
   /**
    * The license URL for the DRM license request.
-   * @platform iOS, visionOS
+   * @platform Android, iOS, visionOS
    */
   licenseUrl?: string;
   /**
