@@ -19,6 +19,8 @@ import {
   type VideoRuntimeError,
 } from "../types/VideoError";
 import type { VideoPlayerStatus } from "../types/VideoPlayerStatus";
+import type { AudioTrack } from "../types/AudioTrack";
+import type { VideoJsAudioTracks } from "../VideoPlayer.web";
 
 type VideoJsPlayer = ReturnType<typeof videojs>;
 
@@ -75,6 +77,9 @@ export class WebEventEmiter implements PlayerEvents {
     // on status change
     this._onError = this._onError.bind(this);
     this.player.on("error", this._onError);
+
+    this._onAudioTrackChange = this._onAudioTrackChange.bind(this);
+    this.player.audioTracks().on("change", this._onAudioTrackChange);
   }
 
   destroy() {
@@ -99,6 +104,8 @@ export class WebEventEmiter implements PlayerEvents {
     this.player.off("volumechange", this._onVolumeChange);
 
     this.player.off("error", this._onError);
+
+    this.player.audioTracks().off("change", this._onAudioTrackChange);
   }
 
   _onTimeUpdate() {
@@ -216,11 +223,27 @@ export class WebEventEmiter implements PlayerEvents {
     this.onError(new VideoError(codeMap[err.code]!, err.message));
   }
 
+  _onAudioTrackChange() {
+    // @ts-expect-error they define length & index properties via prototype
+    const tracks: VideoJsAudioTracks = this.player.audioTracks();
+    const selected = [...Array(tracks.length)]
+      .map((_, i) => ({
+        id: tracks[i]!.id,
+        label: tracks[i]!.label,
+        language: tracks[i]!.language,
+        selected: tracks[i]!.enabled,
+      }))
+      .find((x) => x.selected);
+
+    this.onAudioTrackChange(selected ?? null);
+  }
+
   NOOP = () => {};
 
   onError: (error: VideoRuntimeError) => void = this.NOOP;
   onAudioBecomingNoisy: () => void = this.NOOP;
   onAudioFocusChange: (hasAudioFocus: boolean) => void = this.NOOP;
+  onAudioTrackChange: (track: AudioTrack | null) => void = this.NOOP;
   onBandwidthUpdate: (data: BandwidthData) => void = this.NOOP;
   onBuffer: (buffering: boolean) => void = this.NOOP;
   onControlsVisibleChange: (visible: boolean) => void = this.NOOP;

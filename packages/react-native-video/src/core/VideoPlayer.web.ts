@@ -1,5 +1,6 @@
 import videojs from "video.js";
 import type { VideoPlayerSource } from "../spec/nitro/VideoPlayerSource.nitro";
+import type { AudioTrack } from "./types/AudioTrack";
 import type { IgnoreSilentSwitchMode } from "./types/IgnoreSilentSwitchMode";
 import type { MixAudioMode } from "./types/MixAudioMode";
 import type { TextTrack } from "./types/TextTrack";
@@ -10,16 +11,16 @@ import type {
   VideoSource,
 } from "./types/VideoConfig";
 import type { VideoPlayerBase } from "./types/VideoPlayerBase";
+import type { VideoPlayerSourceBase } from "./types/VideoPlayerSourceBase";
 import type { VideoPlayerStatus } from "./types/VideoPlayerStatus";
 import { VideoPlayerEvents } from "./VideoPlayerEvents";
 import { MediaSessionHandler } from "./web/MediaSession";
 import { WebEventEmiter } from "./web/WebEventEmiter";
-import type { VideoPlayerSourceBase } from "./types/VideoPlayerSourceBase";
 
 type VideoJsPlayer = ReturnType<typeof videojs>;
 
 // declared https://github.com/videojs/video.js/blob/main/src/js/tracks/track-list.js#L58
-type VideoJsTextTracks = {
+export type VideoJsTextTracks = {
   length: number;
   [i: number]: {
     // declared: https://github.com/videojs/video.js/blob/main/src/js/tracks/track.js
@@ -29,6 +30,16 @@ type VideoJsTextTracks = {
     // declared https://github.com/videojs/video.js/blob/20f8d76cd24325a97ccedf0b013cd1a90ad0bcd7/src/js/tracks/text-track.js
     default: boolean;
     mode: "showing" | "disabled" | "hidden";
+  };
+};
+
+export type VideoJsAudioTracks = {
+  length: number;
+  [i: number]: {
+    id: string;
+    label: string;
+    language: string;
+    enabled: boolean;
   };
 };
 
@@ -288,6 +299,31 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   // Selected Text Track
   get selectedTrack(): TextTrack | undefined {
     return this.getAvailableTextTracks().find((x) => x.selected);
+  }
+
+  getAvailableAudioTracks(): AudioTrack[] {
+    // @ts-expect-error they define length & index properties via prototype
+    const tracks: VideoJsAudioTracks = this.player.audioTracks();
+
+    return [...Array(tracks.length)].map((_, i) => ({
+      id: tracks[i]!.id,
+      label: tracks[i]!.label,
+      language: tracks[i]!.language,
+      selected: tracks[i]!.enabled,
+    }));
+  }
+
+  selectAudioTrack(track: AudioTrack | null): void {
+    // @ts-expect-error they define length & index properties via prototype
+    const tracks: VideoJsAudioTracks = this.player.audioTracks();
+
+    for (let i = 0; i < tracks.length; i++) {
+      tracks[i]!.enabled = tracks[i]!.id === track?.id;
+    }
+  }
+
+  get selectedAudioTrack(): AudioTrack | undefined {
+    return this.getAvailableAudioTracks().find((x) => x.selected);
   }
 }
 

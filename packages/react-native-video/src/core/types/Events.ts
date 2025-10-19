@@ -1,3 +1,4 @@
+import type { AudioTrack } from './AudioTrack';
 import type { TextTrack } from './TextTrack';
 import type { VideoRuntimeError } from './VideoError';
 import type { VideoOrientation } from './VideoOrientation';
@@ -16,6 +17,11 @@ export interface VideoPlayerEvents {
    * @platform Android
    */
   onAudioFocusChange: (hasAudioFocus: boolean) => void;
+  /**
+   * Called when the audio track changes
+   * @param track The new audio track
+   */
+  onAudioTrackChange: (track: AudioTrack | null) => void;
   /**
    * Called when the bandwidth of the video changes.
    */
@@ -249,6 +255,7 @@ export const ALL_PLAYER_EVENTS: (keyof AllPlayerEvents)[] =
   allKeysOf<AllPlayerEvents>()(
     'onAudioBecomingNoisy',
     'onAudioFocusChange',
+    'onAudioTrackChange',
     'onBandwidthUpdate',
     'onBuffer',
     'onControlsVisibleChange',
