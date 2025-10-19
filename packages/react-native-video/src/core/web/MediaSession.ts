@@ -39,6 +39,7 @@ export class MediaSessionHandler {
       [
         "seekbackward",
         (details: MediaSessionActionDetails) => {
+          // @ts-expect-error ads is in an optional plugin that isn't typed.
           if (this.player.usingPlugin("ads") && this.player.ads.inAdBreak()) {
             return;
           }
@@ -54,6 +55,7 @@ export class MediaSessionHandler {
       [
         "seekforward",
         (details: MediaSessionActionDetails) => {
+          // @ts-expect-error ads is in an optional plugin that isn't typed.
           if (this.player.usingPlugin("ads") && this.player.ads.inAdBreak()) {
             return;
           }
@@ -69,6 +71,7 @@ export class MediaSessionHandler {
       [
         "seekto",
         (details: MediaSessionActionDetails) => {
+          // @ts-expect-error ads is in an optional plugin that isn't typed.
           if (this.player.usingPlugin("ads") && this.player.ads.inAdBreak()) {
             return;
           }

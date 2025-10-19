@@ -4,10 +4,6 @@ import type { MixAudioMode } from "./types/MixAudioMode";
 import type { TextTrack } from "./types/TextTrack";
 import type { NoAutocomplete } from "./types/Utils";
 import type { VideoConfig, VideoSource } from "./types/VideoConfig";
-import {
-  tryParseNativeVideoError,
-  VideoRuntimeError,
-} from "./types/VideoError";
 import type { VideoPlayerBase } from "./types/VideoPlayerBase";
 import type { VideoPlayerStatus } from "./types/VideoPlayerStatus";
 import { VideoPlayerEvents } from "./VideoPlayerEvents";
@@ -60,24 +56,6 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
 
   __getNativeRef() {
     return this.video;
-  }
-
-  /**
-   * Handles parsing native errors to VideoRuntimeError and calling onError if provided
-   * @internal
-   */
-  private throwError(error: unknown) {
-    const parsedError = tryParseNativeVideoError(error);
-
-    if (
-      parsedError instanceof VideoRuntimeError &&
-      this.triggerEvent("onError", parsedError)
-    ) {
-      // We don't throw errors if onError is provided
-      return;
-    }
-
-    throw parsedError;
   }
 
   // Source
@@ -211,7 +189,8 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   }
 
   play(): void {
-    this.player.play()?.catch(this.throwError);
+    // error are already handled by the `onError` callback, no need to catch it here.
+    this.player.play()?.catch();
   }
 
   pause(): void {

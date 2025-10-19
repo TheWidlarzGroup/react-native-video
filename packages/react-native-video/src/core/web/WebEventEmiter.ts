@@ -10,7 +10,14 @@ import type {
   TimedMetadata,
 } from "../types/Events";
 import type { TextTrack } from "../types/TextTrack";
-import type { VideoRuntimeError } from "../types/VideoError";
+import {
+  type LibraryError,
+  type PlayerError,
+  type SourceError,
+  type UnknownError,
+  VideoError,
+  type VideoRuntimeError,
+} from "../types/VideoError";
 import type { VideoPlayerStatus } from "../types/VideoPlayerStatus";
 
 type VideoJsPlayer = ReturnType<typeof videojs>;
@@ -187,6 +194,26 @@ export class WebEventEmiter implements PlayerEvents {
 
   _onError() {
     this.onStatusChange("error");
+    const err = this.player.error();
+    if (!err) {
+      console.error("Unknown error occured in player");
+      return;
+    }
+    const codeMap = {
+      // @ts-expect-error Code added to html5 MediaError by videojs
+      [MediaError.MEDIA_ERR_CUSTOM]: "unknown/unknown",
+      [MediaError.MEDIA_ERR_ABORTED]: "player/asset-not-initialized",
+      [MediaError.MEDIA_ERR_NETWORK]: "player/network",
+      [MediaError.MEDIA_ERR_DECODE]: "player/invalid-source",
+      [MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED]:
+        "source/unsupported-content-type",
+      // @ts-expect-error Code added to html5 MediaError by videojs
+      [MediaError.MEDIA_ERR_ENCRYPTED]: "source/failed-to-initialize-asset",
+    } as Record<
+      number,
+      LibraryError | PlayerError | SourceError | UnknownError
+    >;
+    this.onError(new VideoError(codeMap[err.code]!, err.message));
   }
 
   NOOP = () => {};
