@@ -17,6 +17,7 @@ import { VideoPlayerEvents } from "./VideoPlayerEvents";
 import { MediaSessionHandler } from "./web/MediaSession";
 import { WebEventEmiter } from "./web/WebEventEmiter";
 import type { VideoTrack } from "./types/VideoTrack";
+import type { QualityLevel } from "./types/QualityLevel";
 
 type VideoJsPlayer = ReturnType<typeof videojs>;
 
@@ -44,6 +45,21 @@ export type VideoJsTracks = {
   };
 };
 
+// declared https://github.com/videojs/videojs-contrib-quality-levels/blob/main/src/quality-level.js#L32
+export type VideoJsQualityArray = {
+  length: number;
+  selectedIndex: number;
+  [i: number]: {
+    id: string;
+    label: string;
+    width: number;
+    height: number;
+    bitrate: number;
+    frameRate: number;
+    enabled: boolean;
+  };
+};
+
 class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   protected video: HTMLVideoElement;
   public player: VideoJsPlayer;
@@ -52,7 +68,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
 
   constructor(source: VideoSource | VideoConfig | VideoPlayerSource) {
     const video = document.createElement("video");
-    const player = videojs(video);
+    const player = videojs(video, { qualityLevels: true });
 
     super(new WebEventEmiter(player));
 
@@ -354,6 +370,43 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
 
   get selectedVideoTrack(): VideoTrack | undefined {
     return this.getAvailableVideoTracks().find((x) => x.selected);
+  }
+
+  // quality
+
+  getAvailableQualities(): QualityLevel[] {
+    // @ts-expect-error this isn't typed
+    const levels: VideoJsQualityArray = this.player.qualityLevels();
+    return [...Array(levels.length)].map((_, i) => ({
+      id: levels[i]!.id,
+      width: levels[i]!.width,
+      height: levels[i]!.height,
+      bitrate: levels[i]!.bitrate,
+      selected: levels.selectedIndex === i,
+    }));
+  }
+
+  selectQuality(quality: QualityLevel | null): void {
+    // @ts-expect-error this isn't typed
+    const levels: VideoJsQualityArray = this.player.qualityLevels();
+
+    for (let i = 0; i < levels.length; i++) {
+      // if quality is null, enable back auto-quality switch (so enable all lvls)
+      levels[i]!.enabled = !quality || levels[i]!.id === quality.id;
+    }
+  }
+
+  get currentQuality(): QualityLevel | undefined {
+    return this.getAvailableQualities().find((x) => x.selected);
+  }
+  get autoQualityEnabled(): boolean {
+    // @ts-expect-error this isn't typed
+    const levels: VideoJsQualityArray = this.player.qualityLevels();
+    // if we have a quality disabled that means we manually disabled it & disabled auto quality
+    for (let i = 0; i < levels.length; i++) {
+      if (!levels[i]!.enabled) return false;
+    }
+    return true;
   }
 }
 

@@ -1,4 +1,5 @@
 import type { AudioTrack } from './AudioTrack';
+import type { QualityLevel } from './QualityLevel';
 import type { TextTrack } from './TextTrack';
 import type { VideoRuntimeError } from './VideoError';
 import type { VideoOrientation } from './VideoOrientation';
@@ -70,6 +71,10 @@ export interface VideoPlayerEvents {
    * Called when the player progress changes.
    */
   onProgress: (data: onProgressData) => void;
+  /**
+   * Called when the player quality changes.
+   */
+  onQualityChange: (quality: QualityLevel) => void;
   /**
    * Called when the video is ready to display.
    */
@@ -273,6 +278,7 @@ export const ALL_PLAYER_EVENTS: (keyof AllPlayerEvents)[] =
     'onPlaybackStateChange',
     'onPlaybackRateChange',
     'onProgress',
+    'onQualityChange',
     'onReadyToDisplay',
     'onSeek',
     'onTimedMetadata',

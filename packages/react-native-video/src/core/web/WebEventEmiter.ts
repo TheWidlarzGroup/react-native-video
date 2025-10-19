@@ -20,8 +20,9 @@ import {
 } from "../types/VideoError";
 import type { VideoPlayerStatus } from "../types/VideoPlayerStatus";
 import type { AudioTrack } from "../types/AudioTrack";
-import type { VideoJsTracks } from "../VideoPlayer.web";
+import type { VideoJsTracks, VideoJsQualityArray } from "../VideoPlayer.web";
 import type { VideoTrack } from "../types/VideoTrack";
+import type { QualityLevel } from "../types/QualityLevel";
 
 type VideoJsPlayer = ReturnType<typeof videojs>;
 
@@ -84,6 +85,10 @@ export class WebEventEmiter implements PlayerEvents {
 
     this._onVideoTrackChange = this._onVideoTrackChange.bind(this);
     this.player.videoTracks().on("change", this._onVideoTrackChange);
+
+    this._onQualityChange = this._onQualityChange.bind(this);
+    // @ts-expect-error this isn't typed
+    this.player.qualityLevels().on("change", this._onQualityChange);
   }
 
   destroy() {
@@ -112,6 +117,10 @@ export class WebEventEmiter implements PlayerEvents {
     this.player.audioTracks().off("change", this._onAudioTrackChange);
 
     this.player.videoTracks().off("change", this._onVideoTrackChange);
+
+    this._onQualityChange = this._onQualityChange.bind(this);
+    // @ts-expect-error this isn't typed
+    this.player.qualityLevels().off("change", this._onQualityChange);
   }
 
   _onTimeUpdate() {
@@ -259,6 +268,20 @@ export class WebEventEmiter implements PlayerEvents {
     this.onVideoTrackChange(selected ?? null);
   }
 
+  _onQualityChange() {
+    // @ts-expect-error this isn't typed
+    const levels: VideoJsQualityArray = this.player.qualityLevels();
+    const quality = levels[levels.selectedIndex]!;
+
+    this.onQualityChange({
+      id: quality.id,
+      width: quality.width,
+      height: quality.height,
+      bitrate: quality.bitrate,
+      selected: true,
+    });
+  }
+
   NOOP = () => {};
 
   onError: (error: VideoRuntimeError) => void = this.NOOP;
@@ -284,4 +307,5 @@ export class WebEventEmiter implements PlayerEvents {
   onVolumeChange: (data: onVolumeChangeData) => void = this.NOOP;
   onStatusChange: (status: VideoPlayerStatus) => void = this.NOOP;
   onVideoTrackChange: (track: VideoTrack | null) => void = this.NOOP;
+  onQualityChange: (quality: QualityLevel) => void = this.NOOP;
 }

@@ -18,6 +18,7 @@ import { createSource } from "./utils/sourceFactory";
 import { VideoPlayerEvents } from "./VideoPlayerEvents";
 import type { AudioTrack } from "./types/AudioTrack";
 import type { VideoTrack } from "./types/VideoTrack";
+import type { QualityLevel } from "./types/QualityLevel";
 
 class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   protected player: VideoPlayerImpl;
@@ -307,6 +308,22 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
 
   get selectedVideoTrack(): VideoTrack | undefined {
     return undefined;
+  }
+
+  // quality
+
+  getAvailableQualities(): QualityLevel[] {
+    return [];
+  }
+
+  selectQuality(_: QualityLevel | null): void {}
+
+  get currentQuality(): QualityLevel | undefined {
+    return undefined;
+  }
+
+  get autoQualityEnabled(): boolean {
+    return true;
   }
 }
 
