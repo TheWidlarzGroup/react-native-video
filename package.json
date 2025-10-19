@@ -1,6 +1,6 @@
 {
     "name": "react-native-video",
-    "version": "6.15.0",
+    "version": "6.17.0",
     "description": "A <Video /> element for react-native",
     "main": "lib/index",
     "source": "src/index.ts",
@@ -43,6 +43,8 @@
         "prepare": "yarn build",
         "xbasic": "yarn --cwd examples/basic",
         "docs": "yarn --cwd docs build",
+        "docs:llms": "node scripts/generate-llms.js",
+        "docs:llms-full": "node scripts/generate-llms-full.js",
         "release": "release-it",
         "test": "echo no test available",
         "check-ios": "scripts/swift-format.sh && scripts/swift-lint.sh && scripts/clang-format.sh",

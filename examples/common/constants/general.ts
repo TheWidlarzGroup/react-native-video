@@ -135,6 +135,25 @@ export const srcAllPlatformList = [
     },
     uri: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4',
   },
+  {
+    description: 'sintel with subtitles',
+    uri: 'https://bitmovin-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+  },
+  {
+    description: '(hls) Apple Advanced',
+    uri: 'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_ts/master.m3u8',
+    type: 'm3u8',
+  },
+  {
+    description: 'elephants dream - multi-language audio & subtitles',
+    uri: 'https://playertest.longtailvideo.com/adaptive/elephants_dream_v4/index.m3u8',
+    type: 'm3u8',
+  },
+  {
+    description: 'tears of steel',
+    uri: 'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8',
+    type: 'm3u8',
+  },
 ];
 
 export const srcIosList: SampleVideoSource[] = [];
@@ -183,6 +202,25 @@ export const srcAndroidList: SampleVideoSource[] = [
     description: 'rtsp big bug bunny',
     uri: 'rtsp://rtspstream:3cfa3c36a9c00f4aa38f3cd35816b287@zephyr.rtsp.stream/movie',
     type: 'rtsp',
+  },
+  {
+    description: 'sintel with subtitles',
+    uri: 'https://bitmovin-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+  },
+  {
+    description: '(hls) Apple Advanced',
+    uri: 'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_ts/master.m3u8',
+    type: 'm3u8',
+  },
+  {
+    description: 'elephants dream - multi-language audio & subtitles',
+    uri: 'https://playertest.longtailvideo.com/adaptive/elephants_dream_v4/index.m3u8',
+    type: 'm3u8',
+  },
+  {
+    description: 'tears of steel',
+    uri: 'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8',
+    type: 'm3u8',
   },
 ];
 

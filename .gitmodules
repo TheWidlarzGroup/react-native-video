@@ -1,0 +1,4 @@
+[submodule "examples/react-native-offline-video-download-starter"]
+	path = examples/react-native-offline-video-download-starter
+	url = https://github.com/TheWidlarzGroup/react-native-offline-video-starter.git
+	branch = main

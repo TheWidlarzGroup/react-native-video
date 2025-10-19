@@ -52,7 +52,6 @@ class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) : View
         private const val PROP_SELECTED_VIDEO_TRACK = "selectedVideoTrack"
         private const val PROP_SELECTED_VIDEO_TRACK_TYPE = "type"
         private const val PROP_SELECTED_VIDEO_TRACK_VALUE = "value"
-        private const val PROP_HIDE_SHUTTER_VIEW = "hideShutterView"
         private const val PROP_CONTROLS = "controls"
         private const val PROP_SUBTITLE_STYLE = "subtitleStyle"
         private const val PROP_SHUTTER_COLOR = "shutterColor"
@@ -225,11 +224,6 @@ class ReactExoplayerViewManager(private val config: ReactExoplayerConfig) : View
     @ReactProp(name = PROP_VIEW_TYPE, defaultInt = ViewType.VIEW_TYPE_SURFACE)
     fun setViewType(videoView: ReactExoplayerView, viewType: Int) {
         videoView.setViewType(viewType)
-    }
-
-    @ReactProp(name = PROP_HIDE_SHUTTER_VIEW, defaultBoolean = false)
-    fun setHideShutterView(videoView: ReactExoplayerView, hideShutterView: Boolean) {
-        videoView.setHideShutterView(hideShutterView)
     }
 
     @ReactProp(name = PROP_CONTROLS, defaultBoolean = false)

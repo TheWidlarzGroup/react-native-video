@@ -574,6 +574,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
             _player!.replaceCurrentItem(with: playerItem)
 
+            if #available(iOS 15.0, *) {
+                if _playInBackground {
+                    _player!.audiovisualBackgroundPlaybackPolicy = .continuesIfPossible
+                } else {
+                    _player!.audiovisualBackgroundPlaybackPolicy = .automatic
+                }
+            }
+
             if _showNotificationControls {
                 // We need to register player after we set current item and only for init
                 NowPlayingInfoCenterManager.shared.registerPlayer(player: _player!)
@@ -592,6 +600,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     self._playerViewController?.allowsVideoFrameAnalysis = true
                 }
             #endif
+
+            if #available(iOS 15.0, *) {
+                if _playInBackground {
+                    _player!.audiovisualBackgroundPlaybackPolicy = .continuesIfPossible
+                } else {
+                    _player!.audiovisualBackgroundPlaybackPolicy = .automatic
+                }
+            }
             // later we can just call "updateNowPlayingInfo:
             NowPlayingInfoCenterManager.shared.updateNowPlayingInfo()
         }
@@ -640,7 +656,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 DebugLog("setSrc Stopping playback")
                 return
             }
-            self.removePlayerLayer()
+
+            // Ensure UI operations are performed on main thread
+            DispatchQueue.main.sync {
+                self.removePlayerLayer()
+            }
             self._playerObserver.player = nil
             self._drmManager = nil
             self._playerObserver.playerItem = nil
@@ -1230,14 +1250,18 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         if _controls != controls || ((_playerLayer == nil) && (_playerViewController == nil)) {
             _controls = controls
             if _controls {
-                self.removePlayerLayer()
-                self.usePlayerViewController()
+                DispatchQueue.main.async {
+                    self.removePlayerLayer()
+                    self.usePlayerViewController()
+                }
             } else {
-                _playerViewController?.view.removeFromSuperview()
-                _playerViewController?.removeFromParent()
-                _playerViewController = nil
-                _playerObserver.playerViewController = nil
-                self.usePlayerLayer()
+                DispatchQueue.main.async {
+                    self._playerViewController?.view.removeFromSuperview()
+                    self._playerViewController?.removeFromParent()
+                    self._playerViewController = nil
+                    self._playerObserver.playerViewController = nil
+                    self.usePlayerLayer()
+                }
             }
         }
     }

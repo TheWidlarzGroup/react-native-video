@@ -140,6 +140,30 @@ class VideoEventEmitter {
                             putString("errorException", exception.toString())
                             putString("errorCode", errorCode)
                             putString("errorStackTrace", stackTrace)
+
+                            // https://github.com/facebook/react-native/blob/v0.80.2/packages/react-native/ReactCommon/react/nativemodule/core/platform/android/ReactCommon/JavaTurboModule.cpp#L465
+                            putMap(
+                                "cause",
+                                Arguments.createMap().apply {
+                                    putString("name", exception.javaClass.simpleName)
+                                    exception.message?.let { putString("message", it) }
+                                    putArray(
+                                        "stackElements",
+                                        Arguments.createArray().apply {
+                                            exception.stackTrace.forEach { element ->
+                                                pushMap(
+                                                    Arguments.createMap().apply {
+                                                        putString("className", element.className)
+                                                        putString("fileName", element.fileName)
+                                                        putInt("lineNumber", element.lineNumber)
+                                                        putString("methodName", element.methodName)
+                                                    }
+                                                )
+                                            }
+                                        }
+                                    )
+                                }
+                            )
                         }
                     )
                 }
@@ -288,12 +312,17 @@ class VideoEventEmitter {
         }
     }
 
+    private class VideoCustomEvent(surfaceId: Int, viewId: Int, private val event: EventTypes, private val paramsSetter: (WritableMap.() -> Unit)?) :
+        Event<VideoCustomEvent>(surfaceId, viewId) {
+
+        override fun getEventName(): String = "top${event.eventName.removePrefix("on")}"
+
+        override fun getEventData(): WritableMap? = Arguments.createMap().apply(paramsSetter ?: {})
+    }
+
     private class EventBuilder(private val surfaceId: Int, private val viewId: Int, private val dispatcher: EventDispatcher) {
         fun dispatch(event: EventTypes, paramsSetter: (WritableMap.() -> Unit)? = null) =
-            dispatcher.dispatchEvent(object : Event<Event<*>>(surfaceId, viewId) {
-                override fun getEventName() = "top${event.eventName.removePrefix("on")}"
-                override fun getEventData() = Arguments.createMap().apply(paramsSetter ?: {})
-            })
+            dispatcher.dispatchEvent(VideoCustomEvent(surfaceId, viewId, event, paramsSetter))
     }
 
     private fun audioTracksToArray(audioTracks: java.util.ArrayList<Track>?): WritableArray =
