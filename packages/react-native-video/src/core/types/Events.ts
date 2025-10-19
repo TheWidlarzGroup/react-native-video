@@ -4,6 +4,7 @@ import type { VideoRuntimeError } from './VideoError';
 import type { VideoOrientation } from './VideoOrientation';
 import type { VideoPlayerSourceBase } from './VideoPlayerSourceBase';
 import type { VideoPlayerStatus } from './VideoPlayerStatus';
+import type { VideoTrack } from './VideoTrack';
 
 export interface VideoPlayerEvents {
   /**
@@ -101,6 +102,11 @@ export interface VideoPlayerEvents {
    * Called when the player status changes.
    */
   onStatusChange: (status: VideoPlayerStatus) => void;
+  /**
+   * Called when the video track changes
+   * @param track The new video track
+   */
+  onVideoTrackChange: (track: VideoTrack | null) => void;
 }
 
 export interface AllPlayerEvents extends VideoPlayerEvents {
@@ -273,5 +279,6 @@ export const ALL_PLAYER_EVENTS: (keyof AllPlayerEvents)[] =
     'onTextTrackDataChanged',
     'onTrackChange',
     'onVolumeChange',
+    'onVideoTrackChange',
     'onStatusChange'
   );

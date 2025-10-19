@@ -16,6 +16,7 @@ import type { VideoPlayerStatus } from "./types/VideoPlayerStatus";
 import { VideoPlayerEvents } from "./VideoPlayerEvents";
 import { MediaSessionHandler } from "./web/MediaSession";
 import { WebEventEmiter } from "./web/WebEventEmiter";
+import type { VideoTrack } from "./types/VideoTrack";
 
 type VideoJsPlayer = ReturnType<typeof videojs>;
 
@@ -33,7 +34,7 @@ export type VideoJsTextTracks = {
   };
 };
 
-export type VideoJsAudioTracks = {
+export type VideoJsTracks = {
   length: number;
   [i: number]: {
     id: string;
@@ -301,9 +302,11 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     return this.getAvailableTextTracks().find((x) => x.selected);
   }
 
+  // audio tracks
+
   getAvailableAudioTracks(): AudioTrack[] {
     // @ts-expect-error they define length & index properties via prototype
-    const tracks: VideoJsAudioTracks = this.player.audioTracks();
+    const tracks: VideoJsTracks = this.player.audioTracks();
 
     return [...Array(tracks.length)].map((_, i) => ({
       id: tracks[i]!.id,
@@ -315,7 +318,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
 
   selectAudioTrack(track: AudioTrack | null): void {
     // @ts-expect-error they define length & index properties via prototype
-    const tracks: VideoJsAudioTracks = this.player.audioTracks();
+    const tracks: VideoJsTracks = this.player.audioTracks();
 
     for (let i = 0; i < tracks.length; i++) {
       tracks[i]!.enabled = tracks[i]!.id === track?.id;
@@ -324,6 +327,33 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
 
   get selectedAudioTrack(): AudioTrack | undefined {
     return this.getAvailableAudioTracks().find((x) => x.selected);
+  }
+
+  // video tracks
+
+  getAvailableVideoTracks(): VideoTrack[] {
+    // @ts-expect-error they define length & index properties via prototype
+    const tracks: VideoJsTracks = this.player.videoTracks();
+
+    return [...Array(tracks.length)].map((_, i) => ({
+      id: tracks[i]!.id,
+      label: tracks[i]!.label,
+      language: tracks[i]!.language,
+      selected: tracks[i]!.enabled,
+    }));
+  }
+
+  selectVideoTrack(track: VideoTrack | null): void {
+    // @ts-expect-error they define length & index properties via prototype
+    const tracks: VideoJsTracks = this.player.videoTracks();
+
+    for (let i = 0; i < tracks.length; i++) {
+      tracks[i]!.enabled = tracks[i]!.id === track?.id;
+    }
+  }
+
+  get selectedVideoTrack(): VideoTrack | undefined {
+    return this.getAvailableVideoTracks().find((x) => x.selected);
   }
 }
 

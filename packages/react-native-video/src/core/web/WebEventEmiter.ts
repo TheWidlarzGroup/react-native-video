@@ -20,7 +20,8 @@ import {
 } from "../types/VideoError";
 import type { VideoPlayerStatus } from "../types/VideoPlayerStatus";
 import type { AudioTrack } from "../types/AudioTrack";
-import type { VideoJsAudioTracks } from "../VideoPlayer.web";
+import type { VideoJsTracks } from "../VideoPlayer.web";
+import type { VideoTrack } from "../types/VideoTrack";
 
 type VideoJsPlayer = ReturnType<typeof videojs>;
 
@@ -80,6 +81,9 @@ export class WebEventEmiter implements PlayerEvents {
 
     this._onAudioTrackChange = this._onAudioTrackChange.bind(this);
     this.player.audioTracks().on("change", this._onAudioTrackChange);
+
+    this._onVideoTrackChange = this._onVideoTrackChange.bind(this);
+    this.player.videoTracks().on("change", this._onVideoTrackChange);
   }
 
   destroy() {
@@ -106,6 +110,8 @@ export class WebEventEmiter implements PlayerEvents {
     this.player.off("error", this._onError);
 
     this.player.audioTracks().off("change", this._onAudioTrackChange);
+
+    this.player.videoTracks().off("change", this._onVideoTrackChange);
   }
 
   _onTimeUpdate() {
@@ -225,7 +231,7 @@ export class WebEventEmiter implements PlayerEvents {
 
   _onAudioTrackChange() {
     // @ts-expect-error they define length & index properties via prototype
-    const tracks: VideoJsAudioTracks = this.player.audioTracks();
+    const tracks: VideoJsTracks = this.player.audioTracks();
     const selected = [...Array(tracks.length)]
       .map((_, i) => ({
         id: tracks[i]!.id,
@@ -236,6 +242,21 @@ export class WebEventEmiter implements PlayerEvents {
       .find((x) => x.selected);
 
     this.onAudioTrackChange(selected ?? null);
+  }
+
+  _onVideoTrackChange() {
+    // @ts-expect-error they define length & index properties via prototype
+    const tracks: VideoJsTracks = this.player.videoTracks();
+    const selected = [...Array(tracks.length)]
+      .map((_, i) => ({
+        id: tracks[i]!.id,
+        label: tracks[i]!.label,
+        language: tracks[i]!.language,
+        selected: tracks[i]!.enabled,
+      }))
+      .find((x) => x.selected);
+
+    this.onVideoTrackChange(selected ?? null);
   }
 
   NOOP = () => {};
@@ -262,4 +283,5 @@ export class WebEventEmiter implements PlayerEvents {
   onTrackChange: (track: TextTrack | null) => void = this.NOOP;
   onVolumeChange: (data: onVolumeChangeData) => void = this.NOOP;
   onStatusChange: (status: VideoPlayerStatus) => void = this.NOOP;
+  onVideoTrackChange: (track: VideoTrack | null) => void = this.NOOP;
 }

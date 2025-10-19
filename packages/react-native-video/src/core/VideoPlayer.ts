@@ -17,6 +17,7 @@ import { createPlayer } from "./utils/playerFactory";
 import { createSource } from "./utils/sourceFactory";
 import { VideoPlayerEvents } from "./VideoPlayerEvents";
 import type { AudioTrack } from "./types/AudioTrack";
+import type { VideoTrack } from "./types/VideoTrack";
 
 class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   protected player: VideoPlayerImpl;
@@ -295,6 +296,16 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   selectAudioTrack(_: AudioTrack | null): void {}
 
   get selectedAudioTrack(): AudioTrack | undefined {
+    return undefined;
+  }
+
+  getAvailableVideoTracks(): VideoTrack[] {
+    return [];
+  }
+
+  selectVideoTrack(_: VideoTrack | null): void {}
+
+  get selectedVideoTrack(): VideoTrack | undefined {
     return undefined;
   }
 }
