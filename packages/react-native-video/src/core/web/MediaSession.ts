@@ -132,7 +132,11 @@ export class MediaSessionHandler {
 
   disable() {}
 
-  updateMediaSession(metadata: CustomVideoMetadata) {
+  updateMediaSession(metadata: CustomVideoMetadata | undefined) {
+    if (!metadata) {
+      mediaSession.metadata = null;
+      return;
+    }
     mediaSession.metadata = new window.MediaMetadata({
       title: metadata.title,
       album: metadata.subtitle,

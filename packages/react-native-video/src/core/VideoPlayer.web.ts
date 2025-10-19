@@ -1,15 +1,20 @@
+import videojs from "video.js";
 import type { VideoPlayerSource } from "../spec/nitro/VideoPlayerSource.nitro";
 import type { IgnoreSilentSwitchMode } from "./types/IgnoreSilentSwitchMode";
 import type { MixAudioMode } from "./types/MixAudioMode";
 import type { TextTrack } from "./types/TextTrack";
 import type { NoAutocomplete } from "./types/Utils";
-import type { VideoConfig, VideoSource } from "./types/VideoConfig";
+import type {
+  NativeVideoConfig,
+  VideoConfig,
+  VideoSource,
+} from "./types/VideoConfig";
 import type { VideoPlayerBase } from "./types/VideoPlayerBase";
 import type { VideoPlayerStatus } from "./types/VideoPlayerStatus";
 import { VideoPlayerEvents } from "./VideoPlayerEvents";
 import { MediaSessionHandler } from "./web/MediaSession";
 import { WebEventEmiter } from "./web/WebEventEmiter";
-import videojs from "video.js";
+import type { VideoPlayerSourceBase } from "./types/VideoPlayerSourceBase";
 
 type VideoJsPlayer = ReturnType<typeof videojs>;
 
@@ -31,6 +36,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   protected video: HTMLVideoElement;
   public player: VideoJsPlayer;
   private mediaSession: MediaSessionHandler;
+  private _source: NativeVideoConfig | undefined;
 
   constructor(source: VideoSource | VideoConfig | VideoPlayerSource) {
     const video = document.createElement("video");
@@ -59,12 +65,23 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   }
 
   // Source
-  get source(): VideoPlayerSource {
-    // TODO: properly implement this
+  get source(): VideoPlayerSourceBase {
     return {
-      uri: this.player.src(undefined),
-      config: {},
-    } as any;
+      uri: this._source?.uri!,
+      config: this._source!,
+      getAssetInformationAsync: async () => {
+        return {
+          bitrate: NaN,
+          width: this.player.videoWidth(),
+          height: this.player.videoHeight(),
+          duration: BigInt(this.duration),
+          fileSize: BigInt(NaN),
+          isHDR: false,
+          isLive: false,
+          orientation: "landscape",
+        };
+      },
+    };
   }
 
   // Status
@@ -166,8 +183,12 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   }
 
   set showNotificationControls(value: boolean) {
-    if (value) this.mediaSession.enable();
-    else this.mediaSession.disable();
+    if (!value) {
+      this.mediaSession.disable();
+      return;
+    }
+    this.mediaSession.enable();
+    this.mediaSession.updateMediaSession(this._source?.metadata);
   }
 
   async initialize(): Promise<void> {
@@ -219,20 +240,24 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
       return;
     }
 
-    if (typeof source === "number") {
+    if (typeof source === "string") {
+      source = { uri: source };
+    }
+
+    if (typeof source === "number" || typeof source.uri === "number") {
       console.error(
         "A source uri must be a string. Numbers are only supported on native.",
       );
       return;
     }
-    if (typeof source === "string") {
-      source = { uri: source };
-    }
+    this._source = source as VideoPlayerSource;
     // TODO: handle start time
     this.player.src({
       src: source.uri,
       type: source.mimeType,
     });
+    if (this.mediaSession.enabled)
+      this.mediaSession.updateMediaSession(source.metadata);
     if (source.initializeOnCreation) await this.preload();
   }
 
