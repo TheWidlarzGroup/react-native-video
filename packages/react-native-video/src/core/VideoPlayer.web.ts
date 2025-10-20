@@ -68,7 +68,15 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
 
   constructor(source: VideoSource | VideoConfig | VideoPlayerSource) {
     const video = document.createElement("video");
-    const player = videojs(video, { qualityLevels: true });
+    const player = videojs(video, {
+      qualityLevels: true,
+      html5: {
+        preloadTextTracks: false,
+        nativeTextTracks: true,
+      },
+    });
+    // @ts-ignore used for debugging or extending purposes
+    window.videojs = videojs;
 
     super(new WebEventEmiter(player));
 
@@ -286,6 +294,16 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     });
     if (this.mediaSession.enabled)
       this.mediaSession.updateMediaSession(source.metadata);
+
+    for (const sub of source.externalSubtitles ?? []) {
+      this.player.addRemoteTextTrack({
+        kind: "subtitles",
+        label: sub.label,
+        src: sub.uri,
+        srclang: sub.language,
+      });
+    }
+
     if (source.initializeOnCreation) await this.preload();
   }
 
@@ -308,8 +326,8 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     const tracks: VideoJsTextTracks = this.player.textTracks();
 
     for (let i = 0; i < tracks.length; i++) {
-      if (tracks[i]!.mode === "showing") tracks[i]!.mode = "disabled";
-      if (tracks[i]!.id === textTrack?.id) tracks[i]!.mode = "showing";
+      tracks[i]!.mode =
+        tracks[i]!.id === textTrack?.id ? "showing" : "disabled";
     }
   }
 

@@ -80,7 +80,7 @@ const VideoView = forwardRef<VideoViewRef, VideoViewProps>(
           ref={vRef}
           style={{
             position: "absolute",
-            inset: 0
+            inset: 0,
           }}
         />
       </View>
