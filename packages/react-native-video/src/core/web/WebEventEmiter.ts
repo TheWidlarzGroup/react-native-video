@@ -80,6 +80,9 @@ export class WebEventEmiter implements PlayerEvents {
     this._onError = this._onError.bind(this);
     this.player.on("error", this._onError);
 
+    this._onTextTrackChange = this._onTextTrackChange.bind(this);
+    this.player.textTracks().on("change", this._onTextTrackChange);
+
     this._onAudioTrackChange = this._onAudioTrackChange.bind(this);
     this.player.audioTracks().on("change", this._onAudioTrackChange);
 
@@ -113,6 +116,8 @@ export class WebEventEmiter implements PlayerEvents {
     this.player.off("volumechange", this._onVolumeChange);
 
     this.player.off("error", this._onError);
+
+    this.player.textTracks().off("change", this._onTextTrackChange);
 
     this.player.audioTracks().off("change", this._onAudioTrackChange);
 
@@ -236,6 +241,21 @@ export class WebEventEmiter implements PlayerEvents {
       LibraryError | PlayerError | SourceError | UnknownError
     >;
     this.onError(new VideoError(codeMap[err.code]!, err.message));
+  }
+
+  _onTextTrackChange() {
+    // @ts-expect-error they define length & index properties via prototype
+    const tracks: VideoJsTextTracks = this.player.textTracks();
+    const selected = [...Array(tracks.length)]
+      .map((_, i) => ({
+        id: tracks[i]!.id,
+        label: tracks[i]!.label,
+        language: tracks[i]!.language,
+        selected: tracks[i]!.mode === "showing",
+      }))
+      .find((x) => x.selected);
+
+    this.onTrackChange(selected ?? null);
   }
 
   _onAudioTrackChange() {
