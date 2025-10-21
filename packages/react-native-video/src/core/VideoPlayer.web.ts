@@ -297,6 +297,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
 
     for (const sub of source.externalSubtitles ?? []) {
       this.player.addRemoteTextTrack({
+        id: sub.uri,
         kind: "subtitles",
         label: sub.label,
         src: sub.uri,
