@@ -53,8 +53,8 @@ npx react-native run-android # run on Android
 
 ## Patch for react-native < 0.80
 
-`react-native` < 0.80 have bug that prevents to properly handle errors by nitro modules on Android.
-We highly recommend to apply bellow patch for `react-native-nitro-modules` to fix this issue.
+Versions of `react-native` < 0.80 have a bug that prevents them from properly handling errors thrown by nitro modules on Android.
+If working with these versions of `react-native`, we highly recommend you apply the `react-native-nitro-modules` patch below, to fix this issue.
 You can apply it using `patch-package`.
 
 :::warning
