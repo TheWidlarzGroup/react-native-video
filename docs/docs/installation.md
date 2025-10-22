@@ -4,7 +4,7 @@ description: React Native Video Installation Guide and Requirements
 ---
 # Installation
 
-React Native Video is a library that allows you to play various kind of videos in a React Native application. It is built on top of the [`react-native-nitro-modules`](https://nitro.margelo.com/docs/what-is-nitro) type-safe and extremely fast native modules framework. React Native Video supports both New Architecture and Old Architecture.
+React Native Video is a library that allows you to play various kinds of video in a React Native application. It is built on top of the [`react-native-nitro-modules`](https://nitro.margelo.com/docs/what-is-nitro) framework, giving it type safety and blazing fast communication across Native and JavaScript threads. React Native Video supports both the New Architecture and the Old Architecture.
 
 ## Requirements
 
