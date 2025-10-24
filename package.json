@@ -34,6 +34,7 @@
     "@release-it/conventional-changelog": "^8.0.2",
     "@tsconfig/react-native": "^2.0.2",
     "@types/eslint__js": "^8.42.3",
+    "@types/node": "^24.9.1",
     "@types/react": "^18.2.44",
     "commitlint": "^17.0.2",
     "eslint": "^8.51.0",

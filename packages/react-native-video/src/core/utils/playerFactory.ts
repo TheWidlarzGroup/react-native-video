@@ -5,8 +5,9 @@ import type {
 } from '../../spec/nitro/VideoPlayer.nitro';
 import type { VideoPlayerSource } from '../../spec/nitro/VideoPlayerSource.nitro';
 import type { VideoConfig, VideoSource } from '../types/VideoConfig';
-import { createSource, isVideoPlayerSource } from './sourceFactory';
+import { createSource } from './sourceFactory';
 import { tryParseNativeVideoError } from '../types/VideoError';
+import { isVideoPlayerSource } from './sourceUtils';
 
 const VideoPlayerFactory =
   NitroModules.createHybridObject<VideoPlayerFactory>('VideoPlayerFactory');

@@ -12,20 +12,12 @@ import type {
   VideoSource,
 } from '../types/VideoConfig';
 import { tryParseNativeVideoError } from '../types/VideoError';
+import { isVideoPlayerSource } from './sourceUtils';
 
 const VideoPlayerSourceFactory =
   NitroModules.createHybridObject<VideoPlayerSourceFactory>(
     'VideoPlayerSourceFactory'
   );
-
-export const isVideoPlayerSource = (obj: any): obj is VideoPlayerSource => {
-  return (
-    obj && // obj is not null
-    typeof obj === 'object' && // obj is an object
-    'name' in obj && // obj has a name property
-    obj.name === 'VideoPlayerSource' // obj.name is 'VideoPlayerSource'
-  );
-};
 
 /**
  * Creates a `VideoPlayerSource` instance from a URI (string).

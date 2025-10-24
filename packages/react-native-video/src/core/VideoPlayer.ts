@@ -1,21 +1,24 @@
-import { Platform } from 'react-native';
-import { NitroModules } from 'react-native-nitro-modules';
-import { type VideoPlayer as VideoPlayerImpl } from '../spec/nitro/VideoPlayer.nitro';
-import type { VideoPlayerSource } from '../spec/nitro/VideoPlayerSource.nitro';
-import type { IgnoreSilentSwitchMode } from './types/IgnoreSilentSwitchMode';
-import type { MixAudioMode } from './types/MixAudioMode';
-import type { TextTrack } from './types/TextTrack';
-import type { NoAutocomplete } from './types/Utils';
-import type { VideoConfig, VideoSource } from './types/VideoConfig';
+import { Platform } from "react-native";
+import { NitroModules } from "react-native-nitro-modules";
+import type { VideoPlayer as VideoPlayerImpl } from "../spec/nitro/VideoPlayer.nitro";
+import type { VideoPlayerSource } from "../spec/nitro/VideoPlayerSource.nitro";
+import type { IgnoreSilentSwitchMode } from "./types/IgnoreSilentSwitchMode";
+import type { MixAudioMode } from "./types/MixAudioMode";
+import type { TextTrack } from "./types/TextTrack";
+import type { NoAutocomplete } from "./types/Utils";
+import type { VideoConfig, VideoSource } from "./types/VideoConfig";
 import {
   tryParseNativeVideoError,
   VideoRuntimeError,
-} from './types/VideoError';
-import type { VideoPlayerBase } from './types/VideoPlayerBase';
-import type { VideoPlayerStatus } from './types/VideoPlayerStatus';
-import { createPlayer } from './utils/playerFactory';
-import { createSource } from './utils/sourceFactory';
-import { VideoPlayerEvents } from './VideoPlayerEvents';
+} from "./types/VideoError";
+import type { VideoPlayerBase } from "./types/VideoPlayerBase";
+import type { VideoPlayerStatus } from "./types/VideoPlayerStatus";
+import { createPlayer } from "./utils/playerFactory";
+import { createSource } from "./utils/sourceFactory";
+import { VideoPlayerEvents } from "./VideoPlayerEvents";
+import type { AudioTrack } from "./types/AudioTrack";
+import type { VideoTrack } from "./types/VideoTrack";
+import type { QualityLevel } from "./types/QualityLevel";
 
 class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   protected player: VideoPlayerImpl;
@@ -57,7 +60,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
 
     if (
       parsedError instanceof VideoRuntimeError &&
-      this.triggerEvent('onError', parsedError)
+      this.triggerEvent("onError", parsedError)
     ) {
       // We don't throw errors if onError is provided
       return;
@@ -153,9 +156,9 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   }
 
   set ignoreSilentSwitchMode(value: IgnoreSilentSwitchMode) {
-    if (__DEV__ && !['ios'].includes(Platform.OS)) {
+    if (__DEV__ && !["ios"].includes(Platform.OS)) {
       console.warn(
-        'ignoreSilentSwitchMode is not supported on this platform, it wont have any effect'
+        "ignoreSilentSwitchMode is not supported on this platform, it wont have any effect",
       );
     }
 
@@ -248,12 +251,16 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   }
 
   async replaceSourceAsync(
-    source: VideoSource | VideoConfig | NoAutocomplete<VideoPlayerSource> | null
+    source:
+      | VideoSource
+      | VideoConfig
+      | NoAutocomplete<VideoPlayerSource>
+      | null,
   ): Promise<void> {
     await this.wrapPromise(
       this.player.replaceSourceAsync(
-        source === null ? null : createSource(source)
-      )
+        source === null ? null : createSource(source),
+      ),
     );
 
     NitroModules.updateMemorySize(this.player);
@@ -280,6 +287,43 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   // Selected Text Track
   get selectedTrack(): TextTrack | undefined {
     return this.player.selectedTrack;
+  }
+
+  // TODO: implement this
+  getAvailableAudioTracks(): AudioTrack[] {
+    return [];
+  }
+
+  selectAudioTrack(_: AudioTrack | null): void {}
+
+  get selectedAudioTrack(): AudioTrack | undefined {
+    return undefined;
+  }
+
+  getAvailableVideoTracks(): VideoTrack[] {
+    return [];
+  }
+
+  selectVideoTrack(_: VideoTrack | null): void {}
+
+  get selectedVideoTrack(): VideoTrack | undefined {
+    return undefined;
+  }
+
+  // quality
+
+  getAvailableQualities(): QualityLevel[] {
+    return [];
+  }
+
+  selectQuality(_: QualityLevel | null): void {}
+
+  get currentQuality(): QualityLevel | undefined {
+    return undefined;
+  }
+
+  get autoQualityEnabled(): boolean {
+    return true;
   }
 }
 

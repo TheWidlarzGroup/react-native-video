@@ -1,7 +1,7 @@
 import type { VideoPlayerSource } from '../../spec/nitro/VideoPlayerSource.nitro';
 import type { NoAutocomplete } from '../types/Utils';
 import type { VideoConfig, VideoSource } from '../types/VideoConfig';
-import { isVideoPlayerSource } from '../utils/sourceFactory';
+import { isVideoPlayerSource } from '../utils/sourceUtils';
 import { VideoPlayer } from '../VideoPlayer';
 import { useManagedInstance } from './useManagedInstance';
 

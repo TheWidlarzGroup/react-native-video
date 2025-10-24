@@ -1,11 +1,11 @@
-import type { VideoPlayerEventEmitter } from '../spec/nitro/VideoPlayerEventEmitter.nitro';
 import {
   ALL_PLAYER_EVENTS,
+  type VideoPlayerEvents as NativePlayerEvents,
   type AllPlayerEvents as PlayerEvents,
-} from './types/Events';
+} from "./types/Events";
 
 export class VideoPlayerEvents {
-  protected eventEmitter: VideoPlayerEventEmitter;
+  protected eventEmitter: NativePlayerEvents;
   protected eventListeners: Partial<
     Record<keyof PlayerEvents, Set<(...params: any[]) => void>>
   > = {};
@@ -13,9 +13,9 @@ export class VideoPlayerEvents {
   protected readonly supportedEvents: (keyof PlayerEvents)[] =
     ALL_PLAYER_EVENTS;
 
-  constructor(eventEmitter: VideoPlayerEventEmitter) {
+  constructor(eventEmitter: NativePlayerEvents) {
     this.eventEmitter = eventEmitter;
-    for (let event of this.supportedEvents) {
+    for (const event of this.supportedEvents) {
       // @ts-expect-error we narrow the type of the event
       this.eventEmitter[event] = this.triggerEvent.bind(this, event);
     }
@@ -26,7 +26,7 @@ export class VideoPlayerEvents {
     ...params: Parameters<PlayerEvents[Event]>
   ): boolean {
     if (!this.eventListeners[event]?.size) return false;
-    for (let fn of this.eventListeners[event]) {
+    for (const fn of this.eventListeners[event]) {
       fn(...params);
     }
     return true;
@@ -34,7 +34,7 @@ export class VideoPlayerEvents {
 
   addEventListener<Event extends keyof PlayerEvents>(
     event: Event,
-    callback: PlayerEvents[Event]
+    callback: PlayerEvents[Event],
   ) {
     this.eventListeners[event] ??= new Set<PlayerEvents[Event]>();
     this.eventListeners[event].add(callback);
@@ -42,7 +42,7 @@ export class VideoPlayerEvents {
 
   removeEventListener<Event extends keyof PlayerEvents>(
     event: Event,
-    callback: PlayerEvents[Event]
+    callback: PlayerEvents[Event],
   ) {
     this.eventListeners[event]?.delete(callback);
   }

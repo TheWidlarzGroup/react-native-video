@@ -16,7 +16,7 @@
     "allowUnusedLabels": false,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "lib": ["ESNext"],
+    "lib": ["ESNext", "dom"],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "noEmit": true,
