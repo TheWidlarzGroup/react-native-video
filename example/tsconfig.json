@@ -3,7 +3,7 @@
     "@react-native/typescript-config/tsconfig.json",
     "../config/tsconfig.json"
   ],
-  "include": ["src", "index.js", "app.json"],
+  "include": ["src", "index.js", "app.json", "rn-harness.config.mjs"],
   "compilerOptions": {
     "jsx": "react",
     "types": ["react-native"]
