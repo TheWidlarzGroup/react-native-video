@@ -1,5 +1,9 @@
 name: Test React Native Video
 
+permissions:
+  contents: read
+  actions: write
+
 on:
   push:
     branches: [v7]
@@ -130,7 +134,7 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           script: |
             adb install -r "./app/build/outputs/apk/debug/app-debug.apk"
-            bun example test:android
+            bun test:android
 
   test-ios:
     name: Test iOS
@@ -167,22 +171,33 @@ jobs:
 
       - name: Install CocoaPods
         if: steps.cache-app-restore.outputs.cache-hit != 'true'
-        working-directory: ios
+        working-directory: example/ios
         run: pod install
 
       - name: Build iOS app
         if: steps.cache-app-restore.outputs.cache-hit != 'true'
-        run: bun react-native build-ios --verbose
+        working-directory: example/ios
+        run: "set -o pipefail && xcodebuild \
+          CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ \
+          -derivedDataPath build -UseModernBuildSystem=YES \
+          -workspace VideoExample.xcworkspace \
+          -scheme VideoExample \
+          -sdk iphonesimulator \
+          -configuration Debug \
+          -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+          build \
+          CODE_SIGNING_ALLOWED=NO"
 
       - name: Save app to cache
         if: steps.cache-app-restore.outputs.cache-hit != 'true' && success()
         uses: actions/cache/save@v4
         with:
-          path: example/ios/build/Build/Products/Debug-iphonesimulator/YourApp.app
+          path: example/ios/build/Build/Products/Debug-iphonesimulator/VideoExample.app
           key: ios-app-${{ hashFiles('ios/Podfile.lock', 'ios/**/*.pbxproj') }}
 
       # Step 3: iOS Simulator setup
-      - uses: futureware-tech/simulator-action@v4
+      - name: Set up iOS Simulator
+        uses: futureware-tech/simulator-action@v4
         with:
           model: 'iPhone 16 Pro'
           os: iOS
