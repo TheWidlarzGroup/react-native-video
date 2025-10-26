@@ -20,6 +20,7 @@
     "react-native-video": "bun run --cwd packages/react-native-video",
     "drm-plugin": "bun run --cwd packages/drm-plugin",
     "example": "bun run --cwd example",
+    "docs": "bun run --cwd docs",
     "postinstall": "patch-package --patch-dir example/patches",
     "release:github": "release-it --preRelease alpha",
     "release": "./scripts/release.sh"
