@@ -94,8 +94,37 @@ This SDK supports:
 👉 **[Start Free Trial on the SDK Platform →](https://sdk.thewidlarzgroup.com/signup?utm_source=rnv&utm_medium=readme&utm_id=start-trial-offline-video-sdk)**
 
 ---
+### 4 · ⚡ Background Upload SDK
 
-### 2 · 🧪 Architecture
+#### Need Reliable Video Uploads in React Native?
+
+If you're building a video-first app and need to **upload large video files reliably in the background**, you're in the right place.
+
+#### 👉 [Check Background Upload SDK for React Native](https://sdk.thewidlarzgroup.com/background-uploader?utm_source=rnv&utm_medium=readme&utm_id=check-background-upload-sdk)
+
+This SDK supports:
+- 📤 Background video uploads
+- 🔄 Automatic retry mechanisms
+- 📊 Upload progress tracking
+- 🛡️ Resume interrupted uploads
+- 📱 Works when app is backgrounded
+- 🔐 Secure upload handling
+
+---
+
+#### 🚀 Perfect for Video-First Apps
+
+Whether you're building social media apps, content platforms, or enterprise solutions, our Background Upload SDK ensures your users can upload videos seamlessly without interruption.
+
+#### 📞 Ready to Get Started?
+
+Contact us to learn more about integrating background video uploads into your React Native application.
+
+👉 Contact us at [hi@thewidlarzgroup.com](mailto:hi@thewidlarzgroup.com)
+
+---
+
+### 3 · 🧪 Architecture
 
 Write your own plugins to extend library logic, attach analytics or add custom workflows - **without forking** the core SDK.  
 → [Plugin documentation](https://docs.thewidlarzgroup.com/react-native-video/other/plugin?utm_source=rnv&utm_medium=readme&utm_id=plugin-text)
