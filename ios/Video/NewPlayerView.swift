@@ -207,6 +207,7 @@ class NewPlayerView: UIView, JSInputProtocol {
         jsPlayerView.onVideoLoad = self.onVideoLoad
         jsPlayerView.onSubtitleTrackChanged = self.onSubtitleTrackChanged
         jsPlayerView.onAudioTrackChanged = self.onAudioTrackChanged
+        jsPlayerView.isMuted = self.muted
         
         //api diff
         jsPlayerView.onVideoEnded = self.onVideoEnd
