@@ -98,7 +98,7 @@ This SDK supports:
   <img src="./docs/assets/baners/bgupload-sdk-banner.png" alt="Offline SDK Preview" width="40%" align="right" />
 </a>
 
-### 4 · ⚡ Background Upload SDK
+### 2 · ⚡ Background Upload SDK
 
 #### Need Reliable Video Uploads in React Native?
 
@@ -131,7 +131,7 @@ Contact us to learn more about integrating background video uploads into your Re
 ### 3 · 🧪 Architecture
 
 Write your own plugins to extend library logic, attach analytics or add custom workflows - **without forking** the core SDK.  
-→ [Plugin documentation](https://docs.thewidlarzgroup.com/react-native-video/other/plugin?utm_source=rnv&utm_medium=readme&utm_id=plugin-text)
+→ [Plugin documentation](https://docs.thewidlarzgroup.com/react-native-video/docs/v6/other/plugin?utm_source=rnv&utm_medium=readme&utm_id=plugin-text)
 
 ---
 
