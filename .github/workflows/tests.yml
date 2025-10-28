@@ -184,7 +184,7 @@ jobs:
           -scheme VideoExample \
           -sdk iphonesimulator \
           -configuration Debug \
-          -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+          -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=18.6' \
           build \
           CODE_SIGNING_ALLOWED=NO"
 
