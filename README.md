@@ -64,7 +64,7 @@ export default () => (
 
 ## 🧩 Plugins
 
-<a href="https://www.thewidlarzgroup.com/offline-video-sdk?utm_source=rnv&utm_medium=readme&utm_id=banner">
+<a href="https://sdk.thewidlarzgroup.com/offline-video?utm_source=rnv&utm_medium=readme&utm_id=banner">
   <img src="./docs/assets/baners/offline-sdk-banner.png" alt="Offline SDK Preview" width="40%" align="right" />
 </a>
 
