@@ -8,7 +8,7 @@ on:
   push:
     branches: [v7]
     paths:
-      - ".github/workflows/harness-android.yml"
+      - ".github/workflows/tests.yml"
       - "example/android/**"
       - "**/nitrogen/generated/shared/**"
       - "**/nitrogen/generated/android/**"
@@ -24,7 +24,7 @@ on:
   pull_request:
     branches: [v7]
     paths:
-      - ".github/workflows/harness-android.yml"
+      - ".github/workflows/tests.yml"
       - "example/android/**"
       - "**/nitrogen/generated/shared/**"
       - "**/nitrogen/generated/android/**"
@@ -138,7 +138,7 @@ jobs:
 
   test-ios:
     name: Test iOS
-    runs-on: macos-latest
+    runs-on: macos-26
     if: ${{ github.event.inputs.platform == 'all' || github.event.inputs.platform == 'ios' || github.event.inputs.platform == null }}
     env:
       DEVELOPER_DIR: /Applications/Xcode_16.4.0.app/Contents/Developer
