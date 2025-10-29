@@ -18,7 +18,7 @@ const getRunners = () => {
       }),
       applePlatform({
         name: 'ios',
-        simulator: appleSimulator('iPhone 16 Pro', '18.6'), // CI's iOS simulator name and version
+        device: appleSimulator('iPhone 16 Pro', '18.6'), // CI's iOS simulator name and version
         bundleId: 'com.twg.videoexample', // CI's iOS bundle ID
       }),
     ];
