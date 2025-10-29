@@ -76,7 +76,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: example/android/app/build/outputs/apk/debug/app-debug.apk
-          key: android-app-${{ hashFiles('android/**/*.gradle*', 'android/**/gradle-wrapper.properties') }}
+          key: android-app-${{ hashFiles('example/android/**/*.gradle*', 'example/android/**/gradle-wrapper.properties') }}
 
       - name: Build Android app
         if: steps.cache-apk-restore.outputs.cache-hit != 'true'
@@ -88,7 +88,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: example/android/app/build/outputs/apk/debug/app-debug.apk
-          key: android-app-${{ hashFiles('android/**/*.gradle*', 'android/**/gradle-wrapper.properties') }}
+          key: android-app-${{ hashFiles('example/android/**/*.gradle*', 'example/android/**/gradle-wrapper.properties') }}
 
       # Step 4: Android Emulator setup with caching
       - name: Enable KVM group perms
@@ -156,8 +156,8 @@ jobs:
         id: cache-app-restore
         uses: actions/cache/restore@v4
         with:
-          path: example/ios/build/Build/Products/Debug-iphonesimulator/YourApp.app
-          key: ios-app-${{ hashFiles('ios/Podfile.lock', 'ios/**/*.pbxproj') }}
+          path: example/ios/build/Build/Products/Debug-iphonesimulator/VideoExample.app
+          key: ios-app-${{ hashFiles('example/ios/Podfile.lock', 'example/ios/**/*.pbxproj') }}
 
       - name: CocoaPods cache
         if: steps.cache-app-restore.outputs.cache-hit != 'true'
@@ -167,7 +167,7 @@ jobs:
             ./example/ios/Pods
             ~/Library/Caches/CocoaPods
             ~/.cocoapods
-          key: pods-${{ runner.os }}-${{ hashFiles('./ios/Podfile.lock') }}
+          key: pods-${{ runner.os }}-${{ hashFiles('./example/ios/Podfile.lock') }}
 
       - name: Install CocoaPods
         if: steps.cache-app-restore.outputs.cache-hit != 'true'
@@ -193,7 +193,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: example/ios/build/Build/Products/Debug-iphonesimulator/VideoExample.app
-          key: ios-app-${{ hashFiles('ios/Podfile.lock', 'ios/**/*.pbxproj') }}
+          key: ios-app-${{ hashFiles('example/ios/Podfile.lock', 'example/ios/**/*.pbxproj') }}
 
       # Step 3: iOS Simulator setup
       - name: Set up iOS Simulator
