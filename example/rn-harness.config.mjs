@@ -1,37 +1,40 @@
+import {
+  androidPlatform,
+  androidEmulator,
+} from '@react-native-harness/platform-android';
+import {
+  applePlatform,
+  appleSimulator,
+} from '@react-native-harness/platform-apple';
+
 const getRunners = () => {
   // This function can be expanded to dynamically fetch or configure runners
   if (process.env.CI) {
     return [
-      {
+      androidPlatform({
         name: 'android',
-        platform: 'android',
-        deviceId: 'Pixel_8_API_35', // Your Android emulator name
-        bundleId: 'com.twg.videoexample', // Your Android bundle ID
-      },
-      {
+        device: androidEmulator('Pixel_8_API_35'), // CI's emulator name
+        bundleId: 'com.twg.videoexample', // CI's App bundle ID
+      }),
+      applePlatform({
         name: 'ios',
-        platform: 'ios',
-        deviceId: 'iPhone 16 Pro', // Your iOS simulator name
-        bundleId: 'com.twg.videoexample', // Your iOS bundle ID
-        systemVersion: '18.6',
-      },
+        simulator: appleSimulator('iPhone 16 Pro', '18.6'), // CI's iOS simulator name and version
+        bundleId: 'com.twg.videoexample', // CI's iOS bundle ID
+      }),
     ];
   }
 
   return [
-    {
+    androidPlatform({
       name: 'android',
-      platform: 'android',
-      deviceId: 'Android_10', // Your Android emulator name
+      device: androidEmulator('Android_10'), // Your Android emulator name
       bundleId: 'com.twg.videoexample', // Your Android bundle ID
-    },
-    {
+    }),
+    applePlatform({
       name: 'ios',
-      platform: 'ios',
-      deviceId: 'iPhone 16 Pro', // Your iOS simulator name
+      device: appleSimulator('iPhone 16 Pro', '18.6'), // Your iOS simulator name and version
       bundleId: 'com.twg.videoexample', // Your iOS bundle ID
-      systemVersion: '26.0',
-    },
+    }),
   ];
 };
 
