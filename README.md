@@ -64,8 +64,8 @@ export default () => (
 
 ## 🧩 Plugins
 
-<a href="https://www.thewidlarzgroup.com/offline-video-sdk?utm_source=rnv&utm_medium=readme&utm_id=banner">
-  <img src="./docs/assets/baners/sdk-banner.png" alt="Offline SDK Preview" width="40%" align="right" />
+<a href="https://sdk.thewidlarzgroup.com/offline-video?utm_source=rnv&utm_medium=readme&utm_id=banner">
+  <img src="./docs/assets/baners/offline-sdk-banner.png" alt="Offline SDK Preview" width="40%" align="right" />
 </a>
 
 ### 1 · 📥 Offline SDK
@@ -74,7 +74,7 @@ export default () => (
 
 If you're building a video-first app and need to **download HLS streams for offline playback**, you're in the right place.
 
-#### 👉 [Check Offline Video SDK for React Native](https://www.thewidlarzgroup.com/offline-video-sdk?utm_source=rnv&utm_medium=readme&utm_id=check-offline-video-sdk)
+#### 👉 [Check Offline Video SDK for React Native](https://sdk.thewidlarzgroup.com/offline-video?utm_source=rnv&utm_medium=readme&utm_id=check-offline-video-sdk)
 
 This SDK supports:
 - 🎞 Offline HLS playback
@@ -94,11 +94,44 @@ This SDK supports:
 👉 **[Start Free Trial on the SDK Platform →](https://sdk.thewidlarzgroup.com/signup?utm_source=rnv&utm_medium=readme&utm_id=start-trial-offline-video-sdk)**
 
 ---
+<a href="https://sdk.thewidlarzgroup.com/background-uploader?utm_source=rnv&utm_medium=readme&utm_id=banner">
+  <img src="./docs/assets/baners/bgupload-sdk-banner.png" alt="Offline SDK Preview" width="40%" align="right" />
+</a>
 
-### 2 · 🧪 Architecture
+### 2 · ⚡ Background Upload SDK
+
+#### Need Reliable Video Uploads in React Native?
+
+If you're building a video-first app and need to **upload large video files reliably in the background**, you're in the right place.
+
+#### 👉 [Check Background Upload SDK for React Native](https://sdk.thewidlarzgroup.com/background-uploader?utm_source=rnv&utm_medium=readme&utm_id=check-background-upload-sdk)
+
+This SDK supports:
+- 📤 Background video uploads
+- 🔄 Automatic retry mechanisms
+- 📊 Upload progress tracking
+- 🛡️ Resume interrupted uploads
+- 📱 Works when app is backgrounded
+- 🔐 Secure upload handling
+
+---
+
+#### 🚀 Perfect for Apps Uploading Large Media
+
+Whether you're building social media apps, content platforms, or enterprise solutions, our Background Upload SDK ensures your users can upload videos seamlessly without interruption.
+
+#### 📞 Ready to Get Started?
+
+Contact us to learn more about integrating background video uploads into your React Native application.
+
+👉 **Contact us at [hi@thewidlarzgroup.com](mailto:hi@thewidlarzgroup.com)**
+
+---
+
+### 3 · 🧪 Architecture
 
 Write your own plugins to extend library logic, attach analytics or add custom workflows - **without forking** the core SDK.  
-→ [Plugin documentation](https://docs.thewidlarzgroup.com/react-native-video/other/plugin?utm_source=rnv&utm_medium=readme&utm_id=plugin-text)
+→ [Plugin documentation](https://docs.thewidlarzgroup.com/react-native-video/docs/v6/other/plugin?utm_source=rnv&utm_medium=readme&utm_id=plugin-text)
 
 ---
 
@@ -108,7 +141,8 @@ Write your own plugins to extend library logic, attach analytics or add custom w
 |----------|-------------|
 | [**Professional Support Packages**](https://www.thewidlarzgroup.com/issue-boost?utm_source=rnv&utm_medium=readme&utm_campaign=professional-support-packages#Contact) | Priority bug-fixes, guaranteed SLAs, [roadmap influence](https://github.com/orgs/TheWidlarzGroup/projects/6) |
 | [**Issue Booster**](https://www.thewidlarzgroup.com/issue-boost?utm_source=rnv&utm_medium=readme) | Fast-track urgent fixes with a pay‑per‑issue model |
-| [**Offline Video SDK**](https://www.thewidlarzgroup.com/offline-video-sdk/?utm_source=rnv&utm_medium=readme&utm_campaign=downloading&utm_id=offline-video-sdk-link) | Plug‑and‑play secure download solution for iOS & Android |
+| [**Offline Video SDK**](https://sdk.thewidlarzgroup.com/offline-video?utm_source=rnv&utm_medium=readme&utm_campaign=downloading&utm_id=offline-video-sdk-link) | Plug‑and‑play secure download solution for iOS & Android |
+| [**Background Upload SDK**](https://sdk.thewidlarzgroup.com/background-uploader?utm_source=rnv&utm_medium=readme&utm_campaign=uploading&utm_id=background-upload-sdk-link) | Reliable background upload solution for iOS & Android |
 | [**Integration Support**](https://www.thewidlarzgroup.com/?utm_source=rnv&utm_medium=readme&utm_campaign=integration-support#Contact) | Hands‑on help integrating video, DRM & offline into your app |
 | [**Free DRM Token Generator**](https://www.thewidlarzgroup.com/services/free-drm-token-generator-for-video?utm_source=rnv&utm_medium=readme&utm_id=free-drm) | Generate Widevine / FairPlay tokens for testing |
 | [**Ready Boilerplates**](https://www.thewidlarzgroup.com/showcases?utm_source=rnv&utm_medium=readme) | Ready-to-use apps with offline HLS/DASH DRM, video frame scrubbing, TikTok-style video feed, background uploads, Skia-based frame processor (R&D phase), and more |
