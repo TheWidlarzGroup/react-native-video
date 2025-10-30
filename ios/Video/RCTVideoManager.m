@@ -42,6 +42,7 @@ RCT_EXPORT_VIEW_PROPERTY(onVideoBuffer, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoError, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoProgress, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoSeek, RCTBubblingEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onSeekEndedEvent, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoEnd, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onTimedMetadata, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onVideoAudioBecomingNoisy, RCTBubblingEventBlock);
@@ -65,6 +66,8 @@ RCT_EXPORT_VIEW_PROPERTY(onAnnotationsButtonClick, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onSubtitleTrackChanged, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onAudioTrackChanged, RCTBubblingEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onSkipMarkerButton, RCTBubblingEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onPlayPauseAction, RCTBubblingEventBlock);
+
 
 RCT_EXTERN_METHOD(seekToPosition:(nonnull NSNumber *)node position:(double)position)
 RCT_EXTERN_METHOD(replaceAdTagParameters:(nonnull NSNumber *)node payload:(NSDictionary)payload)

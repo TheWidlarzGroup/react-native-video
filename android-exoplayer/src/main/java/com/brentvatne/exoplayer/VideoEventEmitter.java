@@ -65,6 +65,8 @@ class VideoEventEmitter {
     private static final String EVENT_SUBTITLE_TRACK_CHANGED = "onSubtitleTrackChanged";
     private static final String EVENT_AUDIO_TRACK_CHANGED = "onAudioTrackChanged";
     private static final String EVENT_SKIP_MARKER = "onSkipMarkerButton";
+    private static final String EVENT_SEEK_ENDED = "onSeekEndedEvent";
+    private static final String EVENT_PLAY_PAUSE_ACTION = "onPlayPauseAction";
 
     static final String[] Events = {
             EVENT_LOAD_START,
@@ -103,7 +105,9 @@ class VideoEventEmitter {
             EVENT_REQUIRE_AD_PARAMETERS,
             EVENT_RELOAD_CURRENT_SOURCE,
             EVENT_BEHIND_LIVE_WINDOW_ERROR,
-            EVENT_SKIP_MARKER
+            EVENT_SKIP_MARKER,
+            EVENT_SEEK_ENDED,
+            EVENT_PLAY_PAUSE_ACTION
     };
 
     @Retention(RetentionPolicy.SOURCE)
@@ -144,7 +148,9 @@ class VideoEventEmitter {
             EVENT_REQUIRE_AD_PARAMETERS,
             EVENT_RELOAD_CURRENT_SOURCE,
             EVENT_BEHIND_LIVE_WINDOW_ERROR,
-            EVENT_SKIP_MARKER
+            EVENT_SKIP_MARKER,
+            EVENT_SEEK_ENDED,
+            EVENT_PLAY_PAUSE_ACTION
     })
     @interface VideoEvents {
     }
@@ -165,6 +171,10 @@ class VideoEventEmitter {
     private static final String EVENT_PROP_CURRENT_DATE = "currentDate";
     private static final String EVENT_PROP_CURRENT_TIME = "currentTime";
 
+    private static final String EVENT_PROP_IS_PAUSE = "isPaused";
+    private static final String EVENT_PROP_SEEK_TYPE = "seekType";
+    private static final String EVENT_PROP_SEEK_START_TIME = "seekStartAt";
+    private static final String EVENT_PROP_SEEK_END_TIME = "seekEndAt";
     private static final String EVENT_PROP_SEEK_TIME = "seekTime";
     private static final String EVENT_PROP_NATURAL_SIZE = "naturalSize";
     private static final String EVENT_PROP_WIDTH = "width";
@@ -189,6 +199,9 @@ class VideoEventEmitter {
     private static final String EVENT_PROP_ERROR_EXCEPTION = "errorException";
 
     private static final String EVENT_PROP_TIMED_METADATA = "metadata";
+    private static final String EVENT_PROP_SEEK_GO_TO_LIVE = "liveBadge";
+    private static final String EVENT_PROP_SEEK_SKIP = "skip";
+    private static final String EVENT_PROP_SEEK = "seek";
 
     void setViewId(int viewId) {
         this.viewId = viewId;
@@ -248,6 +261,32 @@ class VideoEventEmitter {
         event.putDouble(EVENT_PROP_CURRENT_TIME, currentPosition / 1000D);
         event.putDouble(EVENT_PROP_SEEK_TIME, seekTime / 1000D);
         receiveEvent(EVENT_SEEK, event);
+    }
+
+    void goToLiveSeek(long seekStartAt, long seekEndAt) {
+        onSeek(EVENT_PROP_SEEK_GO_TO_LIVE, seekStartAt, seekEndAt);
+    }
+
+    void forwardRewindSeek(long seekStartAt, long seekEndAt) {
+        onSeek(EVENT_PROP_SEEK_SKIP, seekStartAt, seekEndAt);
+    }
+
+    void continuousSeek(long seekStartAt, long seekEndAt) {
+        onSeek(EVENT_PROP_SEEK, seekStartAt, seekEndAt);
+    }
+
+    private void onSeek(String seekType, long seekStartAt, long seekEndAt) {
+        WritableMap event = Arguments.createMap();
+        event.putString(EVENT_PROP_SEEK_TYPE, seekType);
+        event.putDouble(EVENT_PROP_SEEK_START_TIME, seekStartAt / 1000D);
+        event.putDouble(EVENT_PROP_SEEK_END_TIME, seekEndAt / 1000D);
+        receiveEvent(EVENT_SEEK_ENDED, event);
+    }
+
+    void playPauseButtonClick(boolean isPlaying) {
+        WritableMap event = Arguments.createMap();
+        event.putBoolean(EVENT_PROP_IS_PAUSE, !isPlaying);
+        receiveEvent(EVENT_PLAY_PAUSE_ACTION, event);
     }
 
     void ready() {

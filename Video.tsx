@@ -75,6 +75,10 @@ export default class Video extends React.PureComponent<IVideoPlayer, IState> {
     this.props.onSeek?.(event.nativeEvent);
   };
 
+  onSeekEndedEvent = (event) => {
+    this.props.onSeekEndedEvent?.(event.nativeEvent);
+  };
+
   onEnd = (event) => {
     this.props.onEnd?.(event.nativeEvent);
   };
@@ -129,6 +133,10 @@ export default class Video extends React.PureComponent<IVideoPlayer, IState> {
   onSkipMarkerButton = (event) => {
     this.props.onSkipMarkerButton?.(event.nativeEvent);
   };
+
+  onPlayPauseAction = (event) => {
+    this.props.onPlayPauseAction?.(event.nativeEvent);
+  }
 
   replaceAdTagParameters = (payload: IVideoReplaceAdTagParametersPayload) => {
     let command = 'replaceAdTagParameters';
@@ -189,6 +197,7 @@ export default class Video extends React.PureComponent<IVideoPlayer, IState> {
       onVideoError: this.onError,
       onVideoProgress: this.onProgress,
       onVideoSeek: this.onSeek,
+      onSeekEndedEvent: this.onSeekEndedEvent,
       onVideoEnd: this.onEnd,
       onVideoBuffer: this.onBuffer,
       onTimedMetadata: this.onTimedMetadata,
@@ -204,6 +213,7 @@ export default class Video extends React.PureComponent<IVideoPlayer, IState> {
       onReloadCurrentSource: this.onReloadCurrentSource,
       onBehindLiveWindowError: this.onBehindLiveWindowError,
       onSkipMarkerButton: this.onSkipMarkerButton,
+      onPlayPauseAction: this.onPlayPauseAction,
     };
   };
 

@@ -18,13 +18,15 @@ export interface IVideoPlayerCallbacks {
   onRelatedVideosIconClicked?: (e: any) => void;
   onRequireAdParameters?: (e: IVideoPlayerOnRequireAdParametersPayload) => void;
   onSeek?: (e: any) => void;
+  onSeekEndedEvent?: (e: any) => void;
   onStatsIconClick?: () => void;
   onTimedMetadata?: (e: any) => void;
   onVideoAboutToEnd?: (e: any) => void;
   onWatchlistButtonClick?: (e: any) => void;
   onReloadCurrentSource?: (e: any) => void;
   onBehindLiveWindowError?: (e: any) => void;
-  onAudioTrackChanged?: ({ language } : { language: string }) => void;
-  onSubtitleTrackChanged?: ({ language } : { language: string }) => void;
+  onAudioTrackChanged?: ({ language }: { language: string }) => void;
+  onSubtitleTrackChanged?: ({ language }: { language: string }) => void;
   onSkipMarkerButton?: (e: any) => void;
+  onPlayPauseAction?: (e: any) => void;
 }
