@@ -6,4 +6,3 @@ public class PublicAudioSessionManager: NSObject {
 		AudioSessionManager.shared.setIsAudioSessionManagementForcedDisabled(disabled: disabled)
 	}
 }
-
