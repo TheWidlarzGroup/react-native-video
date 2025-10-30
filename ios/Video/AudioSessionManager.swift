@@ -44,7 +44,7 @@ class AudioSessionManager {
 
     // MARK: - Public API
 
-    func setIsAudioSessionManagementForcedDisabled(disabled:Bool) {
+    func setIsAudioSessionManagementForcedDisabled(disabled: Bool) {
         isAudioSessionManagementForcedDisabled = disabled
     }
 
