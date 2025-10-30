@@ -2,7 +2,7 @@
 
 ## Add Offline Playback to Your React Native App — Fast
 
-The [Offline Video SDK](https://www.thewidlarzgroup.com/offline-video-sdk/?utm_source=rnv&utm_medium=docs&utm_campaign=downloading&utm_id=offline-video-sdk-link) is a commercial add-on for `react-native-video` (v6 and v7) that enables secure **offline playback** of HLS streams — including support for **DRM**, **multi-audio**, and **subtitles**.
+The [Offline Video SDK](https://sdk.thewidlarzgroup.com/offline-video/?utm_source=rnv&utm_medium=docs&utm_campaign=downloading&utm_id=offline-video-sdk-link) is a commercial add-on for `react-native-video` (v6 and v7) that enables secure **offline playback** of HLS streams — including support for **DRM**, **multi-audio**, and **subtitles**.
 
 It’s built for teams who need a production-ready solution without spending months on in-house development.  
 Try it free today and ship faster.
@@ -49,7 +49,7 @@ Alternatively, work with our team to accelerate your roadmap.
 
 - 💬 [Contact us for support](mailto:sdk@thewidlarzgroup.com)  
 - 🧪 [Try the SDK – Free Trial](https://sdk.thewidlarzgroup.com/signup?utm_source=rnv&utm_medium=docs&utm_id=downloading_start-trial-offline-video-sdk-2)  
-- 🔗 [Learn more about features](https://www.thewidlarzgroup.com/offline-video-sdk?utm_source=rnv&utm_medium=docs&utm_id=downloading_learn-more-offline-video-sdk)
+- 🔗 [Learn more about features](https://sdk.thewidlarzgroup.com/offline-video?utm_source=rnv&utm_medium=docs&utm_id=downloading_learn-more-offline-video-sdk)
 
 ---
 

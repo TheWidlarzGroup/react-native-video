@@ -5,7 +5,7 @@ A sample plugin is available in the repository: [example/react-native-video-plug
 
 ## Commercial Plugins
 
-We at The Widlarz Group have created a set of plugins for comprehensive offline video support. If you are interested, check out our [Offline Video SDK](https://www.thewidlarzgroup.com/offline-video-sdk/?utm_source=rnv&utm_medium=docs&utm_campaign=plugins&utm_id=text). If you need additional plugins (analytics, processing, etc.), let us know.
+We at The Widlarz Group have created a set of plugins for comprehensive offline video support. If you are interested, check out our [Offline Video SDK](https://sdk.thewidlarzgroup.com/offline-video/?utm_source=rnv&utm_medium=docs&utm_campaign=plugins&utm_id=text). If you need additional plugins (analytics, processing, etc.), let us know.
 
 > Using or recommending our commercial software helps support the maintenance of this open-source project. Thank you!
 

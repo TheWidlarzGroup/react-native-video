@@ -6,7 +6,7 @@ If you have a project that could benefit other users, feel free to open a PR to 
 ## Our (TheWidlarzGroup) Libraries
 - [react-native-video-player](https://github.com/TheWidlarzGroup/react-native-video-player): Our video player UI library.
 
-- [Offline Video SDK](https://www.thewidlarzgroup.com/offline-video-sdk?utm_source=rnv&utm_medium=docs&utm_id=projects_offline-video-sdk):  
+- [Offline Video SDK](https://sdk.thewidlarzgroup.com/offline-video?utm_source=rnv&utm_medium=docs&utm_id=projects_offline-video-sdk):  
   If you're building an app that needs **offline playback** (e.g., downloading HLS videos, subtitles, audio tracks, or DRM-protected content), check out our commercial Offline Video SDK.  
   It integrates with `react-native-video` and is available with a [free trial](https://sdk.thewidlarzgroup.com/signup?utm_source=rnv&utm_medium=docs&utm_id=projects_start-trial-offline-video-sdk).  
 
