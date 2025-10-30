@@ -10,6 +10,9 @@ class AudioSessionManager {
     private var isAudioSessionManagementForcedDisabled = false
 
     private var isAudioSessionManagementDisabled: Bool {
+        if isAudioSessionManagementForcedDisabled {
+            return true
+        }
         // If no views are registered, disable audio session management
         if videoViews.allObjects.isEmpty {
             return true
