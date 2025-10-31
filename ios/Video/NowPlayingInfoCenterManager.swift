@@ -81,7 +81,7 @@ class NowPlayingInfoCenterManager {
         }
     }
 
-    public func cleanup() {
+    func cleanup() {
         observers.removeAll()
         players.removeAllObjects()
 
@@ -199,7 +199,7 @@ class NowPlayingInfoCenterManager {
         remoteCommandCenter.togglePlayPauseCommand.removeTarget(togglePlayPauseTarget)
     }
 
-    public func updateNowPlayingInfo() {
+    func updateNowPlayingInfo() {
         guard let player = currentPlayer, let currentItem = player.currentItem else {
             invalidateCommandTargets()
             MPNowPlayingInfoCenter.default().nowPlayingInfo = [:]

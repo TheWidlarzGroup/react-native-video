@@ -6,7 +6,7 @@ import React
 
 #if os(iOS)
     class RCTPictureInPicture: NSObject, AVPictureInPictureControllerDelegate {
-        public private(set) var _pipController: AVPictureInPictureController?
+        private(set) var _pipController: AVPictureInPictureController?
         private var _onPictureInPictureEnter: (() -> Void)?
         private var _onPictureInPictureExit: (() -> Void)?
         private var _onRestoreUserInterfaceForPictureInPictureStop: (() -> Void)?
@@ -92,7 +92,7 @@ import React
     }
 #else
     class RCTPictureInPicture: NSObject {
-        public let _pipController: NSObject? = nil
+        let _pipController: NSObject? = nil
 
         func setRestoreUserInterfaceForPIPStopCompletionHandler(_: Bool) {}
         func setupPipController(_: AVPlayerLayer?) {}
