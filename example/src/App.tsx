@@ -1,25 +1,25 @@
+import Slider from '@react-native-community/slider';
 import React from 'react';
 import { Alert, SafeAreaView, ScrollView, Text, View } from 'react-native';
-import { styles } from './styles';
+import {
+  type VideoConfig,
+  type VideoPlayerStatus,
+  VideoView,
+  type VideoViewRef,
+  type onLoadData,
+  type onProgressData,
+  type onVolumeChangeData,
+  useEvent,
+  useVideoPlayer,
+} from 'react-native-video';
 import {
   ActionButton,
   ControlButton,
   SwitchControl,
   ToggleButton,
 } from './components/Controls';
-import Slider from '@react-native-community/slider';
-import {
-  type VideoViewRef,
-  type onLoadData,
-  type onProgressData,
-  type VideoPlayerStatus,
-  type onVolumeChangeData,
-  useVideoPlayer,
-  useEvent,
-  VideoView,
-  type VideoConfig,
-} from 'react-native-video';
 import TextTrackManager from './components/TextTrackManager';
+import { styles } from './styles';
 import { type VideoSettings, defaultSettings } from './types/videoSettings';
 import { formatTime } from './utils/time';
 import { getVideoSource } from './utils/videoSource';
@@ -213,7 +213,11 @@ const VideoDemo = () => {
               active={settings.videoType === mode}
               onPress={async () => {
                 updateSetting('videoType', mode);
-                await player.replaceSourceAsync(getVideoSource(mode));
+                try {
+                  await player.replaceSourceAsync(getVideoSource(mode));
+                } catch (error) {
+                  console.error('Error replacing source:', error);
+                }
               }}
             />
           ))}

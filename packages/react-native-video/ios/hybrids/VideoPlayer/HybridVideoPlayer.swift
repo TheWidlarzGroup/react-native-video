@@ -477,7 +477,6 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   var memorySize: Int {
     var size = 0
 
-    size += source.memorySize
     size += playerItem?.asset.estimatedMemoryUsage ?? 0
 
     return size
