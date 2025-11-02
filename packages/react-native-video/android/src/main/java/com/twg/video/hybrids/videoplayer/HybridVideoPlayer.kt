@@ -314,6 +314,9 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
 
       val hybridSource = source as? HybridVideoPlayerSource ?: throw PlayerError.InvalidSource
 
+      val oldSource = this.source as? HybridVideoPlayerSource
+      oldSource?.sourceLoader?.cancel()
+
       runOnMainThreadSync {
         // Update source
         this.source = source
