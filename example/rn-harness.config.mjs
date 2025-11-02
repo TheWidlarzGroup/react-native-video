@@ -1,6 +1,6 @@
 import {
-  androidPlatform,
   androidEmulator,
+  androidPlatform,
 } from '@react-native-harness/platform-android';
 import {
   applePlatform,
