@@ -76,7 +76,7 @@ import UIKit
 
         VideoManager.shared.requestAudioSessionUpdate()
         playerViewController.canStartPictureInPictureAutomaticallyFromInline =
-          self.allowsPictureInPicturePlayback
+          self.autoEnterPictureInPicture
       }
     }
   }
