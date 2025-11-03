@@ -67,6 +67,15 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   }
 
   /**
+   * Updates the memory size of the player and its source. Should be called after any operation that changes the memory size of the player or its source.
+   * @internal
+   */
+  private updateMemorySize() {
+    NitroModules.updateMemorySize(this.player);
+    NitroModules.updateMemorySize(this.player.source);
+  }
+
+  /**
    * Wraps a promise to try parsing native errors to VideoRuntimeError
    * @internal
    */
@@ -196,13 +205,13 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   async initialize(): Promise<void> {
     await this.wrapPromise(this.player.initialize());
 
-    NitroModules.updateMemorySize(this.player);
+    this.updateMemorySize();
   }
 
   async preload(): Promise<void> {
     await this.wrapPromise(this.player.preload());
 
-    NitroModules.updateMemorySize(this.player);
+    this.updateMemorySize();
   }
 
   /**
@@ -250,13 +259,15 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   async replaceSourceAsync(
     source: VideoSource | VideoConfig | NoAutocomplete<VideoPlayerSource> | null
   ): Promise<void> {
+    this.updateMemorySize();
+
     await this.wrapPromise(
       this.player.replaceSourceAsync(
         source === null ? null : createSource(source)
       )
     );
 
-    NitroModules.updateMemorySize(this.player);
+    this.updateMemorySize();
   }
 
   // Text Track Management

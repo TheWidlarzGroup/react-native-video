@@ -11,7 +11,10 @@ import type {
   VideoConfig,
   VideoSource,
 } from '../types/VideoConfig';
-import { tryParseNativeVideoError } from '../types/VideoError';
+import {
+  tryParseNativeVideoError,
+  VideoRuntimeError,
+} from '../types/VideoError';
 
 const VideoPlayerSourceFactory =
   NitroModules.createHybridObject<VideoPlayerSourceFactory>(
@@ -34,6 +37,10 @@ export const isVideoPlayerSource = (obj: any): obj is VideoPlayerSource => {
  * @returns The `VideoPlayerSource` instance
  */
 export const createSourceFromUri = (uri: string) => {
+  if (!uri || typeof uri !== 'string') {
+    throw new Error('RNV: Invalid source. The URI must be a non-empty string.');
+  }
+
   try {
     return VideoPlayerSourceFactory.fromUri(uri);
   } catch (error) {
@@ -52,6 +59,10 @@ export const createSourceFromUri = (uri: string) => {
 export const createSourceFromVideoConfig = (
   config: VideoConfig & { uri: string }
 ) => {
+  if (!config.uri || typeof config.uri !== 'string') {
+    throw new VideoRuntimeError('source/invalid-uri', 'Invalid source URI');
+  }
+
   if (config.externalSubtitles) {
     config.externalSubtitles = parseExternalSubtitles(config.externalSubtitles);
   }
@@ -124,11 +135,15 @@ export const createSource = (
 
   // If source is a number (asset), we need to resolve the asset source and create the player
   if (typeof source === 'number') {
-    return createSourceFromUri(Image.resolveAssetSource(source).uri);
+    const resolvedSource = Image.resolveAssetSource(source);
+    if (!resolvedSource?.uri || typeof resolvedSource.uri !== 'string') {
+      throw new VideoRuntimeError('source/invalid-uri', 'Invalid source URI');
+    }
+    return createSourceFromUri(resolvedSource.uri);
   }
 
   // If source is an object (VideoConfig)
-  if (typeof source === 'object' && 'uri' in source) {
+  if (typeof source === 'object' && source !== null && 'uri' in source) {
     if (typeof source.uri === 'string') {
       return createSourceFromVideoConfig(
         source as VideoConfig & { uri: string }
@@ -136,15 +151,21 @@ export const createSource = (
     }
 
     if (typeof source.uri === 'number') {
+      const resolvedSource = Image.resolveAssetSource(source.uri);
+      if (!resolvedSource?.uri || typeof resolvedSource.uri !== 'string') {
+        throw new VideoRuntimeError('source/invalid-uri', 'Invalid source URI');
+      }
+
       const config = {
         ...source,
-        // Resolve the asset source to get the URI
-        uri: Image.resolveAssetSource(source.uri).uri,
+        uri: resolvedSource.uri,
       };
 
       return createSourceFromVideoConfig(config);
     }
+
+    throw new VideoRuntimeError('source/invalid-uri', 'Invalid source URI');
   }
 
-  throw new Error('RNV: Invalid source type');
+  throw new VideoRuntimeError('player/invalid-source', 'Invalid source');
 };

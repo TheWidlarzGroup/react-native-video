@@ -30,22 +30,29 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     }
   }
   var playerObserver: VideoPlayerObserver?
+  private let sourceLoader = SourceLoader()
 
   init(source: (any HybridVideoPlayerSourceSpec)) throws {
     self.source = source
     self.eventEmitter = HybridVideoPlayerEventEmitter()
-    
+
     // Initialize AVPlayer with empty item
     self.player = AVPlayer()
 
     super.init()
     self.playerObserver = VideoPlayerObserver(delegate: self)
     self.playerObserver?.initializePlayerObservers()
-    
+
     Task {
       if source.config.initializeOnCreation == true {
-        self.playerItem = try await initializePlayerItem()
-        self.player.replaceCurrentItem(with: self.playerItem)
+        do {
+          self.playerItem = try await self.sourceLoader.load {
+            try await self.initializePlayerItem()
+          }
+          self.player.replaceCurrentItem(with: self.playerItem)
+        } catch {
+          // Ignore cancellation errors during initialization
+        }
       }
     }
 
@@ -157,7 +164,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   var isPlaying: Bool {
     return player.rate != 0
   }
-  
+
   var showNotificationControls: Bool = false {
     didSet {
       if showNotificationControls {
@@ -167,23 +174,33 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       }
     }
   }
-  
+
   func initialize() throws -> Promise<Void> {
     return Promise.async { [weak self] in
       guard let self else {
         throw LibraryError.deallocated(objectName: "HybridVideoPlayer").error()
       }
-      
+
       if self.playerItem != nil {
         return
       }
-      
-      self.playerItem = try await self.initializePlayerItem()
-      self.player.replaceCurrentItem(with: self.playerItem)
+
+      do {
+        self.playerItem = try await self.sourceLoader.load {
+          try await self.initializePlayerItem()
+        }
+        self.player.replaceCurrentItem(with: self.playerItem)
+      } catch {
+        if error is CancellationError {
+          throw PlayerError.cancelled.error()
+        }
+        throw error
+      }
     }
   }
 
   func release() {
+    sourceLoader.cancelSync()
     NowPlayingInfoCenterManager.shared.removePlayer(player: player)
     self.player.replaceCurrentItem(with: nil)
     self.playerItem = nil
@@ -217,13 +234,19 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       }
 
       do {
-        let playerItem = try await self.initializePlayerItem()
+        let playerItem = try await self.sourceLoader.load {
+          try await self.initializePlayerItem()
+        }
         self.playerItem = playerItem
 
         self.player.replaceCurrentItem(with: playerItem)
         promise.resolve(withResult: ())
       } catch {
-        promise.reject(withError: error)
+        if error is CancellationError {
+          promise.reject(withError: PlayerError.cancelled.error())
+        } else {
+          promise.reject(withError: error)
+        }
       }
     }
 
@@ -278,11 +301,28 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
         return
       }
 
+      await self.sourceLoader.cancel()
+
+      if let oldSource = self.source as? HybridVideoPlayerSource {
+        oldSource.releaseAsset()
+      }
+
       self.source = source
-      self.playerItem = try await self.initializePlayerItem()
-      self.player.replaceCurrentItem(with: self.playerItem)
-      NowPlayingInfoCenterManager.shared.updateNowPlayingInfo()
-      promise.resolve(withResult: ())
+
+      do {
+        self.playerItem = try await self.sourceLoader.load {
+          try await self.initializePlayerItem()
+        }
+        self.player.replaceCurrentItem(with: self.playerItem)
+        NowPlayingInfoCenterManager.shared.updateNowPlayingInfo()
+        promise.resolve(withResult: ())
+      } catch {
+        if error is CancellationError {
+          promise.reject(withError: PlayerError.cancelled.error())
+        } else {
+          promise.reject(withError: error)
+        }
+      }
     }
 
     return promise
@@ -477,7 +517,6 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   var memorySize: Int {
     var size = 0
 
-    size += source.memorySize
     size += playerItem?.asset.estimatedMemoryUsage ?? 0
 
     return size
