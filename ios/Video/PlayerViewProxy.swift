@@ -289,8 +289,10 @@ class PlayerViewProxy {
             seekBackwardInterval: seekBackwardInterval,
             hideAdUiElements: jsProps.hideAdUiElements.value,
             isWhyThisAdIconEnabled: jsProps.isWhyThisAdIconEnabled.value,
-            isPlayPauseEnabled: jsProps.isPlayPauseEnabled.value)
-        
+            isPlayPauseEnabled: jsProps.isPlayPauseEnabled.value,
+            shouldAutoStart: jsProps.shouldAutoStart.value
+        )
+
         if let rndvJSSource = rndvJSSource {
             let jsVideoData = RNDReactNativeDiceVideo.JSVideoData(source: rndvJSSource, config: rndvJSVideoDataConfig)
             rndvJsProps.videoData.value = jsVideoData

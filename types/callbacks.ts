@@ -1,3 +1,4 @@
+import { IVideoPlayerPlayPauseEvent, IVideoPlayerSeekEndedEvent } from "./event";
 import { IVideoPlayerOnRequireAdParametersPayload } from "./ima";
 
 export interface IVideoPlayerCallbacks {
@@ -18,7 +19,7 @@ export interface IVideoPlayerCallbacks {
   onRelatedVideosIconClicked?: (e: any) => void;
   onRequireAdParameters?: (e: IVideoPlayerOnRequireAdParametersPayload) => void;
   onSeek?: (e: any) => void;
-  onSeekEndedEvent?: (e: any) => void;
+  onSeekEndedEvent?: (e: IVideoPlayerSeekEndedEvent) => void;
   onStatsIconClick?: () => void;
   onTimedMetadata?: (e: any) => void;
   onVideoAboutToEnd?: (e: any) => void;
@@ -28,5 +29,5 @@ export interface IVideoPlayerCallbacks {
   onAudioTrackChanged?: ({ language }: { language: string }) => void;
   onSubtitleTrackChanged?: ({ language }: { language: string }) => void;
   onSkipMarkerButton?: (e: any) => void;
-  onPlayPauseAction?: (e: any) => void;
+  onPlayPauseAction?: (e: IVideoPlayerPlayPauseEvent) => void;
 }

@@ -206,6 +206,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     private boolean hideAdUiElements;
     private boolean isWhyThisAdIconEnabled;
     private boolean isPlayPauseEnabled = true;
+    private boolean shouldAutoStart = true;
     private float jsProgressUpdateInterval = 250.0f;
     // \ End props
 
@@ -551,9 +552,12 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             player = exoDorisFactory.createPlayer(
                     getContext(),
                     adType,
+                    shouldAutoStart,
+                    null,
                     MAX_LOAD_BUFFER_MS,
                     dvrSeekForwardInterval != 0L ? dvrSeekForwardInterval : exoDorisPlayerView.getFastForwardIncrementMs(),
                     dvrSeekBackwardInterval != 0L ? dvrSeekBackwardInterval : exoDorisPlayerView.getRewindIncrementMs(),
+                    null,
                     adViewProvider,
                     exoDorisPlayerView,
                     src.getTracksPolicy());
@@ -608,6 +612,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             sourceBuilder
                     .setId(src.getId())
                     .setUrl(src.getUrl())
+                    .setShouldPlayWhenReady(shouldAutoStart)
                     .setMimeType(src.getMimeType())
                     .setYoSsaiProperties(src.getYoSsai())
                     .setAmtSsaiProperties(src.getAmtSsai())
@@ -1879,6 +1884,10 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     public void setPlayPauseEnabled(boolean playPauseEnabled) {
         isPlayPauseEnabled = playPauseEnabled;
         exoDorisPlayerView.setPlayPauseEnabled(playPauseEnabled);
+    }
+
+    public void setShouldAutoStart(boolean shouldAutoStart) {
+        this.shouldAutoStart = shouldAutoStart;
     }
 
     private boolean isUnauthorizedAdError(Exception error) {

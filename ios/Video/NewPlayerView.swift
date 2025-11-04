@@ -15,6 +15,7 @@ class NewPlayerView: UIView, JSInputProtocol {
     //Events
     //used
     @objc var onBackButton: RCTBubblingEventBlock?
+    @objc var onVideoLoadStart: RCTBubblingEventBlock?
     @objc var onVideoLoad: RCTBubblingEventBlock?
     @objc var onVideoError: RCTBubblingEventBlock?
     @objc var onVideoProgress: RCTBubblingEventBlock?
@@ -38,7 +39,6 @@ class NewPlayerView: UIView, JSInputProtocol {
     @objc var onPlayPauseAction: RCTBubblingEventBlock?
 
     //not used
-    @objc var onVideoLoadStart: RCTBubblingEventBlock?
     @objc var onTimedMetadata: RCTBubblingEventBlock?
     @objc var onVideoAudioBecomingNoisy: RCTBubblingEventBlock?
     @objc var onVideoFullscreenPlayerWillPresent: RCTBubblingEventBlock?
@@ -153,7 +153,13 @@ class NewPlayerView: UIView, JSInputProtocol {
             jsProps.isPlayPauseEnabled.value = isPlayPauseEnabled
         }
     }
-    
+
+    @objc var shouldAutoStart: Bool = true {
+        didSet {
+            jsProps.shouldAutoStart.value = shouldAutoStart
+        }
+    }
+
     //FIXME: review unused variables
     @objc var selectedTextTrack: NSDictionary?
     @objc var selectedAudioTrack: NSDictionary?
@@ -206,7 +212,10 @@ class NewPlayerView: UIView, JSInputProtocol {
         jsPlayerView.onBackButton = self.onBackButton
         jsPlayerView.onVideoError = self.onVideoError
         jsPlayerView.onRequireAdParameters = self.onRequireAdParameters
-        jsPlayerView.onVideoLoad = self.onVideoLoad
+        // in RNDV, onVideoLoad fires when load initiated
+        jsPlayerView.onVideoLoad = self.onVideoLoadStart
+        // in RNDV, onVideoStart fires when the video loaded and about to play
+        jsPlayerView.onVideoStart = self.onVideoLoad
         jsPlayerView.onSubtitleTrackChanged = self.onSubtitleTrackChanged
         jsPlayerView.onAudioTrackChanged = self.onAudioTrackChanged
         jsPlayerView.isMuted = self.muted

@@ -148,6 +148,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_LOCALE = "locale";
     private static final String PROP_IS4K = "is4K";
     private static final String PROP_IS_PLAY_PAUSE_ENABLED = "isPlayPauseEnabled";
+    private static final String PROP_SHOULD_AUTO_START = "shouldAutoStart";
 
     private static final int COMMAND_SEEK_TO_POSITION = 4;
     private static final int COMMAND_REPLACE_AD_TAG_PARAMETERS = 5;
@@ -642,6 +643,11 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     @ReactProp(name = PROP_IS_PLAY_PAUSE_ENABLED)
     public void setIsPlayPauseEnabled(final ReactTVExoplayerView videoView, boolean isPlayPauseEnabled) {
         videoView.setPlayPauseEnabled(isPlayPauseEnabled);
+    }
+
+    @ReactProp(name = PROP_SHOULD_AUTO_START)
+    public void setShouldAutoStart(final ReactTVExoplayerView videoView, boolean shouldAutoStart){
+        videoView.setShouldAutoStart(shouldAutoStart);
     }
 
     private boolean startsWithValidScheme(String uriString) {
