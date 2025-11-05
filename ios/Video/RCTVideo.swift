@@ -1092,7 +1092,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             // Find the nearest view controller
             var viewController: UIViewController! = RCTPresentedViewController() ?? RCTKeyWindow()?.rootViewController
             guard viewController != nil else { return }
-            while let presented = viewController.presentedViewController { viewController = presented }
+            while let presented = viewController.presentedViewController {
+                viewController = presented
+            }
             if viewController != nil {
                 _presentingViewController = viewController
 
