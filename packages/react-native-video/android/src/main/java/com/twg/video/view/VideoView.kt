@@ -320,10 +320,9 @@ class VideoView @JvmOverloads constructor(
     
     Log.d("ReactNativeVideo", "Hiding root content views for PiP video nitroId: $nitroId")
     
-    // Remove playerView from parent
-    // In PiP mode, we don't want to show the controller
-    // Controls are handled by System if we have MediaSession
+    // In PiP mode, disable controls immediately - media session creates its own controls for PiP
     playerView.useController = false
+    
     playerView.setBackgroundColor(Color.BLACK)
     playerView.setShutterBackgroundColor(Color.BLACK)
 
@@ -412,6 +411,11 @@ class VideoView @JvmOverloads constructor(
     return try {
       events.willEnterPictureInPicture?.let { it() }
 
+      // Disable controls before entering PiP - media session creates its own controls for PiP
+      runOnMainThread {
+        playerView.useController = false
+      }
+
       val success = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         val params = createPictureInPictureParams(this)
         safeEnterPictureInPictureMode(params)
@@ -447,6 +451,9 @@ class VideoView @JvmOverloads constructor(
 
     events.willExitPictureInPicture?.let { it() }
 
+    // Restore controls when exiting PiP - they were disabled because media session handles PiP controls
+    playerView.useController = useController
+
     if (movedToRootForPiP) {
       restoreRootContentViews()
     } else {
@@ -471,6 +478,10 @@ class VideoView @JvmOverloads constructor(
       }
       
       events.willExitPictureInPicture?.let { it() }
+      
+      // Restore controls when exiting PiP - they were disabled because media session handles PiP controls
+      playerView.useController = useController
+      
       if (movedToRootForPiP) {
         restoreRootContentViews()
       } else {

@@ -91,6 +91,7 @@ class FullscreenVideoFragment(private val videoView: VideoView) : Fragment() {
       requireActivity().isInPictureInPictureMode
 
     if (isInPictureInPictureMode) {
+      // Disable controls in PiP mode - media session creates its own controls for PiP
       videoView.playerView.useController = false
     } else {
       videoView.playerView.useController = videoView.useController
@@ -197,7 +198,11 @@ class FullscreenVideoFragment(private val videoView: VideoView) : Fragment() {
 
     restoreSystemUI()
 
-    if (videoView.useController == false) {
+    // Keep controls disabled if in PiP mode - media session creates its own controls for PiP
+    val isInPictureInPictureMode = requireActivity().isInPictureInPictureMode
+    if (isInPictureInPictureMode) {
+      videoView.playerView.useController = false
+    } else if (videoView.useController == false) {
       videoView.playerView.useController = false
     }
 

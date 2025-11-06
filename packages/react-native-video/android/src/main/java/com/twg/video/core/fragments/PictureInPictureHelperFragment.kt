@@ -50,6 +50,9 @@ class PictureInPictureHelperFragment(private val videoView: VideoView) : Fragmen
       }
       
       if (currentPipVideo == videoView) {
+        // Disable controls immediately when entering PiP - media session creates its own controls for PiP
+        videoView.playerView.useController = false
+
         // If we're currently in fullscreen, exit it first to prevent parent conflicts
         if (videoView.isInFullscreen) {
           try {
