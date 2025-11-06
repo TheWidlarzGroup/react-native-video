@@ -16,7 +16,7 @@ export const withAndroidNotificationControls: ConfigPlugin = (oldConfig) => {
       return config;
     }
     mainApplication.service?.push({
-      $: {
+      '$': {
         'android:name':
           'com.twg.video.core.services.playback.VideoPlaybackService',
         'android:exported': 'false',
