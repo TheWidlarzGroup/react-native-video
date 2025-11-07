@@ -2,6 +2,8 @@ package com.twg.video.core.fragments
 
 import android.content.res.Configuration
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.annotation.OptIn
 import androidx.fragment.app.Fragment
@@ -57,14 +59,21 @@ class PictureInPictureHelperFragment(private val videoView: VideoView) : Fragmen
         if (videoView.isInFullscreen) {
           try {
             videoView.exitFullscreen()
+            // Post hideRootContentViews to main thread to ensure it runs after exitFullscreen completes
+            Handler(Looper.getMainLooper()).post {
+              videoView.hideRootContentViews()
+              videoView.isInPictureInPicture = true
+            }
           } catch (e: Exception) {
             Log.w("ReactNativeVideo", "Failed to exit fullscreen before entering PiP for nitroId: ${videoView.nitroId}", e)
+            videoView.hideRootContentViews()
+            videoView.isInPictureInPicture = true
           }
+        } else {
+          // Now move the PlayerView to the root for PiP and hide content
+          videoView.hideRootContentViews()
+          videoView.isInPictureInPicture = true
         }
-
-        // Now move the PlayerView to the root for PiP and hide content
-        videoView.hideRootContentViews()
-        videoView.isInPictureInPicture = true
       }
     } else {
       if (videoView.isInPictureInPicture) {

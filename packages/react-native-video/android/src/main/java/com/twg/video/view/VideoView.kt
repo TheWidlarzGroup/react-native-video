@@ -326,21 +326,33 @@ class VideoView @JvmOverloads constructor(
     playerView.setBackgroundColor(Color.BLACK)
     playerView.setShutterBackgroundColor(Color.BLACK)
 
+    val currentActivity = applicationContent.currentActivity ?: return
+    val rootContent = currentActivity.window.decorView.findViewById<ViewGroup>(android.R.id.content)
+    
+    val fullscreenContainer = fullscreenFragmentTag?.let { tag ->
+      (currentActivity as? FragmentActivity)?.supportFragmentManager?.findFragmentByTag(tag)
+        ?.view
+    }
+    
+    rootContentViews = (0 until rootContent.childCount)
+      .map { rootContent.getChildAt(it) }
+      .filter { 
+        it.isVisible && 
+        it != playerView && 
+        it != fullscreenContainer
+      }
+
     // If we're already in fullscreen, the PlayerView is inside the fullscreen container
     // and root content is already hidden. Avoid moving the PlayerView again.
     if (isInFullscreen) {
       Log.d("ReactNativeVideo", "PiP entered while in fullscreen - skipping reparent to root for nitroId: $nitroId")
+      // Still hide the views we captured, but don't move the player view
+      rootContentViews.forEach { view -> view.visibility = GONE }
       movedToRootForPiP = false
       return
     }
 
     (playerView.parent as? ViewGroup)?.removeView(playerView)
-
-    val currentActivity = applicationContent.currentActivity ?: return
-    val rootContent = currentActivity.window.decorView.findViewById<ViewGroup>(android.R.id.content)
-    rootContentViews = (0 until rootContent.childCount)
-      .map { rootContent.getChildAt(it) }
-      .filter { it.isVisible }
 
     rootContentViews.forEach { view -> view.visibility = GONE }
 
@@ -374,6 +386,16 @@ class VideoView @JvmOverloads constructor(
       rootContentViews.forEach { it.visibility = View.VISIBLE }
       rootContentViews = listOf()
       movedToRootForPiP = false
+    } else {
+      // Even if we didn't move the player view to root, we might need to restore hidden views
+      // This can happen when entering PiP from fullscreen - the fullscreen fragment might have
+      // hidden views but we didn't track them in movedToRootForPiP
+      val currentActivity = applicationContent.currentActivity
+      if (currentActivity != null && rootContentViews.isNotEmpty()) {
+        Log.d("ReactNativeVideo", "Restoring root content views that were hidden (not moved to root) for nitroId: $nitroId")
+        rootContentViews.forEach { it.visibility = View.VISIBLE }
+        rootContentViews = listOf()
+      }
     }
 
     // Add PlayerView back to this VideoView only if not already attached
