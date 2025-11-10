@@ -16,7 +16,6 @@ import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetMap
 import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetString
 import com.brentvatne.react.BuildConfig
 import com.facebook.react.bridge.ReadableMap
-import java.util.Locale
 import java.util.Objects
 
 /**
@@ -273,7 +272,7 @@ class Source {
             if (scheme == null) {
                 return false
             }
-            val lowerCaseUri = scheme.lowercase(Locale.getDefault())
+            val lowerCaseUri = scheme.lowercase()
             return (
                 lowerCaseUri == "http" ||
                     lowerCaseUri == "https" ||
