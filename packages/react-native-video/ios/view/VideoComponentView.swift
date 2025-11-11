@@ -166,6 +166,10 @@ import UIKit
           controller.selectSpeed(initialSpeed)
         }
       }
+       // Disable video frame analysis to prevent visual lookup
+      if #available(iOS 16.0, iPadOS 16.0, macCatalyst 18.0, *) {
+        controller.allowsVideoFrameAnalysis = false
+      }
 
       // Find nearest UIViewController
       if let parentVC = self.findViewController() {
