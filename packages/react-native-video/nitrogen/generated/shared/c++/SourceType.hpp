@@ -37,24 +37,22 @@ namespace margelo::nitro::video {
 
 namespace margelo::nitro {
 
-  using namespace margelo::nitro::video;
-
   // C++ SourceType <> JS SourceType (union)
   template <>
-  struct JSIConverter<SourceType> final {
-    static inline SourceType fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
+  struct JSIConverter<margelo::nitro::video::SourceType> final {
+    static inline margelo::nitro::video::SourceType fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       std::string unionValue = JSIConverter<std::string>::fromJSI(runtime, arg);
       switch (hashString(unionValue.c_str(), unionValue.size())) {
-        case hashString("local"): return SourceType::LOCAL;
-        case hashString("network"): return SourceType::NETWORK;
+        case hashString("local"): return margelo::nitro::video::SourceType::LOCAL;
+        case hashString("network"): return margelo::nitro::video::SourceType::NETWORK;
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert \"" + unionValue + "\" to enum SourceType - invalid value!");
       }
     }
-    static inline jsi::Value toJSI(jsi::Runtime& runtime, SourceType arg) {
+    static inline jsi::Value toJSI(jsi::Runtime& runtime, margelo::nitro::video::SourceType arg) {
       switch (arg) {
-        case SourceType::LOCAL: return JSIConverter<std::string>::toJSI(runtime, "local");
-        case SourceType::NETWORK: return JSIConverter<std::string>::toJSI(runtime, "network");
+        case margelo::nitro::video::SourceType::LOCAL: return JSIConverter<std::string>::toJSI(runtime, "local");
+        case margelo::nitro::video::SourceType::NETWORK: return JSIConverter<std::string>::toJSI(runtime, "network");
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert SourceType to JS - invalid value: "
                                     + std::to_string(static_cast<int>(arg)) + "!");

@@ -66,7 +66,11 @@ namespace margelo::nitro::video {
      */
     [[maybe_unused]]
     static jni::local_ref<JVideoInformation::javaobject> fromCpp(const VideoInformation& value) {
-      return newInstance(
+      using JSignature = JVideoInformation(double, double, double, int64_t, int64_t, jboolean, jboolean, jni::alias_ref<JVideoOrientation>);
+      static const auto clazz = javaClassStatic();
+      static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
+      return create(
+        clazz,
         value.bitrate,
         value.width,
         value.height,

@@ -3,6 +3,8 @@ import type { VideoViewEvents } from '../../core/types/Events';
 import type { ResizeMode } from '../../core/types/ResizeMode';
 import type { VideoPlayer } from './VideoPlayer.nitro';
 
+export type SurfaceType = 'surface' | 'texture';
+
 // @internal
 export interface VideoViewViewManager
   extends HybridObject<{ ios: 'swift'; android: 'kotlin' }>,
@@ -17,6 +19,8 @@ export interface VideoViewViewManager
   enterPictureInPicture(): void;
   exitPictureInPicture(): void;
   canEnterPictureInPicture(): boolean;
+  keepScreenAwake: boolean;
+  surfaceType: SurfaceType;
 }
 
 // @internal

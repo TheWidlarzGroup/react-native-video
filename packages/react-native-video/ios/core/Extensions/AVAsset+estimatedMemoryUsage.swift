@@ -6,35 +6,46 @@
 //
 
 import AVFoundation
+import Foundation
 
 extension AVAsset {
   var estimatedMemoryUsage: Int {
-    var size = 0
-    
-    // Get enabled video tracks
-    let enabledVideoTrack = tracks(withMediaType: .video)
-      .filter { $0.isEnabled }
-    
-    // Calculate memory usage for video tracks
-    for track in enabledVideoTrack {
-      let dimensions = track.naturalSize
-      let pixelCount = Int(dimensions.width * dimensions.height)
-      let frameSize = pixelCount * 4 // RGBA
-      let frames = 30 * 15 // 30 FPS * 15 seconds of buffer
-      
-      size += frameSize * frames
+    if let urlAsset = self as? AVURLAsset, urlAsset.url.isFileURL {
+      let resourceValues = try? urlAsset.url.resourceValues(forKeys: [.fileSizeKey])
+      if let fileSize = resourceValues?.fileSize, fileSize > 0 {
+        return fileSize
+      }
     }
-    
-    // Get enabled audio tracks
-    let enabledAudioTrack = tracks(withMediaType: .audio)
-      .filter { $0.isEnabled }
-    
-    // Estimate memory usage for audio tracks
-    for _ in enabledAudioTrack {
-      let frameSize = 44100 * 2 * 2 // 44.1kHz * 2 channels * 2 seconds
-      size += frameSize
+
+    var estimatedSize = 0
+
+    let videoTracks = tracks(withMediaType: .video)
+    let audioTracks = tracks(withMediaType: .audio)
+
+    for track in videoTracks {
+      let size = track.naturalSize
+      let pixelCount = size.width * size.height
+      let duration = CMTimeGetSeconds(track.timeRange.duration)
+
+      if duration > 0 && !duration.isNaN && !duration.isInfinite {
+        let bitrate = track.estimatedDataRate > 0 ? track.estimatedDataRate : 2_000_000
+        estimatedSize += Int((bitrate * Float(duration)) / 8)
+      } else {
+        estimatedSize += Int(pixelCount * 4)
+      }
     }
-    
-    return size
+
+    for track in audioTracks {
+      let duration = CMTimeGetSeconds(track.timeRange.duration)
+      let bitrate = track.estimatedDataRate > 0 ? track.estimatedDataRate : 128_000
+
+      if duration > 0 && !duration.isNaN && !duration.isInfinite {
+        estimatedSize += Int((bitrate * Float(duration)) / 8)
+      } else {
+        estimatedSize += 1_000_000
+      }
+    }
+
+    return estimatedSize > 0 ? estimatedSize : 0
   }
 }

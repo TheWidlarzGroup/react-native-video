@@ -17,6 +17,11 @@
 #else
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
+#if __has_include(<NitroModules/JSIHelpers.hpp>)
+#include <NitroModules/JSIHelpers.hpp>
+#else
+#error NitroModules cannot be found! Are you sure you installed NitroModules properly?
+#endif
 
 
 
@@ -41,19 +46,17 @@ namespace margelo::nitro::video {
 
 namespace margelo::nitro {
 
-  using namespace margelo::nitro::video;
-
   // C++ onVolumeChangeData <> JS onVolumeChangeData (object)
   template <>
-  struct JSIConverter<onVolumeChangeData> final {
-    static inline onVolumeChangeData fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
+  struct JSIConverter<margelo::nitro::video::onVolumeChangeData> final {
+    static inline margelo::nitro::video::onVolumeChangeData fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
-      return onVolumeChangeData(
+      return margelo::nitro::video::onVolumeChangeData(
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, "volume")),
         JSIConverter<bool>::fromJSI(runtime, obj.getProperty(runtime, "muted"))
       );
     }
-    static inline jsi::Value toJSI(jsi::Runtime& runtime, const onVolumeChangeData& arg) {
+    static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::video::onVolumeChangeData& arg) {
       jsi::Object obj(runtime);
       obj.setProperty(runtime, "volume", JSIConverter<double>::toJSI(runtime, arg.volume));
       obj.setProperty(runtime, "muted", JSIConverter<bool>::toJSI(runtime, arg.muted));
@@ -64,6 +67,9 @@ namespace margelo::nitro {
         return false;
       }
       jsi::Object obj = value.getObject(runtime);
+      if (!nitro::isPlainObject(runtime, obj)) {
+        return false;
+      }
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, "volume"))) return false;
       if (!JSIConverter<bool>::canConvert(runtime, obj.getProperty(runtime, "muted"))) return false;
       return true;

@@ -15,11 +15,7 @@ import com.facebook.proguard.annotations.DoNotStrip
  */
 @DoNotStrip
 @Keep
-enum class SourceType {
-  LOCAL,
-  NETWORK;
-
-  @DoNotStrip
-  @Keep
-  private val _ordinal = ordinal
+enum class SourceType(@DoNotStrip @Keep val value: Int) {
+  LOCAL(0),
+  NETWORK(1);
 }

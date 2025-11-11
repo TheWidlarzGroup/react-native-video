@@ -1,3 +1,6 @@
+import type { BufferConfig } from './BufferConfig';
+import type { DrmParams } from './DrmParams';
+
 export type VideoSource = number | string;
 
 export type VideoConfig = {
@@ -15,6 +18,19 @@ export type VideoConfig = {
    * The headers to be sent with the request.
    */
   headers?: Record<string, string>;
+  /**
+   * The DRM parameters to be used.
+   */
+  drm?: DrmParams;
+  /**
+   * The player buffer configuration.
+   */
+  bufferConfig?: BufferConfig;
+  /**
+   * The custom metadata to be associated with the video.
+   * This metadata can be used by the native player to show information about the video.
+   */
+  metadata?: CustomVideoMetadata;
   /**
    * The external subtitles to be used.
    * @note on iOS, only WebVTT (.vtt) subtitles are supported (for HLS streams and MP4 files).
@@ -38,6 +54,13 @@ export type VideoConfig = {
    * ```
    */
   externalSubtitles?: ExternalSubtitle[];
+  /**
+   * when the player is created, this flag will determine if native player should be initialized immediately.
+   * If set to true, the player will be initialized as soon as player is created
+   * If set to false, the player will need be initialized manually later
+   * @default true
+   */
+  initializeOnCreation?: boolean;
 };
 
 // @internal
@@ -45,6 +68,7 @@ export interface NativeVideoConfig extends VideoConfig {
   // The uri should be resolved to string before creating the source
   uri: string;
   externalSubtitles?: NativeExternalSubtitle[];
+  drm?: NativeDrmParams;
 }
 
 /**
@@ -111,4 +135,16 @@ interface NativeExternalSubtitle {
   label: string;
   type: SubtitleType;
   language: string;
+}
+
+interface NativeDrmParams extends DrmParams {
+  type?: string;
+}
+
+interface CustomVideoMetadata {
+  title?: string;
+  subtitle?: string;
+  description?: string;
+  artist?: string;
+  imageUri?: string;
 }

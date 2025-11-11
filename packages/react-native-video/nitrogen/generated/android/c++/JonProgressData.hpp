@@ -47,7 +47,11 @@ namespace margelo::nitro::video {
      */
     [[maybe_unused]]
     static jni::local_ref<JonProgressData::javaobject> fromCpp(const onProgressData& value) {
-      return newInstance(
+      using JSignature = JonProgressData(double, double);
+      static const auto clazz = javaClassStatic();
+      static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
+      return create(
+        clazz,
         value.currentTime,
         value.bufferDuration
       );

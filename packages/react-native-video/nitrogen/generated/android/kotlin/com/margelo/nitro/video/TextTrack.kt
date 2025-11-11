@@ -17,14 +17,30 @@ import com.margelo.nitro.core.*
  */
 @DoNotStrip
 @Keep
-data class TextTrack
+data class TextTrack(
   @DoNotStrip
   @Keep
-  constructor(
-    val id: String,
-    val label: String,
-    val language: String?,
-    val selected: Boolean
-  ) {
-  /* main constructor */
+  val id: String,
+  @DoNotStrip
+  @Keep
+  val label: String,
+  @DoNotStrip
+  @Keep
+  val language: String?,
+  @DoNotStrip
+  @Keep
+  val selected: Boolean
+) {
+  private companion object {
+    /**
+     * Constructor called from C++
+     */
+    @DoNotStrip
+    @Keep
+    @Suppress("unused")
+    @JvmStatic
+    private fun fromCpp(id: String, label: String, language: String?, selected: Boolean): TextTrack {
+      return TextTrack(id, label, language, selected)
+    }
+  }
 }

@@ -56,7 +56,11 @@ namespace margelo::nitro::video {
      */
     [[maybe_unused]]
     static jni::local_ref<JTimedMetadata::javaobject> fromCpp(const TimedMetadata& value) {
-      return newInstance(
+      using JSignature = JTimedMetadata(jni::alias_ref<jni::JArrayClass<JTimedMetadataObject>>);
+      static const auto clazz = javaClassStatic();
+      static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
+      return create(
+        clazz,
         [&]() {
           size_t __size = value.metadata.size();
           jni::local_ref<jni::JArrayClass<JTimedMetadataObject>> __array = jni::JArrayClass<JTimedMetadataObject>::newArray(__size);

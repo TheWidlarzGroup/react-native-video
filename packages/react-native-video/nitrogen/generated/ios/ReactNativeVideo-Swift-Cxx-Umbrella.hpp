@@ -10,6 +10,10 @@
 // Forward declarations of C++ defined types
 // Forward declaration of `BandwidthData` to properly resolve imports.
 namespace margelo::nitro::video { struct BandwidthData; }
+// Forward declaration of `BufferConfig` to properly resolve imports.
+namespace margelo::nitro::video { struct BufferConfig; }
+// Forward declaration of `CustomVideoMetadata` to properly resolve imports.
+namespace margelo::nitro::video { struct CustomVideoMetadata; }
 // Forward declaration of `HybridVideoPlayerEventEmitterSpec` to properly resolve imports.
 namespace margelo::nitro::video { class HybridVideoPlayerEventEmitterSpec; }
 // Forward declaration of `HybridVideoPlayerFactorySpec` to properly resolve imports.
@@ -26,18 +30,28 @@ namespace margelo::nitro::video { class HybridVideoViewViewManagerFactorySpec; }
 namespace margelo::nitro::video { class HybridVideoViewViewManagerSpec; }
 // Forward declaration of `IgnoreSilentSwitchMode` to properly resolve imports.
 namespace margelo::nitro::video { enum class IgnoreSilentSwitchMode; }
+// Forward declaration of `LivePlaybackParams` to properly resolve imports.
+namespace margelo::nitro::video { struct LivePlaybackParams; }
 // Forward declaration of `MixAudioMode` to properly resolve imports.
 namespace margelo::nitro::video { enum class MixAudioMode; }
+// Forward declaration of `NativeDrmParams` to properly resolve imports.
+namespace margelo::nitro::video { struct NativeDrmParams; }
 // Forward declaration of `NativeExternalSubtitle` to properly resolve imports.
 namespace margelo::nitro::video { struct NativeExternalSubtitle; }
 // Forward declaration of `NativeVideoConfig` to properly resolve imports.
 namespace margelo::nitro::video { struct NativeVideoConfig; }
+// Forward declaration of `OnGetLicensePayload` to properly resolve imports.
+namespace margelo::nitro::video { struct OnGetLicensePayload; }
 // Forward declaration of `ResizeMode` to properly resolve imports.
 namespace margelo::nitro::video { enum class ResizeMode; }
+// Forward declaration of `Resolution` to properly resolve imports.
+namespace margelo::nitro::video { struct Resolution; }
 // Forward declaration of `SourceType` to properly resolve imports.
 namespace margelo::nitro::video { enum class SourceType; }
 // Forward declaration of `SubtitleType` to properly resolve imports.
 namespace margelo::nitro::video { enum class SubtitleType; }
+// Forward declaration of `SurfaceType` to properly resolve imports.
+namespace margelo::nitro::video { enum class SurfaceType; }
 // Forward declaration of `TextTrack` to properly resolve imports.
 namespace margelo::nitro::video { struct TextTrack; }
 // Forward declaration of `TimedMetadataObject` to properly resolve imports.
@@ -63,6 +77,8 @@ namespace margelo::nitro::video { struct onVolumeChangeData; }
 
 // Include C++ defined types
 #include "BandwidthData.hpp"
+#include "BufferConfig.hpp"
+#include "CustomVideoMetadata.hpp"
 #include "HybridVideoPlayerEventEmitterSpec.hpp"
 #include "HybridVideoPlayerFactorySpec.hpp"
 #include "HybridVideoPlayerSourceFactorySpec.hpp"
@@ -71,12 +87,17 @@ namespace margelo::nitro::video { struct onVolumeChangeData; }
 #include "HybridVideoViewViewManagerFactorySpec.hpp"
 #include "HybridVideoViewViewManagerSpec.hpp"
 #include "IgnoreSilentSwitchMode.hpp"
+#include "LivePlaybackParams.hpp"
 #include "MixAudioMode.hpp"
+#include "NativeDrmParams.hpp"
 #include "NativeExternalSubtitle.hpp"
 #include "NativeVideoConfig.hpp"
+#include "OnGetLicensePayload.hpp"
 #include "ResizeMode.hpp"
+#include "Resolution.hpp"
 #include "SourceType.hpp"
 #include "SubtitleType.hpp"
+#include "SurfaceType.hpp"
 #include "TextTrack.hpp"
 #include "TimedMetadata.hpp"
 #include "TimedMetadataObject.hpp"

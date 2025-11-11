@@ -17,6 +17,11 @@
 #else
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
+#if __has_include(<NitroModules/JSIHelpers.hpp>)
+#include <NitroModules/JSIHelpers.hpp>
+#else
+#error NitroModules cannot be found! Are you sure you installed NitroModules properly?
+#endif
 
 
 
@@ -41,19 +46,17 @@ namespace margelo::nitro::video {
 
 namespace margelo::nitro {
 
-  using namespace margelo::nitro::video;
-
   // C++ onPlaybackStateChangeData <> JS onPlaybackStateChangeData (object)
   template <>
-  struct JSIConverter<onPlaybackStateChangeData> final {
-    static inline onPlaybackStateChangeData fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
+  struct JSIConverter<margelo::nitro::video::onPlaybackStateChangeData> final {
+    static inline margelo::nitro::video::onPlaybackStateChangeData fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
-      return onPlaybackStateChangeData(
+      return margelo::nitro::video::onPlaybackStateChangeData(
         JSIConverter<bool>::fromJSI(runtime, obj.getProperty(runtime, "isPlaying")),
         JSIConverter<bool>::fromJSI(runtime, obj.getProperty(runtime, "isBuffering"))
       );
     }
-    static inline jsi::Value toJSI(jsi::Runtime& runtime, const onPlaybackStateChangeData& arg) {
+    static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::video::onPlaybackStateChangeData& arg) {
       jsi::Object obj(runtime);
       obj.setProperty(runtime, "isPlaying", JSIConverter<bool>::toJSI(runtime, arg.isPlaying));
       obj.setProperty(runtime, "isBuffering", JSIConverter<bool>::toJSI(runtime, arg.isBuffering));
@@ -64,6 +67,9 @@ namespace margelo::nitro {
         return false;
       }
       jsi::Object obj = value.getObject(runtime);
+      if (!nitro::isPlainObject(runtime, obj)) {
+        return false;
+      }
       if (!JSIConverter<bool>::canConvert(runtime, obj.getProperty(runtime, "isPlaying"))) return false;
       if (!JSIConverter<bool>::canConvert(runtime, obj.getProperty(runtime, "isBuffering"))) return false;
       return true;

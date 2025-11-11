@@ -17,11 +17,14 @@
 namespace margelo::nitro::video { class HybridVideoPlayerSpec; }
 // Forward declaration of `ResizeMode` to properly resolve imports.
 namespace margelo::nitro::video { enum class ResizeMode; }
+// Forward declaration of `SurfaceType` to properly resolve imports.
+namespace margelo::nitro::video { enum class SurfaceType; }
 
 #include <memory>
 #include "HybridVideoPlayerSpec.hpp"
 #include <optional>
 #include "ResizeMode.hpp"
+#include "SurfaceType.hpp"
 #include <functional>
 
 namespace margelo::nitro::video {
@@ -51,8 +54,8 @@ namespace margelo::nitro::video {
 
     public:
       // Properties
-      virtual std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>> getPlayer() = 0;
-      virtual void setPlayer(const std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>>& player) = 0;
+      virtual std::optional<std::shared_ptr<HybridVideoPlayerSpec>> getPlayer() = 0;
+      virtual void setPlayer(const std::optional<std::shared_ptr<HybridVideoPlayerSpec>>& player) = 0;
       virtual bool getControls() = 0;
       virtual void setControls(bool controls) = 0;
       virtual bool getPictureInPicture() = 0;
@@ -61,6 +64,10 @@ namespace margelo::nitro::video {
       virtual void setAutoEnterPictureInPicture(bool autoEnterPictureInPicture) = 0;
       virtual ResizeMode getResizeMode() = 0;
       virtual void setResizeMode(ResizeMode resizeMode) = 0;
+      virtual bool getKeepScreenAwake() = 0;
+      virtual void setKeepScreenAwake(bool keepScreenAwake) = 0;
+      virtual SurfaceType getSurfaceType() = 0;
+      virtual void setSurfaceType(SurfaceType surfaceType) = 0;
       virtual std::optional<std::function<void(bool /* isInPictureInPicture */)>> getOnPictureInPictureChange() = 0;
       virtual void setOnPictureInPictureChange(const std::optional<std::function<void(bool /* isInPictureInPicture */)>>& onPictureInPictureChange) = 0;
       virtual std::optional<std::function<void(bool /* fullscreen */)>> getOnFullscreenChange() = 0;

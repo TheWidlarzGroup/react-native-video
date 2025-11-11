@@ -17,14 +17,30 @@ import com.margelo.nitro.core.*
  */
 @DoNotStrip
 @Keep
-data class NativeExternalSubtitle
+data class NativeExternalSubtitle(
   @DoNotStrip
   @Keep
-  constructor(
-    val uri: String,
-    val label: String,
-    val type: SubtitleType,
-    val language: String
-  ) {
-  /* main constructor */
+  val uri: String,
+  @DoNotStrip
+  @Keep
+  val label: String,
+  @DoNotStrip
+  @Keep
+  val type: SubtitleType,
+  @DoNotStrip
+  @Keep
+  val language: String
+) {
+  private companion object {
+    /**
+     * Constructor called from C++
+     */
+    @DoNotStrip
+    @Keep
+    @Suppress("unused")
+    @JvmStatic
+    private fun fromCpp(uri: String, label: String, type: SubtitleType, language: String): NativeExternalSubtitle {
+      return NativeExternalSubtitle(uri, label, type, language)
+    }
+  }
 }

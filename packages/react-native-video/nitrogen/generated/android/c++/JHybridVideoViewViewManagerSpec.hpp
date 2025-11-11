@@ -29,6 +29,7 @@ namespace margelo::nitro::video {
     // C++ constructor (called from Java via `initHybrid()`)
     explicit JHybridVideoViewViewManagerSpec(jni::alias_ref<jhybridobject> jThis) :
       HybridObject(HybridVideoViewViewManagerSpec::TAG),
+      HybridBase(jThis),
       _javaPart(jni::make_global(jThis)) {}
 
   public:
@@ -48,8 +49,8 @@ namespace margelo::nitro::video {
 
   public:
     // Properties
-    std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>> getPlayer() override;
-    void setPlayer(const std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>>& player) override;
+    std::optional<std::shared_ptr<HybridVideoPlayerSpec>> getPlayer() override;
+    void setPlayer(const std::optional<std::shared_ptr<HybridVideoPlayerSpec>>& player) override;
     bool getControls() override;
     void setControls(bool controls) override;
     bool getPictureInPicture() override;
@@ -58,6 +59,10 @@ namespace margelo::nitro::video {
     void setAutoEnterPictureInPicture(bool autoEnterPictureInPicture) override;
     ResizeMode getResizeMode() override;
     void setResizeMode(ResizeMode resizeMode) override;
+    bool getKeepScreenAwake() override;
+    void setKeepScreenAwake(bool keepScreenAwake) override;
+    SurfaceType getSurfaceType() override;
+    void setSurfaceType(SurfaceType surfaceType) override;
     std::optional<std::function<void(bool /* isInPictureInPicture */)>> getOnPictureInPictureChange() override;
     void setOnPictureInPictureChange(const std::optional<std::function<void(bool /* isInPictureInPicture */)>>& onPictureInPictureChange) override;
     std::optional<std::function<void(bool /* fullscreen */)>> getOnFullscreenChange() override;

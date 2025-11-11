@@ -1,4 +1,4 @@
-package com.videoexample
+package com.twg.videoexample
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

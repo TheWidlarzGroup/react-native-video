@@ -19,12 +19,12 @@
 
 namespace margelo::nitro::video::bridge::swift {
 
-  // pragma MARK: std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>
-  std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec> create_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_(void* _Nonnull swiftUnsafePointer) {
+  // pragma MARK: std::shared_ptr<HybridVideoPlayerSourceSpec>
+  std::shared_ptr<HybridVideoPlayerSourceSpec> create_std__shared_ptr_HybridVideoPlayerSourceSpec_(void* NON_NULL swiftUnsafePointer) noexcept {
     ReactNativeVideo::HybridVideoPlayerSourceSpec_cxx swiftPart = ReactNativeVideo::HybridVideoPlayerSourceSpec_cxx::fromUnsafe(swiftUnsafePointer);
     return std::make_shared<margelo::nitro::video::HybridVideoPlayerSourceSpecSwift>(swiftPart);
   }
-  void* _Nonnull get_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_(std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceSpec_ cppType) {
+  void* NON_NULL get_std__shared_ptr_HybridVideoPlayerSourceSpec_(std__shared_ptr_HybridVideoPlayerSourceSpec_ cppType) {
     std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpecSwift> swiftWrapper = std::dynamic_pointer_cast<margelo::nitro::video::HybridVideoPlayerSourceSpecSwift>(cppType);
     #ifdef NITRO_DEBUG
     if (swiftWrapper == nullptr) [[unlikely]] {
@@ -35,12 +35,12 @@ namespace margelo::nitro::video::bridge::swift {
     return swiftPart.toUnsafe();
   }
   
-  // pragma MARK: std::shared_ptr<margelo::nitro::video::HybridVideoPlayerEventEmitterSpec>
-  std::shared_ptr<margelo::nitro::video::HybridVideoPlayerEventEmitterSpec> create_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerEventEmitterSpec_(void* _Nonnull swiftUnsafePointer) {
+  // pragma MARK: std::shared_ptr<HybridVideoPlayerEventEmitterSpec>
+  std::shared_ptr<HybridVideoPlayerEventEmitterSpec> create_std__shared_ptr_HybridVideoPlayerEventEmitterSpec_(void* NON_NULL swiftUnsafePointer) noexcept {
     ReactNativeVideo::HybridVideoPlayerEventEmitterSpec_cxx swiftPart = ReactNativeVideo::HybridVideoPlayerEventEmitterSpec_cxx::fromUnsafe(swiftUnsafePointer);
     return std::make_shared<margelo::nitro::video::HybridVideoPlayerEventEmitterSpecSwift>(swiftPart);
   }
-  void* _Nonnull get_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerEventEmitterSpec_(std__shared_ptr_margelo__nitro__video__HybridVideoPlayerEventEmitterSpec_ cppType) {
+  void* NON_NULL get_std__shared_ptr_HybridVideoPlayerEventEmitterSpec_(std__shared_ptr_HybridVideoPlayerEventEmitterSpec_ cppType) {
     std::shared_ptr<margelo::nitro::video::HybridVideoPlayerEventEmitterSpecSwift> swiftWrapper = std::dynamic_pointer_cast<margelo::nitro::video::HybridVideoPlayerEventEmitterSpecSwift>(cppType);
     #ifdef NITRO_DEBUG
     if (swiftWrapper == nullptr) [[unlikely]] {
@@ -52,7 +52,7 @@ namespace margelo::nitro::video::bridge::swift {
   }
   
   // pragma MARK: std::function<void()>
-  Func_void create_Func_void(void* _Nonnull swiftClosureWrapper) {
+  Func_void create_Func_void(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = ReactNativeVideo::Func_void::fromUnsafe(swiftClosureWrapper);
     return [swiftClosure = std::move(swiftClosure)]() mutable -> void {
       swiftClosure.call();
@@ -60,19 +60,19 @@ namespace margelo::nitro::video::bridge::swift {
   }
   
   // pragma MARK: std::function<void(const std::exception_ptr& /* error */)>
-  Func_void_std__exception_ptr create_Func_void_std__exception_ptr(void* _Nonnull swiftClosureWrapper) {
+  Func_void_std__exception_ptr create_Func_void_std__exception_ptr(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = ReactNativeVideo::Func_void_std__exception_ptr::fromUnsafe(swiftClosureWrapper);
     return [swiftClosure = std::move(swiftClosure)](const std::exception_ptr& error) mutable -> void {
       swiftClosure.call(error);
     };
   }
   
-  // pragma MARK: std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>
-  std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec> create_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSpec_(void* _Nonnull swiftUnsafePointer) {
+  // pragma MARK: std::shared_ptr<HybridVideoPlayerSpec>
+  std::shared_ptr<HybridVideoPlayerSpec> create_std__shared_ptr_HybridVideoPlayerSpec_(void* NON_NULL swiftUnsafePointer) noexcept {
     ReactNativeVideo::HybridVideoPlayerSpec_cxx swiftPart = ReactNativeVideo::HybridVideoPlayerSpec_cxx::fromUnsafe(swiftUnsafePointer);
     return std::make_shared<margelo::nitro::video::HybridVideoPlayerSpecSwift>(swiftPart);
   }
-  void* _Nonnull get_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSpec_(std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSpec_ cppType) {
+  void* NON_NULL get_std__shared_ptr_HybridVideoPlayerSpec_(std__shared_ptr_HybridVideoPlayerSpec_ cppType) {
     std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpecSwift> swiftWrapper = std::dynamic_pointer_cast<margelo::nitro::video::HybridVideoPlayerSpecSwift>(cppType);
     #ifdef NITRO_DEBUG
     if (swiftWrapper == nullptr) [[unlikely]] {
@@ -83,12 +83,12 @@ namespace margelo::nitro::video::bridge::swift {
     return swiftPart.toUnsafe();
   }
   
-  // pragma MARK: std::shared_ptr<margelo::nitro::video::HybridVideoPlayerFactorySpec>
-  std::shared_ptr<margelo::nitro::video::HybridVideoPlayerFactorySpec> create_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerFactorySpec_(void* _Nonnull swiftUnsafePointer) {
+  // pragma MARK: std::shared_ptr<HybridVideoPlayerFactorySpec>
+  std::shared_ptr<HybridVideoPlayerFactorySpec> create_std__shared_ptr_HybridVideoPlayerFactorySpec_(void* NON_NULL swiftUnsafePointer) noexcept {
     ReactNativeVideo::HybridVideoPlayerFactorySpec_cxx swiftPart = ReactNativeVideo::HybridVideoPlayerFactorySpec_cxx::fromUnsafe(swiftUnsafePointer);
     return std::make_shared<margelo::nitro::video::HybridVideoPlayerFactorySpecSwift>(swiftPart);
   }
-  void* _Nonnull get_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerFactorySpec_(std__shared_ptr_margelo__nitro__video__HybridVideoPlayerFactorySpec_ cppType) {
+  void* NON_NULL get_std__shared_ptr_HybridVideoPlayerFactorySpec_(std__shared_ptr_HybridVideoPlayerFactorySpec_ cppType) {
     std::shared_ptr<margelo::nitro::video::HybridVideoPlayerFactorySpecSwift> swiftWrapper = std::dynamic_pointer_cast<margelo::nitro::video::HybridVideoPlayerFactorySpecSwift>(cppType);
     #ifdef NITRO_DEBUG
     if (swiftWrapper == nullptr) [[unlikely]] {
@@ -100,7 +100,7 @@ namespace margelo::nitro::video::bridge::swift {
   }
   
   // pragma MARK: std::function<void(bool /* hasAudioFocus */)>
-  Func_void_bool create_Func_void_bool(void* _Nonnull swiftClosureWrapper) {
+  Func_void_bool create_Func_void_bool(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = ReactNativeVideo::Func_void_bool::fromUnsafe(swiftClosureWrapper);
     return [swiftClosure = std::move(swiftClosure)](bool hasAudioFocus) mutable -> void {
       swiftClosure.call(hasAudioFocus);
@@ -108,7 +108,7 @@ namespace margelo::nitro::video::bridge::swift {
   }
   
   // pragma MARK: std::function<void(const BandwidthData& /* data */)>
-  Func_void_BandwidthData create_Func_void_BandwidthData(void* _Nonnull swiftClosureWrapper) {
+  Func_void_BandwidthData create_Func_void_BandwidthData(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = ReactNativeVideo::Func_void_BandwidthData::fromUnsafe(swiftClosureWrapper);
     return [swiftClosure = std::move(swiftClosure)](const BandwidthData& data) mutable -> void {
       swiftClosure.call(data);
@@ -116,7 +116,7 @@ namespace margelo::nitro::video::bridge::swift {
   }
   
   // pragma MARK: std::function<void(const onLoadData& /* data */)>
-  Func_void_onLoadData create_Func_void_onLoadData(void* _Nonnull swiftClosureWrapper) {
+  Func_void_onLoadData create_Func_void_onLoadData(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = ReactNativeVideo::Func_void_onLoadData::fromUnsafe(swiftClosureWrapper);
     return [swiftClosure = std::move(swiftClosure)](const onLoadData& data) mutable -> void {
       swiftClosure.call(data);
@@ -124,7 +124,7 @@ namespace margelo::nitro::video::bridge::swift {
   }
   
   // pragma MARK: std::function<void(const onLoadStartData& /* data */)>
-  Func_void_onLoadStartData create_Func_void_onLoadStartData(void* _Nonnull swiftClosureWrapper) {
+  Func_void_onLoadStartData create_Func_void_onLoadStartData(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = ReactNativeVideo::Func_void_onLoadStartData::fromUnsafe(swiftClosureWrapper);
     return [swiftClosure = std::move(swiftClosure)](const onLoadStartData& data) mutable -> void {
       swiftClosure.call(data);
@@ -132,7 +132,7 @@ namespace margelo::nitro::video::bridge::swift {
   }
   
   // pragma MARK: std::function<void(const onPlaybackStateChangeData& /* data */)>
-  Func_void_onPlaybackStateChangeData create_Func_void_onPlaybackStateChangeData(void* _Nonnull swiftClosureWrapper) {
+  Func_void_onPlaybackStateChangeData create_Func_void_onPlaybackStateChangeData(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = ReactNativeVideo::Func_void_onPlaybackStateChangeData::fromUnsafe(swiftClosureWrapper);
     return [swiftClosure = std::move(swiftClosure)](const onPlaybackStateChangeData& data) mutable -> void {
       swiftClosure.call(data);
@@ -140,7 +140,7 @@ namespace margelo::nitro::video::bridge::swift {
   }
   
   // pragma MARK: std::function<void(double /* rate */)>
-  Func_void_double create_Func_void_double(void* _Nonnull swiftClosureWrapper) {
+  Func_void_double create_Func_void_double(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = ReactNativeVideo::Func_void_double::fromUnsafe(swiftClosureWrapper);
     return [swiftClosure = std::move(swiftClosure)](double rate) mutable -> void {
       swiftClosure.call(rate);
@@ -148,7 +148,7 @@ namespace margelo::nitro::video::bridge::swift {
   }
   
   // pragma MARK: std::function<void(const onProgressData& /* data */)>
-  Func_void_onProgressData create_Func_void_onProgressData(void* _Nonnull swiftClosureWrapper) {
+  Func_void_onProgressData create_Func_void_onProgressData(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = ReactNativeVideo::Func_void_onProgressData::fromUnsafe(swiftClosureWrapper);
     return [swiftClosure = std::move(swiftClosure)](const onProgressData& data) mutable -> void {
       swiftClosure.call(data);
@@ -156,7 +156,7 @@ namespace margelo::nitro::video::bridge::swift {
   }
   
   // pragma MARK: std::function<void(const TimedMetadata& /* metadata */)>
-  Func_void_TimedMetadata create_Func_void_TimedMetadata(void* _Nonnull swiftClosureWrapper) {
+  Func_void_TimedMetadata create_Func_void_TimedMetadata(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = ReactNativeVideo::Func_void_TimedMetadata::fromUnsafe(swiftClosureWrapper);
     return [swiftClosure = std::move(swiftClosure)](const TimedMetadata& metadata) mutable -> void {
       swiftClosure.call(metadata);
@@ -164,7 +164,7 @@ namespace margelo::nitro::video::bridge::swift {
   }
   
   // pragma MARK: std::function<void(const std::vector<std::string>& /* texts */)>
-  Func_void_std__vector_std__string_ create_Func_void_std__vector_std__string_(void* _Nonnull swiftClosureWrapper) {
+  Func_void_std__vector_std__string_ create_Func_void_std__vector_std__string_(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = ReactNativeVideo::Func_void_std__vector_std__string_::fromUnsafe(swiftClosureWrapper);
     return [swiftClosure = std::move(swiftClosure)](const std::vector<std::string>& texts) mutable -> void {
       swiftClosure.call(texts);
@@ -172,7 +172,7 @@ namespace margelo::nitro::video::bridge::swift {
   }
   
   // pragma MARK: std::function<void(const std::optional<TextTrack>& /* track */)>
-  Func_void_std__optional_TextTrack_ create_Func_void_std__optional_TextTrack_(void* _Nonnull swiftClosureWrapper) {
+  Func_void_std__optional_TextTrack_ create_Func_void_std__optional_TextTrack_(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = ReactNativeVideo::Func_void_std__optional_TextTrack_::fromUnsafe(swiftClosureWrapper);
     return [swiftClosure = std::move(swiftClosure)](const std::optional<TextTrack>& track) mutable -> void {
       swiftClosure.call(track);
@@ -180,7 +180,7 @@ namespace margelo::nitro::video::bridge::swift {
   }
   
   // pragma MARK: std::function<void(const onVolumeChangeData& /* data */)>
-  Func_void_onVolumeChangeData create_Func_void_onVolumeChangeData(void* _Nonnull swiftClosureWrapper) {
+  Func_void_onVolumeChangeData create_Func_void_onVolumeChangeData(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = ReactNativeVideo::Func_void_onVolumeChangeData::fromUnsafe(swiftClosureWrapper);
     return [swiftClosure = std::move(swiftClosure)](const onVolumeChangeData& data) mutable -> void {
       swiftClosure.call(data);
@@ -188,27 +188,52 @@ namespace margelo::nitro::video::bridge::swift {
   }
   
   // pragma MARK: std::function<void(VideoPlayerStatus /* status */)>
-  Func_void_VideoPlayerStatus create_Func_void_VideoPlayerStatus(void* _Nonnull swiftClosureWrapper) {
+  Func_void_VideoPlayerStatus create_Func_void_VideoPlayerStatus(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = ReactNativeVideo::Func_void_VideoPlayerStatus::fromUnsafe(swiftClosureWrapper);
     return [swiftClosure = std::move(swiftClosure)](VideoPlayerStatus status) mutable -> void {
       swiftClosure.call(static_cast<int>(status));
     };
   }
   
+  // pragma MARK: std::function<void(const std::string& /* result */)>
+  Func_void_std__string create_Func_void_std__string(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = ReactNativeVideo::Func_void_std__string::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const std::string& result) mutable -> void {
+      swiftClosure.call(result);
+    };
+  }
+  
+  // pragma MARK: std::function<std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(const OnGetLicensePayload& /* payload */)>
+  Func_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload create_Func_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = ReactNativeVideo::Func_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const OnGetLicensePayload& payload) mutable -> std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>> {
+      auto __result = swiftClosure.call(payload);
+      return __result;
+    };
+  }
+  
+  // pragma MARK: std::function<void(const std::shared_ptr<Promise<std::string>>& /* result */)>
+  Func_void_std__shared_ptr_Promise_std__string__ create_Func_void_std__shared_ptr_Promise_std__string__(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = ReactNativeVideo::Func_void_std__shared_ptr_Promise_std__string__::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const std::shared_ptr<Promise<std::string>>& result) mutable -> void {
+      swiftClosure.call(result);
+    };
+  }
+  
   // pragma MARK: std::function<void(const VideoInformation& /* result */)>
-  Func_void_VideoInformation create_Func_void_VideoInformation(void* _Nonnull swiftClosureWrapper) {
+  Func_void_VideoInformation create_Func_void_VideoInformation(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = ReactNativeVideo::Func_void_VideoInformation::fromUnsafe(swiftClosureWrapper);
     return [swiftClosure = std::move(swiftClosure)](const VideoInformation& result) mutable -> void {
       swiftClosure.call(result);
     };
   }
   
-  // pragma MARK: std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceFactorySpec>
-  std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceFactorySpec> create_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceFactorySpec_(void* _Nonnull swiftUnsafePointer) {
+  // pragma MARK: std::shared_ptr<HybridVideoPlayerSourceFactorySpec>
+  std::shared_ptr<HybridVideoPlayerSourceFactorySpec> create_std__shared_ptr_HybridVideoPlayerSourceFactorySpec_(void* NON_NULL swiftUnsafePointer) noexcept {
     ReactNativeVideo::HybridVideoPlayerSourceFactorySpec_cxx swiftPart = ReactNativeVideo::HybridVideoPlayerSourceFactorySpec_cxx::fromUnsafe(swiftUnsafePointer);
     return std::make_shared<margelo::nitro::video::HybridVideoPlayerSourceFactorySpecSwift>(swiftPart);
   }
-  void* _Nonnull get_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceFactorySpec_(std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSourceFactorySpec_ cppType) {
+  void* NON_NULL get_std__shared_ptr_HybridVideoPlayerSourceFactorySpec_(std__shared_ptr_HybridVideoPlayerSourceFactorySpec_ cppType) {
     std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceFactorySpecSwift> swiftWrapper = std::dynamic_pointer_cast<margelo::nitro::video::HybridVideoPlayerSourceFactorySpecSwift>(cppType);
     #ifdef NITRO_DEBUG
     if (swiftWrapper == nullptr) [[unlikely]] {
@@ -219,12 +244,12 @@ namespace margelo::nitro::video::bridge::swift {
     return swiftPart.toUnsafe();
   }
   
-  // pragma MARK: std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerSpec>
-  std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerSpec> create_std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerSpec_(void* _Nonnull swiftUnsafePointer) {
+  // pragma MARK: std::shared_ptr<HybridVideoViewViewManagerSpec>
+  std::shared_ptr<HybridVideoViewViewManagerSpec> create_std__shared_ptr_HybridVideoViewViewManagerSpec_(void* NON_NULL swiftUnsafePointer) noexcept {
     ReactNativeVideo::HybridVideoViewViewManagerSpec_cxx swiftPart = ReactNativeVideo::HybridVideoViewViewManagerSpec_cxx::fromUnsafe(swiftUnsafePointer);
     return std::make_shared<margelo::nitro::video::HybridVideoViewViewManagerSpecSwift>(swiftPart);
   }
-  void* _Nonnull get_std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerSpec_(std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerSpec_ cppType) {
+  void* NON_NULL get_std__shared_ptr_HybridVideoViewViewManagerSpec_(std__shared_ptr_HybridVideoViewViewManagerSpec_ cppType) {
     std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerSpecSwift> swiftWrapper = std::dynamic_pointer_cast<margelo::nitro::video::HybridVideoViewViewManagerSpecSwift>(cppType);
     #ifdef NITRO_DEBUG
     if (swiftWrapper == nullptr) [[unlikely]] {
@@ -235,12 +260,12 @@ namespace margelo::nitro::video::bridge::swift {
     return swiftPart.toUnsafe();
   }
   
-  // pragma MARK: std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerFactorySpec>
-  std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerFactorySpec> create_std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerFactorySpec_(void* _Nonnull swiftUnsafePointer) {
+  // pragma MARK: std::shared_ptr<HybridVideoViewViewManagerFactorySpec>
+  std::shared_ptr<HybridVideoViewViewManagerFactorySpec> create_std__shared_ptr_HybridVideoViewViewManagerFactorySpec_(void* NON_NULL swiftUnsafePointer) noexcept {
     ReactNativeVideo::HybridVideoViewViewManagerFactorySpec_cxx swiftPart = ReactNativeVideo::HybridVideoViewViewManagerFactorySpec_cxx::fromUnsafe(swiftUnsafePointer);
     return std::make_shared<margelo::nitro::video::HybridVideoViewViewManagerFactorySpecSwift>(swiftPart);
   }
-  void* _Nonnull get_std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerFactorySpec_(std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerFactorySpec_ cppType) {
+  void* NON_NULL get_std__shared_ptr_HybridVideoViewViewManagerFactorySpec_(std__shared_ptr_HybridVideoViewViewManagerFactorySpec_ cppType) {
     std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerFactorySpecSwift> swiftWrapper = std::dynamic_pointer_cast<margelo::nitro::video::HybridVideoViewViewManagerFactorySpecSwift>(cppType);
     #ifdef NITRO_DEBUG
     if (swiftWrapper == nullptr) [[unlikely]] {

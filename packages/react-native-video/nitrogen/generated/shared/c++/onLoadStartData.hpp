@@ -17,6 +17,11 @@
 #else
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
+#if __has_include(<NitroModules/JSIHelpers.hpp>)
+#include <NitroModules/JSIHelpers.hpp>
+#else
+#error NitroModules cannot be found! Are you sure you installed NitroModules properly?
+#endif
 
 // Forward declaration of `SourceType` to properly resolve imports.
 namespace margelo::nitro::video { enum class SourceType; }
@@ -35,32 +40,30 @@ namespace margelo::nitro::video {
   struct onLoadStartData {
   public:
     SourceType sourceType     SWIFT_PRIVATE;
-    std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec> source     SWIFT_PRIVATE;
+    std::shared_ptr<HybridVideoPlayerSourceSpec> source     SWIFT_PRIVATE;
 
   public:
     onLoadStartData() = default;
-    explicit onLoadStartData(SourceType sourceType, std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec> source): sourceType(sourceType), source(source) {}
+    explicit onLoadStartData(SourceType sourceType, std::shared_ptr<HybridVideoPlayerSourceSpec> source): sourceType(sourceType), source(source) {}
   };
 
 } // namespace margelo::nitro::video
 
 namespace margelo::nitro {
 
-  using namespace margelo::nitro::video;
-
   // C++ onLoadStartData <> JS onLoadStartData (object)
   template <>
-  struct JSIConverter<onLoadStartData> final {
-    static inline onLoadStartData fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
+  struct JSIConverter<margelo::nitro::video::onLoadStartData> final {
+    static inline margelo::nitro::video::onLoadStartData fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
-      return onLoadStartData(
-        JSIConverter<SourceType>::fromJSI(runtime, obj.getProperty(runtime, "sourceType")),
+      return margelo::nitro::video::onLoadStartData(
+        JSIConverter<margelo::nitro::video::SourceType>::fromJSI(runtime, obj.getProperty(runtime, "sourceType")),
         JSIConverter<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>>::fromJSI(runtime, obj.getProperty(runtime, "source"))
       );
     }
-    static inline jsi::Value toJSI(jsi::Runtime& runtime, const onLoadStartData& arg) {
+    static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::video::onLoadStartData& arg) {
       jsi::Object obj(runtime);
-      obj.setProperty(runtime, "sourceType", JSIConverter<SourceType>::toJSI(runtime, arg.sourceType));
+      obj.setProperty(runtime, "sourceType", JSIConverter<margelo::nitro::video::SourceType>::toJSI(runtime, arg.sourceType));
       obj.setProperty(runtime, "source", JSIConverter<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>>::toJSI(runtime, arg.source));
       return obj;
     }
@@ -69,7 +72,10 @@ namespace margelo::nitro {
         return false;
       }
       jsi::Object obj = value.getObject(runtime);
-      if (!JSIConverter<SourceType>::canConvert(runtime, obj.getProperty(runtime, "sourceType"))) return false;
+      if (!nitro::isPlainObject(runtime, obj)) {
+        return false;
+      }
+      if (!JSIConverter<margelo::nitro::video::SourceType>::canConvert(runtime, obj.getProperty(runtime, "sourceType"))) return false;
       if (!JSIConverter<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>>::canConvert(runtime, obj.getProperty(runtime, "source"))) return false;
       return true;
     }

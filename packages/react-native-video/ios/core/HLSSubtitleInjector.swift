@@ -129,6 +129,20 @@ class HLSSubtitleInjector: NSObject {
         .error()
     }
 
+    // Post-process: ensure every variant stream references our subtitle group if we injected it
+    if hasSubtitleGroup {
+      modifiedLines = modifiedLines.map { line in
+        if line.hasPrefix("#EXT-X-STREAM-INF:") && !line.contains("SUBTITLES=") {
+          if line.hasSuffix(",") {
+            return line + "SUBTITLES=\"\(Self.subtitleGroupID)\""
+          } else {
+            return line + ",SUBTITLES=\"\(Self.subtitleGroupID)\""
+          }
+        }
+        return line
+      }
+    }
+
     return modifiedLines.joined(separator: "\n")
   }
 

@@ -74,13 +74,19 @@ namespace margelo::nitro::video {
 
   public:
     // Properties
-    inline std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec> getSource() noexcept override {
+    inline std::shared_ptr<HybridVideoPlayerSourceSpec> getSource() noexcept override {
       auto __result = _swiftPart.getSource();
       return __result;
     }
-    inline std::shared_ptr<margelo::nitro::video::HybridVideoPlayerEventEmitterSpec> getEventEmitter() noexcept override {
+    inline std::shared_ptr<HybridVideoPlayerEventEmitterSpec> getEventEmitter() noexcept override {
       auto __result = _swiftPart.getEventEmitter();
       return __result;
+    }
+    inline bool getShowNotificationControls() noexcept override {
+      return _swiftPart.getShowNotificationControls();
+    }
+    inline void setShowNotificationControls(bool showNotificationControls) noexcept override {
+      _swiftPart.setShowNotificationControls(std::forward<decltype(showNotificationControls)>(showNotificationControls));
     }
     inline VideoPlayerStatus getStatus() noexcept override {
       auto __result = _swiftPart.getStatus();
@@ -155,7 +161,7 @@ namespace margelo::nitro::video {
 
   public:
     // Methods
-    inline std::shared_ptr<Promise<void>> replaceSourceAsync(const std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>>& source) override {
+    inline std::shared_ptr<Promise<void>> replaceSourceAsync(const std::optional<std::shared_ptr<HybridVideoPlayerSourceSpec>>& source) override {
       auto __result = _swiftPart.replaceSourceAsync(source);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
@@ -176,6 +182,14 @@ namespace margelo::nitro::video {
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }
+    }
+    inline std::shared_ptr<Promise<void>> initialize() override {
+      auto __result = _swiftPart.initialize();
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
     }
     inline std::shared_ptr<Promise<void>> preload() override {
       auto __result = _swiftPart.preload();

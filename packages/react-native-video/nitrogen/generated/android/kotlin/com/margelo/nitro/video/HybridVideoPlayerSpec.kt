@@ -47,6 +47,12 @@ abstract class HybridVideoPlayerSpec: HybridObject() {
   
   @get:DoNotStrip
   @get:Keep
+  @set:DoNotStrip
+  @set:Keep
+  abstract var showNotificationControls: Boolean
+  
+  @get:DoNotStrip
+  @get:Keep
   abstract val status: VideoPlayerStatus
   
   @get:DoNotStrip
@@ -130,6 +136,10 @@ abstract class HybridVideoPlayerSpec: HybridObject() {
   
   @DoNotStrip
   @Keep
+  abstract fun initialize(): Promise<Unit>
+  
+  @DoNotStrip
+  @Keep
   abstract fun preload(): Promise<Unit>
   
   @DoNotStrip
@@ -151,6 +161,6 @@ abstract class HybridVideoPlayerSpec: HybridObject() {
   private external fun initHybrid(): HybridData
 
   companion object {
-    private const val TAG = "HybridVideoPlayerSpec"
+    protected const val TAG = "HybridVideoPlayerSpec"
   }
 }

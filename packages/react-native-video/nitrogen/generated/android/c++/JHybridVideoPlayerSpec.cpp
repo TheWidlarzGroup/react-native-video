@@ -23,7 +23,6 @@ namespace margelo::nitro::video { struct TextTrack; }
 #include <memory>
 #include "HybridVideoPlayerSourceSpec.hpp"
 #include "JHybridVideoPlayerSourceSpec.hpp"
-#include <NitroModules/JNISharedPtr.hpp>
 #include "HybridVideoPlayerEventEmitterSpec.hpp"
 #include "JHybridVideoPlayerEventEmitterSpec.hpp"
 #include "VideoPlayerStatus.hpp"
@@ -63,15 +62,24 @@ namespace margelo::nitro::video {
   }
 
   // Properties
-  std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec> JHybridVideoPlayerSpec::getSource() {
+  std::shared_ptr<HybridVideoPlayerSourceSpec> JHybridVideoPlayerSpec::getSource() {
     static const auto method = javaClassStatic()->getMethod<jni::local_ref<JHybridVideoPlayerSourceSpec::javaobject>()>("getSource");
     auto __result = method(_javaPart);
-    return JNISharedPtr::make_shared_from_jni<JHybridVideoPlayerSourceSpec>(jni::make_global(__result));
+    return __result->cthis()->shared_cast<JHybridVideoPlayerSourceSpec>();
   }
-  std::shared_ptr<margelo::nitro::video::HybridVideoPlayerEventEmitterSpec> JHybridVideoPlayerSpec::getEventEmitter() {
+  std::shared_ptr<HybridVideoPlayerEventEmitterSpec> JHybridVideoPlayerSpec::getEventEmitter() {
     static const auto method = javaClassStatic()->getMethod<jni::local_ref<JHybridVideoPlayerEventEmitterSpec::javaobject>()>("getEventEmitter");
     auto __result = method(_javaPart);
-    return JNISharedPtr::make_shared_from_jni<JHybridVideoPlayerEventEmitterSpec>(jni::make_global(__result));
+    return __result->cthis()->shared_cast<JHybridVideoPlayerEventEmitterSpec>();
+  }
+  bool JHybridVideoPlayerSpec::getShowNotificationControls() {
+    static const auto method = javaClassStatic()->getMethod<jboolean()>("getShowNotificationControls");
+    auto __result = method(_javaPart);
+    return static_cast<bool>(__result);
+  }
+  void JHybridVideoPlayerSpec::setShowNotificationControls(bool showNotificationControls) {
+    static const auto method = javaClassStatic()->getMethod<void(jboolean /* showNotificationControls */)>("setShowNotificationControls");
+    method(_javaPart, showNotificationControls);
   }
   VideoPlayerStatus JHybridVideoPlayerSpec::getStatus() {
     static const auto method = javaClassStatic()->getMethod<jni::local_ref<JVideoPlayerStatus>()>("getStatus");
@@ -176,7 +184,7 @@ namespace margelo::nitro::video {
   }
 
   // Methods
-  std::shared_ptr<Promise<void>> JHybridVideoPlayerSpec::replaceSourceAsync(const std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>>& source) {
+  std::shared_ptr<Promise<void>> JHybridVideoPlayerSpec::replaceSourceAsync(const std::optional<std::shared_ptr<HybridVideoPlayerSourceSpec>>& source) {
     static const auto method = javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<JHybridVideoPlayerSourceSpec::javaobject> /* source */)>("replaceSourceAsync");
     auto __result = method(_javaPart, source.has_value() ? std::dynamic_pointer_cast<JHybridVideoPlayerSourceSpec>(source.value())->getJavaPart() : nullptr);
     return [&]() {
@@ -208,6 +216,21 @@ namespace margelo::nitro::video {
   void JHybridVideoPlayerSpec::selectTextTrack(const std::optional<TextTrack>& textTrack) {
     static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JTextTrack> /* textTrack */)>("selectTextTrack");
     method(_javaPart, textTrack.has_value() ? JTextTrack::fromCpp(textTrack.value()) : nullptr);
+  }
+  std::shared_ptr<Promise<void>> JHybridVideoPlayerSpec::initialize() {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>()>("initialize");
+    auto __result = method(_javaPart);
+    return [&]() {
+      auto __promise = Promise<void>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& /* unit */) {
+        __promise->resolve();
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
   }
   std::shared_ptr<Promise<void>> JHybridVideoPlayerSpec::preload() {
     static const auto method = javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>()>("preload");

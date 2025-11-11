@@ -17,12 +17,24 @@ import com.margelo.nitro.core.*
  */
 @DoNotStrip
 @Keep
-data class onPlaybackStateChangeData
+data class onPlaybackStateChangeData(
   @DoNotStrip
   @Keep
-  constructor(
-    val isPlaying: Boolean,
-    val isBuffering: Boolean
-  ) {
-  /* main constructor */
+  val isPlaying: Boolean,
+  @DoNotStrip
+  @Keep
+  val isBuffering: Boolean
+) {
+  private companion object {
+    /**
+     * Constructor called from C++
+     */
+    @DoNotStrip
+    @Keep
+    @Suppress("unused")
+    @JvmStatic
+    private fun fromCpp(isPlaying: Boolean, isBuffering: Boolean): onPlaybackStateChangeData {
+      return onPlaybackStateChangeData(isPlaying, isBuffering)
+    }
+  }
 }

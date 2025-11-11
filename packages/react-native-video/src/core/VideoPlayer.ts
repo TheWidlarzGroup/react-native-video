@@ -20,8 +20,6 @@ import { VideoPlayerEvents } from './VideoPlayerEvents';
 class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   protected player: VideoPlayerImpl;
 
-  public onError?: (error: VideoRuntimeError) => void = undefined;
-
   constructor(source: VideoSource | VideoConfig | VideoPlayerSource) {
     const hybridSource = createSource(source);
     const player = createPlayer(hybridSource);
@@ -57,13 +55,24 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   private throwError(error: unknown) {
     const parsedError = tryParseNativeVideoError(error);
 
-    if (parsedError instanceof VideoRuntimeError && this.onError) {
-      this.onError(parsedError);
+    if (
+      parsedError instanceof VideoRuntimeError &&
+      this.triggerEvent('onError', parsedError)
+    ) {
       // We don't throw errors if onError is provided
       return;
     }
 
     throw parsedError;
+  }
+
+  /**
+   * Updates the memory size of the player and its source. Should be called after any operation that changes the memory size of the player or its source.
+   * @internal
+   */
+  private updateMemorySize() {
+    NitroModules.updateMemorySize(this.player);
+    NitroModules.updateMemorySize(this.player.source);
   }
 
   /**
@@ -185,10 +194,24 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     return this.player.isPlaying;
   }
 
+  get showNotificationControls(): boolean {
+    return this.player.showNotificationControls;
+  }
+
+  set showNotificationControls(value: boolean) {
+    this.player.showNotificationControls = value;
+  }
+
+  async initialize(): Promise<void> {
+    await this.wrapPromise(this.player.initialize());
+
+    this.updateMemorySize();
+  }
+
   async preload(): Promise<void> {
     await this.wrapPromise(this.player.preload());
 
-    NitroModules.updateMemorySize(this.player);
+    this.updateMemorySize();
   }
 
   /**
@@ -236,13 +259,15 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   async replaceSourceAsync(
     source: VideoSource | VideoConfig | NoAutocomplete<VideoPlayerSource> | null
   ): Promise<void> {
+    this.updateMemorySize();
+
     await this.wrapPromise(
       this.player.replaceSourceAsync(
         source === null ? null : createSource(source)
       )
     );
 
-    NitroModules.updateMemorySize(this.player);
+    this.updateMemorySize();
   }
 
   // Text Track Management

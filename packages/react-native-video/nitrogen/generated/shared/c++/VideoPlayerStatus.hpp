@@ -39,28 +39,26 @@ namespace margelo::nitro::video {
 
 namespace margelo::nitro {
 
-  using namespace margelo::nitro::video;
-
   // C++ VideoPlayerStatus <> JS VideoPlayerStatus (union)
   template <>
-  struct JSIConverter<VideoPlayerStatus> final {
-    static inline VideoPlayerStatus fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
+  struct JSIConverter<margelo::nitro::video::VideoPlayerStatus> final {
+    static inline margelo::nitro::video::VideoPlayerStatus fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       std::string unionValue = JSIConverter<std::string>::fromJSI(runtime, arg);
       switch (hashString(unionValue.c_str(), unionValue.size())) {
-        case hashString("idle"): return VideoPlayerStatus::IDLE;
-        case hashString("loading"): return VideoPlayerStatus::LOADING;
-        case hashString("readyToPlay"): return VideoPlayerStatus::READYTOPLAY;
-        case hashString("error"): return VideoPlayerStatus::ERROR;
+        case hashString("idle"): return margelo::nitro::video::VideoPlayerStatus::IDLE;
+        case hashString("loading"): return margelo::nitro::video::VideoPlayerStatus::LOADING;
+        case hashString("readyToPlay"): return margelo::nitro::video::VideoPlayerStatus::READYTOPLAY;
+        case hashString("error"): return margelo::nitro::video::VideoPlayerStatus::ERROR;
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert \"" + unionValue + "\" to enum VideoPlayerStatus - invalid value!");
       }
     }
-    static inline jsi::Value toJSI(jsi::Runtime& runtime, VideoPlayerStatus arg) {
+    static inline jsi::Value toJSI(jsi::Runtime& runtime, margelo::nitro::video::VideoPlayerStatus arg) {
       switch (arg) {
-        case VideoPlayerStatus::IDLE: return JSIConverter<std::string>::toJSI(runtime, "idle");
-        case VideoPlayerStatus::LOADING: return JSIConverter<std::string>::toJSI(runtime, "loading");
-        case VideoPlayerStatus::READYTOPLAY: return JSIConverter<std::string>::toJSI(runtime, "readyToPlay");
-        case VideoPlayerStatus::ERROR: return JSIConverter<std::string>::toJSI(runtime, "error");
+        case margelo::nitro::video::VideoPlayerStatus::IDLE: return JSIConverter<std::string>::toJSI(runtime, "idle");
+        case margelo::nitro::video::VideoPlayerStatus::LOADING: return JSIConverter<std::string>::toJSI(runtime, "loading");
+        case margelo::nitro::video::VideoPlayerStatus::READYTOPLAY: return JSIConverter<std::string>::toJSI(runtime, "readyToPlay");
+        case margelo::nitro::video::VideoPlayerStatus::ERROR: return JSIConverter<std::string>::toJSI(runtime, "error");
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert VideoPlayerStatus to JS - invalid value: "
                                     + std::to_string(static_cast<int>(arg)) + "!");

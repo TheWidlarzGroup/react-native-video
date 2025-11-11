@@ -6,6 +6,7 @@ import type {
 import type { VideoPlayerSource } from '../../spec/nitro/VideoPlayerSource.nitro';
 import type { VideoConfig, VideoSource } from '../types/VideoConfig';
 import { createSource, isVideoPlayerSource } from './sourceFactory';
+import { tryParseNativeVideoError } from '../types/VideoError';
 
 const VideoPlayerFactory =
   NitroModules.createHybridObject<VideoPlayerFactory>('VideoPlayerFactory');
@@ -20,9 +21,13 @@ const VideoPlayerFactory =
 export const createPlayer = (
   source: VideoSource | VideoConfig | VideoPlayerSource
 ): VideoPlayer => {
-  if (isVideoPlayerSource(source)) {
-    return VideoPlayerFactory.createPlayer(source);
-  }
+  try {
+    if (isVideoPlayerSource(source)) {
+      return VideoPlayerFactory.createPlayer(source);
+    }
 
-  return VideoPlayerFactory.createPlayer(createSource(source));
+    return VideoPlayerFactory.createPlayer(createSource(source));
+  } catch (error) {
+    throw tryParseNativeVideoError(error);
+  }
 };

@@ -18,7 +18,7 @@ public extension NativeVideoConfig {
   /**
    * Create a new instance of `NativeVideoConfig`.
    */
-  init(uri: String, externalSubtitles: [NativeExternalSubtitle]?, headers: Dictionary<String, String>?) {
+  init(uri: String, externalSubtitles: [NativeExternalSubtitle]?, drm: NativeDrmParams?, headers: Dictionary<String, String>?, bufferConfig: BufferConfig?, metadata: CustomVideoMetadata?, initializeOnCreation: Bool?) {
     self.init(std.string(uri), { () -> bridge.std__optional_std__vector_NativeExternalSubtitle__ in
       if let __unwrappedValue = externalSubtitles {
         return bridge.create_std__optional_std__vector_NativeExternalSubtitle__({ () -> bridge.std__vector_NativeExternalSubtitle_ in
@@ -31,6 +31,12 @@ public extension NativeVideoConfig {
       } else {
         return .init()
       }
+    }(), { () -> bridge.std__optional_NativeDrmParams_ in
+      if let __unwrappedValue = drm {
+        return bridge.create_std__optional_NativeDrmParams_(__unwrappedValue)
+      } else {
+        return .init()
+      }
     }(), { () -> bridge.std__optional_std__unordered_map_std__string__std__string__ in
       if let __unwrappedValue = headers {
         return bridge.create_std__optional_std__unordered_map_std__string__std__string__({ () -> bridge.std__unordered_map_std__string__std__string_ in
@@ -40,6 +46,24 @@ public extension NativeVideoConfig {
           }
           return __map
         }())
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_BufferConfig_ in
+      if let __unwrappedValue = bufferConfig {
+        return bridge.create_std__optional_BufferConfig_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_CustomVideoMetadata_ in
+      if let __unwrappedValue = metadata {
+        return bridge.create_std__optional_CustomVideoMetadata_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_bool_ in
+      if let __unwrappedValue = initializeOnCreation {
+        return bridge.create_std__optional_bool_(__unwrappedValue)
       } else {
         return .init()
       }
@@ -61,7 +85,8 @@ public extension NativeVideoConfig {
     @inline(__always)
     get {
       return { () -> [NativeExternalSubtitle]? in
-        if let __unwrapped = self.__externalSubtitles.value {
+        if bridge.has_value_std__optional_std__vector_NativeExternalSubtitle__(self.__externalSubtitles) {
+          let __unwrapped = bridge.get_std__optional_std__vector_NativeExternalSubtitle__(self.__externalSubtitles)
           return __unwrapped.map({ __item in __item })
         } else {
           return nil
@@ -86,16 +111,34 @@ public extension NativeVideoConfig {
     }
   }
   
+  var drm: NativeDrmParams? {
+    @inline(__always)
+    get {
+      return self.__drm.value
+    }
+    @inline(__always)
+    set {
+      self.__drm = { () -> bridge.std__optional_NativeDrmParams_ in
+        if let __unwrappedValue = newValue {
+          return bridge.create_std__optional_NativeDrmParams_(__unwrappedValue)
+        } else {
+          return .init()
+        }
+      }()
+    }
+  }
+  
   var headers: Dictionary<String, String>? {
     @inline(__always)
     get {
       return { () -> Dictionary<String, String>? in
-        if let __unwrapped = self.__headers.value {
+        if bridge.has_value_std__optional_std__unordered_map_std__string__std__string__(self.__headers) {
+          let __unwrapped = bridge.get_std__optional_std__unordered_map_std__string__std__string__(self.__headers)
           return { () -> Dictionary<String, String> in
             var __dictionary = Dictionary<String, String>(minimumCapacity: __unwrapped.size())
             let __keys = bridge.get_std__unordered_map_std__string__std__string__keys(__unwrapped)
             for __key in __keys {
-              let __value = __unwrapped[__key]!
+              let __value = bridge.get_std__unordered_map_std__string__std__string__value(__unwrapped, __key)
               __dictionary[String(__key)] = String(__value)
             }
             return __dictionary
@@ -116,6 +159,64 @@ public extension NativeVideoConfig {
             }
             return __map
           }())
+        } else {
+          return .init()
+        }
+      }()
+    }
+  }
+  
+  var bufferConfig: BufferConfig? {
+    @inline(__always)
+    get {
+      return self.__bufferConfig.value
+    }
+    @inline(__always)
+    set {
+      self.__bufferConfig = { () -> bridge.std__optional_BufferConfig_ in
+        if let __unwrappedValue = newValue {
+          return bridge.create_std__optional_BufferConfig_(__unwrappedValue)
+        } else {
+          return .init()
+        }
+      }()
+    }
+  }
+  
+  var metadata: CustomVideoMetadata? {
+    @inline(__always)
+    get {
+      return self.__metadata.value
+    }
+    @inline(__always)
+    set {
+      self.__metadata = { () -> bridge.std__optional_CustomVideoMetadata_ in
+        if let __unwrappedValue = newValue {
+          return bridge.create_std__optional_CustomVideoMetadata_(__unwrappedValue)
+        } else {
+          return .init()
+        }
+      }()
+    }
+  }
+  
+  var initializeOnCreation: Bool? {
+    @inline(__always)
+    get {
+      return { () -> Bool? in
+        if bridge.has_value_std__optional_bool_(self.__initializeOnCreation) {
+          let __unwrapped = bridge.get_std__optional_bool_(self.__initializeOnCreation)
+          return __unwrapped
+        } else {
+          return nil
+        }
+      }()
+    }
+    @inline(__always)
+    set {
+      self.__initializeOnCreation = { () -> bridge.std__optional_bool_ in
+        if let __unwrappedValue = newValue {
+          return bridge.create_std__optional_bool_(__unwrappedValue)
         } else {
           return .init()
         }

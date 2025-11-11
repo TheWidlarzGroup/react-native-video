@@ -38,6 +38,7 @@ enum PlayerError: VideoError {
   case assetNotInitialized
   case invalidSource
   case invalidTrackUrl(url: String)
+  case cancelled
   
   var code: String {
     switch self {
@@ -49,6 +50,8 @@ enum PlayerError: VideoError {
       return "player/invalid-source"
     case .invalidTrackUrl:
       return "player/invalid-track-url"
+    case .cancelled:
+      return "player/cancelled"
     }
   }
   
@@ -62,6 +65,8 @@ enum PlayerError: VideoError {
       return "Invalid source passed to player"
     case let .invalidTrackUrl(url: url):
       return "Invalid track URL: \(url)"
+    case .cancelled:
+      return "Operation was cancelled"
     }
   }
 }
@@ -73,6 +78,7 @@ enum SourceError: VideoError {
   case fileDoesNotExist(uri: String)
   case failedToInitializeAsset
   case unsupportedContentType(uri: String)
+  case cancelled
 
   var code: String {
     switch self {
@@ -86,6 +92,8 @@ enum SourceError: VideoError {
       return "source/failed-to-initialize-asset"
     case .unsupportedContentType:
       return "source/unsupported-content-type"
+    case .cancelled:
+      return "source/cancelled"
     }
   }
 
@@ -101,6 +109,8 @@ enum SourceError: VideoError {
       return "Failed to initialize asset"
     case let .unsupportedContentType(uri: uri):
       return "type of content (\(uri)) is not supported"
+    case .cancelled:
+      return "Operation was cancelled"
     }
   }
 }

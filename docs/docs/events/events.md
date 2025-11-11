@@ -65,7 +65,7 @@ The `VideoPlayer` class, through `VideoPlayerEvents`, supports the following eve
 
 Additionally, the `VideoPlayer` instance itself has an `onError` property:
 
--   `onError: (error: ` [VideoRuntimeError](../api-reference/classes/VideoRuntimeError.md) `) => void` — Fired when an error occurs. The callback receives the `VideoRuntimeError` object.
+-   `onError: (error: ` [VideoRuntimeError](../api-reference/interfaces/VideoRuntimeError.md) `) => void` — Fired when an error occurs. The callback receives the `VideoRuntimeError` object.
 
 **Benefits of `useEvent`**:
 
@@ -73,6 +73,10 @@ Additionally, the `VideoPlayer` instance itself has an `onError` property:
 -   **Type Safety**: Provides better type inference for event callback parameters.
 
 This hook is recommended for managing event subscriptions in a declarative React style. 
+
+### Initialization Timing and Events
+
+`onLoadStart` / `onLoad` will fire automatically after construction when `initializeOnCreation` (default `true`) is enabled. If you set `initializeOnCreation: false`, these events will not fire until you call `initialize()` or `preload()`. Attach your event handlers before invoking those methods to avoid missing early events.
 
 ## Subscribing to Events
 
@@ -83,17 +87,17 @@ import { VideoPlayer } from 'react-native-video';
 
 const player = new VideoPlayer('https://example.com/video.mp4');
 
-player.onLoad = (data) => {
+player.addEventListener('onLoad', (data) => {
   console.log('Video loaded! Duration:', data.duration);
-};
+});
 
-player.onProgress = (data) => {
+player.addEventListener('onProgress', (data) => {
   console.log('Current time:', data.currentTime);
-};
+});
 
-player.onError = (error) => {
+player.addEventListener('onError', (error) => {
   console.error('Player Error:', error.code, error.message);
-};
+});
 
 player.play();
 ```

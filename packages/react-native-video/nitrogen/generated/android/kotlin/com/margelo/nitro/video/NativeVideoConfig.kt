@@ -17,13 +17,39 @@ import com.margelo.nitro.core.*
  */
 @DoNotStrip
 @Keep
-data class NativeVideoConfig
+data class NativeVideoConfig(
   @DoNotStrip
   @Keep
-  constructor(
-    val uri: String,
-    val externalSubtitles: Array<NativeExternalSubtitle>?,
-    val headers: Map<String, String>?
-  ) {
-  /* main constructor */
+  val uri: String,
+  @DoNotStrip
+  @Keep
+  val externalSubtitles: Array<NativeExternalSubtitle>?,
+  @DoNotStrip
+  @Keep
+  val drm: NativeDrmParams?,
+  @DoNotStrip
+  @Keep
+  val headers: Map<String, String>?,
+  @DoNotStrip
+  @Keep
+  val bufferConfig: BufferConfig?,
+  @DoNotStrip
+  @Keep
+  val metadata: CustomVideoMetadata?,
+  @DoNotStrip
+  @Keep
+  val initializeOnCreation: Boolean?
+) {
+  private companion object {
+    /**
+     * Constructor called from C++
+     */
+    @DoNotStrip
+    @Keep
+    @Suppress("unused")
+    @JvmStatic
+    private fun fromCpp(uri: String, externalSubtitles: Array<NativeExternalSubtitle>?, drm: NativeDrmParams?, headers: Map<String, String>?, bufferConfig: BufferConfig?, metadata: CustomVideoMetadata?, initializeOnCreation: Boolean?): NativeVideoConfig {
+      return NativeVideoConfig(uri, externalSubtitles, drm, headers, bufferConfig, metadata, initializeOnCreation)
+    }
+  }
 }

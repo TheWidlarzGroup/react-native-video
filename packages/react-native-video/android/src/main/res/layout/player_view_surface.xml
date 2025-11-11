@@ -1,0 +1,14 @@
+<androidx.media3.ui.PlayerView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/player_view_surface"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    app:surface_type="surface_view"
+    app:scrubber_enabled_size="0dp"
+    app:scrubber_disabled_size="0dp"
+    app:scrubber_dragged_size="0dp"
+    app:touch_target_height="12dp"
+    app:bar_height="5dp" />

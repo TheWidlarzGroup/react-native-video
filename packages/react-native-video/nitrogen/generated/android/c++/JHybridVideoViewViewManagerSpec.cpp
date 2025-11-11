@@ -11,14 +11,17 @@
 namespace margelo::nitro::video { class HybridVideoPlayerSpec; }
 // Forward declaration of `ResizeMode` to properly resolve imports.
 namespace margelo::nitro::video { enum class ResizeMode; }
+// Forward declaration of `SurfaceType` to properly resolve imports.
+namespace margelo::nitro::video { enum class SurfaceType; }
 
 #include <memory>
 #include "HybridVideoPlayerSpec.hpp"
 #include <optional>
 #include "JHybridVideoPlayerSpec.hpp"
-#include <NitroModules/JNISharedPtr.hpp>
 #include "ResizeMode.hpp"
 #include "JResizeMode.hpp"
+#include "SurfaceType.hpp"
+#include "JSurfaceType.hpp"
 #include <functional>
 #include "JFunc_void_bool.hpp"
 #include "JFunc_void.hpp"
@@ -46,12 +49,12 @@ namespace margelo::nitro::video {
   }
 
   // Properties
-  std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>> JHybridVideoViewViewManagerSpec::getPlayer() {
+  std::optional<std::shared_ptr<HybridVideoPlayerSpec>> JHybridVideoViewViewManagerSpec::getPlayer() {
     static const auto method = javaClassStatic()->getMethod<jni::local_ref<JHybridVideoPlayerSpec::javaobject>()>("getPlayer");
     auto __result = method(_javaPart);
-    return __result != nullptr ? std::make_optional(JNISharedPtr::make_shared_from_jni<JHybridVideoPlayerSpec>(jni::make_global(__result))) : std::nullopt;
+    return __result != nullptr ? std::make_optional(__result->cthis()->shared_cast<JHybridVideoPlayerSpec>()) : std::nullopt;
   }
-  void JHybridVideoViewViewManagerSpec::setPlayer(const std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>>& player) {
+  void JHybridVideoViewViewManagerSpec::setPlayer(const std::optional<std::shared_ptr<HybridVideoPlayerSpec>>& player) {
     static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JHybridVideoPlayerSpec::javaobject> /* player */)>("setPlayer");
     method(_javaPart, player.has_value() ? std::dynamic_pointer_cast<JHybridVideoPlayerSpec>(player.value())->getJavaPart() : nullptr);
   }
@@ -90,6 +93,24 @@ namespace margelo::nitro::video {
   void JHybridVideoViewViewManagerSpec::setResizeMode(ResizeMode resizeMode) {
     static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JResizeMode> /* resizeMode */)>("setResizeMode");
     method(_javaPart, JResizeMode::fromCpp(resizeMode));
+  }
+  bool JHybridVideoViewViewManagerSpec::getKeepScreenAwake() {
+    static const auto method = javaClassStatic()->getMethod<jboolean()>("getKeepScreenAwake");
+    auto __result = method(_javaPart);
+    return static_cast<bool>(__result);
+  }
+  void JHybridVideoViewViewManagerSpec::setKeepScreenAwake(bool keepScreenAwake) {
+    static const auto method = javaClassStatic()->getMethod<void(jboolean /* keepScreenAwake */)>("setKeepScreenAwake");
+    method(_javaPart, keepScreenAwake);
+  }
+  SurfaceType JHybridVideoViewViewManagerSpec::getSurfaceType() {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JSurfaceType>()>("getSurfaceType");
+    auto __result = method(_javaPart);
+    return __result->toCpp();
+  }
+  void JHybridVideoViewViewManagerSpec::setSurfaceType(SurfaceType surfaceType) {
+    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JSurfaceType> /* surfaceType */)>("setSurfaceType");
+    method(_javaPart, JSurfaceType::fromCpp(surfaceType));
   }
   std::optional<std::function<void(bool /* isInPictureInPicture */)>> JHybridVideoViewViewManagerSpec::getOnPictureInPictureChange() {
     static const auto method = javaClassStatic()->getMethod<jni::local_ref<JFunc_void_bool::javaobject>()>("getOnPictureInPictureChange_cxx");

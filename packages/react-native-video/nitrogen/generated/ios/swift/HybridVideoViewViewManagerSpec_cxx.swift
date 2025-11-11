@@ -33,7 +33,7 @@ open class HybridVideoViewViewManagerSpec_cxx {
   /**
    * Holds a weak pointer to the C++ class that wraps the Swift class.
    */
-  private var __cxxPart: bridge.std__weak_ptr_margelo__nitro__video__HybridVideoViewViewManagerSpec_
+  private var __cxxPart: bridge.std__weak_ptr_HybridVideoViewViewManagerSpec_
 
   /**
    * Create a new `HybridVideoViewViewManagerSpec_cxx` that wraps the given `HybridVideoViewViewManagerSpec`.
@@ -72,15 +72,15 @@ open class HybridVideoViewViewManagerSpec_cxx {
 
   /**
    * Gets (or creates) the C++ part of this Hybrid Object.
-   * The C++ part is a `std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerSpec>`.
+   * The C++ part is a `std::shared_ptr<HybridVideoViewViewManagerSpec>`.
    */
-  public func getCxxPart() -> bridge.std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerSpec_ {
+  public func getCxxPart() -> bridge.std__shared_ptr_HybridVideoViewViewManagerSpec_ {
     let cachedCxxPart = self.__cxxPart.lock()
     if cachedCxxPart.__convertToBool() {
       return cachedCxxPart
     } else {
-      let newCxxPart = bridge.create_std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerSpec_(self.toUnsafe())
-      __cxxPart = bridge.weakify_std__shared_ptr_margelo__nitro__video__HybridVideoViewViewManagerSpec_(newCxxPart)
+      let newCxxPart = bridge.create_std__shared_ptr_HybridVideoViewViewManagerSpec_(self.toUnsafe())
+      __cxxPart = bridge.weakify_std__shared_ptr_HybridVideoViewViewManagerSpec_(newCxxPart)
       return newCxxPart
     }
   }
@@ -106,12 +106,12 @@ open class HybridVideoViewViewManagerSpec_cxx {
   }
 
   // Properties
-  public final var player: bridge.std__optional_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSpec__ {
+  public final var player: bridge.std__optional_std__shared_ptr_HybridVideoPlayerSpec__ {
     @inline(__always)
     get {
-      return { () -> bridge.std__optional_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSpec__ in
+      return { () -> bridge.std__optional_std__shared_ptr_HybridVideoPlayerSpec__ in
         if let __unwrappedValue = self.__implementation.player {
-          return bridge.create_std__optional_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSpec__({ () -> bridge.std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSpec_ in
+          return bridge.create_std__optional_std__shared_ptr_HybridVideoPlayerSpec__({ () -> bridge.std__shared_ptr_HybridVideoPlayerSpec_ in
             let __cxxWrapped = __unwrappedValue.getCxxWrapper()
             return __cxxWrapped.getCxxPart()
           }())
@@ -123,9 +123,10 @@ open class HybridVideoViewViewManagerSpec_cxx {
     @inline(__always)
     set {
       self.__implementation.player = { () -> (any HybridVideoPlayerSpec)? in
-        if let __unwrapped = newValue.value {
+        if bridge.has_value_std__optional_std__shared_ptr_HybridVideoPlayerSpec__(newValue) {
+          let __unwrapped = bridge.get_std__optional_std__shared_ptr_HybridVideoPlayerSpec__(newValue)
           return { () -> HybridVideoPlayerSpec in
-            let __unsafePointer = bridge.get_std__shared_ptr_margelo__nitro__video__HybridVideoPlayerSpec_(__unwrapped)
+            let __unsafePointer = bridge.get_std__shared_ptr_HybridVideoPlayerSpec_(__unwrapped)
             let __instance = HybridVideoPlayerSpec_cxx.fromUnsafe(__unsafePointer)
             return __instance.getHybridVideoPlayerSpec()
           }()
@@ -180,6 +181,28 @@ open class HybridVideoViewViewManagerSpec_cxx {
     }
   }
   
+  public final var keepScreenAwake: Bool {
+    @inline(__always)
+    get {
+      return self.__implementation.keepScreenAwake
+    }
+    @inline(__always)
+    set {
+      self.__implementation.keepScreenAwake = newValue
+    }
+  }
+  
+  public final var surfaceType: Int32 {
+    @inline(__always)
+    get {
+      return self.__implementation.surfaceType.rawValue
+    }
+    @inline(__always)
+    set {
+      self.__implementation.surfaceType = margelo.nitro.video.SurfaceType(rawValue: newValue)!
+    }
+  }
+  
   public final var onPictureInPictureChange: bridge.std__optional_std__function_void_bool____isInPictureInPicture______ {
     @inline(__always)
     get {
@@ -197,7 +220,8 @@ open class HybridVideoViewViewManagerSpec_cxx {
     @inline(__always)
     set {
       self.__implementation.onPictureInPictureChange = { () -> ((_ isInPictureInPicture: Bool) -> Void)? in
-        if let __unwrapped = newValue.value {
+        if bridge.has_value_std__optional_std__function_void_bool____isInPictureInPicture______(newValue) {
+          let __unwrapped = bridge.get_std__optional_std__function_void_bool____isInPictureInPicture______(newValue)
           return { () -> (Bool) -> Void in
             let __wrappedFunction = bridge.wrap_Func_void_bool(__unwrapped)
             return { (__isInPictureInPicture: Bool) -> Void in
@@ -228,7 +252,8 @@ open class HybridVideoViewViewManagerSpec_cxx {
     @inline(__always)
     set {
       self.__implementation.onFullscreenChange = { () -> ((_ fullscreen: Bool) -> Void)? in
-        if let __unwrapped = newValue.value {
+        if bridge.has_value_std__optional_std__function_void_bool____fullscreen______(newValue) {
+          let __unwrapped = bridge.get_std__optional_std__function_void_bool____fullscreen______(newValue)
           return { () -> (Bool) -> Void in
             let __wrappedFunction = bridge.wrap_Func_void_bool(__unwrapped)
             return { (__fullscreen: Bool) -> Void in
@@ -259,7 +284,8 @@ open class HybridVideoViewViewManagerSpec_cxx {
     @inline(__always)
     set {
       self.__implementation.willEnterFullscreen = { () -> (() -> Void)? in
-        if let __unwrapped = newValue.value {
+        if bridge.has_value_std__optional_std__function_void____(newValue) {
+          let __unwrapped = bridge.get_std__optional_std__function_void____(newValue)
           return { () -> () -> Void in
             let __wrappedFunction = bridge.wrap_Func_void(__unwrapped)
             return { () -> Void in
@@ -290,7 +316,8 @@ open class HybridVideoViewViewManagerSpec_cxx {
     @inline(__always)
     set {
       self.__implementation.willExitFullscreen = { () -> (() -> Void)? in
-        if let __unwrapped = newValue.value {
+        if bridge.has_value_std__optional_std__function_void____(newValue) {
+          let __unwrapped = bridge.get_std__optional_std__function_void____(newValue)
           return { () -> () -> Void in
             let __wrappedFunction = bridge.wrap_Func_void(__unwrapped)
             return { () -> Void in
@@ -321,7 +348,8 @@ open class HybridVideoViewViewManagerSpec_cxx {
     @inline(__always)
     set {
       self.__implementation.willEnterPictureInPicture = { () -> (() -> Void)? in
-        if let __unwrapped = newValue.value {
+        if bridge.has_value_std__optional_std__function_void____(newValue) {
+          let __unwrapped = bridge.get_std__optional_std__function_void____(newValue)
           return { () -> () -> Void in
             let __wrappedFunction = bridge.wrap_Func_void(__unwrapped)
             return { () -> Void in
@@ -352,7 +380,8 @@ open class HybridVideoViewViewManagerSpec_cxx {
     @inline(__always)
     set {
       self.__implementation.willExitPictureInPicture = { () -> (() -> Void)? in
-        if let __unwrapped = newValue.value {
+        if bridge.has_value_std__optional_std__function_void____(newValue) {
+          let __unwrapped = bridge.get_std__optional_std__function_void____(newValue)
           return { () -> () -> Void in
             let __wrappedFunction = bridge.wrap_Func_void(__unwrapped)
             return { () -> Void in

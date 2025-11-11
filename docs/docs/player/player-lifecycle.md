@@ -1,6 +1,6 @@
 ---
 sidebar_label: Player Lifecycle
-sidebar_position: 5
+sidebar_position: 2
 ---
 
 # Player Lifecycle
@@ -9,19 +9,43 @@ Understanding the lifecycle of the `VideoPlayer` is crucial for managing resourc
 
 ## Creation and Initialization
 
-1.  **Instantiation**: A `VideoPlayer` instance is created by calling its constructor with a video source (URL, `VideoSource`, or `VideoConfig`).
+1. **Instantiation**: A `VideoPlayer` instance is created by calling its constructor with a video source (URL, `VideoSource`, or `VideoConfig`).
     ```typescript
     const player = new VideoPlayer('https://example.com/video.mp4');
     ```
-2.  **Native Player Creation**: Internally this creates a native player instance tailored to the platform (iOS/Android).
+2. **Native Player Allocation**: A lightweight native player object is allocated immediately.
+3. **Asset Initialization**: By default (unless you opt out) the underlying media item is prepared **asynchronously right after creation**. You can control this with `initializeOnCreation` inside `VideoConfig`.
+
+### Deferred Initialization (Advanced)
+
+If you pass a `VideoConfig` with `{ initializeOnCreation: false }`, the player will skip preparing the media item automatically. This is useful when:
+
+- You need to batch‑create many players without incurring immediate decoding / network cost
+- You want to attach event handlers before any network requests happen
+- You want explicit control over when buffering begins (e.g. on user interaction)
+
+To initialize later, call:
+```ts
+await player.initialize();
+// or preload if you also want it prepared & ready
+await player.preload();
+```
+
+### Initialization Methods Comparison
+
+| Method | When to use | What it does |
+|--------|-------------|--------------|
+| `initialize()` | You deferred initialization and now want to create the native player item / media source | Creates & attaches the underlying player item / media source without starting playback |
+| `preload()` | You want the player item prepared (buffering kicked off) ahead of an upcoming `play()` call | Ensures the media source is set and prepared; resolves once preparation started (may already be initialized) |
+| Implicit (default) | `initializeOnCreation` not set or `true` | Automatically schedules initialization after JS construction |
 
 :::info
-Player does not initialize asset right after JS class creation. Asset will be initialized when you call `preload()` or access any property/method of the player.
+By default, the player initializes automatically after construction. If you need to defer initialization, set `initializeOnCreation: false` in the config. You can then call `player.initialize()` or `player.preload()` later to start the player.
 :::
 
 ## Playing a Video
 
-1.  **Loading**: When `play()` is called for the first time, or after `replaceSourceAsync()`, the player starts loading the video metadata and buffering content.
+1.  **Loading**: When the player (auto) initializes, `preload()` is called, or after `replaceSourceAsync()`, the player starts loading the video metadata and buffering content.
     -   `onLoadStart`: Fired when the video starts loading.
     -   `onLoad`: Fired when the video metadata is loaded and the player is ready to play (duration, dimensions, etc., are available).
     -   `onBuffer`: Fired when buffering starts or ends.
@@ -91,5 +115,19 @@ const MyComponent = () => {
 -   **Dependency Management**: If the `source` prop passed to `useVideoPlayer` changes, the hook will clean up the old player instance and create a new one with the new source.
 
 :::tip
-Using `useVideoPlayer` is the recommended way to manage `VideoPlayer` instances in functional components to ensure proper lifecycle management and resource cleanup.
+Using `useVideoPlayer` is the recommended way to manage `VideoPlayer` instances in functional components to ensure proper lifecycle management and resource cleanup. It will also respect `initializeOnCreation` (defaults to `true`). If you need deferred initialization with the hook:
+
+```tsx
+const player = useVideoPlayer({
+    source: { uri: 'https://example.com/video.mp4' },
+    initializeOnCreation: false,
+}, (instance) => {
+    // Attach listeners first
+    instance.onLoad = () => console.log('Loaded');
+});
+
+// Later (e.g. on user tap)
+await player.initialize(); // or player.preload()
+player.play();
+```
 :::

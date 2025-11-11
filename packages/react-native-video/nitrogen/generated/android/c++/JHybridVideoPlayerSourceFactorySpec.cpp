@@ -15,11 +15,22 @@ namespace margelo::nitro::video { struct NativeVideoConfig; }
 namespace margelo::nitro::video { struct NativeExternalSubtitle; }
 // Forward declaration of `SubtitleType` to properly resolve imports.
 namespace margelo::nitro::video { enum class SubtitleType; }
+// Forward declaration of `NativeDrmParams` to properly resolve imports.
+namespace margelo::nitro::video { struct NativeDrmParams; }
+// Forward declaration of `OnGetLicensePayload` to properly resolve imports.
+namespace margelo::nitro::video { struct OnGetLicensePayload; }
+// Forward declaration of `BufferConfig` to properly resolve imports.
+namespace margelo::nitro::video { struct BufferConfig; }
+// Forward declaration of `LivePlaybackParams` to properly resolve imports.
+namespace margelo::nitro::video { struct LivePlaybackParams; }
+// Forward declaration of `Resolution` to properly resolve imports.
+namespace margelo::nitro::video { struct Resolution; }
+// Forward declaration of `CustomVideoMetadata` to properly resolve imports.
+namespace margelo::nitro::video { struct CustomVideoMetadata; }
 
 #include <memory>
 #include "HybridVideoPlayerSourceSpec.hpp"
 #include "JHybridVideoPlayerSourceSpec.hpp"
-#include <NitroModules/JNISharedPtr.hpp>
 #include <string>
 #include "NativeVideoConfig.hpp"
 #include "JNativeVideoConfig.hpp"
@@ -29,7 +40,23 @@ namespace margelo::nitro::video { enum class SubtitleType; }
 #include "JNativeExternalSubtitle.hpp"
 #include "SubtitleType.hpp"
 #include "JSubtitleType.hpp"
+#include "NativeDrmParams.hpp"
+#include "JNativeDrmParams.hpp"
 #include <unordered_map>
+#include <NitroModules/Promise.hpp>
+#include "OnGetLicensePayload.hpp"
+#include <functional>
+#include "JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload.hpp"
+#include <NitroModules/JPromise.hpp>
+#include "JOnGetLicensePayload.hpp"
+#include "BufferConfig.hpp"
+#include "JBufferConfig.hpp"
+#include "LivePlaybackParams.hpp"
+#include "JLivePlaybackParams.hpp"
+#include "Resolution.hpp"
+#include "JResolution.hpp"
+#include "CustomVideoMetadata.hpp"
+#include "JCustomVideoMetadata.hpp"
 
 namespace margelo::nitro::video {
 
@@ -57,15 +84,15 @@ namespace margelo::nitro::video {
   
 
   // Methods
-  std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec> JHybridVideoPlayerSourceFactorySpec::fromUri(const std::string& uri) {
+  std::shared_ptr<HybridVideoPlayerSourceSpec> JHybridVideoPlayerSourceFactorySpec::fromUri(const std::string& uri) {
     static const auto method = javaClassStatic()->getMethod<jni::local_ref<JHybridVideoPlayerSourceSpec::javaobject>(jni::alias_ref<jni::JString> /* uri */)>("fromUri");
     auto __result = method(_javaPart, jni::make_jstring(uri));
-    return JNISharedPtr::make_shared_from_jni<JHybridVideoPlayerSourceSpec>(jni::make_global(__result));
+    return __result->cthis()->shared_cast<JHybridVideoPlayerSourceSpec>();
   }
-  std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec> JHybridVideoPlayerSourceFactorySpec::fromVideoConfig(const NativeVideoConfig& config) {
+  std::shared_ptr<HybridVideoPlayerSourceSpec> JHybridVideoPlayerSourceFactorySpec::fromVideoConfig(const NativeVideoConfig& config) {
     static const auto method = javaClassStatic()->getMethod<jni::local_ref<JHybridVideoPlayerSourceSpec::javaobject>(jni::alias_ref<JNativeVideoConfig> /* config */)>("fromVideoConfig");
     auto __result = method(_javaPart, JNativeVideoConfig::fromCpp(config));
-    return JNISharedPtr::make_shared_from_jni<JHybridVideoPlayerSourceSpec>(jni::make_global(__result));
+    return __result->cthis()->shared_cast<JHybridVideoPlayerSourceSpec>();
   }
 
 } // namespace margelo::nitro::video

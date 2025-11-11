@@ -13,6 +13,16 @@ export interface VideoPlayer
   // Holder of the video player events.
   readonly eventEmitter: VideoPlayerEventEmitter;
 
+  /**
+   * Show playback controls in the notifications area
+   *
+   * @note on Android, this can be overridden by {@linkcode VideoPlayer.playInBackground}, as Android requires
+   * a foreground service to show notifications while the app is in the background.
+   *
+   * @default false
+   */
+  showNotificationControls: boolean;
+
   replaceSourceAsync(source: VideoPlayerSource | null): Promise<void>;
 
   /**

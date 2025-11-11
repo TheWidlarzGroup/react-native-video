@@ -13,6 +13,18 @@ namespace margelo::nitro::video { struct NativeVideoConfig; }
 namespace margelo::nitro::video { struct NativeExternalSubtitle; }
 // Forward declaration of `SubtitleType` to properly resolve imports.
 namespace margelo::nitro::video { enum class SubtitleType; }
+// Forward declaration of `NativeDrmParams` to properly resolve imports.
+namespace margelo::nitro::video { struct NativeDrmParams; }
+// Forward declaration of `OnGetLicensePayload` to properly resolve imports.
+namespace margelo::nitro::video { struct OnGetLicensePayload; }
+// Forward declaration of `BufferConfig` to properly resolve imports.
+namespace margelo::nitro::video { struct BufferConfig; }
+// Forward declaration of `LivePlaybackParams` to properly resolve imports.
+namespace margelo::nitro::video { struct LivePlaybackParams; }
+// Forward declaration of `Resolution` to properly resolve imports.
+namespace margelo::nitro::video { struct Resolution; }
+// Forward declaration of `CustomVideoMetadata` to properly resolve imports.
+namespace margelo::nitro::video { struct CustomVideoMetadata; }
 // Forward declaration of `VideoInformation` to properly resolve imports.
 namespace margelo::nitro::video { struct VideoInformation; }
 // Forward declaration of `VideoOrientation` to properly resolve imports.
@@ -27,10 +39,24 @@ namespace margelo::nitro::video { enum class VideoOrientation; }
 #include "JNativeExternalSubtitle.hpp"
 #include "SubtitleType.hpp"
 #include "JSubtitleType.hpp"
+#include "NativeDrmParams.hpp"
+#include "JNativeDrmParams.hpp"
 #include <unordered_map>
-#include "VideoInformation.hpp"
 #include <NitroModules/Promise.hpp>
+#include "OnGetLicensePayload.hpp"
+#include <functional>
+#include "JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload.hpp"
 #include <NitroModules/JPromise.hpp>
+#include "JOnGetLicensePayload.hpp"
+#include "BufferConfig.hpp"
+#include "JBufferConfig.hpp"
+#include "LivePlaybackParams.hpp"
+#include "JLivePlaybackParams.hpp"
+#include "Resolution.hpp"
+#include "JResolution.hpp"
+#include "CustomVideoMetadata.hpp"
+#include "JCustomVideoMetadata.hpp"
+#include "VideoInformation.hpp"
 #include "JVideoInformation.hpp"
 #include "VideoOrientation.hpp"
 #include "JVideoOrientation.hpp"

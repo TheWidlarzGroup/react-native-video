@@ -17,6 +17,11 @@
 #else
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
+#if __has_include(<NitroModules/JSIHelpers.hpp>)
+#include <NitroModules/JSIHelpers.hpp>
+#else
+#error NitroModules cannot be found! Are you sure you installed NitroModules properly?
+#endif
 
 
 
@@ -41,19 +46,17 @@ namespace margelo::nitro::video {
 
 namespace margelo::nitro {
 
-  using namespace margelo::nitro::video;
-
   // C++ TimedMetadataObject <> JS TimedMetadataObject (object)
   template <>
-  struct JSIConverter<TimedMetadataObject> final {
-    static inline TimedMetadataObject fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
+  struct JSIConverter<margelo::nitro::video::TimedMetadataObject> final {
+    static inline margelo::nitro::video::TimedMetadataObject fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
-      return TimedMetadataObject(
+      return margelo::nitro::video::TimedMetadataObject(
         JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, "value")),
         JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, "identifier"))
       );
     }
-    static inline jsi::Value toJSI(jsi::Runtime& runtime, const TimedMetadataObject& arg) {
+    static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::video::TimedMetadataObject& arg) {
       jsi::Object obj(runtime);
       obj.setProperty(runtime, "value", JSIConverter<std::string>::toJSI(runtime, arg.value));
       obj.setProperty(runtime, "identifier", JSIConverter<std::string>::toJSI(runtime, arg.identifier));
@@ -64,6 +67,9 @@ namespace margelo::nitro {
         return false;
       }
       jsi::Object obj = value.getObject(runtime);
+      if (!nitro::isPlainObject(runtime, obj)) {
+        return false;
+      }
       if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, "value"))) return false;
       if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, "identifier"))) return false;
       return true;

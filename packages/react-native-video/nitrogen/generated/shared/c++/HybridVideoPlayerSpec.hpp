@@ -64,8 +64,10 @@ namespace margelo::nitro::video {
 
     public:
       // Properties
-      virtual std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec> getSource() = 0;
-      virtual std::shared_ptr<margelo::nitro::video::HybridVideoPlayerEventEmitterSpec> getEventEmitter() = 0;
+      virtual std::shared_ptr<HybridVideoPlayerSourceSpec> getSource() = 0;
+      virtual std::shared_ptr<HybridVideoPlayerEventEmitterSpec> getEventEmitter() = 0;
+      virtual bool getShowNotificationControls() = 0;
+      virtual void setShowNotificationControls(bool showNotificationControls) = 0;
       virtual VideoPlayerStatus getStatus() = 0;
       virtual double getDuration() = 0;
       virtual double getVolume() = 0;
@@ -91,9 +93,10 @@ namespace margelo::nitro::video {
 
     public:
       // Methods
-      virtual std::shared_ptr<Promise<void>> replaceSourceAsync(const std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSourceSpec>>& source) = 0;
+      virtual std::shared_ptr<Promise<void>> replaceSourceAsync(const std::optional<std::shared_ptr<HybridVideoPlayerSourceSpec>>& source) = 0;
       virtual std::vector<TextTrack> getAvailableTextTracks() = 0;
       virtual void selectTextTrack(const std::optional<TextTrack>& textTrack) = 0;
+      virtual std::shared_ptr<Promise<void>> initialize() = 0;
       virtual std::shared_ptr<Promise<void>> preload() = 0;
       virtual void play() = 0;
       virtual void pause() = 0;

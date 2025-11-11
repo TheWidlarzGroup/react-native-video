@@ -1,6 +1,7 @@
 name: Deploy Documentation
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - v7
@@ -11,6 +12,7 @@ on:
       - 'docs/**'
       # Update on code change (Api Reference)
       - 'packages/react-native-video/src/**'
+  
 
 jobs:
   build:

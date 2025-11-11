@@ -59,7 +59,7 @@ namespace margelo::nitro::video {
 
   public:
     // Methods
-    inline std::shared_ptr<margelo::nitro::video::HybridVideoViewViewManagerSpec> createViewManager(double nitroId) override {
+    inline std::shared_ptr<HybridVideoViewViewManagerSpec> createViewManager(double nitroId) override {
       auto __result = _swiftPart.createViewManager(std::forward<decltype(nitroId)>(nitroId));
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());

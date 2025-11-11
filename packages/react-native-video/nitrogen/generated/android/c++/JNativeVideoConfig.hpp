@@ -10,10 +10,26 @@
 #include <fbjni/fbjni.h>
 #include "NativeVideoConfig.hpp"
 
+#include "BufferConfig.hpp"
+#include "CustomVideoMetadata.hpp"
+#include "JBufferConfig.hpp"
+#include "JCustomVideoMetadata.hpp"
+#include "JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload.hpp"
+#include "JLivePlaybackParams.hpp"
+#include "JNativeDrmParams.hpp"
 #include "JNativeExternalSubtitle.hpp"
+#include "JOnGetLicensePayload.hpp"
+#include "JResolution.hpp"
 #include "JSubtitleType.hpp"
+#include "LivePlaybackParams.hpp"
+#include "NativeDrmParams.hpp"
 #include "NativeExternalSubtitle.hpp"
+#include "OnGetLicensePayload.hpp"
+#include "Resolution.hpp"
 #include "SubtitleType.hpp"
+#include <NitroModules/JPromise.hpp>
+#include <NitroModules/Promise.hpp>
+#include <functional>
 #include <optional>
 #include <string>
 #include <unordered_map>
@@ -42,8 +58,16 @@ namespace margelo::nitro::video {
       jni::local_ref<jni::JString> uri = this->getFieldValue(fieldUri);
       static const auto fieldExternalSubtitles = clazz->getField<jni::JArrayClass<JNativeExternalSubtitle>>("externalSubtitles");
       jni::local_ref<jni::JArrayClass<JNativeExternalSubtitle>> externalSubtitles = this->getFieldValue(fieldExternalSubtitles);
+      static const auto fieldDrm = clazz->getField<JNativeDrmParams>("drm");
+      jni::local_ref<JNativeDrmParams> drm = this->getFieldValue(fieldDrm);
       static const auto fieldHeaders = clazz->getField<jni::JMap<jni::JString, jni::JString>>("headers");
       jni::local_ref<jni::JMap<jni::JString, jni::JString>> headers = this->getFieldValue(fieldHeaders);
+      static const auto fieldBufferConfig = clazz->getField<JBufferConfig>("bufferConfig");
+      jni::local_ref<JBufferConfig> bufferConfig = this->getFieldValue(fieldBufferConfig);
+      static const auto fieldMetadata = clazz->getField<JCustomVideoMetadata>("metadata");
+      jni::local_ref<JCustomVideoMetadata> metadata = this->getFieldValue(fieldMetadata);
+      static const auto fieldInitializeOnCreation = clazz->getField<jni::JBoolean>("initializeOnCreation");
+      jni::local_ref<jni::JBoolean> initializeOnCreation = this->getFieldValue(fieldInitializeOnCreation);
       return NativeVideoConfig(
         uri->toStdString(),
         externalSubtitles != nullptr ? std::make_optional([&]() {
@@ -56,6 +80,7 @@ namespace margelo::nitro::video {
           }
           return __vector;
         }()) : std::nullopt,
+        drm != nullptr ? std::make_optional(drm->toCpp()) : std::nullopt,
         headers != nullptr ? std::make_optional([&]() {
           std::unordered_map<std::string, std::string> __map;
           __map.reserve(headers->size());
@@ -63,7 +88,10 @@ namespace margelo::nitro::video {
             __map.emplace(__entry.first->toStdString(), __entry.second->toStdString());
           }
           return __map;
-        }()) : std::nullopt
+        }()) : std::nullopt,
+        bufferConfig != nullptr ? std::make_optional(bufferConfig->toCpp()) : std::nullopt,
+        metadata != nullptr ? std::make_optional(metadata->toCpp()) : std::nullopt,
+        initializeOnCreation != nullptr ? std::make_optional(static_cast<bool>(initializeOnCreation->value())) : std::nullopt
       );
     }
 
@@ -73,7 +101,11 @@ namespace margelo::nitro::video {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeVideoConfig::javaobject> fromCpp(const NativeVideoConfig& value) {
-      return newInstance(
+      using JSignature = JNativeVideoConfig(jni::alias_ref<jni::JString>, jni::alias_ref<jni::JArrayClass<JNativeExternalSubtitle>>, jni::alias_ref<JNativeDrmParams>, jni::alias_ref<jni::JMap<jni::JString, jni::JString>>, jni::alias_ref<JBufferConfig>, jni::alias_ref<JCustomVideoMetadata>, jni::alias_ref<jni::JBoolean>);
+      static const auto clazz = javaClassStatic();
+      static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
+      return create(
+        clazz,
         jni::make_jstring(value.uri),
         value.externalSubtitles.has_value() ? [&]() {
           size_t __size = value.externalSubtitles.value().size();
@@ -84,13 +116,17 @@ namespace margelo::nitro::video {
           }
           return __array;
         }() : nullptr,
+        value.drm.has_value() ? JNativeDrmParams::fromCpp(value.drm.value()) : nullptr,
         value.headers.has_value() ? [&]() -> jni::local_ref<jni::JMap<jni::JString, jni::JString>> {
           auto __map = jni::JHashMap<jni::JString, jni::JString>::create(value.headers.value().size());
           for (const auto& __entry : value.headers.value()) {
             __map->put(jni::make_jstring(__entry.first), jni::make_jstring(__entry.second));
           }
           return __map;
-        }() : nullptr
+        }() : nullptr,
+        value.bufferConfig.has_value() ? JBufferConfig::fromCpp(value.bufferConfig.value()) : nullptr,
+        value.metadata.has_value() ? JCustomVideoMetadata::fromCpp(value.metadata.value()) : nullptr,
+        value.initializeOnCreation.has_value() ? jni::JBoolean::valueOf(value.initializeOnCreation.value()) : nullptr
       );
     }
   };

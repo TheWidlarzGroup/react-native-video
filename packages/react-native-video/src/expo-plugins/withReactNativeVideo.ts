@@ -4,6 +4,7 @@ import { getPackageInfo } from './getPackageInfo';
 import { withAndroidExtensions } from './withAndroidExtensions';
 import { withAndroidPictureInPicture } from './withAndroidPictureInPicture';
 import { withBackgroundAudio } from './withBackgroundAudio';
+import { withAndroidNotificationControls } from './withAndroidNotificationControls';
 
 const withRNVideo: ConfigPlugin<ConfigProps> = (config, props = {}) => {
   if (props.enableAndroidPictureInPicture) {
@@ -20,6 +21,8 @@ const withRNVideo: ConfigPlugin<ConfigProps> = (config, props = {}) => {
   if (props.enableBackgroundAudio) {
     config = withBackgroundAudio(config, props.enableBackgroundAudio);
   }
+
+  config = withAndroidNotificationControls(config);
 
   return config;
 };

@@ -7,7 +7,7 @@ description: Introduction to React Native Video library
 
 **One of the most popular video playback libraries for React Native applications.**
 
-`react-native-video` provides a comprehensive solution for video playback in React Native, built on top of [`react-native-nitro-modules`](https://nitro.margelo.com/docs/what-is-nitro) framework. Whether you're building a video streaming app, media player, or educational platform, `react-native-video` gives you the tools you need to create exceptional video experiences.
+`react-native-video` provides a comprehensive solution for video playback in React Native, built on top of the [`react-native-nitro-modules`](https://nitro.margelo.com/docs/what-is-nitro) framework. Whether you're building a video streaming app, media player, or educational platform, `react-native-video` gives you the tools you need to create exceptional video experiences.
 
 ## Why Choose `react-native-video`?
 

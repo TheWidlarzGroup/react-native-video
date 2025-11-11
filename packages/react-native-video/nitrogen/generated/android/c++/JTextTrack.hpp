@@ -54,7 +54,11 @@ namespace margelo::nitro::video {
      */
     [[maybe_unused]]
     static jni::local_ref<JTextTrack::javaobject> fromCpp(const TextTrack& value) {
-      return newInstance(
+      using JSignature = JTextTrack(jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jboolean);
+      static const auto clazz = javaClassStatic();
+      static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
+      return create(
+        clazz,
         jni::make_jstring(value.id),
         jni::make_jstring(value.label),
         value.language.has_value() ? jni::make_jstring(value.language.value()) : nullptr,

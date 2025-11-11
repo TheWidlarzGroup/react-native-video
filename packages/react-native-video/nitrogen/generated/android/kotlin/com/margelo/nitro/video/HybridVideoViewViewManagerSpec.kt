@@ -67,6 +67,18 @@ abstract class HybridVideoViewViewManagerSpec: HybridObject() {
   @set:Keep
   abstract var resizeMode: ResizeMode
   
+  @get:DoNotStrip
+  @get:Keep
+  @set:DoNotStrip
+  @set:Keep
+  abstract var keepScreenAwake: Boolean
+  
+  @get:DoNotStrip
+  @get:Keep
+  @set:DoNotStrip
+  @set:Keep
+  abstract var surfaceType: SurfaceType
+  
   abstract var onPictureInPictureChange: ((isInPictureInPicture: Boolean) -> Unit)?
   
   private var onPictureInPictureChange_cxx: Func_void_bool?
@@ -175,6 +187,6 @@ abstract class HybridVideoViewViewManagerSpec: HybridObject() {
   private external fun initHybrid(): HybridData
 
   companion object {
-    private const val TAG = "HybridVideoViewViewManagerSpec"
+    protected const val TAG = "HybridVideoViewViewManagerSpec"
   }
 }

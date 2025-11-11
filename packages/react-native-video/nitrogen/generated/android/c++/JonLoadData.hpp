@@ -57,7 +57,11 @@ namespace margelo::nitro::video {
      */
     [[maybe_unused]]
     static jni::local_ref<JonLoadData::javaobject> fromCpp(const onLoadData& value) {
-      return newInstance(
+      using JSignature = JonLoadData(double, double, double, double, jni::alias_ref<JVideoOrientation>);
+      static const auto clazz = javaClassStatic();
+      static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
+      return create(
+        clazz,
         value.currentTime,
         value.duration,
         value.height,

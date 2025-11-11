@@ -17,13 +17,27 @@ import com.margelo.nitro.core.*
  */
 @DoNotStrip
 @Keep
-data class BandwidthData
+data class BandwidthData(
   @DoNotStrip
   @Keep
-  constructor(
-    val bitrate: Double,
-    val width: Double?,
-    val height: Double?
-  ) {
-  /* main constructor */
+  val bitrate: Double,
+  @DoNotStrip
+  @Keep
+  val width: Double?,
+  @DoNotStrip
+  @Keep
+  val height: Double?
+) {
+  private companion object {
+    /**
+     * Constructor called from C++
+     */
+    @DoNotStrip
+    @Keep
+    @Suppress("unused")
+    @JvmStatic
+    private fun fromCpp(bitrate: Double, width: Double?, height: Double?): BandwidthData {
+      return BandwidthData(bitrate, width, height)
+    }
+  }
 }

@@ -15,10 +15,7 @@ public protocol NativeVideoPlayerSpec {
   // MARK: - Properties
   
   /// The underlying AVPlayer instance (should not be used directly)
-  var player: AVPlayer? { get set }
-  
-  /// The actual player that should be used for playback
-  var playerPointer: AVPlayer { get set }
+  var player: AVPlayer { get set }
   
   /// The current player item
   var playerItem: AVPlayerItem? { get set }

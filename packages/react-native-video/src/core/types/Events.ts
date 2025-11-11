@@ -1,5 +1,6 @@
 import type { VideoPlayerSource } from '../../spec/nitro/VideoPlayerSource.nitro';
 import type { TextTrack } from './TextTrack';
+import type { VideoRuntimeError } from './VideoError';
 import type { VideoOrientation } from './VideoOrientation';
 import type { VideoPlayerStatus } from './VideoPlayerStatus';
 
@@ -90,6 +91,10 @@ export interface VideoPlayerEvents {
    * Called when the player status changes.
    */
   onStatusChange: (status: VideoPlayerStatus) => void;
+}
+
+export interface AllPlayerEvents extends VideoPlayerEvents {
+  onError: (error: VideoRuntimeError) => void;
 }
 
 export interface VideoViewEvents {
@@ -220,3 +225,42 @@ export interface onVolumeChangeData {
    */
   muted: boolean;
 }
+
+type CheckAllAndOnly<T, A extends readonly (keyof T)[]> =
+  // Missing keys?
+  Exclude<keyof T, A[number]> extends never
+    ? // Extra keys?
+      Exclude<A[number], keyof T> extends never
+      ? A
+      : ['Extra keys', Exclude<A[number], keyof T>]
+    : ['Missing keys', Exclude<keyof T, A[number]>];
+
+function allKeysOf<T>() {
+  return <A extends readonly (keyof T)[]>(...arr: A): CheckAllAndOnly<T, A> => {
+    return arr as CheckAllAndOnly<T, A>;
+  };
+}
+
+export const ALL_PLAYER_EVENTS: (keyof AllPlayerEvents)[] =
+  allKeysOf<AllPlayerEvents>()(
+    'onAudioBecomingNoisy',
+    'onAudioFocusChange',
+    'onBandwidthUpdate',
+    'onBuffer',
+    'onControlsVisibleChange',
+    'onEnd',
+    'onError',
+    'onExternalPlaybackChange',
+    'onLoad',
+    'onLoadStart',
+    'onPlaybackStateChange',
+    'onPlaybackRateChange',
+    'onProgress',
+    'onReadyToDisplay',
+    'onSeek',
+    'onTimedMetadata',
+    'onTextTrackDataChanged',
+    'onTrackChange',
+    'onVolumeChange',
+    'onStatusChange'
+  );

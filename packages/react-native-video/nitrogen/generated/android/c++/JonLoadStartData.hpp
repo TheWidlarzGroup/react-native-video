@@ -14,7 +14,6 @@
 #include "JHybridVideoPlayerSourceSpec.hpp"
 #include "JSourceType.hpp"
 #include "SourceType.hpp"
-#include <NitroModules/JNISharedPtr.hpp>
 #include <memory>
 
 namespace margelo::nitro::video {
@@ -42,7 +41,7 @@ namespace margelo::nitro::video {
       jni::local_ref<JHybridVideoPlayerSourceSpec::javaobject> source = this->getFieldValue(fieldSource);
       return onLoadStartData(
         sourceType->toCpp(),
-        JNISharedPtr::make_shared_from_jni<JHybridVideoPlayerSourceSpec>(jni::make_global(source))
+        source->cthis()->shared_cast<JHybridVideoPlayerSourceSpec>()
       );
     }
 
@@ -52,7 +51,11 @@ namespace margelo::nitro::video {
      */
     [[maybe_unused]]
     static jni::local_ref<JonLoadStartData::javaobject> fromCpp(const onLoadStartData& value) {
-      return newInstance(
+      using JSignature = JonLoadStartData(jni::alias_ref<JSourceType>, jni::alias_ref<JHybridVideoPlayerSourceSpec::javaobject>);
+      static const auto clazz = javaClassStatic();
+      static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
+      return create(
+        clazz,
         JSourceType::fromCpp(value.sourceType),
         std::dynamic_pointer_cast<JHybridVideoPlayerSourceSpec>(value.source)->getJavaPart()
       );

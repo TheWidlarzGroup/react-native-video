@@ -13,6 +13,7 @@ public protocol HybridVideoPlayerSpec_protocol: HybridObject {
   // Properties
   var source: (any HybridVideoPlayerSourceSpec) { get }
   var eventEmitter: (any HybridVideoPlayerEventEmitterSpec) { get }
+  var showNotificationControls: Bool { get set }
   var status: VideoPlayerStatus { get }
   var duration: Double { get }
   var volume: Double { get set }
@@ -31,6 +32,7 @@ public protocol HybridVideoPlayerSpec_protocol: HybridObject {
   func replaceSourceAsync(source: (any HybridVideoPlayerSourceSpec)?) throws -> Promise<Void>
   func getAvailableTextTracks() throws -> [TextTrack]
   func selectTextTrack(textTrack: TextTrack?) throws -> Void
+  func initialize() throws -> Promise<Void>
   func preload() throws -> Promise<Void>
   func play() throws -> Void
   func pause() throws -> Void

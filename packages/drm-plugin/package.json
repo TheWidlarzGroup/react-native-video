@@ -1,0 +1,135 @@
+{
+  "name": "@react-native-video/drm",
+  "version": "7.0.0-alpha.8",
+  "description": "DRM plugin for react-native-video",
+  "main": "./lib/module/index.js",
+  "types": "./lib/typescript/src/index.d.ts",
+  "exports": {
+    ".": {
+      "source": "./src/index.tsx",
+      "types": "./lib/typescript/src/index.d.ts",
+      "default": "./lib/module/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "lib",
+    "android",
+    "ios",
+    "cpp",
+    "nitrogen",
+    "nitro.json",
+    "*.podspec",
+    "react-native.config.js",
+    "!ios/build",
+    "!android/build",
+    "!android/gradle",
+    "!android/gradlew",
+    "!android/gradlew.bat",
+    "!android/local.properties",
+    "!**/__tests__",
+    "!**/__fixtures__",
+    "!**/__mocks__",
+    "!**/.*"
+  ],
+  "scripts": {
+    "test": "jest",
+    "typecheck": "tsc",
+    "lint": "eslint \"**/*.{js,ts,tsx}\"",
+    "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
+    "prepare": "bun run build",
+    "build": "bob build",
+    "specs": "nitrogen",
+    "release": "release-it --preRelease alpha --npm.tag=next"
+  },
+  "keywords": [
+    "react-native",
+    "react-native-video",
+    "drm",
+    "ios",
+    "android"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TheWidlarzGroup/react-native-video.git"
+  },
+  "author": "TheWidlarzGroup <hi@thewidlarzgroup.com> (https://github.com/TheWidlarzGroup)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/TheWidlarzGroup/react-native-video/issues"
+  },
+  "homepage": "https://github.com/TheWidlarzGroup/react-native-video#readme",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
+  "devDependencies": {
+    "@react-native/babel-preset": "0.79.2",
+    "@release-it/conventional-changelog": "^9.0.2",
+    "@types/react": "^18.3.0",
+    "del-cli": "^5.1.0",
+    "eslint": "^8.51.0",
+    "eslint-config-prettier": "9.0.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "nitrogen": "^0.30.0",
+    "prettier": "^3.0.3",
+    "react": "18.3.1",
+    "react-native": "^0.77.0",
+    "react-native-builder-bob": "^0.40.13",
+    "react-native-nitro-modules": "^0.30.0",
+    "release-it": "^17.10.0",
+    "typescript": "^5.8.3",
+    "react-native-video": "*"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*",
+    "react-native-video": ">=7.0.0-alpha.3",
+    "react-native-nitro-modules": ">=0.27.2"
+  },
+  "jest": {
+    "preset": "react-native",
+    "modulePathIgnorePatterns": [
+      "<rootDir>/example/node_modules",
+      "<rootDir>/lib/"
+    ]
+  },
+  "release-it": {
+    "git": false,
+    "npm": {
+      "publish": true,
+      "publishArgs": "--access public"
+    },
+    "github": {
+      "release": false
+    },
+    "hooks": {
+      "before:init": "bun typecheck && bun lint",
+      "after:bump": "bun run build && cp ../../LICENSE ./LICENSE"
+    }
+  },
+  "react-native-builder-bob": {
+    "source": "src",
+    "output": "lib",
+    "targets": [
+      [
+        "module",
+        {
+          "esm": true
+        }
+      ],
+      [
+        "typescript",
+        {
+          "project": "tsconfig.build.json"
+        }
+      ]
+    ]
+  },
+  "create-react-native-library": {
+    "languages": "kotlin-swift",
+    "type": "nitro-module",
+    "version": "0.52.0"
+  }
+}

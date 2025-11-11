@@ -16,11 +16,14 @@ namespace ReactNativeVideo { class HybridVideoViewViewManagerSpec_cxx; }
 namespace margelo::nitro::video { class HybridVideoPlayerSpec; }
 // Forward declaration of `ResizeMode` to properly resolve imports.
 namespace margelo::nitro::video { enum class ResizeMode; }
+// Forward declaration of `SurfaceType` to properly resolve imports.
+namespace margelo::nitro::video { enum class SurfaceType; }
 
 #include <memory>
 #include "HybridVideoPlayerSpec.hpp"
 #include <optional>
 #include "ResizeMode.hpp"
+#include "SurfaceType.hpp"
 #include <functional>
 
 #include "ReactNativeVideo-Swift-Cxx-Umbrella.hpp"
@@ -60,11 +63,11 @@ namespace margelo::nitro::video {
 
   public:
     // Properties
-    inline std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>> getPlayer() noexcept override {
+    inline std::optional<std::shared_ptr<HybridVideoPlayerSpec>> getPlayer() noexcept override {
       auto __result = _swiftPart.getPlayer();
       return __result;
     }
-    inline void setPlayer(const std::optional<std::shared_ptr<margelo::nitro::video::HybridVideoPlayerSpec>>& player) noexcept override {
+    inline void setPlayer(const std::optional<std::shared_ptr<HybridVideoPlayerSpec>>& player) noexcept override {
       _swiftPart.setPlayer(player);
     }
     inline bool getControls() noexcept override {
@@ -91,6 +94,19 @@ namespace margelo::nitro::video {
     }
     inline void setResizeMode(ResizeMode resizeMode) noexcept override {
       _swiftPart.setResizeMode(static_cast<int>(resizeMode));
+    }
+    inline bool getKeepScreenAwake() noexcept override {
+      return _swiftPart.getKeepScreenAwake();
+    }
+    inline void setKeepScreenAwake(bool keepScreenAwake) noexcept override {
+      _swiftPart.setKeepScreenAwake(std::forward<decltype(keepScreenAwake)>(keepScreenAwake));
+    }
+    inline SurfaceType getSurfaceType() noexcept override {
+      auto __result = _swiftPart.getSurfaceType();
+      return static_cast<SurfaceType>(__result);
+    }
+    inline void setSurfaceType(SurfaceType surfaceType) noexcept override {
+      _swiftPart.setSurfaceType(static_cast<int>(surfaceType));
     }
     inline std::optional<std::function<void(bool /* isInPictureInPicture */)>> getOnPictureInPictureChange() noexcept override {
       auto __result = _swiftPart.getOnPictureInPictureChange();
