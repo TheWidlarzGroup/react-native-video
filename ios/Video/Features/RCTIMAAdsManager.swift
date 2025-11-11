@@ -34,6 +34,15 @@
             let adContainerView = UIView(frame: _video.bounds)
             adContainerView.backgroundColor = .clear
             _video.addSubview(adContainerView)
+            
+            // added layout resize according to subview of video
+            adContainerView.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                adContainerView.topAnchor.constraint(equalTo: _video.topAnchor),
+                adContainerView.bottomAnchor.constraint(equalTo: _video.bottomAnchor),
+                adContainerView.leadingAnchor.constraint(equalTo: _video.leadingAnchor),
+                adContainerView.trailingAnchor.constraint(equalTo: _video.trailingAnchor)
+            ])
 
             // Create ad display container for ad rendering.
             let adDisplayContainer = IMAAdDisplayContainer(adContainer: adContainerView, viewController: _video.reactViewController())
