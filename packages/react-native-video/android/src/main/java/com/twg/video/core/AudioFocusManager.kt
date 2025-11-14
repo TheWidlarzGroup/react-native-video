@@ -88,7 +88,7 @@ class AudioFocusManager() {
 
   private fun determineRequiredMixMode(): MixAudioMode? {
     val activePlayers = players.filter { player ->
-      player.player?.isPlaying == true && player.player?.volume != 0f
+      player.player.isPlaying && player.player.volume != 0f
     }
 
     if (activePlayers.isEmpty()) {
@@ -195,7 +195,7 @@ class AudioFocusManager() {
   private fun pauseActivePlayers() {
     Threading.runOnMainThread {
       players.forEach { player ->
-        player.player?.let { mediaPlayer ->
+        player.player.let { mediaPlayer ->
           if (mediaPlayer.volume != 0f && mediaPlayer.isPlaying) {
             mediaPlayer.pause()
           }
@@ -207,7 +207,7 @@ class AudioFocusManager() {
   private fun duckActivePlayers() {
     Threading.runOnMainThread {
       players.forEach { player ->
-        player.player?.let { mediaPlayer ->
+        player.player.let { mediaPlayer ->
           // We need to duck the volume to 50%. After the audio focus is regained,
           // we will restore the volume to the user's volume.
           mediaPlayer.volume = mediaPlayer.volume * 0.5f
@@ -220,7 +220,7 @@ class AudioFocusManager() {
     Threading.runOnMainThread {
       // Resume players that were paused due to audio focus loss
       players.forEach { player ->
-        player.player?.let { mediaPlayer ->
+        player.player.let { mediaPlayer ->
           // Restore full volume if it was ducked
           if (mediaPlayer.volume != 0f && mediaPlayer.volume.toDouble() != player.userVolume) {
             mediaPlayer.volume = player.userVolume.toFloat()
