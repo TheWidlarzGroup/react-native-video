@@ -121,7 +121,9 @@ const VideoDemo = () => {
 
   const player = useVideoPlayer(
     getVideoSource(defaultSettings.videoType),
-    (_player) => {}
+    (_player) => {
+      player.seekTo(1);
+    }
   );
 
   useEvent(player, 'onEnd', handlePlayerEnd);

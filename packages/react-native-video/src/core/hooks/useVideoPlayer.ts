@@ -19,6 +19,9 @@ const sourceEqual = <T extends VideoConfig | VideoSource | VideoPlayerSource>(
 /**
  * Creates a `VideoPlayer` instance and manages its lifecycle.
  *
+ * if `initializeOnCreation` is true (default), the `setup` function will be called when the player is started loading source.
+ * if `initializeOnCreation` is false, the `setup` function will be called when the player is created. changes made to player made before initializing will be overwritten when initializing.
+ *
  * @param source - The source of the video to play
  * @param setup - A function to setup the player
  * @returns The `VideoPlayer` instance
@@ -31,7 +34,16 @@ export const useVideoPlayer = (
     {
       factory: () => {
         const player = new VideoPlayer(source);
-        setup?.(player);
+
+        if (player.source.config.initializeOnCreation) {
+          // No need to cleanup event listener, it will be cleaned up when the player is destroyed.
+          player.addEventListener('onLoadStart', () => {
+            setup?.(player);
+          });
+        } else {
+          setup?.(player);
+        }
+
         return player;
       },
       cleanup: (player) => {
