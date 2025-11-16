@@ -51,7 +51,9 @@ class HybridVideoViewViewManager(nitroId: Int): HybridVideoViewViewManagerSpec()
   override var autoEnterPictureInPicture: Boolean
     get() = videoView.get()?.autoEnterPictureInPicture == true
     set(value) {
-      videoView.get()?.autoEnterPictureInPicture = value
+      Threading.runOnMainThread {
+        videoView.get()?.autoEnterPictureInPicture = value
+      }
     }
 
   override var pictureInPicture: Boolean

@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import type { VideoPlayerSource } from '../../spec/nitro/VideoPlayerSource.nitro';
 import type { NoAutocomplete } from '../types/Utils';
 import type { VideoConfig, VideoSource } from '../types/VideoConfig';
@@ -30,16 +31,28 @@ export const useVideoPlayer = (
   source: VideoConfig | VideoSource | NoAutocomplete<VideoPlayerSource>,
   setup?: (player: VideoPlayer) => void
 ) => {
+  const setupCalled = useRef(false);
+
   return useManagedInstance(
     {
       factory: () => {
         const player = new VideoPlayer(source);
 
         if (player.source.config.initializeOnCreation) {
-          // No need to cleanup event listener, it will be cleaned up when the player is destroyed.
-          player.addEventListener('onLoadStart', () => {
-            setup?.(player);
-          });
+          // if source is small video, it can happen that onLoadStart is called before we set event from JS
+          // Thats why we adding event listener and calling setup once if player is loading or ready to play
+          // That way we ensure that setup is always called
+
+          const callSetupOnce = () => {
+            if (!setupCalled.current) {
+              setupCalled.current = true;
+              console.log('calling setup');
+              setup?.(player);
+            }
+          };
+
+          player.addEventListener('onLoadStart', callSetupOnce);
+          player.addEventListener('onStatusChange', callSetupOnce);
         } else {
           setup?.(player);
         }
@@ -48,6 +61,7 @@ export const useVideoPlayer = (
       },
       cleanup: (player) => {
         player.__destroy();
+        setupCalled.current = false;
       },
       dependenciesEqualFn: sourceEqual,
     },
