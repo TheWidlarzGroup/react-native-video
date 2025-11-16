@@ -143,6 +143,17 @@ class VideoView @JvmOverloads constructor(
   var isInPictureInPicture: Boolean = false
     set(value) {
       field = value
+      
+      if (value) {
+        playerView.useController = false
+        playerView.controllerAutoShow = false
+        playerView.controllerHideOnTouch = true
+      } else {
+        playerView.useController = useController
+        playerView.controllerAutoShow = true
+        playerView.controllerHideOnTouch = true
+      }
+      
       events.onPictureInPictureChange?.let { it(value) }
     }
   private var rootContentViews: List<View> = listOf()
@@ -436,6 +447,7 @@ class VideoView @JvmOverloads constructor(
       // Disable controls before entering PiP - media session creates its own controls for PiP
       runOnMainThread {
         playerView.useController = false
+        playerView.controllerAutoShow = false
       }
 
       val success = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -475,6 +487,7 @@ class VideoView @JvmOverloads constructor(
 
     // Restore controls when exiting PiP - they were disabled because media session handles PiP controls
     playerView.useController = useController
+    playerView.controllerAutoShow = true
 
     if (movedToRootForPiP) {
       restoreRootContentViews()
@@ -503,6 +516,7 @@ class VideoView @JvmOverloads constructor(
       
       // Restore controls when exiting PiP - they were disabled because media session handles PiP controls
       playerView.useController = useController
+      playerView.controllerAutoShow = true
       
       if (movedToRootForPiP) {
         restoreRootContentViews()

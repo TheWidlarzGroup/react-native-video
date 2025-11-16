@@ -60,7 +60,11 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
     throw LibraryError.ApplicationContextNotFound
   }
 
-  lateinit var player: ExoPlayer
+  var player: ExoPlayer = runOnMainThreadSync {
+    // Build Temporary player that will be replaced when source is loaded
+    return@runOnMainThreadSync ExoPlayer.Builder(context).build()
+  }
+
   var loadedWithSource = false
   private var currentPlayerView: WeakReference<PlayerView>? = null
 
@@ -277,8 +281,6 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
       if (source.config.initializeOnCreation == true) {
         initializePlayer()
         player.prepare()
-      } else {
-        player = ExoPlayer.Builder(context).build()
       }
     }
 

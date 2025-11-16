@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import type { VideoPlayerSource } from '../../spec/nitro/VideoPlayerSource.nitro';
 import type { NoAutocomplete } from '../types/Utils';
 import type { VideoConfig, VideoSource } from '../types/VideoConfig';
@@ -19,6 +20,9 @@ const sourceEqual = <T extends VideoConfig | VideoSource | VideoPlayerSource>(
 /**
  * Creates a `VideoPlayer` instance and manages its lifecycle.
  *
+ * if `initializeOnCreation` is true (default), the `setup` function will be called when the player is started loading source.
+ * if `initializeOnCreation` is false, the `setup` function will be called when the player is created. changes made to player made before initializing will be overwritten when initializing.
+ *
  * @param source - The source of the video to play
  * @param setup - A function to setup the player
  * @returns The `VideoPlayer` instance
@@ -27,15 +31,37 @@ export const useVideoPlayer = (
   source: VideoConfig | VideoSource | NoAutocomplete<VideoPlayerSource>,
   setup?: (player: VideoPlayer) => void
 ) => {
+  const setupCalled = useRef(false);
+
   return useManagedInstance(
     {
       factory: () => {
         const player = new VideoPlayer(source);
-        setup?.(player);
+
+        if (player.source.config.initializeOnCreation) {
+          // if source is small video, it can happen that onLoadStart is called before we set event from JS
+          // Thats why we adding event listener and calling setup once if player is loading or ready to play
+          // That way we ensure that setup is always called
+
+          const callSetupOnce = () => {
+            if (!setupCalled.current) {
+              setupCalled.current = true;
+              console.log('calling setup');
+              setup?.(player);
+            }
+          };
+
+          player.addEventListener('onLoadStart', callSetupOnce);
+          player.addEventListener('onStatusChange', callSetupOnce);
+        } else {
+          setup?.(player);
+        }
+
         return player;
       },
       cleanup: (player) => {
         player.__destroy();
+        setupCalled.current = false;
       },
       dependenciesEqualFn: sourceEqual,
     },
