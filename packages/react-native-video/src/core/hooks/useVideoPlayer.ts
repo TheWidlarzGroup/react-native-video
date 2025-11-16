@@ -46,7 +46,6 @@ export const useVideoPlayer = (
           const callSetupOnce = () => {
             if (!setupCalled.current) {
               setupCalled.current = true;
-              console.log('calling setup');
               setup?.(player);
             }
           };
