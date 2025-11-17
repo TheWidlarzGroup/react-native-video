@@ -1835,6 +1835,23 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
     }
 
+    private func findPlayerLayer(in view: UIView) -> AVPlayerLayer? {
+        if let layer = view.layer as? AVPlayerLayer {
+            return layer
+        }
+        for sublayer in view.layer.sublayers ?? [] {
+            if let playerLayer = sublayer as? AVPlayerLayer {
+                return playerLayer
+            }
+        }
+        for subview in view.subviews {
+            if let playerLayer = findPlayerLayer(in: subview) {
+                return playerLayer
+            }
+        }
+        return nil
+    }
+
     @objc
     func enterPictureInPicture() {
         #if os(iOS)
@@ -1844,10 +1861,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             
             if _pip?._pipController == nil, let playerViewController = _playerViewController, _controls, let player = _player {
                 if #available(iOS 9.0, *) {
-                    let pipLayer = AVPlayerLayer(player: player)
-                    pipLayer.frame = playerViewController.view.bounds
-                    pipLayer.videoGravity = playerViewController.videoGravity
-                    _pip?.setupPipController(pipLayer)
+                    if let existingPlayerLayer = findPlayerLayer(in: playerViewController.view) {
+                        _pip?.setupPipController(existingPlayerLayer)
+                    } else {
+                        let pipLayer = AVPlayerLayer(player: player)
+                        pipLayer.frame = playerViewController.view.bounds
+                        pipLayer.videoGravity = playerViewController.videoGravity
+                        _pip?.setupPipController(pipLayer)
+                    }
                 }
             }
             
