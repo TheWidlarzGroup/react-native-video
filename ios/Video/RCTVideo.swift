@@ -1850,13 +1850,13 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             if _pip == nil {
                 initPictureinPicture()
             }
-            
+
             if _pip?._pipController == nil, let playerViewController = _playerViewController, _controls {
                 if let existingPlayerLayer = findPlayerLayer(in: playerViewController.view) {
                     _pip?.setupPipController(existingPlayerLayer)
                 }
             }
-            
+
             _pip?.enterPictureInPicture()
         #endif
     }
@@ -1877,4 +1877,3 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc
     func setOnClick(_: Any) {}
 }
-
