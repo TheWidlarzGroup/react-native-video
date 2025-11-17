@@ -68,14 +68,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             if isPictureInPictureActive() { return }
             if _enterPictureInPictureOnLeave {
                 initPictureinPicture()
-                if #available(iOS 9.0, tvOS 14.0, *) {
-                    _playerViewController?.allowsPictureInPicturePlayback = true
-                }
             } else {
                 _pip?.deinitPipController()
-                if #available(iOS 9.0, tvOS 14.0, *) {
-                    _playerViewController?.allowsPictureInPicturePlayback = false
-                }
             }
         }
     }
@@ -1222,9 +1216,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             }
         }
 
-        if #available(iOS 9.0, tvOS 14.0, *) {
-            viewController.allowsPictureInPicturePlayback = _enterPictureInPictureOnLeave
-        }
         return viewController
     }
 
@@ -1853,7 +1844,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             
             if _pip?._pipController == nil, let playerViewController = _playerViewController, _controls, let player = _player {
                 if #available(iOS 9.0, *) {
-                    playerViewController.allowsPictureInPicturePlayback = false
                     let pipLayer = AVPlayerLayer(player: player)
                     pipLayer.frame = playerViewController.view.bounds
                     pipLayer.videoGravity = playerViewController.videoGravity
@@ -1872,14 +1862,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _pip?.exitPictureInPicture()
         if _enterPictureInPictureOnLeave {
             initPictureinPicture()
-            if #available(iOS 9.0, tvOS 14.0, *) {
-                _playerViewController?.allowsPictureInPicturePlayback = true
-            }
         } else {
             _pip?.deinitPipController()
-            if #available(iOS 9.0, tvOS 14.0, *) {
-                _playerViewController?.allowsPictureInPicturePlayback = false
-            }
         }
     }
 
