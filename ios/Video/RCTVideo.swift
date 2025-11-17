@@ -172,14 +172,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         #endif
     }
 
-    func setupPictureInPicture() {
-        #if os(iOS)
-            if _playerLayer != nil && !_controls && _pip?._pipController == nil {
-                _pip?.setupPipController(_playerLayer)
-            }
-        #endif
-    }
-
     func initPictureinPicture() {
         #if os(iOS)
             if _pip == nil {
@@ -1859,16 +1851,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 initPictureinPicture()
             }
             
-            if _pip?._pipController == nil, let playerViewController = _playerViewController, _controls, let player = _player {
-                if #available(iOS 9.0, *) {
-                    if let existingPlayerLayer = findPlayerLayer(in: playerViewController.view) {
-                        _pip?.setupPipController(existingPlayerLayer)
-                    } else {
-                        let pipLayer = AVPlayerLayer(player: player)
-                        pipLayer.frame = playerViewController.view.bounds
-                        pipLayer.videoGravity = playerViewController.videoGravity
-                        _pip?.setupPipController(pipLayer)
-                    }
+            if _pip?._pipController == nil, let playerViewController = _playerViewController, _controls {
+                if let existingPlayerLayer = findPlayerLayer(in: playerViewController.view) {
+                    _pip?.setupPipController(existingPlayerLayer)
                 }
             }
             
@@ -1892,3 +1877,4 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc
     func setOnClick(_: Any) {}
 }
+
