@@ -105,6 +105,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     #endif
 
     private var _pip: RCTPictureInPicture?
+    private var _isPictureInPictureActive = false
 
     // Events
     @objc var onVideoLoadStart: RCTDirectEventBlock?
@@ -138,19 +139,21 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func _onPictureInPictureEnter() {
-        onPictureInPictureStatusChanged?(["isActive": NSNumber(value: true)])
+        handlePictureInPictureEnter()
     }
 
     @objc
     func _onPictureInPictureExit() {
-        onPictureInPictureStatusChanged?(["isActive": NSNumber(value: false)])
+        handlePictureInPictureExit()
     }
 
     func handlePictureInPictureEnter() {
+        _isPictureInPictureActive = true
         onPictureInPictureStatusChanged?(["isActive": NSNumber(value: true)])
     }
 
     func handlePictureInPictureExit() {
+        _isPictureInPictureActive = false
         onPictureInPictureStatusChanged?(["isActive": NSNumber(value: false)])
 
         // To continue audio playback in backgroud we need to set
@@ -169,9 +172,17 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     func isPictureInPictureActive() -> Bool {
         #if os(iOS)
-            return _pip?._pipController?.isPictureInPictureActive == true
+            return _isPictureInPictureActive
         #else
             return false
+        #endif
+    }
+
+    func setupPictureInPicture() {
+        #if os(iOS)
+            if _playerLayer != nil && !_controls && _pip?._pipController == nil {
+                _pip?.setupPipController(_playerLayer)
+            }
         #endif
     }
 
@@ -1244,6 +1255,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     func setControls(_ controls: Bool) {
         if _controls != controls || ((_playerLayer == nil) && (_playerViewController == nil)) {
             _controls = controls
+            #if os(iOS)
+                if !isPictureInPictureActive() {
+                    _pip?.deinitPipController()
+                }
+            #endif
             if _controls {
                 DispatchQueue.main.async {
                     self.removePlayerLayer()
@@ -1830,13 +1846,23 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func enterPictureInPicture() {
-        if _pip?._pipController == nil {
-            initPictureinPicture()
-            if #available(iOS 9.0, tvOS 14.0, *) {
-                _playerViewController?.allowsPictureInPicturePlayback = true
+        #if os(iOS)
+            if _pip == nil {
+                initPictureinPicture()
             }
-        }
-        _pip?.enterPictureInPicture()
+            
+            if _pip?._pipController == nil, let playerViewController = _playerViewController, _controls, let player = _player {
+                if #available(iOS 9.0, *) {
+                    playerViewController.allowsPictureInPicturePlayback = false
+                    let pipLayer = AVPlayerLayer(player: player)
+                    pipLayer.frame = playerViewController.view.bounds
+                    pipLayer.videoGravity = playerViewController.videoGravity
+                    _pip?.setupPipController(pipLayer)
+                }
+            }
+            
+            _pip?.enterPictureInPicture()
+        #endif
     }
 
     @objc
