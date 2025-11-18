@@ -1,5 +1,21 @@
 
 
+# [6.18.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.17.0...v6.18.0) (2025-11-18)
+
+
+### Bug Fixes
+
+* **android:** prevent duplicate `onVideoEnd` callback on prop changes ([#4762](https://github.com/TheWidlarzGroup/react-native-video/issues/4762)) ([05cd597](https://github.com/TheWidlarzGroup/react-native-video/commit/05cd5972c21ebcacf3cd5952e92f121a84b5c9a9))
+* **ci:** update ios device for builds ([#4757](https://github.com/TheWidlarzGroup/react-native-video/issues/4757)) ([a9f7524](https://github.com/TheWidlarzGroup/react-native-video/commit/a9f752435f3d94abfdb37ef5dc9c444038e3ad6a))
+* entering PiP mode when controls are true ([#4776](https://github.com/TheWidlarzGroup/react-native-video/issues/4776)) ([ba65ab1](https://github.com/TheWidlarzGroup/react-native-video/commit/ba65ab123321713e537fc7ccb1ac3ed5676f1677))
+* **iOS:** use top-most presented view controller for fullscreen presentation on iOS ([#4753](https://github.com/TheWidlarzGroup/react-native-video/issues/4753)) ([5d75b48](https://github.com/TheWidlarzGroup/react-native-video/commit/5d75b482952a9cd3e5f59237e302137857739d4e))
+* prevent `audiovisualBackgroundPlaybackPolicy` crash ([#4763](https://github.com/TheWidlarzGroup/react-native-video/issues/4763)) ([fbb260e](https://github.com/TheWidlarzGroup/react-native-video/commit/fbb260e9164194a55d2b26404aea000e924e2f04))
+
+
+### Features
+
+* **ios:** add PublicAudioSessionManager for audio session management ([#4747](https://github.com/TheWidlarzGroup/react-native-video/issues/4747)) ([f2afd16](https://github.com/TheWidlarzGroup/react-native-video/commit/f2afd16d0bc7fc72e0b4d8400d74342244158674))
+
 # [6.17.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.16.1...v6.17.0) (2025-10-06)
 
 
