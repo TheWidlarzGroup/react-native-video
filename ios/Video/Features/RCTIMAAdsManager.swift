@@ -31,7 +31,7 @@
         func requestAds() {
             guard let _video else { return }
             // fixes RCTVideo --> RCTIMAAdsManager --> IMAAdsLoader --> IMAAdDisplayContainer --> RCTVideo memory leak.
-            let adContainerView = UIView(frame: _video.bounds)
+            let adContainerView = UIView()
             adContainerView.backgroundColor = .clear
             _video.addSubview(adContainerView)
 
