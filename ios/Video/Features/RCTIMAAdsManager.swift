@@ -35,7 +35,7 @@
             adContainerView.backgroundColor = .clear
             _video.addSubview(adContainerView)
 
-            // added layout resize according to subview of video
+            // Enable Auto Layout to ensure the ad container resizes with the video view.
             adContainerView.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([
                 adContainerView.topAnchor.constraint(equalTo: _video.topAnchor),
