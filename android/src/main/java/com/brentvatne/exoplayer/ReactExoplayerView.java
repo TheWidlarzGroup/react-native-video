@@ -414,7 +414,14 @@ public class ReactExoplayerView extends FrameLayout implements
                 int width = videoFormat != null ? (isRotatedContent ? videoFormat.height : videoFormat.width) : 0;
                 int height = videoFormat != null ? (isRotatedContent ? videoFormat.width : videoFormat.height) : 0;
                 String trackId = videoFormat != null ? videoFormat.id : null;
-                eventEmitter.onVideoBandwidthUpdate.invoke(bitrate, height, width, trackId);
+                // Bloomberg. https://github.com/BloombergMedia/horseshoe/pull/6013
+                // Originated in
+                // UNTRACKED. Use AVPlayer's indicatedBitrate instead of observedBitrate
+                // https://github.com/BloombergMedia/horseshoe/pull/4027
+                // It is needed because the "bitrate" argument is not the actual bitrate of the playing video,
+                // but is the video download speed instead.
+                long indicatedBitrate = videoFormat != null ? videoFormat.bitrate : bitrate;
+                eventEmitter.onVideoBandwidthUpdate.invoke(indicatedBitrate, height, width, trackId);
             }
         }
     }
@@ -1607,6 +1614,7 @@ public class ReactExoplayerView extends FrameLayout implements
         return videoTracks;
     }
 
+    @WorkerThread
     private ArrayList<VideoTrack> getVideoTrackInfoFromManifest() {
         return this.getVideoTrackInfoFromManifest(0);
     }

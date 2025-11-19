@@ -996,10 +996,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func applyModifiers() {
-        if let video = _player?.currentItem,
-           video.status != AVPlayerItem.Status.readyToPlay {
+        // Bloomberg ENG4BCMI PATCH BEGIN: Prevent hang when currentItem is nil or not ready
+        if _player?.currentItem?.status != AVPlayerItem.Status.readyToPlay {
             return
         }
+        // Bloomberg ENG4BCMI PATCH END
+
         if _muted {
             if !_controls {
                 _player?.volume = 0
@@ -1223,6 +1225,18 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         if #available(iOS 9.0, tvOS 14.0, *) {
             viewController.allowsPictureInPicturePlayback = _enterPictureInPictureOnLeave
         }
+        // Bloomberg ENG4BCMA-5034 autoplay release fixes
+        // When AVPlayerViewController (from which RCTVideoPlayerViewController inherits) is created,
+        // its 'view' ('view.layer', actually) has black background color.
+        // Let's make the 'view' background color to be transparent
+        // so the background color of the view behind the video player will be visible.
+        // The view that is behind the video player belongs to the same 'react-native-video' library.
+        // We change the background color of that view by setting the 'backgroundColor' of the 'style' property
+        // that supplied to the 'Video' component of the 'react-native-video' library
+        // (for example, check the 'videoInThumbnailStyle' prop).
+        // FYI: On Android, the background color of the video player is transparent by default.
+        viewController.view.backgroundColor = .clear
+        // End of Bloomberg ENG4BCMA-5034 autoplay release fixes
         return viewController
     }
 
