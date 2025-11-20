@@ -197,7 +197,7 @@ export type OnBandwidthUpdateData = Readonly<{
   bitrate: Int32;
   width?: Float;
   height?: Float;
-  trackId?: Int32;
+  trackId?: string;
 }>;
 
 export type OnSeekData = Readonly<{
@@ -248,7 +248,7 @@ export type OnTextTrackDataChangedData = Readonly<{
 export type OnVideoTracksData = Readonly<{
   videoTracks: {
     index: Int32;
-    tracksId?: string;
+    trackId?: string;
     codecs?: string;
     width?: Float;
     height?: Float;
