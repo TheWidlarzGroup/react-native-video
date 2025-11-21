@@ -1466,20 +1466,31 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
         this.repeat = repeat;
     }
 
-    private void selectTrack(TracksPolicy.TrackPolicy trackPolicy, int trackType, @Nullable List<String> preferredLanguages) {
+    private void selectTrack(int trackType, @Nullable List<String> preferredLanguages) {
         Track track = null;
         List<Track> trackList = getTracks(player.getExoPlayer().getCurrentTracks());
         if (trackType == C.TRACK_TYPE_TEXT) {
-            if (preferredLanguages == null || preferredLanguages.isEmpty() || preferredLanguages.get(0) == null) { // "OFF" or user not select preferred subtitle
-                if (trackPolicy != null) { // track policy is active, select track policy subtitle
-                    track = TrackUtils.findMatchingTrack(localizationService, trackList, trackType, trackPolicy.getSubtitle());
-                }
-            } else { // select user preferred subtitle
-                track = TrackUtils.findMatchingTrack(localizationService, trackList, trackType, preferredLanguages.get(0));
+            if (preferredLanguages != null
+                    && !preferredLanguages.isEmpty()
+                    && preferredLanguages.get(0) != null) {
+
+                track = TrackUtils.findMatchingTrack(
+                        localizationService,
+                        trackList,
+                        trackType,
+                        preferredLanguages.get(0)
+                );
             }
         } else if (trackType == C.TRACK_TYPE_AUDIO) {
-            if (preferredLanguages != null && !preferredLanguages.isEmpty() && preferredLanguages.get(0) != null) {
-                track = TrackUtils.findMatchingTrack(localizationService, trackList, trackType, preferredLanguages.get(0));
+            if (preferredLanguages != null
+                    && !preferredLanguages.isEmpty()
+                    && preferredLanguages.get(0) != null) {
+                track = TrackUtils.findMatchingTrack(
+                        localizationService,
+                        trackList,
+                        trackType,
+                        preferredLanguages.get(0)
+                );
             }
         }
         if (track != null) {
@@ -2032,13 +2043,9 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
             } else if (playerEvent instanceof DorisPlayerEvent.TrackInfoChanged) {
                 if (selectUserPreferredTrack) {
                     selectUserPreferredTrack = false;
-                    // check track policy
-                    Tracks tracks = player.getExoPlayer().getCurrentTracks();
-                    TracksPolicy.TrackPolicy trackPolicy = getTrackPolicy(trackSelector, tracks, getPreferredAudioLang());
-
                     // Preselect subtitle and audio.
-                    selectTrack(trackPolicy, C.TRACK_TYPE_TEXT, getPreferredSubtitleLang());
-                    selectTrack(trackPolicy, C.TRACK_TYPE_AUDIO, getPreferredAudioLang());
+                    selectTrack(C.TRACK_TYPE_TEXT, getPreferredSubtitleLang());
+                    selectTrack(C.TRACK_TYPE_AUDIO, getPreferredAudioLang());
                 }
             } else if (playerEvent instanceof DorisPlayerEvent.TimelineAdjusterChanged) {
                 if (exoDorisPlayerView != null) {
