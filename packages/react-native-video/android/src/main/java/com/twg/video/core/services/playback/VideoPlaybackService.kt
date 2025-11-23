@@ -31,6 +31,7 @@ class VideoPlaybackService : MediaSessionService() {
   private var binder = VideoPlaybackServiceBinder(this)
   private var sourceActivity: Class<Activity>? = null // retained for future deep-links; currently unused
   private var isForeground = false
+  private var cachedLaunchIntent: Intent? = null
 
   override fun onCreate() {
     super.onCreate()
@@ -65,13 +66,20 @@ class VideoPlaybackService : MediaSessionService() {
 
     // Ensure tapping the notification opens the app via sessionActivity
     try {
-      val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+      var launchIntent = cachedLaunchIntent
+      if (launchIntent == null) {
+        launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+        cachedLaunchIntent = launchIntent
+      }
+
       if (launchIntent != null) {
-        launchIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        // Clone the intent before modifying it to avoid mutating the cached instance
+        val intentToUse = launchIntent.clone() as Intent
+        intentToUse.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
         val contentIntent = PendingIntent.getActivity(
           this,
           0,
-          launchIntent,
+          intentToUse,
           PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         builder.setSessionActivity(contentIntent)
@@ -175,19 +183,30 @@ class VideoPlaybackService : MediaSessionService() {
     val nm = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       try {
-        val channel = NotificationChannel(
-          NOTIFICATION_CHANNEL_ID,
-          "Media playback",
-          NotificationManager.IMPORTANCE_LOW
-        )
-        channel.setShowBadge(false)
-        nm.createNotificationChannel(channel)
+        if (nm.getNotificationChannel(NOTIFICATION_CHANNEL_ID) == null) {
+          val channel = NotificationChannel(
+            NOTIFICATION_CHANNEL_ID,
+            "Media playback",
+            NotificationManager.IMPORTANCE_LOW
+          )
+          channel.setShowBadge(false)
+          nm.createNotificationChannel(channel)
+        }
       } catch (_: Exception) {
         Log.e(TAG, "Failed to create notification channel!")
       }
     }
 
-    val appName = try { applicationInfo.loadLabel(packageManager).toString() } catch (_: Exception) { "Media Playback" }
+    val appName = try {
+      val labelRes = applicationInfo.labelRes
+      if (labelRes != 0) {
+        getString(labelRes)
+      } else {
+        applicationInfo.nonLocalizedLabel?.toString() ?: applicationInfo.loadLabel(packageManager).toString()
+      }
+    } catch (_: Exception) {
+      "Media Playback"
+    }
 
     return NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
       .setSmallIcon(android.R.drawable.ic_media_play)
