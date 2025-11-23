@@ -74,9 +74,8 @@ class VideoPlaybackService : MediaSessionService() {
 
       if (launchIntent != null) {
         // Clone the intent before modifying it to avoid mutating the cached instance
-        val intentToUse = launchIntent.cloneFilter().apply {
-          addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        }
+        val intentToUse = launchIntent.clone() as Intent
+        intentToUse.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
         val contentIntent = PendingIntent.getActivity(
           this,
           0,
