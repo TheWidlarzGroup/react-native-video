@@ -13,6 +13,7 @@ public struct VideoSource {
     let drm: DRMParams
     var textTracks: [TextTrack] = []
     let adParams: AdParams
+    let daiParams: DaiParams
 
     let json: NSDictionary?
 
@@ -31,6 +32,7 @@ public struct VideoSource {
             self.customMetadata = nil
             self.drm = DRMParams(nil)
             adParams = AdParams(nil)
+            daiParams = DaiParams(nil)
             return
         }
         self.json = json
@@ -59,5 +61,6 @@ public struct VideoSource {
             return TextTrack(trackDict as? NSDictionary)
         } ?? []
         adParams = AdParams(json["ad"] as? NSDictionary)
+        daiParams = DaiParams(json["dai"] as? NSDictionary)
     }
 }

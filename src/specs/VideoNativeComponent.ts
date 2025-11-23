@@ -31,6 +31,14 @@ export type AdsConfig = Readonly<{
   adLanguage?: string;
 }>;
 
+type DaiConfig = Readonly<{
+  contentSourceId?: string;
+  videoId?: string;
+  assetKey?: string;
+  adTagParameters?: Record<string, string>;
+  backupStreamUri?: string;
+}>;
+
 export type VideoSrc = Readonly<{
   uri?: string;
   isNetwork?: boolean;
@@ -51,6 +59,7 @@ export type VideoSrc = Readonly<{
   textTracksAllowChunklessPreparation?: boolean; // android
   textTracks?: TextTracks;
   ad?: AdsConfig;
+  dai?: DaiConfig;
   minLoadRetryCount?: Int32; // Android
   bufferConfig?: BufferConfig; // Android
 }>;
