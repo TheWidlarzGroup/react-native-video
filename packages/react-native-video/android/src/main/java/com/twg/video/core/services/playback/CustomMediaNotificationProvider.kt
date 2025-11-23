@@ -84,9 +84,13 @@ class CustomMediaNotificationProvider(context: Context) : DefaultMediaNotificati
   private fun getAppName(): String {
     return try {
       val context = getContext()
-      val pm = context.packageManager
-      val label = pm.getApplicationLabel(context.applicationInfo)
-      label.toString()
+      val applicationInfo = context.applicationInfo
+      val labelRes = applicationInfo.labelRes
+      if (labelRes != 0) {
+        context.getString(labelRes)
+      } else {
+        applicationInfo.nonLocalizedLabel?.toString() ?: context.packageManager.getApplicationLabel(applicationInfo).toString()
+      }
     } catch (e: Exception) {
       return "Unknown"
     }
