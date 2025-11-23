@@ -18,6 +18,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.media.AudioManager;
+import android.media.MediaCodecList;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
@@ -2392,14 +2393,21 @@ public class ReactExoplayerView extends FrameLayout implements
             return C.INDEX_UNSET;
         }
 
-        int groupIndex = 0; // default if no match
-        String locale2 = Locale.getDefault().getLanguage(); // 2 letter code
-        String locale3 = Locale.getDefault().getISO3Language(); // 3 letter code
+        int groupIndex = C.INDEX_UNSET; // default if no match
+        Locale defaultLocale = Locale.getDefault();
+        String locale2 = defaultLocale.getLanguage();  // 2-letter code
+        String locale3 = defaultLocale.getISO3Language(); // 3-letter code
         for (int i = 0; i < groups.length; ++i) {
             Format format = groups.get(i).getFormat(0);
+
+            // Skip if codec is not supported
+            if (!isCodecSupported(format.sampleMimeType)) {
+                continue;
+            }
+
             String language = format.language;
-            if (language != null && (language.equals(locale2) || language.equals(locale3))) {
-                groupIndex = i;
+            groupIndex = i;
+            if((language != null && (language.equalsIgnoreCase(locale2) || language.equalsIgnoreCase(locale3)))){
                 break;
             }
         }
@@ -2746,5 +2754,18 @@ public class ReactExoplayerView extends FrameLayout implements
     public void setControlsStyles(ControlsConfig controlsStyles) {
         controlsConfig = controlsStyles;
         refreshControlsStyles();
+    }
+
+    public boolean isCodecSupported(String format) {
+        int codecCount = MediaCodecList.getCodecCount();
+        for (int i = 0; i < codecCount; i++) {
+            android.media.MediaCodecInfo codecInfo = MediaCodecList.getCodecInfoAt(i);
+            for (String type : codecInfo.getSupportedTypes()) {
+                if (type.equalsIgnoreCase(format)) {
+                    return true; // Early return when a match is found
+                }
+            }
+        }
+        return false; // No match found
     }
 }
