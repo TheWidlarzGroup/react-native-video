@@ -1,5 +1,6 @@
 {
   "lockfileVersion": 1,
+  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "react-native-video-monorepo",
@@ -51,7 +52,7 @@
     },
     "example": {
       "name": "react-native-video-example",
-      "version": "7.0.0-alpha.9",
+      "version": "7.0.0-alpha.10",
       "dependencies": {
         "@react-native-community/slider": "^4.5.6",
         "@react-native-video/drm": "*",
@@ -79,7 +80,7 @@
     },
     "packages/drm-plugin": {
       "name": "@react-native-video/drm",
-      "version": "7.0.0-alpha.9",
+      "version": "7.0.0-alpha.10",
       "devDependencies": {
         "@react-native/babel-preset": "0.79.2",
         "@release-it/conventional-changelog": "^9.0.2",
@@ -107,7 +108,7 @@
     },
     "packages/react-native-video": {
       "name": "react-native-video",
-      "version": "7.0.0-alpha.9",
+      "version": "7.0.0-alpha.10",
       "devDependencies": {
         "@expo/config-plugins": "^10.0.2",
         "@react-native/eslint-config": "^0.77.0",
