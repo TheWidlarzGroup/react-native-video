@@ -11,6 +11,7 @@ As of version 0.76+, React Native Video for Windows uses the **TurboModule archi
 The Windows implementation now includes:
 - **TurboModule-based native modules** using the `REACT_MODULE` macro system
 - **VideoManager module** for imperative video control commands
+- **Microsoft.UI.Xaml.Controls** for modern XAML MediaPlayerElement
 - Codegen configuration for automatic type generation
 - Modern C++/WinRT implementation with async/await support
 
@@ -70,4 +71,9 @@ The Windows implementation uses React Native's TurboModule system which provides
 
 - `VideoManagerModule.h/cpp` - TurboModule for imperative video commands
 - `ReactVideoViewManager.h/cpp` - View manager for the Video component
-- `ReactVideoView.h/cpp` - Native video player view implementation
+- `ReactVideoView.h/cpp` - Native video player view implementation using Microsoft.UI.Xaml.Controls.MediaPlayerElement
+
+### NuGet Dependencies
+
+- **Microsoft.UI.Xaml** (2.8.6+) - Modern XAML controls including MediaPlayerElement
+- **Microsoft.Windows.CppWinRT** - C++/WinRT language projection
