@@ -15,10 +15,12 @@ export interface Spec extends TurboModule {
     licenseUrl: string,
   ): Promise<void>;
   setFullScreenCmd(reactTag: number, fullScreen: boolean): Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/ban-types
   setSourceCmd(reactTag: number, source?: Object): Promise<void>;
   setVolumeCmd(reactTag: number, volume: number): Promise<void>;
   enterPictureInPictureCmd(reactTag: number): Promise<void>;
   exitPictureInPictureCmd(reactTag: number): Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/ban-types
   save(reactTag: number, option: Object): Promise<Object>;
   getCurrentPosition(reactTag: number): Promise<number>;
 }

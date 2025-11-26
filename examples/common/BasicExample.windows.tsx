@@ -56,7 +56,8 @@ class VideoPlayer extends Component {
       <TouchableOpacity
         onPress={() => {
           this.setState({rate: rate});
-        }}>
+        }}
+      >
         <Text style={style}>{rate}x</Text>
       </TouchableOpacity>
     );
@@ -73,7 +74,8 @@ class VideoPlayer extends Component {
       <TouchableOpacity
         onPress={() => {
           this.setState({resizeMode: resizeMode});
-        }}>
+        }}
+      >
         <Text style={style}>{resizeMode}</Text>
       </TouchableOpacity>
     );
@@ -90,7 +92,8 @@ class VideoPlayer extends Component {
       <TouchableOpacity
         onPress={() => {
           this.setState({volume: volume});
-        }}>
+        }}
+      >
         <Text style={style}>{volume * 100}%</Text>
       </TouchableOpacity>
     );
@@ -106,7 +109,8 @@ class VideoPlayer extends Component {
           style={styles.fullScreen}
           onPress={() => {
             this.setState({paused: !this.state.paused});
-          }}>
+          }}
+        >
           <Video
             source={require('./assets/videos/broadchurch.mp4')}
             style={styles.fullScreen}

@@ -16,7 +16,10 @@ module.exports = makeMetroConfig({
     extraNodeModules: {
       common: path.resolve(__dirname, '../common'),
       'react-native-video': path.resolve(__dirname, '../../lib/'),
-      '@react-native-picker/picker': path.resolve(__dirname, 'node_modules/@react-native-picker/picker'),
+      '@react-native-picker/picker': path.resolve(
+        __dirname,
+        'node_modules/@react-native-picker/picker',
+      ),
     },
   },
   watchFolders: [

@@ -25,7 +25,8 @@ const _TopControl: FC<Props> = ({
         <TouchableOpacity
           onPress={() => {
             toggleControls();
-          }}>
+          }}
+        >
           <Text style={styles.leftRightControlOption}>
             {showRNVControls ? 'Hide controls' : 'Show controls'}
           </Text>

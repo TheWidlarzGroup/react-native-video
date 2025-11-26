@@ -31,18 +31,19 @@ export const VideoTrackSelector = ({
             ? 'auto'
             : `${selectedVideoTrack?.value}`
         }
-        onValueChange={itemValue => {
+        onValueChange={(itemValue) => {
           if (itemValue !== 'empty') {
             onValueChange(itemValue);
           }
-        }}>
+        }}
+      >
         <Picker.Item label={'auto'} value={'auto'} key={'auto'} />
         {videoTracks?.length <= 0 || videoTracks?.length <= 0 ? (
           <Picker.Item label={'empty'} value={'empty'} key={'empty'} />
         ) : (
           <Picker.Item label={'none'} value={'none'} key={'none'} />
         )}
-        {videoTracks?.map(track => {
+        {videoTracks?.map((track) => {
           if (!track) {
             return;
           }
