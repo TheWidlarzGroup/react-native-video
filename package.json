@@ -29,13 +29,23 @@
         "react": "18.2.0",
         "react-native": "0.78.2",
         "react-native-web": "0.20.0",
-        "react-native-windows": "^0.61.0-0",
+        "react-native-windows": "^0.76.0",
         "release-it": "^16.2.1",
         "typescript": "5.1.6"
     },
     "peerDependencies": {
         "react": "*",
         "react-native": "*"
+    },
+    "codegenConfig": {
+        "name": "RNVideoSpec",
+        "type": "all",
+        "jsSrcsDir": "src/specs",
+        "windows": {
+            "namespace": "ReactNativeVideo",
+            "outputDirectory": "windows/codegen",
+            "componentsWindows": true
+        }
     },
     "scripts": {
         "lint": "yarn eslint .",
