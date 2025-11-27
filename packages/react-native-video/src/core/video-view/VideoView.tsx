@@ -191,7 +191,7 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
               // the native manager may not have been able to find the view before the view was unmounted
               // This should really never happen, but it's better to be safe than sorry
 
-              // We don't throw an error here, because it's not a actual error.
+              // We don't throw an error here, because it's not an actual error.
               console.warn(
                 '[ReactNativeVideo] VideoView was unmounted before native manager was able to find it. It can happen when the view is quickly mounted and unmounted.'
               );
