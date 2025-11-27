@@ -1,9 +1,9 @@
 import {
-  describe,
-  it,
-  expect,
-  beforeEach,
   afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
 } from 'react-native-harness';
 import { VideoPlayer } from 'react-native-video';
 
