@@ -8,7 +8,11 @@ import type {
 } from '../../spec/nitro/VideoViewViewManager.nitro';
 import type { VideoViewEvents } from '../types/Events';
 import type { ResizeMode } from '../types/ResizeMode';
-import { tryParseNativeVideoError, VideoError } from '../types/VideoError';
+import {
+  tryParseNativeVideoError,
+  VideoComponentError,
+  VideoError,
+} from '../types/VideoError';
 import type { VideoPlayer } from '../VideoPlayer';
 import { NativeVideoView } from './NativeVideoView';
 
@@ -172,7 +176,31 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
             resizeMode: resizeMode,
           });
         } catch (error) {
-          throw tryParseNativeVideoError(error);
+          const parsedError = tryParseNativeVideoError(error);
+
+          if (
+            parsedError instanceof VideoComponentError &&
+            parsedError.code === 'view/not-found'
+          ) {
+            // The view was not found, did view get unmounted?
+            if (id === nitroId) {
+              // The id from native is same as the one we have,
+              // so the view was unmounted before native manger was able to find it
+
+              // On slow devices, when we quickly mount and unmount the view,
+              // the native manager may not have been able to find the view before the view was unmounted
+              // This should really never happen, but it's better to be safe than sorry
+
+              // We don't throw an error here, because it's not a actual error.
+              console.warn(
+                '[ReactNativeVideo] VideoView was unmounted before native manager was able to find it. It can happen when the view is quickly mounted and unmounted.'
+              );
+
+              return;
+            }
+          }
+
+          throw parsedError;
         }
       },
       [
@@ -182,6 +210,7 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
         pictureInPicture,
         autoEnterPictureInPicture,
         resizeMode,
+        nitroId,
       ]
     );
 
