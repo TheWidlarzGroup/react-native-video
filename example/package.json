@@ -9,7 +9,10 @@
     "typecheck": "tsc",
     "start": "react-native start --client-logs",
     "bundle-install": "bundle install",
-    "pods": "cd ios && pod install && cd .."
+    "pods": "cd ios && pod install && cd ..",
+    "test:android": "react-native-harness --harnessRunner android --verbose",
+    "test:ios": "react-native-harness --harnessRunner ios --verbose",
+    "test": "bun run test:android && bun run test:ios"
   },
   "dependencies": {
     "@react-native-community/slider": "^4.5.6",
@@ -30,6 +33,9 @@
     "@react-native/eslint-config": "^0.77.0",
     "@react-native/metro-config": "^0.77.0",
     "@react-native/typescript-config": "^0.77.0",
+    "react-native-harness": "^1.0.0-alpha.18",
+    "@react-native-harness/platform-android": "^1.0.0-alpha.18",
+    "@react-native-harness/platform-apple": "^1.0.0-alpha.18",
     "@types/react": "^18.2.44",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",

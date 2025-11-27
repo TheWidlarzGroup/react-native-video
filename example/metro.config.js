@@ -1,7 +1,8 @@
-const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
+const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
 const path = require('path');
 const escape = require('escape-string-regexp');
 const exclusionList = require('metro-config/src/defaults/exclusionList');
+const { withRnHarness } = require('react-native-harness/metro');
 const pak = require('../package.json');
 
 const root = path.resolve(__dirname, '..');
@@ -28,6 +29,7 @@ const config = {
       acc[name] = path.join(__dirname, 'node_modules', name);
       return acc;
     }, {}),
+    unstable_enablePackageExports: true,
   },
   transformer: {
     getTransformOptions: async () => ({
@@ -39,4 +41,6 @@ const config = {
   },
 };
 
-module.exports = mergeConfig(getDefaultConfig(__dirname), config);
+module.exports = withRnHarness(
+  mergeConfig(getDefaultConfig(__dirname), config)
+);
