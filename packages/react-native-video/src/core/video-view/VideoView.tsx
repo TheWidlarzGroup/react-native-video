@@ -185,7 +185,7 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
             // The view was not found, did view get unmounted?
             if (id === nitroId) {
               // The id from native is same as the one we have,
-              // so the view was unmounted before native manger was able to find it
+              // so the view was unmounted before native manager was able to find it
 
               // On slow devices, when we quickly mount and unmount the view,
               // the native manager may not have been able to find the view before the view was unmounted
