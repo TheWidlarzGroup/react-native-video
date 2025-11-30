@@ -122,7 +122,7 @@ const VideoDemo = () => {
   const player = useVideoPlayer(
     getVideoSource(defaultSettings.videoType),
     (_player) => {
-      player.seekTo(1);
+      _player.seekTo(1);
     }
   );
 
