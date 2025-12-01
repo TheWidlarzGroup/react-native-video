@@ -9,7 +9,6 @@ import com.facebook.react.uimanager.ViewManager
 
 class VideoPackage : ReactPackage {
   override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> {
-    AppContextHolder.init(reactContext.applicationContext)
     return emptyList()
   }
 

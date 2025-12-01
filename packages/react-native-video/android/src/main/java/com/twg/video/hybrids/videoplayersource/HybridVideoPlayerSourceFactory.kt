@@ -6,14 +6,14 @@ import androidx.media3.common.MediaItem
 import androidx.media3.datasource.RawResourceDataSource
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.proguard.annotations.DoNotStrip
-import com.twg.video.react.AppContextHolder
+import com.margelo.nitro.NitroModules
 
 @DoNotStrip
 class HybridVideoPlayerSourceFactory: HybridVideoPlayerSourceFactorySpec() {
-  private val appContext: Context
-    get() = AppContextHolder.appContext
+  private val applicationContext: Context
+    get() = NitroModules.applicationContext
       ?: throw IllegalStateException(
-        "AppContextHolder.appContext has not been initialized."
+        "NitroModules.applicationContext has not been initialized."
       )
 
   private fun normalizeUri(input: String): String {
@@ -23,8 +23,8 @@ class HybridVideoPlayerSourceFactory: HybridVideoPlayerSourceFactorySpec() {
       return parsedUri.toString()
     }
 
-    val resId = appContext.resources
-      .getIdentifier(input, "raw", appContext.packageName)
+    val resId = applicationContext.resources
+      .getIdentifier(input, "raw", applicationContext.packageName)
 
     if (resId == 0) {
       throw IllegalArgumentException("The video resource '$input' could not be found in res/raw")
