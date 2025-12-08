@@ -1,0 +1,18 @@
+diff --git a/node_modules/nitrogen/src/syntax/swift/SwiftCxxBridgedType.ts b/node_modules/nitrogen/src/syntax/swift/SwiftCxxBridgedType.ts
+index a1761b4..b79abb6 100644
+--- a/node_modules/nitrogen/src/syntax/swift/SwiftCxxBridgedType.ts
++++ b/node_modules/nitrogen/src/syntax/swift/SwiftCxxBridgedType.ts
+@@ -452,7 +452,12 @@ export class SwiftCxxBridgedType implements BridgedType<'swift', 'c++'> {
+             // TODO: Remove this check for booleans once https://github.com/swiftlang/swift/issues/84848 is fixed.
+             const swiftBug84848Workaround =
+               optional.wrappingType.kind === 'boolean'
+-            if (!wrapping.needsSpecialHandling && !swiftBug84848Workaround) {
++            
++            // TODO: Remove this check for numbers once the Swift bug is fixed.
++            const swiftNumberWorkaround =
++              optional.wrappingType.kind === 'number'
++              
++            if (!wrapping.needsSpecialHandling && !swiftBug84848Workaround && !swiftNumberWorkaround) {
+               return `${cppParameterName}.value`
+             }
+             return `
