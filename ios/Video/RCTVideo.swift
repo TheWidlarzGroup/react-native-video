@@ -440,6 +440,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         if currentTimeSecs > duration || didEnd {
             currentTimeSecs = duration
         }
+        
+        var seekableDuration = Float(RCTVideoUtils.calculateSeekableDuration(_player))
+        var playableDuration = Float(RCTVideoUtils.calculatePlayableDuration(_player, withSource: _source))
 
         if currentTimeSecs >= 0 {
             #if USE_GOOGLE_IMA
@@ -447,14 +450,27 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     _imaAdsManager.requestAds()
                     _didRequestAds = true
                 }
+
+                if let currentContentTIme = _imaAdsManager.convertStreamTimeToContentTime(streamTime: TimeInterval(currentTimeSecs)) {
+                    currentTimeSecs = currentContentTIme
+                }
+            
+                if let seekableContentDuration = _imaAdsManager.convertStreamTimeToContentTime(streamTime: TimeInterval(seekableDuration)) {
+                    seekableDuration = Float(seekableContentDuration)
+                }
+
+                if let playableContentDuration = _imaAdsManager.convertStreamTimeToContentTime(streamTime: TimeInterval(playableDuration)) {
+                    playableDuration = Float(playableContentDuration)
+                }
             #endif
+            
             onVideoProgress?([
                 "currentTime": currentTimeSecs,
-                "playableDuration": RCTVideoUtils.calculatePlayableDuration(_player, withSource: _source),
+                "playableDuration": playableDuration,
                 "atValue": currentTime?.value ?? .zero,
                 "currentPlaybackTime": NSNumber(value: Double(currentPlaybackTime?.timeIntervalSince1970 ?? 0 * 1000)).int64Value,
                 "target": reactTag as Any,
-                "seekableDuration": RCTVideoUtils.calculateSeekableDuration(_player),
+                "seekableDuration": seekableDuration
             ])
         }
     }
@@ -895,18 +911,35 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             return
         }
 
+        var seekTime: Float = time.floatValue
+        
+        #if USE_GOOGLE_IMA
+            if let contentTime = _imaAdsManager.convertContentTimeToStreamTime(contentTime: TimeInterval(seekTime)) {
+                seekTime = Float(contentTime)
+            }
+        #endif
+
         RCTPlayerOperations.seek(
             player: player,
             playerItem: item,
             paused: _paused,
-            seekTime: time.floatValue,
+            seekTime: seekTime,
             seekTolerance: tolerance.floatValue
         ) { [weak self] (_: Bool) in
             guard let self else { return }
 
             self._playerObserver.addTimeObserverIfNotSet()
             self.setPaused(self._paused)
-            self.onVideoSeek?(["currentTime": NSNumber(value: Float(CMTimeGetSeconds(item.currentTime()))),
+
+            var currentTime = Float(CMTimeGetSeconds(item.currentTime()))
+
+            #if USE_GOOGLE_IMA
+                if let contentTime = self._imaAdsManager.convertStreamTimeToContentTime(streamTime: TimeInterval(currentTime)) {
+                    currentTime = Float(contentTime)
+                }
+            #endif
+
+            self.onVideoSeek?(["currentTime": NSNumber(value: currentTime),
                                "seekTime": time,
                                "target": self.reactTag as Any])
         }
@@ -1608,8 +1641,21 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
                 let audioTracks = await RCTVideoUtils.getAudioTrackInfo(self._player)
                 let textTracks = await RCTVideoUtils.getTextTrackInfo(self._player)
+
+                var currentTime = Float(CMTimeGetSeconds(_playerItem.currentTime()))
+
+                #if USE_GOOGLE_IMA
+                    if let contentTime = _imaAdsManager.convertStreamTimeToContentTime(streamTime: TimeInterval(currentTime)) {
+                        currentTime = Float(contentTime)
+                    }
+
+                    if let contentDuration = _imaAdsManager.convertStreamTimeToContentTime(streamTime: TimeInterval(duration)) {
+                        duration = Float(contentDuration)
+                    }
+                #endif
+                
                 self.onVideoLoad?(["duration": NSNumber(value: duration),
-                                   "currentTime": NSNumber(value: Float(CMTimeGetSeconds(_playerItem.currentTime()))),
+                                   "currentTime": NSNumber(value: currentTime),
                                    "canPlayReverse": NSNumber(value: _playerItem.canPlayReverse),
                                    "canPlayFastForward": NSNumber(value: _playerItem.canPlayFastForward),
                                    "canPlaySlowForward": NSNumber(value: _playerItem.canPlaySlowForward),
