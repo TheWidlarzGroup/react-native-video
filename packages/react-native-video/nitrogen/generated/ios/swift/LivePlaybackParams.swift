@@ -55,7 +55,14 @@ public extension LivePlaybackParams {
   var minPlaybackSpeed: Double? {
     @inline(__always)
     get {
-      return self.__minPlaybackSpeed.value
+      return { () -> Double? in
+        if bridge.has_value_std__optional_double_(self.__minPlaybackSpeed) {
+          let __unwrapped = bridge.get_std__optional_double_(self.__minPlaybackSpeed)
+          return __unwrapped
+        } else {
+          return nil
+        }
+      }()
     }
     @inline(__always)
     set {
@@ -72,7 +79,14 @@ public extension LivePlaybackParams {
   var maxPlaybackSpeed: Double? {
     @inline(__always)
     get {
-      return self.__maxPlaybackSpeed.value
+      return { () -> Double? in
+        if bridge.has_value_std__optional_double_(self.__maxPlaybackSpeed) {
+          let __unwrapped = bridge.get_std__optional_double_(self.__maxPlaybackSpeed)
+          return __unwrapped
+        } else {
+          return nil
+        }
+      }()
     }
     @inline(__always)
     set {
@@ -89,7 +103,14 @@ public extension LivePlaybackParams {
   var maxOffsetMs: Double? {
     @inline(__always)
     get {
-      return self.__maxOffsetMs.value
+      return { () -> Double? in
+        if bridge.has_value_std__optional_double_(self.__maxOffsetMs) {
+          let __unwrapped = bridge.get_std__optional_double_(self.__maxOffsetMs)
+          return __unwrapped
+        } else {
+          return nil
+        }
+      }()
     }
     @inline(__always)
     set {
@@ -106,7 +127,14 @@ public extension LivePlaybackParams {
   var minOffsetMs: Double? {
     @inline(__always)
     get {
-      return self.__minOffsetMs.value
+      return { () -> Double? in
+        if bridge.has_value_std__optional_double_(self.__minOffsetMs) {
+          let __unwrapped = bridge.get_std__optional_double_(self.__minOffsetMs)
+          return __unwrapped
+        } else {
+          return nil
+        }
+      }()
     }
     @inline(__always)
     set {
@@ -123,7 +151,14 @@ public extension LivePlaybackParams {
   var targetOffsetMs: Double? {
     @inline(__always)
     get {
-      return self.__targetOffsetMs.value
+      return { () -> Double? in
+        if bridge.has_value_std__optional_double_(self.__targetOffsetMs) {
+          let __unwrapped = bridge.get_std__optional_double_(self.__targetOffsetMs)
+          return __unwrapped
+        } else {
+          return nil
+        }
+      }()
     }
     @inline(__always)
     set {
