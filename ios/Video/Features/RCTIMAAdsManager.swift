@@ -149,6 +149,14 @@
                 daiAdContainerView = nil
             }
         }
+        
+        func convertStreamTimeToContentTime(streamTime: TimeInterval) -> TimeInterval? {
+            streamManager?.contentTime(forStreamTime: streamTime)
+        }
+        
+        func convertContentTimeToStreamTime(contentTime: TimeInterval) -> TimeInterval? {
+            streamManager?.streamTime(forContentTime: contentTime)
+        }
 
         // MARK: - Getters
 
