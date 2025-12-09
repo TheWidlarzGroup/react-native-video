@@ -6,6 +6,11 @@ export enum IVideoPlayerSeekType {
   SKIP_MARKER = "skipMarker",
 }
 
+export enum IVideoPlayerMediaTrackAction {
+  UI = "ui",
+  PLAYER = "player",
+}
+
 export interface IVideoPlayerSeekEndedEvent {
   seekType: IVideoPlayerSeekType;
   seekStartAt: number;
@@ -15,3 +20,8 @@ export interface IVideoPlayerSeekEndedEvent {
 export interface IVideoPlayerPlayPauseEvent {
   isPaused: boolean;
 };
+
+export interface IVideoPlayerMediaTrackChangedEvent {
+  language: string;
+  action: IVideoPlayerMediaTrackAction;
+}

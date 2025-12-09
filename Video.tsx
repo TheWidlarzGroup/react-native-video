@@ -158,6 +158,14 @@ export default class Video extends React.PureComponent<IVideoPlayer, IState> {
     this.props.onBehindLiveWindowError?.(event.nativeEvent);
   }
 
+  onAudioTrackChanged = (event) => { 
+    this.props.onAudioTrackChanged?.(event.nativeEvent);
+  }
+
+  onSubtitleTrackChanged = (event) => {
+    this.props.onSubtitleTrackChanged?.(event.nativeEvent);
+  }
+
   /**
    * @description seeks to a specified time in the video
    * @param time video time in seconds
@@ -214,6 +222,8 @@ export default class Video extends React.PureComponent<IVideoPlayer, IState> {
       onBehindLiveWindowError: this.onBehindLiveWindowError,
       onSkipMarkerButton: this.onSkipMarkerButton,
       onPlayPauseAction: this.onPlayPauseAction,
+      onAudioTrackChanged: this.onAudioTrackChanged,
+      onSubtitleTrackChanged: this.onSubtitleTrackChanged,
     };
   };
 

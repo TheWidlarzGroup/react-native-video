@@ -192,6 +192,7 @@ class VideoEventEmitter {
     private static final String EVENT_PROP_DATE = "date";
     private static final String EVENT_PROP_IS_BLOCKING = "isBlocking";
     private static final String EVENT_PROP_LANGUAGE = "language";
+    private static final String EVENT_PROP_ACTION = "action";
     private static final String EVENT_PROP_TARGET = "target";
 
     private static final String EVENT_PROP_ERROR = "error";
@@ -457,16 +458,32 @@ class VideoEventEmitter {
         receiveEvent(EVENT_ANNOTATIONS_BUTTON_CLICK, null);
     }
 
-    void subtitleTrackChanged(String language) {
+    void subtitleTrackChanged(String language, boolean userInitiated) {
+        // when user select subtitle, track 'ui' 'player' twice events. matching as TvOS.
         String lang = "OFF".equalsIgnoreCase(language) ? "" : language;
+        if (userInitiated) {
+            WritableMap map = Arguments.createMap();
+            map.putString(EVENT_PROP_LANGUAGE, lang);
+            map.putString(EVENT_PROP_ACTION, "ui");
+            receiveEvent(EVENT_SUBTITLE_TRACK_CHANGED, map);
+        }
         WritableMap map = Arguments.createMap();
         map.putString(EVENT_PROP_LANGUAGE, lang);
+        map.putString(EVENT_PROP_ACTION, "player");
         receiveEvent(EVENT_SUBTITLE_TRACK_CHANGED, map);
     }
 
-    void audioTrackChanged(String language) {
+    void audioTrackChanged(String language, boolean userInitiated) {
+        // when user select subtitle, track 'ui' 'player' twice events. matching as TvOS.
+        if (userInitiated) {
+            WritableMap map = Arguments.createMap();
+            map.putString(EVENT_PROP_LANGUAGE, language);
+            map.putString(EVENT_PROP_ACTION, "ui");
+            receiveEvent(EVENT_AUDIO_TRACK_CHANGED, map);
+        }
         WritableMap map = Arguments.createMap();
         map.putString(EVENT_PROP_LANGUAGE, language);
+        map.putString(EVENT_PROP_ACTION, "player");
         receiveEvent(EVENT_AUDIO_TRACK_CHANGED, map);
     }
 

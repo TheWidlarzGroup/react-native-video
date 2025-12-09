@@ -1,4 +1,4 @@
-import { IVideoPlayerPlayPauseEvent, IVideoPlayerSeekEndedEvent } from "./event";
+import { IVideoPlayerMediaTrackChangedEvent, IVideoPlayerPlayPauseEvent, IVideoPlayerSeekEndedEvent } from "./event";
 import { IVideoPlayerOnRequireAdParametersPayload } from "./ima";
 
 export interface IVideoPlayerCallbacks {
@@ -26,8 +26,8 @@ export interface IVideoPlayerCallbacks {
   onWatchlistButtonClick?: (e: any) => void;
   onReloadCurrentSource?: (e: any) => void;
   onBehindLiveWindowError?: (e: any) => void;
-  onAudioTrackChanged?: ({ language }: { language: string }) => void;
-  onSubtitleTrackChanged?: ({ language }: { language: string }) => void;
+  onAudioTrackChanged?: (e: IVideoPlayerMediaTrackChangedEvent) => void;
+  onSubtitleTrackChanged?: (e: IVideoPlayerMediaTrackChangedEvent) => void;
   onSkipMarkerButton?: (e: any) => void;
   onPlayPauseAction?: (e: IVideoPlayerPlayPauseEvent) => void;
 }

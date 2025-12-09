@@ -1979,21 +1979,21 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     }
 
     @Override
-    public void onSubtitleSelected(String language) {
+    public void onSubtitleSelected(String language, boolean userInitiated) {
         TrackPreferenceStorage storage = TrackPreferenceStorage.getInstance(getContext());
         storage.storePreferredSubtitleLanguage(language == null
                 ? TrackPreferenceStorage.NONE
                 : language);
-        eventEmitter.subtitleTrackChanged(language);
+        eventEmitter.subtitleTrackChanged(language, userInitiated);
     }
 
     @Override
-    public void onAudioSelected(String language) {
+    public void onAudioSelected(String language, boolean userInitiated) {
         TrackPreferenceStorage storage = TrackPreferenceStorage.getInstance(getContext());
         storage.storePreferredAudioLanguage(language == null
                 ? TrackPreferenceStorage.NONE
                 : language);
-        eventEmitter.audioTrackChanged(language);
+        eventEmitter.audioTrackChanged(language, userInitiated);
     }
 
     public void replaceAdTagParameters(Map<String, Object> replaceAdTagParametersMap) {
