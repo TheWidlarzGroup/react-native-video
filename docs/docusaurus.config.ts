@@ -38,7 +38,7 @@ const config: Config = {
           includeCurrentVersion: true,
           versions: {
             current: {
-              label: 'v7 Alpha',
+              label: 'v7 Beta',
               path: 'v7',
               banner: 'none',
             },
@@ -103,7 +103,7 @@ const config: Config = {
         {
           type: 'docsVersionDropdown',
           versions: {
-            current: {label: 'v7 Alpha'},
+            current: {label: 'v7 Beta'},
             '6.x': {label: 'v6'},
           },
           position: 'right',

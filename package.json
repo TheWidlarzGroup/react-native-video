@@ -22,7 +22,7 @@
     "example": "bun run --cwd example",
     "docs": "bun run --cwd docs",
     "postinstall": "patch-package --patch-dir example/patches",
-    "release:github": "release-it --preRelease alpha",
+    "release:github": "release-it --preRelease beta",
     "release": "./scripts/release.sh"
   },
   "devDependencies": {

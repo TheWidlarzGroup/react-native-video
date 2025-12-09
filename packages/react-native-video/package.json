@@ -53,7 +53,7 @@
     "prepare": "bun run build",
     "build": "bob build",
     "specs": "nitrogen",
-    "release": "release-it --preRelease alpha --npm.tag=next"
+    "release": "release-it --preRelease beta --npm.tag=beta"
   },
   "keywords": [
     "react-native",

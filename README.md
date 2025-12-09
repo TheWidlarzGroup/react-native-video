@@ -63,8 +63,8 @@ npm install react-native-nitro-modules
 Then install `react-native-video`
 
 ```bash
-# Install the alpha version of react-native-video v7
-npm install react-native-video@next
+# Install the beta version of react-native-video v7
+npm install react-native-video@beta
 
 # Install pods
 cd ios && pod install
