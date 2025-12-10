@@ -9,7 +9,6 @@ import androidx.media3.extractor.ExtractorOutput;
 import androidx.media3.extractor.PositionHolder;
 import androidx.media3.extractor.SeekMap;
 import androidx.media3.extractor.TrackOutput;
-import androidx.media3.extractor.text.SubtitleExtractor;
 
 import java.io.IOException;
 
@@ -27,7 +26,7 @@ public final class UnknownSubtitlesExtractor implements Extractor {
 
     @Override
     public void init(ExtractorOutput output) {
-      TrackOutput trackOutput = output.track(SubtitleExtractor.TRACK_ID, C.TRACK_TYPE_TEXT);
+      TrackOutput trackOutput = output.track(/* id= */ 0, C.TRACK_TYPE_TEXT);
       output.seekMap(new SeekMap.Unseekable(C.TIME_UNSET));
       output.endTracks();
       trackOutput.format(
