@@ -24,6 +24,7 @@ namespace margelo::nitro::video { enum class SurfaceType; }
 #include "JSurfaceType.hpp"
 #include <functional>
 #include "JFunc_void_bool.hpp"
+#include <NitroModules/JNICallable.hpp>
 #include "JFunc_void.hpp"
 
 namespace margelo::nitro::video {
@@ -46,6 +47,12 @@ namespace margelo::nitro::video {
   void JHybridVideoViewViewManagerSpec::dispose() noexcept {
     static const auto method = javaClassStatic()->getMethod<void()>("dispose");
     method(_javaPart);
+  }
+
+  std::string JHybridVideoViewViewManagerSpec::toString() {
+    static const auto method = javaClassStatic()->getMethod<jni::JString()>("toString");
+    auto javaString = method(_javaPart);
+    return javaString->toStdString();
   }
 
   // Properties
@@ -121,9 +128,7 @@ namespace margelo::nitro::video {
         return downcast->cthis()->getFunction();
       } else {
         auto __resultRef = jni::make_global(__result);
-        return [__resultRef](bool isInPictureInPicture) -> void {
-          return __resultRef->invoke(isInPictureInPicture);
-        };
+        return JNICallable<JFunc_void_bool, void(bool)>(std::move(__resultRef));
       }
     }()) : std::nullopt;
   }
@@ -140,9 +145,7 @@ namespace margelo::nitro::video {
         return downcast->cthis()->getFunction();
       } else {
         auto __resultRef = jni::make_global(__result);
-        return [__resultRef](bool fullscreen) -> void {
-          return __resultRef->invoke(fullscreen);
-        };
+        return JNICallable<JFunc_void_bool, void(bool)>(std::move(__resultRef));
       }
     }()) : std::nullopt;
   }
@@ -159,9 +162,7 @@ namespace margelo::nitro::video {
         return downcast->cthis()->getFunction();
       } else {
         auto __resultRef = jni::make_global(__result);
-        return [__resultRef]() -> void {
-          return __resultRef->invoke();
-        };
+        return JNICallable<JFunc_void, void()>(std::move(__resultRef));
       }
     }()) : std::nullopt;
   }
@@ -178,9 +179,7 @@ namespace margelo::nitro::video {
         return downcast->cthis()->getFunction();
       } else {
         auto __resultRef = jni::make_global(__result);
-        return [__resultRef]() -> void {
-          return __resultRef->invoke();
-        };
+        return JNICallable<JFunc_void, void()>(std::move(__resultRef));
       }
     }()) : std::nullopt;
   }
@@ -197,9 +196,7 @@ namespace margelo::nitro::video {
         return downcast->cthis()->getFunction();
       } else {
         auto __resultRef = jni::make_global(__result);
-        return [__resultRef]() -> void {
-          return __resultRef->invoke();
-        };
+        return JNICallable<JFunc_void, void()>(std::move(__resultRef));
       }
     }()) : std::nullopt;
   }
@@ -216,9 +213,7 @@ namespace margelo::nitro::video {
         return downcast->cthis()->getFunction();
       } else {
         auto __resultRef = jni::make_global(__result);
-        return [__resultRef]() -> void {
-          return __resultRef->invoke();
-        };
+        return JNICallable<JFunc_void, void()>(std::move(__resultRef));
       }
     }()) : std::nullopt;
   }

@@ -1,41 +1,166 @@
 package com.margelo.nitro.video
 
-class HybridVideoPlayerEventEmitter(): HybridVideoPlayerEventEmitterSpec() {
-  override var onAudioBecomingNoisy: () -> Unit = {}
+import android.util.Log
+import com.margelo.nitro.core.NullType
+import java.util.UUID
 
-  override var onAudioFocusChange: (Boolean) -> Unit = {}
+data class ListenerPair(val id: UUID, val eventName: String, val callback: Any)
 
-  override var onBandwidthUpdate: (BandwidthData) -> Unit = {}
+class HybridVideoPlayerEventEmitter : HybridVideoPlayerEventEmitterSpec() {
+  var listeners: MutableList<ListenerPair> = mutableListOf()
 
-  override var onBuffer: (Boolean) -> Unit = {}
+  // MARK: - Private helpers
+  private fun <T : Any> addListener(eventName: String, listener: T): ListenerSubscription {
+    val id = UUID.randomUUID()
+    listeners.add(ListenerPair(id, eventName, listener))
+    return ListenerSubscription { listeners.removeAll { it.id == id } }
+  }
 
-  override var onControlsVisibleChange: (Boolean) -> Unit = {}
+  private inline fun <reified T> emitEvent(eventName: String, invokeCallback: (T) -> Unit) {
+    listeners.filter { it.eventName == eventName }.forEach { pair ->
+      try {
+        @Suppress("UNCHECKED_CAST")
+        val callback = pair.callback as? T
+        if (callback == null) {
+          Log.d(TAG, "Invalid callback type for $eventName")
+          return@forEach
+        }
+        invokeCallback(callback)
+      } catch (error: Error) {
+        Log.d(TAG, "Error calling $eventName listener $error")
+      }
+    }
+  }
 
-  override var onEnd: () -> Unit = {}
+  // MARK: - Listener registration methods
+  
+  override fun addOnAudioBecomingNoisyListener(listener: () -> Unit) =
+    addListener("onAudioBecomingNoisy", listener)
 
-  override var onExternalPlaybackChange: (Boolean) -> Unit = {}
+  override fun addOnAudioFocusChangeListener(listener: (Boolean) -> Unit) =
+    addListener("onAudioFocusChange", listener)
 
-  override var onLoad: (onLoadData) -> Unit = {}
+  override fun addOnBandwidthUpdateListener(listener: (BandwidthData) -> Unit) =
+    addListener("onBandwidthUpdate", listener)
 
-  override var onLoadStart: (onLoadStartData) -> Unit = {}
+  override fun addOnBufferListener(listener: (Boolean) -> Unit) =
+    addListener("onBuffer", listener)
 
-  override var onPlaybackStateChange: (onPlaybackStateChangeData) -> Unit = {}
+  override fun addOnControlsVisibleChangeListener(listener: (Boolean) -> Unit) =
+    addListener("onControlsVisibleChange", listener)
 
-  override var onPlaybackRateChange: (Double) -> Unit = {}
+  override fun addOnEndListener(listener: () -> Unit) =
+    addListener("onEnd", listener)
 
-  override var onProgress: (onProgressData) -> Unit = {}
+  override fun addOnExternalPlaybackChangeListener(listener: (Boolean) -> Unit) =
+    addListener("onExternalPlaybackChange", listener)
 
-  override var onReadyToDisplay: () -> Unit = {}
+  override fun addOnLoadListener(listener: (onLoadData) -> Unit) =
+    addListener("onLoad", listener)
 
-  override var onSeek: (Double) -> Unit = {}
+  override fun addOnLoadStartListener(listener: (onLoadStartData) -> Unit) =
+    addListener("onLoadStart", listener)
 
-  override var onTimedMetadata: (TimedMetadata) -> Unit = {}
+  override fun addOnPlaybackStateChangeListener(listener: (onPlaybackStateChangeData) -> Unit) =
+    addListener("onPlaybackStateChange", listener)
 
-  override var onTextTrackDataChanged: (Array<String>) -> Unit = {}
+  override fun addOnPlaybackRateChangeListener(listener: (Double) -> Unit) =
+    addListener("onPlaybackRateChange", listener)
 
-  override var onTrackChange: (TextTrack?) -> Unit = {}
+  override fun addOnProgressListener(listener: (onProgressData) -> Unit) =
+    addListener("onProgress", listener)
 
-  override var onVolumeChange: (onVolumeChangeData) -> Unit = {}
+  override fun addOnReadyToDisplayListener(listener: () -> Unit) =
+    addListener("onReadyToDisplay", listener)
 
-  override var onStatusChange: (VideoPlayerStatus) -> Unit = {}
+  override fun addOnSeekListener(listener: (Double) -> Unit) =
+    addListener("onSeek", listener)
+
+  override fun addOnStatusChangeListener(listener: (VideoPlayerStatus) -> Unit) =
+    addListener("onStatusChange", listener)
+
+  override fun addOnTimedMetadataListener(listener: (TimedMetadata) -> Unit) =
+    addListener("onTimedMetadata", listener)
+
+  override fun addOnTextTrackDataChangedListener(listener: (Array<String>) -> Unit) =
+    addListener("onTextTrackDataChanged", listener)
+
+  override fun addOnTrackChangeListener(listener: (Variant_NullType_TextTrack?) -> Unit) =
+    addListener("onTrackChange", listener)
+
+  override fun addOnVolumeChangeListener(listener: (onVolumeChangeData) -> Unit) =
+    addListener("onVolumeChange", listener)
+
+  override fun clearAllListeners() {
+    listeners.clear()
+  }
+
+  // MARK: - Event emission methods
+
+  fun onAudioBecomingNoisy() =
+    emitEvent<() -> Unit>("onAudioBecomingNoisy") { it() }
+
+  fun onAudioFocusChange(hasFocus: Boolean) =
+    emitEvent<(Boolean) -> Unit>("onAudioFocusChange") { it(hasFocus) }
+
+  fun onBandwidthUpdate(data: BandwidthData) =
+    emitEvent<(BandwidthData) -> Unit>("onBandwidthUpdate") { it(data) }
+
+  fun onBuffer(isBuffering: Boolean) =
+    emitEvent<(Boolean) -> Unit>("onBuffer") { it(isBuffering) }
+
+  fun onControlsVisibleChange(isVisible: Boolean) =
+    emitEvent<(Boolean) -> Unit>("onControlsVisibleChange") { it(isVisible) }
+
+  fun onEnd() =
+    emitEvent<() -> Unit>("onEnd") { it() }
+
+  fun onExternalPlaybackChange(isExternalPlayback: Boolean) =
+    emitEvent<(Boolean) -> Unit>("onExternalPlaybackChange") { it(isExternalPlayback) }
+
+  fun onLoad(data: onLoadData) =
+    emitEvent<(onLoadData) -> Unit>("onLoad") { it(data) }
+
+  fun onLoadStart(data: onLoadStartData) =
+    emitEvent<(onLoadStartData) -> Unit>("onLoadStart") { it(data) }
+
+  fun onPlaybackStateChange(data: onPlaybackStateChangeData) =
+    emitEvent<(onPlaybackStateChangeData) -> Unit>("onPlaybackStateChange") { it(data) }
+
+  fun onPlaybackRateChange(rate: Double) =
+    emitEvent<(Double) -> Unit>("onPlaybackRateChange") { it(rate) }
+
+  fun onProgress(data: onProgressData) =
+    emitEvent<(onProgressData) -> Unit>("onProgress") { it(data) }
+
+  fun onReadyToDisplay() =
+    emitEvent<() -> Unit>("onReadyToDisplay") { it() }
+
+  fun onSeek(position: Double) =
+    emitEvent<(Double) -> Unit>("onSeek") { it(position) }
+
+  fun onTimedMetadata(metadata: TimedMetadata) =
+    emitEvent<(TimedMetadata) -> Unit>("onTimedMetadata") { it(metadata) }
+
+  fun onTextTrackDataChanged(tracks: Array<String>) =
+    emitEvent<(Array<String>) -> Unit>("onTextTrackDataChanged") { it(tracks) }
+
+  fun onTrackChange(track: TextTrack?) {
+    val param = if (track == null) {
+      Variant_NullType_TextTrack.create(NullType.NULL)
+    } else {
+      Variant_NullType_TextTrack.create(track)
+    }
+    emitEvent<(Variant_NullType_TextTrack?) -> Unit>("onTrackChange") { it(param) }
+  }
+
+  fun onVolumeChange(data: onVolumeChangeData) =
+    emitEvent<(onVolumeChangeData) -> Unit>("onVolumeChange") { it(data) }
+
+  fun onStatusChange(status: VideoPlayerStatus) =
+    emitEvent<(VideoPlayerStatus) -> Unit>("onStatusChange") { it(status) }
+
+  companion object {
+    const val TAG = "HybridVideoPlayerEventEmitter"
+  }
 }

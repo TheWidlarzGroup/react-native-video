@@ -47,6 +47,7 @@ namespace margelo::nitro::video { struct CustomVideoMetadata; }
 #include "OnGetLicensePayload.hpp"
 #include <functional>
 #include "JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload.hpp"
+#include <NitroModules/JNICallable.hpp>
 #include <NitroModules/JPromise.hpp>
 #include "JOnGetLicensePayload.hpp"
 #include "BufferConfig.hpp"
@@ -78,6 +79,12 @@ namespace margelo::nitro::video {
   void JHybridVideoPlayerSourceFactorySpec::dispose() noexcept {
     static const auto method = javaClassStatic()->getMethod<void()>("dispose");
     method(_javaPart);
+  }
+
+  std::string JHybridVideoPlayerSourceFactorySpec::toString() {
+    static const auto method = javaClassStatic()->getMethod<jni::JString()>("toString");
+    auto javaString = method(_javaPart);
+    return javaString->toStdString();
   }
 
   // Properties

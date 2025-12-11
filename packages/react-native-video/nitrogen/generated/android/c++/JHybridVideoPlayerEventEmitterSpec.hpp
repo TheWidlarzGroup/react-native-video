@@ -41,6 +41,7 @@ namespace margelo::nitro::video {
   public:
     size_t getExternalMemorySize() noexcept override;
     void dispose() noexcept override;
+    std::string toString() override;
 
   public:
     inline const jni::global_ref<JHybridVideoPlayerEventEmitterSpec::javaobject>& getJavaPart() const noexcept {
@@ -49,48 +50,30 @@ namespace margelo::nitro::video {
 
   public:
     // Properties
-    std::function<void()> getOnAudioBecomingNoisy() override;
-    void setOnAudioBecomingNoisy(const std::function<void()>& onAudioBecomingNoisy) override;
-    std::function<void(bool /* hasAudioFocus */)> getOnAudioFocusChange() override;
-    void setOnAudioFocusChange(const std::function<void(bool /* hasAudioFocus */)>& onAudioFocusChange) override;
-    std::function<void(const BandwidthData& /* data */)> getOnBandwidthUpdate() override;
-    void setOnBandwidthUpdate(const std::function<void(const BandwidthData& /* data */)>& onBandwidthUpdate) override;
-    std::function<void(bool /* buffering */)> getOnBuffer() override;
-    void setOnBuffer(const std::function<void(bool /* buffering */)>& onBuffer) override;
-    std::function<void(bool /* visible */)> getOnControlsVisibleChange() override;
-    void setOnControlsVisibleChange(const std::function<void(bool /* visible */)>& onControlsVisibleChange) override;
-    std::function<void()> getOnEnd() override;
-    void setOnEnd(const std::function<void()>& onEnd) override;
-    std::function<void(bool /* externalPlaybackActive */)> getOnExternalPlaybackChange() override;
-    void setOnExternalPlaybackChange(const std::function<void(bool /* externalPlaybackActive */)>& onExternalPlaybackChange) override;
-    std::function<void(const onLoadData& /* data */)> getOnLoad() override;
-    void setOnLoad(const std::function<void(const onLoadData& /* data */)>& onLoad) override;
-    std::function<void(const onLoadStartData& /* data */)> getOnLoadStart() override;
-    void setOnLoadStart(const std::function<void(const onLoadStartData& /* data */)>& onLoadStart) override;
-    std::function<void(const onPlaybackStateChangeData& /* data */)> getOnPlaybackStateChange() override;
-    void setOnPlaybackStateChange(const std::function<void(const onPlaybackStateChangeData& /* data */)>& onPlaybackStateChange) override;
-    std::function<void(double /* rate */)> getOnPlaybackRateChange() override;
-    void setOnPlaybackRateChange(const std::function<void(double /* rate */)>& onPlaybackRateChange) override;
-    std::function<void(const onProgressData& /* data */)> getOnProgress() override;
-    void setOnProgress(const std::function<void(const onProgressData& /* data */)>& onProgress) override;
-    std::function<void()> getOnReadyToDisplay() override;
-    void setOnReadyToDisplay(const std::function<void()>& onReadyToDisplay) override;
-    std::function<void(double /* seekTime */)> getOnSeek() override;
-    void setOnSeek(const std::function<void(double /* seekTime */)>& onSeek) override;
-    std::function<void(const TimedMetadata& /* metadata */)> getOnTimedMetadata() override;
-    void setOnTimedMetadata(const std::function<void(const TimedMetadata& /* metadata */)>& onTimedMetadata) override;
-    std::function<void(const std::vector<std::string>& /* texts */)> getOnTextTrackDataChanged() override;
-    void setOnTextTrackDataChanged(const std::function<void(const std::vector<std::string>& /* texts */)>& onTextTrackDataChanged) override;
-    std::function<void(const std::optional<TextTrack>& /* track */)> getOnTrackChange() override;
-    void setOnTrackChange(const std::function<void(const std::optional<TextTrack>& /* track */)>& onTrackChange) override;
-    std::function<void(const onVolumeChangeData& /* data */)> getOnVolumeChange() override;
-    void setOnVolumeChange(const std::function<void(const onVolumeChangeData& /* data */)>& onVolumeChange) override;
-    std::function<void(VideoPlayerStatus /* status */)> getOnStatusChange() override;
-    void setOnStatusChange(const std::function<void(VideoPlayerStatus /* status */)>& onStatusChange) override;
+    
 
   public:
     // Methods
-    
+    ListenerSubscription addOnAudioBecomingNoisyListener(const std::function<void()>& listener) override;
+    ListenerSubscription addOnAudioFocusChangeListener(const std::function<void(bool /* hasAudioFocus */)>& listener) override;
+    ListenerSubscription addOnBandwidthUpdateListener(const std::function<void(const BandwidthData& /* data */)>& listener) override;
+    ListenerSubscription addOnBufferListener(const std::function<void(bool /* buffering */)>& listener) override;
+    ListenerSubscription addOnControlsVisibleChangeListener(const std::function<void(bool /* visible */)>& listener) override;
+    ListenerSubscription addOnEndListener(const std::function<void()>& listener) override;
+    ListenerSubscription addOnExternalPlaybackChangeListener(const std::function<void(bool /* externalPlaybackActive */)>& listener) override;
+    ListenerSubscription addOnLoadListener(const std::function<void(const onLoadData& /* data */)>& listener) override;
+    ListenerSubscription addOnLoadStartListener(const std::function<void(const onLoadStartData& /* data */)>& listener) override;
+    ListenerSubscription addOnPlaybackStateChangeListener(const std::function<void(const onPlaybackStateChangeData& /* data */)>& listener) override;
+    ListenerSubscription addOnPlaybackRateChangeListener(const std::function<void(double /* rate */)>& listener) override;
+    ListenerSubscription addOnProgressListener(const std::function<void(const onProgressData& /* data */)>& listener) override;
+    ListenerSubscription addOnReadyToDisplayListener(const std::function<void()>& listener) override;
+    ListenerSubscription addOnSeekListener(const std::function<void(double /* position */)>& listener) override;
+    ListenerSubscription addOnStatusChangeListener(const std::function<void(VideoPlayerStatus /* status */)>& listener) override;
+    ListenerSubscription addOnTimedMetadataListener(const std::function<void(const TimedMetadata& /* data */)>& listener) override;
+    ListenerSubscription addOnTextTrackDataChangedListener(const std::function<void(const std::vector<std::string>& /* data */)>& listener) override;
+    ListenerSubscription addOnTrackChangeListener(const std::function<void(const std::optional<std::variant<nitro::NullType, TextTrack>>& /* track */)>& listener) override;
+    ListenerSubscription addOnVolumeChangeListener(const std::function<void(const onVolumeChangeData& /* data */)>& listener) override;
+    void clearAllListeners() override;
 
   private:
     friend HybridBase;

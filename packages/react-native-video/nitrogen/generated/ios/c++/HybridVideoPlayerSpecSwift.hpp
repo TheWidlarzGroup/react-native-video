@@ -35,6 +35,8 @@ namespace margelo::nitro::video { struct TextTrack; }
 #include <optional>
 #include <string>
 #include <NitroModules/Promise.hpp>
+#include <NitroModules/Null.hpp>
+#include <variant>
 #include <vector>
 
 #include "ReactNativeVideo-Swift-Cxx-Umbrella.hpp"
@@ -70,6 +72,9 @@ namespace margelo::nitro::video {
     }
     void dispose() noexcept override {
       _swiftPart.dispose();
+    }
+    std::string toString() override {
+      return _swiftPart.toString();
     }
 
   public:
@@ -161,7 +166,7 @@ namespace margelo::nitro::video {
 
   public:
     // Methods
-    inline std::shared_ptr<Promise<void>> replaceSourceAsync(const std::optional<std::shared_ptr<HybridVideoPlayerSourceSpec>>& source) override {
+    inline std::shared_ptr<Promise<void>> replaceSourceAsync(const std::optional<std::variant<nitro::NullType, std::shared_ptr<HybridVideoPlayerSourceSpec>>>& source) override {
       auto __result = _swiftPart.replaceSourceAsync(source);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
@@ -177,7 +182,7 @@ namespace margelo::nitro::video {
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline void selectTextTrack(const std::optional<TextTrack>& textTrack) override {
+    inline void selectTextTrack(const std::optional<std::variant<nitro::NullType, TextTrack>>& textTrack) override {
       auto __result = _swiftPart.selectTextTrack(textTrack);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());

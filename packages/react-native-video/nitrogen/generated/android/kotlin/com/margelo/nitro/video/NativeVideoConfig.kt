@@ -9,7 +9,6 @@ package com.margelo.nitro.video
 
 import androidx.annotation.Keep
 import com.facebook.proguard.annotations.DoNotStrip
-import com.margelo.nitro.core.*
 
 
 /**
@@ -40,6 +39,8 @@ data class NativeVideoConfig(
   @Keep
   val initializeOnCreation: Boolean?
 ) {
+  /* primary constructor */
+
   private companion object {
     /**
      * Constructor called from C++

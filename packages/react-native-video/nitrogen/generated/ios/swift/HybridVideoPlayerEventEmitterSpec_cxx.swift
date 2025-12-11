@@ -76,7 +76,7 @@ open class HybridVideoPlayerEventEmitterSpec_cxx {
    */
   public func getCxxPart() -> bridge.std__shared_ptr_HybridVideoPlayerEventEmitterSpec_ {
     let cachedCxxPart = self.__cxxPart.lock()
-    if cachedCxxPart.__convertToBool() {
+    if Bool(fromCxx: cachedCxxPart) {
       return cachedCxxPart
     } else {
       let newCxxPart = bridge.create_std__shared_ptr_HybridVideoPlayerEventEmitterSpec_(self.toUnsafe())
@@ -105,380 +105,368 @@ open class HybridVideoPlayerEventEmitterSpec_cxx {
     self.__implementation.dispose()
   }
 
+  /**
+   * Call toString() on the Swift class.
+   */
+  @inline(__always)
+  public func toString() -> String {
+    return self.__implementation.toString()
+  }
+
   // Properties
-  public final var onAudioBecomingNoisy: bridge.Func_void {
-    @inline(__always)
-    get {
-      return { () -> bridge.Func_void in
-        let __closureWrapper = Func_void(self.__implementation.onAudioBecomingNoisy)
-        return bridge.create_Func_void(__closureWrapper.toUnsafe())
-      }()
-    }
-    @inline(__always)
-    set {
-      self.__implementation.onAudioBecomingNoisy = { () -> () -> Void in
-        let __wrappedFunction = bridge.wrap_Func_void(newValue)
+  
+
+  // Methods
+  @inline(__always)
+  public final func addOnAudioBecomingNoisyListener(listener: bridge.Func_void) -> bridge.Result_ListenerSubscription_ {
+    do {
+      let __result = try self.__implementation.addOnAudioBecomingNoisyListener(listener: { () -> () -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void(listener)
         return { () -> Void in
           __wrappedFunction.call()
         }
-      }()
+      }())
+      let __resultCpp = __result
+      return bridge.create_Result_ListenerSubscription_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_ListenerSubscription_(__exceptionPtr)
     }
   }
   
-  public final var onAudioFocusChange: bridge.Func_void_bool {
-    @inline(__always)
-    get {
-      return { () -> bridge.Func_void_bool in
-        let __closureWrapper = Func_void_bool(self.__implementation.onAudioFocusChange)
-        return bridge.create_Func_void_bool(__closureWrapper.toUnsafe())
-      }()
-    }
-    @inline(__always)
-    set {
-      self.__implementation.onAudioFocusChange = { () -> (Bool) -> Void in
-        let __wrappedFunction = bridge.wrap_Func_void_bool(newValue)
+  @inline(__always)
+  public final func addOnAudioFocusChangeListener(listener: bridge.Func_void_bool) -> bridge.Result_ListenerSubscription_ {
+    do {
+      let __result = try self.__implementation.addOnAudioFocusChangeListener(listener: { () -> (Bool) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_bool(listener)
         return { (__hasAudioFocus: Bool) -> Void in
           __wrappedFunction.call(__hasAudioFocus)
         }
-      }()
+      }())
+      let __resultCpp = __result
+      return bridge.create_Result_ListenerSubscription_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_ListenerSubscription_(__exceptionPtr)
     }
   }
   
-  public final var onBandwidthUpdate: bridge.Func_void_BandwidthData {
-    @inline(__always)
-    get {
-      return { () -> bridge.Func_void_BandwidthData in
-        let __closureWrapper = Func_void_BandwidthData(self.__implementation.onBandwidthUpdate)
-        return bridge.create_Func_void_BandwidthData(__closureWrapper.toUnsafe())
-      }()
-    }
-    @inline(__always)
-    set {
-      self.__implementation.onBandwidthUpdate = { () -> (BandwidthData) -> Void in
-        let __wrappedFunction = bridge.wrap_Func_void_BandwidthData(newValue)
+  @inline(__always)
+  public final func addOnBandwidthUpdateListener(listener: bridge.Func_void_BandwidthData) -> bridge.Result_ListenerSubscription_ {
+    do {
+      let __result = try self.__implementation.addOnBandwidthUpdateListener(listener: { () -> (BandwidthData) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_BandwidthData(listener)
         return { (__data: BandwidthData) -> Void in
           __wrappedFunction.call(__data)
         }
-      }()
+      }())
+      let __resultCpp = __result
+      return bridge.create_Result_ListenerSubscription_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_ListenerSubscription_(__exceptionPtr)
     }
   }
   
-  public final var onBuffer: bridge.Func_void_bool {
-    @inline(__always)
-    get {
-      return { () -> bridge.Func_void_bool in
-        let __closureWrapper = Func_void_bool(self.__implementation.onBuffer)
-        return bridge.create_Func_void_bool(__closureWrapper.toUnsafe())
-      }()
-    }
-    @inline(__always)
-    set {
-      self.__implementation.onBuffer = { () -> (Bool) -> Void in
-        let __wrappedFunction = bridge.wrap_Func_void_bool(newValue)
+  @inline(__always)
+  public final func addOnBufferListener(listener: bridge.Func_void_bool) -> bridge.Result_ListenerSubscription_ {
+    do {
+      let __result = try self.__implementation.addOnBufferListener(listener: { () -> (Bool) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_bool(listener)
         return { (__buffering: Bool) -> Void in
           __wrappedFunction.call(__buffering)
         }
-      }()
+      }())
+      let __resultCpp = __result
+      return bridge.create_Result_ListenerSubscription_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_ListenerSubscription_(__exceptionPtr)
     }
   }
   
-  public final var onControlsVisibleChange: bridge.Func_void_bool {
-    @inline(__always)
-    get {
-      return { () -> bridge.Func_void_bool in
-        let __closureWrapper = Func_void_bool(self.__implementation.onControlsVisibleChange)
-        return bridge.create_Func_void_bool(__closureWrapper.toUnsafe())
-      }()
-    }
-    @inline(__always)
-    set {
-      self.__implementation.onControlsVisibleChange = { () -> (Bool) -> Void in
-        let __wrappedFunction = bridge.wrap_Func_void_bool(newValue)
+  @inline(__always)
+  public final func addOnControlsVisibleChangeListener(listener: bridge.Func_void_bool) -> bridge.Result_ListenerSubscription_ {
+    do {
+      let __result = try self.__implementation.addOnControlsVisibleChangeListener(listener: { () -> (Bool) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_bool(listener)
         return { (__visible: Bool) -> Void in
           __wrappedFunction.call(__visible)
         }
-      }()
+      }())
+      let __resultCpp = __result
+      return bridge.create_Result_ListenerSubscription_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_ListenerSubscription_(__exceptionPtr)
     }
   }
   
-  public final var onEnd: bridge.Func_void {
-    @inline(__always)
-    get {
-      return { () -> bridge.Func_void in
-        let __closureWrapper = Func_void(self.__implementation.onEnd)
-        return bridge.create_Func_void(__closureWrapper.toUnsafe())
-      }()
-    }
-    @inline(__always)
-    set {
-      self.__implementation.onEnd = { () -> () -> Void in
-        let __wrappedFunction = bridge.wrap_Func_void(newValue)
+  @inline(__always)
+  public final func addOnEndListener(listener: bridge.Func_void) -> bridge.Result_ListenerSubscription_ {
+    do {
+      let __result = try self.__implementation.addOnEndListener(listener: { () -> () -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void(listener)
         return { () -> Void in
           __wrappedFunction.call()
         }
-      }()
+      }())
+      let __resultCpp = __result
+      return bridge.create_Result_ListenerSubscription_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_ListenerSubscription_(__exceptionPtr)
     }
   }
   
-  public final var onExternalPlaybackChange: bridge.Func_void_bool {
-    @inline(__always)
-    get {
-      return { () -> bridge.Func_void_bool in
-        let __closureWrapper = Func_void_bool(self.__implementation.onExternalPlaybackChange)
-        return bridge.create_Func_void_bool(__closureWrapper.toUnsafe())
-      }()
-    }
-    @inline(__always)
-    set {
-      self.__implementation.onExternalPlaybackChange = { () -> (Bool) -> Void in
-        let __wrappedFunction = bridge.wrap_Func_void_bool(newValue)
+  @inline(__always)
+  public final func addOnExternalPlaybackChangeListener(listener: bridge.Func_void_bool) -> bridge.Result_ListenerSubscription_ {
+    do {
+      let __result = try self.__implementation.addOnExternalPlaybackChangeListener(listener: { () -> (Bool) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_bool(listener)
         return { (__externalPlaybackActive: Bool) -> Void in
           __wrappedFunction.call(__externalPlaybackActive)
         }
-      }()
+      }())
+      let __resultCpp = __result
+      return bridge.create_Result_ListenerSubscription_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_ListenerSubscription_(__exceptionPtr)
     }
   }
   
-  public final var onLoad: bridge.Func_void_onLoadData {
-    @inline(__always)
-    get {
-      return { () -> bridge.Func_void_onLoadData in
-        let __closureWrapper = Func_void_onLoadData(self.__implementation.onLoad)
-        return bridge.create_Func_void_onLoadData(__closureWrapper.toUnsafe())
-      }()
-    }
-    @inline(__always)
-    set {
-      self.__implementation.onLoad = { () -> (onLoadData) -> Void in
-        let __wrappedFunction = bridge.wrap_Func_void_onLoadData(newValue)
+  @inline(__always)
+  public final func addOnLoadListener(listener: bridge.Func_void_onLoadData) -> bridge.Result_ListenerSubscription_ {
+    do {
+      let __result = try self.__implementation.addOnLoadListener(listener: { () -> (onLoadData) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_onLoadData(listener)
         return { (__data: onLoadData) -> Void in
           __wrappedFunction.call(__data)
         }
-      }()
+      }())
+      let __resultCpp = __result
+      return bridge.create_Result_ListenerSubscription_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_ListenerSubscription_(__exceptionPtr)
     }
   }
   
-  public final var onLoadStart: bridge.Func_void_onLoadStartData {
-    @inline(__always)
-    get {
-      return { () -> bridge.Func_void_onLoadStartData in
-        let __closureWrapper = Func_void_onLoadStartData(self.__implementation.onLoadStart)
-        return bridge.create_Func_void_onLoadStartData(__closureWrapper.toUnsafe())
-      }()
-    }
-    @inline(__always)
-    set {
-      self.__implementation.onLoadStart = { () -> (onLoadStartData) -> Void in
-        let __wrappedFunction = bridge.wrap_Func_void_onLoadStartData(newValue)
+  @inline(__always)
+  public final func addOnLoadStartListener(listener: bridge.Func_void_onLoadStartData) -> bridge.Result_ListenerSubscription_ {
+    do {
+      let __result = try self.__implementation.addOnLoadStartListener(listener: { () -> (onLoadStartData) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_onLoadStartData(listener)
         return { (__data: onLoadStartData) -> Void in
           __wrappedFunction.call(__data)
         }
-      }()
+      }())
+      let __resultCpp = __result
+      return bridge.create_Result_ListenerSubscription_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_ListenerSubscription_(__exceptionPtr)
     }
   }
   
-  public final var onPlaybackStateChange: bridge.Func_void_onPlaybackStateChangeData {
-    @inline(__always)
-    get {
-      return { () -> bridge.Func_void_onPlaybackStateChangeData in
-        let __closureWrapper = Func_void_onPlaybackStateChangeData(self.__implementation.onPlaybackStateChange)
-        return bridge.create_Func_void_onPlaybackStateChangeData(__closureWrapper.toUnsafe())
-      }()
-    }
-    @inline(__always)
-    set {
-      self.__implementation.onPlaybackStateChange = { () -> (onPlaybackStateChangeData) -> Void in
-        let __wrappedFunction = bridge.wrap_Func_void_onPlaybackStateChangeData(newValue)
+  @inline(__always)
+  public final func addOnPlaybackStateChangeListener(listener: bridge.Func_void_onPlaybackStateChangeData) -> bridge.Result_ListenerSubscription_ {
+    do {
+      let __result = try self.__implementation.addOnPlaybackStateChangeListener(listener: { () -> (onPlaybackStateChangeData) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_onPlaybackStateChangeData(listener)
         return { (__data: onPlaybackStateChangeData) -> Void in
           __wrappedFunction.call(__data)
         }
-      }()
+      }())
+      let __resultCpp = __result
+      return bridge.create_Result_ListenerSubscription_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_ListenerSubscription_(__exceptionPtr)
     }
   }
   
-  public final var onPlaybackRateChange: bridge.Func_void_double {
-    @inline(__always)
-    get {
-      return { () -> bridge.Func_void_double in
-        let __closureWrapper = Func_void_double(self.__implementation.onPlaybackRateChange)
-        return bridge.create_Func_void_double(__closureWrapper.toUnsafe())
-      }()
-    }
-    @inline(__always)
-    set {
-      self.__implementation.onPlaybackRateChange = { () -> (Double) -> Void in
-        let __wrappedFunction = bridge.wrap_Func_void_double(newValue)
+  @inline(__always)
+  public final func addOnPlaybackRateChangeListener(listener: bridge.Func_void_double) -> bridge.Result_ListenerSubscription_ {
+    do {
+      let __result = try self.__implementation.addOnPlaybackRateChangeListener(listener: { () -> (Double) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_double(listener)
         return { (__rate: Double) -> Void in
           __wrappedFunction.call(__rate)
         }
-      }()
+      }())
+      let __resultCpp = __result
+      return bridge.create_Result_ListenerSubscription_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_ListenerSubscription_(__exceptionPtr)
     }
   }
   
-  public final var onProgress: bridge.Func_void_onProgressData {
-    @inline(__always)
-    get {
-      return { () -> bridge.Func_void_onProgressData in
-        let __closureWrapper = Func_void_onProgressData(self.__implementation.onProgress)
-        return bridge.create_Func_void_onProgressData(__closureWrapper.toUnsafe())
-      }()
-    }
-    @inline(__always)
-    set {
-      self.__implementation.onProgress = { () -> (onProgressData) -> Void in
-        let __wrappedFunction = bridge.wrap_Func_void_onProgressData(newValue)
+  @inline(__always)
+  public final func addOnProgressListener(listener: bridge.Func_void_onProgressData) -> bridge.Result_ListenerSubscription_ {
+    do {
+      let __result = try self.__implementation.addOnProgressListener(listener: { () -> (onProgressData) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_onProgressData(listener)
         return { (__data: onProgressData) -> Void in
           __wrappedFunction.call(__data)
         }
-      }()
+      }())
+      let __resultCpp = __result
+      return bridge.create_Result_ListenerSubscription_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_ListenerSubscription_(__exceptionPtr)
     }
   }
   
-  public final var onReadyToDisplay: bridge.Func_void {
-    @inline(__always)
-    get {
-      return { () -> bridge.Func_void in
-        let __closureWrapper = Func_void(self.__implementation.onReadyToDisplay)
-        return bridge.create_Func_void(__closureWrapper.toUnsafe())
-      }()
-    }
-    @inline(__always)
-    set {
-      self.__implementation.onReadyToDisplay = { () -> () -> Void in
-        let __wrappedFunction = bridge.wrap_Func_void(newValue)
+  @inline(__always)
+  public final func addOnReadyToDisplayListener(listener: bridge.Func_void) -> bridge.Result_ListenerSubscription_ {
+    do {
+      let __result = try self.__implementation.addOnReadyToDisplayListener(listener: { () -> () -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void(listener)
         return { () -> Void in
           __wrappedFunction.call()
         }
-      }()
+      }())
+      let __resultCpp = __result
+      return bridge.create_Result_ListenerSubscription_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_ListenerSubscription_(__exceptionPtr)
     }
   }
   
-  public final var onSeek: bridge.Func_void_double {
-    @inline(__always)
-    get {
-      return { () -> bridge.Func_void_double in
-        let __closureWrapper = Func_void_double(self.__implementation.onSeek)
-        return bridge.create_Func_void_double(__closureWrapper.toUnsafe())
-      }()
-    }
-    @inline(__always)
-    set {
-      self.__implementation.onSeek = { () -> (Double) -> Void in
-        let __wrappedFunction = bridge.wrap_Func_void_double(newValue)
-        return { (__seekTime: Double) -> Void in
-          __wrappedFunction.call(__seekTime)
+  @inline(__always)
+  public final func addOnSeekListener(listener: bridge.Func_void_double) -> bridge.Result_ListenerSubscription_ {
+    do {
+      let __result = try self.__implementation.addOnSeekListener(listener: { () -> (Double) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_double(listener)
+        return { (__position: Double) -> Void in
+          __wrappedFunction.call(__position)
         }
-      }()
+      }())
+      let __resultCpp = __result
+      return bridge.create_Result_ListenerSubscription_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_ListenerSubscription_(__exceptionPtr)
     }
   }
   
-  public final var onTimedMetadata: bridge.Func_void_TimedMetadata {
-    @inline(__always)
-    get {
-      return { () -> bridge.Func_void_TimedMetadata in
-        let __closureWrapper = Func_void_TimedMetadata(self.__implementation.onTimedMetadata)
-        return bridge.create_Func_void_TimedMetadata(__closureWrapper.toUnsafe())
-      }()
-    }
-    @inline(__always)
-    set {
-      self.__implementation.onTimedMetadata = { () -> (TimedMetadata) -> Void in
-        let __wrappedFunction = bridge.wrap_Func_void_TimedMetadata(newValue)
-        return { (__metadata: TimedMetadata) -> Void in
-          __wrappedFunction.call(__metadata)
+  @inline(__always)
+  public final func addOnStatusChangeListener(listener: bridge.Func_void_VideoPlayerStatus) -> bridge.Result_ListenerSubscription_ {
+    do {
+      let __result = try self.__implementation.addOnStatusChangeListener(listener: { () -> (VideoPlayerStatus) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_VideoPlayerStatus(listener)
+        return { (__status: VideoPlayerStatus) -> Void in
+          __wrappedFunction.call(__status.rawValue)
         }
-      }()
+      }())
+      let __resultCpp = __result
+      return bridge.create_Result_ListenerSubscription_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_ListenerSubscription_(__exceptionPtr)
     }
   }
   
-  public final var onTextTrackDataChanged: bridge.Func_void_std__vector_std__string_ {
-    @inline(__always)
-    get {
-      return { () -> bridge.Func_void_std__vector_std__string_ in
-        let __closureWrapper = Func_void_std__vector_std__string_(self.__implementation.onTextTrackDataChanged)
-        return bridge.create_Func_void_std__vector_std__string_(__closureWrapper.toUnsafe())
-      }()
+  @inline(__always)
+  public final func addOnTimedMetadataListener(listener: bridge.Func_void_TimedMetadata) -> bridge.Result_ListenerSubscription_ {
+    do {
+      let __result = try self.__implementation.addOnTimedMetadataListener(listener: { () -> (TimedMetadata) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_TimedMetadata(listener)
+        return { (__data: TimedMetadata) -> Void in
+          __wrappedFunction.call(__data)
+        }
+      }())
+      let __resultCpp = __result
+      return bridge.create_Result_ListenerSubscription_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_ListenerSubscription_(__exceptionPtr)
     }
-    @inline(__always)
-    set {
-      self.__implementation.onTextTrackDataChanged = { () -> ([String]) -> Void in
-        let __wrappedFunction = bridge.wrap_Func_void_std__vector_std__string_(newValue)
-        return { (__texts: [String]) -> Void in
+  }
+  
+  @inline(__always)
+  public final func addOnTextTrackDataChangedListener(listener: bridge.Func_void_std__vector_std__string_) -> bridge.Result_ListenerSubscription_ {
+    do {
+      let __result = try self.__implementation.addOnTextTrackDataChangedListener(listener: { () -> ([String]) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_std__vector_std__string_(listener)
+        return { (__data: [String]) -> Void in
           __wrappedFunction.call({ () -> bridge.std__vector_std__string_ in
-            var __vector = bridge.create_std__vector_std__string_(__texts.count)
-            for __item in __texts {
+            var __vector = bridge.create_std__vector_std__string_(__data.count)
+            for __item in __data {
               __vector.push_back(std.string(__item))
             }
             return __vector
           }())
         }
-      }()
+      }())
+      let __resultCpp = __result
+      return bridge.create_Result_ListenerSubscription_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_ListenerSubscription_(__exceptionPtr)
     }
   }
   
-  public final var onTrackChange: bridge.Func_void_std__optional_TextTrack_ {
-    @inline(__always)
-    get {
-      return { () -> bridge.Func_void_std__optional_TextTrack_ in
-        let __closureWrapper = Func_void_std__optional_TextTrack_(self.__implementation.onTrackChange)
-        return bridge.create_Func_void_std__optional_TextTrack_(__closureWrapper.toUnsafe())
-      }()
-    }
-    @inline(__always)
-    set {
-      self.__implementation.onTrackChange = { () -> (TextTrack?) -> Void in
-        let __wrappedFunction = bridge.wrap_Func_void_std__optional_TextTrack_(newValue)
-        return { (__track: TextTrack?) -> Void in
-          __wrappedFunction.call({ () -> bridge.std__optional_TextTrack_ in
+  @inline(__always)
+  public final func addOnTrackChangeListener(listener: bridge.Func_void_std__optional_std__variant_nitro__NullType__TextTrack__) -> bridge.Result_ListenerSubscription_ {
+    do {
+      let __result = try self.__implementation.addOnTrackChangeListener(listener: { () -> (Variant_NullType_TextTrack?) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_std__optional_std__variant_nitro__NullType__TextTrack__(listener)
+        return { (__track: Variant_NullType_TextTrack?) -> Void in
+          __wrappedFunction.call({ () -> bridge.std__optional_std__variant_nitro__NullType__TextTrack__ in
             if let __unwrappedValue = __track {
-              return bridge.create_std__optional_TextTrack_(__unwrappedValue)
+              return bridge.create_std__optional_std__variant_nitro__NullType__TextTrack__({ () -> bridge.std__variant_nitro__NullType__TextTrack_ in
+                switch __unwrappedValue {
+                  case .first(let __value):
+                    return bridge.create_std__variant_nitro__NullType__TextTrack_(margelo.nitro.NullType.null)
+                  case .second(let __value):
+                    return bridge.create_std__variant_nitro__NullType__TextTrack_(__value)
+                }
+              }().variant)
             } else {
               return .init()
             }
           }())
         }
-      }()
+      }())
+      let __resultCpp = __result
+      return bridge.create_Result_ListenerSubscription_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_ListenerSubscription_(__exceptionPtr)
     }
   }
   
-  public final var onVolumeChange: bridge.Func_void_onVolumeChangeData {
-    @inline(__always)
-    get {
-      return { () -> bridge.Func_void_onVolumeChangeData in
-        let __closureWrapper = Func_void_onVolumeChangeData(self.__implementation.onVolumeChange)
-        return bridge.create_Func_void_onVolumeChangeData(__closureWrapper.toUnsafe())
-      }()
-    }
-    @inline(__always)
-    set {
-      self.__implementation.onVolumeChange = { () -> (onVolumeChangeData) -> Void in
-        let __wrappedFunction = bridge.wrap_Func_void_onVolumeChangeData(newValue)
+  @inline(__always)
+  public final func addOnVolumeChangeListener(listener: bridge.Func_void_onVolumeChangeData) -> bridge.Result_ListenerSubscription_ {
+    do {
+      let __result = try self.__implementation.addOnVolumeChangeListener(listener: { () -> (onVolumeChangeData) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_onVolumeChangeData(listener)
         return { (__data: onVolumeChangeData) -> Void in
           __wrappedFunction.call(__data)
         }
-      }()
+      }())
+      let __resultCpp = __result
+      return bridge.create_Result_ListenerSubscription_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_ListenerSubscription_(__exceptionPtr)
     }
   }
   
-  public final var onStatusChange: bridge.Func_void_VideoPlayerStatus {
-    @inline(__always)
-    get {
-      return { () -> bridge.Func_void_VideoPlayerStatus in
-        let __closureWrapper = Func_void_VideoPlayerStatus(self.__implementation.onStatusChange)
-        return bridge.create_Func_void_VideoPlayerStatus(__closureWrapper.toUnsafe())
-      }()
-    }
-    @inline(__always)
-    set {
-      self.__implementation.onStatusChange = { () -> (VideoPlayerStatus) -> Void in
-        let __wrappedFunction = bridge.wrap_Func_void_VideoPlayerStatus(newValue)
-        return { (__status: VideoPlayerStatus) -> Void in
-          __wrappedFunction.call(__status.rawValue)
-        }
-      }()
+  @inline(__always)
+  public final func clearAllListeners() -> bridge.Result_void_ {
+    do {
+      try self.__implementation.clearAllListeners()
+      return bridge.create_Result_void_()
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_void_(__exceptionPtr)
     }
   }
-
-  // Methods
-  
 }

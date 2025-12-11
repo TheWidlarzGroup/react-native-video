@@ -14,6 +14,7 @@
 #include <NitroModules/Promise.hpp>
 #include "OnGetLicensePayload.hpp"
 #include <functional>
+#include <NitroModules/JNICallable.hpp>
 #include <NitroModules/JPromise.hpp>
 #include "JOnGetLicensePayload.hpp"
 
@@ -65,7 +66,7 @@ namespace margelo::nitro::video {
   /**
    * An implementation of Func_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload that is backed by a C++ implementation (using `std::function<...>`)
    */
-  struct JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload_cxx final: public jni::HybridClass<JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload_cxx, JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload> {
+  class JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload_cxx final: public jni::HybridClass<JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload_cxx, JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload> {
   public:
     static jni::local_ref<JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload::javaobject> fromCpp(const std::function<std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(const OnGetLicensePayload& /* payload */)>& func) {
       return JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload_cxx::newObjectCxxArgs(func);

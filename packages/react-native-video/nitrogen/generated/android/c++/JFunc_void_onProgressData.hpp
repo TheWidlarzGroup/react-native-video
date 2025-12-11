@@ -12,6 +12,7 @@
 
 #include "onProgressData.hpp"
 #include <functional>
+#include <NitroModules/JNICallable.hpp>
 #include "JonProgressData.hpp"
 
 namespace margelo::nitro::video {
@@ -39,7 +40,7 @@ namespace margelo::nitro::video {
   /**
    * An implementation of Func_void_onProgressData that is backed by a C++ implementation (using `std::function<...>`)
    */
-  struct JFunc_void_onProgressData_cxx final: public jni::HybridClass<JFunc_void_onProgressData_cxx, JFunc_void_onProgressData> {
+  class JFunc_void_onProgressData_cxx final: public jni::HybridClass<JFunc_void_onProgressData_cxx, JFunc_void_onProgressData> {
   public:
     static jni::local_ref<JFunc_void_onProgressData::javaobject> fromCpp(const std::function<void(const onProgressData& /* data */)>& func) {
       return JFunc_void_onProgressData_cxx::newObjectCxxArgs(func);

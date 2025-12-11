@@ -12,6 +12,8 @@
 // Forward declaration of `HybridVideoPlayerEventEmitterSpec_cxx` to properly resolve imports.
 namespace ReactNativeVideo { class HybridVideoPlayerEventEmitterSpec_cxx; }
 
+// Forward declaration of `ListenerSubscription` to properly resolve imports.
+namespace margelo::nitro::video { struct ListenerSubscription; }
 // Forward declaration of `BandwidthData` to properly resolve imports.
 namespace margelo::nitro::video { struct BandwidthData; }
 // Forward declaration of `onLoadData` to properly resolve imports.
@@ -28,6 +30,8 @@ namespace margelo::nitro::video { class HybridVideoPlayerSourceSpec; }
 namespace margelo::nitro::video { struct onPlaybackStateChangeData; }
 // Forward declaration of `onProgressData` to properly resolve imports.
 namespace margelo::nitro::video { struct onProgressData; }
+// Forward declaration of `VideoPlayerStatus` to properly resolve imports.
+namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 // Forward declaration of `TimedMetadata` to properly resolve imports.
 namespace margelo::nitro::video { struct TimedMetadata; }
 // Forward declaration of `TimedMetadataObject` to properly resolve imports.
@@ -36,9 +40,8 @@ namespace margelo::nitro::video { struct TimedMetadataObject; }
 namespace margelo::nitro::video { struct TextTrack; }
 // Forward declaration of `onVolumeChangeData` to properly resolve imports.
 namespace margelo::nitro::video { struct onVolumeChangeData; }
-// Forward declaration of `VideoPlayerStatus` to properly resolve imports.
-namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 
+#include "ListenerSubscription.hpp"
 #include <functional>
 #include "BandwidthData.hpp"
 #include <optional>
@@ -50,13 +53,15 @@ namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 #include "HybridVideoPlayerSourceSpec.hpp"
 #include "onPlaybackStateChangeData.hpp"
 #include "onProgressData.hpp"
+#include "VideoPlayerStatus.hpp"
 #include "TimedMetadata.hpp"
 #include "TimedMetadataObject.hpp"
 #include <vector>
 #include <string>
+#include <NitroModules/Null.hpp>
 #include "TextTrack.hpp"
+#include <variant>
 #include "onVolumeChangeData.hpp"
-#include "VideoPlayerStatus.hpp"
 
 #include "ReactNativeVideo-Swift-Cxx-Umbrella.hpp"
 
@@ -92,146 +97,174 @@ namespace margelo::nitro::video {
     void dispose() noexcept override {
       _swiftPart.dispose();
     }
+    std::string toString() override {
+      return _swiftPart.toString();
+    }
 
   public:
     // Properties
-    inline std::function<void()> getOnAudioBecomingNoisy() noexcept override {
-      auto __result = _swiftPart.getOnAudioBecomingNoisy();
-      return __result;
-    }
-    inline void setOnAudioBecomingNoisy(const std::function<void()>& onAudioBecomingNoisy) noexcept override {
-      _swiftPart.setOnAudioBecomingNoisy(onAudioBecomingNoisy);
-    }
-    inline std::function<void(bool /* hasAudioFocus */)> getOnAudioFocusChange() noexcept override {
-      auto __result = _swiftPart.getOnAudioFocusChange();
-      return __result;
-    }
-    inline void setOnAudioFocusChange(const std::function<void(bool /* hasAudioFocus */)>& onAudioFocusChange) noexcept override {
-      _swiftPart.setOnAudioFocusChange(onAudioFocusChange);
-    }
-    inline std::function<void(const BandwidthData& /* data */)> getOnBandwidthUpdate() noexcept override {
-      auto __result = _swiftPart.getOnBandwidthUpdate();
-      return __result;
-    }
-    inline void setOnBandwidthUpdate(const std::function<void(const BandwidthData& /* data */)>& onBandwidthUpdate) noexcept override {
-      _swiftPart.setOnBandwidthUpdate(onBandwidthUpdate);
-    }
-    inline std::function<void(bool /* buffering */)> getOnBuffer() noexcept override {
-      auto __result = _swiftPart.getOnBuffer();
-      return __result;
-    }
-    inline void setOnBuffer(const std::function<void(bool /* buffering */)>& onBuffer) noexcept override {
-      _swiftPart.setOnBuffer(onBuffer);
-    }
-    inline std::function<void(bool /* visible */)> getOnControlsVisibleChange() noexcept override {
-      auto __result = _swiftPart.getOnControlsVisibleChange();
-      return __result;
-    }
-    inline void setOnControlsVisibleChange(const std::function<void(bool /* visible */)>& onControlsVisibleChange) noexcept override {
-      _swiftPart.setOnControlsVisibleChange(onControlsVisibleChange);
-    }
-    inline std::function<void()> getOnEnd() noexcept override {
-      auto __result = _swiftPart.getOnEnd();
-      return __result;
-    }
-    inline void setOnEnd(const std::function<void()>& onEnd) noexcept override {
-      _swiftPart.setOnEnd(onEnd);
-    }
-    inline std::function<void(bool /* externalPlaybackActive */)> getOnExternalPlaybackChange() noexcept override {
-      auto __result = _swiftPart.getOnExternalPlaybackChange();
-      return __result;
-    }
-    inline void setOnExternalPlaybackChange(const std::function<void(bool /* externalPlaybackActive */)>& onExternalPlaybackChange) noexcept override {
-      _swiftPart.setOnExternalPlaybackChange(onExternalPlaybackChange);
-    }
-    inline std::function<void(const onLoadData& /* data */)> getOnLoad() noexcept override {
-      auto __result = _swiftPart.getOnLoad();
-      return __result;
-    }
-    inline void setOnLoad(const std::function<void(const onLoadData& /* data */)>& onLoad) noexcept override {
-      _swiftPart.setOnLoad(onLoad);
-    }
-    inline std::function<void(const onLoadStartData& /* data */)> getOnLoadStart() noexcept override {
-      auto __result = _swiftPart.getOnLoadStart();
-      return __result;
-    }
-    inline void setOnLoadStart(const std::function<void(const onLoadStartData& /* data */)>& onLoadStart) noexcept override {
-      _swiftPart.setOnLoadStart(onLoadStart);
-    }
-    inline std::function<void(const onPlaybackStateChangeData& /* data */)> getOnPlaybackStateChange() noexcept override {
-      auto __result = _swiftPart.getOnPlaybackStateChange();
-      return __result;
-    }
-    inline void setOnPlaybackStateChange(const std::function<void(const onPlaybackStateChangeData& /* data */)>& onPlaybackStateChange) noexcept override {
-      _swiftPart.setOnPlaybackStateChange(onPlaybackStateChange);
-    }
-    inline std::function<void(double /* rate */)> getOnPlaybackRateChange() noexcept override {
-      auto __result = _swiftPart.getOnPlaybackRateChange();
-      return __result;
-    }
-    inline void setOnPlaybackRateChange(const std::function<void(double /* rate */)>& onPlaybackRateChange) noexcept override {
-      _swiftPart.setOnPlaybackRateChange(onPlaybackRateChange);
-    }
-    inline std::function<void(const onProgressData& /* data */)> getOnProgress() noexcept override {
-      auto __result = _swiftPart.getOnProgress();
-      return __result;
-    }
-    inline void setOnProgress(const std::function<void(const onProgressData& /* data */)>& onProgress) noexcept override {
-      _swiftPart.setOnProgress(onProgress);
-    }
-    inline std::function<void()> getOnReadyToDisplay() noexcept override {
-      auto __result = _swiftPart.getOnReadyToDisplay();
-      return __result;
-    }
-    inline void setOnReadyToDisplay(const std::function<void()>& onReadyToDisplay) noexcept override {
-      _swiftPart.setOnReadyToDisplay(onReadyToDisplay);
-    }
-    inline std::function<void(double /* seekTime */)> getOnSeek() noexcept override {
-      auto __result = _swiftPart.getOnSeek();
-      return __result;
-    }
-    inline void setOnSeek(const std::function<void(double /* seekTime */)>& onSeek) noexcept override {
-      _swiftPart.setOnSeek(onSeek);
-    }
-    inline std::function<void(const TimedMetadata& /* metadata */)> getOnTimedMetadata() noexcept override {
-      auto __result = _swiftPart.getOnTimedMetadata();
-      return __result;
-    }
-    inline void setOnTimedMetadata(const std::function<void(const TimedMetadata& /* metadata */)>& onTimedMetadata) noexcept override {
-      _swiftPart.setOnTimedMetadata(onTimedMetadata);
-    }
-    inline std::function<void(const std::vector<std::string>& /* texts */)> getOnTextTrackDataChanged() noexcept override {
-      auto __result = _swiftPart.getOnTextTrackDataChanged();
-      return __result;
-    }
-    inline void setOnTextTrackDataChanged(const std::function<void(const std::vector<std::string>& /* texts */)>& onTextTrackDataChanged) noexcept override {
-      _swiftPart.setOnTextTrackDataChanged(onTextTrackDataChanged);
-    }
-    inline std::function<void(const std::optional<TextTrack>& /* track */)> getOnTrackChange() noexcept override {
-      auto __result = _swiftPart.getOnTrackChange();
-      return __result;
-    }
-    inline void setOnTrackChange(const std::function<void(const std::optional<TextTrack>& /* track */)>& onTrackChange) noexcept override {
-      _swiftPart.setOnTrackChange(onTrackChange);
-    }
-    inline std::function<void(const onVolumeChangeData& /* data */)> getOnVolumeChange() noexcept override {
-      auto __result = _swiftPart.getOnVolumeChange();
-      return __result;
-    }
-    inline void setOnVolumeChange(const std::function<void(const onVolumeChangeData& /* data */)>& onVolumeChange) noexcept override {
-      _swiftPart.setOnVolumeChange(onVolumeChange);
-    }
-    inline std::function<void(VideoPlayerStatus /* status */)> getOnStatusChange() noexcept override {
-      auto __result = _swiftPart.getOnStatusChange();
-      return __result;
-    }
-    inline void setOnStatusChange(const std::function<void(VideoPlayerStatus /* status */)>& onStatusChange) noexcept override {
-      _swiftPart.setOnStatusChange(onStatusChange);
-    }
+    
 
   public:
     // Methods
-    
+    inline ListenerSubscription addOnAudioBecomingNoisyListener(const std::function<void()>& listener) override {
+      auto __result = _swiftPart.addOnAudioBecomingNoisyListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline ListenerSubscription addOnAudioFocusChangeListener(const std::function<void(bool /* hasAudioFocus */)>& listener) override {
+      auto __result = _swiftPart.addOnAudioFocusChangeListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline ListenerSubscription addOnBandwidthUpdateListener(const std::function<void(const BandwidthData& /* data */)>& listener) override {
+      auto __result = _swiftPart.addOnBandwidthUpdateListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline ListenerSubscription addOnBufferListener(const std::function<void(bool /* buffering */)>& listener) override {
+      auto __result = _swiftPart.addOnBufferListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline ListenerSubscription addOnControlsVisibleChangeListener(const std::function<void(bool /* visible */)>& listener) override {
+      auto __result = _swiftPart.addOnControlsVisibleChangeListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline ListenerSubscription addOnEndListener(const std::function<void()>& listener) override {
+      auto __result = _swiftPart.addOnEndListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline ListenerSubscription addOnExternalPlaybackChangeListener(const std::function<void(bool /* externalPlaybackActive */)>& listener) override {
+      auto __result = _swiftPart.addOnExternalPlaybackChangeListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline ListenerSubscription addOnLoadListener(const std::function<void(const onLoadData& /* data */)>& listener) override {
+      auto __result = _swiftPart.addOnLoadListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline ListenerSubscription addOnLoadStartListener(const std::function<void(const onLoadStartData& /* data */)>& listener) override {
+      auto __result = _swiftPart.addOnLoadStartListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline ListenerSubscription addOnPlaybackStateChangeListener(const std::function<void(const onPlaybackStateChangeData& /* data */)>& listener) override {
+      auto __result = _swiftPart.addOnPlaybackStateChangeListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline ListenerSubscription addOnPlaybackRateChangeListener(const std::function<void(double /* rate */)>& listener) override {
+      auto __result = _swiftPart.addOnPlaybackRateChangeListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline ListenerSubscription addOnProgressListener(const std::function<void(const onProgressData& /* data */)>& listener) override {
+      auto __result = _swiftPart.addOnProgressListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline ListenerSubscription addOnReadyToDisplayListener(const std::function<void()>& listener) override {
+      auto __result = _swiftPart.addOnReadyToDisplayListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline ListenerSubscription addOnSeekListener(const std::function<void(double /* position */)>& listener) override {
+      auto __result = _swiftPart.addOnSeekListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline ListenerSubscription addOnStatusChangeListener(const std::function<void(VideoPlayerStatus /* status */)>& listener) override {
+      auto __result = _swiftPart.addOnStatusChangeListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline ListenerSubscription addOnTimedMetadataListener(const std::function<void(const TimedMetadata& /* data */)>& listener) override {
+      auto __result = _swiftPart.addOnTimedMetadataListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline ListenerSubscription addOnTextTrackDataChangedListener(const std::function<void(const std::vector<std::string>& /* data */)>& listener) override {
+      auto __result = _swiftPart.addOnTextTrackDataChangedListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline ListenerSubscription addOnTrackChangeListener(const std::function<void(const std::optional<std::variant<nitro::NullType, TextTrack>>& /* track */)>& listener) override {
+      auto __result = _swiftPart.addOnTrackChangeListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline ListenerSubscription addOnVolumeChangeListener(const std::function<void(const onVolumeChangeData& /* data */)>& listener) override {
+      auto __result = _swiftPart.addOnVolumeChangeListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline void clearAllListeners() override {
+      auto __result = _swiftPart.clearAllListeners();
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+    }
 
   private:
     ReactNativeVideo::HybridVideoPlayerEventEmitterSpec_cxx _swiftPart;

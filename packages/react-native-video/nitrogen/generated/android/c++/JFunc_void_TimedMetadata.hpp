@@ -12,6 +12,7 @@
 
 #include "TimedMetadata.hpp"
 #include <functional>
+#include <NitroModules/JNICallable.hpp>
 #include "JTimedMetadata.hpp"
 #include "TimedMetadataObject.hpp"
 #include <vector>
@@ -23,7 +24,7 @@ namespace margelo::nitro::video {
   using namespace facebook;
 
   /**
-   * Represents the Java/Kotlin callback `(metadata: TimedMetadata) -> Unit`.
+   * Represents the Java/Kotlin callback `(data: TimedMetadata) -> Unit`.
    * This can be passed around between C++ and Java/Kotlin.
    */
   struct JFunc_void_TimedMetadata: public jni::JavaClass<JFunc_void_TimedMetadata> {
@@ -34,18 +35,18 @@ namespace margelo::nitro::video {
     /**
      * Invokes the function this `JFunc_void_TimedMetadata` instance holds through JNI.
      */
-    void invoke(const TimedMetadata& metadata) const {
-      static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JTimedMetadata> /* metadata */)>("invoke");
-      method(self(), JTimedMetadata::fromCpp(metadata));
+    void invoke(const TimedMetadata& data) const {
+      static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JTimedMetadata> /* data */)>("invoke");
+      method(self(), JTimedMetadata::fromCpp(data));
     }
   };
 
   /**
    * An implementation of Func_void_TimedMetadata that is backed by a C++ implementation (using `std::function<...>`)
    */
-  struct JFunc_void_TimedMetadata_cxx final: public jni::HybridClass<JFunc_void_TimedMetadata_cxx, JFunc_void_TimedMetadata> {
+  class JFunc_void_TimedMetadata_cxx final: public jni::HybridClass<JFunc_void_TimedMetadata_cxx, JFunc_void_TimedMetadata> {
   public:
-    static jni::local_ref<JFunc_void_TimedMetadata::javaobject> fromCpp(const std::function<void(const TimedMetadata& /* metadata */)>& func) {
+    static jni::local_ref<JFunc_void_TimedMetadata::javaobject> fromCpp(const std::function<void(const TimedMetadata& /* data */)>& func) {
       return JFunc_void_TimedMetadata_cxx::newObjectCxxArgs(func);
     }
 
@@ -53,13 +54,13 @@ namespace margelo::nitro::video {
     /**
      * Invokes the C++ `std::function<...>` this `JFunc_void_TimedMetadata_cxx` instance holds.
      */
-    void invoke_cxx(jni::alias_ref<JTimedMetadata> metadata) {
-      _func(metadata->toCpp());
+    void invoke_cxx(jni::alias_ref<JTimedMetadata> data) {
+      _func(data->toCpp());
     }
 
   public:
     [[nodiscard]]
-    inline const std::function<void(const TimedMetadata& /* metadata */)>& getFunction() const {
+    inline const std::function<void(const TimedMetadata& /* data */)>& getFunction() const {
       return _func;
     }
 
@@ -70,11 +71,11 @@ namespace margelo::nitro::video {
     }
 
   private:
-    explicit JFunc_void_TimedMetadata_cxx(const std::function<void(const TimedMetadata& /* metadata */)>& func): _func(func) { }
+    explicit JFunc_void_TimedMetadata_cxx(const std::function<void(const TimedMetadata& /* data */)>& func): _func(func) { }
 
   private:
     friend HybridBase;
-    std::function<void(const TimedMetadata& /* metadata */)> _func;
+    std::function<void(const TimedMetadata& /* data */)> _func;
   };
 
 } // namespace margelo::nitro::video

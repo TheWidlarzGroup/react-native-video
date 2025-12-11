@@ -9,8 +9,7 @@ package com.margelo.nitro.video
 
 import androidx.annotation.Keep
 import com.facebook.proguard.annotations.DoNotStrip
-import com.margelo.nitro.core.*
-
+import com.margelo.nitro.core.Promise
 
 /**
  * Represents the JavaScript object/struct "NativeDrmParams".
@@ -38,8 +37,14 @@ data class NativeDrmParams(
   val multiSession: Boolean?,
   @DoNotStrip
   @Keep
-  val getLicense: ((payload: OnGetLicensePayload) -> Promise<Promise<String>>)?
+  val getLicense: Func_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload?
 ) {
+  /**
+   * Create a new instance of NativeDrmParams from Kotlin
+   */
+  constructor(type: String?, licenseUrl: String?, certificateUrl: String?, contentId: String?, licenseHeaders: Map<String, String>?, multiSession: Boolean?, getLicense: ((payload: OnGetLicensePayload) -> Promise<Promise<String>>)?):
+         this(type, licenseUrl, certificateUrl, contentId, licenseHeaders, multiSession, getLicense?.let { Func_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload_java(it) })
+
   private companion object {
     /**
      * Constructor called from C++
@@ -49,7 +54,7 @@ data class NativeDrmParams(
     @Suppress("unused")
     @JvmStatic
     private fun fromCpp(type: String?, licenseUrl: String?, certificateUrl: String?, contentId: String?, licenseHeaders: Map<String, String>?, multiSession: Boolean?, getLicense: Func_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload?): NativeDrmParams {
-      return NativeDrmParams(type, licenseUrl, certificateUrl, contentId, licenseHeaders, multiSession, getLicense?.let { it })
+      return NativeDrmParams(type, licenseUrl, certificateUrl, contentId, licenseHeaders, multiSession, getLicense)
     }
   }
 }

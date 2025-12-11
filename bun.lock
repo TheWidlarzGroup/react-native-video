@@ -51,13 +51,13 @@
     },
     "example": {
       "name": "react-native-video-example",
-      "version": "7.0.0-alpha.11",
+      "version": "7.0.0-beta.0",
       "dependencies": {
         "@react-native-community/slider": "^4.5.6",
         "@react-native-video/drm": "*",
         "react": "18.3.1",
         "react-native": "^0.77.0",
-        "react-native-nitro-modules": "^0.30.0",
+        "react-native-nitro-modules": "^0.31.0",
         "react-native-video": "*",
       },
       "devDependencies": {
@@ -79,7 +79,7 @@
     },
     "packages/drm-plugin": {
       "name": "@react-native-video/drm",
-      "version": "7.0.0-alpha.11",
+      "version": "7.0.0-beta.0",
       "devDependencies": {
         "@react-native/babel-preset": "0.79.2",
         "@release-it/conventional-changelog": "^9.0.2",
@@ -88,12 +88,12 @@
         "eslint": "^8.51.0",
         "eslint-config-prettier": "9.0.0",
         "eslint-plugin-prettier": "^5.0.1",
-        "nitrogen": "^0.30.0",
+        "nitrogen": "^0.31.0",
         "prettier": "^3.0.3",
         "react": "18.3.1",
         "react-native": "^0.77.0",
         "react-native-builder-bob": "^0.40.13",
-        "react-native-nitro-modules": "^0.30.0",
+        "react-native-nitro-modules": "^0.31.0",
         "react-native-video": "*",
         "release-it": "^17.10.0",
         "typescript": "^5.8.3",
@@ -107,7 +107,7 @@
     },
     "packages/react-native-video": {
       "name": "react-native-video",
-      "version": "7.0.0-alpha.12",
+      "version": "7.0.0-beta.0",
       "devDependencies": {
         "@expo/config-plugins": "^10.0.2",
         "@react-native/eslint-config": "^0.77.0",
@@ -116,12 +116,12 @@
         "eslint": "^8.51.0",
         "eslint-config-prettier": "^9.0.0",
         "eslint-plugin-prettier": "^5.0.1",
-        "nitrogen": "^0.30.0",
+        "nitrogen": "^0.31.0",
         "prettier": "^3.0.3",
         "react": "18.3.1",
         "react-native": "^0.77.0",
         "react-native-builder-bob": "^0.40.0",
-        "react-native-nitro-modules": "^0.30.0",
+        "react-native-nitro-modules": "^0.31.0",
         "typescript": "^5.2.2",
       },
       "peerDependencies": {
@@ -2686,7 +2686,7 @@
 
     "new-github-release-url": ["new-github-release-url@2.0.0", "", { "dependencies": { "type-fest": "^2.5.1" } }, "sha512-NHDDGYudnvRutt/VhKFlX26IotXe1w0cmkDm6JGquh5bz/bDTw0LufSmH/GxTjEdpHEO+bVKFTwdrcGa/9XlKQ=="],
 
-    "nitrogen": ["nitrogen@0.30.1", "", { "dependencies": { "chalk": "^5.3.0", "react-native-nitro-modules": "^0.30.1", "ts-morph": "^27.0.0", "yargs": "^18.0.0", "zod": "^4.0.5" }, "bin": { "nitrogen": "lib/index.js" } }, "sha512-Ls4gahvOxcI2WXyhimHinv4LOujbyXir8bE4hyhqG8vAV5spEcDi0F4nZ0oiTERAnfN/rq1Lskx+hc7Wrl5O+g=="],
+    "nitrogen": ["nitrogen@0.31.10", "", { "dependencies": { "chalk": "^5.3.0", "react-native-nitro-modules": "^0.31.10", "ts-morph": "^27.0.0", "yargs": "^18.0.0", "zod": "^4.0.5" }, "bin": { "nitrogen": "lib/index.js" } }, "sha512-Z77c1lj4IeyCigxiO59fW4fnHgfvOZvksTTwfESAJBnHG2DnS28VQ2oCAWL+fPIEvMozLFi+cRyTQu63eJMCSA=="],
 
     "no-case": ["no-case@3.0.4", "", { "dependencies": { "lower-case": "^2.0.2", "tslib": "^2.0.3" } }, "sha512-fgAN3jGAh+RoxUGZHTSOLJIqUc2wmoBwGR4tbpNAKmmovFoWq0OdRkb0VkldReO2a2iBT/OEulG9XSUc10r3zg=="],
 
@@ -3066,7 +3066,7 @@
 
     "react-native-monorepo-config": ["react-native-monorepo-config@0.1.10", "", { "dependencies": { "escape-string-regexp": "^5.0.0", "fast-glob": "^3.3.3" } }, "sha512-v0rlaLZiCUg95Mpw6xNRQce5k9yio0qscKjNQaPtFYMNL75YugS2UPUItIPLIRbZubK+s2/LRzBjX+mdyUgh4g=="],
 
-    "react-native-nitro-modules": ["react-native-nitro-modules@0.30.1", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-/m1kIUx4qQonqauVLn/DdkXFTKQI180VUJz7G2P/4Jab3NfUqdrFg6ixpf9bH1YXsXb92hK/8epTgl0B8OPxfw=="],
+    "react-native-nitro-modules": ["react-native-nitro-modules@0.31.10", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-hcvjTu9YJE9fMmnAUvhG8CxvYLpOuMQ/2eyi/S6GyrecezF6Rmk/uRQEL6v09BRFWA/xRVZNQVulQPS+2HS3mQ=="],
 
     "react-native-video": ["react-native-video@workspace:packages/react-native-video"],
 

@@ -33,6 +33,13 @@ public protocol HybridVideoViewViewManagerSpec_protocol: HybridObject {
   func canEnterPictureInPicture() throws -> Bool
 }
 
+public extension HybridVideoViewViewManagerSpec_protocol {
+  /// Default implementation of ``HybridObject.toString``
+  func toString() -> String {
+    return "[HybridObject VideoViewViewManager]"
+  }
+}
+
 /// See ``HybridVideoViewViewManagerSpec``
 open class HybridVideoViewViewManagerSpec_base {
   private weak var cxxWrapper: HybridVideoViewViewManagerSpec_cxx? = nil

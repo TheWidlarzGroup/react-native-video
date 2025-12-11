@@ -66,7 +66,8 @@ namespace margelo::nitro::video {
           jni::local_ref<jni::JArrayClass<JTimedMetadataObject>> __array = jni::JArrayClass<JTimedMetadataObject>::newArray(__size);
           for (size_t __i = 0; __i < __size; __i++) {
             const auto& __element = value.metadata[__i];
-            __array->setElement(__i, *JTimedMetadataObject::fromCpp(__element));
+            auto __elementJni = JTimedMetadataObject::fromCpp(__element);
+            __array->setElement(__i, *__elementJni);
           }
           return __array;
         }()

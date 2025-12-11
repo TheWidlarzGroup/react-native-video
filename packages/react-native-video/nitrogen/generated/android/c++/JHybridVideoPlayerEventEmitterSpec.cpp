@@ -7,6 +7,8 @@
 
 #include "JHybridVideoPlayerEventEmitterSpec.hpp"
 
+// Forward declaration of `ListenerSubscription` to properly resolve imports.
+namespace margelo::nitro::video { struct ListenerSubscription; }
 // Forward declaration of `BandwidthData` to properly resolve imports.
 namespace margelo::nitro::video { struct BandwidthData; }
 // Forward declaration of `onLoadData` to properly resolve imports.
@@ -23,6 +25,8 @@ namespace margelo::nitro::video { class HybridVideoPlayerSourceSpec; }
 namespace margelo::nitro::video { struct onPlaybackStateChangeData; }
 // Forward declaration of `onProgressData` to properly resolve imports.
 namespace margelo::nitro::video { struct onProgressData; }
+// Forward declaration of `VideoPlayerStatus` to properly resolve imports.
+namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 // Forward declaration of `TimedMetadata` to properly resolve imports.
 namespace margelo::nitro::video { struct TimedMetadata; }
 // Forward declaration of `TimedMetadataObject` to properly resolve imports.
@@ -31,11 +35,12 @@ namespace margelo::nitro::video { struct TimedMetadataObject; }
 namespace margelo::nitro::video { struct TextTrack; }
 // Forward declaration of `onVolumeChangeData` to properly resolve imports.
 namespace margelo::nitro::video { struct onVolumeChangeData; }
-// Forward declaration of `VideoPlayerStatus` to properly resolve imports.
-namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 
+#include "ListenerSubscription.hpp"
+#include "JListenerSubscription.hpp"
 #include <functional>
 #include "JFunc_void.hpp"
+#include <NitroModules/JNICallable.hpp>
 #include "JFunc_void_bool.hpp"
 #include "BandwidthData.hpp"
 #include "JFunc_void_BandwidthData.hpp"
@@ -61,6 +66,9 @@ namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 #include "onProgressData.hpp"
 #include "JFunc_void_onProgressData.hpp"
 #include "JonProgressData.hpp"
+#include "VideoPlayerStatus.hpp"
+#include "JFunc_void_VideoPlayerStatus.hpp"
+#include "JVideoPlayerStatus.hpp"
 #include "TimedMetadata.hpp"
 #include "JFunc_void_TimedMetadata.hpp"
 #include "JTimedMetadata.hpp"
@@ -69,15 +77,16 @@ namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 #include "JTimedMetadataObject.hpp"
 #include <string>
 #include "JFunc_void_std__vector_std__string_.hpp"
+#include <NitroModules/Null.hpp>
 #include "TextTrack.hpp"
-#include "JFunc_void_std__optional_TextTrack_.hpp"
+#include <variant>
+#include "JFunc_void_std__optional_std__variant_nitro__NullType__TextTrack__.hpp"
+#include "JVariant_NullType_TextTrack.hpp"
+#include <NitroModules/JNull.hpp>
 #include "JTextTrack.hpp"
 #include "onVolumeChangeData.hpp"
 #include "JFunc_void_onVolumeChangeData.hpp"
 #include "JonVolumeChangeData.hpp"
-#include "VideoPlayerStatus.hpp"
-#include "JFunc_void_VideoPlayerStatus.hpp"
-#include "JVideoPlayerStatus.hpp"
 
 namespace margelo::nitro::video {
 
@@ -101,370 +110,114 @@ namespace margelo::nitro::video {
     method(_javaPart);
   }
 
-  // Properties
-  std::function<void()> JHybridVideoPlayerEventEmitterSpec::getOnAudioBecomingNoisy() {
-    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JFunc_void::javaobject>()>("getOnAudioBecomingNoisy_cxx");
-    auto __result = method(_javaPart);
-    return [&]() -> std::function<void()> {
-      if (__result->isInstanceOf(JFunc_void_cxx::javaClassStatic())) [[likely]] {
-        auto downcast = jni::static_ref_cast<JFunc_void_cxx::javaobject>(__result);
-        return downcast->cthis()->getFunction();
-      } else {
-        auto __resultRef = jni::make_global(__result);
-        return [__resultRef]() -> void {
-          return __resultRef->invoke();
-        };
-      }
-    }();
-  }
-  void JHybridVideoPlayerEventEmitterSpec::setOnAudioBecomingNoisy(const std::function<void()>& onAudioBecomingNoisy) {
-    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void::javaobject> /* onAudioBecomingNoisy */)>("setOnAudioBecomingNoisy_cxx");
-    method(_javaPart, JFunc_void_cxx::fromCpp(onAudioBecomingNoisy));
-  }
-  std::function<void(bool /* hasAudioFocus */)> JHybridVideoPlayerEventEmitterSpec::getOnAudioFocusChange() {
-    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JFunc_void_bool::javaobject>()>("getOnAudioFocusChange_cxx");
-    auto __result = method(_javaPart);
-    return [&]() -> std::function<void(bool /* hasAudioFocus */)> {
-      if (__result->isInstanceOf(JFunc_void_bool_cxx::javaClassStatic())) [[likely]] {
-        auto downcast = jni::static_ref_cast<JFunc_void_bool_cxx::javaobject>(__result);
-        return downcast->cthis()->getFunction();
-      } else {
-        auto __resultRef = jni::make_global(__result);
-        return [__resultRef](bool hasAudioFocus) -> void {
-          return __resultRef->invoke(hasAudioFocus);
-        };
-      }
-    }();
-  }
-  void JHybridVideoPlayerEventEmitterSpec::setOnAudioFocusChange(const std::function<void(bool /* hasAudioFocus */)>& onAudioFocusChange) {
-    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_bool::javaobject> /* onAudioFocusChange */)>("setOnAudioFocusChange_cxx");
-    method(_javaPart, JFunc_void_bool_cxx::fromCpp(onAudioFocusChange));
-  }
-  std::function<void(const BandwidthData& /* data */)> JHybridVideoPlayerEventEmitterSpec::getOnBandwidthUpdate() {
-    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JFunc_void_BandwidthData::javaobject>()>("getOnBandwidthUpdate_cxx");
-    auto __result = method(_javaPart);
-    return [&]() -> std::function<void(const BandwidthData& /* data */)> {
-      if (__result->isInstanceOf(JFunc_void_BandwidthData_cxx::javaClassStatic())) [[likely]] {
-        auto downcast = jni::static_ref_cast<JFunc_void_BandwidthData_cxx::javaobject>(__result);
-        return downcast->cthis()->getFunction();
-      } else {
-        auto __resultRef = jni::make_global(__result);
-        return [__resultRef](BandwidthData data) -> void {
-          return __resultRef->invoke(data);
-        };
-      }
-    }();
-  }
-  void JHybridVideoPlayerEventEmitterSpec::setOnBandwidthUpdate(const std::function<void(const BandwidthData& /* data */)>& onBandwidthUpdate) {
-    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_BandwidthData::javaobject> /* onBandwidthUpdate */)>("setOnBandwidthUpdate_cxx");
-    method(_javaPart, JFunc_void_BandwidthData_cxx::fromCpp(onBandwidthUpdate));
-  }
-  std::function<void(bool /* buffering */)> JHybridVideoPlayerEventEmitterSpec::getOnBuffer() {
-    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JFunc_void_bool::javaobject>()>("getOnBuffer_cxx");
-    auto __result = method(_javaPart);
-    return [&]() -> std::function<void(bool /* buffering */)> {
-      if (__result->isInstanceOf(JFunc_void_bool_cxx::javaClassStatic())) [[likely]] {
-        auto downcast = jni::static_ref_cast<JFunc_void_bool_cxx::javaobject>(__result);
-        return downcast->cthis()->getFunction();
-      } else {
-        auto __resultRef = jni::make_global(__result);
-        return [__resultRef](bool buffering) -> void {
-          return __resultRef->invoke(buffering);
-        };
-      }
-    }();
-  }
-  void JHybridVideoPlayerEventEmitterSpec::setOnBuffer(const std::function<void(bool /* buffering */)>& onBuffer) {
-    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_bool::javaobject> /* onBuffer */)>("setOnBuffer_cxx");
-    method(_javaPart, JFunc_void_bool_cxx::fromCpp(onBuffer));
-  }
-  std::function<void(bool /* visible */)> JHybridVideoPlayerEventEmitterSpec::getOnControlsVisibleChange() {
-    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JFunc_void_bool::javaobject>()>("getOnControlsVisibleChange_cxx");
-    auto __result = method(_javaPart);
-    return [&]() -> std::function<void(bool /* visible */)> {
-      if (__result->isInstanceOf(JFunc_void_bool_cxx::javaClassStatic())) [[likely]] {
-        auto downcast = jni::static_ref_cast<JFunc_void_bool_cxx::javaobject>(__result);
-        return downcast->cthis()->getFunction();
-      } else {
-        auto __resultRef = jni::make_global(__result);
-        return [__resultRef](bool visible) -> void {
-          return __resultRef->invoke(visible);
-        };
-      }
-    }();
-  }
-  void JHybridVideoPlayerEventEmitterSpec::setOnControlsVisibleChange(const std::function<void(bool /* visible */)>& onControlsVisibleChange) {
-    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_bool::javaobject> /* onControlsVisibleChange */)>("setOnControlsVisibleChange_cxx");
-    method(_javaPart, JFunc_void_bool_cxx::fromCpp(onControlsVisibleChange));
-  }
-  std::function<void()> JHybridVideoPlayerEventEmitterSpec::getOnEnd() {
-    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JFunc_void::javaobject>()>("getOnEnd_cxx");
-    auto __result = method(_javaPart);
-    return [&]() -> std::function<void()> {
-      if (__result->isInstanceOf(JFunc_void_cxx::javaClassStatic())) [[likely]] {
-        auto downcast = jni::static_ref_cast<JFunc_void_cxx::javaobject>(__result);
-        return downcast->cthis()->getFunction();
-      } else {
-        auto __resultRef = jni::make_global(__result);
-        return [__resultRef]() -> void {
-          return __resultRef->invoke();
-        };
-      }
-    }();
-  }
-  void JHybridVideoPlayerEventEmitterSpec::setOnEnd(const std::function<void()>& onEnd) {
-    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void::javaobject> /* onEnd */)>("setOnEnd_cxx");
-    method(_javaPart, JFunc_void_cxx::fromCpp(onEnd));
-  }
-  std::function<void(bool /* externalPlaybackActive */)> JHybridVideoPlayerEventEmitterSpec::getOnExternalPlaybackChange() {
-    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JFunc_void_bool::javaobject>()>("getOnExternalPlaybackChange_cxx");
-    auto __result = method(_javaPart);
-    return [&]() -> std::function<void(bool /* externalPlaybackActive */)> {
-      if (__result->isInstanceOf(JFunc_void_bool_cxx::javaClassStatic())) [[likely]] {
-        auto downcast = jni::static_ref_cast<JFunc_void_bool_cxx::javaobject>(__result);
-        return downcast->cthis()->getFunction();
-      } else {
-        auto __resultRef = jni::make_global(__result);
-        return [__resultRef](bool externalPlaybackActive) -> void {
-          return __resultRef->invoke(externalPlaybackActive);
-        };
-      }
-    }();
-  }
-  void JHybridVideoPlayerEventEmitterSpec::setOnExternalPlaybackChange(const std::function<void(bool /* externalPlaybackActive */)>& onExternalPlaybackChange) {
-    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_bool::javaobject> /* onExternalPlaybackChange */)>("setOnExternalPlaybackChange_cxx");
-    method(_javaPart, JFunc_void_bool_cxx::fromCpp(onExternalPlaybackChange));
-  }
-  std::function<void(const onLoadData& /* data */)> JHybridVideoPlayerEventEmitterSpec::getOnLoad() {
-    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JFunc_void_onLoadData::javaobject>()>("getOnLoad_cxx");
-    auto __result = method(_javaPart);
-    return [&]() -> std::function<void(const onLoadData& /* data */)> {
-      if (__result->isInstanceOf(JFunc_void_onLoadData_cxx::javaClassStatic())) [[likely]] {
-        auto downcast = jni::static_ref_cast<JFunc_void_onLoadData_cxx::javaobject>(__result);
-        return downcast->cthis()->getFunction();
-      } else {
-        auto __resultRef = jni::make_global(__result);
-        return [__resultRef](onLoadData data) -> void {
-          return __resultRef->invoke(data);
-        };
-      }
-    }();
-  }
-  void JHybridVideoPlayerEventEmitterSpec::setOnLoad(const std::function<void(const onLoadData& /* data */)>& onLoad) {
-    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_onLoadData::javaobject> /* onLoad */)>("setOnLoad_cxx");
-    method(_javaPart, JFunc_void_onLoadData_cxx::fromCpp(onLoad));
-  }
-  std::function<void(const onLoadStartData& /* data */)> JHybridVideoPlayerEventEmitterSpec::getOnLoadStart() {
-    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JFunc_void_onLoadStartData::javaobject>()>("getOnLoadStart_cxx");
-    auto __result = method(_javaPart);
-    return [&]() -> std::function<void(const onLoadStartData& /* data */)> {
-      if (__result->isInstanceOf(JFunc_void_onLoadStartData_cxx::javaClassStatic())) [[likely]] {
-        auto downcast = jni::static_ref_cast<JFunc_void_onLoadStartData_cxx::javaobject>(__result);
-        return downcast->cthis()->getFunction();
-      } else {
-        auto __resultRef = jni::make_global(__result);
-        return [__resultRef](onLoadStartData data) -> void {
-          return __resultRef->invoke(data);
-        };
-      }
-    }();
-  }
-  void JHybridVideoPlayerEventEmitterSpec::setOnLoadStart(const std::function<void(const onLoadStartData& /* data */)>& onLoadStart) {
-    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_onLoadStartData::javaobject> /* onLoadStart */)>("setOnLoadStart_cxx");
-    method(_javaPart, JFunc_void_onLoadStartData_cxx::fromCpp(onLoadStart));
-  }
-  std::function<void(const onPlaybackStateChangeData& /* data */)> JHybridVideoPlayerEventEmitterSpec::getOnPlaybackStateChange() {
-    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JFunc_void_onPlaybackStateChangeData::javaobject>()>("getOnPlaybackStateChange_cxx");
-    auto __result = method(_javaPart);
-    return [&]() -> std::function<void(const onPlaybackStateChangeData& /* data */)> {
-      if (__result->isInstanceOf(JFunc_void_onPlaybackStateChangeData_cxx::javaClassStatic())) [[likely]] {
-        auto downcast = jni::static_ref_cast<JFunc_void_onPlaybackStateChangeData_cxx::javaobject>(__result);
-        return downcast->cthis()->getFunction();
-      } else {
-        auto __resultRef = jni::make_global(__result);
-        return [__resultRef](onPlaybackStateChangeData data) -> void {
-          return __resultRef->invoke(data);
-        };
-      }
-    }();
-  }
-  void JHybridVideoPlayerEventEmitterSpec::setOnPlaybackStateChange(const std::function<void(const onPlaybackStateChangeData& /* data */)>& onPlaybackStateChange) {
-    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_onPlaybackStateChangeData::javaobject> /* onPlaybackStateChange */)>("setOnPlaybackStateChange_cxx");
-    method(_javaPart, JFunc_void_onPlaybackStateChangeData_cxx::fromCpp(onPlaybackStateChange));
-  }
-  std::function<void(double /* rate */)> JHybridVideoPlayerEventEmitterSpec::getOnPlaybackRateChange() {
-    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JFunc_void_double::javaobject>()>("getOnPlaybackRateChange_cxx");
-    auto __result = method(_javaPart);
-    return [&]() -> std::function<void(double /* rate */)> {
-      if (__result->isInstanceOf(JFunc_void_double_cxx::javaClassStatic())) [[likely]] {
-        auto downcast = jni::static_ref_cast<JFunc_void_double_cxx::javaobject>(__result);
-        return downcast->cthis()->getFunction();
-      } else {
-        auto __resultRef = jni::make_global(__result);
-        return [__resultRef](double rate) -> void {
-          return __resultRef->invoke(rate);
-        };
-      }
-    }();
-  }
-  void JHybridVideoPlayerEventEmitterSpec::setOnPlaybackRateChange(const std::function<void(double /* rate */)>& onPlaybackRateChange) {
-    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_double::javaobject> /* onPlaybackRateChange */)>("setOnPlaybackRateChange_cxx");
-    method(_javaPart, JFunc_void_double_cxx::fromCpp(onPlaybackRateChange));
-  }
-  std::function<void(const onProgressData& /* data */)> JHybridVideoPlayerEventEmitterSpec::getOnProgress() {
-    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JFunc_void_onProgressData::javaobject>()>("getOnProgress_cxx");
-    auto __result = method(_javaPart);
-    return [&]() -> std::function<void(const onProgressData& /* data */)> {
-      if (__result->isInstanceOf(JFunc_void_onProgressData_cxx::javaClassStatic())) [[likely]] {
-        auto downcast = jni::static_ref_cast<JFunc_void_onProgressData_cxx::javaobject>(__result);
-        return downcast->cthis()->getFunction();
-      } else {
-        auto __resultRef = jni::make_global(__result);
-        return [__resultRef](onProgressData data) -> void {
-          return __resultRef->invoke(data);
-        };
-      }
-    }();
-  }
-  void JHybridVideoPlayerEventEmitterSpec::setOnProgress(const std::function<void(const onProgressData& /* data */)>& onProgress) {
-    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_onProgressData::javaobject> /* onProgress */)>("setOnProgress_cxx");
-    method(_javaPart, JFunc_void_onProgressData_cxx::fromCpp(onProgress));
-  }
-  std::function<void()> JHybridVideoPlayerEventEmitterSpec::getOnReadyToDisplay() {
-    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JFunc_void::javaobject>()>("getOnReadyToDisplay_cxx");
-    auto __result = method(_javaPart);
-    return [&]() -> std::function<void()> {
-      if (__result->isInstanceOf(JFunc_void_cxx::javaClassStatic())) [[likely]] {
-        auto downcast = jni::static_ref_cast<JFunc_void_cxx::javaobject>(__result);
-        return downcast->cthis()->getFunction();
-      } else {
-        auto __resultRef = jni::make_global(__result);
-        return [__resultRef]() -> void {
-          return __resultRef->invoke();
-        };
-      }
-    }();
-  }
-  void JHybridVideoPlayerEventEmitterSpec::setOnReadyToDisplay(const std::function<void()>& onReadyToDisplay) {
-    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void::javaobject> /* onReadyToDisplay */)>("setOnReadyToDisplay_cxx");
-    method(_javaPart, JFunc_void_cxx::fromCpp(onReadyToDisplay));
-  }
-  std::function<void(double /* seekTime */)> JHybridVideoPlayerEventEmitterSpec::getOnSeek() {
-    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JFunc_void_double::javaobject>()>("getOnSeek_cxx");
-    auto __result = method(_javaPart);
-    return [&]() -> std::function<void(double /* seekTime */)> {
-      if (__result->isInstanceOf(JFunc_void_double_cxx::javaClassStatic())) [[likely]] {
-        auto downcast = jni::static_ref_cast<JFunc_void_double_cxx::javaobject>(__result);
-        return downcast->cthis()->getFunction();
-      } else {
-        auto __resultRef = jni::make_global(__result);
-        return [__resultRef](double seekTime) -> void {
-          return __resultRef->invoke(seekTime);
-        };
-      }
-    }();
-  }
-  void JHybridVideoPlayerEventEmitterSpec::setOnSeek(const std::function<void(double /* seekTime */)>& onSeek) {
-    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_double::javaobject> /* onSeek */)>("setOnSeek_cxx");
-    method(_javaPart, JFunc_void_double_cxx::fromCpp(onSeek));
-  }
-  std::function<void(const TimedMetadata& /* metadata */)> JHybridVideoPlayerEventEmitterSpec::getOnTimedMetadata() {
-    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JFunc_void_TimedMetadata::javaobject>()>("getOnTimedMetadata_cxx");
-    auto __result = method(_javaPart);
-    return [&]() -> std::function<void(const TimedMetadata& /* metadata */)> {
-      if (__result->isInstanceOf(JFunc_void_TimedMetadata_cxx::javaClassStatic())) [[likely]] {
-        auto downcast = jni::static_ref_cast<JFunc_void_TimedMetadata_cxx::javaobject>(__result);
-        return downcast->cthis()->getFunction();
-      } else {
-        auto __resultRef = jni::make_global(__result);
-        return [__resultRef](TimedMetadata metadata) -> void {
-          return __resultRef->invoke(metadata);
-        };
-      }
-    }();
-  }
-  void JHybridVideoPlayerEventEmitterSpec::setOnTimedMetadata(const std::function<void(const TimedMetadata& /* metadata */)>& onTimedMetadata) {
-    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_TimedMetadata::javaobject> /* onTimedMetadata */)>("setOnTimedMetadata_cxx");
-    method(_javaPart, JFunc_void_TimedMetadata_cxx::fromCpp(onTimedMetadata));
-  }
-  std::function<void(const std::vector<std::string>& /* texts */)> JHybridVideoPlayerEventEmitterSpec::getOnTextTrackDataChanged() {
-    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JFunc_void_std__vector_std__string_::javaobject>()>("getOnTextTrackDataChanged_cxx");
-    auto __result = method(_javaPart);
-    return [&]() -> std::function<void(const std::vector<std::string>& /* texts */)> {
-      if (__result->isInstanceOf(JFunc_void_std__vector_std__string__cxx::javaClassStatic())) [[likely]] {
-        auto downcast = jni::static_ref_cast<JFunc_void_std__vector_std__string__cxx::javaobject>(__result);
-        return downcast->cthis()->getFunction();
-      } else {
-        auto __resultRef = jni::make_global(__result);
-        return [__resultRef](std::vector<std::string> texts) -> void {
-          return __resultRef->invoke(texts);
-        };
-      }
-    }();
-  }
-  void JHybridVideoPlayerEventEmitterSpec::setOnTextTrackDataChanged(const std::function<void(const std::vector<std::string>& /* texts */)>& onTextTrackDataChanged) {
-    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_std__vector_std__string_::javaobject> /* onTextTrackDataChanged */)>("setOnTextTrackDataChanged_cxx");
-    method(_javaPart, JFunc_void_std__vector_std__string__cxx::fromCpp(onTextTrackDataChanged));
-  }
-  std::function<void(const std::optional<TextTrack>& /* track */)> JHybridVideoPlayerEventEmitterSpec::getOnTrackChange() {
-    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JFunc_void_std__optional_TextTrack_::javaobject>()>("getOnTrackChange_cxx");
-    auto __result = method(_javaPart);
-    return [&]() -> std::function<void(const std::optional<TextTrack>& /* track */)> {
-      if (__result->isInstanceOf(JFunc_void_std__optional_TextTrack__cxx::javaClassStatic())) [[likely]] {
-        auto downcast = jni::static_ref_cast<JFunc_void_std__optional_TextTrack__cxx::javaobject>(__result);
-        return downcast->cthis()->getFunction();
-      } else {
-        auto __resultRef = jni::make_global(__result);
-        return [__resultRef](std::optional<TextTrack> track) -> void {
-          return __resultRef->invoke(track);
-        };
-      }
-    }();
-  }
-  void JHybridVideoPlayerEventEmitterSpec::setOnTrackChange(const std::function<void(const std::optional<TextTrack>& /* track */)>& onTrackChange) {
-    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_std__optional_TextTrack_::javaobject> /* onTrackChange */)>("setOnTrackChange_cxx");
-    method(_javaPart, JFunc_void_std__optional_TextTrack__cxx::fromCpp(onTrackChange));
-  }
-  std::function<void(const onVolumeChangeData& /* data */)> JHybridVideoPlayerEventEmitterSpec::getOnVolumeChange() {
-    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JFunc_void_onVolumeChangeData::javaobject>()>("getOnVolumeChange_cxx");
-    auto __result = method(_javaPart);
-    return [&]() -> std::function<void(const onVolumeChangeData& /* data */)> {
-      if (__result->isInstanceOf(JFunc_void_onVolumeChangeData_cxx::javaClassStatic())) [[likely]] {
-        auto downcast = jni::static_ref_cast<JFunc_void_onVolumeChangeData_cxx::javaobject>(__result);
-        return downcast->cthis()->getFunction();
-      } else {
-        auto __resultRef = jni::make_global(__result);
-        return [__resultRef](onVolumeChangeData data) -> void {
-          return __resultRef->invoke(data);
-        };
-      }
-    }();
-  }
-  void JHybridVideoPlayerEventEmitterSpec::setOnVolumeChange(const std::function<void(const onVolumeChangeData& /* data */)>& onVolumeChange) {
-    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_onVolumeChangeData::javaobject> /* onVolumeChange */)>("setOnVolumeChange_cxx");
-    method(_javaPart, JFunc_void_onVolumeChangeData_cxx::fromCpp(onVolumeChange));
-  }
-  std::function<void(VideoPlayerStatus /* status */)> JHybridVideoPlayerEventEmitterSpec::getOnStatusChange() {
-    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JFunc_void_VideoPlayerStatus::javaobject>()>("getOnStatusChange_cxx");
-    auto __result = method(_javaPart);
-    return [&]() -> std::function<void(VideoPlayerStatus /* status */)> {
-      if (__result->isInstanceOf(JFunc_void_VideoPlayerStatus_cxx::javaClassStatic())) [[likely]] {
-        auto downcast = jni::static_ref_cast<JFunc_void_VideoPlayerStatus_cxx::javaobject>(__result);
-        return downcast->cthis()->getFunction();
-      } else {
-        auto __resultRef = jni::make_global(__result);
-        return [__resultRef](VideoPlayerStatus status) -> void {
-          return __resultRef->invoke(status);
-        };
-      }
-    }();
-  }
-  void JHybridVideoPlayerEventEmitterSpec::setOnStatusChange(const std::function<void(VideoPlayerStatus /* status */)>& onStatusChange) {
-    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_VideoPlayerStatus::javaobject> /* onStatusChange */)>("setOnStatusChange_cxx");
-    method(_javaPart, JFunc_void_VideoPlayerStatus_cxx::fromCpp(onStatusChange));
+  std::string JHybridVideoPlayerEventEmitterSpec::toString() {
+    static const auto method = javaClassStatic()->getMethod<jni::JString()>("toString");
+    auto javaString = method(_javaPart);
+    return javaString->toStdString();
   }
 
-  // Methods
+  // Properties
   
+
+  // Methods
+  ListenerSubscription JHybridVideoPlayerEventEmitterSpec::addOnAudioBecomingNoisyListener(const std::function<void()>& listener) {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void::javaobject> /* listener */)>("addOnAudioBecomingNoisyListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoPlayerEventEmitterSpec::addOnAudioFocusChangeListener(const std::function<void(bool /* hasAudioFocus */)>& listener) {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void_bool::javaobject> /* listener */)>("addOnAudioFocusChangeListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_bool_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoPlayerEventEmitterSpec::addOnBandwidthUpdateListener(const std::function<void(const BandwidthData& /* data */)>& listener) {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void_BandwidthData::javaobject> /* listener */)>("addOnBandwidthUpdateListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_BandwidthData_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoPlayerEventEmitterSpec::addOnBufferListener(const std::function<void(bool /* buffering */)>& listener) {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void_bool::javaobject> /* listener */)>("addOnBufferListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_bool_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoPlayerEventEmitterSpec::addOnControlsVisibleChangeListener(const std::function<void(bool /* visible */)>& listener) {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void_bool::javaobject> /* listener */)>("addOnControlsVisibleChangeListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_bool_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoPlayerEventEmitterSpec::addOnEndListener(const std::function<void()>& listener) {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void::javaobject> /* listener */)>("addOnEndListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoPlayerEventEmitterSpec::addOnExternalPlaybackChangeListener(const std::function<void(bool /* externalPlaybackActive */)>& listener) {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void_bool::javaobject> /* listener */)>("addOnExternalPlaybackChangeListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_bool_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoPlayerEventEmitterSpec::addOnLoadListener(const std::function<void(const onLoadData& /* data */)>& listener) {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void_onLoadData::javaobject> /* listener */)>("addOnLoadListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_onLoadData_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoPlayerEventEmitterSpec::addOnLoadStartListener(const std::function<void(const onLoadStartData& /* data */)>& listener) {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void_onLoadStartData::javaobject> /* listener */)>("addOnLoadStartListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_onLoadStartData_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoPlayerEventEmitterSpec::addOnPlaybackStateChangeListener(const std::function<void(const onPlaybackStateChangeData& /* data */)>& listener) {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void_onPlaybackStateChangeData::javaobject> /* listener */)>("addOnPlaybackStateChangeListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_onPlaybackStateChangeData_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoPlayerEventEmitterSpec::addOnPlaybackRateChangeListener(const std::function<void(double /* rate */)>& listener) {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void_double::javaobject> /* listener */)>("addOnPlaybackRateChangeListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_double_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoPlayerEventEmitterSpec::addOnProgressListener(const std::function<void(const onProgressData& /* data */)>& listener) {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void_onProgressData::javaobject> /* listener */)>("addOnProgressListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_onProgressData_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoPlayerEventEmitterSpec::addOnReadyToDisplayListener(const std::function<void()>& listener) {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void::javaobject> /* listener */)>("addOnReadyToDisplayListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoPlayerEventEmitterSpec::addOnSeekListener(const std::function<void(double /* position */)>& listener) {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void_double::javaobject> /* listener */)>("addOnSeekListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_double_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoPlayerEventEmitterSpec::addOnStatusChangeListener(const std::function<void(VideoPlayerStatus /* status */)>& listener) {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void_VideoPlayerStatus::javaobject> /* listener */)>("addOnStatusChangeListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_VideoPlayerStatus_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoPlayerEventEmitterSpec::addOnTimedMetadataListener(const std::function<void(const TimedMetadata& /* data */)>& listener) {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void_TimedMetadata::javaobject> /* listener */)>("addOnTimedMetadataListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_TimedMetadata_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoPlayerEventEmitterSpec::addOnTextTrackDataChangedListener(const std::function<void(const std::vector<std::string>& /* data */)>& listener) {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void_std__vector_std__string_::javaobject> /* listener */)>("addOnTextTrackDataChangedListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_std__vector_std__string__cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoPlayerEventEmitterSpec::addOnTrackChangeListener(const std::function<void(const std::optional<std::variant<nitro::NullType, TextTrack>>& /* track */)>& listener) {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void_std__optional_std__variant_nitro__NullType__TextTrack__::javaobject> /* listener */)>("addOnTrackChangeListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_std__optional_std__variant_nitro__NullType__TextTrack___cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoPlayerEventEmitterSpec::addOnVolumeChangeListener(const std::function<void(const onVolumeChangeData& /* data */)>& listener) {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void_onVolumeChangeData::javaobject> /* listener */)>("addOnVolumeChangeListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_onVolumeChangeData_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  void JHybridVideoPlayerEventEmitterSpec::clearAllListeners() {
+    static const auto method = javaClassStatic()->getMethod<void()>("clearAllListeners");
+    method(_javaPart);
+  }
 
 } // namespace margelo::nitro::video

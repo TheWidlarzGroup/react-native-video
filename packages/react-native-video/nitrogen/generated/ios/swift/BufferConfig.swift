@@ -5,6 +5,7 @@
 /// Copyright © 2025 Marc Rousavy @ Margelo
 ///
 
+import Foundation
 import NitroModules
 
 /**
@@ -108,14 +109,7 @@ public extension BufferConfig {
   var minBufferMs: Double? {
     @inline(__always)
     get {
-      return { () -> Double? in
-        if bridge.has_value_std__optional_double_(self.__minBufferMs) {
-          let __unwrapped = bridge.get_std__optional_double_(self.__minBufferMs)
-          return __unwrapped
-        } else {
-          return nil
-        }
-      }()
+      return self.__minBufferMs.value
     }
     @inline(__always)
     set {
@@ -132,14 +126,7 @@ public extension BufferConfig {
   var maxBufferMs: Double? {
     @inline(__always)
     get {
-      return { () -> Double? in
-        if bridge.has_value_std__optional_double_(self.__maxBufferMs) {
-          let __unwrapped = bridge.get_std__optional_double_(self.__maxBufferMs)
-          return __unwrapped
-        } else {
-          return nil
-        }
-      }()
+      return self.__maxBufferMs.value
     }
     @inline(__always)
     set {
@@ -156,14 +143,7 @@ public extension BufferConfig {
   var bufferForPlaybackMs: Double? {
     @inline(__always)
     get {
-      return { () -> Double? in
-        if bridge.has_value_std__optional_double_(self.__bufferForPlaybackMs) {
-          let __unwrapped = bridge.get_std__optional_double_(self.__bufferForPlaybackMs)
-          return __unwrapped
-        } else {
-          return nil
-        }
-      }()
+      return self.__bufferForPlaybackMs.value
     }
     @inline(__always)
     set {
@@ -180,14 +160,7 @@ public extension BufferConfig {
   var bufferForPlaybackAfterRebufferMs: Double? {
     @inline(__always)
     get {
-      return { () -> Double? in
-        if bridge.has_value_std__optional_double_(self.__bufferForPlaybackAfterRebufferMs) {
-          let __unwrapped = bridge.get_std__optional_double_(self.__bufferForPlaybackAfterRebufferMs)
-          return __unwrapped
-        } else {
-          return nil
-        }
-      }()
+      return self.__bufferForPlaybackAfterRebufferMs.value
     }
     @inline(__always)
     set {
@@ -204,14 +177,7 @@ public extension BufferConfig {
   var backBufferDurationMs: Double? {
     @inline(__always)
     get {
-      return { () -> Double? in
-        if bridge.has_value_std__optional_double_(self.__backBufferDurationMs) {
-          let __unwrapped = bridge.get_std__optional_double_(self.__backBufferDurationMs)
-          return __unwrapped
-        } else {
-          return nil
-        }
-      }()
+      return self.__backBufferDurationMs.value
     }
     @inline(__always)
     set {
@@ -228,14 +194,7 @@ public extension BufferConfig {
   var preferredForwardBufferDurationMs: Double? {
     @inline(__always)
     get {
-      return { () -> Double? in
-        if bridge.has_value_std__optional_double_(self.__preferredForwardBufferDurationMs) {
-          let __unwrapped = bridge.get_std__optional_double_(self.__preferredForwardBufferDurationMs)
-          return __unwrapped
-        } else {
-          return nil
-        }
-      }()
+      return self.__preferredForwardBufferDurationMs.value
     }
     @inline(__always)
     set {
@@ -252,14 +211,7 @@ public extension BufferConfig {
   var preferredPeakBitRate: Double? {
     @inline(__always)
     get {
-      return { () -> Double? in
-        if bridge.has_value_std__optional_double_(self.__preferredPeakBitRate) {
-          let __unwrapped = bridge.get_std__optional_double_(self.__preferredPeakBitRate)
-          return __unwrapped
-        } else {
-          return nil
-        }
-      }()
+      return self.__preferredPeakBitRate.value
     }
     @inline(__always)
     set {
@@ -293,14 +245,7 @@ public extension BufferConfig {
   var preferredPeakBitRateForExpensiveNetworks: Double? {
     @inline(__always)
     get {
-      return { () -> Double? in
-        if bridge.has_value_std__optional_double_(self.__preferredPeakBitRateForExpensiveNetworks) {
-          let __unwrapped = bridge.get_std__optional_double_(self.__preferredPeakBitRateForExpensiveNetworks)
-          return __unwrapped
-        } else {
-          return nil
-        }
-      }()
+      return self.__preferredPeakBitRateForExpensiveNetworks.value
     }
     @inline(__always)
     set {

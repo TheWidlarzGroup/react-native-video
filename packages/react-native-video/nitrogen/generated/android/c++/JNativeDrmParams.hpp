@@ -13,6 +13,7 @@
 #include "JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload.hpp"
 #include "JOnGetLicensePayload.hpp"
 #include "OnGetLicensePayload.hpp"
+#include <NitroModules/JNICallable.hpp>
 #include <NitroModules/JPromise.hpp>
 #include <NitroModules/Promise.hpp>
 #include <functional>
@@ -73,9 +74,7 @@ namespace margelo::nitro::video {
             return downcast->cthis()->getFunction();
           } else {
             auto getLicenseRef = jni::make_global(getLicense);
-            return [getLicenseRef](OnGetLicensePayload payload) -> std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>> {
-              return getLicenseRef->invoke(payload);
-            };
+            return JNICallable<JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload, std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(OnGetLicensePayload)>(std::move(getLicenseRef));
           }
         }()) : std::nullopt
       );

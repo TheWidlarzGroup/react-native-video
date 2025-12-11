@@ -13,6 +13,8 @@
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
 
+// Forward declaration of `ListenerSubscription` to properly resolve imports.
+namespace margelo::nitro::video { struct ListenerSubscription; }
 // Forward declaration of `BandwidthData` to properly resolve imports.
 namespace margelo::nitro::video { struct BandwidthData; }
 // Forward declaration of `onLoadData` to properly resolve imports.
@@ -23,28 +25,31 @@ namespace margelo::nitro::video { struct onLoadStartData; }
 namespace margelo::nitro::video { struct onPlaybackStateChangeData; }
 // Forward declaration of `onProgressData` to properly resolve imports.
 namespace margelo::nitro::video { struct onProgressData; }
+// Forward declaration of `VideoPlayerStatus` to properly resolve imports.
+namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 // Forward declaration of `TimedMetadata` to properly resolve imports.
 namespace margelo::nitro::video { struct TimedMetadata; }
 // Forward declaration of `TextTrack` to properly resolve imports.
 namespace margelo::nitro::video { struct TextTrack; }
 // Forward declaration of `onVolumeChangeData` to properly resolve imports.
 namespace margelo::nitro::video { struct onVolumeChangeData; }
-// Forward declaration of `VideoPlayerStatus` to properly resolve imports.
-namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 
+#include "ListenerSubscription.hpp"
 #include <functional>
 #include "BandwidthData.hpp"
 #include "onLoadData.hpp"
 #include "onLoadStartData.hpp"
 #include "onPlaybackStateChangeData.hpp"
 #include "onProgressData.hpp"
+#include "VideoPlayerStatus.hpp"
 #include "TimedMetadata.hpp"
 #include <string>
 #include <vector>
+#include <NitroModules/Null.hpp>
 #include "TextTrack.hpp"
+#include <variant>
 #include <optional>
 #include "onVolumeChangeData.hpp"
-#include "VideoPlayerStatus.hpp"
 
 namespace margelo::nitro::video {
 
@@ -73,48 +78,30 @@ namespace margelo::nitro::video {
 
     public:
       // Properties
-      virtual std::function<void()> getOnAudioBecomingNoisy() = 0;
-      virtual void setOnAudioBecomingNoisy(const std::function<void()>& onAudioBecomingNoisy) = 0;
-      virtual std::function<void(bool /* hasAudioFocus */)> getOnAudioFocusChange() = 0;
-      virtual void setOnAudioFocusChange(const std::function<void(bool /* hasAudioFocus */)>& onAudioFocusChange) = 0;
-      virtual std::function<void(const BandwidthData& /* data */)> getOnBandwidthUpdate() = 0;
-      virtual void setOnBandwidthUpdate(const std::function<void(const BandwidthData& /* data */)>& onBandwidthUpdate) = 0;
-      virtual std::function<void(bool /* buffering */)> getOnBuffer() = 0;
-      virtual void setOnBuffer(const std::function<void(bool /* buffering */)>& onBuffer) = 0;
-      virtual std::function<void(bool /* visible */)> getOnControlsVisibleChange() = 0;
-      virtual void setOnControlsVisibleChange(const std::function<void(bool /* visible */)>& onControlsVisibleChange) = 0;
-      virtual std::function<void()> getOnEnd() = 0;
-      virtual void setOnEnd(const std::function<void()>& onEnd) = 0;
-      virtual std::function<void(bool /* externalPlaybackActive */)> getOnExternalPlaybackChange() = 0;
-      virtual void setOnExternalPlaybackChange(const std::function<void(bool /* externalPlaybackActive */)>& onExternalPlaybackChange) = 0;
-      virtual std::function<void(const onLoadData& /* data */)> getOnLoad() = 0;
-      virtual void setOnLoad(const std::function<void(const onLoadData& /* data */)>& onLoad) = 0;
-      virtual std::function<void(const onLoadStartData& /* data */)> getOnLoadStart() = 0;
-      virtual void setOnLoadStart(const std::function<void(const onLoadStartData& /* data */)>& onLoadStart) = 0;
-      virtual std::function<void(const onPlaybackStateChangeData& /* data */)> getOnPlaybackStateChange() = 0;
-      virtual void setOnPlaybackStateChange(const std::function<void(const onPlaybackStateChangeData& /* data */)>& onPlaybackStateChange) = 0;
-      virtual std::function<void(double /* rate */)> getOnPlaybackRateChange() = 0;
-      virtual void setOnPlaybackRateChange(const std::function<void(double /* rate */)>& onPlaybackRateChange) = 0;
-      virtual std::function<void(const onProgressData& /* data */)> getOnProgress() = 0;
-      virtual void setOnProgress(const std::function<void(const onProgressData& /* data */)>& onProgress) = 0;
-      virtual std::function<void()> getOnReadyToDisplay() = 0;
-      virtual void setOnReadyToDisplay(const std::function<void()>& onReadyToDisplay) = 0;
-      virtual std::function<void(double /* seekTime */)> getOnSeek() = 0;
-      virtual void setOnSeek(const std::function<void(double /* seekTime */)>& onSeek) = 0;
-      virtual std::function<void(const TimedMetadata& /* metadata */)> getOnTimedMetadata() = 0;
-      virtual void setOnTimedMetadata(const std::function<void(const TimedMetadata& /* metadata */)>& onTimedMetadata) = 0;
-      virtual std::function<void(const std::vector<std::string>& /* texts */)> getOnTextTrackDataChanged() = 0;
-      virtual void setOnTextTrackDataChanged(const std::function<void(const std::vector<std::string>& /* texts */)>& onTextTrackDataChanged) = 0;
-      virtual std::function<void(const std::optional<TextTrack>& /* track */)> getOnTrackChange() = 0;
-      virtual void setOnTrackChange(const std::function<void(const std::optional<TextTrack>& /* track */)>& onTrackChange) = 0;
-      virtual std::function<void(const onVolumeChangeData& /* data */)> getOnVolumeChange() = 0;
-      virtual void setOnVolumeChange(const std::function<void(const onVolumeChangeData& /* data */)>& onVolumeChange) = 0;
-      virtual std::function<void(VideoPlayerStatus /* status */)> getOnStatusChange() = 0;
-      virtual void setOnStatusChange(const std::function<void(VideoPlayerStatus /* status */)>& onStatusChange) = 0;
+      
 
     public:
       // Methods
-      
+      virtual ListenerSubscription addOnAudioBecomingNoisyListener(const std::function<void()>& listener) = 0;
+      virtual ListenerSubscription addOnAudioFocusChangeListener(const std::function<void(bool /* hasAudioFocus */)>& listener) = 0;
+      virtual ListenerSubscription addOnBandwidthUpdateListener(const std::function<void(const BandwidthData& /* data */)>& listener) = 0;
+      virtual ListenerSubscription addOnBufferListener(const std::function<void(bool /* buffering */)>& listener) = 0;
+      virtual ListenerSubscription addOnControlsVisibleChangeListener(const std::function<void(bool /* visible */)>& listener) = 0;
+      virtual ListenerSubscription addOnEndListener(const std::function<void()>& listener) = 0;
+      virtual ListenerSubscription addOnExternalPlaybackChangeListener(const std::function<void(bool /* externalPlaybackActive */)>& listener) = 0;
+      virtual ListenerSubscription addOnLoadListener(const std::function<void(const onLoadData& /* data */)>& listener) = 0;
+      virtual ListenerSubscription addOnLoadStartListener(const std::function<void(const onLoadStartData& /* data */)>& listener) = 0;
+      virtual ListenerSubscription addOnPlaybackStateChangeListener(const std::function<void(const onPlaybackStateChangeData& /* data */)>& listener) = 0;
+      virtual ListenerSubscription addOnPlaybackRateChangeListener(const std::function<void(double /* rate */)>& listener) = 0;
+      virtual ListenerSubscription addOnProgressListener(const std::function<void(const onProgressData& /* data */)>& listener) = 0;
+      virtual ListenerSubscription addOnReadyToDisplayListener(const std::function<void()>& listener) = 0;
+      virtual ListenerSubscription addOnSeekListener(const std::function<void(double /* position */)>& listener) = 0;
+      virtual ListenerSubscription addOnStatusChangeListener(const std::function<void(VideoPlayerStatus /* status */)>& listener) = 0;
+      virtual ListenerSubscription addOnTimedMetadataListener(const std::function<void(const TimedMetadata& /* data */)>& listener) = 0;
+      virtual ListenerSubscription addOnTextTrackDataChangedListener(const std::function<void(const std::vector<std::string>& /* data */)>& listener) = 0;
+      virtual ListenerSubscription addOnTrackChangeListener(const std::function<void(const std::optional<std::variant<nitro::NullType, TextTrack>>& /* track */)>& listener) = 0;
+      virtual ListenerSubscription addOnVolumeChangeListener(const std::function<void(const onVolumeChangeData& /* data */)>& listener) = 0;
+      virtual void clearAllListeners() = 0;
 
     protected:
       // Hybrid Setup

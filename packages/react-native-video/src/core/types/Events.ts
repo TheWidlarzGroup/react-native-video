@@ -93,9 +93,11 @@ export interface VideoPlayerEvents {
   onStatusChange: (status: VideoPlayerStatus) => void;
 }
 
-export interface AllPlayerEvents extends VideoPlayerEvents {
+export interface JSVideoPlayerEvents {
   onError: (error: VideoRuntimeError) => void;
 }
+
+export type AllPlayerEvents = VideoPlayerEvents & JSVideoPlayerEvents;
 
 export interface VideoViewEvents {
   /**

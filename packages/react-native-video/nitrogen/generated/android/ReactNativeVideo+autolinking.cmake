@@ -42,6 +42,8 @@ target_sources(
   ../nitrogen/generated/shared/c++/HybridVideoViewViewManagerFactorySpec.cpp
   # Android-specific Nitrogen C++ sources
   ../nitrogen/generated/android/c++/JHybridVideoPlayerSpec.cpp
+  ../nitrogen/generated/android/c++/JVariant_NullType_HybridVideoPlayerSourceSpec.cpp
+  ../nitrogen/generated/android/c++/JVariant_NullType_TextTrack.cpp
   ../nitrogen/generated/android/c++/JHybridVideoPlayerFactorySpec.cpp
   ../nitrogen/generated/android/c++/JHybridVideoPlayerEventEmitterSpec.cpp
   ../nitrogen/generated/android/c++/JHybridVideoPlayerSourceSpec.cpp

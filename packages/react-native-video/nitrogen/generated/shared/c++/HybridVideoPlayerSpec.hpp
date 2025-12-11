@@ -35,6 +35,8 @@ namespace margelo::nitro::video { struct TextTrack; }
 #include "TextTrack.hpp"
 #include <optional>
 #include <NitroModules/Promise.hpp>
+#include <NitroModules/Null.hpp>
+#include <variant>
 #include <vector>
 
 namespace margelo::nitro::video {
@@ -93,9 +95,9 @@ namespace margelo::nitro::video {
 
     public:
       // Methods
-      virtual std::shared_ptr<Promise<void>> replaceSourceAsync(const std::optional<std::shared_ptr<HybridVideoPlayerSourceSpec>>& source) = 0;
+      virtual std::shared_ptr<Promise<void>> replaceSourceAsync(const std::optional<std::variant<nitro::NullType, std::shared_ptr<HybridVideoPlayerSourceSpec>>>& source) = 0;
       virtual std::vector<TextTrack> getAvailableTextTracks() = 0;
-      virtual void selectTextTrack(const std::optional<TextTrack>& textTrack) = 0;
+      virtual void selectTextTrack(const std::optional<std::variant<nitro::NullType, TextTrack>>& textTrack) = 0;
       virtual std::shared_ptr<Promise<void>> initialize() = 0;
       virtual std::shared_ptr<Promise<void>> preload() = 0;
       virtual void play() = 0;

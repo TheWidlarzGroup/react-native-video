@@ -76,7 +76,7 @@ open class HybridVideoPlayerFactorySpec_cxx {
    */
   public func getCxxPart() -> bridge.std__shared_ptr_HybridVideoPlayerFactorySpec_ {
     let cachedCxxPart = self.__cxxPart.lock()
-    if cachedCxxPart.__convertToBool() {
+    if Bool(fromCxx: cachedCxxPart) {
       return cachedCxxPart
     } else {
       let newCxxPart = bridge.create_std__shared_ptr_HybridVideoPlayerFactorySpec_(self.toUnsafe())
@@ -103,6 +103,14 @@ open class HybridVideoPlayerFactorySpec_cxx {
   @inline(__always)
   public func dispose() {
     self.__implementation.dispose()
+  }
+
+  /**
+   * Call toString() on the Swift class.
+   */
+  @inline(__always)
+  public func toString() -> String {
+    return self.__implementation.toString()
   }
 
   // Properties

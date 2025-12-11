@@ -5,6 +5,7 @@
 /// Copyright © 2025 Marc Rousavy @ Margelo
 ///
 
+import Foundation
 import NitroModules
 
 /**
@@ -48,14 +49,7 @@ public extension BandwidthData {
   var width: Double? {
     @inline(__always)
     get {
-      return { () -> Double? in
-        if bridge.has_value_std__optional_double_(self.__width) {
-          let __unwrapped = bridge.get_std__optional_double_(self.__width)
-          return __unwrapped
-        } else {
-          return nil
-        }
-      }()
+      return self.__width.value
     }
     @inline(__always)
     set {
@@ -72,14 +66,7 @@ public extension BandwidthData {
   var height: Double? {
     @inline(__always)
     get {
-      return { () -> Double? in
-        if bridge.has_value_std__optional_double_(self.__height) {
-          let __unwrapped = bridge.get_std__optional_double_(self.__height)
-          return __unwrapped
-        } else {
-          return nil
-        }
-      }()
+      return self.__height.value
     }
     @inline(__always)
     set {

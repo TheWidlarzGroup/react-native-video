@@ -9,7 +9,6 @@ package com.margelo.nitro.video
 
 import androidx.annotation.Keep
 import com.facebook.proguard.annotations.DoNotStrip
-import com.margelo.nitro.core.*
 
 
 /**
@@ -31,6 +30,8 @@ data class OnGetLicensePayload(
   @Keep
   val spc: String
 ) {
+  /* primary constructor */
+
   private companion object {
     /**
      * Constructor called from C++

@@ -76,7 +76,7 @@ open class HybridVideoPlayerSpec_cxx {
    */
   public func getCxxPart() -> bridge.std__shared_ptr_HybridVideoPlayerSpec_ {
     let cachedCxxPart = self.__cxxPart.lock()
-    if cachedCxxPart.__convertToBool() {
+    if Bool(fromCxx: cachedCxxPart) {
       return cachedCxxPart
     } else {
       let newCxxPart = bridge.create_std__shared_ptr_HybridVideoPlayerSpec_(self.toUnsafe())
@@ -103,6 +103,14 @@ open class HybridVideoPlayerSpec_cxx {
   @inline(__always)
   public func dispose() {
     self.__implementation.dispose()
+  }
+
+  /**
+   * Call toString() on the Swift class.
+   */
+  @inline(__always)
+  public func toString() -> String {
+    return self.__implementation.toString()
   }
 
   // Properties
@@ -272,15 +280,27 @@ open class HybridVideoPlayerSpec_cxx {
 
   // Methods
   @inline(__always)
-  public final func replaceSourceAsync(source: bridge.std__optional_std__shared_ptr_HybridVideoPlayerSourceSpec__) -> bridge.Result_std__shared_ptr_Promise_void___ {
+  public final func replaceSourceAsync(source: bridge.std__optional_std__variant_nitro__NullType__std__shared_ptr_HybridVideoPlayerSourceSpec___) -> bridge.Result_std__shared_ptr_Promise_void___ {
     do {
-      let __result = try self.__implementation.replaceSourceAsync(source: { () -> (any HybridVideoPlayerSourceSpec)? in
-        if bridge.has_value_std__optional_std__shared_ptr_HybridVideoPlayerSourceSpec__(source) {
-          let __unwrapped = bridge.get_std__optional_std__shared_ptr_HybridVideoPlayerSourceSpec__(source)
-          return { () -> HybridVideoPlayerSourceSpec in
-            let __unsafePointer = bridge.get_std__shared_ptr_HybridVideoPlayerSourceSpec_(__unwrapped)
-            let __instance = HybridVideoPlayerSourceSpec_cxx.fromUnsafe(__unsafePointer)
-            return __instance.getHybridVideoPlayerSourceSpec()
+      let __result = try self.__implementation.replaceSourceAsync(source: { () -> Variant_NullType__any_HybridVideoPlayerSourceSpec_? in
+        if bridge.has_value_std__optional_std__variant_nitro__NullType__std__shared_ptr_HybridVideoPlayerSourceSpec___(source) {
+          let __unwrapped = bridge.get_std__optional_std__variant_nitro__NullType__std__shared_ptr_HybridVideoPlayerSourceSpec___(source)
+          return { () -> Variant_NullType__any_HybridVideoPlayerSourceSpec_ in
+            let __variant = bridge.std__variant_nitro__NullType__std__shared_ptr_HybridVideoPlayerSourceSpec__(__unwrapped)
+            switch __variant.index() {
+              case 0:
+                let __actual = __variant.get_0()
+                return .first(NullType.null)
+              case 1:
+                let __actual = __variant.get_1()
+                return .second({ () -> HybridVideoPlayerSourceSpec in
+                  let __unsafePointer = bridge.get_std__shared_ptr_HybridVideoPlayerSourceSpec_(__actual)
+                  let __instance = HybridVideoPlayerSourceSpec_cxx.fromUnsafe(__unsafePointer)
+                  return __instance.getHybridVideoPlayerSourceSpec()
+                }())
+              default:
+                fatalError("Variant can never have index \(__variant.index())!")
+            }
           }()
         } else {
           return nil
@@ -320,9 +340,28 @@ open class HybridVideoPlayerSpec_cxx {
   }
   
   @inline(__always)
-  public final func selectTextTrack(textTrack: bridge.std__optional_TextTrack_) -> bridge.Result_void_ {
+  public final func selectTextTrack(textTrack: bridge.std__optional_std__variant_nitro__NullType__TextTrack__) -> bridge.Result_void_ {
     do {
-      try self.__implementation.selectTextTrack(textTrack: textTrack.value)
+      try self.__implementation.selectTextTrack(textTrack: { () -> Variant_NullType_TextTrack? in
+        if bridge.has_value_std__optional_std__variant_nitro__NullType__TextTrack__(textTrack) {
+          let __unwrapped = bridge.get_std__optional_std__variant_nitro__NullType__TextTrack__(textTrack)
+          return { () -> Variant_NullType_TextTrack in
+            let __variant = bridge.std__variant_nitro__NullType__TextTrack_(__unwrapped)
+            switch __variant.index() {
+              case 0:
+                let __actual = __variant.get_0()
+                return .first(NullType.null)
+              case 1:
+                let __actual = __variant.get_1()
+                return .second(__actual)
+              default:
+                fatalError("Variant can never have index \(__variant.index())!")
+            }
+          }()
+        } else {
+          return nil
+        }
+      }())
       return bridge.create_Result_void_()
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()

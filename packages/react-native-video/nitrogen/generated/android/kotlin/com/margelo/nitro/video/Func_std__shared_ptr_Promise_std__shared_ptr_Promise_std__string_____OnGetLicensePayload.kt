@@ -10,9 +10,8 @@ package com.margelo.nitro.video
 import androidx.annotation.Keep
 import com.facebook.jni.HybridData
 import com.facebook.proguard.annotations.DoNotStrip
-import com.margelo.nitro.core.*
 import dalvik.annotation.optimization.FastNative
-
+import com.margelo.nitro.core.Promise
 
 /**
  * Represents the JavaScript callback `(payload: struct) => std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>`.

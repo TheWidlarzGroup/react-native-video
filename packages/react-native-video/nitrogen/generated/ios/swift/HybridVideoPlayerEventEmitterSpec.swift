@@ -11,28 +11,36 @@ import NitroModules
 /// See ``HybridVideoPlayerEventEmitterSpec``
 public protocol HybridVideoPlayerEventEmitterSpec_protocol: HybridObject {
   // Properties
-  var onAudioBecomingNoisy: () -> Void { get set }
-  var onAudioFocusChange: (_ hasAudioFocus: Bool) -> Void { get set }
-  var onBandwidthUpdate: (_ data: BandwidthData) -> Void { get set }
-  var onBuffer: (_ buffering: Bool) -> Void { get set }
-  var onControlsVisibleChange: (_ visible: Bool) -> Void { get set }
-  var onEnd: () -> Void { get set }
-  var onExternalPlaybackChange: (_ externalPlaybackActive: Bool) -> Void { get set }
-  var onLoad: (_ data: onLoadData) -> Void { get set }
-  var onLoadStart: (_ data: onLoadStartData) -> Void { get set }
-  var onPlaybackStateChange: (_ data: onPlaybackStateChangeData) -> Void { get set }
-  var onPlaybackRateChange: (_ rate: Double) -> Void { get set }
-  var onProgress: (_ data: onProgressData) -> Void { get set }
-  var onReadyToDisplay: () -> Void { get set }
-  var onSeek: (_ seekTime: Double) -> Void { get set }
-  var onTimedMetadata: (_ metadata: TimedMetadata) -> Void { get set }
-  var onTextTrackDataChanged: (_ texts: [String]) -> Void { get set }
-  var onTrackChange: (_ track: TextTrack?) -> Void { get set }
-  var onVolumeChange: (_ data: onVolumeChangeData) -> Void { get set }
-  var onStatusChange: (_ status: VideoPlayerStatus) -> Void { get set }
+  
 
   // Methods
-  
+  func addOnAudioBecomingNoisyListener(listener: @escaping () -> Void) throws -> ListenerSubscription
+  func addOnAudioFocusChangeListener(listener: @escaping (_ hasAudioFocus: Bool) -> Void) throws -> ListenerSubscription
+  func addOnBandwidthUpdateListener(listener: @escaping (_ data: BandwidthData) -> Void) throws -> ListenerSubscription
+  func addOnBufferListener(listener: @escaping (_ buffering: Bool) -> Void) throws -> ListenerSubscription
+  func addOnControlsVisibleChangeListener(listener: @escaping (_ visible: Bool) -> Void) throws -> ListenerSubscription
+  func addOnEndListener(listener: @escaping () -> Void) throws -> ListenerSubscription
+  func addOnExternalPlaybackChangeListener(listener: @escaping (_ externalPlaybackActive: Bool) -> Void) throws -> ListenerSubscription
+  func addOnLoadListener(listener: @escaping (_ data: onLoadData) -> Void) throws -> ListenerSubscription
+  func addOnLoadStartListener(listener: @escaping (_ data: onLoadStartData) -> Void) throws -> ListenerSubscription
+  func addOnPlaybackStateChangeListener(listener: @escaping (_ data: onPlaybackStateChangeData) -> Void) throws -> ListenerSubscription
+  func addOnPlaybackRateChangeListener(listener: @escaping (_ rate: Double) -> Void) throws -> ListenerSubscription
+  func addOnProgressListener(listener: @escaping (_ data: onProgressData) -> Void) throws -> ListenerSubscription
+  func addOnReadyToDisplayListener(listener: @escaping () -> Void) throws -> ListenerSubscription
+  func addOnSeekListener(listener: @escaping (_ position: Double) -> Void) throws -> ListenerSubscription
+  func addOnStatusChangeListener(listener: @escaping (_ status: VideoPlayerStatus) -> Void) throws -> ListenerSubscription
+  func addOnTimedMetadataListener(listener: @escaping (_ data: TimedMetadata) -> Void) throws -> ListenerSubscription
+  func addOnTextTrackDataChangedListener(listener: @escaping (_ data: [String]) -> Void) throws -> ListenerSubscription
+  func addOnTrackChangeListener(listener: @escaping (_ track: Variant_NullType_TextTrack?) -> Void) throws -> ListenerSubscription
+  func addOnVolumeChangeListener(listener: @escaping (_ data: onVolumeChangeData) -> Void) throws -> ListenerSubscription
+  func clearAllListeners() throws -> Void
+}
+
+public extension HybridVideoPlayerEventEmitterSpec_protocol {
+  /// Default implementation of ``HybridObject.toString``
+  func toString() -> String {
+    return "[HybridObject VideoPlayerEventEmitter]"
+  }
 }
 
 /// See ``HybridVideoPlayerEventEmitterSpec``

@@ -41,6 +41,7 @@ namespace margelo::nitro::video {
   public:
     size_t getExternalMemorySize() noexcept override;
     void dispose() noexcept override;
+    std::string toString() override;
 
   public:
     inline const jni::global_ref<JHybridVideoPlayerSpec::javaobject>& getJavaPart() const noexcept {
@@ -78,9 +79,9 @@ namespace margelo::nitro::video {
 
   public:
     // Methods
-    std::shared_ptr<Promise<void>> replaceSourceAsync(const std::optional<std::shared_ptr<HybridVideoPlayerSourceSpec>>& source) override;
+    std::shared_ptr<Promise<void>> replaceSourceAsync(const std::optional<std::variant<nitro::NullType, std::shared_ptr<HybridVideoPlayerSourceSpec>>>& source) override;
     std::vector<TextTrack> getAvailableTextTracks() override;
-    void selectTextTrack(const std::optional<TextTrack>& textTrack) override;
+    void selectTextTrack(const std::optional<std::variant<nitro::NullType, TextTrack>>& textTrack) override;
     std::shared_ptr<Promise<void>> initialize() override;
     std::shared_ptr<Promise<void>> preload() override;
     void play() override;

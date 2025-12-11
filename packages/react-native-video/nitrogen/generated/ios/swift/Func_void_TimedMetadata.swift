@@ -5,25 +5,25 @@
 /// Copyright © 2025 Marc Rousavy @ Margelo
 ///
 
+import Foundation
 import NitroModules
 
-
 /**
- * Wraps a Swift `(_ metadata: TimedMetadata) -> Void` as a class.
+ * Wraps a Swift `(_ data: TimedMetadata) -> Void` as a class.
  * This class can be used from C++, e.g. to wrap the Swift closure as a `std::function`.
  */
 public final class Func_void_TimedMetadata {
   public typealias bridge = margelo.nitro.video.bridge.swift
 
-  private let closure: (_ metadata: TimedMetadata) -> Void
+  private let closure: (_ data: TimedMetadata) -> Void
 
-  public init(_ closure: @escaping (_ metadata: TimedMetadata) -> Void) {
+  public init(_ closure: @escaping (_ data: TimedMetadata) -> Void) {
     self.closure = closure
   }
 
   @inline(__always)
-  public func call(metadata: TimedMetadata) -> Void {
-    self.closure(metadata)
+  public func call(data: TimedMetadata) -> Void {
+    self.closure(data)
   }
 
   /**

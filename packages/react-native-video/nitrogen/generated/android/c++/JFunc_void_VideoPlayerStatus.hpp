@@ -12,6 +12,7 @@
 
 #include "VideoPlayerStatus.hpp"
 #include <functional>
+#include <NitroModules/JNICallable.hpp>
 #include "JVideoPlayerStatus.hpp"
 
 namespace margelo::nitro::video {
@@ -39,7 +40,7 @@ namespace margelo::nitro::video {
   /**
    * An implementation of Func_void_VideoPlayerStatus that is backed by a C++ implementation (using `std::function<...>`)
    */
-  struct JFunc_void_VideoPlayerStatus_cxx final: public jni::HybridClass<JFunc_void_VideoPlayerStatus_cxx, JFunc_void_VideoPlayerStatus> {
+  class JFunc_void_VideoPlayerStatus_cxx final: public jni::HybridClass<JFunc_void_VideoPlayerStatus_cxx, JFunc_void_VideoPlayerStatus> {
   public:
     static jni::local_ref<JFunc_void_VideoPlayerStatus::javaobject> fromCpp(const std::function<void(VideoPlayerStatus /* status */)>& func) {
       return JFunc_void_VideoPlayerStatus_cxx::newObjectCxxArgs(func);

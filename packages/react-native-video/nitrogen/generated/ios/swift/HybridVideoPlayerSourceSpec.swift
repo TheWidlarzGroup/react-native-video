@@ -18,6 +18,13 @@ public protocol HybridVideoPlayerSourceSpec_protocol: HybridObject {
   func getAssetInformationAsync() throws -> Promise<VideoInformation>
 }
 
+public extension HybridVideoPlayerSourceSpec_protocol {
+  /// Default implementation of ``HybridObject.toString``
+  func toString() -> String {
+    return "[HybridObject VideoPlayerSource]"
+  }
+}
+
 /// See ``HybridVideoPlayerSourceSpec``
 open class HybridVideoPlayerSourceSpec_base {
   private weak var cxxWrapper: HybridVideoPlayerSourceSpec_cxx? = nil

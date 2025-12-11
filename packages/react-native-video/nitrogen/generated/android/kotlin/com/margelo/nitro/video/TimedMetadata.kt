@@ -9,7 +9,6 @@ package com.margelo.nitro.video
 
 import androidx.annotation.Keep
 import com.facebook.proguard.annotations.DoNotStrip
-import com.margelo.nitro.core.*
 
 
 /**
@@ -22,6 +21,8 @@ data class TimedMetadata(
   @Keep
   val metadata: Array<TimedMetadataObject>
 ) {
+  /* primary constructor */
+
   private companion object {
     /**
      * Constructor called from C++

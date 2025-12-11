@@ -1,23 +1,21 @@
 package com.twg.video.core.player
 
-import android.content.IntentFilter
 import android.media.AudioManager
-import androidx.core.content.ContextCompat
-import com.margelo.nitro.video.HybridVideoPlayerEventEmitterSpec
+import com.margelo.nitro.video.HybridVideoPlayerEventEmitter
 
 // TODO: We should make VideoFocusManager that will track focus globally for now lets just do simple listener
 class OnAudioFocusChangedListener : AudioManager.OnAudioFocusChangeListener {
-  private var eventEmitter: HybridVideoPlayerEventEmitterSpec? = null
+  private var eventEmitter: HybridVideoPlayerEventEmitter? = null
 
   override fun onAudioFocusChange(focusChange: Int) {
     when (focusChange) {
-      AudioManager.AUDIOFOCUS_GAIN -> eventEmitter?.onAudioFocusChange?.invoke(true)
-      AudioManager.AUDIOFOCUS_LOSS -> eventEmitter?.onAudioFocusChange?.invoke(false)
-      AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> eventEmitter?.onAudioFocusChange?.invoke(false)
+      AudioManager.AUDIOFOCUS_GAIN -> eventEmitter?.onAudioFocusChange(true)
+      AudioManager.AUDIOFOCUS_LOSS -> eventEmitter?.onAudioFocusChange(false)
+      AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> eventEmitter?.onAudioFocusChange(false)
     }
   }
 
-  fun setEventEmitter(eventEmitter: HybridVideoPlayerEventEmitterSpec) {
+  fun setEventEmitter(eventEmitter: HybridVideoPlayerEventEmitter) {
     this.eventEmitter = eventEmitter
   }
 

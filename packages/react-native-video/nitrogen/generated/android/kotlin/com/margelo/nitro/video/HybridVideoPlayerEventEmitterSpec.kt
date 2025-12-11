@@ -10,7 +10,8 @@ package com.margelo.nitro.video
 import androidx.annotation.Keep
 import com.facebook.jni.HybridData
 import com.facebook.proguard.annotations.DoNotStrip
-import com.margelo.nitro.core.*
+import com.margelo.nitro.core.NullType
+import com.margelo.nitro.core.HybridObject
 
 /**
  * A Kotlin class representing the VideoPlayerEventEmitter HybridObject.
@@ -36,275 +37,189 @@ abstract class HybridVideoPlayerEventEmitterSpec: HybridObject() {
     super.updateNative(hybridData)
   }
 
+  // Default implementation of `HybridObject.toString()`
+  override fun toString(): String {
+    return "[HybridObject VideoPlayerEventEmitter]"
+  }
+
   // Properties
-  abstract var onAudioBecomingNoisy: () -> Unit
   
-  private var onAudioBecomingNoisy_cxx: Func_void
-    @Keep
-    @DoNotStrip
-    get() {
-      return Func_void_java(onAudioBecomingNoisy)
-    }
-    @Keep
-    @DoNotStrip
-    set(value) {
-      onAudioBecomingNoisy = value
-    }
-  
-  abstract var onAudioFocusChange: (hasAudioFocus: Boolean) -> Unit
-  
-  private var onAudioFocusChange_cxx: Func_void_bool
-    @Keep
-    @DoNotStrip
-    get() {
-      return Func_void_bool_java(onAudioFocusChange)
-    }
-    @Keep
-    @DoNotStrip
-    set(value) {
-      onAudioFocusChange = value
-    }
-  
-  abstract var onBandwidthUpdate: (data: BandwidthData) -> Unit
-  
-  private var onBandwidthUpdate_cxx: Func_void_BandwidthData
-    @Keep
-    @DoNotStrip
-    get() {
-      return Func_void_BandwidthData_java(onBandwidthUpdate)
-    }
-    @Keep
-    @DoNotStrip
-    set(value) {
-      onBandwidthUpdate = value
-    }
-  
-  abstract var onBuffer: (buffering: Boolean) -> Unit
-  
-  private var onBuffer_cxx: Func_void_bool
-    @Keep
-    @DoNotStrip
-    get() {
-      return Func_void_bool_java(onBuffer)
-    }
-    @Keep
-    @DoNotStrip
-    set(value) {
-      onBuffer = value
-    }
-  
-  abstract var onControlsVisibleChange: (visible: Boolean) -> Unit
-  
-  private var onControlsVisibleChange_cxx: Func_void_bool
-    @Keep
-    @DoNotStrip
-    get() {
-      return Func_void_bool_java(onControlsVisibleChange)
-    }
-    @Keep
-    @DoNotStrip
-    set(value) {
-      onControlsVisibleChange = value
-    }
-  
-  abstract var onEnd: () -> Unit
-  
-  private var onEnd_cxx: Func_void
-    @Keep
-    @DoNotStrip
-    get() {
-      return Func_void_java(onEnd)
-    }
-    @Keep
-    @DoNotStrip
-    set(value) {
-      onEnd = value
-    }
-  
-  abstract var onExternalPlaybackChange: (externalPlaybackActive: Boolean) -> Unit
-  
-  private var onExternalPlaybackChange_cxx: Func_void_bool
-    @Keep
-    @DoNotStrip
-    get() {
-      return Func_void_bool_java(onExternalPlaybackChange)
-    }
-    @Keep
-    @DoNotStrip
-    set(value) {
-      onExternalPlaybackChange = value
-    }
-  
-  abstract var onLoad: (data: onLoadData) -> Unit
-  
-  private var onLoad_cxx: Func_void_onLoadData
-    @Keep
-    @DoNotStrip
-    get() {
-      return Func_void_onLoadData_java(onLoad)
-    }
-    @Keep
-    @DoNotStrip
-    set(value) {
-      onLoad = value
-    }
-  
-  abstract var onLoadStart: (data: onLoadStartData) -> Unit
-  
-  private var onLoadStart_cxx: Func_void_onLoadStartData
-    @Keep
-    @DoNotStrip
-    get() {
-      return Func_void_onLoadStartData_java(onLoadStart)
-    }
-    @Keep
-    @DoNotStrip
-    set(value) {
-      onLoadStart = value
-    }
-  
-  abstract var onPlaybackStateChange: (data: onPlaybackStateChangeData) -> Unit
-  
-  private var onPlaybackStateChange_cxx: Func_void_onPlaybackStateChangeData
-    @Keep
-    @DoNotStrip
-    get() {
-      return Func_void_onPlaybackStateChangeData_java(onPlaybackStateChange)
-    }
-    @Keep
-    @DoNotStrip
-    set(value) {
-      onPlaybackStateChange = value
-    }
-  
-  abstract var onPlaybackRateChange: (rate: Double) -> Unit
-  
-  private var onPlaybackRateChange_cxx: Func_void_double
-    @Keep
-    @DoNotStrip
-    get() {
-      return Func_void_double_java(onPlaybackRateChange)
-    }
-    @Keep
-    @DoNotStrip
-    set(value) {
-      onPlaybackRateChange = value
-    }
-  
-  abstract var onProgress: (data: onProgressData) -> Unit
-  
-  private var onProgress_cxx: Func_void_onProgressData
-    @Keep
-    @DoNotStrip
-    get() {
-      return Func_void_onProgressData_java(onProgress)
-    }
-    @Keep
-    @DoNotStrip
-    set(value) {
-      onProgress = value
-    }
-  
-  abstract var onReadyToDisplay: () -> Unit
-  
-  private var onReadyToDisplay_cxx: Func_void
-    @Keep
-    @DoNotStrip
-    get() {
-      return Func_void_java(onReadyToDisplay)
-    }
-    @Keep
-    @DoNotStrip
-    set(value) {
-      onReadyToDisplay = value
-    }
-  
-  abstract var onSeek: (seekTime: Double) -> Unit
-  
-  private var onSeek_cxx: Func_void_double
-    @Keep
-    @DoNotStrip
-    get() {
-      return Func_void_double_java(onSeek)
-    }
-    @Keep
-    @DoNotStrip
-    set(value) {
-      onSeek = value
-    }
-  
-  abstract var onTimedMetadata: (metadata: TimedMetadata) -> Unit
-  
-  private var onTimedMetadata_cxx: Func_void_TimedMetadata
-    @Keep
-    @DoNotStrip
-    get() {
-      return Func_void_TimedMetadata_java(onTimedMetadata)
-    }
-    @Keep
-    @DoNotStrip
-    set(value) {
-      onTimedMetadata = value
-    }
-  
-  abstract var onTextTrackDataChanged: (texts: Array<String>) -> Unit
-  
-  private var onTextTrackDataChanged_cxx: Func_void_std__vector_std__string_
-    @Keep
-    @DoNotStrip
-    get() {
-      return Func_void_std__vector_std__string__java(onTextTrackDataChanged)
-    }
-    @Keep
-    @DoNotStrip
-    set(value) {
-      onTextTrackDataChanged = value
-    }
-  
-  abstract var onTrackChange: (track: TextTrack?) -> Unit
-  
-  private var onTrackChange_cxx: Func_void_std__optional_TextTrack_
-    @Keep
-    @DoNotStrip
-    get() {
-      return Func_void_std__optional_TextTrack__java(onTrackChange)
-    }
-    @Keep
-    @DoNotStrip
-    set(value) {
-      onTrackChange = value
-    }
-  
-  abstract var onVolumeChange: (data: onVolumeChangeData) -> Unit
-  
-  private var onVolumeChange_cxx: Func_void_onVolumeChangeData
-    @Keep
-    @DoNotStrip
-    get() {
-      return Func_void_onVolumeChangeData_java(onVolumeChange)
-    }
-    @Keep
-    @DoNotStrip
-    set(value) {
-      onVolumeChange = value
-    }
-  
-  abstract var onStatusChange: (status: VideoPlayerStatus) -> Unit
-  
-  private var onStatusChange_cxx: Func_void_VideoPlayerStatus
-    @Keep
-    @DoNotStrip
-    get() {
-      return Func_void_VideoPlayerStatus_java(onStatusChange)
-    }
-    @Keep
-    @DoNotStrip
-    set(value) {
-      onStatusChange = value
-    }
 
   // Methods
+  abstract fun addOnAudioBecomingNoisyListener(listener: () -> Unit): ListenerSubscription
   
+  @DoNotStrip
+  @Keep
+  private fun addOnAudioBecomingNoisyListener_cxx(listener: Func_void): ListenerSubscription {
+    val __result = addOnAudioBecomingNoisyListener(listener)
+    return __result
+  }
+  
+  abstract fun addOnAudioFocusChangeListener(listener: (hasAudioFocus: Boolean) -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnAudioFocusChangeListener_cxx(listener: Func_void_bool): ListenerSubscription {
+    val __result = addOnAudioFocusChangeListener(listener)
+    return __result
+  }
+  
+  abstract fun addOnBandwidthUpdateListener(listener: (data: BandwidthData) -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnBandwidthUpdateListener_cxx(listener: Func_void_BandwidthData): ListenerSubscription {
+    val __result = addOnBandwidthUpdateListener(listener)
+    return __result
+  }
+  
+  abstract fun addOnBufferListener(listener: (buffering: Boolean) -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnBufferListener_cxx(listener: Func_void_bool): ListenerSubscription {
+    val __result = addOnBufferListener(listener)
+    return __result
+  }
+  
+  abstract fun addOnControlsVisibleChangeListener(listener: (visible: Boolean) -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnControlsVisibleChangeListener_cxx(listener: Func_void_bool): ListenerSubscription {
+    val __result = addOnControlsVisibleChangeListener(listener)
+    return __result
+  }
+  
+  abstract fun addOnEndListener(listener: () -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnEndListener_cxx(listener: Func_void): ListenerSubscription {
+    val __result = addOnEndListener(listener)
+    return __result
+  }
+  
+  abstract fun addOnExternalPlaybackChangeListener(listener: (externalPlaybackActive: Boolean) -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnExternalPlaybackChangeListener_cxx(listener: Func_void_bool): ListenerSubscription {
+    val __result = addOnExternalPlaybackChangeListener(listener)
+    return __result
+  }
+  
+  abstract fun addOnLoadListener(listener: (data: onLoadData) -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnLoadListener_cxx(listener: Func_void_onLoadData): ListenerSubscription {
+    val __result = addOnLoadListener(listener)
+    return __result
+  }
+  
+  abstract fun addOnLoadStartListener(listener: (data: onLoadStartData) -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnLoadStartListener_cxx(listener: Func_void_onLoadStartData): ListenerSubscription {
+    val __result = addOnLoadStartListener(listener)
+    return __result
+  }
+  
+  abstract fun addOnPlaybackStateChangeListener(listener: (data: onPlaybackStateChangeData) -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnPlaybackStateChangeListener_cxx(listener: Func_void_onPlaybackStateChangeData): ListenerSubscription {
+    val __result = addOnPlaybackStateChangeListener(listener)
+    return __result
+  }
+  
+  abstract fun addOnPlaybackRateChangeListener(listener: (rate: Double) -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnPlaybackRateChangeListener_cxx(listener: Func_void_double): ListenerSubscription {
+    val __result = addOnPlaybackRateChangeListener(listener)
+    return __result
+  }
+  
+  abstract fun addOnProgressListener(listener: (data: onProgressData) -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnProgressListener_cxx(listener: Func_void_onProgressData): ListenerSubscription {
+    val __result = addOnProgressListener(listener)
+    return __result
+  }
+  
+  abstract fun addOnReadyToDisplayListener(listener: () -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnReadyToDisplayListener_cxx(listener: Func_void): ListenerSubscription {
+    val __result = addOnReadyToDisplayListener(listener)
+    return __result
+  }
+  
+  abstract fun addOnSeekListener(listener: (position: Double) -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnSeekListener_cxx(listener: Func_void_double): ListenerSubscription {
+    val __result = addOnSeekListener(listener)
+    return __result
+  }
+  
+  abstract fun addOnStatusChangeListener(listener: (status: VideoPlayerStatus) -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnStatusChangeListener_cxx(listener: Func_void_VideoPlayerStatus): ListenerSubscription {
+    val __result = addOnStatusChangeListener(listener)
+    return __result
+  }
+  
+  abstract fun addOnTimedMetadataListener(listener: (data: TimedMetadata) -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnTimedMetadataListener_cxx(listener: Func_void_TimedMetadata): ListenerSubscription {
+    val __result = addOnTimedMetadataListener(listener)
+    return __result
+  }
+  
+  abstract fun addOnTextTrackDataChangedListener(listener: (data: Array<String>) -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnTextTrackDataChangedListener_cxx(listener: Func_void_std__vector_std__string_): ListenerSubscription {
+    val __result = addOnTextTrackDataChangedListener(listener)
+    return __result
+  }
+  
+  abstract fun addOnTrackChangeListener(listener: (track: Variant_NullType_TextTrack?) -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnTrackChangeListener_cxx(listener: Func_void_std__optional_std__variant_nitro__NullType__TextTrack__): ListenerSubscription {
+    val __result = addOnTrackChangeListener(listener)
+    return __result
+  }
+  
+  abstract fun addOnVolumeChangeListener(listener: (data: onVolumeChangeData) -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnVolumeChangeListener_cxx(listener: Func_void_onVolumeChangeData): ListenerSubscription {
+    val __result = addOnVolumeChangeListener(listener)
+    return __result
+  }
+  
+  @DoNotStrip
+  @Keep
+  abstract fun clearAllListeners(): Unit
 
   private external fun initHybrid(): HybridData
 

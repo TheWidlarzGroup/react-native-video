@@ -10,7 +10,9 @@ package com.margelo.nitro.video
 import androidx.annotation.Keep
 import com.facebook.jni.HybridData
 import com.facebook.proguard.annotations.DoNotStrip
-import com.margelo.nitro.core.*
+import com.margelo.nitro.core.Promise
+import com.margelo.nitro.core.NullType
+import com.margelo.nitro.core.HybridObject
 
 /**
  * A Kotlin class representing the VideoPlayer HybridObject.
@@ -34,6 +36,11 @@ abstract class HybridVideoPlayerSpec: HybridObject() {
   override fun updateNative(hybridData: HybridData) {
     mHybridData = hybridData
     super.updateNative(hybridData)
+  }
+
+  // Default implementation of `HybridObject.toString()`
+  override fun toString(): String {
+    return "[HybridObject VideoPlayer]"
   }
 
   // Properties
@@ -124,7 +131,7 @@ abstract class HybridVideoPlayerSpec: HybridObject() {
   // Methods
   @DoNotStrip
   @Keep
-  abstract fun replaceSourceAsync(source: HybridVideoPlayerSourceSpec?): Promise<Unit>
+  abstract fun replaceSourceAsync(source: Variant_NullType_HybridVideoPlayerSourceSpec?): Promise<Unit>
   
   @DoNotStrip
   @Keep
@@ -132,7 +139,7 @@ abstract class HybridVideoPlayerSpec: HybridObject() {
   
   @DoNotStrip
   @Keep
-  abstract fun selectTextTrack(textTrack: TextTrack?): Unit
+  abstract fun selectTextTrack(textTrack: Variant_NullType_TextTrack?): Unit
   
   @DoNotStrip
   @Keep
