@@ -13,6 +13,8 @@ namespace margelo::nitro::video { class HybridVideoPlayerSpec; }
 namespace margelo::nitro::video { enum class ResizeMode; }
 // Forward declaration of `SurfaceType` to properly resolve imports.
 namespace margelo::nitro::video { enum class SurfaceType; }
+// Forward declaration of `ListenerSubscription` to properly resolve imports.
+namespace margelo::nitro::video { struct ListenerSubscription; }
 
 #include <memory>
 #include "HybridVideoPlayerSpec.hpp"
@@ -22,10 +24,12 @@ namespace margelo::nitro::video { enum class SurfaceType; }
 #include "JResizeMode.hpp"
 #include "SurfaceType.hpp"
 #include "JSurfaceType.hpp"
+#include "ListenerSubscription.hpp"
+#include "JListenerSubscription.hpp"
 #include <functional>
-#include "JFunc_void_bool.hpp"
-#include <NitroModules/JNICallable.hpp>
 #include "JFunc_void.hpp"
+#include <NitroModules/JNICallable.hpp>
+#include "JFunc_void_bool.hpp"
 
 namespace margelo::nitro::video {
 
@@ -119,108 +123,6 @@ namespace margelo::nitro::video {
     static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JSurfaceType> /* surfaceType */)>("setSurfaceType");
     method(_javaPart, JSurfaceType::fromCpp(surfaceType));
   }
-  std::optional<std::function<void(bool /* isInPictureInPicture */)>> JHybridVideoViewViewManagerSpec::getOnPictureInPictureChange() {
-    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JFunc_void_bool::javaobject>()>("getOnPictureInPictureChange_cxx");
-    auto __result = method(_javaPart);
-    return __result != nullptr ? std::make_optional([&]() -> std::function<void(bool /* isInPictureInPicture */)> {
-      if (__result->isInstanceOf(JFunc_void_bool_cxx::javaClassStatic())) [[likely]] {
-        auto downcast = jni::static_ref_cast<JFunc_void_bool_cxx::javaobject>(__result);
-        return downcast->cthis()->getFunction();
-      } else {
-        auto __resultRef = jni::make_global(__result);
-        return JNICallable<JFunc_void_bool, void(bool)>(std::move(__resultRef));
-      }
-    }()) : std::nullopt;
-  }
-  void JHybridVideoViewViewManagerSpec::setOnPictureInPictureChange(const std::optional<std::function<void(bool /* isInPictureInPicture */)>>& onPictureInPictureChange) {
-    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_bool::javaobject> /* onPictureInPictureChange */)>("setOnPictureInPictureChange_cxx");
-    method(_javaPart, onPictureInPictureChange.has_value() ? JFunc_void_bool_cxx::fromCpp(onPictureInPictureChange.value()) : nullptr);
-  }
-  std::optional<std::function<void(bool /* fullscreen */)>> JHybridVideoViewViewManagerSpec::getOnFullscreenChange() {
-    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JFunc_void_bool::javaobject>()>("getOnFullscreenChange_cxx");
-    auto __result = method(_javaPart);
-    return __result != nullptr ? std::make_optional([&]() -> std::function<void(bool /* fullscreen */)> {
-      if (__result->isInstanceOf(JFunc_void_bool_cxx::javaClassStatic())) [[likely]] {
-        auto downcast = jni::static_ref_cast<JFunc_void_bool_cxx::javaobject>(__result);
-        return downcast->cthis()->getFunction();
-      } else {
-        auto __resultRef = jni::make_global(__result);
-        return JNICallable<JFunc_void_bool, void(bool)>(std::move(__resultRef));
-      }
-    }()) : std::nullopt;
-  }
-  void JHybridVideoViewViewManagerSpec::setOnFullscreenChange(const std::optional<std::function<void(bool /* fullscreen */)>>& onFullscreenChange) {
-    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_bool::javaobject> /* onFullscreenChange */)>("setOnFullscreenChange_cxx");
-    method(_javaPart, onFullscreenChange.has_value() ? JFunc_void_bool_cxx::fromCpp(onFullscreenChange.value()) : nullptr);
-  }
-  std::optional<std::function<void()>> JHybridVideoViewViewManagerSpec::getWillEnterFullscreen() {
-    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JFunc_void::javaobject>()>("getWillEnterFullscreen_cxx");
-    auto __result = method(_javaPart);
-    return __result != nullptr ? std::make_optional([&]() -> std::function<void()> {
-      if (__result->isInstanceOf(JFunc_void_cxx::javaClassStatic())) [[likely]] {
-        auto downcast = jni::static_ref_cast<JFunc_void_cxx::javaobject>(__result);
-        return downcast->cthis()->getFunction();
-      } else {
-        auto __resultRef = jni::make_global(__result);
-        return JNICallable<JFunc_void, void()>(std::move(__resultRef));
-      }
-    }()) : std::nullopt;
-  }
-  void JHybridVideoViewViewManagerSpec::setWillEnterFullscreen(const std::optional<std::function<void()>>& willEnterFullscreen) {
-    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void::javaobject> /* willEnterFullscreen */)>("setWillEnterFullscreen_cxx");
-    method(_javaPart, willEnterFullscreen.has_value() ? JFunc_void_cxx::fromCpp(willEnterFullscreen.value()) : nullptr);
-  }
-  std::optional<std::function<void()>> JHybridVideoViewViewManagerSpec::getWillExitFullscreen() {
-    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JFunc_void::javaobject>()>("getWillExitFullscreen_cxx");
-    auto __result = method(_javaPart);
-    return __result != nullptr ? std::make_optional([&]() -> std::function<void()> {
-      if (__result->isInstanceOf(JFunc_void_cxx::javaClassStatic())) [[likely]] {
-        auto downcast = jni::static_ref_cast<JFunc_void_cxx::javaobject>(__result);
-        return downcast->cthis()->getFunction();
-      } else {
-        auto __resultRef = jni::make_global(__result);
-        return JNICallable<JFunc_void, void()>(std::move(__resultRef));
-      }
-    }()) : std::nullopt;
-  }
-  void JHybridVideoViewViewManagerSpec::setWillExitFullscreen(const std::optional<std::function<void()>>& willExitFullscreen) {
-    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void::javaobject> /* willExitFullscreen */)>("setWillExitFullscreen_cxx");
-    method(_javaPart, willExitFullscreen.has_value() ? JFunc_void_cxx::fromCpp(willExitFullscreen.value()) : nullptr);
-  }
-  std::optional<std::function<void()>> JHybridVideoViewViewManagerSpec::getWillEnterPictureInPicture() {
-    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JFunc_void::javaobject>()>("getWillEnterPictureInPicture_cxx");
-    auto __result = method(_javaPart);
-    return __result != nullptr ? std::make_optional([&]() -> std::function<void()> {
-      if (__result->isInstanceOf(JFunc_void_cxx::javaClassStatic())) [[likely]] {
-        auto downcast = jni::static_ref_cast<JFunc_void_cxx::javaobject>(__result);
-        return downcast->cthis()->getFunction();
-      } else {
-        auto __resultRef = jni::make_global(__result);
-        return JNICallable<JFunc_void, void()>(std::move(__resultRef));
-      }
-    }()) : std::nullopt;
-  }
-  void JHybridVideoViewViewManagerSpec::setWillEnterPictureInPicture(const std::optional<std::function<void()>>& willEnterPictureInPicture) {
-    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void::javaobject> /* willEnterPictureInPicture */)>("setWillEnterPictureInPicture_cxx");
-    method(_javaPart, willEnterPictureInPicture.has_value() ? JFunc_void_cxx::fromCpp(willEnterPictureInPicture.value()) : nullptr);
-  }
-  std::optional<std::function<void()>> JHybridVideoViewViewManagerSpec::getWillExitPictureInPicture() {
-    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JFunc_void::javaobject>()>("getWillExitPictureInPicture_cxx");
-    auto __result = method(_javaPart);
-    return __result != nullptr ? std::make_optional([&]() -> std::function<void()> {
-      if (__result->isInstanceOf(JFunc_void_cxx::javaClassStatic())) [[likely]] {
-        auto downcast = jni::static_ref_cast<JFunc_void_cxx::javaobject>(__result);
-        return downcast->cthis()->getFunction();
-      } else {
-        auto __resultRef = jni::make_global(__result);
-        return JNICallable<JFunc_void, void()>(std::move(__resultRef));
-      }
-    }()) : std::nullopt;
-  }
-  void JHybridVideoViewViewManagerSpec::setWillExitPictureInPicture(const std::optional<std::function<void()>>& willExitPictureInPicture) {
-    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void::javaobject> /* willExitPictureInPicture */)>("setWillExitPictureInPicture_cxx");
-    method(_javaPart, willExitPictureInPicture.has_value() ? JFunc_void_cxx::fromCpp(willExitPictureInPicture.value()) : nullptr);
-  }
 
   // Methods
   void JHybridVideoViewViewManagerSpec::enterFullscreen() {
@@ -243,6 +145,40 @@ namespace margelo::nitro::video {
     static const auto method = javaClassStatic()->getMethod<jboolean()>("canEnterPictureInPicture");
     auto __result = method(_javaPart);
     return static_cast<bool>(__result);
+  }
+  ListenerSubscription JHybridVideoViewViewManagerSpec::addOnPictureInPictureChangeListener(const std::function<void(bool /* isInPictureInPicture */)>& listener) {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void_bool::javaobject> /* listener */)>("addOnPictureInPictureChangeListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_bool_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoViewViewManagerSpec::addOnFullscreenChangeListener(const std::function<void(bool /* fullscreen */)>& listener) {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void_bool::javaobject> /* listener */)>("addOnFullscreenChangeListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_bool_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoViewViewManagerSpec::addWillEnterFullscreenListener(const std::function<void()>& listener) {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void::javaobject> /* listener */)>("addWillEnterFullscreenListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoViewViewManagerSpec::addWillExitFullscreenListener(const std::function<void()>& listener) {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void::javaobject> /* listener */)>("addWillExitFullscreenListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoViewViewManagerSpec::addWillEnterPictureInPictureListener(const std::function<void()>& listener) {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void::javaobject> /* listener */)>("addWillEnterPictureInPictureListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoViewViewManagerSpec::addWillExitPictureInPictureListener(const std::function<void()>& listener) {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void::javaobject> /* listener */)>("addWillExitPictureInPictureListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  void JHybridVideoViewViewManagerSpec::clearAllListeners() {
+    static const auto method = javaClassStatic()->getMethod<void()>("clearAllListeners");
+    method(_javaPart);
   }
 
 } // namespace margelo::nitro::video

@@ -83,90 +83,6 @@ abstract class HybridVideoViewViewManagerSpec: HybridObject() {
   @set:DoNotStrip
   @set:Keep
   abstract var surfaceType: SurfaceType
-  
-  abstract var onPictureInPictureChange: ((isInPictureInPicture: Boolean) -> Unit)?
-  
-  private var onPictureInPictureChange_cxx: Func_void_bool?
-    @Keep
-    @DoNotStrip
-    get() {
-      return onPictureInPictureChange?.let { Func_void_bool_java(it) }
-    }
-    @Keep
-    @DoNotStrip
-    set(value) {
-      onPictureInPictureChange = value?.let { it }
-    }
-  
-  abstract var onFullscreenChange: ((fullscreen: Boolean) -> Unit)?
-  
-  private var onFullscreenChange_cxx: Func_void_bool?
-    @Keep
-    @DoNotStrip
-    get() {
-      return onFullscreenChange?.let { Func_void_bool_java(it) }
-    }
-    @Keep
-    @DoNotStrip
-    set(value) {
-      onFullscreenChange = value?.let { it }
-    }
-  
-  abstract var willEnterFullscreen: (() -> Unit)?
-  
-  private var willEnterFullscreen_cxx: Func_void?
-    @Keep
-    @DoNotStrip
-    get() {
-      return willEnterFullscreen?.let { Func_void_java(it) }
-    }
-    @Keep
-    @DoNotStrip
-    set(value) {
-      willEnterFullscreen = value?.let { it }
-    }
-  
-  abstract var willExitFullscreen: (() -> Unit)?
-  
-  private var willExitFullscreen_cxx: Func_void?
-    @Keep
-    @DoNotStrip
-    get() {
-      return willExitFullscreen?.let { Func_void_java(it) }
-    }
-    @Keep
-    @DoNotStrip
-    set(value) {
-      willExitFullscreen = value?.let { it }
-    }
-  
-  abstract var willEnterPictureInPicture: (() -> Unit)?
-  
-  private var willEnterPictureInPicture_cxx: Func_void?
-    @Keep
-    @DoNotStrip
-    get() {
-      return willEnterPictureInPicture?.let { Func_void_java(it) }
-    }
-    @Keep
-    @DoNotStrip
-    set(value) {
-      willEnterPictureInPicture = value?.let { it }
-    }
-  
-  abstract var willExitPictureInPicture: (() -> Unit)?
-  
-  private var willExitPictureInPicture_cxx: Func_void?
-    @Keep
-    @DoNotStrip
-    get() {
-      return willExitPictureInPicture?.let { Func_void_java(it) }
-    }
-    @Keep
-    @DoNotStrip
-    set(value) {
-      willExitPictureInPicture = value?.let { it }
-    }
 
   // Methods
   @DoNotStrip
@@ -188,6 +104,64 @@ abstract class HybridVideoViewViewManagerSpec: HybridObject() {
   @DoNotStrip
   @Keep
   abstract fun canEnterPictureInPicture(): Boolean
+  
+  abstract fun addOnPictureInPictureChangeListener(listener: (isInPictureInPicture: Boolean) -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnPictureInPictureChangeListener_cxx(listener: Func_void_bool): ListenerSubscription {
+    val __result = addOnPictureInPictureChangeListener(listener)
+    return __result
+  }
+  
+  abstract fun addOnFullscreenChangeListener(listener: (fullscreen: Boolean) -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnFullscreenChangeListener_cxx(listener: Func_void_bool): ListenerSubscription {
+    val __result = addOnFullscreenChangeListener(listener)
+    return __result
+  }
+  
+  abstract fun addWillEnterFullscreenListener(listener: () -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addWillEnterFullscreenListener_cxx(listener: Func_void): ListenerSubscription {
+    val __result = addWillEnterFullscreenListener(listener)
+    return __result
+  }
+  
+  abstract fun addWillExitFullscreenListener(listener: () -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addWillExitFullscreenListener_cxx(listener: Func_void): ListenerSubscription {
+    val __result = addWillExitFullscreenListener(listener)
+    return __result
+  }
+  
+  abstract fun addWillEnterPictureInPictureListener(listener: () -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addWillEnterPictureInPictureListener_cxx(listener: Func_void): ListenerSubscription {
+    val __result = addWillEnterPictureInPictureListener(listener)
+    return __result
+  }
+  
+  abstract fun addWillExitPictureInPictureListener(listener: () -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addWillExitPictureInPictureListener_cxx(listener: Func_void): ListenerSubscription {
+    val __result = addWillExitPictureInPictureListener(listener)
+    return __result
+  }
+  
+  @DoNotStrip
+  @Keep
+  abstract fun clearAllListeners(): Unit
 
   private external fun initHybrid(): HybridData
 

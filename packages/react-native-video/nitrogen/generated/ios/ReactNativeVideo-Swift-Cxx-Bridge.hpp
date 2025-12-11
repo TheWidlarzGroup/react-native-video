@@ -1052,51 +1052,6 @@ namespace margelo::nitro::video::bridge::swift {
     return *optional;
   }
   
-  // pragma MARK: std::optional<std::function<void(bool /* isInPictureInPicture */)>>
-  /**
-   * Specialized version of `std::optional<std::function<void(bool / * isInPictureInPicture * /)>>`.
-   */
-  using std__optional_std__function_void_bool____isInPictureInPicture______ = std::optional<std::function<void(bool /* isInPictureInPicture */)>>;
-  inline std::optional<std::function<void(bool /* isInPictureInPicture */)>> create_std__optional_std__function_void_bool____isInPictureInPicture______(const std::function<void(bool /* isInPictureInPicture */)>& value) noexcept {
-    return std::optional<std::function<void(bool /* isInPictureInPicture */)>>(value);
-  }
-  inline bool has_value_std__optional_std__function_void_bool____isInPictureInPicture______(const std::optional<std::function<void(bool /* isInPictureInPicture */)>>& optional) noexcept {
-    return optional.has_value();
-  }
-  inline std::function<void(bool /* isInPictureInPicture */)> get_std__optional_std__function_void_bool____isInPictureInPicture______(const std::optional<std::function<void(bool /* isInPictureInPicture */)>>& optional) noexcept {
-    return *optional;
-  }
-  
-  // pragma MARK: std::optional<std::function<void(bool /* fullscreen */)>>
-  /**
-   * Specialized version of `std::optional<std::function<void(bool / * fullscreen * /)>>`.
-   */
-  using std__optional_std__function_void_bool____fullscreen______ = std::optional<std::function<void(bool /* fullscreen */)>>;
-  inline std::optional<std::function<void(bool /* fullscreen */)>> create_std__optional_std__function_void_bool____fullscreen______(const std::function<void(bool /* fullscreen */)>& value) noexcept {
-    return std::optional<std::function<void(bool /* fullscreen */)>>(value);
-  }
-  inline bool has_value_std__optional_std__function_void_bool____fullscreen______(const std::optional<std::function<void(bool /* fullscreen */)>>& optional) noexcept {
-    return optional.has_value();
-  }
-  inline std::function<void(bool /* fullscreen */)> get_std__optional_std__function_void_bool____fullscreen______(const std::optional<std::function<void(bool /* fullscreen */)>>& optional) noexcept {
-    return *optional;
-  }
-  
-  // pragma MARK: std::optional<std::function<void()>>
-  /**
-   * Specialized version of `std::optional<std::function<void()>>`.
-   */
-  using std__optional_std__function_void____ = std::optional<std::function<void()>>;
-  inline std::optional<std::function<void()>> create_std__optional_std__function_void____(const std::function<void()>& value) noexcept {
-    return std::optional<std::function<void()>>(value);
-  }
-  inline bool has_value_std__optional_std__function_void____(const std::optional<std::function<void()>>& optional) noexcept {
-    return optional.has_value();
-  }
-  inline std::function<void()> get_std__optional_std__function_void____(const std::optional<std::function<void()>>& optional) noexcept {
-    return *optional;
-  }
-  
   // pragma MARK: std::shared_ptr<HybridVideoViewViewManagerSpec>
   /**
    * Specialized version of `std::shared_ptr<HybridVideoViewViewManagerSpec>`.

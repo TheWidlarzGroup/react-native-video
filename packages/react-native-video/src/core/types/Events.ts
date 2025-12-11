@@ -266,3 +266,13 @@ export const ALL_PLAYER_EVENTS: (keyof AllPlayerEvents)[] =
     'onVolumeChange',
     'onStatusChange'
   );
+
+export const ALL_VIEW_EVENTS: (keyof VideoViewEvents)[] =
+  allKeysOf<VideoViewEvents>()(
+    'onPictureInPictureChange',
+    'onFullscreenChange',
+    'willEnterFullscreen',
+    'willExitFullscreen',
+    'willEnterPictureInPicture',
+    'willExitPictureInPicture'
+  );
