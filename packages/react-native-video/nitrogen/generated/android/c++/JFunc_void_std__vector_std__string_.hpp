@@ -13,13 +13,14 @@
 #include <string>
 #include <vector>
 #include <functional>
+#include <NitroModules/JNICallable.hpp>
 
 namespace margelo::nitro::video {
 
   using namespace facebook;
 
   /**
-   * Represents the Java/Kotlin callback `(texts: Array<String>) -> Unit`.
+   * Represents the Java/Kotlin callback `(data: Array<String>) -> Unit`.
    * This can be passed around between C++ and Java/Kotlin.
    */
   struct JFunc_void_std__vector_std__string_: public jni::JavaClass<JFunc_void_std__vector_std__string_> {
@@ -30,14 +31,15 @@ namespace margelo::nitro::video {
     /**
      * Invokes the function this `JFunc_void_std__vector_std__string_` instance holds through JNI.
      */
-    void invoke(const std::vector<std::string>& texts) const {
-      static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<jni::JArrayClass<jni::JString>> /* texts */)>("invoke");
+    void invoke(const std::vector<std::string>& data) const {
+      static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<jni::JArrayClass<jni::JString>> /* data */)>("invoke");
       method(self(), [&]() {
-        size_t __size = texts.size();
+        size_t __size = data.size();
         jni::local_ref<jni::JArrayClass<jni::JString>> __array = jni::JArrayClass<jni::JString>::newArray(__size);
         for (size_t __i = 0; __i < __size; __i++) {
-          const auto& __element = texts[__i];
-          __array->setElement(__i, *jni::make_jstring(__element));
+          const auto& __element = data[__i];
+          auto __elementJni = jni::make_jstring(__element);
+          __array->setElement(__i, *__elementJni);
         }
         return __array;
       }());
@@ -47,9 +49,9 @@ namespace margelo::nitro::video {
   /**
    * An implementation of Func_void_std__vector_std__string_ that is backed by a C++ implementation (using `std::function<...>`)
    */
-  struct JFunc_void_std__vector_std__string__cxx final: public jni::HybridClass<JFunc_void_std__vector_std__string__cxx, JFunc_void_std__vector_std__string_> {
+  class JFunc_void_std__vector_std__string__cxx final: public jni::HybridClass<JFunc_void_std__vector_std__string__cxx, JFunc_void_std__vector_std__string_> {
   public:
-    static jni::local_ref<JFunc_void_std__vector_std__string_::javaobject> fromCpp(const std::function<void(const std::vector<std::string>& /* texts */)>& func) {
+    static jni::local_ref<JFunc_void_std__vector_std__string_::javaobject> fromCpp(const std::function<void(const std::vector<std::string>& /* data */)>& func) {
       return JFunc_void_std__vector_std__string__cxx::newObjectCxxArgs(func);
     }
 
@@ -57,13 +59,13 @@ namespace margelo::nitro::video {
     /**
      * Invokes the C++ `std::function<...>` this `JFunc_void_std__vector_std__string__cxx` instance holds.
      */
-    void invoke_cxx(jni::alias_ref<jni::JArrayClass<jni::JString>> texts) {
+    void invoke_cxx(jni::alias_ref<jni::JArrayClass<jni::JString>> data) {
       _func([&]() {
-              size_t __size = texts->size();
+              size_t __size = data->size();
               std::vector<std::string> __vector;
               __vector.reserve(__size);
               for (size_t __i = 0; __i < __size; __i++) {
-                auto __element = texts->getElement(__i);
+                auto __element = data->getElement(__i);
                 __vector.push_back(__element->toStdString());
               }
               return __vector;
@@ -72,7 +74,7 @@ namespace margelo::nitro::video {
 
   public:
     [[nodiscard]]
-    inline const std::function<void(const std::vector<std::string>& /* texts */)>& getFunction() const {
+    inline const std::function<void(const std::vector<std::string>& /* data */)>& getFunction() const {
       return _func;
     }
 
@@ -83,11 +85,11 @@ namespace margelo::nitro::video {
     }
 
   private:
-    explicit JFunc_void_std__vector_std__string__cxx(const std::function<void(const std::vector<std::string>& /* texts */)>& func): _func(func) { }
+    explicit JFunc_void_std__vector_std__string__cxx(const std::function<void(const std::vector<std::string>& /* data */)>& func): _func(func) { }
 
   private:
     friend HybridBase;
-    std::function<void(const std::vector<std::string>& /* texts */)> _func;
+    std::function<void(const std::vector<std::string>& /* data */)> _func;
   };
 
 } // namespace margelo::nitro::video

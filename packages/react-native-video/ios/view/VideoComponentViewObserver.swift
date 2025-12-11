@@ -28,31 +28,33 @@ final class VideoViewDelegate: NSObject, VideoComponentViewDelegate {
   }
   
   func onPictureInPictureChange(_ isActive: Bool) {
-    viewManager?.onPictureInPictureChange?(isActive)
+    viewManager?.onPictureInPictureChange(isActive)
   }
   
   func onFullscreenChange(_ isActive: Bool) {
-    viewManager?.onFullscreenChange?(isActive)
+    viewManager?.onFullscreenChange(isActive)
   }
   
   func willEnterFullscreen() {
-    viewManager?.willEnterFullscreen?()
+    viewManager?.willEnterFullscreen()
   }
   
   func willExitFullscreen() {
-    viewManager?.willExitFullscreen?()
+    viewManager?.willExitFullscreen()
   }
   
   func willEnterPictureInPicture() {
-    viewManager?.willEnterPictureInPicture?()
+    viewManager?.willEnterPictureInPicture()
   }
   
   func willExitPictureInPicture() {
-    viewManager?.willExitPictureInPicture?()
+    viewManager?.willExitPictureInPicture()
   }
   
   func onReadyToDisplay() {
-    viewManager?.player?.eventEmitter.onReadyToDisplay()
+    if let player = viewManager?.player as? HybridVideoPlayer {
+      player._eventEmitter?.onReadyToDisplay()
+    }
   }
 }
 

@@ -30,6 +30,8 @@ namespace margelo::nitro::video { class HybridVideoViewViewManagerFactorySpec; }
 namespace margelo::nitro::video { class HybridVideoViewViewManagerSpec; }
 // Forward declaration of `IgnoreSilentSwitchMode` to properly resolve imports.
 namespace margelo::nitro::video { enum class IgnoreSilentSwitchMode; }
+// Forward declaration of `ListenerSubscription` to properly resolve imports.
+namespace margelo::nitro::video { struct ListenerSubscription; }
 // Forward declaration of `LivePlaybackParams` to properly resolve imports.
 namespace margelo::nitro::video { struct LivePlaybackParams; }
 // Forward declaration of `MixAudioMode` to properly resolve imports.
@@ -87,6 +89,7 @@ namespace margelo::nitro::video { struct onVolumeChangeData; }
 #include "HybridVideoViewViewManagerFactorySpec.hpp"
 #include "HybridVideoViewViewManagerSpec.hpp"
 #include "IgnoreSilentSwitchMode.hpp"
+#include "ListenerSubscription.hpp"
 #include "LivePlaybackParams.hpp"
 #include "MixAudioMode.hpp"
 #include "NativeDrmParams.hpp"
@@ -109,6 +112,7 @@ namespace margelo::nitro::video { struct onVolumeChangeData; }
 #include "onPlaybackStateChangeData.hpp"
 #include "onProgressData.hpp"
 #include "onVolumeChangeData.hpp"
+#include <NitroModules/Null.hpp>
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/Result.hpp>
 #include <exception>
@@ -117,6 +121,7 @@ namespace margelo::nitro::video { struct onVolumeChangeData; }
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <variant>
 #include <vector>
 
 // C++ helpers for Swift

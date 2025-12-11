@@ -10,12 +10,11 @@ package com.margelo.nitro.video
 import androidx.annotation.Keep
 import com.facebook.jni.HybridData
 import com.facebook.proguard.annotations.DoNotStrip
-import com.margelo.nitro.core.*
 import dalvik.annotation.optimization.FastNative
 
 
 /**
- * Represents the JavaScript callback `(metadata: struct) => void`.
+ * Represents the JavaScript callback `(data: struct) => void`.
  * This can be either implemented in C++ (in which case it might be a callback coming from JS),
  * or in Kotlin/Java (in which case it is a native callback).
  */
@@ -29,11 +28,11 @@ fun interface Func_void_TimedMetadata: (TimedMetadata) -> Unit {
    */
   @DoNotStrip
   @Keep
-  override fun invoke(metadata: TimedMetadata): Unit
+  override fun invoke(data: TimedMetadata): Unit
 }
 
 /**
- * Represents the JavaScript callback `(metadata: struct) => void`.
+ * Represents the JavaScript callback `(data: struct) => void`.
  * This is implemented in C++, via a `std::function<...>`.
  * The callback might be coming from JS.
  */
@@ -57,15 +56,15 @@ class Func_void_TimedMetadata_cxx: Func_void_TimedMetadata {
 
   @DoNotStrip
   @Keep
-  override fun invoke(metadata: TimedMetadata): Unit
-    = invoke_cxx(metadata)
+  override fun invoke(data: TimedMetadata): Unit
+    = invoke_cxx(data)
 
   @FastNative
-  private external fun invoke_cxx(metadata: TimedMetadata): Unit
+  private external fun invoke_cxx(data: TimedMetadata): Unit
 }
 
 /**
- * Represents the JavaScript callback `(metadata: struct) => void`.
+ * Represents the JavaScript callback `(data: struct) => void`.
  * This is implemented in Java/Kotlin, via a `(TimedMetadata) -> Unit`.
  * The callback is always coming from native.
  */
@@ -75,7 +74,7 @@ class Func_void_TimedMetadata_cxx: Func_void_TimedMetadata {
 class Func_void_TimedMetadata_java(private val function: (TimedMetadata) -> Unit): Func_void_TimedMetadata {
   @DoNotStrip
   @Keep
-  override fun invoke(metadata: TimedMetadata): Unit {
-    return this.function(metadata)
+  override fun invoke(data: TimedMetadata): Unit {
+    return this.function(data)
   }
 }

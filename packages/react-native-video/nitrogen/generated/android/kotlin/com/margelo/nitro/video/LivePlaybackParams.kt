@@ -9,7 +9,6 @@ package com.margelo.nitro.video
 
 import androidx.annotation.Keep
 import com.facebook.proguard.annotations.DoNotStrip
-import com.margelo.nitro.core.*
 
 
 /**
@@ -34,6 +33,8 @@ data class LivePlaybackParams(
   @Keep
   val targetOffsetMs: Double?
 ) {
+  /* primary constructor */
+
   private companion object {
     /**
      * Constructor called from C++

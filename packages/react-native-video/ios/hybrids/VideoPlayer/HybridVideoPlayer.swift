@@ -10,6 +10,7 @@ import Foundation
 import NitroModules
 
 class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
+
   /**
    * Player instance for video playback
    */
@@ -70,12 +71,15 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   var status: VideoPlayerStatus = .idle {
     didSet {
       if status != oldValue {
-        eventEmitter.onStatusChange(status)
+        _eventEmitter?.onStatusChange(status)
       }
     }
   }
 
   var eventEmitter: HybridVideoPlayerEventEmitterSpec
+  var _eventEmitter: HybridVideoPlayerEventEmitter? {
+    return eventEmitter as? HybridVideoPlayerEventEmitter
+  }
 
   var volume: Double {
     set {
@@ -89,7 +93,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   var muted: Bool {
     set {
       player.isMuted = newValue
-      eventEmitter.onVolumeChange(
+      _eventEmitter?.onVolumeChange(
         onVolumeChangeData(
           volume: Double(player.volume),
           muted: muted
@@ -103,7 +107,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
 
   var currentTime: Double {
     set {
-      eventEmitter.onSeek(newValue)
+      _eventEmitter?.onSeek(newValue)
       player.seek(
         to: CMTime(seconds: newValue, preferredTimescale: 1000),
         toleranceBefore: .zero,
@@ -281,46 +285,65 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     currentTime = time
   }
 
-  func replaceSourceAsync(source: (any HybridVideoPlayerSourceSpec)?) throws
+  func replaceSourceAsync(
+    source: Variant_NullType__any_HybridVideoPlayerSourceSpec_?
+  ) throws
     -> Promise<Void>
   {
     let promise = Promise<Void>()
 
+    /**
+     @frozen
+     public indirect enum Variant_NullType__any_HybridVideoPlayerSourceSpec_ {
+       case first(NullType)
+       case second((any HybridVideoPlayerSourceSpec))
+     }
+     */
+
+    // if source is nil, release player
+    // if source is not NullType, set source
     guard let source else {
       release()
       promise.resolve(withResult: ())
       return promise
     }
 
-    Task.detached(priority: .userInitiated) { [weak self] in
-      guard let self else {
-        promise.reject(
-          withError: LibraryError.deallocated(objectName: "HybridVideoPlayer")
-            .error()
-        )
-        return
-      }
-
-      await self.sourceLoader.cancel()
-
-      if let oldSource = self.source as? HybridVideoPlayerSource {
-        oldSource.releaseAsset()
-      }
-
-      self.source = source
-
-      do {
-        self.playerItem = try await self.sourceLoader.load {
-          try await self.initializePlayerItem()
+    switch source {
+    case .first(_):
+      release()
+      promise.resolve(withResult: ())
+      return promise
+    case .second(let newSource):
+      Task.detached(priority: .userInitiated) { [weak self] in
+        guard let self else {
+          promise.reject(
+            withError: LibraryError.deallocated(objectName: "HybridVideoPlayer")
+              .error()
+          )
+          return
         }
-        self.player.replaceCurrentItem(with: self.playerItem)
-        NowPlayingInfoCenterManager.shared.updateNowPlayingInfo()
-        promise.resolve(withResult: ())
-      } catch {
-        if error is CancellationError {
-          promise.reject(withError: PlayerError.cancelled.error())
-        } else {
-          promise.reject(withError: error)
+
+        await self.sourceLoader.cancel()
+
+        if let oldSource = self.source as? HybridVideoPlayerSource {
+          oldSource.releaseAsset()
+        }
+
+        self.source = newSource
+
+        do {
+          self.playerItem = try await self.sourceLoader.load {
+            try await self.initializePlayerItem()
+          }
+          self.player.replaceCurrentItem(with: self.playerItem)
+          NowPlayingInfoCenterManager.shared.updateNowPlayingInfo()
+          promise.resolve(withResult: ())
+        } catch {
+          if error is CancellationError {
+            promise.reject(withError: PlayerError.cancelled.error())
+          } else {
+            promise.reject(withError: error)
+          }
         }
       }
     }
@@ -343,7 +366,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     )
 
     let isNetworkSource = _source.url.isFileURL == false
-    eventEmitter.onLoadStart(
+    _eventEmitter?.onLoadStart(
       .init(sourceType: isNetworkSource ? .network : .local, source: _source)
     )
 
@@ -412,7 +435,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     return tracks
   }
 
-  func selectTextTrack(textTrack: TextTrack?) throws {
+  func selectTextTrack(textTrack: Variant_NullType_TextTrack?) throws {
     guard let currentItem = player.currentItem else {
       throw PlayerError.notInitialized.error()
     }
@@ -429,37 +452,45 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     guard let textTrack = textTrack else {
       currentItem.select(nil, in: mediaSelection)
       selectedExternalTrackIndex = nil
-      eventEmitter.onTrackChange(nil)
+      _eventEmitter?.onTrackChange(nil)
       return
     }
 
-    // If textTrack id is empty, deselect any selected track
-    if textTrack.id.isEmpty {
+    switch textTrack {
+    case .first(_):
       currentItem.select(nil, in: mediaSelection)
       selectedExternalTrackIndex = nil
-      eventEmitter.onTrackChange(nil)
+      _eventEmitter?.onTrackChange(nil)
       return
-    }
-
-    if textTrack.id.hasPrefix("external-") {
-      let trackIndexStr = String(textTrack.id.dropFirst("external-".count))
-      if let trackIndex = Int(trackIndexStr),
-        trackIndex < mediaSelection.options.count
-      {
-        let option = mediaSelection.options[trackIndex]
-        currentItem.select(option, in: mediaSelection)
-        selectedExternalTrackIndex = trackIndex
-        eventEmitter.onTrackChange(textTrack)
+    case .second(let textTrack):
+      // If textTrack id is empty, deselect any selected track
+      if textTrack.id.isEmpty {
+        currentItem.select(nil, in: mediaSelection)
+        selectedExternalTrackIndex = nil
+        _eventEmitter?.onTrackChange(nil)
+        return
       }
-    } else if textTrack.id.hasPrefix("builtin-") {
-      for option in mediaSelection.options {
-        let optionId =
-          "builtin-\(option.displayName)-\(option.locale?.identifier ?? "unknown")"
-        if optionId == textTrack.id {
+
+      if textTrack.id.hasPrefix("external-") {
+        let trackIndexStr = String(textTrack.id.dropFirst("external-".count))
+        if let trackIndex = Int(trackIndexStr),
+          trackIndex < mediaSelection.options.count
+        {
+          let option = mediaSelection.options[trackIndex]
           currentItem.select(option, in: mediaSelection)
-          selectedExternalTrackIndex = nil
-          eventEmitter.onTrackChange(textTrack)
-          return
+          selectedExternalTrackIndex = trackIndex
+          _eventEmitter?.onTrackChange(.second(textTrack))
+        }
+      } else if textTrack.id.hasPrefix("builtin-") {
+        for option in mediaSelection.options {
+          let optionId =
+            "builtin-\(option.displayName)-\(option.locale?.identifier ?? "unknown")"
+          if optionId == textTrack.id {
+            currentItem.select(option, in: mediaSelection)
+            selectedExternalTrackIndex = nil
+            _eventEmitter?.onTrackChange(.second(textTrack))
+            return
+          }
         }
       }
     }

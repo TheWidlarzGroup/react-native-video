@@ -41,6 +41,7 @@ namespace margelo::nitro::video {
   public:
     size_t getExternalMemorySize() noexcept override;
     void dispose() noexcept override;
+    std::string toString() override;
 
   public:
     inline const jni::global_ref<JHybridVideoViewViewManagerSpec::javaobject>& getJavaPart() const noexcept {
@@ -63,18 +64,6 @@ namespace margelo::nitro::video {
     void setKeepScreenAwake(bool keepScreenAwake) override;
     SurfaceType getSurfaceType() override;
     void setSurfaceType(SurfaceType surfaceType) override;
-    std::optional<std::function<void(bool /* isInPictureInPicture */)>> getOnPictureInPictureChange() override;
-    void setOnPictureInPictureChange(const std::optional<std::function<void(bool /* isInPictureInPicture */)>>& onPictureInPictureChange) override;
-    std::optional<std::function<void(bool /* fullscreen */)>> getOnFullscreenChange() override;
-    void setOnFullscreenChange(const std::optional<std::function<void(bool /* fullscreen */)>>& onFullscreenChange) override;
-    std::optional<std::function<void()>> getWillEnterFullscreen() override;
-    void setWillEnterFullscreen(const std::optional<std::function<void()>>& willEnterFullscreen) override;
-    std::optional<std::function<void()>> getWillExitFullscreen() override;
-    void setWillExitFullscreen(const std::optional<std::function<void()>>& willExitFullscreen) override;
-    std::optional<std::function<void()>> getWillEnterPictureInPicture() override;
-    void setWillEnterPictureInPicture(const std::optional<std::function<void()>>& willEnterPictureInPicture) override;
-    std::optional<std::function<void()>> getWillExitPictureInPicture() override;
-    void setWillExitPictureInPicture(const std::optional<std::function<void()>>& willExitPictureInPicture) override;
 
   public:
     // Methods
@@ -83,6 +72,13 @@ namespace margelo::nitro::video {
     void enterPictureInPicture() override;
     void exitPictureInPicture() override;
     bool canEnterPictureInPicture() override;
+    ListenerSubscription addOnPictureInPictureChangeListener(const std::function<void(bool /* isInPictureInPicture */)>& listener) override;
+    ListenerSubscription addOnFullscreenChangeListener(const std::function<void(bool /* fullscreen */)>& listener) override;
+    ListenerSubscription addWillEnterFullscreenListener(const std::function<void()>& listener) override;
+    ListenerSubscription addWillExitFullscreenListener(const std::function<void()>& listener) override;
+    ListenerSubscription addWillEnterPictureInPictureListener(const std::function<void()>& listener) override;
+    ListenerSubscription addWillExitPictureInPictureListener(const std::function<void()>& listener) override;
+    void clearAllListeners() override;
 
   private:
     friend HybridBase;

@@ -307,8 +307,10 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
     currentTime = time.coerceIn(0.0, duration)
   }
 
-  override fun replaceSourceAsync(source: HybridVideoPlayerSourceSpec?): Promise<Unit> {
+  override fun replaceSourceAsync(source: Variant_NullType_HybridVideoPlayerSourceSpec?): Promise<Unit> {
     return Promise.async {
+      val source = source?.asSecondOrNull()
+
       if (source == null) {
         release()
         return@async
@@ -351,10 +353,11 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
       VideoPlaybackService.stopService(this, videoPlaybackServiceConnection)
     }
 
-    VideoManager.unregisterPlayer(this)
-    stopProgressUpdates()
-    loadedWithSource = false
     runOnMainThread {
+      VideoManager.unregisterPlayer(this)
+      stopProgressUpdates()
+      loadedWithSource = false
+
       player.removeListener(playerListener)
       player.removeAnalyticsListener(analyticsListener)
       player.release() // Release player
@@ -597,10 +600,10 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
     return TextTrackUtils.getAvailableTextTracks(player, source)
   }
 
-  override fun selectTextTrack(textTrack: TextTrack?) {
+  override fun selectTextTrack(textTrack: Variant_NullType_TextTrack?) {
     selectedExternalTrackIndex = TextTrackUtils.selectTextTrack(
       player = player,
-      textTrack = textTrack,
+      textTrack = textTrack?.asSecondOrNull(),
       source = source,
       onTrackChange = { track -> eventEmitter.onTrackChange(track) }
     )

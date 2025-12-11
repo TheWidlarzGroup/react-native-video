@@ -7,12 +7,24 @@ import com.twg.video.core.VideoManager
 import com.twg.video.core.VideoViewError
 import com.twg.video.core.utils.PictureInPictureUtils
 import com.twg.video.core.utils.Threading
+import java.util.UUID
+
+data class ViewListenerPair(
+  val id: UUID,
+  val eventName: String,
+  val callback: Any
+)
 
 @DoNotStrip
 @OptIn(UnstableApi::class)
-class HybridVideoViewViewManager(nitroId: Int): HybridVideoViewViewManagerSpec(), VideoViewEvents {
+class HybridVideoViewViewManager(nitroId: Int): HybridVideoViewViewManagerSpec(), VideoViewEventsEmitter {
   private var videoView =
     VideoManager.getVideoViewWeakReferenceByNitroId(nitroId) ?: throw VideoViewError.ViewNotFound(nitroId)
+  private val listeners = mutableListOf<ViewListenerPair>()
+
+  init {
+    videoView.get()?.eventsEmitter = this
+  }
 
   override var player: HybridVideoPlayerSpec?
     get() {
@@ -86,47 +98,90 @@ class HybridVideoViewViewManager(nitroId: Int): HybridVideoViewViewManagerSpec()
       videoView.get()?.surfaceType = value
     }
 
-  // View callbacks
-  override var onPictureInPictureChange: ((Boolean) -> Unit)? = null
-    set(value) {
-      field = value
-      videoView.get()?.events?.onPictureInPictureChange = value
+  // MARK: - Private helpers
+
+  private fun <T> addListener(eventName: String, listener: T): ListenerSubscription {
+    val id = UUID.randomUUID()
+    listeners.add(ViewListenerPair(id, eventName, listener as Any))
+    return ListenerSubscription { listeners.removeAll { it.id == id } }
+  }
+
+  @Suppress("UNCHECKED_CAST")
+  private fun <T> emitEvent(eventName: String, invoke: (T) -> Unit) {
+    listeners.filter { it.eventName == eventName }.forEach { pair ->
+      try {
+        invoke(pair.callback as T)
+      } catch (e: Exception) {
+        println("[ReactNativeVideo] Error calling $eventName listener: $e")
+      }
     }
-  override var onFullscreenChange: ((Boolean) -> Unit)? = null
-    set(value) {
-      field = value
-      videoView.get()?.events?.onFullscreenChange = value
-    }
-  override var willEnterFullscreen: (() -> Unit)? = null
-    set(value) {
-      field = value
-      videoView.get()?.events?.willEnterFullscreen = value
-    }
-  override var willExitFullscreen: (() -> Unit)? = null
-    set(value) {
-      field = value
-      videoView.get()?.events?.willExitFullscreen = value
-    }
-  override var willEnterPictureInPicture: (() -> Unit)? = null
-    set(value) {
-      field = value
-      videoView.get()?.events?.willEnterPictureInPicture = value
-    }
-  override var willExitPictureInPicture: (() -> Unit)? = null
-    set(value) {
-      field = value
-      videoView.get()?.events?.willExitPictureInPicture = value
-    }
+  }
+
+  // MARK: - Listener registration methods
+
+  override fun addOnPictureInPictureChangeListener(listener: (Boolean) -> Unit): ListenerSubscription {
+    return addListener("onPictureInPictureChange", listener)
+  }
+
+  override fun addOnFullscreenChangeListener(listener: (Boolean) -> Unit): ListenerSubscription {
+    return addListener("onFullscreenChange", listener)
+  }
+
+  override fun addWillEnterFullscreenListener(listener: () -> Unit): ListenerSubscription {
+    return addListener("willEnterFullscreen", listener)
+  }
+
+  override fun addWillExitFullscreenListener(listener: () -> Unit): ListenerSubscription {
+    return addListener("willExitFullscreen", listener)
+  }
+
+  override fun addWillEnterPictureInPictureListener(listener: () -> Unit): ListenerSubscription {
+    return addListener("willEnterPictureInPicture", listener)
+  }
+
+  override fun addWillExitPictureInPictureListener(listener: () -> Unit): ListenerSubscription {
+    return addListener("willExitPictureInPicture", listener)
+  }
+
+  override fun clearAllListeners() {
+    listeners.clear()
+  }
+
+  // MARK: - Event emission methods (called by VideoView)
+
+  override fun onPictureInPictureChange(isActive: Boolean) {
+    emitEvent<(Boolean) -> Unit>("onPictureInPictureChange") { it(isActive) }
+  }
+
+  override fun onFullscreenChange(isActive: Boolean) {
+    emitEvent<(Boolean) -> Unit>("onFullscreenChange") { it(isActive) }
+  }
+
+  override fun willEnterFullscreen() {
+    emitEvent<() -> Unit>("willEnterFullscreen") { it() }
+  }
+
+  override fun willExitFullscreen() {
+    emitEvent<() -> Unit>("willExitFullscreen") { it() }
+  }
+
+  override fun willEnterPictureInPicture() {
+    emitEvent<() -> Unit>("willEnterPictureInPicture") { it() }
+  }
+
+  override fun willExitPictureInPicture() {
+    emitEvent<() -> Unit>("willExitPictureInPicture") { it() }
+  }
 
   override val memorySize: Long
     get() = 0
 }
 
-interface VideoViewEvents {
-  var onPictureInPictureChange: ((Boolean) -> Unit)?
-  var onFullscreenChange: ((Boolean) -> Unit)?
-  var willEnterFullscreen: (() -> Unit)?
-  var willExitFullscreen: (() -> Unit)?
-  var willEnterPictureInPicture: (() -> Unit)?
-  var willExitPictureInPicture: (() -> Unit)?
+interface VideoViewEventsEmitter {
+  fun onPictureInPictureChange(isActive: Boolean)
+  fun onFullscreenChange(isActive: Boolean)
+  fun willEnterFullscreen()
+  fun willExitFullscreen()
+  fun willEnterPictureInPicture()
+  fun willExitPictureInPicture()
 }

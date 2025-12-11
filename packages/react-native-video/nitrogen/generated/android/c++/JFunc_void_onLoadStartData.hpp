@@ -12,6 +12,7 @@
 
 #include "onLoadStartData.hpp"
 #include <functional>
+#include <NitroModules/JNICallable.hpp>
 #include "JonLoadStartData.hpp"
 #include "SourceType.hpp"
 #include "JSourceType.hpp"
@@ -44,7 +45,7 @@ namespace margelo::nitro::video {
   /**
    * An implementation of Func_void_onLoadStartData that is backed by a C++ implementation (using `std::function<...>`)
    */
-  struct JFunc_void_onLoadStartData_cxx final: public jni::HybridClass<JFunc_void_onLoadStartData_cxx, JFunc_void_onLoadStartData> {
+  class JFunc_void_onLoadStartData_cxx final: public jni::HybridClass<JFunc_void_onLoadStartData_cxx, JFunc_void_onLoadStartData> {
   public:
     static jni::local_ref<JFunc_void_onLoadStartData::javaobject> fromCpp(const std::function<void(const onLoadStartData& /* data */)>& func) {
       return JFunc_void_onLoadStartData_cxx::newObjectCxxArgs(func);

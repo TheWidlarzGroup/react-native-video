@@ -17,6 +17,13 @@ public protocol HybridVideoViewViewManagerFactorySpec_protocol: HybridObject {
   func createViewManager(nitroId: Double) throws -> (any HybridVideoViewViewManagerSpec)
 }
 
+public extension HybridVideoViewViewManagerFactorySpec_protocol {
+  /// Default implementation of ``HybridObject.toString``
+  func toString() -> String {
+    return "[HybridObject VideoViewViewManagerFactory]"
+  }
+}
+
 /// See ``HybridVideoViewViewManagerFactorySpec``
 open class HybridVideoViewViewManagerFactorySpec_base {
   private weak var cxxWrapper: HybridVideoViewViewManagerFactorySpec_cxx? = nil

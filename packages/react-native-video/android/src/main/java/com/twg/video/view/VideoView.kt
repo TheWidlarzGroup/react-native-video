@@ -24,7 +24,7 @@ import com.margelo.nitro.NitroModules
 import com.margelo.nitro.video.HybridVideoPlayer
 import com.margelo.nitro.video.ResizeMode
 import com.margelo.nitro.video.SurfaceType
-import com.margelo.nitro.video.VideoViewEvents
+import com.margelo.nitro.video.VideoViewEventsEmitter
 import com.twg.video.core.LibraryError
 import com.twg.video.core.VideoManager
 import com.twg.video.core.VideoViewError
@@ -124,21 +124,16 @@ class VideoView @JvmOverloads constructor(
       }
     }
 
-  var events = object : VideoViewEvents {
-    override var onPictureInPictureChange: ((Boolean) -> Unit)? = {}
-    override var onFullscreenChange: ((Boolean) -> Unit)? = {}
-    override var willEnterFullscreen: (() -> Unit)? = {}
-    override var willExitFullscreen: (() -> Unit)? = {}
-    override var willEnterPictureInPicture: (() -> Unit)? = {}
-    override var willExitPictureInPicture: (() -> Unit)? = {}
-  }
+  var eventsEmitter: VideoViewEventsEmitter? = null
 
   var onNitroIdChange: ((Int?) -> Unit)? = null
   var playerView = createPlayerView()
   var isInFullscreen: Boolean = false
     set(value) {
+      if (value != field) {
+        eventsEmitter?.onFullscreenChange(value)
+      }
       field = value
-      events.onFullscreenChange?.let { it(value) }
     }
   var isInPictureInPicture: Boolean = false
     set(value) {
@@ -154,7 +149,7 @@ class VideoView @JvmOverloads constructor(
         playerView.controllerHideOnTouch = true
       }
       
-      events.onPictureInPictureChange?.let { it(value) }
+      eventsEmitter?.onPictureInPictureChange(value)
     }
   private var rootContentViews: List<View> = listOf()
   private var pictureInPictureHelperTag: String? = null
@@ -234,7 +229,7 @@ class VideoView @JvmOverloads constructor(
     }
 
     try {
-      events.willEnterFullscreen?.let { it() }
+      eventsEmitter?.willEnterFullscreen()
 
       val fragment = FullscreenVideoFragment(this)
       fullscreenFragmentTag = fragment.id
@@ -256,7 +251,7 @@ class VideoView @JvmOverloads constructor(
       return
     }
 
-    events.willExitFullscreen?.let { it() }
+    eventsEmitter?.willExitFullscreen()
 
     val currentActivity = applicationContent.currentActivity
     fullscreenFragmentTag?.let { tag ->
@@ -442,7 +437,7 @@ class VideoView @JvmOverloads constructor(
     val currentActivity = applicationContent.currentActivity ?: return false
 
     return try {
-      events.willEnterPictureInPicture?.let { it() }
+      eventsEmitter?.willEnterPictureInPicture()
 
       // Disable controls before entering PiP - media session creates its own controls for PiP
       runOnMainThread {
@@ -483,7 +478,7 @@ class VideoView @JvmOverloads constructor(
 
     VideoManager.notifyPictureInPictureExited(this)
 
-    events.willExitPictureInPicture?.let { it() }
+    eventsEmitter?.willExitPictureInPicture()
 
     // Restore controls when exiting PiP - they were disabled because media session handles PiP controls
     playerView.useController = useController
@@ -512,7 +507,7 @@ class VideoView @JvmOverloads constructor(
         Log.d("ReactNativeVideo", "Activity is in PiP mode, preparing for transition")
       }
       
-      events.willExitPictureInPicture?.let { it() }
+      eventsEmitter?.willExitPictureInPicture()
       
       // Restore controls when exiting PiP - they were disabled because media session handles PiP controls
       playerView.useController = useController

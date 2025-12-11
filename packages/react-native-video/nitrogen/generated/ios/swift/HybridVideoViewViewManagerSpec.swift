@@ -18,12 +18,6 @@ public protocol HybridVideoViewViewManagerSpec_protocol: HybridObject {
   var resizeMode: ResizeMode { get set }
   var keepScreenAwake: Bool { get set }
   var surfaceType: SurfaceType { get set }
-  var onPictureInPictureChange: ((_ isInPictureInPicture: Bool) -> Void)? { get set }
-  var onFullscreenChange: ((_ fullscreen: Bool) -> Void)? { get set }
-  var willEnterFullscreen: (() -> Void)? { get set }
-  var willExitFullscreen: (() -> Void)? { get set }
-  var willEnterPictureInPicture: (() -> Void)? { get set }
-  var willExitPictureInPicture: (() -> Void)? { get set }
 
   // Methods
   func enterFullscreen() throws -> Void
@@ -31,6 +25,20 @@ public protocol HybridVideoViewViewManagerSpec_protocol: HybridObject {
   func enterPictureInPicture() throws -> Void
   func exitPictureInPicture() throws -> Void
   func canEnterPictureInPicture() throws -> Bool
+  func addOnPictureInPictureChangeListener(listener: @escaping (_ isInPictureInPicture: Bool) -> Void) throws -> ListenerSubscription
+  func addOnFullscreenChangeListener(listener: @escaping (_ fullscreen: Bool) -> Void) throws -> ListenerSubscription
+  func addWillEnterFullscreenListener(listener: @escaping () -> Void) throws -> ListenerSubscription
+  func addWillExitFullscreenListener(listener: @escaping () -> Void) throws -> ListenerSubscription
+  func addWillEnterPictureInPictureListener(listener: @escaping () -> Void) throws -> ListenerSubscription
+  func addWillExitPictureInPictureListener(listener: @escaping () -> Void) throws -> ListenerSubscription
+  func clearAllListeners() throws -> Void
+}
+
+public extension HybridVideoViewViewManagerSpec_protocol {
+  /// Default implementation of ``HybridObject.toString``
+  func toString() -> String {
+    return "[HybridObject VideoViewViewManager]"
+  }
 }
 
 /// See ``HybridVideoViewViewManagerSpec``

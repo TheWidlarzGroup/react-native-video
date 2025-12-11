@@ -1,12 +1,13 @@
 import * as React from 'react';
 import type { ViewProps, ViewStyle } from 'react-native';
 import { NitroModules } from 'react-native-nitro-modules';
+import type { ListenerSubscription } from '../../spec/nitro/VideoPlayerEventEmitter.nitro';
 import type {
   SurfaceType,
   VideoViewViewManager,
   VideoViewViewManagerFactory,
 } from '../../spec/nitro/VideoViewViewManager.nitro';
-import type { VideoViewEvents } from '../types/Events';
+import { type VideoViewEvents } from '../types/Events';
 import type { ResizeMode } from '../types/ResizeMode';
 import {
   tryParseNativeVideoError,
@@ -85,6 +86,16 @@ export interface VideoViewRef {
    * @returns true if picture in picture mode is supported, false otherwise
    */
   canEnterPictureInPicture: () => boolean;
+  /**
+   * Adds a listener for a view event.
+   * @param event - The event to add a listener for.
+   * @param callback - The callback to call when the event is triggered.
+   * @returns A subscription object that can be used to remove the listener.
+   */
+  addEventListener: <Event extends keyof VideoViewEvents>(
+    event: Event,
+    callback: VideoViewEvents[Event]
+  ) => ListenerSubscription;
 }
 
 let nitroIdCounter = 1;
@@ -114,12 +125,6 @@ const updateProps = (manager: VideoViewViewManager, props: VideoViewProps) => {
   manager.pictureInPicture = props.pictureInPicture ?? false;
   manager.autoEnterPictureInPicture = props.autoEnterPictureInPicture ?? false;
   manager.resizeMode = props.resizeMode ?? 'none';
-  manager.onPictureInPictureChange = props.onPictureInPictureChange;
-  manager.onFullscreenChange = props.onFullscreenChange;
-  manager.willEnterFullscreen = props.willEnterFullscreen;
-  manager.willExitFullscreen = props.willExitFullscreen;
-  manager.willEnterPictureInPicture = props.willEnterPictureInPicture;
-  manager.willExitPictureInPicture = props.willExitPictureInPicture;
   manager.keepScreenAwake = props.keepScreenAwake ?? true;
   manager.surfaceType = props.surfaceType ?? 'surface';
 };
@@ -143,12 +148,19 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
       pictureInPicture = false,
       autoEnterPictureInPicture = false,
       resizeMode = 'none',
+      onPictureInPictureChange,
+      onFullscreenChange,
+      willEnterFullscreen,
+      willExitFullscreen,
+      willEnterPictureInPicture,
+      willExitPictureInPicture,
       ...props
     },
     ref
   ) => {
     const nitroId = React.useMemo(() => nitroIdCounter++, []);
     const nitroViewManager = React.useRef<VideoViewViewManager | null>(null);
+    const [isManagerReady, setIsManagerReady] = React.useState(false);
 
     const setupViewManager = React.useCallback(
       (id: number) => {
@@ -166,15 +178,7 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
             }
           }
 
-          // Updates props to native view
-          updateProps(nitroViewManager.current, {
-            ...props,
-            player: player,
-            controls: controls,
-            pictureInPicture: pictureInPicture,
-            autoEnterPictureInPicture: autoEnterPictureInPicture,
-            resizeMode: resizeMode,
-          });
+          setIsManagerReady(true);
         } catch (error) {
           const parsedError = tryParseNativeVideoError(error);
 
@@ -203,15 +207,7 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
           throw parsedError;
         }
       },
-      [
-        props,
-        player,
-        controls,
-        pictureInPicture,
-        autoEnterPictureInPicture,
-        resizeMode,
-        nitroId,
-      ]
+      [nitroId]
     );
 
     const onNitroIdChange = React.useCallback(
@@ -252,10 +248,125 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
             }
           );
         },
+        addEventListener: <Event extends keyof VideoViewEvents>(
+          event: Event,
+          callback: VideoViewEvents[Event]
+        ): ListenerSubscription => {
+          return wrapNativeViewManagerFunction(
+            nitroViewManager.current,
+            (manager) => {
+              switch (event) {
+                case 'onPictureInPictureChange':
+                  return manager.addOnPictureInPictureChangeListener(
+                    callback as VideoViewEvents['onPictureInPictureChange']
+                  );
+                case 'onFullscreenChange':
+                  return manager.addOnFullscreenChangeListener(
+                    callback as VideoViewEvents['onFullscreenChange']
+                  );
+                case 'willEnterFullscreen':
+                  return manager.addWillEnterFullscreenListener(
+                    callback as VideoViewEvents['willEnterFullscreen']
+                  );
+                case 'willExitFullscreen':
+                  return manager.addWillExitFullscreenListener(
+                    callback as VideoViewEvents['willExitFullscreen']
+                  );
+                case 'willEnterPictureInPicture':
+                  return manager.addWillEnterPictureInPictureListener(
+                    callback as VideoViewEvents['willEnterPictureInPicture']
+                  );
+                case 'willExitPictureInPicture':
+                  return manager.addWillExitPictureInPictureListener(
+                    callback as VideoViewEvents['willExitPictureInPicture']
+                  );
+                default:
+                  throw new Error(
+                    `[React Native Video] Unsupported event: ${event}`
+                  );
+              }
+            }
+          );
+        },
       }),
       []
     );
 
+    // Cleanup all listeners on unmount
+    React.useEffect(() => {
+      return () => {
+        if (nitroViewManager.current) {
+          nitroViewManager.current.clearAllListeners();
+          setIsManagerReady(false);
+        }
+      };
+    }, []);
+
+    // Register prop-based event callbacks as listeners
+    React.useEffect(() => {
+      if (!nitroViewManager.current) {
+        return;
+      }
+
+      const subscriptions: ListenerSubscription[] = [];
+
+      if (onPictureInPictureChange) {
+        subscriptions.push(
+          nitroViewManager.current.addOnPictureInPictureChangeListener(
+            onPictureInPictureChange
+          )
+        );
+      }
+      if (onFullscreenChange) {
+        subscriptions.push(
+          nitroViewManager.current.addOnFullscreenChangeListener(
+            onFullscreenChange
+          )
+        );
+      }
+      if (willEnterFullscreen) {
+        subscriptions.push(
+          nitroViewManager.current.addWillEnterFullscreenListener(
+            willEnterFullscreen
+          )
+        );
+      }
+      if (willExitFullscreen) {
+        subscriptions.push(
+          nitroViewManager.current.addWillExitFullscreenListener(
+            willExitFullscreen
+          )
+        );
+      }
+      if (willEnterPictureInPicture) {
+        subscriptions.push(
+          nitroViewManager.current.addWillEnterPictureInPictureListener(
+            willEnterPictureInPicture
+          )
+        );
+      }
+      if (willExitPictureInPicture) {
+        subscriptions.push(
+          nitroViewManager.current.addWillExitPictureInPictureListener(
+            willExitPictureInPicture
+          )
+        );
+      }
+
+      return () => {
+        subscriptions.forEach((sub) => sub.remove());
+      };
+    }, [
+      onPictureInPictureChange,
+      onFullscreenChange,
+      willEnterFullscreen,
+      willExitFullscreen,
+      willEnterPictureInPicture,
+      willExitPictureInPicture,
+      isManagerReady,
+    ]);
+
+    // Update non-event props
     React.useEffect(() => {
       if (!nitroViewManager.current) {
         return;
@@ -277,6 +388,7 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
       autoEnterPictureInPicture,
       resizeMode,
       props,
+      isManagerReady,
     ]);
 
     return (

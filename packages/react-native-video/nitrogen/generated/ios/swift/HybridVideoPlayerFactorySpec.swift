@@ -17,6 +17,13 @@ public protocol HybridVideoPlayerFactorySpec_protocol: HybridObject {
   func createPlayer(source: (any HybridVideoPlayerSourceSpec)) throws -> (any HybridVideoPlayerSpec)
 }
 
+public extension HybridVideoPlayerFactorySpec_protocol {
+  /// Default implementation of ``HybridObject.toString``
+  func toString() -> String {
+    return "[HybridObject VideoPlayerFactory]"
+  }
+}
+
 /// See ``HybridVideoPlayerFactorySpec``
 open class HybridVideoPlayerFactorySpec_base {
   private weak var cxxWrapper: HybridVideoPlayerFactorySpec_cxx? = nil

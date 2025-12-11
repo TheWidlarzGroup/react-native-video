@@ -12,6 +12,7 @@
 
 #include "onPlaybackStateChangeData.hpp"
 #include <functional>
+#include <NitroModules/JNICallable.hpp>
 #include "JonPlaybackStateChangeData.hpp"
 
 namespace margelo::nitro::video {
@@ -39,7 +40,7 @@ namespace margelo::nitro::video {
   /**
    * An implementation of Func_void_onPlaybackStateChangeData that is backed by a C++ implementation (using `std::function<...>`)
    */
-  struct JFunc_void_onPlaybackStateChangeData_cxx final: public jni::HybridClass<JFunc_void_onPlaybackStateChangeData_cxx, JFunc_void_onPlaybackStateChangeData> {
+  class JFunc_void_onPlaybackStateChangeData_cxx final: public jni::HybridClass<JFunc_void_onPlaybackStateChangeData_cxx, JFunc_void_onPlaybackStateChangeData> {
   public:
     static jni::local_ref<JFunc_void_onPlaybackStateChangeData::javaobject> fromCpp(const std::function<void(const onPlaybackStateChangeData& /* data */)>& func) {
       return JFunc_void_onPlaybackStateChangeData_cxx::newObjectCxxArgs(func);

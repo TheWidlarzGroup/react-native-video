@@ -29,15 +29,22 @@ public protocol HybridVideoPlayerSpec_protocol: HybridObject {
   var selectedTrack: TextTrack? { get }
 
   // Methods
-  func replaceSourceAsync(source: (any HybridVideoPlayerSourceSpec)?) throws -> Promise<Void>
+  func replaceSourceAsync(source: Variant_NullType__any_HybridVideoPlayerSourceSpec_?) throws -> Promise<Void>
   func getAvailableTextTracks() throws -> [TextTrack]
-  func selectTextTrack(textTrack: TextTrack?) throws -> Void
+  func selectTextTrack(textTrack: Variant_NullType_TextTrack?) throws -> Void
   func initialize() throws -> Promise<Void>
   func preload() throws -> Promise<Void>
   func play() throws -> Void
   func pause() throws -> Void
   func seekBy(time: Double) throws -> Void
   func seekTo(time: Double) throws -> Void
+}
+
+public extension HybridVideoPlayerSpec_protocol {
+  /// Default implementation of ``HybridObject.toString``
+  func toString() -> String {
+    return "[HybridObject VideoPlayer]"
+  }
 }
 
 /// See ``HybridVideoPlayerSpec``

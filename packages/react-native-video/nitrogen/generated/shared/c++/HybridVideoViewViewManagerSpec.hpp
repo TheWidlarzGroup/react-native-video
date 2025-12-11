@@ -19,12 +19,15 @@ namespace margelo::nitro::video { class HybridVideoPlayerSpec; }
 namespace margelo::nitro::video { enum class ResizeMode; }
 // Forward declaration of `SurfaceType` to properly resolve imports.
 namespace margelo::nitro::video { enum class SurfaceType; }
+// Forward declaration of `ListenerSubscription` to properly resolve imports.
+namespace margelo::nitro::video { struct ListenerSubscription; }
 
 #include <memory>
 #include "HybridVideoPlayerSpec.hpp"
 #include <optional>
 #include "ResizeMode.hpp"
 #include "SurfaceType.hpp"
+#include "ListenerSubscription.hpp"
 #include <functional>
 
 namespace margelo::nitro::video {
@@ -68,18 +71,6 @@ namespace margelo::nitro::video {
       virtual void setKeepScreenAwake(bool keepScreenAwake) = 0;
       virtual SurfaceType getSurfaceType() = 0;
       virtual void setSurfaceType(SurfaceType surfaceType) = 0;
-      virtual std::optional<std::function<void(bool /* isInPictureInPicture */)>> getOnPictureInPictureChange() = 0;
-      virtual void setOnPictureInPictureChange(const std::optional<std::function<void(bool /* isInPictureInPicture */)>>& onPictureInPictureChange) = 0;
-      virtual std::optional<std::function<void(bool /* fullscreen */)>> getOnFullscreenChange() = 0;
-      virtual void setOnFullscreenChange(const std::optional<std::function<void(bool /* fullscreen */)>>& onFullscreenChange) = 0;
-      virtual std::optional<std::function<void()>> getWillEnterFullscreen() = 0;
-      virtual void setWillEnterFullscreen(const std::optional<std::function<void()>>& willEnterFullscreen) = 0;
-      virtual std::optional<std::function<void()>> getWillExitFullscreen() = 0;
-      virtual void setWillExitFullscreen(const std::optional<std::function<void()>>& willExitFullscreen) = 0;
-      virtual std::optional<std::function<void()>> getWillEnterPictureInPicture() = 0;
-      virtual void setWillEnterPictureInPicture(const std::optional<std::function<void()>>& willEnterPictureInPicture) = 0;
-      virtual std::optional<std::function<void()>> getWillExitPictureInPicture() = 0;
-      virtual void setWillExitPictureInPicture(const std::optional<std::function<void()>>& willExitPictureInPicture) = 0;
 
     public:
       // Methods
@@ -88,6 +79,13 @@ namespace margelo::nitro::video {
       virtual void enterPictureInPicture() = 0;
       virtual void exitPictureInPicture() = 0;
       virtual bool canEnterPictureInPicture() = 0;
+      virtual ListenerSubscription addOnPictureInPictureChangeListener(const std::function<void(bool /* isInPictureInPicture */)>& listener) = 0;
+      virtual ListenerSubscription addOnFullscreenChangeListener(const std::function<void(bool /* fullscreen */)>& listener) = 0;
+      virtual ListenerSubscription addWillEnterFullscreenListener(const std::function<void()>& listener) = 0;
+      virtual ListenerSubscription addWillExitFullscreenListener(const std::function<void()>& listener) = 0;
+      virtual ListenerSubscription addWillEnterPictureInPictureListener(const std::function<void()>& listener) = 0;
+      virtual ListenerSubscription addWillExitPictureInPictureListener(const std::function<void()>& listener) = 0;
+      virtual void clearAllListeners() = 0;
 
     protected:
       // Hybrid Setup

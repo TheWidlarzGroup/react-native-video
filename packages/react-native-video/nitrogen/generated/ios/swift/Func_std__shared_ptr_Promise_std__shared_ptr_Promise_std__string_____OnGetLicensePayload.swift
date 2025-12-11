@@ -5,8 +5,8 @@
 /// Copyright © 2025 Marc Rousavy @ Margelo
 ///
 
+import Foundation
 import NitroModules
-
 
 /**
  * Wraps a Swift `(_ payload: OnGetLicensePayload) -> Promise<Promise<String>>` as a class.
