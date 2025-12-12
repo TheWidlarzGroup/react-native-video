@@ -1,0 +1,3576 @@
+# React Native Video v6 Documentation
+
+> Complete documentation for React Native Video v6
+
+This file contains all documentation content in a single document following the llmstxt.org standard.
+
+## Ads
+
+# Ads
+
+## IMA SDK
+
+`react-native-video` includes built-in support for Google IMA SDK on Android and iOS. To enable it, refer to the [installation section](../installation.md).
+
+### Usage
+
+To use AVOD (Ad-Supported Video on Demand), pass the `adTagUrl` prop to the `Video` component. The `adTagUrl` should be a VAST-compliant URI.
+
+#### Example:
+
+```jsx
+adTagUrl="https://pubads.g.doubleclick.net/gampad/ads?iu=/21775744923/external/vmap_ad_samples&sz=640x480&cust_params=sample_ar%3Dpremidpostoptimizedpodbumper&ciu_szs=300x250&gdfp_req=1&ad_rule=1&output=vmap&unviewed_position_start=1&env=vp&impl=s&cmsid=496&vid=short_onecue&correlator="
+```
+
+> **Note:** Video ads cannot start when Picture-in-Picture (PiP) mode is active on iOS. More details are available in the [Google IMA SDK Docs](https://developers.google.com/interactive-media-ads/docs/sdks/ios/client-side/picture_in_picture?hl=en#starting_ads). If you are using custom controls, hide the PiP button when receiving the `STARTED` event from `onReceiveAdEvent` and show it again when receiving the `ALL_ADS_COMPLETED` event.
+
+### Events
+
+To receive events from the IMA SDK, pass the `onReceiveAdEvent` prop to the `Video` component. The full list of supported events is available [here](https://github.com/TheWidlarzGroup/react-native-video/blob/master/src/types/Ads.ts).
+
+#### Example:
+
+```jsx
+...
+onReceiveAdEvent={event => console.log(event)}
+...
+```
+
+### Localization
+
+To change the language of the IMA SDK, pass the `adLanguage` prop to the `Video` component. The list of supported languages is available [here](https://developers.google.com/interactive-media-ads/docs/sdks/android/client-side/localization#locale-codes).
+
+- By default, **iOS** uses the system language, and **Android** defaults to `en` (English).
+
+#### Example:
+
+```jsx
+...
+adLanguage="fr"
+...
+```
+
+---
+
+## DRM
+
+import PlatformsList from "@site/src/components/PlatformsList/PlatformsList.tsx";
+
+# DRM
+
+## DRM Example
+
+We provide a sample implementation in the [example app](https://github.com/TheWidlarzGroup/react-native-video/blob/master/examples/common/DRMExample.tsx) demonstrating how to use DRM with `react-native-video`. You’ll need a valid token—visit [our site](https://www.thewidlarzgroup.com/services/free-drm-token-generator-for-video?utm_source=rnv&utm_medium=docs&utm_campaign=drm&utm_id=text) to obtain a **free 24-hour token**.
+
+## DRM Offline
+
+If you need DRM-protected content available offline, our [Offline Video SDK](https://www.thewidlarzgroup.com/offline-video-sdk/?utm_source=rnv&utm_medium=docs&utm_campaign=drm&utm_id=offline-video-sdk-link) enables downloading, storing, and managing streams with and without DRM. It also handles many edge cases you may encounter over time.
+
+### Prerequisites:
+
+- Use `react-native-video` v6 or v7. If you're still on v5 or lower, [contact us](https://www.thewidlarzgroup.com/?utm_source=rnv&utm_medium=docs&utm_campaign=drm&utm_id=upgrade-contact#Contact) for assistance.
+
+> Supporting our software kits helps maintain this open-source project. Thank you!
+
+## Providing DRM Data (Tested with HTTP/HTTPS Assets)
+
+You can configure DRM playback by providing a DRM object with the following properties. This feature disables the use of `TextureView` on Android.
+
+### DRM Properties
+
+### `base64Certificate`
+
+**Type:** boolean
+**Default:** `false`
+
+Indicates whether the certificate URL returns data in Base64 format.
+
+### `certificateUrl`
+
+**Type:** string
+**Default:** `undefined`
+
+The URL used to fetch a valid certificate for FairPlay.
+
+### `getLicense`
+
+**Type:** function
+**Default:** `undefined`
+
+Instead of setting `licenseServer`, you can manually acquire the license in JavaScript and send the result to the native module for FairPlay DRM configuration.
+
+The following parameters are available in `getLicense`:
+
+- `contentId`: The content ID from the DRM object or `loadingRequest.request.url?.host`
+- `loadedLicenseUrl`: The URL retrieved from `loadingRequest.request.URL.absoluteString`, starting with `skd://` or `clearkey://`
+- `licenseServer`: The URL passed in the DRM object
+- `spcString`: The SPC used for DRM validation
+
+You should return a Base64-encoded CKC response, either directly or as a `Promise`.
+
+#### Example:
+
+```js
+getLicense: (spcString, contentId, licenseUrl, loadedLicenseUrl) => {
+  const base64spc = Base64.encode(spcString);
+  const formData = new FormData();
+  formData.append("spc", base64spc);
+  return fetch(`https://license.pallycon.com/ri/licenseManager.do`, {
+    method: "POST",
+    headers: {
+      "pallycon-customdata-v2": "your-custom-header",
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: formData,
+  })
+    .then((response) => response.text())
+    .then((response) => response)
+    .catch((error) => console.error("Error", error));
+};
+```
+
+### `contentId`
+
+**Type:** string
+**Default:** `undefined`
+
+Sets the content ID for the stream. If not specified, the system uses the host value from `loadingRequest.request.URL.host`.
+
+### `headers`
+
+**Type:** Object
+**Default:** `undefined`
+
+Custom headers for the license server request.
+
+#### Example:
+
+```js
+drm: {
+  type: DRMType.WIDEVINE,
+  licenseServer: 'https://drm-widevine-licensing.axtest.net/AcquireLicense',
+  headers: {
+    'X-AxDRM-Message': 'your-drm-header',
+  },
+}
+```
+
+### `licenseServer`
+
+**Type:** string
+**Default:** `undefined`
+
+The license server URL that authorizes protected content playback.
+
+### `multiDrm`
+
+**Type:** boolean
+**Default:** `false`
+
+Indicates whether the DRM system should support key rotation. See [Android Developer Docs](https://developer.android.google.cn/media/media3/exoplayer/drm?hl=en#key-rotation) for more details.
+
+### `type`
+
+**Type:** DRMType
+**Default:** `undefined`
+
+Defines the DRM type:
+
+- **Android:** `DRMType.WIDEVINE`, `DRMType.PLAYREADY`, `DRMType.CLEARKEY`
+- **iOS:** `DRMType.FAIRPLAY`
+
+### `localSourceEncryptionKeyScheme`
+
+**Type:** string
+
+Sets the URL scheme for stream encryption keys used in local assets.
+
+#### Example:
+
+```js
+localSourceEncryptionKeyScheme = "my-offline-key";
+```
+
+## Common Usage Scenarios
+
+### Sending Cookies to the License Server
+
+You can send cookies using the `headers` prop.
+
+#### Example:
+
+```js
+drm: {
+  type: DRMType.WIDEVINE,
+  licenseServer: 'https://drm-widevine-licensing.axtest.net/AcquireLicense',
+  headers: {
+    'Cookie': 'PHPSESSID=your-session-id; csrftoken=mytoken; _gat=1; foo=bar'
+  },
+}
+```
+
+### Custom License Acquisition (iOS Only)
+
+#### Example:
+
+```js
+drm: {
+  type: DRMType.FAIRPLAY,
+  getLicense: (spcString) => {
+    const base64spc = Base64.encode(spcString);
+    return fetch('YOUR_LICENSE_SERVER_URL', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({
+        getFairplayLicense: {
+          foo: 'bar',
+          spcMessage: base64spc,
+        }
+      })
+    })
+      .then(response => response.json())
+      .then((response) => {
+        if (response?.getFairplayLicenseResponse?.ckcResponse) {
+          return response.getFairplayLicenseResponse.ckcResponse;
+        }
+        throw new Error('No valid response');
+      })
+      .catch((error) => console.error('CKC error', error));
+  }
+}
+```
+
+---
+
+## Events
+
+import PlatformsList from "@site/src/components/PlatformsList/PlatformsList.tsx";
+
+# Events
+
+This page lists all available callbacks for handling player notifications.
+
+## Details
+
+### `onAudioBecomingNoisy`
+
+Triggered when audio output changes (e.g., switching from headphones to speakers). It's recommended to pause the media when this event occurs.
+
+**Payload:** _none_
+
+---
+
+### `onAudioFocusChanged`
+
+Called when audio focus is gained or lost.
+
+**Payload:**
+| Property | Type | Description |
+|---------------|--------|----------------------------------------------|
+| hasAudioFocus | boolean | `true` if media has audio focus, `false` otherwise |
+
+**Example:**
+
+```javascript
+{
+  hasAudioFocus: true;
+}
+```
+
+---
+
+### `onAudioTracks`
+
+Triggered when available audio tracks change.
+
+**Payload:** _Array of objects with track details_
+
+| Property | Type    | Description                                                                      |
+| -------- | ------- | -------------------------------------------------------------------------------- |
+| index    | number  | Internal track ID                                                                |
+| title    | string  | Descriptive track name                                                           |
+| language | string  | [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) language code |
+| bitrate  | number  | Track bitrate                                                                    |
+| type     | string  | Track MIME type                                                                  |
+| selected | boolean | `true` if track is currently playing                                             |
+
+**Example:**
+
+```javascript
+{
+  audioTracks: [
+    {
+      language: "es",
+      title: "Spanish",
+      type: "audio/mpeg",
+      index: 0,
+      selected: true,
+    },
+    { language: "en", title: "English", type: "audio/mpeg", index: 1 },
+  ];
+}
+```
+
+---
+
+### `onBandwidthUpdate`
+
+Called when available bandwidth changes.
+
+**Payload:**
+| Property | Type | Description |
+|----------|--------|-----------------------------------------------|
+| bitrate | number | Estimated bitrate in bits/sec |
+| width | number | Video width (Android only) |
+| height | number | Video height (Android only) |
+| trackId | string | Video track ID (Android only) |
+
+**Example (iOS):**
+
+```javascript
+{
+  bitrate: 1000000;
+}
+```
+
+**Example (Android):**
+
+```javascript
+{
+  bitrate: 1000000,
+  width: 1920,
+  height: 1080,
+  trackId: 'some-track-id'
+}
+```
+
+> **Note:** On Android, set the [`reportBandwidth`](#reportbandwidth) prop to enable this event.
+
+---
+
+### `onBuffer`
+
+Triggered when buffering starts or stops.
+
+**Payload:**
+| Property | Type | Description |
+|------------|--------|---------------------------------|
+| isBuffering | boolean | `true` if buffering is active |
+
+**Example:**
+
+```javascript
+{
+  isBuffering: true;
+}
+```
+
+---
+
+### `onControlsVisibilityChange`
+
+Triggered when the video player controls become visible or hidden.
+
+**Payload:**
+| Property | Type | Description |
+|----------|--------|-------------------------------------|
+| isVisible | boolean | `true` if controls are visible |
+
+**Example:**
+
+```javascript
+{
+  isVisible: true;
+}
+```
+
+---
+
+### `onEnd`
+
+Triggered when the media reaches the end.
+
+**Payload:** _none_
+
+---
+
+### `onError`
+
+Called when a playback error occurs.
+
+**Payload:**
+| Property | Type | Description |
+|---------|--------|---------------------------|
+| error | object | Error details |
+
+---
+
+### `onExternalPlaybackChange`
+
+Called when external playback mode changes (e.g., Apple TV connection/disconnection).
+
+**Payload:**
+| Property | Type | Description |
+|-------------------------|--------|--------------------------------------------|
+| isExternalPlaybackActive | boolean | `true` if external playback is active |
+
+**Example:**
+
+```javascript
+{
+  isExternalPlaybackActive: true;
+}
+```
+
+---
+
+### `onFullscreenPlayerWillPresent`
+
+Called before entering fullscreen mode.
+
+**Payload:** _none_
+
+---
+
+### `onFullscreenPlayerDidPresent`
+
+Called when fullscreen mode is active.
+
+**Payload:** _none_
+
+---
+
+### `onFullscreenPlayerWillDismiss`
+
+Called before exiting fullscreen mode.
+
+**Payload:** _none_
+
+---
+
+### `onFullscreenPlayerDidDismiss`
+
+Called when fullscreen mode is exited.
+
+**Payload:** _none_
+
+---
+
+### `onLoad`
+
+Triggered when the media is loaded and ready to play.
+
+### Payload:
+
+| Property    | Type   | Description                                                                                                                                                                                                                                                                                                                                                                            |
+| ----------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| currentTime | number | Time in seconds where the media will start                                                                                                                                                                                                                                                                                                                                             |
+| duration    | number | Length of the media in seconds                                                                                                                                                                                                                                                                                                                                                         |
+| naturalSize | object | Properties: &ensp; width - Width in pixels that the video was encoded at &ensp; height - Height in pixels that the video was encoded at &ensp; orientation - "portrait", "landscape" or "square"                                                                                                                                                                        |
+| audioTracks | array  | An array of audio track info objects with the following properties: &ensp; index - Index number &ensp; title - Description of the track &ensp; language - 2 letter [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) or 3 letter [ISO639-2](https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes) language code &ensp; type - Mime type of track |
+| textTracks  | array  | An array of text track info objects with the following properties: &ensp; index - Index number &ensp; title - Description of the track &ensp; language - 2 letter [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) or 3 letter [ISO 639-2](https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes) language code &ensp; type - Mime type of track |
+| videoTracks | array  | An array of video track info objects with the following properties: &ensp; trackId - ID for the track &ensp; bitrate - Bit rate in bits per second &ensp; codecs - Comma separated list of codecs &ensp; height - Height of the video &ensp; width - Width of the video                                                                                       |
+| trackId     | string | Provide key information about the video track, typically including: `Resolution`, `Bitrate`.                                                                                                                                                                                                                                                                                           |
+
+**Example:**
+
+```js
+{
+  canPlaySlowForward: true,
+  canPlayReverse: false,
+  canPlaySlowReverse: false,
+  canPlayFastForward: false,
+  canStepForward: false,
+  canStepBackward: false,
+  currentTime: 0,
+  duration: 5910.208984375,
+  naturalSize: {
+     height: 1080
+     orientation: 'landscape'
+     width: '1920'
+  },
+  audioTracks: [
+    { language: 'es', title: 'Spanish', type: 'audio/mpeg', index: 0 },
+    { language: 'en', title: 'English', type: 'audio/mpeg', index: 1 }
+  ],
+  textTracks: [
+    { title: '#1 French', language: 'fr', index: 0, type: 'text/vtt' },
+    { title: '#2 English CC', language: 'en', index: 1, type: 'text/vtt' },
+    { title: '#3 English Director Commentary', language: 'en', index: 2, type: 'text/vtt' }
+  ],
+  videoTracks: [
+    { index: 0, bitrate: 3987904, codecs: "avc1.640028", height: 720, trackId: "f1-v1-x3", width: 1280 },
+    { index: 1, bitrate: 7981888, codecs: "avc1.640028", height: 1080, trackId: "f2-v1-x3", width: 1920 },
+    { index: 2, bitrate: 1994979, codecs: "avc1.4d401f", height: 480, trackId: "f3-v1-x3", width: 848 }
+  ],
+  trackId: "720p 2400kbps",
+}
+```
+
+> **Note:** `audioTracks`, `textTracks`, and `videoTracks` are not available on the web.
+
+---
+
+### `onLoadStart`
+
+Triggered when media starts loading.
+
+**Payload:**
+| Property | Type | Description |
+|----------|--------|-------------------------------------|
+| isNetwork | boolean | `true` if media is loaded from a network |
+| type | string | Media type (not available on Windows) |
+| uri | string | Media source URI (not available on Windows) |
+
+**Example:**
+
+```javascript
+{
+  isNetwork: true,
+  type: '',
+  uri: 'https://example.com/video.mp4'
+}
+```
+
+---
+
+### `onPlaybackStateChanged`
+
+Triggered when playback state changes.
+
+**Payload:**
+| Property | Type | Description |
+|----------|--------|-------------------------------------|
+| isPlaying | boolean | `true` if media is playing |
+| isSeeking | boolean | `true` if seeking is in progress |
+
+**Example:**
+
+```javascript
+{
+  isPlaying: true,
+  isSeeking: false
+}
+```
+
+---
+
+### `onPictureInPictureStatusChanged`
+
+Triggered when Picture-in-Picture (PiP) mode is activated or deactivated.
+
+**Payload:**
+| Property | Type | Description |
+|----------|--------|----------------------------------|
+| isActive | boolean | `true` if PiP mode is active |
+
+**Example:**
+
+```javascript
+{
+  isActive: true;
+}
+```
+
+---
+
+### `onPlaybackRateChange`
+
+Triggered when playback speed changes.
+
+**Payload:**
+| Property | Type | Description |
+|-------------|--------|---------------------------------|
+| playbackRate | number | `0` (paused), `1` (normal speed), other values indicate speed changes |
+
+**Example:**
+
+```javascript
+{
+  playbackRate: 0; // indicates paused
+}
+```
+
+---
+
+### `onProgress`
+
+Triggered every `progressUpdateInterval` milliseconds, providing information about the current playback position.
+
+**Payload:**
+| Property | Type | Description |
+|----------------|--------|-------------------------------------------------------------------------|
+| currentTime | number | Current playback position (seconds) |
+| playableDuration | number | Duration that can be played using only the buffer (seconds) |
+| seekableDuration | number | Duration that can be seeked to (usually the total length of the media) |
+
+**Example:**
+
+```javascript
+{
+  currentTime: 5.2,
+  playableDuration: 34.6,
+  seekableDuration: 888
+}
+```
+
+---
+
+### `onReadyForDisplay`
+
+Triggered when the first video frame is ready to be displayed. This is when the poster is removed.
+
+**Payload:** _none_
+
+- iOS: [`readyForDisplay`](https://developer.apple.com/documentation/avkit/avplayerviewcontroller/1615830-readyfordisplay?language=objc)
+- Android: [`STATE_READY`](https://exoplayer.dev/doc/reference/com/google/android/exoplayer2/Player.html#STATE_READY)
+
+---
+
+### `onReceiveAdEvent`
+
+Triggered when an AdEvent is received from the IMA SDK.
+
+Enum `AdEvent` possible values for [Android](https://developers.google.com/interactive-media-ads/docs/sdks/html5/client-side/reference/js/google.ima.AdEvent) and [iOS](https://developers.google.com/interactive-media-ads/docs/sdks/ios/client-side/reference/Enums/IMAAdEventType):
+
+  AdEvent
+
+| Event                      | Platform     | Description                                                                                                                                                                                                 |
+| -------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AD_BREAK_ENDED`           | iOS          | Fired the first time each ad break ends. Applications must reenable seeking when this occurs (only used for dynamic ad insertion).                                                                          |
+| `AD_BREAK_READY`           | Android, iOS | Fires when an ad rule or a VMAP ad break would have played if autoPlayAdBreaks is false.                                                                                                                    |
+| `AD_BREAK_STARTED`         | iOS          | Fired first time each ad break begins playback. If an ad break is watched subsequent times this will not be fired. Applications must disable seeking when this occurs (only used for dynamic ad insertion). |
+| `AD_BUFFERING`             | Android      | Fires when the ad has stalled playback to buffer.                                                                                                                                                           |
+| `AD_CAN_PLAY`              | Android      | Fires when the ad is ready to play without buffering, either at the beginning of the ad or after buffering completes.                                                                                       |
+| `AD_METADATA`              | Android      | Fires when an ads list is loaded.                                                                                                                                                                           |
+| `AD_PERIOD_ENDED`          | iOS          | Fired every time the stream switches from advertising or slate to content. This will be fired even when an ad is played a second time or when seeking into an ad (only used for dynamic ad insertion).      |
+| `AD_PERIOD_STARTED`        | iOS          | Fired every time the stream switches from content to advertising or slate. This will be fired even when an ad is played a second time or when seeking into an ad (only used for dynamic ad insertion).      |
+| `AD_PROGRESS`              | Android      | Fires when the ad's current time value changes. The event `data` will be populated with an AdProgressData object.                                                                                           |
+| `ALL_ADS_COMPLETED`        | Android, iOS | Fires when the ads manager is done playing all the valid ads in the ads response, or when the response doesn't return any valid ads.                                                                        |
+| `CLICK`                    | Android, iOS | Fires when the ad is clicked.                                                                                                                                                                               |
+| `COMPLETED`                | Android, iOS | Fires when the ad completes playing.                                                                                                                                                                        |
+| `CONTENT_PAUSE_REQUESTED`  | Android      | Fires when content should be paused. This usually happens right before an ad is about to cover the content.                                                                                                 |
+| `CONTENT_RESUME_REQUESTED` | Android      | Fires when content should be resumed. This usually happens when an ad finishes or collapses.                                                                                                                |
+| `CUEPOINTS_CHANGED`        | iOS          | Cuepoints changed for VOD stream (only used for dynamic ad insertion).                                                                                                                                      |
+| `DURATION_CHANGE`          | Android      | Fires when the ad's duration changes.                                                                                                                                                                       |
+| `ERROR`                    | Android, iOS | Fires when an error occurred while loading the ad and prevent it from playing.                                                                                                                              |
+| `FIRST_QUARTILE`           | Android, iOS | Fires when the ad playhead crosses first quartile.                                                                                                                                                          |
+| `IMPRESSION`               | Android      | Fires when the impression URL has been pinged.                                                                                                                                                              |
+| `INTERACTION`              | Android      | Fires when an ad triggers the interaction callback. Ad interactions contain an interaction ID string in the ad data.                                                                                        |
+| `LINEAR_CHANGED`           | Android      | Fires when the displayed ad changes from linear to nonlinear, or the reverse.                                                                                                                               |
+| `LOADED`                   | Android, iOS | Fires when ad data is available.                                                                                                                                                                            |
+| `LOG`                      | Android, iOS | Fires when a non-fatal error is encountered. The user need not take any action since the SDK will continue with the same or next ad playback depending on the error situation.                              |
+| `MIDPOINT`                 | Android, iOS | Fires when the ad playhead crosses midpoint.                                                                                                                                                                |
+| `PAUSED`                   | Android, iOS | Fires when the ad is paused.                                                                                                                                                                                |
+| `RESUMED`                  | Android, iOS | Fires when the ad is resumed.                                                                                                                                                                               |
+| `SKIPPABLE_STATE_CHANGED`  | Android      | Fires when the displayed ads skippable state is changed.                                                                                                                                                    |
+| `SKIPPED`                  | Android, iOS | Fires when the ad is skipped by the user.                                                                                                                                                                   |
+| `STARTED`                  | Android, iOS | Fires when the ad starts playing.                                                                                                                                                                           |
+| `STREAM_LOADED`            | iOS          | Stream request has loaded (only used for dynamic ad insertion).                                                                                                                                             |
+| `TAPPED`                   | iOS          | Fires when the ad is tapped.                                                                                                                                                                                |
+| `THIRD_QUARTILE`           | Android, iOS | Fires when the ad playhead crosses third quartile.                                                                                                                                                          |
+| `UNKNOWN`                  | iOS          | An unknown event has fired                                                                                                                                                                                  |
+| `USER_CLOSE`               | Android      | Fires when the ad is closed by the user.                                                                                                                                                                    |
+| `VIDEO_CLICKED`            | Android      | Fires when the non-clickthrough portion of a video ad is clicked.                                                                                                                                           |
+| `VIDEO_ICON_CLICKED`       | Android      | Fires when a user clicks a video icon.                                                                                                                                                                      |
+| `VOLUME_CHANGED`           | Android      | Fires when the ad volume has changed.                                                                                                                                                                       |
+| `VOLUME_MUTED`             | Android      | Fires when the ad volume has been muted.                                                                                                                                                                    |
+
+**Payload:**
+| Property | Type | Description |
+|----------|-----------------------------------------|---------------------|
+| event | AdEvent | The ad event received |
+| data | Record&lt;string, string&gt; \| undefined | Additional ad event data |
+
+**Example:**
+
+```json
+{
+  "data": {
+    "key": "value"
+  },
+  "event": "LOG"
+}
+```
+
+---
+
+### `onRestoreUserInterfaceForPictureInPictureStop`
+
+Corresponds to Apple's [`restoreUserInterfaceForPictureInPictureStopWithCompletionHandler`](https://developer.apple.com/documentation/avkit/avpictureinpicturecontrollerdelegate/1614703-pictureinpicturecontroller?language=objc).
+Call `restoreUserInterfaceForPictureInPictureStopCompleted` inside this function when the UI is restored.
+
+**Payload:** _none_
+
+---
+
+### `onSeek`
+
+Triggered when a seek operation completes.
+
+**Payload:**
+| Property | Type | Description |
+|------------|--------|---------------------------------|
+| currentTime | number | Current time after seeking |
+| seekTime | number | Requested seek time |
+
+**Example:**
+
+```javascript
+{
+  currentTime: 100.5,
+  seekTime: 100
+}
+```
+
+> **Note:** On iOS, this callback is not reported when native controls are enabled.
+
+---
+
+### `onTimedMetadata`
+
+Triggered when timed metadata is available.
+
+**Payload:**
+| Property | Type | Description |
+|----------|------|--------------------------|
+| metadata | array | Array of metadata objects |
+
+**Example:**
+
+```javascript
+{
+  metadata: [
+    { value: "Streaming Encoder", identifier: "TRSN" },
+    { value: "Internet Stream", identifier: "TRSO" },
+    { value: "Any Time You Like", identifier: "TIT2" },
+  ];
+}
+```
+
+---
+
+### `onTextTrackDataChanged`
+
+Triggered when new subtitle data becomes available.
+
+**Payload:**
+| Property | Type | Description |
+|----------------|--------|--------------------------------------------------|
+| subtitleTracks | string | The subtitle text content in a compatible format |
+
+**Example:**
+
+```javascript
+{
+  subtitleTracks: "This blade has a dark past.";
+}
+```
+
+---
+
+### `onTextTracks`
+
+Triggered when available text (subtitle) tracks change.
+
+**Payload:**
+| Property | Type | Description |
+|----------|--------|--------------------------------------------------------------------------------------------------------------|
+| index | number | Internal track ID |
+| title | string | Track name |
+| language | string | 2 letter [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) language code |
+| type | string | Track MIME type (_VTT_, _SRT_, _TTML_) |
+| selected | boolean | `true` if the track is currently playing |
+
+**Example:**
+
+```javascript
+{
+  textTracks: [
+    {
+      index: 0,
+      title: "English Subtitles",
+      type: "vtt",
+      selected: true,
+    },
+  ];
+}
+```
+
+---
+
+### `onVideoTracks`
+
+Triggered when video tracks change.
+
+**Payload:**
+| Property | Type | Description |
+|----------|---------|-----------------------------------|
+| index | number | Track index |
+| trackId | string | Internal track ID |
+| codecs | string | Codec type |
+| width | number | Video width |
+| height | number | Video height |
+| bitrate | number | Track bitrate (bps) |
+| selected | boolean | `true` if the track is playing |
+| rotation | number | Rotation angle (0, 90, 180, 270) |
+
+**Example:**
+
+```javascript
+{
+  videoTracks: [
+    {
+      index: 0,
+      trackId: "1",
+      codecs: "video/mp4",
+      width: 1920,
+      height: 1080,
+      bitrate: 5000000,
+      selected: true,
+      rotation: 0,
+    },
+  ];
+}
+```
+
+---
+
+### `onVolumeChange`
+
+Triggered when the player volume changes.
+
+> **Note:** This event applies to the player's volume, not the device's system volume.
+
+**Payload:**
+| Property | Type | Description |
+|----------|--------|---------------------------------|
+| volume | number | Volume level (0 to 1) |
+| muted | boolean | Whether the player is muted |
+
+**Example:**
+
+```javascript
+{
+  volume: 0.5;
+}
+```
+
+---
+
+## Methods
+
+import PlatformsList from "@site/src/components/PlatformsList/PlatformsList.tsx";
+
+# Methods
+
+This page shows the list of available methods.
+
+## Details
+
+### `dismissFullscreenPlayer`
+
+```tsx
+dismissFullscreenPlayer(): Promise
+```
+
+Exits fullscreen mode.
+
+> **Deprecated:** Use `setFullScreen(false)` instead.
+
+---
+
+### `pause`
+
+```tsx
+pause(): Promise
+```
+
+Pauses the video.
+
+---
+
+### `presentFullscreenPlayer`
+
+```tsx
+presentFullscreenPlayer(): Promise
+```
+
+Enters fullscreen mode.
+
+- On **iOS**, this opens a fullscreen view controller with controls.
+- On **Android**, this makes the player fullscreen but requires styling to match screen dimensions.
+
+> **Deprecated:** Use `setFullScreen(true)` instead.
+
+---
+
+### `resume`
+
+```tsx
+resume(): Promise
+```
+
+Resumes video playback.
+
+---
+
+### `restoreUserInterfaceForPictureInPictureStopCompleted`
+
+```tsx
+restoreUserInterfaceForPictureInPictureStopCompleted(restored);
+```
+
+Must be called after `onRestoreUserInterfaceForPictureInPictureStop`.
+Corresponds to Apple's [`restoreUserInterfaceForPictureInPictureStop`](https://developer.apple.com/documentation/avkit/avpictureinpicturecontrollerdelegate/1614703-pictureinpicturecontroller?language=objc).
+
+---
+
+### `save`
+
+```tsx
+save(): Promise
+```
+
+Saves the video to the user's **Photos app** with the current filter.
+
+#### Notes:
+
+- Supports **MP4** export only.
+- Exports to the **cache directory** with a generated UUID filename.
+- Requires **internet connection** if the video is not already buffered.
+- Video remains in the **Photos app** until manually deleted.
+- Works with **cached videos**.
+
+#### Future improvements:
+
+- Support for **multiple quality options**.
+- Support for **more formats**.
+- Support for **custom directory and filename**.
+
+---
+
+### `enterPictureInPicture`
+
+```tsx
+enterPictureInPicture();
+```
+
+Activates Picture-in-Picture (PiP) mode.
+
+#### Android setup:
+
+For **Expo**, enable PiP in `app.json`:
+
+```json
+"plugins": [
+  [
+    "react-native-video",
+    {
+      "enableAndroidPictureInPicture": true
+    }
+  ]
+]
+```
+
+For **Bare React Native**, update `AndroidManifest.xml`:
+
+```xml
+
+```
+
+> **Note:**
+>
+> - On **Android**, entering PiP moves the app to the **background**.
+> - On **iOS**, **video ads cannot start** in PiP mode ([Google IMA SDK](https://developers.google.com/interactive-media-ads/docs/sdks/ios/client-side/picture_in_picture?hl=en#starting_ads)).
+
+---
+
+### `exitPictureInPicture`
+
+```tsx
+exitPictureInPicture();
+```
+
+Exits Picture-in-Picture (PiP) mode.
+
+---
+
+### `seek`
+
+```tsx
+seek(seconds: number)
+```
+
+Seeks to the specified position (**in seconds**).
+
+#### Notes:
+
+- **Must be called after** `onLoad`.
+- Triggers the [`onSeek`](./events#onseek) event.
+
+#### **iOS Exact Seek:**
+
+```tsx
+seek(seconds, tolerance: number)
+```
+
+- Default **tolerance**: ±100ms.
+- Set `tolerance = 0` for **precise seeking**.
+
+---
+
+### `setVolume`
+
+```tsx
+setVolume(value: number): Promise
+```
+
+Changes the **volume** level. Same behavior as the [`volume`](./props#volume) prop.
+
+---
+
+### `getCurrentPosition`
+
+```tsx
+getCurrentPosition(): Promise
+```
+
+Returns the **current playback position** in seconds.
+
+> **Throws an error** if the player is not initialized.
+
+---
+
+### `setSource`
+
+```tsx
+setSource(source: ReactVideoSource): Promise
+```
+
+Updates the media source **dynamically**.
+
+> **Note:** This **overrides** the `source` prop.
+
+---
+
+### `setFullScreen`
+
+```tsx
+setFullScreen(fullscreen: boolean): Promise
+```
+
+Toggles fullscreen mode.
+
+- `true` → Enters fullscreen.
+- `false` → Exits fullscreen.
+
+---
+
+### `nativeHtmlVideoRef`
+
+A **reference to the native HTML `` element**.
+Useful for integrating **third-party** video libraries like **hls.js, shaka, video.js, etc.**.
+
+---
+
+### **Example Usage**
+
+```tsx
+const videoRef = useRef(null);
+
+const handleVideoControls = async () => {
+  if (!videoRef.current) return;
+
+  // Fullscreen controls
+  videoRef.current.presentFullscreenPlayer();
+  videoRef.current.dismissFullscreenPlayer();
+
+  // Playback controls
+  videoRef.current.pause();
+  videoRef.current.resume();
+
+  // Save video
+  const response = await videoRef.current.save();
+  console.log("Saved video path:", response.uri);
+
+  // Seek to 200s (or with tolerance on iOS)
+  videoRef.current.seek(200);
+  videoRef.current.seek(200, 10);
+};
+
+return (
+  
+);
+```
+
+## Static Methods
+
+### `getWidevineLevel`
+
+```tsx
+getWidevineLevel(): Promise
+```
+
+Returns the **Widevine DRM level**:
+
+- **0** → Unknown / Not supported.
+- **1, 2, 3** → Supported Widevine levels.
+
+---
+
+### `isCodecSupported`
+
+```tsx
+isCodecSupported(mimetype: string, width: number, height: number): Promise
+```
+
+Checks if the given **video codec** is supported.
+
+| Result        | Meaning                          |
+| ------------- | -------------------------------- |
+| `hardware`    | Hardware decoding supported      |
+| `software`    | Only software decoding available |
+| `unsupported` | Codec **not supported**          |
+
+---
+
+### `isHEVCSupported`
+
+```tsx
+isHEVCSupported(): Promise
+```
+
+Checks if **HEVC (H.265)** is supported at **1920×1080 resolution**.
+
+> Uses `isCodecSupported` internally.
+
+---
+
+### Static Methods Example Usage
+
+```tsx
+import { VideoDecoderProperties } from "react-native-video";
+
+VideoDecoderProperties.getWidevineLevel().then((level) => {
+  console.log("Widevine Level:", level);
+});
+
+VideoDecoderProperties.isCodecSupported("video/hevc", 1920, 1080).then(
+  (support) => {
+    console.log("HEVC Support:", support);
+  }
+);
+
+VideoDecoderProperties.isHEVCSupported().then((support) => {
+  console.log("HEVC 1080p Support:", support);
+});
+```
+
+---
+
+## Props
+
+import PlatformsList from "@site/src/components/PlatformsList/PlatformsList.tsx";
+
+# Configurable Props
+
+This page shows the list of available properties to configure the player.
+
+## Details
+
+### `adTagUrl`
+
+:::warning
+Deprecated, use `source.ad.adTagUrl` instead.
+:::
+
+Sets the VAST URI to play AVOD ads.
+
+**Example:**
+
+```javascript
+adTagUrl =
+  "https://pubads.g.doubleclick.net/gampad/ads?iu=/21775744923/external/vmap_ad_samples&sz=640x480&cust_params=sample_ar%3Dpremidpostoptimizedpodbumper&ciu_szs=300x250&gdfp_req=1&ad_rule=1&output=vmap&unviewed_position_start=1&env=vp&impl=s&cmsid=496&vid=short_onecue&correlator=";
+```
+
+> **Note:** You need to enable IMA SDK in the Gradle or Podfile – see [Enable Client-Side Ads Insertion](../installation.md).
+
+---
+
+### `allowsExternalPlayback`
+
+Indicates whether the player allows switching to external playback mode such as AirPlay or HDMI.
+
+- **true (default)** – Allows switching to external playback mode.
+- **false** – Prevents switching to external playback mode.
+
+---
+
+### `audioOutput`
+
+Changes the audio output.
+
+- **speaker (default)** – Plays through the speaker.
+- **earpiece** – Plays through the earpiece.
+
+---
+
+### `automaticallyWaitsToMinimizeStalling`
+
+Indicates whether the player should automatically delay playback to minimize stalling. Available for clients linked against iOS 10.0 and later.
+
+- **false** – Immediately starts playback.
+- **true (default)** – Delays playback to minimize stalling.
+
+---
+
+### `bufferConfig`
+
+:::warning
+Deprecated, use `source.bufferConfig` instead.
+:::
+
+Adjusts the buffer settings. This prop takes an object with one or more of the following properties:
+
+| Property                          | Type   | Description                                                                       |
+| --------------------------------- | ------ | --------------------------------------------------------------------------------- |
+| minBufferMs                       | number | Minimum duration (ms) the player will attempt to keep buffered.                   |
+| maxBufferMs                       | number | Maximum duration (ms) the player will attempt to buffer.                          |
+| bufferForPlaybackMs               | number | Duration (ms) that must be buffered before playback starts or resumes.            |
+| bufferForPlaybackAfterRebufferMs  | number | Duration (ms) that must be buffered after a rebuffer before playback resumes.     |
+| backBufferDurationMs              | number | Duration (ms) of buffer to keep before the current position (allows rewinding).   |
+| maxHeapAllocationPercent          | number | Percentage of available heap the video can use to buffer (0 to 1).                |
+| minBackBufferMemoryReservePercent | number | Percentage of available app memory before the back buffer is disabled (0 to 1).   |
+| minBufferMemoryReservePercent     | number | Percentage of available app memory reserved for preventing buffer usage (0 to 1). |
+| cacheSizeMB                       | number | Cache size in MB. Set to `0` to disable caching (Android only).                   |
+| live                              | object | Object containing configuration for live playback. See below.                     |
+
+#### Live Buffer Configurations
+
+| Property         | Type   | Description                                                        |
+| ---------------- | ------ | ------------------------------------------------------------------ |
+| maxPlaybackSpeed | number | Maximum playback speed for catching up to target live offset.      |
+| minPlaybackSpeed | number | Minimum playback speed for falling back to target live offset.     |
+| maxOffsetMs      | number | Maximum allowed live offset. The player won’t exceed this limit.   |
+| minOffsetMs      | number | Minimum allowed live offset. The player won’t go below this limit. |
+| targetOffsetMs   | number | The target live offset the player will aim to maintain.            |
+
+For more details on Android live streaming, see [ExoPlayer Live Streaming](https://developer.android.com/media/media3/exoplayer/live-streaming?hl=en).
+
+#### Example with Default Values
+
+```javascript
+bufferConfig={{
+  minBufferMs: 15000,
+  maxBufferMs: 50000,
+  bufferForPlaybackMs: 2500,
+  bufferForPlaybackAfterRebufferMs: 5000,
+  backBufferDurationMs: 120000,
+  cacheSizeMB: 0,
+  live: {
+      targetOffsetMs: 500,
+  },
+}}
+```
+
+> **Note:** The Android cache is global and shared among all components. The first `cacheSizeMB` value set persists throughout the app lifecycle.
+
+---
+
+### `bufferingStrategy`
+
+Configures the buffering and data loading strategy.
+
+- **Default (default)** – Uses ExoPlayer's default loading strategy.
+- **DisableBuffering** – Prevents buffering beyond the immediate need. **Use with caution, as this may stop playback.**
+- **DependingOnMemory** – Uses ExoPlayer’s default strategy but stops buffering and triggers garbage collection when memory is low.
+
+---
+
+### `chapters`
+
+Provides a custom chapter source for tvOS. This prop takes an array of objects with the following properties:
+
+| Property  | Type    | Description                                                                    |
+| --------- | ------- | ------------------------------------------------------------------------------ |
+| title     | string  | The title of the chapter.                                                      |
+| startTime | number  | The start time of the chapter (seconds).                                       |
+| endTime   | number  | The end time of the chapter (seconds).                                         |
+| uri       | string? | Optional image override URL (HTTP or Base64). Some media auto-generate images. |
+
+---
+
+### `currentPlaybackTime`
+
+When playing an HLS live stream with an `EXT-X-PROGRAM-DATE-TIME` tag, this property contains the epoch value in milliseconds.
+
+---
+
+### `controls`
+
+Determines whether player controls are shown.
+
+- **false (default)** – Hides player controls.
+- **true** – Displays player controls.
+
+Controls are always visible in fullscreen mode, even if `controls={false}`. To add custom controls, use packages like:
+
+- [react-native-video-controls](https://github.com/itsnubix/react-native-video-controls)
+- [react-native-media-console](https://github.com/criszz77/react-native-media-console)
+
+See [Useful Side Projects](../projects.md).
+
+---
+
+### `controlsStyles`
+
+Adjust the control styles. This prop is needed only if `controls={true}` and is an object. See the supported properties below.
+
+| Property                            | Type    | Description                                                         |
+| ----------------------------------- | ------- | ------------------------------------------------------------------- |
+| hidePosition                        | boolean | Hides the position indicator. Default is `false`.                   |
+| hidePlayPause                       | boolean | Hides the play/pause button. Default is `false`.                    |
+| hideForward                         | boolean | Hides the forward button. Default is `false`.                       |
+| hideRewind                          | boolean | Hides the rewind button. Default is `false`.                        |
+| hideNext                            | boolean | Hides the next button. Default is `false`.                          |
+| hidePrevious                        | boolean | Hides the previous button. Default is `false`.                      |
+| hideFullscreen                      | boolean | Hides the fullscreen button. Default is `false`.                    |
+| hideSeekBar                         | boolean | Hides the seek bar, useful for live broadcasts. Default is `false`. |
+| hideDuration                        | boolean | Hides the duration display. Default is `false`.                     |
+| hideNavigationBarOnFullScreenMode   | boolean | Hides the navigation bar in fullscreen mode. Default is `true`.     |
+| hideNotificationBarOnFullScreenMode | boolean | Hides the notification bar in fullscreen mode. Default is `true`.   |
+| hideSettingButton                   | boolean | Hides the settings button. Default is `true`.                       |
+| seekIncrementMS                     | number  | Defines the seek increment in milliseconds. Default is `10000`.     |
+| liveLabel                           | string  | Sets a label for live video.                                        |
+
+**Example with default values:**
+
+```javascript
+controlsStyles={{
+  hidePosition: false,
+  hidePlayPause: false,
+  hideForward: false,
+  hideRewind: false,
+  hideNext: false,
+  hidePrevious: false,
+  hideFullscreen: false,
+  hideSeekBar: false,
+  hideDuration: false,
+  hideNavigationBarOnFullScreenMode: true,
+  hideNotificationBarOnFullScreenMode: true,
+  hideSettingButton: true,
+  seekIncrementMS: 10000,
+  liveLabel: "LIVE"
+}}
+```
+
+---
+
+### `contentStartTime`
+
+:::warning
+Deprecated, use `source.contentStartTime` instead.
+:::
+
+Defines the start time in milliseconds for SSAI content. This ensures that video resolutions are loaded at the correct time. **Note:** This feature only works with DASH streams.
+
+---
+
+### `debug`
+
+Enables detailed logging.
+
+:::warning
+Do not use this in production builds.
+:::
+
+| Property | Type    | Description                               |
+| -------- | ------- | ----------------------------------------- |
+| `enable` | boolean | Enables verbose logs. Default is `false`. |
+| `thread` | boolean | Displays logs with thread information.    |
+
+**Example:**
+
+```javascript
+debug={{
+  enable: true,
+  thread: true,
+}}
+```
+
+---
+
+### `disableFocus`
+
+Determines whether video audio should override background music/audio on Android.
+
+- **false (default)** – Overrides background audio/music.
+- **true** – Allows background audio/music from other apps to continue playing.
+
+> **Note:** If `true`, multiple videos can play simultaneously. If `false`, starting another video will pause the first one.
+
+---
+
+### `disableDisconnectError`
+
+Determines if the player should throw an error when the network connection is lost.
+
+- **false (default)** – Throws an error when the connection is lost.
+- **true** – The player will keep trying to buffer when the connection is lost.
+
+---
+
+### `disableAudioSessionManagement`
+
+Disable audio session management in library (for all views).
+
+- **true** - Disable audio session management in the library.
+- **false (default)** - Enable audio session management in the library.
+
+:::danger
+This prop disables audio session management in the library. You only should use this prop if you are managing the audio session yourself.
+You can encounter issues with other features, like background audio, if you don't properly manage the audio session.
+:::
+
+---
+
+### `drm`
+
+:::warning
+Deprecated, use `source.drm` instead.
+:::
+
+To set up DRM, follow [this guide](./drm.mdx).
+
+---
+
+### `enterPictureInPictureOnLeave`
+
+Determines whether to enter Picture-in-Picture (PiP) mode when the user leaves the app.
+
+- **false (default)** – Does not enable PiP mode.
+- **true** – Plays media in PiP mode when the user switches apps.
+
+**Using this on Android:**
+
+- **With Expo:** Add `enableAndroidPictureInPicture` to `app.json`:
+
+```json
+  "plugins": [
+    [
+      "react-native-video",
+      {
+        "enableAndroidPictureInPicture": true
+      }
+    ]
+  ]
+```
+
+- **With Bare React Native:** Add PiP support in `AndroidManifest.xml`:
+
+```xml
+
+```
+
+> **Note:** Video ads cannot start when using PiP on iOS. More details are available in the [Google IMA SDK Docs](https://developers.google.com/interactive-media-ads/docs/sdks/ios/client-side/picture_in_picture?hl=en#starting_ads).
+
+---
+
+### `filter`
+
+Applies a video filter.
+
+| FilterType         | Description           |
+| ------------------ | --------------------- |
+| `NONE (default)`   | No filter             |
+| `INVERT`           | CIColorInvert         |
+| `MONOCHROME`       | CIColorMonochrome     |
+| `POSTERIZE`        | CIColorPosterize      |
+| `FALSE`            | CIFalseColor          |
+| `MAXIMUMCOMPONENT` | CIMaximumComponent    |
+| `MINIMUMCOMPONENT` | CIMinimumComponent    |
+| `CHROME`           | CIPhotoEffectChrome   |
+| `FADE`             | CIPhotoEffectFade     |
+| `INSTANT`          | CIPhotoEffectInstant  |
+| `MONO`             | CIPhotoEffectMono     |
+| `NOIR`             | CIPhotoEffectNoir     |
+| `PROCESS`          | CIPhotoEffectProcess  |
+| `TONAL`            | CIPhotoEffectTonal    |
+| `TRANSFER`         | CIPhotoEffectTransfer |
+| `SEPIA`            | CISepiaTone           |
+
+> **Notes:**
+>
+> 1. Using a filter may increase CPU usage.
+> 2. Saving a filtered video and reloading it is a workaround for performance issues.
+> 3. Filters are not supported on HLS playlists.
+> 4. `filterEnabled` must be set to `true` for filters to work.
+
+---
+
+### `filterEnabled`
+
+Enables video filter.
+
+- **false (default)** – Don't enable filter.
+- **true** – Enable filter.
+
+---
+
+### `focusable`
+
+Determines whether this video view should be focusable with a non-touch input device, such as a hardware keyboard.
+
+- **false** – Makes view unfocusable.
+- **true (default)** – Makes view focusable.
+
+---
+
+### `fullscreen`
+
+Controls whether the player enters fullscreen on play.
+
+- **false (default)** – Don’t display the video in fullscreen.
+- **true** – Display the video in fullscreen.
+
+See [presentFullscreenPlayer](#presentfullscreenplayer) for details.
+
+---
+
+### `fullscreenAutorotate`
+
+If a preferred [fullscreenOrientation](#fullscreenorientation) is set, this causes the video to rotate to that orientation but permits rotation of the screen to match the user's holding position. Defaults to `true`.
+
+---
+
+### `fullscreenOrientation`
+
+- **all (default)** – Allows rotation in all orientations.
+- **landscape** – Locks fullscreen to landscape mode.
+- **portrait** – Locks fullscreen to portrait mode.
+
+---
+
+### `headers`
+
+Passes headers to the HTTP client, which can be used for authorization. Headers must be part of the source object.
+
+**Example:**
+
+```javascript
+source={{
+  uri: "https://www.example.com/video.mp4",
+  headers: {
+    Authorization: 'Bearer some-token-value',
+    'X-Custom-Header': 'some value'
+  }
+}}
+```
+
+---
+
+### `hideShutterView`
+
+Controls whether the ExoPlayer shutter view (black screen while loading) is enabled.
+
+- **false (default)** – Show shutter view.
+- **true** – Hide shutter view.
+
+---
+
+### `ignoreSilentSwitch`
+
+Controls the iOS silent switch behavior.
+
+- **"inherit" (default)** – Uses the default AVPlayer behavior.
+- **"ignore"** – Plays audio even if the silent switch is set.
+- **"obey"** – Doesn’t play audio if the silent switch is set.
+
+---
+
+### `maxBitRate`
+
+Sets the desired limit, in bits per second, of network bandwidth consumption when multiple video streams are available for a playlist.
+
+**Default:** `0` (no limit on maxBitRate).
+
+**Example:**
+
+```javascript
+maxBitRate={2000000} // 2 megabits
+```
+
+---
+
+### `mixWithOthers`
+
+Controls how audio mixes with other apps.
+
+- **"inherit" (default)** – Uses the default AVPlayer behavior.
+- **"mix"** – Allows this video’s audio to mix with other apps.
+- **"duck"** – Lowers the volume of other apps while playing this video.
+
+---
+
+### `muted`
+
+Controls whether the audio is muted.
+
+- **false (default)** – Don’t mute audio.
+- **true** – Mute audio.
+
+---
+
+### `paused`
+
+Controls whether the media is paused.
+
+- **false (default)** – Don’t pause the media.
+- **true** – Pause the media.
+
+---
+
+### `playInBackground`
+
+Determines whether the media should continue playing while the app is in the background.
+
+- **false (default)** – Don’t continue playing the media.
+- **true** – Continue playing the media.
+
+To use this feature on iOS, you must:
+
+- [Enable Background Audio](https://developer.apple.com/library/archive/documentation/Audio/Conceptual/AudioSessionProgrammingGuide/AudioSessionBasics/AudioSessionBasics.html#//apple_ref/doc/uid/TP40007875-CH3-SW3) in your Xcode project.
+- Set the `ignoreSilentSwitch` prop to "ignore".
+
+---
+
+### `playWhenInactive`
+
+Determines whether the media should continue playing when notifications or the Control Center are in front of the video.
+
+- **false (default)** – Don’t continue playing the media.
+- **true** – Continue playing the media.
+
+---
+
+### `poster`
+
+:::warning
+Value: string with a URL for the poster is deprecated, use `poster` as an object instead.
+:::
+
+An image to display while the video is loading.
+
+**Example:**
+
+```javascript
+
+  poster=
+  {{
+    source: { uri: "https://baconmockup.com/300/200/" },
+    resizeMode: "cover",
+  }}
+
+```
+
+---
+
+### `posterResizeMode`
+
+:::warning
+Deprecated, use `poster` with `resizeMode` key instead.
+:::
+
+Determines how to resize the poster image when the frame doesn’t match the raw video dimensions.
+
+- **"contain" (default)** – Scales the image uniformly to fit within the view.
+- **"center"** – Centers the image in the view without scaling beyond its original size.
+- **"cover"** – Scales the image uniformly, ensuring it fills the view while maintaining aspect ratio.
+- **"none"** – No resizing applied.
+- **"repeat"** – Repeats the image to fill the view (iOS only).
+- **"stretch"** – Stretches width and height independently, potentially distorting the aspect ratio.
+
+---
+
+### `preferredForwardBufferDuration`
+
+Defines how long the player should buffer media ahead of the playhead to prevent playback interruptions.
+
+**Default:** `0`.
+
+[Apple Documentation](https://developer.apple.com/documentation/avfoundation/avplayeritem/1643630-preferredforwardbufferduration)
+
+---
+
+### `preventsDisplaySleepDuringVideoPlayback`
+
+Determines whether the device screen should remain active while playing a video.
+
+**Default:** `true` (prevents the display from sleeping).
+
+---
+
+### `progressUpdateInterval`
+
+Sets the delay (in milliseconds) between `onProgress` events.
+
+**Default:** `250.0` ms.
+
+---
+
+### `rate`
+
+Controls the speed at which the media should play.
+
+- **0.0** – Pauses the video (iOS only).
+- **1.0 (default)** – Plays at normal speed.
+- **Other values** – Adjusts playback speed (faster/slower).
+
+---
+
+### `renderLoader`
+
+Allows you to provide a custom component to display while the video is loading.
+
+If `renderLoader` is provided, `poster` and `posterResizeMode` will be ignored.
+
+`renderLoader` can be either a component or a function returning a component.
+
+#### Function Signature
+
+```typescript
+interface ReactVideoRenderLoaderProps {
+  source?: ReactVideoSource;
+  style?: StyleProp;
+  resizeMode?: EnumValues;
+}
+```
+
+#### Example
+
+```javascript
+
+  renderLoader=
+  {() => (
+    
+      Custom Loader
+    
+  )}
+
+```
+
+---
+
+### `repeat`
+
+Determines whether to repeat the video when playback reaches the end.
+
+- **false (default)** – Don’t repeat the video.
+- **true** – Repeat the video.
+
+---
+
+### `reportBandwidth`
+
+Determines whether to generate `onBandwidthUpdate` events. This is necessary due to the high frequency of these events on ExoPlayer.
+
+- **false (default)** – Don’t generate `onBandwidthUpdate` events.
+- **true** – Generate `onBandwidthUpdate` events.
+
+---
+
+### `resizeMode`
+
+Determines how to resize the video when the frame doesn’t match the raw video dimensions.
+
+- **"none" (default)** – No resizing applied.
+- **"contain"** – Scales the video uniformly to fit within the view.
+- **"cover"** – Scales the video uniformly to fill the view while maintaining aspect ratio.
+- **"stretch"** – Stretches width and height independently, which may alter the aspect ratio.
+
+---
+
+### `selectedAudioTrack`
+
+Configures which audio track, if any, is played.
+
+```javascript
+selectedAudioTrack={{
+  type: "title",
+  value: "Dubbing"
+}}
+```
+
+| Type               | Value  | Description                                                                                 |
+| ------------------ | ------ | ------------------------------------------------------------------------------------------- |
+| "system" (default) | N/A    | Play the audio track that matches the system language. If none match, play the first track. |
+| "disabled"         | N/A    | Turn off audio.                                                                             |
+| "title"            | string | Play the audio track with the specified title, e.g., "French".                              |
+| "language"         | string | Play the audio track with the specified language, e.g., "fr".                               |
+| "index"            | number | Play the audio track with the specified index, e.g., 0.                                     |
+
+If no matching track is found, the first available track will be played. If multiple tracks match, the first match will be used.
+
+---
+
+### `selectedTextTrack`
+
+Configures which text track (captions or subtitles), if any, is shown.
+
+```javascript
+selectedTextTrack={{
+  type: "title",
+  value: "English Subtitles"
+}}
+```
+
+| Type               | Value  | Description                                                             |
+| ------------------ | ------ | ----------------------------------------------------------------------- |
+| "system" (default) | N/A    | Display captions only if the system preference for captions is enabled. |
+| "disabled"         | N/A    | Don’t display a text track.                                             |
+| "title"            | string | Display the text track with the specified title, e.g., "French 1".      |
+| "language"         | string | Display the text track with the specified language, e.g., "fr".         |
+| "index"            | number | Display the text track with the specified index, e.g., 0.               |
+
+If no matching track is found, no subtitles will be displayed. If multiple tracks match, the first match will be used.
+
+---
+
+### `selectedVideoTrack`
+
+Configures which video track should be played. By default, the player uses Adaptive Bitrate Streaming (ABR) to automatically select the best stream based on available bandwidth.
+
+```javascript
+selectedVideoTrack={{
+  type: "resolution",
+  value: 480
+}}
+```
+
+| Type             | Value  | Description                                                                    |
+| ---------------- | ------ | ------------------------------------------------------------------------------ |
+| "auto" (default) | N/A    | Let the player determine the best track using ABR.                             |
+| "disabled"       | N/A    | Turn off video.                                                                |
+| "resolution"     | number | Play the video track with the specified height, e.g., 480 for the 480p stream. |
+| "index"          | number | Play the video track with the specified index, e.g., 0.                        |
+
+If no matching track is found, ABR will be used.
+
+---
+
+### `shutterColor`
+
+Applies color to the shutter view. If black flashes appear before the video starts, set:
+
+```javascript
+shutterColor = "transparent";
+```
+
+**Default:** `black`.
+
+---
+
+### `source`
+
+Sets the media source. You can pass an asset loaded via `require` or an object with a `uri`.
+
+Setting the source will trigger the player to attempt to load the provided media with all other given props. Ensure all props are provided before or at the same time as setting the source.
+
+Rendering the player component with a `null` source initializes the player and starts playing once a source value is provided.
+
+Providing a `null` source value after loading a previous source stops playback and clears out the previous content.
+
+The documentation for this prop is incomplete and will be updated as each option is investigated and tested.
+
+#### Asset Loaded via `require`
+
+:::danger
+On iOS, file names must not contain spaces. For example, `my video.mp4` will not work—use `my-video.mp4` instead.
+:::
+
+Example:
+
+Pass the asset directly (deprecated):
+
+```javascript
+const sintel = require("./sintel.mp4");
+source = { sintel };
+```
+
+Or by using a URI (starting from `6.0.0-beta.6`):
+
+```javascript
+const sintel = require('./sintel.mp4');
+source={{ uri: sintel }}
+```
+
+#### URI String
+
+A number of URI schemes are supported by passing an object with a `uri` attribute.
+
+All URI strings must be URL encoded.
+For example, `'www.myurl.com/blabla?q=test uri'` is invalid, whereas `'www.myurl.com/blabla?q=test%20uri'` is valid.
+
+##### Web Address (`http://`, `https://`)
+
+Example:
+
+```javascript
+source={{ uri: 'https://www.sample-videos.com/video/mp4/720/big_buck_bunny_720p_10mb.mp4' }}
+```
+
+##### File Path (`file://`)
+
+Example:
+
+```javascript
+source={{ uri: 'file:///sdcard/Movies/sintel.mp4' }}
+```
+
+Note: Your app will need permission to read external storage if accessing a file outside your app.
+
+##### File from Asset Folder (`asset://`)
+
+Allows playing a video file from the app's asset folder.
+
+Example:
+
+```javascript
+source={{ uri: 'asset:///sintel.mp4' }}
+```
+
+##### iPod Library (`ipod-library://`)
+
+Path to a sound file in your iTunes library, typically shared from iTunes to your app.
+
+Example:
+
+```javascript
+source={{ uri: 'ipod-library:///path/to/music.mp3' }}
+```
+
+Note: Using this feature requires adding an entry for `NSAppleMusicUsageDescription` to your `Info.plist` file, as described [here](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CocoaKeys.html).
+
+##### Explicit MIME Type for Streams
+
+Provide a `type` property (`mpd`/`m3u8`/`ism`) inside the source object.
+This is needed when the URL extension does not match the expected MIME type.
+
+Example (URL extension is `.ism` for Smooth Streaming, but the file is actually MPEG-DASH (`mpd`)):
+
+```javascript
+source={{ uri: 'http://host-serving-a-type-different-than-the-extension.ism/manifest(format=mpd-time-csf)',
+type: 'mpd' }}
+```
+
+##### Other Protocols
+
+The following protocols are supported on some platforms but not fully documented yet:
+`content://, ms-appx://, ms-appdata://, assets-library://`
+
+#### Using DRM Content
+
+To set up DRM, follow [this guide](./drm.mdx).
+
+Example:
+
+```javascript
+{
+  description: 'WV: Secure SD & HD (cbcs, MP4, H264)',
+  uri: 'https://storage.googleapis.com/wvmedia/cbcs/h264/tears/tears_aes_cbcs.mpd',
+  drm: {
+    type: DRMType.WIDEVINE,
+    licenseServer:
+      'https://proxy.uat.widevine.com/proxy?provider=widevine_test',
+  },
+},
+```
+
+#### Start Playback at a Specific Point in Time
+
+Provide an optional `startPosition` for video playback. The value is in milliseconds. If the `cropStart` prop is applied, it will be applied from that point forward.
+(If it is negative, undefined, or `null`, it is ignored.)
+
+#### Playing Only a Portion of the Video (Start & End Time)
+
+Provide an optional `cropStart` and/or `cropEnd` for the video. Values are in milliseconds. This is useful when you want to play only a portion of a large video.
+
+**Example:**
+
+```javascript
+source={{ uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', cropStart: 36012, cropEnd: 48500 }}
+
+source={{ uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', cropStart: 36012 }}
+
+source={{ uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', cropEnd: 48500 }}
+```
+
+#### Overriding the Metadata of a Source
+
+Provide optional `title`, `subtitle`, `artist`, `imageUri`, and/or `description` properties for the video.
+This is useful when using notification controls on Android or iOS or adapting the tvOS playback experience.
+
+**Example:**
+
+```javascript
+source={{
+    uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+    metadata: {
+      title: 'Custom Title',
+      subtitle: 'Custom Subtitle',
+      artist: 'Custom Artist',
+      description: 'Custom Description',
+      imageUri: 'https://pbs.twimg.com/profile_images/1498641868397191170/6qW2XkuI_400x400.png'
+    }
+  }}
+```
+
+#### `ad`
+
+Sets the ad configuration.
+
+**Example:**
+
+```javascript
+ad: {
+  adTagUrl =
+    "https://pubads.g.doubleclick.net/gampad/ads?iu=/21775744923/external/vmap_ad_samples&sz=640x480&cust_params=sample_ar%3Dpremidpostoptimizedpodbumper&ciu_szs=300x250&gdfp_req=1&ad_rule=1&output=vmap&unviewed_position_start=1&env=vp&impl=s&cmsid=496&vid=short_onecue&correlator=";
+  adLanguage = "fr";
+}
+```
+
+See: [ads](./ads.md) for more information.
+
+Note: You need to enable IMA SDK in the Gradle or Pod file - [enable client-side ads insertion](../installation.md).
+
+#### `contentStartTime`
+
+The start time in ms for SSAI content. This determines at what time to load the video info like resolutions. Use this only when you have an SSAI stream where the ad resolution is not the same as the content resolution.
+
+Note: This feature only works on DASH streams.
+
+#### `textTracksAllowChunklessPreparation`
+
+Allow Chunkless Preparation for HLS media sources.
+See: [disabling-chunkless](https://developer.android.com/media/media3/exoplayer/hls?#disabling-chunkless) in the Android documentation.
+
+Default value: `true`.
+
+```javascript
+source={{
+    uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+    textTracksAllowChunklessPreparation: false,
+  }}
+```
+
+#### `bufferConfig`
+
+Adjust the buffer settings. This prop takes an object with one or more of the properties listed below.
+
+| Property                          | Type   | Description                                                                                                                                     |
+| --------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| minBufferMs                       | number | Minimum duration of media that the player will attempt to buffer at all times, in milliseconds.                                                 |
+| maxBufferMs                       | number | Maximum duration of media that the player will attempt to buffer, in milliseconds.                                                              |
+| bufferForPlaybackMs               | number | Duration of media that must be buffered for playback to start or resume following a user action, in milliseconds.                               |
+| bufferForPlaybackAfterRebufferMs  | number | Duration of media that must be buffered for playback to resume after a rebuffer, in milliseconds.                                               |
+| backBufferDurationMs              | number | Duration of buffer to keep before the current position, allowing rewinding without rebuffering.                                                 |
+| maxHeapAllocationPercent          | number | Percentage of available heap that the video can use to buffer, between 0 and 1.                                                                 |
+| minBackBufferMemoryReservePercent | number | Percentage of available app memory at which during startup the back buffer will be disabled, between 0 and 1.                                   |
+| minBufferMemoryReservePercent     | number | Percentage of available app memory to keep in reserve, preventing buffer usage, between 0 and 1.                                                |
+| initialBitrate                    | number | Initial bitrate in bits per second (Android only). Defaults to 1_000_000. Used only at start, then ABR (Adaptive Bitrate Streaming) takes over. |
+| cacheSizeMB                       | number | Cache size in MB, preventing new src requests and saving bandwidth while repeating videos, or 0 to disable. Android only.                       |
+| live                              | object | Object containing another config set for live playback configuration.                                                                           |
+
+#### `minLoadRetryCount`
+
+Sets the minimum number of times to retry loading data before failing and reporting an error to the application. Useful for recovering from transient internet failures.
+
+Default: `3`. Retries `3` times.
+
+**Example:**
+
+```javascript
+source={{
+  uri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+  minLoadRetryCount: 5 // Retry 5 times.
+}}
+```
+
+#### `textTracks`
+
+Load one or more "sidecar" text tracks. This takes an array of objects representing each track. Each object should have the format:
+
+:::warning  
+This feature does not work with HLS playlists (e.g., m3u8) on iOS.
+:::
+
+| Property | Description                                                                                                 |
+| -------- | ----------------------------------------------------------------------------------------------------------- |
+| title    | Descriptive name for the track.                                                                             |
+| language | 2-letter [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) representing the language. |
+| type     | Mime type of the track. Supports `TextTrackType.SUBRIP`, `TextTrackType.TTML`, `TextTrackType.VTT`.         |
+| uri      | URL for the text track. Only tracks hosted on a web server are supported.                                   |
+
+Note: Due to iOS limitations, sidecar text tracks are not compatible with AirPlay. If `textTracks` are specified, AirPlay support will be automatically disabled.
+
+**Example:**
+
+```javascript
+import { TextTrackType } from "react-native-video";
+
+textTracks = [
+  {
+    title: "English CC",
+    language: "en",
+    type: TextTrackType.VTT, // "text/vtt"
+    uri: "https://bitdash-a.akamaihd.net/content/sintel/subtitles/subtitles_en.vtt",
+  },
+  {
+    title: "Spanish Subtitles",
+    language: "es",
+    type: TextTrackType.SUBRIP, // "application/x-subrip"
+    uri: "https://durian.blender.org/wp-content/content/subtitles/sintel_es.srt",
+  },
+];
+```
+
+---
+
+### `subtitleStyle`
+
+| Property             | Platform     | Description                                                                                                                                                                                        | Platforms    |
+| -------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| fontSize             | Android      | Adjust the font size of the subtitles. Default: font size of the device                                                                                                                            | Android      |
+| paddingTop           | Android      | Adjust the top padding of the subtitles. Default: 0                                                                                                                                                | Android      |
+| paddingBottom        | Android      | Adjust the bottom padding of the subtitles. Default: 0                                                                                                                                             | Android      |
+| paddingLeft          | Android      | Adjust the left padding of the subtitles. Default: 0                                                                                                                                               | Android      |
+| paddingRight         | Android      | Adjust the right padding of the subtitles. Default: 0                                                                                                                                              | Android      |
+| opacity              | Android, iOS | Adjust the visibility of subtitles with 0 hiding and 1 fully showing them. Android supports float values between 0 and 1 for varying opacity levels, whereas iOS supports only 0 or 1. Default: 1. | Android, iOS |
+| subtitlesFollowVideo | Android      | Boolean to adjust position of subtitles. Default: true                                                                                                                                             |
+
+**Example:**
+
+```javascript
+subtitleStyle={{ paddingBottom: 50, fontSize: 20, opacity: 0 }}
+```
+
+Note for `subtitlesFollowVideo`
+
+`subtitlesFollowVideo` helps to determine how the subtitles are positioned.
+To understand this prop, you need to understand how view management works.
+The main View style passed to react-native-video is the space reserved to display the video component.
+It may not match exactly the real video size.
+For example, you can pass a 4:3 video view and render a 16:9 video inside.
+So there is a second view, the video view.
+
+Subtitles are managed in a third view.
+
+- When `subtitlesFollowVideo` is set to true, the subtitle view will adapt to the video view.
+  If the video is displayed out of screen, the subtitles may also be displayed out of screen.
+- When `subtitlesFollowVideo` is set to false, the subtitle view will adapt to the main view.
+  If the video is displayed out of screen, the subtitles may still remain visible within the main view.
+
+This prop can be changed at runtime.
+
+---
+
+### `textTracks`
+
+:::warning
+Deprecated, use `source.textTracks` instead. Changing text tracks will restart playback.
+:::
+
+Load one or more "sidecar" text tracks. This takes an array of objects representing each track. Each object should have the format:
+
+:::warning
+This feature does not work with HLS playlists (e.g., m3u8) on iOS.
+:::
+
+| Property | Description                                                                                                                                                                         |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| title    | Descriptive name for the track                                                                                                                                                      |
+| language | 2-letter [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) representing the language                                                                          |
+| type     | Mime type of the track (TextTrackType.SUBRIP - SubRip (.srt), TextTrackType.TTML - TTML (.ttml), TextTrackType.VTT - WebVTT (.vtt)). iOS only supports VTT, Android supports all 3. |
+| uri      | URL for the text track. Currently, only tracks hosted on a web server are supported.                                                                                                |
+
+On iOS, sidecar text tracks are only supported for individual files, not HLS playlists. For HLS, you should include the text tracks as part of the playlist.
+
+Note: Due to iOS limitations, sidecar text tracks are not compatible with AirPlay. If `textTracks` are specified, AirPlay support will be automatically disabled.
+
+**Example:**
+
+```javascript
+import { TextTrackType }, Video from 'react-native-video';
+
+textTracks=[
+  {
+    title: "English CC",
+    language: "en",
+    type: TextTrackType.VTT, // "text/vtt"
+    uri: "https://bitdash-a.akamaihd.net/content/sintel/subtitles/subtitles_en.vtt"
+  },
+  {
+    title: "Spanish Subtitles",
+    language: "es",
+    type: TextTrackType.SUBRIP, // "application/x-subrip"
+    uri: "https://durian.blender.org/wp-content/content/subtitles/sintel_es.srt"
+  }
+]
+```
+
+---
+
+### `showNotificationControls`
+
+Controls whether to show media controls in the notification area.
+For Android, each Video component will have its own notification controls, whereas on iOS only one notification control will be shown for the last active Video component.
+
+On Android, this will also allow for external controls, Google Assistant session, and other benefits of `MediaSession`.
+
+You probably also want to set `playInBackground` to `true` to keep the video playing when the app is in the background, or `playWhenInactive` to `true` to keep the video playing when notifications or the Control Center are in front of the video.
+
+To customize the notification controls, you can use the `metadata` property in the `source` prop.
+
+- **false (default)** - Don't show media controls in the notification area.
+- **true** - Show media controls in the notification area.
+
+**To test notification controls on iOS, you need to run the app on a real device, as the simulator does not support it.**
+
+**For Android, you have to add the following code in your `AndroidManifest.xml` file:**
+
+```xml
+
+    ...
+    
+    
+    ...
+
+    
+      ...
+      
+          
+            
+          
+      
+    
+
+```
+
+---
+
+### `useSecureView`
+
+:::warning
+deprecated, use viewType instead
+:::
+
+Force the output to a SurfaceView and enables the secure surface.
+
+This will override useTextureView flag.
+
+SurfaceView is the only one that can be labeled as secure.
+
+- **true** - Use security
+- **false (default)** - Do not use security
+
+### `useTextureView`
+
+:::warning
+deprecated, use viewType instead
+:::
+
+Controls whether to output to a TextureView or SurfaceView.
+
+SurfaceView is more efficient and provides better performance but has two limitations:
+
+- It can't be animated, transformed or scaled
+- You can't overlay multiple SurfaceViews
+
+useTextureView can only be set at the same time you're setting the source.
+
+- **true (default)** - Use a TextureView
+- **false** - Use a SurfaceView
+
+### `viewType`
+
+Allows explicitly specifying the view type.
+This flag replaces `useSecureView` and `useTextureView` fields.
+There are 3 available values:
+
+- 'textureView': The video is rendered in a texture view. It allows mapping the view on a texture (useful for 3D).
+  DRM playback is not supported on textureView. If the DRM prop is provided, the surface will be transformed into a SurfaceView.
+- 'surfaceView' (default): The video is rendered in a surface, taking fewer resources to render.
+- 'secureView': The video is rendered in a surface that prevents screenshots from being taken.
+
+### `volume`
+
+Adjust the volume.
+
+- **1.0 (default)** - Play at full volume
+- **0.0** - Mute the audio
+- **Other values** - Reduce volume
+
+### `cmcd`
+
+Configure CMCD (Common Media Client Data) parameters. CMCD is a standard for conveying client-side metrics and capabilities to servers, which can help improve streaming quality and performance.
+
+For detailed information about CMCD, please refer to the [CTA-5004 Final Specification](https://cdn.cta.tech/cta/media/media/resources/standards/pdfs/cta-5004-final.pdf).
+
+- **false (default)** - Don't use CMCD
+- **true** - Use default CMCD configuration
+- **object** - Use custom CMCD configuration
+
+When providing an object, you can configure the following properties:
+
+| Property  | Type       | Description                                       |
+| --------- | ---------- | ------------------------------------------------- |
+| `mode`    | `CmcdMode` | The mode for sending CMCD data                    |
+| `request` | `CmcdData` | Custom key-value pairs for the request object     |
+| `session` | `CmcdData` | Custom key-value pairs for the session object     |
+| `object`  | `CmcdData` | Custom key-value pairs for the object metadata    |
+| `status`  | `CmcdData` | Custom key-value pairs for the status information |
+
+Note: The `mode` property defaults to `CmcdMode.MODE_QUERY_PARAMETER` if not specified.
+
+#### `CmcdMode`
+
+CmcdMode is an enum that defines how CMCD data should be sent:
+
+- `CmcdMode.MODE_REQUEST_HEADER` (0) - Send CMCD data in the HTTP request headers.
+- `CmcdMode.MODE_QUERY_PARAMETER` (1) - Send CMCD data as query parameters in the URL.
+
+#### `CmcdData`
+
+CmcdData is a type representing custom key-value pairs for CMCD data. It's defined as:
+
+```typescript
+type CmcdData = Record;
+```
+
+Custom key names MUST include a hyphenated prefix to prevent namespace collisions. It's recommended to use a reverse-DNS syntax for custom prefixes.
+
+**Example:**
+
+```javascript
+
+```
+
+---
+
+## Installation
+
+# Installation
+
+Using npm:
+
+```shell
+npm install --save react-native-video
+```
+
+or using yarn:
+
+```shell
+yarn add react-native-video
+```
+
+Then follow the instructions for your platform to link `react-native-video` into your project.
+
+# Specific Platform Installation
+
+iOS
+
+## iOS
+
+### Standard Method
+Run `pod install` in the `ios` directory of your project.
+
+:::warning
+From version `6.0.0`, the minimum iOS version required is `13.0`. For more information, see the [updating section](updating.md).
+:::
+
+### Enable Custom Features in the Podfile
+
+Sample configurations are available in the sample app. See the [sample pod file](https://github.com/TheWidlarzGroup/react-native-video/blob/9c669a2d8a53df36773fd82ff0917280d0659bc7/examples/basic/ios/Podfile#L34).
+
+#### Video Caching
+
+To enable video caching, add the following line to your Podfile: ([more info here](other/caching.md))
+
+```podfile
+# Enable Video Caching
+$RNVideoUseVideoCaching=true
+```
+
+#### Google IMA
+
+Google IMA is the SDK for client-side ads integration. See the [Google documentation](https://developers.google.com/interactive-media-ads/docs/sdks/ios/client-side) for more details.
+
+To enable Google IMA, add the following line to your Podfile:
+
+```podfile
+$RNVideoUseGoogleIMA=true
+```
+
+**If you are using Expo, you can use the [Expo plugin](other/expo.md).**
+
+> **Note:** If you are enabling video caching (using `$RNVideoUseVideoCaching`), you must add the following to your `Gemfile`:
+>
+> ```ruby
+> gem "cocoapods-swift-modular-headers"
+> ```
+>
+> Then, install dependencies using:
+>
+> ```sh
+> bundle install
+> bundle exec pod install
+> ```
+>
+> This enables Swift modular headers for Swift dependencies.
+
+Android
+
+## Android
+
+From version `>= 6.0.0`, your application must use Kotlin version `>= 1.8.0`.
+
+```gradle
+buildscript {
+    ...
+    ext.kotlinVersion = '1.8.0'
+    ext.compileSdkVersion = 34
+    ext.targetSdkVersion = 34
+    ...
+}
+```
+
+### Enable Custom Features in the Gradle File
+
+**If you are using Expo, you can use the [Expo plugin](other/expo.md).**
+
+You can enable or disable the following features by setting the corresponding variables in your `android/build.gradle` file:
+
+- `useExoplayerIMA` - Enable Google IMA SDK (ads support)
+- `useExoplayerRtsp` - Enable RTSP support
+- `useExoplayerSmoothStreaming` - Enable SmoothStreaming support
+- `useExoplayerDash` - Enable Dash support
+- `useExoplayerHls` - Enable HLS support
+
+Each enabled feature increases the APK size, so only enable what you need.
+
+By default, the enabled features are:
+- `useExoplayerSmoothStreaming`
+- `useExoplayerDash`
+- `useExoplayerHls`
+
+Example:
+
+```gradle
+buildscript {
+  ext {
+    ...
+    useExoplayerIMA = true
+    useExoplayerRtsp = true
+    useExoplayerSmoothStreaming = true
+    useExoplayerDash = true
+    useExoplayerHls = true
+    ...
+  }
+}
+```
+
+See the [sample app](https://github.com/TheWidlarzGroup/react-native-video/blob/9c669a2d8a53df36773fd82ff0917280d0659bc7/examples/basic/android/build.gradle#L14C5-L14C5).
+
+Windows
+
+## Windows
+
+### Autolinking
+
+**React Native Windows 0.63 and above**
+
+Autolinking should automatically add `react-native-video` to your app.
+
+### Manual Linking
+
+**React Native Windows 0.62**
+
+Make the following manual additions:
+
+#### `windows\myapp.sln`
+
+Add the _ReactNativeVideoCPP_ project to your solution:
+
+1. Open your solution in Visual Studio 2019.
+2. Right-click the Solution icon in Solution Explorer > Add > Existing Project...
+3. Select `node_modules\react-native-video\windows\ReactNativeVideoCPP\ReactNativeVideoCPP.vcxproj`.
+
+#### `windows\myapp\myapp.vcxproj`
+
+Add a reference to _ReactNativeVideoCPP_ to your main application project:
+
+1. Open your solution in Visual Studio 2019.
+2. Right-click the main application project > Add > Reference...
+3. Check _ReactNativeVideoCPP_ from Solution Projects.
+
+#### `pch.h`
+
+Add:
+
+```cpp
+#include "winrt/ReactNativeVideoCPP.h"
+```
+
+#### `app.cpp`
+
+Add:
+
+```cpp
+PackageProviders().Append(winrt::ReactNativeVideoCPP::ReactPackageProvider());
+```
+
+before `InitializeComponent();`.
+
+**React Native Windows 0.61 and below**
+
+Follow the manual linking steps for React Native Windows 0.62, but use _ReactNativeVideoCPP61_ instead of _ReactNativeVideoCPP_.
+
+tvOS
+
+## tvOS
+
+`react-native link react-native-video` does not work properly with the tvOS target, so the library must be added manually.
+
+### Steps:
+
+1. Select your project in Xcode.
+
+   ![tvOS step 1](./assets/tvOS-step-1.jpg)
+
+2. Select the tvOS target of your application and open the "General" tab.
+
+   ![tvOS step 2](./assets/tvOS-step-2.jpg)
+
+3. Scroll to "Linked Frameworks and Libraries" and click the `+` button.
+
+   ![tvOS step 3](./assets/tvOS-step-3.jpg)
+
+4. Select `RCTVideo-tvOS`.
+
+   ![tvOS step 4](./assets/tvOS-step-4.jpg)
+
+visionOS
+
+## visionOS
+
+Run `pod install` in the `visionos` directory of your project.
+
+Web
+
+## Web
+
+No additional setup is required. Everything should work out of the box.
+
+However, only basic video support is available. HLS, Dash, ads, and DRM are not currently supported.
+
+---
+
+## Intro
+
+# A `` Component for React Native
+
+## About
+`react-native-video` is a React Native library that provides a Video component to render media content like videos and streams.
+
+It allows you to stream video files (m3u, mpd, mp4, etc.) inside your React Native application.
+
+- ExoPlayer for Android
+- AVPlayer for iOS, tvOS, and visionOS
+- Windows UWP for Windows
+- HTML5 for Web
+- Trick mode support
+- Subtitles (embedded or side-loaded)
+- DRM support
+- Client-side ad insertion (via Google IMA)
+- PiP (Picture-in-Picture)
+- Embedded playback controls
+- And more
+
+The goal of this package is to provide lightweight but full control over the player.
+
+## V6.0.0 Information
+:::warning
+**Version 6**: This documentation covers features available only in v6.0.0 and later.
+If you're unsure or need an older version, you can still use [version 5.2.x](https://github.com/TheWidlarzGroup/react-native-video/blob/v5.2.0/README.md).
+:::
+
+Version 6.x requires **react-native >= 0.68.2**
+:::warning
+From **6.0.0-beta.8**, it also requires **iOS >= 13.0** (default in React Native 0.73).
+:::
+
+For older versions of React Native, [please use version 5.x](https://github.com/TheWidlarzGroup/react-native-video/tree/v5.2.0).
+
+## Usage
+
+```javascript
+// Load the module
+import Video, { VideoRef } from 'react-native-video';
+
+// Inside your render function, assuming you have a file called
+// "background.mp4" in your project. You can include multiple videos
+// on a single screen if needed.
+
+const VideoPlayer = () => {
+  const videoRef = useRef(null);
+  const background = require('./background.mp4');
+
+  return (
+    
+  );
+};
+
+// Later in your styles...
+var styles = StyleSheet.create({
+  backgroundVideo: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    bottom: 0,
+    right: 0,
+  },
+});
+```
+
+---
+
+## Caching
+
+# Caching
+
+Caching is supported on `iOS` platforms with a CocoaPods setup and on `Android` using `SimpleCache`.
+
+## Android
+
+Android uses an LRU `SimpleCache` with a variable cache size, which can be specified by `bufferConfig - cacheSizeMB`. This creates a folder named `RNVCache` inside the app's `cache` directory.
+
+Note that `react-native-video` does not currently offer a native method to flush the cache, but it can be cleared by manually clearing the app's cache.
+
+Additionally, this resolves the issue in RNV6 where the source URI was repeatedly called when looping a video on Android.
+
+## iOS
+
+### Technology
+
+The cache is backed by [SPTPersistentCache](https://github.com/spotify/SPTPersistentCache) and [DVAssetLoaderDelegate](https://github.com/vdugnist/DVAssetLoaderDelegate).
+
+### How It Works
+
+Caching is based on the asset's URL. `SPTPersistentCache` uses an LRU ([Least Recently Used](https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU))) caching policy.
+
+### Restrictions
+
+Currently, caching is only supported for URLs ending in `.mp4`, `.m4v`, or `.mov`. In future versions, URLs with query strings (e.g., `test.mp4?resolution=480p`) will be supported once dependencies allow access to the `Content-Type` header.
+
+At this time, HLS playlists (`.m3u8`) and videos with sideloaded text tracks are not supported and will bypass the cache.
+
+You will see warnings in the Xcode logs when using `debug` mode. If you're unsure whether your video is cached, check your Xcode logs.
+
+By default, files expire after 30 days, and the maximum cache size is 100MB.
+
+Future updates may include more configurable caching options.
+
+> **Note:** If you are enabling video caching (using `$RNVideoUseVideoCaching`), you must add the following to your `Gemfile`:
+>
+> ```ruby
+> gem "cocoapods-swift-modular-headers"
+> ```
+>
+> Then, install dependencies using:
+>
+> ```sh
+> bundle install
+> bundle exec pod install
+> ```
+>
+> This enables Swift modular headers for Swift dependencies.
+
+---
+
+## Debugging
+
+# Debugging
+
+This page provides useful tips for debugging and troubleshooting issues in the package or your application.
+
+## Using the Sample App
+
+This repository contains multiple sample implementations in the `example` folder. It is always preferable to test behavior in a sample app rather than in a full application. The basic sample allows testing of many features.
+
+To use the sample app, follow these steps:
+
+- Clone this repository:
+  ```shell
+  git clone git@github.com:TheWidlarzGroup/react-native-video.git
+  ```
+- Navigate to the root folder and build the package. This generates a transpiled version in the `lib` folder:
+  ```shell
+  cd react-native-video && yarn && yarn build
+  ```
+- Navigate to the sample app and install dependencies:
+  ```shell
+  cd example/basic && yarn install
+  ```
+- Build and run the app:
+    - For Android:
+      ```shell
+      yarn android
+      ```
+    - For iOS:
+      ```shell
+      cd ios && pod install && cd .. && yarn ios
+      ```
+
+## HTTP Playback Doesn't Work or Black Screen on Release Build (Android)
+
+If your video works in Debug mode but shows only a black screen in Release mode, check the URL of your video. If you are using the `http` protocol, you need to add the following line to your `AndroidManifest.xml` file. [More details here](https://developer.android.com/guide/topics/manifest/application-element#usesCleartextTraffic):
+
+```xml
+
+```
+
+## Decoder Issue (Android)
+
+Some devices have a maximum number of simultaneous video playbacks. If this limit is reached, ExoPlayer returns an error: `Unable to instantiate decoder`.
+
+**Known issue:** This happens frequently in Debug mode.
+
+## Unable to Play Clear Content (All OS)
+
+Before opening a ticket, follow these steps:
+
+### Check Remote File Access
+
+Ensure you can download the manifest/content file using a browser.
+
+### Check If Another Player Can Play the Content
+
+Clear playback should work with any video player. Test the content with another player, such as [VLC](https://www.videolan.org/vlc/), to confirm it plays without issues.
+
+## Unable to Play Protected Content (All OS)
+
+### Protected Content Gives an Error (Token Error / Access Forbidden)
+
+If the content requires an access token or HTTP headers, ensure you can access the data using `wget` or a REST client. Provide all necessary authentication parameters.
+
+## Debugging Network Calls Not Visible in React Native Debugging Tools
+
+This is a React Native limitation—React Native debugging tools only capture network calls made in JavaScript.
+
+To debug network calls, use tools like:
+- [Charles Proxy](https://www.charlesproxy.com/)
+- [Fiddler](https://www.telerik.com/fiddler)
+
+These tools allow you to sniff all HTTP/HTTPS calls, including access to content, DRM, and audio/video chunks. Compare the request/response patterns with previous tests to diagnose issues.
+
+## Debugging Media3: Build from Media3 Source
+
+If you need to use a specific ExoPlayer version or modify default behavior, you may need to build from the Media3 source code.
+
+### Configure Player Path
+
+Add the following lines to `settings.gradle` to configure your Media3 source path:
+
+```gradle
+gradle.ext.androidxMediaModulePrefix = 'media-'
+apply from: file("../../../../media3/core_settings.gradle")
+```
+
+Replace this with the actual Media3 source path. Ensure that you use the same version (or a compatible API version) supported by the package.
+
+### Enable Building from Source
+
+In your `build.gradle` file, add the following setting:
+
+```gradle
+buildscript {
+    ext {
+        ...
+        buildFromMedia3Source = true
+        ...
+    }
+}
+```
+
+## Still Not Working?
+
+You can open a ticket or contact us for [premium support](https://www.thewidlarzgroup.com/?utm_source=rnv&utm_medium=docs&utm_campaign=debugging&utm_id=enterprise#Contact).
+
+---
+
+## Downloading
+
+# Offline Video SDK
+
+## Add Offline Playback to Your React Native App — Fast
+
+The [Offline Video SDK](https://www.thewidlarzgroup.com/offline-video-sdk/?utm_source=rnv&utm_medium=docs&utm_campaign=downloading&utm_id=offline-video-sdk-link) is a commercial add-on for `react-native-video` (v6 and v7) that enables secure **offline playback** of HLS streams — including support for **DRM**, **multi-audio**, and **subtitles**.
+
+It’s built for teams who need a production-ready solution without spending months on in-house development.  
+Try it free today and ship faster.
+
+➡️ [Start Free Trial](https://sdk.thewidlarzgroup.com/signup?utm_source=rnv&utm_medium=docs&utm_id=downloading_start-trial-offline-video-sdk-1)
+
+---
+
+## 🚀 Key Features
+
+- **Stream Downloading**  
+  Download and store HLS content for offline playback, including full control over asset management.
+
+- **Offline DRM**  
+  Seamlessly supports offline playback of DRM-protected content, with proper rights enforcement and license handling.
+
+- **Multiple Audio Tracks & Subtitles**  
+  Choose which tracks to download (e.g. language, subtitles) — ideal for localized content.
+
+- **Selective Downloads**  
+  Only selected tracks are downloaded by default to optimize storage.
+
+- **DRM License Optimization**  
+  Works efficiently with persistent licenses — no need to re-fetch unless expired.
+
+- **Background Download Management**  
+  Handles queuing, progress tracking, retries, pausing/resuming – all out of the box.
+
+- **Pluggable Architecture**  
+  Compatible with your existing player setup — doesn’t interfere with other plugins or custom features.
+
+---
+
+## ⚙️ Compatibility & Requirements
+
+- Supports `react-native-video` **v6** and **v7**
+
+---
+
+## 🤝 Integration & Support
+
+You can integrate the SDK yourself using our documentation and [Offline Video Starter Project](https://github.com/TheWidlarzGroup/react-native-offline-video-starter?utm_source=rnv&utm_medium=docs&utm_id=downloading_offline-video-sdk-starter), which includes a ready-to-run example app demonstrating offline playback, multi-audio, subtitles, and DRM setup.  
+Alternatively, work with our team to accelerate your roadmap.
+
+- 💬 [Contact us for support](mailto:sdk@thewidlarzgroup.com)  
+- 🧪 [Try the SDK – Free Trial](https://sdk.thewidlarzgroup.com/signup?utm_source=rnv&utm_medium=docs&utm_id=downloading_start-trial-offline-video-sdk-2)  
+- 🔗 [Learn more about features](https://www.thewidlarzgroup.com/offline-video-sdk?utm_source=rnv&utm_medium=docs&utm_id=downloading_learn-more-offline-video-sdk)
+
+---
+
+## 📄 Licensing & Trials
+
+The Offline Video SDK is distributed under a commercial license.  
+You can evaluate it for free for 14 days — no credit card required.
+
+Have questions or need help?  
+📬 [sdk@thewidlarzgroup.com](mailto:sdk@thewidlarzgroup.com)
+
+---
+
+## Expo
+
+# Expo
+
+## Expo Plugin
+
+Starting from version `6.3.1`, `react-native-video` supports an Expo plugin. You can configure `react-native-video` properties in the `app.json`, `app.config.json`, or `app.config.js` file.
+
+This is particularly useful when using the `Expo` managed workflow (`expo prebuild`), as it automatically sets up `react-native-video` properties in the native part of the Expo project.
+
+### Example Configuration
+
+```json
+// app.json
+{
+  "name": "my app",
+  "plugins": [
+    [
+      "react-native-video",
+      {
+        "enableNotificationControls": true,
+        "androidExtensions": {
+          "useExoplayerRtsp": false,
+          "useExoplayerSmoothStreaming": false,
+          "useExoplayerHls": false,
+          "useExoplayerDash": false
+        }
+      }
+    ]
+  ]
+}
+```
+
+## Expo Plugin Properties
+
+| Property | Type | Default | Description |
+| --- | --- | --- | --- |
+| enableNotificationControls | boolean | false | Add required changes on android to use notification controls for video player |
+| enableBackgroundAudio | boolean | false | Add required changes to play video in background on iOS |
+| enableADSExtension | boolean | false | Add required changes to use ads extension for video player |
+| enableCacheExtension | boolean | false | Add required changes to use cache extension for video player on iOS |
+| androidExtensions | object | {} | You can enable/disable extensions as per your requirement - this allow to reduce library size on android |
+| enableAndroidPictureInPicture | boolean | false | Apply configs to be able to use Picture-in-picture on android |
+
+---
+
+## Miscellaneous
+
+# Miscellaneous
+
+## iOS App Transport Security
+
+By default, iOS only allows loading encrypted (`https`) URLs. If you need to load content from an unencrypted (`http`) source, you must modify your `Info.plist` file and add the following entry:
+
+![App Transport Security](../assets/AppTransportSecuritySetting.png)
+
+For more details, check this [article](https://cocoacasts.com/how-to-add-app-transport-security-exception-domains).
+
+## Audio Mixing
+
+In future versions, `react-native-video` will include an Audio Manager for configuring how videos mix with other audio-playing apps.
+
+On iOS, if you want to allow background music from other apps to continue playing over your video component, update your `AppDelegate.m` file:
+
+### **AppDelegate.m**
+
+```objective-c
+#import   // Import the AVFoundation framework
+
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+{
+  ...
+  [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryAmbient error:nil];  // Allow background audio
+  ...
+}
+```
+
+You can also use the [`ignoreSilentSwitch`](#ignoresilentswitch) prop.
+
+## Android Expansion File Usage
+
+Expansion files allow you to include assets exceeding the 100MB APK size limit without requiring an update every time you push a new version.
+
+- Only supports `.mp4` files, and they **must not be compressed**.
+- Example command to prevent compression:
+
+```bash
+zip -r -n .mp4 *.mp4 player.video.example.com
+```
+
+### Example Usage in Code:
+
+```javascript
+// Assuming "background.mp4" is included in your expansion file.
+
+```
+
+## Load Files with the React Native Asset System
+
+The asset system introduced in RN `0.14` allows loading shared image resources across iOS and Android without modifying native code. As of RN `0.31`, the same applies to `.mp4` video assets on Android. From RN `0.33`, iOS support was added. Requires `react-native-video@0.9.0` or later.
+
+### Example:
+
+```javascript
+
+```
+
+## Play in Background on iOS
+
+To allow audio playback in the background on iOS, set the audio session to `AVAudioSessionCategoryPlayback`. See the [Apple documentation](https://developer.apple.com/documentation/avfoundation/avaudiosession) for more details.
+
+_(Note: There is an open ticket to [expose this as a prop](https://github.com/react-native-community/react-native-video/issues/310).)_
+
+---
+
+## New Architecture
+
+# New Architecture
+
+## Fabric
+
+The library currently does not support Fabric. We are working on adding support. In the meantime, you can use the Interop Layer.
+
+## Interop Layer
+
+You can use this library with the New Architecture by enabling the Interop Layer.
+
+### Requirements:
+- `react-native` **>= 0.72.0**
+- `react-native-video` **>= 6.0.0-beta.5**
+
+For `react-native` versions **< 0.74**, you need to add the following configuration in the `react-native.config.js` file:
+
+```javascript
+module.exports = {
+  project: {
+    android: {
+      unstable_reactLegacyComponentNames: ['Video'],
+    },
+    ios: {
+      unstable_reactLegacyComponentNames: ['Video'],
+    },
+  },
+};
+```
+
+## Bridgeless Mode
+
+The library currently does not support Bridgeless Mode. We are working on adding support.
+
+---
+
+## Plugins
+
+# Plugins
+
+Since version `6.4.0`, it is possible to create plugins for analytics management and potentially more.
+A sample plugin is available in the repository: [example/react-native-video-plugin-sample](https://github.com/TheWidlarzGroup/react-native-video/tree/master/examples/react-native-video-plugin-sample).
+
+## Commercial Plugins
+
+We at The Widlarz Group have created a set of plugins for comprehensive offline video support. If you are interested, check out our [Offline Video SDK](https://www.thewidlarzgroup.com/offline-video-sdk/?utm_source=rnv&utm_medium=docs&utm_campaign=plugins&utm_id=text). If you need additional plugins (analytics, processing, etc.), let us know.
+
+> Using or recommending our commercial software helps support the maintenance of this open-source project. Thank you!
+
+## Plugins for Analytics
+
+Most analytics systems that track player data (e.g., bitrate, errors) can be integrated directly with ExoPlayer or AVPlayer.
+This plugin system allows for non-intrusive analytics integration with `react-native-video`. It should be implemented in native languages (Kotlin/Swift) to ensure efficiency.
+
+The goal is to enable easy analytics integration without modifying `react-native-video` itself.
+
+## Warnings & Considerations
+
+This is an **experimental API** and may change over time. The API is simple yet flexible enough to implement analytics systems.
+If additional metadata is needed, you should implement a setter in your custom package.
+
+Since the API is flexible, misuse is possible. The player handle should be treated as **read-only**. Modifying player behavior may cause unexpected issues in `react-native-video`.
+
+## General Setup
+
+First, create a new React Native package:
+
+```shell
+npx create-react-native-library@latest react-native-video-custom-analytics
+```
+
+Both Android and iOS implementations expose an `RNVPlugin` interface.
+Your `react-native-video-custom-analytics` package should implement this interface and register itself as a plugin for `react-native-video`.
+
+## Plugin Types
+
+There are two types of plugins you can implement:
+
+1. **Base Plugin (`RNVPlugin`)**: For general-purpose plugins that don't need specific player implementation details.
+2. **Player-Specific Plugins**:
+   - `RNVAVPlayerPlugin` for iOS: Provides type-safe access to AVPlayer instances
+   - `RNVExoplayerPlugin` for Android: Provides type-safe access to ExoPlayer instances
+
+Choose the appropriate plugin type based on your needs. If you need direct access to player-specific APIs, use the player-specific plugin classes.
+
+## Android Implementation
+
+### 1. Create the Plugin
+
+You can implement either the base `RNVPlugin` interface or the player-specific `RNVExoplayerPlugin` interface.
+
+#### Base Plugin
+
+```kotlin
+class MyAnalyticsPlugin : RNVPlugin {
+    override fun onInstanceCreated(id: String, player: Any) {
+        // Handle player creation
+    }
+
+    override fun onInstanceRemoved(id: String, player: Any) {
+        // Handle player removal
+    }
+}
+```
+
+#### ExoPlayer-Specific Plugin
+
+```kotlin
+class MyExoPlayerAnalyticsPlugin : RNVExoplayerPlugin {
+    override fun onInstanceCreated(id: String, player: ExoPlayer) {
+        // Handle ExoPlayer creation with type-safe access
+    }
+
+    override fun onInstanceRemoved(id: String, player: ExoPlayer) {
+        // Handle ExoPlayer removal with type-safe access
+    }
+}
+```
+
+The `RNVPlugin` interface defines two functions:
+
+```kotlin
+/**
+ * Function called when a new player is created
+ * @param id: a random string identifying the player
+ * @param player: the instantiated player reference
+ */
+fun onInstanceCreated(id: String, player: Any)
+
+/**
+ * Function called when a player should be destroyed
+ * when this callback is called, the plugin shall free all
+ * resources and release all reference to Player object
+ * @param id: a random string identifying the player
+ * @param player: the player to release
+ */
+fun onInstanceRemoved(id: String, player: Any)
+```
+
+### 2. Register the Plugin
+
+To register the plugin within the main `react-native-video` package, call:
+
+```kotlin
+ReactNativeVideoManager.getInstance().registerPlugin(plugin)
+```
+
+In the sample implementation, the plugin is registered in the `createNativeModules` entry point.
+
+Once registered, your module can track player updates and report analytics data.
+
+### Extending Core Functionality via Plugins
+
+In addition to analytics, plugins can also be used to modify or override core behavior of `react-native-video`.
+
+This allows native modules to deeply integrate with the playback system - for example:
+- replacing the media source factory,
+- modifying the media item before playback starts (e.g., injecting stream keys),
+- disabling caching dynamically per source.
+
+These capabilities are available through the advanced Android plugin interface: `RNVExoplayerPlugin`.
+
+:::warning
+These extension points are optional — if no plugin provides them, the player behaves exactly as it did before.
+:::
+
+---
+
+#### Plugin Extension Points (Android)
+
+If your plugin implements `RNVExoplayerPlugin`, you can override the following methods:
+
+##### 1. `overrideMediaItemBuilder`
+
+Allows you to modify the `MediaItem.Builder` before it’s used. You can inject stream keys, cache keys, or override URIs.
+
+```kotlin
+override fun overrideMediaItemBuilder(
+    source: Source,
+    mediaItemBuilder: MediaItem.Builder
+): MediaItem.Builder? {
+    // Return modified builder or null to use default
+}
+```
+
+##### 2. `overrideMediaDataSourceFactory`
+
+Lets you replace the data source used by ExoPlayer. Useful for implementing read-only cache or request interception.
+
+```kotlin
+override fun overrideMediaDataSourceFactory(
+    source: Source,
+    mediaDataSourceFactory: DataSource.Factory
+): DataSource.Factory? {
+    // Return your custom factory or null to use default
+}
+```
+
+##### 3. `overrideMediaSourceFactory`
+
+Allows you to override the default MediaSource.Factory used by ExoPlayer for creating media sources.
+Use this if you need to inject a custom media source implementation. If you return null, the default media source factory will be used.
+
+```kotlin
+override fun overrideMediaSourceFactory(
+    source: Source,
+    mediaSourceFactory: MediaSource.Factory,
+    mediaDataSourceFactory: DataSource.Factory
+  ): MediaSource.Factory? {
+    // Return your custom factory or null to use default
+  }
+```
+
+##### 4. `shouldDisableCache`
+
+Enables dynamic disabling of the caching system per source.
+
+```kotlin
+override fun shouldDisableCache(source: Source): Boolean {
+    return true // your own logic
+}
+```
+
+---
+
+Once implemented, `react-native-video` will automatically invoke these methods for each `` instance.
+
+## iOS Implementation
+
+### 1. Podspec Integration
+
+Your new module must have access to `react-native-video`. Add it as a dependency in your Podspec file:
+
+```podfile
+s.dependency "react-native-video"
+```
+
+### 2. Create the Plugin
+
+You can implement either the base `RNVPlugin` class or the player-specific `RNVAVPlayerPlugin` class.
+
+#### Base Plugin
+
+```swift
+class MyAnalyticsPlugin: RNVPlugin {
+    override func onInstanceCreated(id: String, player: Any) {
+        // Handle player creation
+    }
+
+    override func onInstanceRemoved(id: String, player: Any) {
+        // Handle player removal
+    }
+}
+```
+
+#### AVPlayer-Specific Plugin
+
+```swift
+class MyAVPlayerAnalyticsPlugin: RNVAVPlayerPlugin {
+    override func onInstanceCreated(id: String, player: AVPlayer) {
+        // Handle AVPlayer creation with type-safe access
+    }
+
+    override func onInstanceRemoved(id: String, player: AVPlayer) {
+        // Handle AVPlayer removal with type-safe access
+    }
+
+    /// Optionally override the asset used by the player before playback starts
+    override func overridePlayerAsset(source: VideoSource, asset: AVAsset) async -> OverridePlayerAssetResult? {
+        // Return a modified asset or nil to use the default
+        return nil
+    }
+}
+```
+
+The `RNVAVPlayerPlugin` class defines several extension points:
+
+```swift
+/**
+ * Function called when a new AVPlayer instance is created
+ * @param id: a random string identifying the player
+ * @param player: the instantiated AVPlayer
+ */
+open func onInstanceCreated(id: String, player: AVPlayer) { /* no-op */ }
+
+/**
+ * Function called when an AVPlayer instance is being removed
+ * @param id: a random string identifying the player
+ * @param player: the AVPlayer to release
+ */
+open func onInstanceRemoved(id: String, player: AVPlayer) { /* no-op */ }
+
+/**
+ * Optionally override the asset used by the player before playback starts.
+ * Allows you to modify or replace the AVAsset before it is used to create the AVPlayerItem.
+ * Return nil to use the default asset.
+ *
+ * @param source: The VideoSource describing the video (uri, type, headers, etc.)
+ * @param asset: The AVAsset prepared by the player
+ * @return: OverridePlayerAssetResult if you want to override, or nil to use the default
+ */
+open func overridePlayerAsset(source: VideoSource, asset: AVAsset) async -> OverridePlayerAssetResult? { nil }
+```
+
+##### `OverridePlayerAssetResult` and `OverridePlayerAssetType`
+
+To override the asset, return an `OverridePlayerAssetResult`:
+
+```swift
+public struct OverridePlayerAssetResult {
+  public let type: OverridePlayerAssetType
+  public let asset: AVAsset
+
+  public init(type: OverridePlayerAssetType, asset: AVAsset) {
+    self.type = type
+    self.asset = asset
+  }
+}
+
+public enum OverridePlayerAssetType {
+  case partial // Return a partially modified asset; will go through the default prepare process
+  case full    // Return a fully modified asset; will skip the default prepare process
+}
+```
+
+- Use `.partial` if you want the asset to continue through the player's normal preparation (e.g., for text tracks or metadata injection).
+- Use `.full` if you want to provide a fully prepared asset that will be used as-is for playback.
+
+**Example:**
+
+```swift
+override func overridePlayerAsset(source: VideoSource, asset: AVAsset) async -> OverridePlayerAssetResult? {
+    // Example: Replace the asset URL
+    let newAsset = AVAsset(url: URL(string: "https://example.com/override.mp4")!)
+    return Result(type: .full, asset: newAsset)
+}
+```
+
+> Only one plugin can override the player asset at a time. If multiple plugins implement this, only the first will be used.
+
+### 3. Register the Plugin
+
+To register the plugin in `react-native-video`, call:
+
+```swift
+ReactNativeVideoManager.shared.registerPlugin(plugin: plugin)
+```
+
+In the sample implementation, the plugin is registered inside the `VideoPluginSample` file within the `init` function:
+
+```swift
+import react_native_video
+
+...
+
+override init() {
+    super.init()
+    ReactNativeVideoManager.shared.registerPlugin(plugin: self)
+}
+```
+
+Once registered, your module can track player updates and report analytics data to your backend.
+
+## Custom DRM Manager
+
+You can provide a custom DRM manager through your plugin to handle DRM in a custom way. This is useful when you need to integrate with a specific DRM provider or implement custom DRM logic.
+
+### Android Implementation
+
+#### 1/ Create custom DRM manager
+
+Create a class that implements the `DRMManagerSpec` interface:
+
+```kotlin
+class CustomDRMManager : DRMManagerSpec {
+    @Throws(UnsupportedDrmException::class)
+    override fun buildDrmSessionManager(uuid: UUID, drmProps: DRMProps): DrmSessionManager? {
+        // Your custom implementation for building DRM session manager
+        // Return null if the DRM scheme is not supported
+        // Throw UnsupportedDrmException if the DRM scheme is invalid
+    }
+}
+```
+
+#### 2/ Register DRM manager in your plugin
+
+Implement `getDRMManager()` in your ExoPlayer plugin to provide the custom DRM manager:
+
+```kotlin
+class CustomVideoPlugin : RNVExoplayerPlugin {
+    private val drmManager = CustomDRMManager()
+    
+    override fun getDRMManager(): DRMManagerSpec? {
+        return drmManager
+    }
+    
+    override fun onInstanceCreated(id: String, player: ExoPlayer) {
+        // Handle player creation
+    }
+    
+    override fun onInstanceRemoved(id: String, player: ExoPlayer) {
+        // Handle player removal
+    }
+}
+```
+
+### iOS Implementation
+
+#### 1/ Create custom DRM manager
+
+Create a class that implements the `DRMManagerSpec` protocol:
+
+```swift
+class CustomDRMManager: NSObject, DRMManagerSpec {
+    func createContentKeyRequest(
+        asset: AVContentKeyRecipient,
+        drmProps: DRMParams?,
+        reactTag: NSNumber?,
+        onVideoError: RCTDirectEventBlock?,
+        onGetLicense: RCTDirectEventBlock?
+    ) {
+        // Initialize content key session and handle key request
+    }
+    
+    func handleContentKeyRequest(keyRequest: AVContentKeyRequest) {
+        // Process the content key request
+    }
+    
+    func finishProcessingContentKeyRequest(keyRequest: AVContentKeyRequest, license: Data) throws {
+        // Finish processing the key request with the obtained license
+    }
+    
+    func handleError(_ error: Error, for keyRequest: AVContentKeyRequest) {
+        // Handle any errors during the DRM process
+    }
+    
+    func setJSLicenseResult(license: String, licenseUrl: String) {
+        // Handle successful license acquisition from JS side
+    }
+    
+    func setJSLicenseError(error: String, licenseUrl: String) {
+        // Handle license acquisition errors from JS side
+    }
+}
+```
+
+#### 2/ Register DRM manager in your plugin
+
+Implement `getDRMManager()` in your AVPlayer plugin to provide the custom DRM manager:
+
+```swift
+class CustomVideoPlugin: RNVAVPlayerPlugin {
+    override func getDRMManager() -> DRMManagerSpec? {
+        return CustomDRMManager()
+    }
+    
+    override func onInstanceCreated(id: String, player: AVPlayer) {
+        // Handle player creation
+    }
+    
+    override func onInstanceRemoved(id: String, player: AVPlayer) {
+        // Handle player removal
+    }
+}
+```
+
+### Important notes about DRM managers:
+
+1. Only one plugin can provide a DRM manager at a time. If multiple plugins try to provide DRM managers, only the first one will be used.
+2. The custom DRM manager will be used for all video instances in the app.
+3. If no custom DRM manager is provided:
+   - On iOS, the default FairPlay-based implementation will be used
+   - On Android, the default ExoPlayer DRM implementation will be used
+4. The DRM manager must handle all DRM-related functionality:
+   - On iOS: key requests, license acquisition, and error handling through AVContentKeySession
+   - On Android: DRM session management and license acquisition through ExoPlayer's DrmSessionManager
+
+---
+
+## Useful Projects
+
+# Useful Projects
+
+This page lists open-source projects that can be helpful for your player implementation. 
+If you have a project that could benefit other users, feel free to open a PR to add it here.
+
+## Our (TheWidlarzGroup) Libraries
+- [react-native-video-player](https://github.com/TheWidlarzGroup/react-native-video-player): Our video player UI library.
+- [Offline Video SDK](https://www.thewidlarzgroup.com/offline-video-sdk?utm_source=rnv&utm_medium=docs&utm_id=projects_offline-video-sdk): If you're building an app that needs **offline playback** (e.g., downloading HLS videos, subtitles, audio tracks, or DRM-protected content), check out our commercial Offline Video SDK. It integrates with `react-native-video` and is available with a [free trial](https://sdk.thewidlarzgroup.com/signup?utm_source=rnv&utm_medium=docs&utm_id=projects_start-trial-offline-video-sdk). To get started quickly, you can clone our [Offline Video Starter Project](https://github.com/TheWidlarzGroup/react-native-offline-video-starter?utm_source=rnv&utm_medium=docs&utm_id=projects_offline-video-starter), which includes a ready-to-run example app demonstrating offline playback, multi-audio, subtitles, and DRM setup.
+
+## Community Libraries
+- [react-native-corner-video](https://github.com/Lg0gs/react-native-corner-video): A floating video player.
+- [react-native-track-player](https://github.com/doublesymmetry/react-native-track-player): A toolbox for audio playback.
+- [react-native-video-controls](https://github.com/itsnubix/react-native-video-controls): A video player UI.
+- [react-native-media-console](https://github.com/criszz77/react-native-media-console): An updated version of react-native-video-controls, rewritten in TypeScript.
+
+---
+
+## Updating
+
+# Updating
+
+## Version 6.0.0
+
+### iOS
+
+#### Minimum iOS Version
+Starting from version 6.0.0, the minimum supported iOS version is 13.0. Projects using `react-native  Gem::Version.new(min_ios_version_supported)
++   min_ios_version_supported = MIN_IOS_OVERRIDE
++ end
+```
+
+#### Linking
+In your project's Podfile, add support for static dependency linking. This is required to support the new Promises subdependency in the iOS Swift conversion.
+
+Add `use_frameworks! :linkage => :static` right below `platform :ios` in your iOS project Podfile.
+
+[See the example iOS project for reference](https://github.com/TheWidlarzGroup/react-native-video/blob/master/examples/basic/ios/Podfile#L5).
+
+#### Podspec
+
+You can remove the following lines from your Podfile as they are no longer needed:
+
+```diff
+-  `pod 'react-native-video', :path => '../node_modules/react-native-video/react-native-video.podspec'`
+
+-  `pod 'react-native-video/VideoCaching', :path => '../node_modules/react-native-video/react-native-video.podspec'`
+```
+
+If you were previously using VideoCaching, you should set the `$RNVideoUseVideoCaching` flag in your Podspec. See the [installation section](https://docs.thewidlarzgroup.com/react-native-video/installation#video-caching) for details.
+
+> **Note:** If you are enabling video caching (using `$RNVideoUseVideoCaching`), you must add the following to your `Gemfile`:
+>
+> ```ruby
+> gem "cocoapods-swift-modular-headers"
+> ```
+>
+> Then, install dependencies using:
+>
+> ```sh
+> bundle install
+> bundle exec pod install
+> ```
+>
+> This enables Swift modular headers for Swift dependencies.
+
+### Android
+
+If you were using ExoPlayer on V5, remove the patch from **android/settings.gradle**:
+
+```diff
+- include ':react-native-video'
+- project(':react-native-video').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-video/android-exoplayer')
+```
+
+#### Using App Build Settings
+You need to create a `project.ext` section in the top-level `build.gradle` file (not `app/build.gradle`). Fill in the values from the example below using the ones found in your `app/build.gradle` file.
+
+```groovy
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    ... // Various other settings go here
+}
+
+allprojects {
+    ... // Various other settings go here
+
+    project.ext {
+        compileSdkVersion = 31
+        buildToolsVersion = "30.0.2"
+
+        minSdkVersion = 21
+        targetSdkVersion = 22
+    }
+}
+```
+
+If you encounter the error `Could not find com.android.support:support-annotations:27.0.0.`, reinstall your Android Support Repository.

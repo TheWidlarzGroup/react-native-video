@@ -1,0 +1,24 @@
+# React Native Video v6 Documentation
+
+> Complete documentation for React Native Video v6
+
+This file contains links to documentation sections following the llmstxt.org standard.
+
+## Table of Contents
+
+- [Ads](https://docs.thewidlarzgroup.com/react-native-video/docs/v6/component/ads): React Native Video Ads Integration
+- [DRM](https://docs.thewidlarzgroup.com/react-native-video/docs/v6/component/drm): React Native Video DRM Integration
+- [Events](https://docs.thewidlarzgroup.com/react-native-video/docs/v6/component/events): React Native Video Component Events
+- [Methods](https://docs.thewidlarzgroup.com/react-native-video/docs/v6/component/methods): React Native Video Component Methods
+- [Props](https://docs.thewidlarzgroup.com/react-native-video/docs/v6/component/props): React Native Video Component Props
+- [Installation](https://docs.thewidlarzgroup.com/react-native-video/docs/v6/installation): Using npm:
+- [Intro](https://docs.thewidlarzgroup.com/react-native-video/docs/v6/intro): It allows you to stream video files (m3u, mpd, mp4, etc.) inside your React Native application.
+- [Caching](https://docs.thewidlarzgroup.com/react-native-video/docs/v6/other/caching): React Native Video Caching Integration
+- [Debugging](https://docs.thewidlarzgroup.com/react-native-video/docs/v6/other/debug): React Native Video Debugging Tips
+- [Downloading](https://docs.thewidlarzgroup.com/react-native-video/docs/v6/other/downloading): React Native Video Integration with Offline Video SDK
+- [Expo](https://docs.thewidlarzgroup.com/react-native-video/docs/v6/other/expo): React Native Video Expo Plugin
+- [Miscellaneous](https://docs.thewidlarzgroup.com/react-native-video/docs/v6/other/misc): React Native Video Miscellaneous & Tips
+- [New Architecture](https://docs.thewidlarzgroup.com/react-native-video/docs/v6/other/new-arch): React Native Video New Architecture Support
+- [Plugins](https://docs.thewidlarzgroup.com/react-native-video/docs/v6/other/plugin): React Native Video Plugins Integration
+- [Useful Projects](https://docs.thewidlarzgroup.com/react-native-video/docs/v6/projects): React Native Video Useful Projects
+- [Updating](https://docs.thewidlarzgroup.com/react-native-video/docs/v6/updating): React Native Video Updating Guide
