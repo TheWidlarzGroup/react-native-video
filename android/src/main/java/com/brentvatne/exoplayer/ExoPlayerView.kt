@@ -214,8 +214,9 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
         val isLive = player.isCurrentMediaItemLive
         val seekable = player.isCurrentMediaItemSeekable
 
-        // Show/hide badge
-        liveBadge.visibility = if (isLive) View.VISIBLE else View.GONE
+        // Show/hide badge - always hide, see:
+        // https://github.com/TheWidlarzGroup/react-native-video/issues/4623#issuecomment-3218156762
+        liveBadge.visibility = View.GONE
 
         // Disable/enable scrubbing based on seekable
         val timeBar = playerView.findViewById<DefaultTimeBar?>(androidx.media3.ui.R.id.exo_progress)
