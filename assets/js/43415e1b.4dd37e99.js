@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunk_react_native_video_docs=self.webpackChunk_react_native_video_docs||[]).push([["6071"],{9291:function(e){e.exports=JSON.parse('{"tags":[{"label":"planned","permalink":"/react-native-video/docs/v7/tags/planned","count":1}]}')}}]);
