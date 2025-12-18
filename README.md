@@ -12,15 +12,15 @@ The most battle-tested open-source video player component for React Native with 
 
 | Feature | Status |
 |---------|--------|
-| 📱 Plays all video formats natively supported by iOS/Android | ✅ Available & Production Ready by August |
-| ▶️ Local and remote playback | ✅ Available & Production Ready by August |
-| 🔁 Streaming: HLS • DASH • SmoothStreaming | ✅ Available & Production Ready by August |
-| 🧩 Expo plugin support | ✅ Available & Production Ready by August |
-| 📴 Offline playback, video download, support for side-tracks and side-captions (via [optional SDK](https://docs.thewidlarzgroup.com/offline-video-sdk?utm_source=rnv&utm_medium=readme&utm_id=features-text)) | ✅ Available & Production Ready by August |
-| 📱 Picture in Picture | ✅ Available & Production Ready by August |
+| 📱 Plays all video formats natively supported by iOS/Android | ✅ Available |
+| ▶️ Local and remote playback | ✅ Available |
+| 🔁 Streaming: HLS • DASH • SmoothStreaming | ✅ Available |
+| 🧩 Expo plugin support | ✅ Available |
+| 📴 Offline playback, video download, support for side-tracks and side-captions (via [optional SDK](https://docs.thewidlarzgroup.com/offline-video-sdk?utm_source=rnv&utm_medium=readme&utm_id=features-text)) | ✅ Available |
+| 📱 Picture in Picture | ✅ Available |
 | 🎚️ Fine-grained control over tracks, buffering & events | 🏗️ In Development |
-| 🧠 Advanced control over playback and buffering | 📝 [TODO](https://github.com/TheWidlarzGroup/react-native-video/issues/4604) |
-| 🔐 DRM: Widevine & FairPlay ([See free DRM stream example](https://www.thewidlarzgroup.com/services/free-drm-token-generator-for-video?utm_source=rnv&utm_medium=readme&utm_id=free-drm)) | 📝 [TODO](https://github.com/TheWidlarzGroup/react-native-video/issues/4606) |
+| 🧠 Advanced control over playback and buffering | ✅ Available |
+| 🔐 DRM: Widevine & FairPlay ([See free DRM stream example](https://www.thewidlarzgroup.com/services/free-drm-token-generator-for-video?utm_source=rnv&utm_medium=readme&utm_id=free-drm)) | ✅ Available |
 | 🌐 Basic Web Support | 📝 [TODO](https://github.com/TheWidlarzGroup/react-native-video/issues/4605) |
 | 📺 TV Support | 📝 [TODO](https://github.com/TheWidlarzGroup/react-native-video/issues/4607) |
 | 🥽 VisionOS Support | 📝 [TODO](https://github.com/TheWidlarzGroup/react-native-video/issues/4608) |
@@ -51,11 +51,11 @@ The most battle-tested open-source video player component for React Native with 
 ### Requirements
 
 - React Native 0.75 or higher
-- `react-native-nitro-modules` (>=0.27.2) - Please see [nitro requirements](https://nitro.margelo.com/docs/minimum-requirements)
+- `react-native-nitro-modules` (>=0.31.10) - Please see [nitro requirements](https://nitro.margelo.com/docs/minimum-requirements)
 
 ### Install
 
-`react-native-video` requires `react-native-nitro-modules` (>=0.27.2) in your project.
+`react-native-video` requires `react-native-nitro-modules` (>=0.31.10) in your project.
 ```bash
 npm install react-native-nitro-modules
 ```
