@@ -228,6 +228,10 @@ namespace margelo::nitro::video {
     static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JVariant_NullType_TextTrack> /* textTrack */)>("selectTextTrack");
     method(_javaPart, textTrack.has_value() ? JVariant_NullType_TextTrack::fromCpp(textTrack.value()) : nullptr);
   }
+  void JHybridVideoPlayerSpec::release() {
+    static const auto method = javaClassStatic()->getMethod<void()>("release");
+    method(_javaPart);
+  }
   std::shared_ptr<Promise<void>> JHybridVideoPlayerSpec::initialize() {
     static const auto method = javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>()>("initialize");
     auto __result = method(_javaPart);

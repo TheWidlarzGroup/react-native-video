@@ -10,6 +10,7 @@
 // Include C++ implementation defined types
 #include "HybridPluginManagerSpecSwift.hpp"
 #include "ReactNativeVideoDrm-Swift-Cxx-Umbrella.hpp"
+#include <NitroModules/NitroDefines.hpp>
 
 namespace margelo::nitro::videodrm::bridge::swift {
 

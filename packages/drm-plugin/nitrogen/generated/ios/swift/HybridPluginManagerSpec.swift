@@ -18,6 +18,13 @@ public protocol HybridPluginManagerSpec_protocol: HybridObject {
   func disable() throws -> Void
 }
 
+public extension HybridPluginManagerSpec_protocol {
+  /// Default implementation of ``HybridObject.toString``
+  func toString() -> String {
+    return "[HybridObject PluginManager]"
+  }
+}
+
 /// See ``HybridPluginManagerSpec``
 open class HybridPluginManagerSpec_base {
   private weak var cxxWrapper: HybridPluginManagerSpec_cxx? = nil

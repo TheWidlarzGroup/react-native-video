@@ -49,7 +49,7 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
 
   func onPlaybackLikelyToKeepUp() {
     isCurrentlyBuffering = false
-    if player.timeControlStatus == .playing {
+    if player.timeControlStatus != .waitingToPlayAtSpecifiedRate {
       status = .readytoplay
     }
     updateAndEmitPlaybackState()

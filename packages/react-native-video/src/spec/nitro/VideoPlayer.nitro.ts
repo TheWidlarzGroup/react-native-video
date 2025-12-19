@@ -23,6 +23,12 @@ export interface VideoPlayer
    */
   showNotificationControls: boolean;
 
+  /**
+   * Replace the current source of the player.
+   * @param source - The new source of the video.
+   * @note If you want to clear the source, you can pass null. It has the same effect as {@link release}.
+   * see {@link VideoPlayerSourceBase}
+   */
   replaceSourceAsync(source: VideoPlayerSource | null): Promise<void>;
 
   /**
@@ -36,6 +42,11 @@ export interface VideoPlayer
    * @param textTrack - Text track to select, or null to unselect current track
    */
   selectTextTrack(textTrack: TextTrack | null): void;
+
+  /**
+   * Releases the player's native resources and releases native state.
+   */
+  release(): void;
 }
 
 export interface VideoPlayerFactory

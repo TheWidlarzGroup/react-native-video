@@ -206,6 +206,9 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   func release() {
     sourceLoader.cancelSync()
     NowPlayingInfoCenterManager.shared.removePlayer(player: player)
+    
+    try? _eventEmitter?.clearAllListeners()
+    
     self.player.replaceCurrentItem(with: nil)
     self.playerItem = nil
 
