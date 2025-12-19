@@ -391,8 +391,8 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   }
 
   override val memorySize: Long
-    // 1MB by default
-    get() = allocator?.totalBytesAllocated?.toLong() ?: (1024L * 1000L)
+    // 1 MiB by default
+    get() = allocator?.totalBytesAllocated?.toLong() ?: (1024L * 1024L)
 
   private fun startProgressUpdates() {
     stopProgressUpdates() // Ensure no multiple runnables
