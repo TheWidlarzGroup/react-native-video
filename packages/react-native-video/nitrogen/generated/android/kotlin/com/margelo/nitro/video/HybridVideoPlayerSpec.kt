@@ -143,6 +143,10 @@ abstract class HybridVideoPlayerSpec: HybridObject() {
   
   @DoNotStrip
   @Keep
+  abstract fun release(): Unit
+  
+  @DoNotStrip
+  @Keep
   abstract fun initialize(): Promise<Unit>
   
   @DoNotStrip

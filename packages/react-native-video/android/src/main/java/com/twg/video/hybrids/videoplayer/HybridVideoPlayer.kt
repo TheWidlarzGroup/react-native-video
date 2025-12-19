@@ -43,7 +43,7 @@ import kotlin.math.max
 
 @UnstableApi
 @DoNotStrip
-class HybridVideoPlayer() : HybridVideoPlayerSpec() {
+class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   override lateinit var source: HybridVideoPlayerSourceSpec
   override var eventEmitter = HybridVideoPlayerEventEmitter()
     set(value) {
@@ -348,7 +348,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
     }
   }
 
-  private fun release() {
+  override fun release() {
     if (playInBackground || showNotificationControls) {
       VideoPlaybackService.stopService(this, videoPlaybackServiceConnection)
     }
@@ -357,6 +357,8 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
       VideoManager.unregisterPlayer(this)
       stopProgressUpdates()
       loadedWithSource = false
+
+      eventEmitter.clearAllListeners()
 
       player.removeListener(playerListener)
       player.removeAnalyticsListener(analyticsListener)
@@ -384,8 +386,13 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
     release()
   }
 
+  override fun close() {
+    release()
+  }
+
   override val memorySize: Long
-    get() = allocator?.totalBytesAllocated?.toLong() ?: 0L
+    // 1MB by default
+    get() = allocator?.totalBytesAllocated?.toLong() ?: (1024L * 1000L)
 
   private fun startProgressUpdates() {
     stopProgressUpdates() // Ensure no multiple runnables

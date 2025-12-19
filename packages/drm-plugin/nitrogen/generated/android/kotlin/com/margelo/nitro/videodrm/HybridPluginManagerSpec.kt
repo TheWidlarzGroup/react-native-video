@@ -10,7 +10,7 @@ package com.margelo.nitro.videodrm
 import androidx.annotation.Keep
 import com.facebook.jni.HybridData
 import com.facebook.proguard.annotations.DoNotStrip
-import com.margelo.nitro.core.*
+import com.margelo.nitro.core.HybridObject
 
 /**
  * A Kotlin class representing the PluginManager HybridObject.
@@ -34,6 +34,11 @@ abstract class HybridPluginManagerSpec: HybridObject() {
   override fun updateNative(hybridData: HybridData) {
     mHybridData = hybridData
     super.updateNative(hybridData)
+  }
+
+  // Default implementation of `HybridObject.toString()`
+  override fun toString(): String {
+    return "[HybridObject PluginManager]"
   }
 
   // Properties

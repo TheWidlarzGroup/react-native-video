@@ -43,6 +43,7 @@ namespace margelo::nitro::video {
       prototype.registerHybridMethod("replaceSourceAsync", &HybridVideoPlayerSpec::replaceSourceAsync);
       prototype.registerHybridMethod("getAvailableTextTracks", &HybridVideoPlayerSpec::getAvailableTextTracks);
       prototype.registerHybridMethod("selectTextTrack", &HybridVideoPlayerSpec::selectTextTrack);
+      prototype.registerHybridMethod("release", &HybridVideoPlayerSpec::release);
       prototype.registerHybridMethod("initialize", &HybridVideoPlayerSpec::initialize);
       prototype.registerHybridMethod("preload", &HybridVideoPlayerSpec::preload);
       prototype.registerHybridMethod("play", &HybridVideoPlayerSpec::play);

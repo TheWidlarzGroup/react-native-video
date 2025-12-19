@@ -7,30 +7,42 @@ import java.util.UUID
 data class ListenerPair(val id: UUID, val eventName: String, val callback: Any)
 
 class HybridVideoPlayerEventEmitter : HybridVideoPlayerEventEmitterSpec() {
+  private val lock = Any()
+
   var listeners: MutableList<ListenerPair> = mutableListOf()
 
   // MARK: - Private helpers
   private fun <T : Any> addListener(eventName: String, listener: T): ListenerSubscription {
     val id = UUID.randomUUID()
-    listeners.add(ListenerPair(id, eventName, listener))
-    return ListenerSubscription { listeners.removeAll { it.id == id } }
+    synchronized(lock) {
+      listeners.add(ListenerPair(id, eventName, listener))
+    }
+    return ListenerSubscription {
+      synchronized(lock) {
+        listeners.removeAll { it.id == id }
+      }
+    }
   }
 
   private inline fun <reified T> emitEvent(eventName: String, invokeCallback: (T) -> Unit) {
-    listeners.filter { it.eventName == eventName }.forEach { pair ->
+    val snapshot: List<ListenerPair> = synchronized(lock) {
+      listeners.filter { it.eventName == eventName }.toList()
+    }
+
+    snapshot.forEach { pair ->
       try {
         @Suppress("UNCHECKED_CAST")
-        val callback = pair.callback as? T
-        if (callback == null) {
+        val callback = pair.callback as? T ?: run {
           Log.d(TAG, "Invalid callback type for $eventName")
           return@forEach
         }
         invokeCallback(callback)
-      } catch (error: Error) {
-        Log.d(TAG, "Error calling $eventName listener $error")
+      } catch (t: Throwable) {
+        Log.d(TAG, "Error calling $eventName listener", t)
       }
     }
   }
+
 
   // MARK: - Listener registration methods
   
@@ -92,7 +104,9 @@ class HybridVideoPlayerEventEmitter : HybridVideoPlayerEventEmitterSpec() {
     addListener("onVolumeChange", listener)
 
   override fun clearAllListeners() {
-    listeners.clear()
+    synchronized(lock) {
+      listeners.clear()
+    }
   }
 
   // MARK: - Event emission methods

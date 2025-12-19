@@ -170,9 +170,17 @@ object VideoManager : LifecycleEventListener {
   }
 
   fun unregisterPlayer(player: HybridVideoPlayer) {
-    players.remove(player)
     audioFocusManager.unregisterPlayer(player)
     PluginsRegistry.shared.notifyPlayerDestroyed(WeakReference(player))
+
+    // Remove player from any views that were using it
+    players[player]?.forEach { nitroId ->
+      views[nitroId]?.get()?.let { view ->
+        view.hybridPlayer = null
+      }
+    }
+
+    players.remove(player)
   }
 
   fun getPlayerByNitroId(nitroId: Int): HybridVideoPlayer? {
