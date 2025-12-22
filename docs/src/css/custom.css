@@ -1,30 +1,7 @@
+@import '@widlarzgroup/docusaurus-ui/css/custom.css';
+
 /**
  * Any CSS included here will be global. The classic template
  * bundles Infima by default. Infima is a CSS framework designed to
  * work well for content-centric websites.
  */
-
-/* You can override the default Infima variables here. */
-:root {
-  --ifm-code-font-size: 95%;
-  --ifm-color-primary: #96c9eb;
-  --ifm-color-primary-dark: #76b8e5;
-  --ifm-color-primary-darker: #65b0e2;
-  --ifm-color-primary-darkest: #3597d9;
-  --ifm-color-primary-light: #b6daf1;
-  --ifm-color-primary-lighter: #c7e2f4;
-  --ifm-color-primary-lightest: #f7fbfd;
-  --ifm-color-secondary: #f4d970;
-  --ifm-color-secondary-dark: #f1d04f;
-  --ifm-color-secondary-darker: #f0cc3e;
-  --ifm-color-secondary-darkest: #e7bc12;
-  --ifm-color-secondary-light: #f7e291;
-  --ifm-color-secondary-lighter: #f8e6a2;
-  --ifm-color-secondary-lightest: #fcf3d3;
-  --ifm-background-color: #171717;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
-}
-
-.hidden {
-  display: none !important;
-}
