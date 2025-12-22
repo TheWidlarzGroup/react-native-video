@@ -163,6 +163,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             _playerViewController?.player = nil
             _player?.play()
         }
+
+        // Refresh Now Playing info after PiP exits to re-establish artwork in Dynamic Island
+        // PiP takes over the Now Playing session, so we need to refresh it when PiP ends
+        if _showNotificationControls {
+            NowPlayingInfoCenterManager.shared.updateNowPlayingInfo()
+        }
     }
 
     func handleRestoreUserInterfaceForPictureInPictureStop() {
@@ -1412,7 +1418,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func getPip() -> RCTPictureInPicture? {
-        initPictureinPicture()
+        // Only initialize PiP if enterPictureInPictureOnLeave is enabled
+        // This prevents auto-PiP when minimizing when user wants Dynamic Island controls instead
+        if _enterPictureInPictureOnLeave {
+            initPictureinPicture()
+        }
         return _pip
     }
 
@@ -2059,17 +2069,19 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 throw NSError(domain: "RCTVideo", code: -1, userInfo: [NSLocalizedDescriptionKey: "Player not initialized. Call preparePlayerForDai() first."])
             }
 
-            _playerItem = playerItem
+            // Propagate metadata to the player item for lock screen/notification controls
+            let playerItemWithMetadata = await playerItemPropegateMetadata(playerItem)
+            _playerItem = playerItemWithMetadata
             _playerObserver.playerItem = _playerItem
 
             setPreferredForwardBufferDuration(_preferredForwardBufferDuration)
-            setPlaybackRange(playerItem, withCropStart: _source?.cropStart, withCropEnd: _source?.cropEnd)
+            setPlaybackRange(playerItemWithMetadata, withCropStart: _source?.cropStart, withCropEnd: _source?.cropEnd)
             setFilter(_filterName)
             if let maxBitRate = _maxBitRate {
                 _playerItem?.preferredPeakBitRate = Double(maxBitRate)
             }
 
-            _player.replaceCurrentItem(with: playerItem)
+            _player.replaceCurrentItem(with: playerItemWithMetadata)
 
             #if !os(tvOS) && !os(visionOS)
                 if #available(iOS 16.0, macCatalyst 18.0, *) {
