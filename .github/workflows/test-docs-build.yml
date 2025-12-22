@@ -3,14 +3,14 @@ name: Test Documentation Build
 on:
   pull_request:
     branches:
-      - v7
+      - master
     paths:
       # Update on workflow change
-      - '.github/workflows/test-docs-build.yml'
+      - ".github/workflows/test-docs-build.yml"
       # Update on docs change
-      - 'docs/**'
+      - "docs/**"
       # Update on code change (Api Reference)
-      - 'packages/react-native-video/src/**'
+      - "packages/react-native-video/src/**"
 
 jobs:
   test-docs-deploy:

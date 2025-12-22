@@ -4,15 +4,14 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - v7
+      - master
     paths:
       # Update on workflow change
-      - '.github/workflows/deploy-docs.yml'
+      - ".github/workflows/deploy-docs.yml"
       # Update on docs change
-      - 'docs/**'
+      - "docs/**"
       # Update on code change (Api Reference)
-      - 'packages/react-native-video/src/**'
-  
+      - "packages/react-native-video/src/**"
 
 jobs:
   build:
