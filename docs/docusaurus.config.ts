@@ -79,6 +79,8 @@ const config: Config = {
     },
   ],
 
+  themes: ['@widlarzgroup/docusaurus-ui'],
+
   themeConfig: {
     image: 'img/twg-social-card.png',
     navbar: {
