@@ -6,6 +6,7 @@
 }
 
 .featureSvg {
+  background-color: var(--color-accent-primarasddy);
   height: 200px;
   width: 200px;
 }
