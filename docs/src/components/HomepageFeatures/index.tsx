@@ -14,32 +14,24 @@ const FeatureList: FeatureItem[] = [
     title: 'React Native First',
     Svg: require('@site/static/img/reactjs-icon.svg').default,
     description: (
-      <>
-        React Native Video is a video player created for React Native.
-      </>
+      <>React Native Video is a video player created for React Native.</>
     ),
   },
   {
     title: 'Multi Subtitles & Audio Tracks',
     Svg: require('@site/static/img/download-icon.svg').default,
     description: (
-      <>
-        React Native Video supports multiple subtitles and audio tracks.
-      </>
+      <>React Native Video supports multiple subtitles and audio tracks.</>
     ),
   },
   {
     title: 'DRM Protected Content',
     Svg: require('@site/static/img/drm-content-icon.svg').default,
-    description: (
-      <>
-        React Native Video supports DRM protected content.
-      </>
-    ),
+    description: <>React Native Video supports DRM protected content.</>,
   },
 ];
 
-function Feature({title, Svg, description}: FeatureItem) {
+function Feature({ title, Svg, description }: FeatureItem) {
   return (
     <div className={clsx('col col--4')}>
       <div className="text--center">

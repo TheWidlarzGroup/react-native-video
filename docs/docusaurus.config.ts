@@ -20,7 +20,7 @@ const config: Config = {
 
   future: {
     experimental_faster: true,
-    v4: true
+    v4: true,
   },
 
   i18n: {
@@ -37,7 +37,7 @@ const config: Config = {
           lastVersion: '6.x',
           includeCurrentVersion: true,
           versions: {
-            current: {
+            'current': {
               label: 'v7 Beta',
               path: 'v7',
               banner: 'none',
@@ -105,8 +105,8 @@ const config: Config = {
         {
           type: 'docsVersionDropdown',
           versions: {
-            current: {label: 'v7 Beta'},
-            '6.x': {label: 'v6'},
+            'current': { label: 'v7 Beta' },
+            '6.x': { label: 'v6' },
           },
           position: 'right',
         },
@@ -154,7 +154,7 @@ const config: Config = {
       {
         name: 'API Reference',
         entryPoints: ['../packages/react-native-video/src'],
-        exclude: "../packages/react-native-video/src/index.ts",
+        exclude: '../packages/react-native-video/src/index.ts',
         tsconfig: '../packages/react-native-video/tsconfig.json',
         out: './docs/api-reference',
         watch: process.env.TYPEDOC_WATCH,
@@ -162,12 +162,12 @@ const config: Config = {
         excludeProtected: true,
         excludeExternals: true,
         excludeInternal: true,
-        readme: "none",
+        readme: 'none',
         sidebar: {
           autoConfiguration: false,
         },
-        parametersFormat: "table",
-        enumMembersFormat: "table",
+        parametersFormat: 'table',
+        enumMembersFormat: 'table',
         useCodeBlocks: true,
       },
     ],
@@ -178,10 +178,10 @@ const config: Config = {
         id: 'llms-v6',
         generateLLMsTxt: false,
         generateLLMsFullTxt: false,
-        docsDir: "versioned_docs/version-6.x",
+        docsDir: 'versioned_docs/version-6.x',
         pathTransformation: {
           ignorePaths: ['docs'],
-          addPaths: ['react-native-video/docs/v6']
+          addPaths: ['react-native-video/docs/v6'],
         },
         version: '6.x.x',
         customLLMFiles: [
@@ -199,8 +199,8 @@ const config: Config = {
             includePatterns: ['**/*.md', '**/*.mdx'],
             fullContent: true,
           },
-        ]
-      }
+        ],
+      },
     ],
     // LLMs txt generation for v7
     [
@@ -209,10 +209,10 @@ const config: Config = {
         id: 'llms-v7',
         generateLLMsTxt: false,
         generateLLMsFullTxt: false,
-        docsDir: "docs",
+        docsDir: 'docs',
         pathTransformation: {
           ignorePaths: ['docs'],
-          addPaths: ['react-native-video/docs/v7']
+          addPaths: ['react-native-video/docs/v7'],
         },
         version: '7.x.x',
         customLLMFiles: [
@@ -229,10 +229,10 @@ const config: Config = {
             description: 'Complete documentation for React Native Video v7',
             includePatterns: ['docs/**/*.md'],
             fullContent: true,
-          }
-        ]
-      }
-    ]
+          },
+        ],
+      },
+    ],
   ],
 };
 
