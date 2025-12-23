@@ -4,8 +4,11 @@ pre-commit:
     lint:
       glob: "*.{js,ts,jsx,tsx}"
       run: bun lint
+    lint-docs-css:
+      glob: "docs/**/*.css"
+      run: bun run docs lint
     types:
-      glob: "*.{js,ts, jsx, tsx}"
+      glob: "*.{js,ts,jsx,tsx}"
       run: bun typecheck
 commit-msg:
   parallel: true
