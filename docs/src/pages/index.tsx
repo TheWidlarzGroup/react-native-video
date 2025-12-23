@@ -9,11 +9,11 @@ import { useMemo, type ReactNode } from 'react';
 import styles from './index.module.css';
 
 interface PreferredVersion {
-  preferredVersion: {label: string, mainDocId: string, path: string} | null;
+  preferredVersion: { label: string; mainDocId: string; path: string } | null;
 }
 
 function HomepageHeader() {
-  const {siteConfig} = useDocusaurusContext();
+  const { siteConfig } = useDocusaurusContext();
 
   const version = useDocsPreferredVersion() as PreferredVersion;
 
@@ -28,15 +28,17 @@ function HomepageHeader() {
   return (
     <header className={clsx('hero hero--primary', styles.heroBanner)}>
       <div className="container">
-        <img src="./img/twg-logo.png" alt="TheWidlarzGroup Logo" className={styles.logo} />
+        <img
+          src="./img/twg-logo.png"
+          alt="TheWidlarzGroup Logo"
+          className={styles.logo}
+        />
         <Heading as="h1" className="hero__title">
           {siteConfig.title}
         </Heading>
         <p className="hero__subtitle">{siteConfig.tagline}</p>
         <div className={styles.buttons}>
-          <Link
-            className="button button--secondary button--lg"
-            to={link}>
+          <Link className="button button--secondary button--lg" to={link}>
             Get Started
           </Link>
         </div>
@@ -46,11 +48,12 @@ function HomepageHeader() {
 }
 
 export default function Home(): ReactNode {
-  const {siteConfig} = useDocusaurusContext();
+  const { siteConfig } = useDocusaurusContext();
   return (
     <Layout
       title={`${siteConfig.title}`}
-      description="Video player for React Native.">
+      description="Video player for React Native."
+    >
       <HomepageHeader />
       <main>
         <HomepageFeatures />
