@@ -3,10 +3,13 @@ pre-commit:
   commands:
     lint:
       glob: "*.{js,ts,jsx,tsx}"
+      exclude: "docs/**/*"
       run: bun lint
-    lint-docs-css:
-      glob: "docs/**/*.css"
-      run: bun run docs lint
+    lint-docs:
+      # using @widlarzgroup/eslint-plugin-docusaurus for CSS variable validation
+      root: "docs/"
+      glob: "**/*.{js,ts,jsx,tsx,css}"
+      run: bun run lint
     types:
       glob: "*.{js,ts,jsx,tsx}"
       run: bun typecheck
