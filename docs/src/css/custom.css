@@ -1,7 +1,14 @@
+/**
+ * Custom CSS for this project.
+ * 
+ * We import base styles from @widlarzgroup/docusaurus-ui which:
+ * - Overrides default Infima variables with our custom design system
+ * - Provides new CSS variables for colors (--color-accent-*, --color-secondary-*, etc.)
+ * - Adds custom component styles and utilities
+ * 
+ * You can further customize any CSS variables here - they will take
+ * precedence over both Infima defaults and the imported package styles.
+ */
 @import '@widlarzgroup/docusaurus-ui/css/custom.css';
 
-/**
- * Any CSS included here will be global. The classic template
- * bundles Infima by default. Infima is a CSS framework designed to
- * work well for content-centric websites.
- */
+/* Add your custom overrides below */

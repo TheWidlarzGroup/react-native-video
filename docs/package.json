@@ -20,7 +20,7 @@
     "@docusaurus/faster": "^3.8.1",
     "@docusaurus/preset-classic": "^3.8.1",
     "@mdx-js/react": "^3.0.0",
-    "@widlarzgroup/docusaurus-ui": "^0.0.2",
+    "@widlarzgroup/docusaurus-ui": "^0.0.3",
     "clsx": "^2.0.0",
     "docusaurus-lunr-search": "^3.6.0",
     "prism-react-renderer": "^2.3.0",
@@ -31,9 +31,10 @@
     "@docusaurus/module-type-aliases": "^3.8.1",
     "@docusaurus/tsconfig": "^3.8.1",
     "@docusaurus/types": "^3.8.1",
-    "eslint": "^8.51.0",
+    "@widlarzgroup/eslint-plugin-docusaurus": "^0.0.1",
     "docusaurus-plugin-llms": "^0.1.5",
     "docusaurus-plugin-typedoc": "^1.4.0",
+    "eslint": "^8.51.0",
     "typescript": "^5.2.2"
   },
   "browserslist": {
