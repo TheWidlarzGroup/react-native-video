@@ -7,7 +7,7 @@ import { ScrollIndicator } from './ScrollIndicator/ScrollIndicator';
 import styles from './Hero.module.css';
 
 const GITHUB_URL = 'https://github.com/TheWidlarzGroup/react-native-video';
-const DEFAULT_DOCS_PATH = '/docs/v7/intro';
+const DEFAULT_DOCS_PATH = '/docs/v6/intro';
 
 const STATS = [
   { value: '7k+', label: 'GitHub Stars' },
