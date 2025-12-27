@@ -1,4 +1,4 @@
-import React, { type ReactNode } from 'react';
+import React from 'react';
 import { motion } from 'motion/react';
 import styles from './ScrollIndicator.module.css';
 
@@ -6,9 +6,7 @@ interface ScrollIndicatorProps {
   label?: string;
 }
 
-export function ScrollIndicator({
-  label = 'Explore',
-}: ScrollIndicatorProps): ReactNode {
+export function ScrollIndicator({ label = 'Explore' }: ScrollIndicatorProps) {
   return (
     <motion.div
       className={styles.indicator}

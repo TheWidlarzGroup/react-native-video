@@ -1,4 +1,4 @@
-import React, { type ReactNode } from 'react';
+import React from 'react';
 import styles from './FeatureCard.module.css';
 
 export interface FeatureCardItem {
@@ -7,11 +7,7 @@ export interface FeatureCardItem {
   Icon: React.ComponentType<React.ComponentProps<'svg'>>;
 }
 
-export function FeatureCard({
-  title,
-  description,
-  Icon,
-}: FeatureCardItem): ReactNode {
+export function FeatureCard({ title, description, Icon }: FeatureCardItem) {
   return (
     <div className={styles.card}>
       <div className={styles.iconWrapper}>

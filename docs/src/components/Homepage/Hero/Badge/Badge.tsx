@@ -7,7 +7,7 @@ interface BadgeProps {
   children: ReactNode;
 }
 
-export function Badge({ children }: BadgeProps): ReactNode {
+export function Badge({ children }: BadgeProps) {
   return (
     <motion.div className={styles.badge} variants={itemVariants}>
       <span className={styles.dot} />

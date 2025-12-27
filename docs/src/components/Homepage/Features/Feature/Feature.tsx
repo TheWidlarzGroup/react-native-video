@@ -1,4 +1,4 @@
-import React, { type ReactNode } from 'react';
+import React from 'react';
 import styles from './Feature.module.css';
 
 export interface FeatureItem {
@@ -7,7 +7,7 @@ export interface FeatureItem {
   description: string;
 }
 
-export function Feature({ title, Icon, description }: FeatureItem): ReactNode {
+export function Feature({ title, Icon, description }: FeatureItem) {
   return (
     <div className={styles.card}>
       <div className={styles.iconWrapper}>

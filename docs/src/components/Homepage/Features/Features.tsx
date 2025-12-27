@@ -1,4 +1,4 @@
-import React, { type ReactNode } from 'react';
+import React from 'react';
 import { Feature, type FeatureItem } from './Feature/Feature';
 import styles from './Features.module.css';
 
@@ -46,7 +46,7 @@ const FEATURE_LIST: FeatureItem[] = [
   },
 ];
 
-export function Features(): ReactNode {
+export function Features() {
   return (
     <section className={styles.features}>
       <div className={styles.container}>

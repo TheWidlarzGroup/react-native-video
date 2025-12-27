@@ -1,4 +1,4 @@
-import React, { type ReactNode } from 'react';
+import React from 'react';
 import Link from '@docusaurus/Link';
 import { FeatureCard, type FeatureCardItem } from './FeatureCard/FeatureCard';
 import styles from './Enterprise.module.css';
@@ -32,7 +32,7 @@ const FEATURE_LIST: FeatureCardItem[] = [
   },
 ];
 
-export function Enterprise(): ReactNode {
+export function Enterprise() {
   return (
     <section className={styles.enterprise}>
       <div className={styles.container}>

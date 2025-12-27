@@ -1,4 +1,4 @@
-import React, { type ReactNode } from 'react';
+import React from 'react';
 import Link from '@docusaurus/Link';
 import { motion } from 'motion/react';
 import { itemVariants } from '../Hero';
@@ -12,7 +12,7 @@ interface ButtonsProps {
   githubLink: string;
 }
 
-export function Buttons({ docsLink, githubLink }: ButtonsProps): ReactNode {
+export function Buttons({ docsLink, githubLink }: ButtonsProps) {
   return (
     <motion.div className={styles.buttons} variants={itemVariants}>
       <Link to={docsLink} className={styles.primary}>

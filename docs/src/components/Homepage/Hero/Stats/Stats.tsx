@@ -1,4 +1,4 @@
-import React, { type ReactNode } from 'react';
+import React from 'react';
 import { motion } from 'motion/react';
 import { itemVariants } from '../Hero';
 import styles from './Stats.module.css';
@@ -12,7 +12,7 @@ interface StatsProps {
   stats: StatItem[];
 }
 
-export function Stats({ stats }: StatsProps): ReactNode {
+export function Stats({ stats }: StatsProps) {
   return (
     <motion.div className={styles.stats} variants={itemVariants}>
       {stats.map((stat) => (

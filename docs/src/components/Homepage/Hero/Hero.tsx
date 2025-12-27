@@ -1,4 +1,4 @@
-import React, { useMemo, type ReactNode } from 'react';
+import React, { useMemo } from 'react';
 import { useDocsPreferredVersion } from '@docusaurus/theme-common';
 import { motion, type Variants } from 'motion/react';
 import { Badge } from './Badge/Badge';
@@ -48,7 +48,7 @@ interface PreferredVersion {
   preferredVersion: { label: string; mainDocId: string; path: string } | null;
 }
 
-function useDocsLink(): string {
+function useDocsLink() {
   const version = useDocsPreferredVersion() as PreferredVersion;
 
   return useMemo(() => {
@@ -59,7 +59,7 @@ function useDocsLink(): string {
   }, [version]);
 }
 
-export function Hero(): ReactNode {
+export function Hero() {
   const docsLink = useDocsLink();
 
   return (
