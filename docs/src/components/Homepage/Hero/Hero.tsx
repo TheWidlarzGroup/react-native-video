@@ -40,7 +40,7 @@ export function Hero(): ReactNode {
 
         <img
           src="./img/twg-logo.png"
-          alt="React Native Video"
+          alt="TheWidlarzGroup logo"
           className={styles.logo}
         />
 
