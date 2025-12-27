@@ -1,0 +1,90 @@
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  animation: fadeInUp 0.8s ease-out 0.4s both;
+}
+
+.primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 2rem;
+  background: var(--color-accent-bright);
+  color: #0f0f0f;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 12px;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 0 0 rgba(150, 201, 235, 0);
+}
+
+.primary:hover {
+  transform: translateY(-2px);
+  background: var(--color-accent-bright-dim);
+  color: #0f0f0f;
+  text-decoration: none;
+}
+
+.primary:active {
+  transform: translateY(-1px);
+}
+
+.secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 2rem;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-size: 1rem;
+  font-weight: 600;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.secondary:hover {
+  background: var(--color-accent-subtle);
+  border-color: var(--color-border-hover);
+  transform: translateY(-3px);
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.3s ease;
+}
+
+.primary:hover .icon {
+  transform: translateX(4px);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .primary,
+  .secondary {
+    width: 100%;
+    justify-content: center;
+  }
+}

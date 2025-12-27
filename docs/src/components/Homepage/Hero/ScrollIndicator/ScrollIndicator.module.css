@@ -1,0 +1,50 @@
+.indicator {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  animation: fadeInUp 0.8s ease-out 0.6s both, scrollPulse 2s ease-in-out 1.4s infinite;
+}
+
+.line {
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(to bottom, var(--color-text-muted), transparent);
+}
+
+@keyframes scrollPulse {
+  0%, 100% {
+    opacity: 0.5;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(10px);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .indicator {
+    display: none;
+  }
+}
