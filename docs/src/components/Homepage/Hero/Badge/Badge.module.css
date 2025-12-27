@@ -17,12 +17,6 @@
   height: 8px;
   background: var(--color-secondary-dim);
   border-radius: 50%;
-  animation: blink 2s ease-in-out infinite;
-}
-
-@keyframes blink {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 0.3; }
 }
 
 @media screen and (max-width: 480px) {
