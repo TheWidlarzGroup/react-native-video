@@ -1,5 +1,6 @@
 import React, { useMemo, type ReactNode } from 'react';
 import { useDocsPreferredVersion } from '@docusaurus/theme-common';
+import { motion, type Variants } from 'motion/react';
 import { Badge } from './Badge/Badge';
 import { Buttons } from './Buttons/Buttons';
 import { Stats } from './Stats/Stats';
@@ -14,6 +15,34 @@ const STATS = [
   { value: '350k+', label: 'Weekly Downloads' },
   { value: 'TWG', label: 'Company Backed' },
 ];
+
+const containerVariants: Variants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.1,
+    },
+  },
+};
+
+export const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: 'easeOut' },
+  },
+};
+
+const logoVariants: Variants = {
+  hidden: { opacity: 0, scale: 0.8 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.5, ease: 'easeOut' },
+  },
+};
 
 interface PreferredVersion {
   preferredVersion: { label: string; mainDocId: string; path: string } | null;
@@ -35,27 +64,33 @@ export function Hero(): ReactNode {
 
   return (
     <header className={styles.hero}>
-      <div className={styles.content}>
+      <motion.div
+        className={styles.content}
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         <Badge>v7 Beta Available</Badge>
 
-        <img
+        <motion.img
           src="./img/twg-logo.png"
           alt="TheWidlarzGroup logo"
           className={styles.logo}
+          variants={logoVariants}
         />
 
-        <h1 className={styles.title}>
+        <motion.h1 className={styles.title} variants={itemVariants}>
           <span className={styles.titleAccent}>Video</span> for React Native
-        </h1>
+        </motion.h1>
 
-        <p className={styles.subtitle}>
+        <motion.p className={styles.subtitle} variants={itemVariants}>
           The most feature-rich video player for React Native. Multi-platform
           support with DRM, subtitles, and audio tracks.
-        </p>
+        </motion.p>
 
         <Buttons docsLink={docsLink} githubLink={GITHUB_URL} />
         <Stats stats={STATS} />
-      </div>
+      </motion.div>
 
       <ScrollIndicator />
     </header>

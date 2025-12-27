@@ -10,7 +10,6 @@
   font-size: 0.85rem;
   font-weight: 500;
   color: var(--color-secondary);
-  animation: fadeInUp 0.8s ease-out 0.1s both;
 }
 
 .dot {
@@ -24,17 +23,6 @@
 @keyframes blink {
   0%, 100% { opacity: 0.5; }
   50% { opacity: 0.3; }
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(40px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 @media screen and (max-width: 480px) {

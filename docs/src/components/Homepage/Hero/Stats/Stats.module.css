@@ -4,7 +4,6 @@
   margin-top: 5rem;
   padding-top: 3rem;
   border-top: 1px solid var(--color-border);
-  animation: fadeInUp 0.8s ease-out 0.5s both;
 }
 
 .stat {
@@ -24,17 +23,6 @@
   color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(40px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 @media screen and (max-width: 768px) {

@@ -3,7 +3,6 @@
   flex-wrap: wrap;
   gap: 1rem;
   justify-content: center;
-  animation: fadeInUp 0.8s ease-out 0.4s both;
 }
 
 .primary {
@@ -63,17 +62,6 @@
 
 .primary:hover .icon {
   transform: translateX(4px);
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(40px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 @media screen and (max-width: 768px) {

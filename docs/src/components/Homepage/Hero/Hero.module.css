@@ -50,18 +50,6 @@
   background: rgba(150, 201, 235, 0.004);
 }
 
-@keyframes float {
-  0%, 100% {
-    transform: translate(0, 0) scale(1);
-  }
-  33% {
-    transform: translate(30px, -30px) scale(1.05);
-  }
-  66% {
-    transform: translate(-20px, 20px) scale(0.95);
-  }
-}
-
 .content {
   position: relative;
   z-index: 1;
@@ -70,18 +58,6 @@
   align-items: center;
   text-align: center;
   max-width: 900px;
-  animation: fadeInUp 0.8s ease-out;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(40px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .logo {
@@ -97,16 +73,6 @@
   line-height: 1.1;
   margin-bottom: 1.5rem;
   color: var(--color-text-primary);
-  animation: fadeInUp 0.8s ease-out 0.2s both;
-}
-
-@keyframes shimmer {
-  0%, 100% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
 }
 
 .titleAccent {
@@ -124,7 +90,6 @@
   max-width: 600px;
   line-height: 1.7;
   margin-bottom: 3rem;
-  animation: fadeInUp 0.8s ease-out 0.3s both;
 }
 
 @media screen and (min-width: 769px) {

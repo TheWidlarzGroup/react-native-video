@@ -1,5 +1,7 @@
 import React, { type ReactNode } from 'react';
 import Link from '@docusaurus/Link';
+import { motion } from 'motion/react';
+import { itemVariants } from '../Hero';
 import styles from './Buttons.module.css';
 
 const ArrowIcon = require('@site/static/img/arrow-icon.svg').default;
@@ -12,7 +14,7 @@ interface ButtonsProps {
 
 export function Buttons({ docsLink, githubLink }: ButtonsProps): ReactNode {
   return (
-    <div className={styles.buttons}>
+    <motion.div className={styles.buttons} variants={itemVariants}>
       <Link to={docsLink} className={styles.primary}>
         Get Started
         <ArrowIcon role="img" className={styles.icon} />
@@ -21,6 +23,6 @@ export function Buttons({ docsLink, githubLink }: ButtonsProps): ReactNode {
         <GitHubIcon role="img" className={styles.icon} />
         View on GitHub
       </Link>
-    </div>
+    </motion.div>
   );
 }
