@@ -86,7 +86,7 @@ const config: Config = {
     navbar: {
       title: 'React Native Video',
       logo: {
-        alt: 'React Native Video Logo',
+        alt: 'TheWidlarzGroup Logo',
         style: {
           width: '60px',
           height: '40px',

@@ -12,3 +12,7 @@
 @import '@widlarzgroup/docusaurus-ui/css/custom.css';
 
 /* Add your custom overrides below */
+
+:root {
+    --color-dark: #0f0f0f;
+}
