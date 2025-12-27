@@ -12,7 +12,7 @@
   gap: 0.5rem;
   padding: 1rem 2rem;
   background: var(--color-accent-bright);
-  color: #0f0f0f;
+  color: var(--color-dark);
   font-size: 1rem;
   font-weight: 600;
   border-radius: 12px;
@@ -24,7 +24,7 @@
 .primary:hover {
   transform: translateY(-2px);
   background: var(--color-accent-bright-dim);
-  color: #0f0f0f;
+  color: var(--color-dark);
   text-decoration: none;
 }
 
