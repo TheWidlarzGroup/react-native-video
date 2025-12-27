@@ -47,12 +47,7 @@ export function Enterprise(): ReactNode {
               development, and dedicated support to help you build the perfect
               video solution for your business.
             </p>
-            <Link
-              to={CONTACT_URL}
-              className={styles.ctaButton}
-              target="_blank"
-              rel="noreferrer"
-            >
+            <Link to={CONTACT_URL} className={styles.ctaButton}>
               Get in touch
               <ArrowIcon className={styles.arrowIcon} />
             </Link>
