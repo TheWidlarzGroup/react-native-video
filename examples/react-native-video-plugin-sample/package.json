@@ -5,5 +5,12 @@
   "main": "src/index",
   "author": " <> ()",
   "license": "UNLICENSED",
-  "homepage": "#readme"
+  "homepage": "#readme",
+  "scripts": {
+    "windows": "react-native run-windows --root .. --proj-dir windows --arch x64"
+  },
+  "peerDependencies": {
+    "react-native": "*",
+    "react-native-windows": "*"
+  }
 }
