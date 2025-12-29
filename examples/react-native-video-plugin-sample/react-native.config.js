@@ -1,4 +1,13 @@
 module.exports = {
+  project: {
+    windows: {
+      sourceDir: 'windows',
+      solutionFile: 'video-plugin-sample-demo.sln',
+      project: {
+        projectFile: 'VideoPluginSampleDemo\\VideoPluginSampleDemo.vcxproj',
+      },
+    },
+  },
   dependency: {
     platforms: {
       windows: {
