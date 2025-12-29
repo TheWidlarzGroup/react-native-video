@@ -1,0 +1,27 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  margin-bottom: 1.5rem;
+  background: var(--color-secondary-subtle);
+  border: 1px solid rgba(250, 216, 91, 0.25);
+  border-radius: 100px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-secondary);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  background: var(--color-secondary-dim);
+  border-radius: 50%;
+}
+
+@media screen and (max-width: 480px) {
+  .badge {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.8rem;
+  }
+}

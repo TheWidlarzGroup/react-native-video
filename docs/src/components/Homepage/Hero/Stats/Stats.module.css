@@ -1,0 +1,35 @@
+.stats {
+  display: flex;
+  gap: 4rem;
+  margin-top: 5rem;
+  padding-top: 3rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.stat {
+  text-align: center;
+}
+
+.value {
+  display: block;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-accent-bright);
+  letter-spacing: -0.02em;
+}
+
+.label {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+@media screen and (max-width: 768px) {
+  .stats {
+    flex-direction: column;
+    gap: 2rem;
+    margin-top: 3rem;
+    padding-top: 2rem;
+  }
+}
