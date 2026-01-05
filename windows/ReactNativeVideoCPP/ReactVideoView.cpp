@@ -18,13 +18,12 @@ using namespace Microsoft::UI::Xaml::Controls;
 namespace winrt::ReactNativeVideoCPP::implementation {
 
 ReactVideoView::ReactVideoView(winrt::Microsoft::ReactNative::IReactContext const &reactContext)
-    : m_reactContext(reactContext) {
-  // Create MediaPlayerElement using Microsoft.UI.Xaml.Controls
-  m_mediaPlayerElement = MediaPlayerElement();
-  
-  // always create and set the player here instead of depending on auto-create logic
-  // in the MediaPlayerElement (only when auto play is on or URI is set)
-  m_player = winrt::Windows::Media::Playback::MediaPlayer();
+    : m_reactContext(reactContext)
+    // Create MediaPlayerElement using Microsoft.UI.Xaml.Controls
+    , m_mediaPlayerElement(MediaPlayerElement())
+    // always create and set the player here instead of depending on auto-create logic
+    // in the MediaPlayerElement (only when auto play is on or URI is set)
+    , m_player(winrt::Windows::Media::Playback::MediaPlayer()) {
   m_mediaPlayerElement.SetMediaPlayer(m_player);
   m_mediaPlayerElement.AreTransportControlsEnabled(false);
   
