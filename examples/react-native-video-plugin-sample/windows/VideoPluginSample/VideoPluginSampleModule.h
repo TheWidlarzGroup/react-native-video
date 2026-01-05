@@ -17,11 +17,10 @@ namespace winrt::VideoPluginSample::implementation
             m_reactContext = reactContext;
         }
 
-        REACT_METHOD(multiply);
-        void multiply(int a, int b, winrt::Microsoft::ReactNative::ReactPromise<int> promise) noexcept
-        {
-            promise.Resolve(a * b);
-        }
+        // Add your custom native methods here using REACT_METHOD macro
+        // Example:
+        // REACT_METHOD(CustomMethod);
+        // void CustomMethod(std::string param) noexcept { ... }
 
     private:
         winrt::Microsoft::ReactNative::ReactContext m_reactContext;

@@ -17,6 +17,10 @@ const VideoPluginSample = NativeModules.VideoPluginSample
       },
     );
 
-export function multiply(a: number, b: number): Promise<number> {
-  return VideoPluginSample.multiply(a, b);
-}
+// Export your custom native methods here
+// Example:
+// export function customMethod(param: string): Promise<void> {
+//   return VideoPluginSample.customMethod(param);
+// }
+
+export default VideoPluginSample;

@@ -3,88 +3,59 @@
  * Windows Win32 Demo
  */
 
-import React, {useState} from 'react';
+import React, {useState, useRef} from 'react';
 import {
   StyleSheet,
   Text,
   View,
   Button,
-  TextInput,
   ScrollView,
 } from 'react-native';
-import {multiply} from './src/index';
+import Video from 'react-native-video';
 
 const App = () => {
-  const [number1, setNumber1] = useState('5');
-  const [number2, setNumber2] = useState('7');
-  const [result, setResult] = useState(null);
-
-  const handleMultiply = async () => {
-    try {
-      const num1 = parseInt(number1, 10);
-      const num2 = parseInt(number2, 10);
-      
-      if (isNaN(num1) || isNaN(num2)) {
-        setResult('Please enter valid numbers');
-        return;
-      }
-
-      const res = await multiply(num1, num2);
-      setResult(`${num1} × ${num2} = ${res}`);
-    } catch (error) {
-      setResult(`Error: ${error.message}`);
-    }
-  };
+  const [paused, setPaused] = useState(true);
+  const videoRef = useRef(null);
 
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.title}>Video Plugin Sample Demo</Text>
+        <Text style={styles.title}>React Native Video Plugin Sample</Text>
         <Text style={styles.subtitle}>Windows Win32 Application</Text>
-        
+
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>TurboModule Multiply Function</Text>
+          <Text style={styles.cardTitle}>Video Player</Text>
           
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Number 1:</Text>
-            <TextInput
-              style={styles.input}
-              value={number1}
-              onChangeText={setNumber1}
-              keyboardType="numeric"
-              placeholder="Enter first number"
+          <View style={styles.videoContainer}>
+            <Video
+              ref={videoRef}
+              source={{
+                uri: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+              }}
+              style={styles.video}
+              paused={paused}
+              controls={false}
+              resizeMode="contain"
             />
           </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Number 2:</Text>
-            <TextInput
-              style={styles.input}
-              value={number2}
-              onChangeText={setNumber2}
-              keyboardType="numeric"
-              placeholder="Enter second number"
+          <View style={styles.videoControls}>
+            <Button
+              title={paused ? 'Play' : 'Pause'}
+              onPress={() => setPaused(!paused)}
             />
           </View>
-
-          <Button title="Multiply" onPress={handleMultiply} />
-
-          {result !== null && (
-            <View style={styles.resultContainer}>
-              <Text style={styles.resultText}>{result}</Text>
-            </View>
-          )}
         </View>
 
         <View style={styles.infoCard}>
-          <Text style={styles.infoTitle}>About This Demo</Text>
+          <Text style={styles.infoTitle}>About This Sample</Text>
           <Text style={styles.infoText}>
             This is a Windows Win32 desktop application built with React Native.
-            It demonstrates a TurboModule implementation for the react-native-video-plugin-sample.
+            It demonstrates a plugin sample for react-native-video running on Windows.
           </Text>
           <Text style={styles.infoText}>
-            The multiply function is implemented in native C++ code and called from JavaScript,
-            showcasing the turbomodule architecture.
+            The sample showcases how to integrate react-native-video in a plugin architecture,
+            providing a foundation for building video-related extensions.
           </Text>
         </View>
       </View>
@@ -130,34 +101,8 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 20,
   },
-  inputContainer: {
-    marginBottom: 15,
-  },
-  label: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 5,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 4,
-    padding: 10,
-    fontSize: 16,
-  },
-  resultContainer: {
-    marginTop: 20,
-    padding: 15,
-    backgroundColor: '#e3f2fd',
-    borderRadius: 4,
-  },
-  resultText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1976d2',
-    textAlign: 'center',
-  },
   infoCard: {
+    marginTop: 20,
     backgroundColor: 'white',
     borderRadius: 8,
     padding: 20,
@@ -178,6 +123,21 @@ const styles = StyleSheet.create({
     color: '#666',
     lineHeight: 20,
     marginBottom: 10,
+  },
+  videoContainer: {
+    width: '100%',
+    height: 200,
+    backgroundColor: '#000',
+    borderRadius: 4,
+    overflow: 'hidden',
+    marginVertical: 10,
+  },
+  video: {
+    width: '100%',
+    height: '100%',
+  },
+  videoControls: {
+    marginTop: 10,
   },
 });
 

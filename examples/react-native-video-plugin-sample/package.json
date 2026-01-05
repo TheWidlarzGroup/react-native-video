@@ -13,6 +13,7 @@
   },
   "peerDependencies": {
     "react-native": "*",
+    "react-native-video": "*",
     "react-native-windows": "*"
   },
   "devDependencies": {

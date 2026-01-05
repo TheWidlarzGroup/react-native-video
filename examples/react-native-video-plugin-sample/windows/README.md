@@ -4,7 +4,9 @@ This folder contains the Windows Win32 application demo for the react-native-vid
 
 ## Prerequisites
 
-- Visual Studio 2019 or later with C++ desktop development workload
+- Visual Studio 2022 (or later) with:
+  - Desktop development with C++ workload
+  - C++ (v143) build tools
 - Windows 10 SDK (10.0.16299.0 or later)
 - Node.js and npm/yarn
 
@@ -31,11 +33,11 @@ This folder contains the Windows Win32 application demo for the react-native-vid
 ## Project Structure
 
 - **VideoPluginSampleDemo**: Win32 desktop application that hosts React Native
-- **VideoPluginSample**: TurboModule DLL that implements the native module functionality
+- **VideoPluginSample**: Plugin module demonstrating react-native-video integration
 
-## TurboModule Implementation
+## Plugin Architecture
 
-The VideoPluginSample module demonstrates a simple TurboModule with a `multiply` method that multiplies two numbers. This serves as a template for implementing more complex native functionality.
+This sample demonstrates how to integrate react-native-video in a Windows plugin architecture. The VideoPluginSample module provides a foundation for building video-related extensions and custom functionality on the Windows platform.
 
 ## Troubleshooting
 

@@ -3,51 +3,77 @@
 
 #include "pch.h"
 
-#include <winrt/VideoPluginSample.h>
+#include "NativeModules.h"
 
-using namespace winrt;
-using namespace Windows::Foundation;
-using namespace Microsoft::ReactNative;
+// A PackageProvider containing any turbo modules you define within this app project
+struct CompReactPackageProvider
+    : winrt::implements<CompReactPackageProvider, winrt::Microsoft::ReactNative::IReactPackageProvider> {
+  void CreatePackage(winrt::Microsoft::ReactNative::IReactPackageBuilder const &packageBuilder) noexcept {
+    // Register any native modules or view managers defined within this app project
+    packageBuilder.AddPackageProvider(winrt::VideoPluginSample::ReactPackageProvider());
+  }
+};
 
-int __cdecl wmain(int argc, wchar_t** argv, wchar_t** /* envp */)
-{
-    UNREFERENCED_PARAMETER(argc);
-    UNREFERENCED_PARAMETER(argv);
+// The entry point of the Win32 application
+_Use_decl_annotations_ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, PSTR /* commandLine */, int showCmd) {
+  // Initialize WinRT
+  winrt::init_apartment(winrt::apartment_type::single_threaded);
 
-    winrt::init_apartment(winrt::apartment_type::single_threaded);
+  // Enable per monitor DPI scaling
+  SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 
-    auto host = ReactNativeHost();
+  // Find the path hosting the app exe file
+  WCHAR appDirectory[MAX_PATH];
+  GetModuleFileNameW(NULL, appDirectory, MAX_PATH);
+  PathCchRemoveFileSpec(appDirectory, MAX_PATH);
 
-    // PackageProviders for external modules
-    host.PackageProviders().Append(winrt::make<ReactPackageProvider>());
-    host.PackageProviders().Append(winrt::VideoPluginSample::ReactPackageProvider());
+  // Create a ReactNativeWin32App with the ReactNativeAppBuilder
+  auto reactNativeWin32App{winrt::Microsoft::ReactNative::ReactNativeAppBuilder().Build()};
 
-    // Initialize instance settings
-    host.InstanceSettings().UseWebDebugger(false);
-    host.InstanceSettings().UseFastRefresh(false);
-    host.InstanceSettings().UseDeveloperSupport(false);
+  // Configure the initial InstanceSettings for the app's ReactNativeHost
+  auto settings{reactNativeWin32App.ReactNativeHost().InstanceSettings()};
+  
+  // Register any native modules defined within this app project
+  settings.PackageProviders().Append(winrt::make<CompReactPackageProvider>());
 
 #if BUNDLE
-    host.InstanceSettings().JavaScriptBundleFile(L"index.windows");
-    host.InstanceSettings().UseDeveloperSupport(false);
+  // Load the JS bundle from a file (not Metro):
+  // Set the path (on disk) where the .bundle file is located
+  settings.BundleRootPath(std::wstring(L"file://").append(appDirectory).append(L"\\Bundle\\").c_str());
+  // Set the name of the bundle file (without the .bundle extension)
+  settings.JavaScriptBundleFile(L"index.windows");
+  // Disable hot reload
+  settings.UseFastRefresh(false);
 #else
-    host.InstanceSettings().JavaScriptBundleFile(L"index");
-    host.InstanceSettings().JavaScriptMainModuleName(L"index");
-    host.InstanceSettings().UseDeveloperSupport(true);
+  // Load the JS bundle from Metro
+  settings.JavaScriptBundleFile(L"index");
+  // Enable hot reload
+  settings.UseFastRefresh(true);
 #endif
 
-    host.InstanceSettings().JSIEngineOverride(JSIEngine::Hermes);
+#if _DEBUG
+  // For Debug builds
+  // Enable Direct Debugging of JS
+  settings.UseDirectDebugger(true);
+  // Enable the Developer Menu
+  settings.UseDeveloperSupport(true);
+#else
+  // For Release builds:
+  // Disable Direct Debugging of JS
+  settings.UseDirectDebugger(false);
+  // Disable the Developer Menu
+  settings.UseDeveloperSupport(false);
+#endif
 
-    // Create the react instance and load the javascript bundle
-    host.LoadInstance();
+  // Get the AppWindow so we can configure its initial title and size
+  auto appWindow{reactNativeWin32App.AppWindow()};
+  appWindow.Title(L"VideoPluginSampleDemo");
+  appWindow.Resize({1000, 1000});
 
-    // We're not exiting until the window is closed, so make sure the reactor instance doesn't shutdown
-    MSG msg = {};
-    while (GetMessage(&msg, nullptr, 0, 0))
-    {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-    }
+  // Get the ReactViewOptions so we can set the initial RN component to load
+  auto viewOptions{reactNativeWin32App.ReactViewOptions()};
+  viewOptions.ComponentName(L"VideoPluginSampleDemo");
 
-    return static_cast<int>(msg.wParam);
+  // Start the app
+  reactNativeWin32App.Start();
 }
