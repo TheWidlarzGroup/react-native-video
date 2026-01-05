@@ -446,8 +446,8 @@ public class ReactExoplayerView extends FrameLayout implements
     private void updateControllerConfig() {
         if (exoPlayerView == null) return;
         
+        // Extra configuration for proper touch handling
         exoPlayerView.setControllerShowTimeoutMs(5000);
-        
         exoPlayerView.setControllerAutoShow(true);
         exoPlayerView.setControllerHideOnTouch(true);
         
@@ -456,8 +456,9 @@ public class ReactExoplayerView extends FrameLayout implements
 
     private void updateControllerVisibility() {
         if (exoPlayerView == null) return;
-            
-        exoPlayerView.setUseController(controls && !controlsConfig.getHideFullscreen());
+        
+        boolean shouldShowControls = controls || isFullscreen;
+        exoPlayerView.setUseController(shouldShowControls);
     }
 
     private void openSettings() {
@@ -498,10 +499,6 @@ public class ReactExoplayerView extends FrameLayout implements
         builder.show();
     }
 
-    private void addPlayerControl() {
-        updateControllerConfig();
-    }
-
     /**
      * Update the layout
      * @param view  view needs to update layout
@@ -516,7 +513,8 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     private void refreshControlsStyles() {
-        if (exoPlayerView == null || player == null || !controls) return;
+        if (exoPlayerView == null || player == null) return;
+        // Always update controller visibility to ensure it matches current state
         updateControllerVisibility();
     }
 
@@ -2642,6 +2640,10 @@ public class ReactExoplayerView extends FrameLayout implements
                     setFullscreen(false);
                 }
             }, controlsConfig);
+            updateControllerConfig();
+            if (exoPlayerView != null) {
+                exoPlayerView.showController();
+            }
             eventEmitter.onVideoFullscreenPlayerWillPresent.invoke();
             if (fullScreenPlayerView != null) {
                 fullScreenPlayerView.show();
@@ -2654,7 +2656,10 @@ public class ReactExoplayerView extends FrameLayout implements
             if (fullScreenPlayerView != null) {
                 fullScreenPlayerView.dismiss();
                 reLayoutControls();
-                setControls(controls);
+                refreshControlsStyles();
+                if (!controls && exoPlayerView != null) {
+                    exoPlayerView.hideController();
+                }
             }
             UiThreadUtil.runOnUiThread(() -> {
                 eventEmitter.onVideoFullscreenPlayerDidDismiss.invoke();
@@ -2697,20 +2702,13 @@ public class ReactExoplayerView extends FrameLayout implements
      * Handling controls prop
      *
      * @param controls  Controls prop, if true enable controls, if false disable them
+     *                  Note: Controls are always visible in fullscreen mode, even if controls={false}
      */
     public void setControls(boolean controls) {
         this.controls = controls;
-        if (exoPlayerView != null) {
-            exoPlayerView.setUseController(controls);
-            // Additional configuration for proper touch handling
-            if (controls) {
-                exoPlayerView.setControllerAutoShow(true);
-                exoPlayerView.setControllerHideOnTouch(true);  // Show controls on touch, don't hide
-                exoPlayerView.setControllerShowTimeoutMs(5000);
-            }
-        }
-        if (controls) {
-            addPlayerControl();
+        boolean shouldShowControls = controls || isFullscreen;
+        if (shouldShowControls) {
+            updateControllerConfig();
         }
         refreshControlsStyles();
     }
