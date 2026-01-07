@@ -58,7 +58,7 @@ object PictureInPictureUtil {
         if (view.enterPictureInPictureOnLeave) {
             activity.addOnPictureInPictureModeChangedListener(onPictureInPictureModeChanged)
         }
-        
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             activity.addOnUserLeaveHintListener(onUserLeaveHintCallback)
         }
@@ -69,7 +69,7 @@ object PictureInPictureUtil {
                 if (view.enterPictureInPictureOnLeave) {
                     removeOnPictureInPictureModeChangedListener(onPictureInPictureModeChanged)
                 }
-                
+
                 removeOnUserLeaveHintListener(onUserLeaveHintCallback)
             }
         }
