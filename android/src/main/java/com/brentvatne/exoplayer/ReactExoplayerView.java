@@ -2817,18 +2817,14 @@ public class ReactExoplayerView extends FrameLayout implements
     /**
      * Initializes the player for DAI source.
      *
-     * Waits for the player to be set, requests the DAI stream, and completes player initialization.
+     * Requests the DAI stream and completes player initialization.
      *
      * @param runningSource The source containing DAI properties
      */
     private void initializeDaiSource(Source runningSource) {
-        while (player == null) {
-            try {
-                wait();
-            } catch (InterruptedException ex) {
-                Thread.currentThread().interrupt();
-                DebugLog.e(TAG, ex.toString());
-            }
+        if (player == null) {
+            DebugLog.w(TAG, "Player is null in initializeDaiSource, skipping DAI initialization");
+            return;
         }
 
         requestDaiStream(
