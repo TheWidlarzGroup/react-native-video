@@ -53,7 +53,52 @@ import type {
   ReactVideoProps,
   CmcdData,
   ReactVideoSource,
+  AdConfig,
 } from './types';
+import type {ISO639_1} from './types/language';
+import type {AdsConfig} from './specs/VideoNativeComponent';
+
+function normalizeAdConfig(
+  ad: AdConfig | undefined,
+  legacyAdTagUrl: string | undefined,
+  legacyAdLanguage: ISO639_1 | undefined,
+): AdsConfig | undefined {
+  if (ad) {
+    // Default to 'csai' for backward compatibility with old API (ad without type)
+    const adType = 'type' in ad ? ad.type : 'csai';
+
+    if (adType === 'dai') {
+      return {
+        type: 'dai',
+        adLanguage: ad.adLanguage,
+        contentSourceId: 'contentSourceId' in ad ? ad.contentSourceId : undefined,
+        videoId: 'videoId' in ad ? ad.videoId : undefined,
+        assetKey: 'assetKey' in ad ? ad.assetKey : undefined,
+        format: 'format' in ad ? ad.format : undefined,
+        adTagParameters: 'adTagParameters' in ad ? ad.adTagParameters : undefined,
+        fallbackUri: 'fallbackUri' in ad ? ad.fallbackUri : undefined,
+      };
+    }
+
+    // CSAI (explicit or default for backward compatibility)
+    return {
+      type: 'csai',
+      adTagUrl: 'adTagUrl' in ad ? ad.adTagUrl : undefined,
+      adLanguage: ad.adLanguage,
+    };
+  }
+
+  // Legacy props at <Video> component level
+  if (legacyAdTagUrl || legacyAdLanguage) {
+    return {
+      type: 'csai',
+      adTagUrl: legacyAdTagUrl,
+      adLanguage: legacyAdLanguage,
+    };
+  }
+
+  return undefined;
+}
 
 const Video = forwardRef<VideoRef, ReactVideoProps>(
   (
@@ -166,7 +211,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         if (uri && uri.match(/^\//)) {
           uri = `file://${uri}`;
         }
-        if (!uri && !_source.dai) {
+        if (!uri && _source.ad?.type !== 'dai') {
           console.log('Trying to load empty source');
         }
         const isNetwork = !!(uri && uri.match(/^(rtp|rtsp|http|https):/));
@@ -222,13 +267,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         const selectedContentStartTime =
           _source.contentStartTime || contentStartTime;
 
-        const _ad =
-          _source.ad ||
-          (adTagUrl || adLanguage
-            ? {adTagUrl: adTagUrl, adLanguage: adLanguage}
-            : undefined);
-
-        const _dai = _source.dai || undefined;
+        const _ad = normalizeAdConfig(_source.ad, adTagUrl, adLanguage);
 
         const _minLoadRetryCount =
           _source.minLoadRetryCount || minLoadRetryCount;
@@ -251,7 +290,6 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           metadata: resolvedSource.metadata,
           drm: _drm,
           ad: _ad,
-          dai: _dai,
           cmcd: _cmcd,
           textTracks: _textTracks,
           textTracksAllowChunklessPreparation:

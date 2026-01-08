@@ -2775,15 +2775,10 @@ public class ReactExoplayerView extends FrameLayout implements
      * @return true if the source is a DAI request, false otherwise
      */
     private boolean isDaiRequest(Source source) {
-        if (source == null || source.getDaiProps() == null) {
+        if (source == null || source.getAdsProps() == null) {
             return false;
         }
-        
-        boolean hasContentSourceId = source.getDaiProps().getContentSourceId() != null;
-        boolean hasVideoId = source.getDaiProps().getVideoId() != null;
-        boolean hasAssetKey = source.getDaiProps().getAssetKey() != null;
-        
-        return (hasContentSourceId && hasVideoId) || hasAssetKey;
+        return source.getAdsProps().isDAI();
     }
 
     /**
@@ -2837,10 +2832,10 @@ public class ReactExoplayerView extends FrameLayout implements
         }
 
         requestDaiStream(
-                runningSource.getDaiProps().getContentSourceId(),
-                runningSource.getDaiProps().getVideoId(),
-                runningSource.getDaiProps().getAssetKey(),
-                runningSource.getDaiProps().getAdTagParameters()
+                runningSource.getAdsProps().getContentSourceId(),
+                runningSource.getAdsProps().getVideoId(),
+                runningSource.getAdsProps().getAssetKey(),
+                runningSource.getAdsProps().getAdTagParameters()
         );
 
         player.prepare();
@@ -2916,11 +2911,11 @@ public class ReactExoplayerView extends FrameLayout implements
      * @return true if backup stream was successfully used, false otherwise
      */
     private boolean handleDaiBackupStream() {
-        if (source == null || source.getDaiProps() == null) {
+        if (source == null || source.getAdsProps() == null) {
             return false;
         }
         
-        String backupStreamUri = source.getDaiProps().getBackupStreamUri();
+        String backupStreamUri = source.getAdsProps().getFallbackUri();
         if (backupStreamUri == null || backupStreamUri.isEmpty()) {
             return false;
         }

@@ -27,16 +27,15 @@ type VideoMetadata = Readonly<{
 }>;
 
 export type AdsConfig = Readonly<{
+  type?: string;
   adTagUrl?: string;
   adLanguage?: string;
-}>;
-
-type DaiConfig = Readonly<{
   contentSourceId?: string;
   videoId?: string;
   assetKey?: string;
+  format?: string;
   adTagParameters?: Record<string, string>;
-  backupStreamUri?: string;
+  fallbackUri?: string;
 }>;
 
 export type VideoSrc = Readonly<{
@@ -59,7 +58,6 @@ export type VideoSrc = Readonly<{
   textTracksAllowChunklessPreparation?: boolean; // android
   textTracks?: TextTracks;
   ad?: AdsConfig;
-  dai?: DaiConfig;
   minLoadRetryCount?: Int32; // Android
   bufferConfig?: BufferConfig; // Android
 }>;

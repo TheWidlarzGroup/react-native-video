@@ -40,7 +40,6 @@ export type ReactVideoSourceProperties = {
   textTracksAllowChunklessPreparation?: boolean;
   textTracks?: TextTracks;
   ad?: AdConfig;
-  dai?: DaiConfig;
   minLoadRetryCount?: number; // Android
   bufferConfig?: BufferConfig;
 };
@@ -78,31 +77,43 @@ export enum DRMType {
   FAIRPLAY = 'fairplay',
 }
 
-export type AdConfig = Readonly<{
-  adTagUrl?: string;
+export type DaiFormat = 'hls' | 'dash';
+
+type AdConfigBase = Readonly<{
   adLanguage?: ISO639_1;
 }>;
 
-type DaiConfigShared = Readonly<{
-  adTagParameters?: Record<string, string>;
-  backupStreamUri?: string;
-}>;
-
-export type DaiConfigLive = DaiConfigShared &
+export type AdConfigCSAI = AdConfigBase &
   Readonly<{
-    assetKey: string;
-    contentSourceId?: never;
-    videoId?: never;
+    type: 'csai';
+    adTagUrl: string;
   }>;
 
-export type DaiConfigVod = DaiConfigShared &
+type AdConfigDAIBase = AdConfigBase &
+  Readonly<{
+    type: 'dai';
+    format?: DaiFormat;
+    adTagParameters?: Record<string, string>;
+    fallbackUri?: string;
+  }>;
+
+export type AdConfigDAIVod = AdConfigDAIBase &
   Readonly<{
     contentSourceId: string;
     videoId: string;
     assetKey?: never;
   }>;
 
-export type DaiConfig = DaiConfigLive | DaiConfigVod;
+export type AdConfigDAILive = AdConfigDAIBase &
+  Readonly<{
+    assetKey: string;
+    contentSourceId?: never;
+    videoId?: never;
+  }>;
+
+export type AdConfigDAI = AdConfigDAIVod | AdConfigDAILive;
+
+export type AdConfig = AdConfigCSAI | AdConfigDAI;
 
 export type Drm = Readonly<{
   type?: DRMType;

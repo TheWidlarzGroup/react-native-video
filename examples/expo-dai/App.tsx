@@ -71,7 +71,8 @@ function AppContent() {
 
   // Video source state - updated when Apply button is pressed
   const [videoSource, setVideoSource] = useState<ReactVideoSource>({
-    dai: {
+    ad: {
+      type: 'dai',
       contentSourceId: '2548831',
       videoId: 'tears-of-steel',
     },
@@ -337,17 +338,19 @@ function AppContent() {
     // Update video source state based on content type
     if (contentType === 'vod') {
       setVideoSource({
-        dai: {
+        ad: {
+          type: 'dai',
           contentSourceId: vodContentSourceId,
           videoId: vodVideoId,
-          ...(backupStreamUri && {backupStreamUri}),
+          ...(backupStreamUri && {fallbackUri: backupStreamUri}),
         },
       });
     } else {
       setVideoSource({
-        dai: {
+        ad: {
+          type: 'dai',
           assetKey: liveAssetKey,
-          ...(backupStreamUri && {backupStreamUri}),
+          ...(backupStreamUri && {fallbackUri: backupStreamUri}),
         },
       });
     }

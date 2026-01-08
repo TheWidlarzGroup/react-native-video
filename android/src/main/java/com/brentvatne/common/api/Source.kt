@@ -75,15 +75,7 @@ class Source {
      */
     var cmcdProps: CMCDProps? = null
 
-    /**
-     * Ads playback properties
-     */
     var adsProps: AdsProps? = null
-
-    /**
-     * DAI (Dynamic Ad Insertion) properties
-     */
-    var daiProps: DaiProps? = null
 
     /*
      * buffering configuration
@@ -95,7 +87,7 @@ class Source {
      */
     var sideLoadedTextTracks: SideLoadedTextTrackList? = null
 
-    override fun hashCode(): Int = Objects.hash(uriString, uri, startPositionMs, cropStartMs, cropEndMs, extension, metadata, headers)
+    override fun hashCode(): Int = Objects.hash(uriString, uri, startPositionMs, cropStartMs, cropEndMs, extension, metadata, headers, adsProps)
 
     /** return true if this and src are equals  */
     override fun equals(other: Any?): Boolean {
@@ -111,7 +103,6 @@ class Source {
                 cmcdProps == other.cmcdProps &&
                 sideLoadedTextTracks == other.sideLoadedTextTracks &&
                 adsProps == other.adsProps &&
-                daiProps == other.daiProps &&
                 minLoadRetryCount == other.minLoadRetryCount &&
                 isLocalAssetFile == other.isLocalAssetFile &&
                 isAsset == other.isAsset &&
@@ -183,7 +174,6 @@ class Source {
         private const val PROP_SRC_DRM = "drm"
         private const val PROP_SRC_CMCD = "cmcd"
         private const val PROP_SRC_ADS = "ad"
-        private const val PROP_SRC_DAI = "dai"
         private const val PROP_SRC_TEXT_TRACKS_ALLOW_CHUNKLESS_PREPARATION = "textTracksAllowChunklessPreparation"
         private const val PROP_SRC_TEXT_TRACKS = "textTracks"
         private const val PROP_SRC_MIN_LOAD_RETRY_COUNT = "minLoadRetryCount"
@@ -245,7 +235,6 @@ class Source {
                 source.cmcdProps = CMCDProps.parse(safeGetMap(src, PROP_SRC_CMCD))
                 if (BuildConfig.USE_EXOPLAYER_IMA) {
                     source.adsProps = AdsProps.parse(safeGetMap(src, PROP_SRC_ADS))
-                    source.daiProps = DaiProps.parse(safeGetMap(src, PROP_SRC_DAI))
                 }
                 source.textTracksAllowChunklessPreparation = safeGetBool(src, PROP_SRC_TEXT_TRACKS_ALLOW_CHUNKLESS_PREPARATION, true)
                 source.sideLoadedTextTracks = SideLoadedTextTrackList.parse(safeGetArray(src, PROP_SRC_TEXT_TRACKS))

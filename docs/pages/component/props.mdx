@@ -954,77 +954,79 @@ source={{
 
 <PlatformsList types={['Android', 'iOS']} />
 
-Sets the ad configuration.
+Sets the ad configuration. Supports both Client-Side Ad Insertion (CSAI) and Dynamic Ad Insertion (DAI) through the unified `type` field.
 
-**Example:**
+**CSAI (Client-Side Ad Insertion)**
+
+For client-side ads using VAST tags:
+
+| Property     | Type   | Required | Description                                                                                                     |
+|--------------|--------|----------|-----------------------------------------------------------------------------------------------------------------|
+| `type`       | string | Yes      | Must be `'csai'`                                                                                                |
+| `adTagUrl`   | string | Yes      | VAST-compliant ad tag URL                                                                                       |
+| `adLanguage` | string | Optional | Language code for the IMA SDK (e.g., `'en'`, `'fr'`)                                                            |
+
+**CSAI Example:**
 
 ```javascript
-ad: {
-  adTagUrl="https://pubads.g.doubleclick.net/gampad/ads?iu=/21775744923/external/vmap_ad_samples&sz=640x480&cust_params=sample_ar%3Dpremidpostoptimizedpodbumper&ciu_szs=300x250&gdfp_req=1&ad_rule=1&output=vmap&unviewed_position_start=1&env=vp&impl=s&cmsid=496&vid=short_onecue&correlator="
-  adLanguage="fr"
-}
+source={{
+  uri: 'https://example.com/video.mp4',
+  ad: {
+    type: 'csai',
+    adTagUrl: 'https://pubads.g.doubleclick.net/gampad/ads?...',
+    adLanguage: 'fr'
+  }
+}}
 ```
 
-See: [ads](./ads.md) for more information.
+**DAI (Dynamic Ad Insertion)**
 
-Note: You need to enable IMA SDK in the Gradle or Pod file - [enable client-side ads insertion](/installation).
-
-#### `dai`
-
-<PlatformsList types={['Android', 'iOS']} />
-
-Sets the DAI (Dynamic Ad Insertion) configuration for server-side ad insertion. DAI supports both Video On Demand (VOD) and Live streaming.
-
-DAI differs from client-side ad insertion (`ad` prop) in that ads are stitched into the stream server-side, providing a seamless viewing experience without playback interruptions.
-
-**Configuration Types:**
-
-There are two types of DAI configurations:
-
-1. **VOD (Video On Demand)** – Requires `contentSourceId` and `videoId`
-2. **Live** – Requires `assetKey`
-
-**Properties:**
+For server-side ad insertion. Supports both VOD and Live streaming.
 
 | Property          | Type   | Required  | Description                                                                                                                                                                                                               |
 |-------------------|--------|-----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `type`            | string | Yes       | Must be `'dai'`                                                                                                                                                                                                           |
 | `contentSourceId` | string | VOD only  | The content source ID for VOD streams. Required for VOD, must not be used with `assetKey`.                                                                                                                                |
 | `videoId`         | string | VOD only  | The video ID for VOD streams. Required for VOD, must not be used with `assetKey`.                                                                                                                                         |
 | `assetKey`        | string | Live only | The asset key for live streams. Required for Live, must not be used with `contentSourceId` or `videoId`.                                                                                                                  |
 | `adTagParameters` | object | Optional  | Custom key-value pairs to pass as ad tag parameters to the IMA SDK. For a list of supported Ad Manager ad tag parameters, see the [Google Ad Manager documentation](https://support.google.com/admanager/answer/7320899). |
-| `backupStreamUri` | string | Optional  | Fallback stream URI. If the DAI stream fails to load, the player will automatically fall back to this URI.                                                                                                                |
+| `fallbackUri`     | string | Optional  | Fallback stream URI. If the DAI stream fails to load, the player will automatically fall back to this URI.                                                                                                                |
+| `adLanguage`      | string | Optional  | Language code for the IMA SDK (e.g., `'en'`, `'fr'`)                                                                                                                                                                      |
 
-**VOD Example:**
+**DAI VOD Example:**
 
 ```javascript
 source={{
-  dai: {
+  ad: {
+    type: 'dai',
     contentSourceId: '2548831',
     videoId: 'tears-of-steel',
     adTagParameters: {
       'custom_param': 'value'
     },
-    backupStreamUri: 'https://example.com/backup-stream.m3u8'
+    fallbackUri: 'https://example.com/backup-stream.m3u8'
   }
 }}
 ```
 
-**Live Example:**
+**DAI Live Example:**
 
 ```javascript
 source={{
-  dai: {
+  ad: {
+    type: 'dai',
     assetKey: 'c-rArva4ShKVIAkNfy6HUQ',
     adTagParameters: {
       'custom_param': 'value'
     },
-    backupStreamUri: 'https://example.com/backup-stream.m3u8'
+    fallbackUri: 'https://example.com/backup-stream.m3u8'
   }
 }}
 ```
+
 See: [ads](./ads.md) for more information.
 
-Note: You need to enable IMA SDK in the Gradle or Podfile – see [Enable Client-Side Ads Insertion](/installation). The same IMA SDK extension supports both client-side ads (`ad` prop) and server-side ads (`dai` prop).
+Note: You need to enable IMA SDK in the Gradle or Podfile – see [Enable Client-Side Ads Insertion](/installation).
 
 #### `contentStartTime`
 

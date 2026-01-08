@@ -9,6 +9,8 @@ The IMA SDK supports two types of ad insertion:
 1. **Client-Side Ad Insertion (CSAI)** – Ads are inserted client-side using VAST tags
 2. **Dynamic Ad Insertion (DAI)** – Server-side ad insertion where ads are stitched into the stream
 
+Both ad types are configured through the unified `ad` property in the source configuration, using the `type` field to specify which mode to use.
+
 ---
 
 ## Client-Side Ad Insertion (CSAI)
@@ -17,7 +19,7 @@ CSAI inserts ads client-side using VAST (Video Ad Serving Template) tags. Ads ar
 
 ### Usage
 
-To use CSAI, pass the `adTagUrl` prop to the `Video` component. The `adTagUrl` should be a VAST-compliant URI.
+To use CSAI, configure the `ad` property with `type: 'csai'` and provide an `adTagUrl`. The `adTagUrl` should be a VAST-compliant URI.
 
 #### Example:
 
@@ -26,6 +28,7 @@ To use CSAI, pass the `adTagUrl` prop to the `Video` component. The `adTagUrl` s
   source={{
     uri: 'https://example.com/video.mp4',
     ad: {
+      type: 'csai',
       adTagUrl: 'https://pubads.g.doubleclick.net/gampad/ads?iu=/21775744923/external/vmap_ad_samples&sz=640x480&cust_params=sample_ar%3Dpremidpostoptimizedpodbumper&ciu_szs=300x250&gdfp_req=1&ad_rule=1&output=vmap&unviewed_position_start=1&env=vp&impl=s&cmsid=496&vid=short_onecue&correlator='
     }
   }}
@@ -60,6 +63,7 @@ To change the language of the IMA SDK, pass the `adLanguage` prop within the `ad
   source={{
     uri: 'https://example.com/video.mp4',
     ad: {
+      type: 'csai',
       adTagUrl: 'https://example.com/adtag',
       adLanguage: 'fr'
     }
@@ -80,20 +84,21 @@ DAI is ideal for:
 
 ### Usage
 
-To use DAI, configure the `dai` property within the `source` prop. DAI supports both Video On Demand (VOD) and Live streaming.
+To use DAI, configure the `ad` property with `type: 'dai'` within the `source` prop. DAI supports both Video On Demand (VOD) and Live streaming.
 
 #### VOD Example:
 
 ```jsx
 <Video
   source={{
-    dai: {
+    ad: {
+      type: 'dai',
       contentSourceId: '2548831',
       videoId: 'tears-of-steel',
       adTagParameters: {
         'custom_param': 'value'
       },
-      backupStreamUri: 'https://example.com/backup-stream.m3u8'
+      fallbackUri: 'https://example.com/backup-stream.m3u8'
     }
   }}
 />
@@ -104,12 +109,13 @@ To use DAI, configure the `dai` property within the `source` prop. DAI supports 
 ```jsx
 <Video
   source={{
-    dai: {
+    ad: {
+      type: 'dai',
       assetKey: 'c-rArva4ShKVIAkNfy6HUQ',
       adTagParameters: {
         'custom_param': 'value'
       },
-      backupStreamUri: 'https://example.com/backup-stream.m3u8'
+      fallbackUri: 'https://example.com/backup-stream.m3u8'
     }
   }}
 />
@@ -126,7 +132,7 @@ For Live streams, you must provide:
 
 Optional properties:
 - `adTagParameters` – Custom key-value pairs to pass as ad tag parameters to the IMA SDK. For a list of supported Ad Manager ad tag parameters, see the [Google Ad Manager documentation](https://support.google.com/admanager/answer/7320899?hl=en#npa).
-- `backupStreamUri` – Fallback stream URI. If the DAI stream fails to load, the player will automatically fall back to this URI
+- `fallbackUri` – Fallback stream URI. If the DAI stream fails to load, the player will automatically fall back to this URI
 
 ### Events
 
@@ -137,7 +143,8 @@ DAI uses the same `onReceiveAdEvent` prop as CSAI to report ad-related events. T
 ```jsx
 <Video
   source={{
-    dai: {
+    ad: {
+      type: 'dai',
       contentSourceId: '2548831',
       videoId: 'tears-of-steel'
     }
@@ -145,13 +152,13 @@ DAI uses the same `onReceiveAdEvent` prop as CSAI to report ad-related events. T
   onReceiveAdEvent={event => console.log(event)}
   // ... other props
 />
-
-For more details on DAI configuration properties, see the [props documentation](/component/props#dai).
 ```
 
-### Backup Stream
+For more details on ad configuration properties, see the [props documentation](/component/props#ad).
 
-If the DAI stream fails to load and a `backupStreamUri` is provided, the player will automatically fall back to the backup stream. This ensures playback continuity even when DAI services are unavailable.
+### Fallback Stream
+
+If the DAI stream fails to load and a `fallbackUri` is provided, the player will automatically fall back to the fallback stream. This ensures playback continuity even when DAI services are unavailable.
 
 ### Example App
 
@@ -165,7 +172,7 @@ For testing and experimenting with DAI, you can use the `expo-dai` example app l
 | Playback interruptions | Possible during ad breaks             | Seamless, no interruptions             |
 | Stream format          | Original video + separate ad requests | Single unified stream with ads         |
 | Use case               | VOD with pre-defined ad breaks        | Live and VOD with dynamic ad insertion |
-| Configuration          | `source.ad.adTagUrl`                  | `source.dai` with content identifiers  |
+| Configuration          | `source.ad` with `type: 'csai'`       | `source.ad` with `type: 'dai'`         |
 
 ---
 

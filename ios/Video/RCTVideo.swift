@@ -443,7 +443,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         if currentTimeSecs >= 0 {
             #if USE_GOOGLE_IMA
-                if !_didRequestAds && currentTimeSecs >= 0.0001 && _source?.adParams.adTagUrl != nil {
+                if !_didRequestAds && currentTimeSecs >= 0.0001 && _source?.adParams.isCSAI == true {
                     _imaAdsManager.requestAds()
                     _didRequestAds = true
                 }
@@ -622,10 +622,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
 
         #if USE_GOOGLE_IMA
-            if _source?.adParams.adTagUrl != nil {
-                // Set up your content playhead and contentComplete callback.
+            if _source?.adParams.isCSAI == true {
                 _contentPlayhead = IMAAVPlayerContentPlayhead(avPlayer: _player!)
-
                 _imaAdsManager.setUpAdsLoader()
             }
         #endif
@@ -1883,41 +1881,28 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         ///
         /// Returns `true` if either:
         /// - VOD request: both `contentSourceId` and `videoId` are present
-        /// - Live request: `assetKey` is present
         func isDaiSource() -> Bool {
-            guard let daiParams = _source?.daiParams else {
-                return false
-            }
-
-            let isVodRequest = daiParams.contentSourceId != nil && daiParams.videoId != nil
-            let isLiveRequest = daiParams.assetKey != nil
-
-            return isVodRequest || isLiveRequest
+            return _source?.adParams.isDAI ?? false
         }
 
-        /// Returns the content source ID for DAI VOD requests.
         func getContentSourceId() -> String? {
-            return _source?.daiParams.contentSourceId
+            return _source?.adParams.contentSourceId
         }
 
-        /// Returns the asset key for DAI Live requests.
         func getAssetKey() -> String? {
-            return _source?.daiParams.assetKey
+            return _source?.adParams.assetKey
         }
 
-        /// Returns the video ID for DAI VOD requests.
         func getVideoId() -> String? {
-            return _source?.daiParams.videoId
+            return _source?.adParams.videoId
         }
 
-        /// Returns the ad tag parameters for DAI requests.
         func getAdTagParameters() -> [String: String]? {
-            return _source?.daiParams.adTagParameters
+            return _source?.adParams.adTagParameters
         }
 
-        /// Returns the backup stream URI for DAI requests.
         func getBackupStreamUri() -> String? {
-            return _source?.daiParams.backupStreamUri
+            return _source?.adParams.fallbackUri
         }
 
         /// Returns the IMA video display instance used for DAI playback.
