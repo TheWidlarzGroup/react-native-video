@@ -64,6 +64,7 @@ function AppContent() {
 
   // Content type and input state
   const [contentType, setContentType] = useState<'vod' | 'live'>('vod');
+  const [format, setFormat] = useState<'hls' | 'dash'>('hls');
   const [vodContentSourceId, setVodContentSourceId] = useState('2548831');
   const [vodVideoId, setVodVideoId] = useState('tears-of-steel');
   const [liveAssetKey, setLiveAssetKey] = useState('c-rArva4ShKVIAkNfy6HUQ');
@@ -342,6 +343,7 @@ function AppContent() {
           type: 'dai',
           contentSourceId: vodContentSourceId,
           videoId: vodVideoId,
+          format,
           ...(backupStreamUri && {fallbackUri: backupStreamUri}),
         },
       });
@@ -350,6 +352,7 @@ function AppContent() {
         ad: {
           type: 'dai',
           assetKey: liveAssetKey,
+          format,
           ...(backupStreamUri && {fallbackUri: backupStreamUri}),
         },
       });
@@ -357,6 +360,7 @@ function AppContent() {
 
     addEvent('Source Applied', {
       contentType,
+      format,
       vodContentSourceId,
       vodVideoId,
       liveAssetKey,
@@ -364,6 +368,7 @@ function AppContent() {
     });
   }, [
     contentType,
+    format,
     vodContentSourceId,
     vodVideoId,
     liveAssetKey,
@@ -433,6 +438,7 @@ function AppContent() {
         eventBufferLength={eventBuffer.length}
         showDebug={showDebug}
         contentType={contentType}
+        format={format}
         vodContentSourceId={vodContentSourceId}
         vodVideoId={vodVideoId}
         liveAssetKey={liveAssetKey}
@@ -444,6 +450,7 @@ function AppContent() {
         onToggleStreaming={toggleStreaming}
         onToggleDebug={() => setShowDebug(!showDebug)}
         onContentTypeChange={setContentType}
+        onFormatChange={setFormat}
         onVodContentSourceIdChange={setVodContentSourceId}
         onVodVideoIdChange={setVodVideoId}
         onLiveAssetKeyChange={setLiveAssetKey}

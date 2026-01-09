@@ -131,6 +131,7 @@ For Live streams, you must provide:
 - `assetKey` – The asset key for the live stream
 
 Optional properties:
+- `format` – Stream format: `'hls'` (default) or `'dash'`. Android only - iOS automatically detects the format.
 - `adTagParameters` – Custom key-value pairs to pass as ad tag parameters to the IMA SDK. For a list of supported Ad Manager ad tag parameters, see the [Google Ad Manager documentation](https://support.google.com/admanager/answer/7320899?hl=en#npa).
 - `fallbackUri` – Fallback stream URI. If the DAI stream fails to load, the player will automatically fall back to this URI
 

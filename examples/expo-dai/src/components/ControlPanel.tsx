@@ -17,6 +17,7 @@ interface ControlPanelProps {
   eventBufferLength: number;
   showDebug: boolean;
   contentType: 'vod' | 'live';
+  format: 'hls' | 'dash';
   vodContentSourceId: string;
   vodVideoId: string;
   liveAssetKey: string;
@@ -34,6 +35,7 @@ interface ControlPanelProps {
   onToggleStreaming: () => void;
   onToggleDebug: () => void;
   onContentTypeChange: (type: 'vod' | 'live') => void;
+  onFormatChange: (format: 'hls' | 'dash') => void;
   onVodContentSourceIdChange: (value: string) => void;
   onVodVideoIdChange: (value: string) => void;
   onLiveAssetKeyChange: (value: string) => void;
@@ -49,6 +51,7 @@ export function ControlPanel({
   eventBufferLength,
   showDebug,
   contentType,
+  format,
   vodContentSourceId,
   vodVideoId,
   liveAssetKey,
@@ -60,6 +63,7 @@ export function ControlPanel({
   onToggleStreaming,
   onToggleDebug,
   onContentTypeChange,
+  onFormatChange,
   onVodContentSourceIdChange,
   onVodVideoIdChange,
   onLiveAssetKeyChange,
@@ -81,11 +85,13 @@ export function ControlPanel({
       {/* Source Settings */}
       <VideoSettings
         contentType={contentType}
+        format={format}
         vodContentSourceId={vodContentSourceId}
         vodVideoId={vodVideoId}
         liveAssetKey={liveAssetKey}
         backupStreamUri={backupStreamUri}
         onContentTypeChange={onContentTypeChange}
+        onFormatChange={onFormatChange}
         onVodContentSourceIdChange={onVodContentSourceIdChange}
         onVodVideoIdChange={onVodVideoIdChange}
         onLiveAssetKeyChange={onLiveAssetKeyChange}

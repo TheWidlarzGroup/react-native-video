@@ -2831,6 +2831,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 runningSource.getAdsProps().getContentSourceId(),
                 runningSource.getAdsProps().getVideoId(),
                 runningSource.getAdsProps().getAssetKey(),
+                runningSource.getAdsProps().getFormat(),
                 runningSource.getAdsProps().getAdTagParameters()
         );
 
@@ -2852,9 +2853,10 @@ public class ReactExoplayerView extends FrameLayout implements
      * @param contentSourceId The content source ID for VOD requests
      * @param videoId The video ID for VOD requests
      * @param assetKey The asset key for Live requests
+     * @param format The stream format ("hls" or "dash"), defaults to HLS if null
      * @param adTagParameters Optional ad tag parameters to include as query parameters
      */
-    private void requestDaiStream(String contentSourceId, String videoId, String assetKey, Map<String, String> adTagParameters) {
+    private void requestDaiStream(String contentSourceId, String videoId, String assetKey, String format, Map<String, String> adTagParameters) {
         if (daiAdsLoader == null) {
             eventEmitter.onVideoError.invoke("DaiAdsLoader is null", null, "DAI_ADS_LOADER_NULL_ERROR");
             return;
@@ -2862,20 +2864,22 @@ public class ReactExoplayerView extends FrameLayout implements
         
         daiAdsLoader.setPlayer(player);
         
+        int streamFormat = "dash".equalsIgnoreCase(format) ? CONTENT_TYPE_DASH : CONTENT_TYPE_HLS;
+        
         try {
             Uri.Builder uriBuilder;
             
             if (assetKey != null) {
                 uriBuilder = new ImaServerSideAdInsertionUriBuilder()
                         .setAssetKey(assetKey)
-                        .setFormat(CONTENT_TYPE_HLS)
+                        .setFormat(streamFormat)
                         .build()
                         .buildUpon();
             } else if (contentSourceId != null && videoId != null) {
                 uriBuilder = new ImaServerSideAdInsertionUriBuilder()
                         .setContentSourceId(contentSourceId)
                         .setVideoId(videoId)
-                        .setFormat(CONTENT_TYPE_HLS)
+                        .setFormat(streamFormat)
                         .build()
                         .buildUpon();
             } else {

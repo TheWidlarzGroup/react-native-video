@@ -9,11 +9,13 @@ import {
 
 interface VideoSettingsProps {
   contentType: 'vod' | 'live';
+  format: 'hls' | 'dash';
   vodContentSourceId: string;
   vodVideoId: string;
   liveAssetKey: string;
   backupStreamUri: string;
   onContentTypeChange: (type: 'vod' | 'live') => void;
+  onFormatChange: (format: 'hls' | 'dash') => void;
   onVodContentSourceIdChange: (value: string) => void;
   onVodVideoIdChange: (value: string) => void;
   onLiveAssetKeyChange: (value: string) => void;
@@ -23,11 +25,13 @@ interface VideoSettingsProps {
 
 export function VideoSettings({
   contentType,
+  format,
   vodContentSourceId,
   vodVideoId,
   liveAssetKey,
   backupStreamUri,
   onContentTypeChange,
+  onFormatChange,
   onVodContentSourceIdChange,
   onVodVideoIdChange,
   onLiveAssetKeyChange,
@@ -66,6 +70,40 @@ export function VideoSettings({
               contentType === 'live' && styles.contentTypeTabTextActive,
             ]}>
             📺 Live
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Format Toggle - HLS/DASH (Android only) */}
+      <View style={styles.contentTypeContainer}>
+        <TouchableOpacity
+          style={[
+            styles.contentTypeTab,
+            styles.contentTypeTabLeft,
+            format === 'hls' && styles.contentTypeTabActive,
+          ]}
+          onPress={() => onFormatChange('hls')}>
+          <Text
+            style={[
+              styles.contentTypeTabText,
+              format === 'hls' && styles.contentTypeTabTextActive,
+            ]}>
+            HLS
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.contentTypeTab,
+            styles.contentTypeTabRight,
+            format === 'dash' && styles.contentTypeTabActive,
+          ]}
+          onPress={() => onFormatChange('dash')}>
+          <Text
+            style={[
+              styles.contentTypeTabText,
+              format === 'dash' && styles.contentTypeTabTextActive,
+            ]}>
+            DASH
           </Text>
         </TouchableOpacity>
       </View>
