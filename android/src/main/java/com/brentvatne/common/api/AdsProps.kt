@@ -37,9 +37,10 @@ class AdsProps {
             )
     }
 
-    override fun hashCode(): Int = Objects.hash(
-        type, adTagUrl, adLanguage, contentSourceId, videoId, assetKey, format, adTagParameters, fallbackUri
-    )
+    override fun hashCode(): Int =
+        Objects.hash(
+            type, adTagUrl, adLanguage, contentSourceId, videoId, assetKey, format, adTagParameters, fallbackUri
+        )
 
     companion object {
         private const val PROP_TYPE = "type"
