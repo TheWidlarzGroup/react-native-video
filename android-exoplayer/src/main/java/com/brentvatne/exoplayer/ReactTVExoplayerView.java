@@ -546,8 +546,10 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     ? secondaryPlayerView
                     : exoDorisPlayerView;
 
-            long dvrSeekBackwardInterval = src.getDvrSeekBackwardInterval();
             long dvrSeekForwardInterval = src.getDvrSeekForwardInterval();
+            long dvrSeekBackwardInterval = src.getDvrSeekBackwardInterval();
+            exoDorisPlayerView.setFastForwardIncrementMs(dvrSeekForwardInterval);
+            exoDorisPlayerView.setRewindIncrementMs(dvrSeekBackwardInterval);
 
             player = exoDorisFactory.createPlayer(
                     getContext(),
@@ -555,8 +557,8 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                     shouldAutoStart,
                     null,
                     MAX_LOAD_BUFFER_MS,
-                    dvrSeekForwardInterval != 0L ? dvrSeekForwardInterval : exoDorisPlayerView.getFastForwardIncrementMs(),
-                    dvrSeekBackwardInterval != 0L ? dvrSeekBackwardInterval : exoDorisPlayerView.getRewindIncrementMs(),
+                    exoDorisPlayerView.getFastForwardIncrementMs(),
+                    exoDorisPlayerView.getRewindIncrementMs(),
                     null,
                     adViewProvider,
                     exoDorisPlayerView,
