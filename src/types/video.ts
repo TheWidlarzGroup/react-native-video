@@ -40,7 +40,7 @@ export type ReactVideoSourceProperties = {
   textTracksAllowChunklessPreparation?: boolean;
   textTracks?: TextTracks;
   ad?: AdConfig;
-  dai?: DaiConfig;
+  dai?: DaiConfig; // BLOOMBERG: DAI configuration
   minLoadRetryCount?: number; // Android
   bufferConfig?: BufferConfig;
 };
@@ -83,6 +83,8 @@ export type AdConfig = Readonly<{
   adLanguage?: ISO639_1;
 }>;
 
+// BLOOMBERG BEGIN
+// Purpose: DAI (Dynamic Ad Insertion) type definitions
 type DaiConfigShared = Readonly<{
   adTagParameters?: Record<string, string>;
   backupStreamUri?: string;
@@ -103,6 +105,7 @@ export type DaiConfigVod = DaiConfigShared &
   }>;
 
 export type DaiConfig = DaiConfigLive | DaiConfigVod;
+// BLOOMBERG END
 
 export type Drm = Readonly<{
   type?: DRMType;

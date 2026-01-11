@@ -214,8 +214,7 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
         val isLive = player.isCurrentMediaItemLive
         val seekable = player.isCurrentMediaItemSeekable
 
-        // Show/hide badge - always hide, see:
-        // https://github.com/TheWidlarzGroup/react-native-video/issues/4623#issuecomment-3218156762
+        // BLOOMBERG: Always hide live badge due to positioning issues
         liveBadge.visibility = View.GONE
 
         // Disable/enable scrubbing based on seekable

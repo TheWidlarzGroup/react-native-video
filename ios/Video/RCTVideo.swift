@@ -164,11 +164,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             _player?.play()
         }
 
-        // Refresh Now Playing info after PiP exits to re-establish artwork in Dynamic Island
-        // PiP takes over the Now Playing session, so we need to refresh it when PiP ends
+        // BLOOMBERG BEGIN
+        // Purpose: Refresh Now Playing info after PiP to re-establish artwork in Dynamic Island
         if _showNotificationControls {
             NowPlayingInfoCenterManager.shared.updateNowPlayingInfo()
         }
+        // BLOOMBERG END
     }
 
     func handleRestoreUserInterfaceForPictureInPictureStop() {
@@ -215,9 +216,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         AudioSessionManager.shared.registerView(view: self)
 
         #if os(iOS)
+            // BLOOMBERG BEGIN
+            // Purpose: Only initialize PiP when needed to allow Now Playing controls
             if _enterPictureInPictureOnLeave {
                 initPictureinPicture()
             }
+            // BLOOMBERG END
         #endif
 
         NotificationCenter.default.addObserver(
@@ -446,7 +450,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         if currentTimeSecs > duration || didEnd {
             currentTimeSecs = duration
         }
-        
+
         var seekableDuration = Float(RCTVideoUtils.calculateSeekableDuration(_player))
         var playableDuration = Float(RCTVideoUtils.calculatePlayableDuration(_player, withSource: _source))
 
@@ -460,7 +464,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 if let currentContentTIme = _imaAdsManager.convertStreamTimeToContentTime(streamTime: TimeInterval(currentTimeSecs)) {
                     currentTimeSecs = currentContentTIme
                 }
-            
+
                 if let seekableContentDuration = _imaAdsManager.convertStreamTimeToContentTime(streamTime: TimeInterval(seekableDuration)) {
                     seekableDuration = Float(seekableContentDuration)
                 }
@@ -469,14 +473,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                     playableDuration = Float(playableContentDuration)
                 }
             #endif
-            
+
             onVideoProgress?([
                 "currentTime": currentTimeSecs,
                 "playableDuration": playableDuration,
                 "atValue": currentTime?.value ?? .zero,
                 "currentPlaybackTime": NSNumber(value: Double(currentPlaybackTime?.timeIntervalSince1970 ?? 0 * 1000)).int64Value,
                 "target": reactTag as Any,
-                "seekableDuration": seekableDuration
+                "seekableDuration": seekableDuration,
             ])
         }
     }
@@ -918,7 +922,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
 
         var seekTime: Float = time.floatValue
-        
+
         #if USE_GOOGLE_IMA
             if let contentTime = _imaAdsManager.convertContentTimeToStreamTime(contentTime: TimeInterval(seekTime)) {
                 seekTime = Float(contentTime)
@@ -1035,11 +1039,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func applyModifiers() {
-        // Bloomberg ENG4BCMI PATCH BEGIN: Prevent hang when currentItem is nil or not ready
+        // BLOOMBERG BEGIN
+        // Purpose: Prevent hang when currentItem is nil or not ready
         if _player?.currentItem?.status != AVPlayerItem.Status.readyToPlay {
             return
         }
-        // Bloomberg ENG4BCMI PATCH END
+        // BLOOMBERG END
 
         if _muted {
             if !_controls {
@@ -1264,6 +1269,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         if #available(iOS 9.0, tvOS 14.0, *) {
             viewController.allowsPictureInPicturePlayback = _enterPictureInPictureOnLeave
         }
+        // BLOOMBERG BEGIN
+        // Purpose: Make AVPlayerViewController background transparent to match Android behavior
         // Bloomberg ENG4BCMA-5034 autoplay release fixes
         // When AVPlayerViewController (from which RCTVideoPlayerViewController inherits) is created,
         // its 'view' ('view.layer', actually) has black background color.
@@ -1275,7 +1282,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         // (for example, check the 'videoInThumbnailStyle' prop).
         // FYI: On Android, the background color of the video player is transparent by default.
         viewController.view.backgroundColor = .clear
-        // End of Bloomberg ENG4BCMA-5034 autoplay release fixes
+        // BLOOMBERG END
         return viewController
     }
 
@@ -1418,11 +1425,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func getPip() -> RCTPictureInPicture? {
-        // Only initialize PiP if enterPictureInPictureOnLeave is enabled
-        // This prevents auto-PiP when minimizing when user wants Dynamic Island controls instead
+        // BLOOMBERG BEGIN
+        // Purpose: Only initialize PiP when needed to prevent auto-PiP for Dynamic Island controls
         if _enterPictureInPictureOnLeave {
             initPictureinPicture()
         }
+        // BLOOMBERG END
         return _pip
     }
 
@@ -1663,7 +1671,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                         duration = Float(contentDuration)
                     }
                 #endif
-                
+
                 self.onVideoLoad?(["duration": NSNumber(value: duration),
                                    "currentTime": NSNumber(value: currentTime),
                                    "canPlayReverse": NSNumber(value: _playerItem.canPlayReverse),
@@ -1945,6 +1953,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     func setOnClick(_: Any) {}
 }
 
+// BLOOMBERG BEGIN
+// Purpose: DAI (Dynamic Ad Insertion) support for server-side ad insertion
 // MARK: - DAI Support
 
 #if USE_GOOGLE_IMA
@@ -2134,3 +2144,4 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
     }
 #endif
+// BLOOMBERG END

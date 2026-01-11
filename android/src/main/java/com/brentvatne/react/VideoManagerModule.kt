@@ -18,7 +18,8 @@ class VideoManagerModule(reactContext: ReactApplicationContext?) : ReactContextB
     private fun performOnPlayerView(reactTag: Int, callback: (ReactExoplayerView?) -> Unit) {
         UiThreadUtil.runOnUiThread {
             try {
-                // Bloomberg ENG4BCMI PATCH BEGIN: prevent build issues coming from react-native-video:lintDebug
+                // BLOOMBERG BEGIN
+                // Purpose: Extract conditional into variable to avoid lint errors
                 val uiManagerType: Int = if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
                     UIManagerType.FABRIC
                 } else {
@@ -28,7 +29,7 @@ class VideoManagerModule(reactContext: ReactApplicationContext?) : ReactContextB
                     reactApplicationContext,
                     uiManagerType
                 )
-                // Bloomberg ENG4BCMI PATCH END
+                // BLOOMBERG END
 
                 val view = uiManager?.resolveView(reactTag)
 

@@ -1,3 +1,5 @@
+// BLOOMBERG: IMA server-side ad insertion media source wrapper
+
 package androidx.media3.exoplayer.ima;
 
 import android.content.Context;

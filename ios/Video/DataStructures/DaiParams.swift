@@ -1,3 +1,5 @@
+// BLOOMBERG: Data structure for DAI configuration
+
 public struct DaiParams {
     let contentSourceId: String?
     let videoId: String?

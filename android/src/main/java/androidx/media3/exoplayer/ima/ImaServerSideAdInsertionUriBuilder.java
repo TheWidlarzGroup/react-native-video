@@ -1,3 +1,5 @@
+// BLOOMBERG: URI builder for DAI streams
+
 package androidx.media3.exoplayer.ima;
 
 import android.net.Uri;

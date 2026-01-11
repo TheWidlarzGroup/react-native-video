@@ -1,4 +1,5 @@
 export enum AdEvent {
+  // BLOOMBERG: DAI event
   /**
    * iOS only: Fired the first time each ad break ends. Applications must reenable seeking when this occurs (only used for dynamic ad insertion).
    */
@@ -7,6 +8,7 @@ export enum AdEvent {
    * Fires when an ad rule or a VMAP ad break would have played if autoPlayAdBreaks is false.
    */
   AD_BREAK_READY = 'AD_BREAK_READY',
+  // BLOOMBERG: DAI event
   /**
    * iOS only: Fired first time each ad break begins playback. If an ad break is watched subsequent times this will not be fired. Applications must disable seeking when this occurs (only used for dynamic ad insertion).
    */
@@ -23,10 +25,12 @@ export enum AdEvent {
    * Android only: Fires when an ads list is loaded.
    */
   AD_METADATA = 'AD_METADATA',
+  // BLOOMBERG: DAI event
   /**
    * iOS only: Fired every time the stream switches from advertising or slate to content. This will be fired even when an ad is played a second time or when seeking into an ad (only used for dynamic ad insertion).
    */
   AD_PERIOD_ENDED = 'AD_PERIOD_ENDED',
+  // BLOOMBERG: DAI event
   /**
    * iOS only: Fired every time the stream switches from content to advertising or slate. This will be fired even when an ad is played a second time or when seeking into an ad (only used for dynamic ad insertion).
    */
@@ -115,6 +119,7 @@ export enum AdEvent {
    * Fires when the ad starts playing.
    */
   STARTED = 'STARTED',
+  // BLOOMBERG: DAI event
   /**
    * iOS only: Stream request has loaded (only used for dynamic ad insertion).
    */
