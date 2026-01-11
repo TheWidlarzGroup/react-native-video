@@ -61,8 +61,11 @@ import React
             _pipController = AVPictureInPictureController(playerLayer: playerLayer)
             if #available(iOS 14.2, *) {
                 // BLOOMBERG BEGIN
-                // Purpose: Prevent automatic PiP to allow Now Playing controls in Dynamic Island
-                _pipController?.canStartPictureInPictureAutomaticallyFromInline = false
+                // Purpose: We want to enable Dynamic Island. This value should be false for Bloomberg
+                // But this requires us to implement a custom mini-player state that we don't have yet.
+                // true is the upstream behavior, but I'm leaving this comment here to find it later
+                // for modification later.
+                _pipController?.canStartPictureInPictureAutomaticallyFromInline = true
                 // BLOOMBERG END
             }
             _pipController?.delegate = self
