@@ -71,11 +71,12 @@ class AudioSessionManager {
             return !view.isMuted() && view._player != nil && view._player?.rate != 0
         }
 
-        // Don't configure audio session if no player is playing and remote controls aren't active
-        // This prevents taking control from other apps when just opening/foregrounding the app
+        // BLOOMBERG BEGIN
+        // Purpose: Prevent taking audio control from other apps when just opening app
         if !isAnyPlayerPlaying && !remoteControlEventsActive {
             return
         }
+        // BLOOMBERG END
 
         if isAnyPlayerPlaying || remoteControlEventsActive {
             activateAudioSession()
@@ -158,10 +159,11 @@ class AudioSessionManager {
             return view._mixWithOthers == "mix" || view._mixWithOthers == "duck"
         }
 
-        // Only take exclusive audio control when actually playing with notification controls
-        // This allows other apps to keep playing until the user presses play
+        // BLOOMBERG BEGIN
+        // Purpose: Only take exclusive audio when actually playing with notification controls
         let shouldTakeExclusiveAudio = anyPlayerPlaying && (anyPlayerShowNotificationControls || anyPlayerNeedsBackgroundPlayback)
         let canAllowMixing = anyPlayerWantsMixing && !shouldTakeExclusiveAudio
+        // BLOOMBERG END
 
         if isAudioSessionManagementDisabled {
             // AUDIO SESSION MANAGEMENT DISABLED BY USER

@@ -60,9 +60,10 @@ import React
             // Create new controller passing reference to the AVPlayerLayer
             _pipController = AVPictureInPictureController(playerLayer: playerLayer)
             if #available(iOS 14.2, *) {
-                // Disable automatic PiP when going to background
-                // This allows Now Playing controls (with artwork) to show in Dynamic Island instead
+                // BLOOMBERG BEGIN
+                // Purpose: Prevent automatic PiP to allow Now Playing controls in Dynamic Island
                 _pipController?.canStartPictureInPictureAutomaticallyFromInline = false
+                // BLOOMBERG END
             }
             _pipController?.delegate = self
         }

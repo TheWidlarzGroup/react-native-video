@@ -1,3 +1,5 @@
+// BLOOMBERG: Data class for DAI configuration
+
 package com.brentvatne.common.api
 
 import com.brentvatne.common.toolbox.ReactBridgeUtils
