@@ -2915,15 +2915,15 @@ public class ReactExoplayerView extends FrameLayout implements
             return false;
         }
         
-        String backupStreamUri = source.getAdsProps().getFallbackUri();
-        if (backupStreamUri == null || backupStreamUri.isEmpty()) {
+        String fallbackStreamUri = source.getAdsProps().getFallbackUri();
+        if (fallbackStreamUri == null || fallbackStreamUri.isEmpty()) {
             return false;
         }
         
-        DebugLog.d(TAG, "DAI stream error occurred, falling back to backup stream URI: " + backupStreamUri);
+        DebugLog.d(TAG, "DAI stream error occurred, falling back to backup stream URI: " + fallbackStreamUri);
         
         WritableMap backupSourceMap = Arguments.createMap();
-        backupSourceMap.putString("uri", backupStreamUri);
+        backupSourceMap.putString("uri", fallbackStreamUri);
         backupSourceMap.putBoolean("isNetwork", true);
         
         Source backupSource = Source.parse(backupSourceMap, themedReactContext);
