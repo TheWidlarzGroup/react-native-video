@@ -209,53 +209,53 @@ class Source {
         fun parse(src: ReadableMap?, context: Context): Source {
             val source = Source()
 
-            if (src != null) {
-                val uriString = safeGetString(src, PROP_SRC_URI, null)
-                if (uriString != null && !TextUtils.isEmpty(uriString)) {
+            if (src == null) return source
+
+            safeGetString(src, PROP_SRC_URI, null)
+                ?.takeIf { it.isNotBlank() }
+                ?.let { uriString ->
                     var uri = Uri.parse(uriString)
-                    if (uri == null) {
-                        return source
-                    } else if (!isValidScheme(uri.scheme)) {
-                        uri = getUriFromAssetId(context, uriString)
-                        if (uri == null) {
-                            return source
-                        }
+
+                    if (!isValidScheme(uri.scheme)) {
+                        uri = getUriFromAssetId(context, uriString) ?: return source
                     }
+
                     source.uriString = uriString
                     source.uri = uri
                 }
-                source.isLocalAssetFile = safeGetBool(src, PROP_SRC_IS_LOCAL_ASSET_FILE, false)
-                source.isAsset = safeGetBool(src, PROP_SRC_IS_ASSET, false)
-                source.startPositionMs = safeGetInt(src, PROP_SRC_START_POSITION, -1)
-                source.cropStartMs = safeGetInt(src, PROP_SRC_CROP_START, -1)
-                source.cropEndMs = safeGetInt(src, PROP_SRC_CROP_END, -1)
-                source.contentStartTime = safeGetInt(src, PROP_SRC_CONTENT_START_TIME, -1)
-                source.extension = safeGetString(src, PROP_SRC_TYPE, null)
-                source.drmProps = parse(safeGetMap(src, PROP_SRC_DRM))
-                source.cmcdProps = CMCDProps.parse(safeGetMap(src, PROP_SRC_CMCD))
-                if (BuildConfig.USE_EXOPLAYER_IMA) {
-                    source.adsProps = AdsProps.parse(safeGetMap(src, PROP_SRC_ADS))
-                }
-                source.textTracksAllowChunklessPreparation = safeGetBool(src, PROP_SRC_TEXT_TRACKS_ALLOW_CHUNKLESS_PREPARATION, true)
-                source.sideLoadedTextTracks = SideLoadedTextTrackList.parse(safeGetArray(src, PROP_SRC_TEXT_TRACKS))
-                source.minLoadRetryCount = safeGetInt(src, PROP_SRC_MIN_LOAD_RETRY_COUNT, 3)
-                source.bufferConfig = BufferConfig.parse(safeGetMap(src, PROP_SRC_BUFFER_CONFIG))
 
-                val propSrcHeadersArray = safeGetArray(src, PROP_SRC_HEADERS)
-                if (propSrcHeadersArray != null) {
-                    if (propSrcHeadersArray.size() > 0) {
-                        for (i in 0 until propSrcHeadersArray.size()) {
-                            val current = propSrcHeadersArray.getMap(i)
-                            val key = current?.getString("key")
-                            val value = current?.getString("value")
-                            if (key != null && value != null) {
-                                source.headers[key] = value
-                            }
+            source.isLocalAssetFile = safeGetBool(src, PROP_SRC_IS_LOCAL_ASSET_FILE, false)
+            source.isAsset = safeGetBool(src, PROP_SRC_IS_ASSET, false)
+            source.startPositionMs = safeGetInt(src, PROP_SRC_START_POSITION, -1)
+            source.cropStartMs = safeGetInt(src, PROP_SRC_CROP_START, -1)
+            source.cropEndMs = safeGetInt(src, PROP_SRC_CROP_END, -1)
+            source.contentStartTime = safeGetInt(src, PROP_SRC_CONTENT_START_TIME, -1)
+            source.extension = safeGetString(src, PROP_SRC_TYPE, null)
+            source.drmProps = parse(safeGetMap(src, PROP_SRC_DRM))
+            source.cmcdProps = CMCDProps.parse(safeGetMap(src, PROP_SRC_CMCD))
+            if (BuildConfig.USE_EXOPLAYER_IMA) {
+                source.adsProps = AdsProps.parse(safeGetMap(src, PROP_SRC_ADS))
+            }
+            source.textTracksAllowChunklessPreparation = safeGetBool(src, PROP_SRC_TEXT_TRACKS_ALLOW_CHUNKLESS_PREPARATION, true)
+            source.sideLoadedTextTracks = SideLoadedTextTrackList.parse(safeGetArray(src, PROP_SRC_TEXT_TRACKS))
+            source.minLoadRetryCount = safeGetInt(src, PROP_SRC_MIN_LOAD_RETRY_COUNT, 3)
+            source.bufferConfig = BufferConfig.parse(safeGetMap(src, PROP_SRC_BUFFER_CONFIG))
+
+            val propSrcHeadersArray = safeGetArray(src, PROP_SRC_HEADERS)
+            if (propSrcHeadersArray != null) {
+                if (propSrcHeadersArray.size() > 0) {
+                    for (i in 0 until propSrcHeadersArray.size()) {
+                        val current = propSrcHeadersArray.getMap(i)
+                        val key = current?.getString("key")
+                        val value = current?.getString("value")
+                        if (key != null && value != null) {
+                            source.headers[key] = value
                         }
                     }
                 }
-                source.metadata = Metadata.parse(safeGetMap(src, PROP_SRC_METADATA))
             }
+            source.metadata = Metadata.parse(safeGetMap(src, PROP_SRC_METADATA))
+
             return source
         }
 
