@@ -47,4 +47,6 @@ export interface IVideoPlayer extends IVideoPlayerCallbacks, ViewProps {
   subtitleHorizontalPadding?: number;
   isPlayPauseEnabled?: boolean;
   shouldAutoStart?: boolean;
+  isPauseAdsEnabled?: boolean;
+  treatAllOverlayAdsAsPauseAds?: boolean;
 }

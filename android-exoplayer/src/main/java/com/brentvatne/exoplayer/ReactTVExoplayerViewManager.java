@@ -149,6 +149,8 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_IS4K = "is4K";
     private static final String PROP_IS_PLAY_PAUSE_ENABLED = "isPlayPauseEnabled";
     private static final String PROP_SHOULD_AUTO_START = "shouldAutoStart";
+    private static final String PROP_IS_PAUSE_ADS_ENABLED = "isPauseAdsEnabled";
+    private static final String PROP_TREAT_ALL_OVERLAY_ADS_AS_PAUSE_ADS = "treatAllOverlayAdsAsPauseAds";
 
     private static final int COMMAND_SEEK_TO_POSITION = 4;
     private static final int COMMAND_REPLACE_AD_TAG_PARAMETERS = 5;
@@ -648,6 +650,16 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     @ReactProp(name = PROP_SHOULD_AUTO_START)
     public void setShouldAutoStart(final ReactTVExoplayerView videoView, boolean shouldAutoStart){
         videoView.setShouldAutoStart(shouldAutoStart);
+    }
+
+    @ReactProp(name = PROP_IS_PAUSE_ADS_ENABLED)
+    public void setIsPauseAdsEnabled(final ReactTVExoplayerView videoView, boolean isPauseAdsEnabled){
+        videoView.setIsPauseAdsEnabled(isPauseAdsEnabled);
+    }
+
+    @ReactProp(name = PROP_TREAT_ALL_OVERLAY_ADS_AS_PAUSE_ADS)
+    public void setTreatAllOverlayAdsAsPauseAd(final ReactTVExoplayerView videoView, boolean treatAllOverlayAdsAsPauseAds){
+        videoView.setTreatAllOverlayAdsAsPauseAd(treatAllOverlayAdsAsPauseAds);
     }
 
     private boolean startsWithValidScheme(String uriString) {
