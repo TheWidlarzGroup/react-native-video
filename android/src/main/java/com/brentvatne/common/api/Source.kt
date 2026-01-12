@@ -75,6 +75,9 @@ class Source {
      */
     var cmcdProps: CMCDProps? = null
 
+    /**
+     * Ads playback properties
+     */
     var adsProps: AdsProps? = null
 
     /*
