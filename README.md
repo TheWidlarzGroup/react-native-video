@@ -102,26 +102,18 @@ export default () => (
 
 ---
 
-## 🧩 Plugins
+## :inbox_tray: We're building a Pro Player!
+We see the need for a more feature-rich video player. There is a gap between open source and commercial players, and we want to fill that gap with plugins.
 
-<a href="https://www.thewidlarzgroup.com/offline-video-sdk?utm_source=rnv&utm_medium=readme&utm_id=banner">
-  <img src="./docs/static/baners/sdk-banner.png" alt="Offline SDK Preview" width="40%" align="right" />
-</a>
+**Are you using a commercial player just for 1-2 features?** Maybe you are paying for a license just to get **DRM**, **Ads**, or **Analytics**? Let us know. We want to identify these missing pieces and build them, so you can switch back to open source.
 
-### 1 · 📥 Offline SDK
+**This is what we have already. Check out!**
 
-Enable offline streaming with full control over downloads, license lifecycle, secure storage, and media access.
+* [Offline Manager](https://sdk.thewidlarzgroup.com/offline-video): Logic for downloading and watching videos offline.
+* [Background Uploader](https://sdk.thewidlarzgroup.com/background-uploader): Handles uploads even if the app is minimized (not strictly a player plugin, but super useful).
+* [Chapters](https://sdk.thewidlarzgroup.com/chapters): Visual markers on the timeline to navigate content.
 
-- Track selection (bitrate, audio, subtitles)
-- Pause / resume & background queueing
-- Expiration & auto-cleanup
-- Built for Android & iOS
-- → [Read the SDK Docs](https://docs.thewidlarzgroup.com/offline-video-sdk?utm_source=rnv&utm_medium=readme&utm_id=modules-sdk-text)
-
-### 2 · 🧪 Architecture
-
-Write your own plugins to extend library logic, attach analytics or add custom workflows - **without forking** the core SDK.  
-→ [Plugin documentation](https://docs.thewidlarzgroup.com/react-native-video/other/plugin)
+[-> Tell us what to build next ←](https://sdk.thewidlarzgroup.com/ask-for-plugin) or reach out to us sdk@thewidlarzgroup.com
 
 ---
 
