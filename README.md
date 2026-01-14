@@ -101,8 +101,8 @@ export default () => (
 ```
 
 ---
-<a href="https://www.thewidlarzgroup.com/offline-video-sdk?utm_source=rnv&utm_medium=readme&utm_id=banner">
-  <img src="./docs/static/baners/rnv-pro-player-banner.png" alt="Offline SDK Preview" width="40%" align="right" />
+<a href="https://sdk.thewidlarzgroup.com">
+  <img src="./docs/static/baners/rnv-pro-player-banner.png" alt="Offline SDK Preview" width="35%" align="right" />
 </a>
 
 ## :inbox_tray: We're building a Pro Player!
@@ -116,7 +116,11 @@ We see the need for a more feature-rich video player. There is a gap between ope
 * [Background Uploader](https://sdk.thewidlarzgroup.com/background-uploader): Handles uploads even if the app is minimized (not strictly a player plugin, but super useful).
 * [Chapters](https://sdk.thewidlarzgroup.com/chapters): Visual markers on the timeline to navigate content.
 
+<br/>
+
 [-> Tell us what to build next ←](https://sdk.thewidlarzgroup.com/ask-for-plugin) or reach out to us sdk@thewidlarzgroup.com
+
+<br/>
 
 ---
 
