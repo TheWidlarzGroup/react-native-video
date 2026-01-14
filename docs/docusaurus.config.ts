@@ -9,10 +9,10 @@ const config: Config = {
   tagline: 'React Native Video - Video player for React Native',
   favicon: 'img/favicon.ico',
 
-  url: 'https://docs.thewidlarzgroup.com',
+  url: 'https://moskalakamil.github.io',
   baseUrl: '/react-native-video',
 
-  organizationName: 'TheWidlarzGroup',
+  organizationName: 'moskalakamil',
   projectName: 'react-native-video',
 
   onBrokenLinks: 'throw',
@@ -79,11 +79,7 @@ const config: Config = {
     },
   ],
 
-  themes: ['@widlarzgroup/docusaurus-ui', '@docusaurus/theme-mermaid'],
-
-  markdown: {
-    mermaid: true,
-  },
+  themes: ['@widlarzgroup/docusaurus-ui'],
 
   themeConfig: {
     image: 'img/twg-social-card.png',
@@ -148,26 +144,6 @@ const config: Config = {
     prism: {
       theme: prismThemes.oneLight,
       darkTheme: prismThemes.oneDark,
-    },
-    mermaid: {
-      theme: {
-        light: 'base',
-        dark: 'dark',
-      },
-      options: {
-        maxTextSize: 500,
-        flowchart: {
-          htmlLabels: true,
-          curve: 'basis',
-        },
-        themeVariables: {
-          primaryColor: '#e8f4fd',
-          primaryBorderColor: '#3578e5',
-          lineColor: '#3578e5',
-          secondaryColor: '#f5f6f7',
-          tertiaryColor: '#fff',
-        },
-      },
     },
   } satisfies Preset.ThemeConfig,
 

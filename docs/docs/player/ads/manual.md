@@ -14,24 +14,27 @@ Most analytics systems that track player data (e.g., bitrate, errors) can be int
 
 ## Architecture
 
-```mermaid
-flowchart TB
-    subgraph RN[React Native App]
-        subgraph RNV[react-native-video]
-            PS[Plugin System]
-        end
-    end
-    
-    PS -->|onPlayerCreated| Android
-    PS -->|onPlayerCreated| iOS
-    
-    subgraph Android[Your Plugin - Kotlin]
-        EXO[ExoPlayer.AnalyticsListener]
-    end
-    
-    subgraph iOS[Your Plugin - Swift]
-        AVP[AVPlayer KVO Observers]
-    end
+```
+┌─────────────────────────────────────┐
+│     React Native App                │
+│  ┌───────────────────────────────┐  │
+│  │   react-native-video          │  │
+│  │  ┌─────────────────────────┐  │  │
+│  │  │   Plugin System         │  │  │
+│  │  └─────────────────────────┘  │  │
+│  └───────────────────────────────┘  │
+└─────────────────────────────────────┘
+         │                    │
+         │ onPlayerCreated    │ onPlayerCreated
+         ▼                    ▼
+┌─────────────────┐  ┌─────────────────┐
+│ Android Plugin  │  │  iOS Plugin     │
+│   (Kotlin)      │  │   (Swift)       │
+│                 │  │                 │
+│ ExoPlayer       │  │ AVPlayer        │
+│ Analytics       │  │ KVO Observers   │
+│ Listener        │  │                 │
+└─────────────────┘  └─────────────────┘
 ```
 
 ## Implementation
