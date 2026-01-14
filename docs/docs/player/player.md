@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-sidebar_label: Player
+sidebar_label: player
 ---
 
 # Player
@@ -48,7 +48,7 @@ const playerWithConfig = new VideoPlayer({
 ```
 
 :::warning
-When using `VideoPlayer` class directly, you need to manually manage the player lifecycle. Once you no longer need the player, you need to call `release()` method to release the player's native resources. see [Player Lifecycle](./player-lifecycle.md) for more details.
+When using `VideoPlayer` class directly, you need to manually manage the player lifecycle. Once you no longer need the player, you need to call `release()` method to release the player's native resources. See [Player Lifecycle](./video-player.md#player-lifecycle) for more details.
 :::
 
 For detailed information about using the class, see [VideoPlayer](./video-player.md).

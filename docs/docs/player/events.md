@@ -1,6 +1,6 @@
 ---
-sidebar_label: Events
-sidebar_position: 6
+sidebar_label: events
+sidebar_position: 5
 ---
 
 # Handling Player Events

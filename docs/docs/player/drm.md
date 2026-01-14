@@ -1,6 +1,6 @@
 ---
-sidebar_position: 5
-sidebar_label: DRM
+sidebar_position: 4
+sidebar_label: drm
 ---
 
 # DRM

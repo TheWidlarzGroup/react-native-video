@@ -42,11 +42,12 @@ export default function App() {
 
 ## What's Next?
 
-- **[Installation Guide](./fundaments/installation.md)** - Get started with `react-native-video`
-- **[VideoPlayer](./player/player.md)** - Learn about the core player functionality
-- **[VideoView Component](./video-view/intro.md)** - Understand the video display component
-- **[Event Handling](./player/events.md)** - Master player events and callbacks
-- **[Configuration](./fundaments/configuration/expo-plugin.md)** - Configure the player
+- **[Installation Guide](./installation.md)** - Get started with `react-native-video`
+- **[Configuration](./configuration/expo-plugin.md)** - Configure the player
+- **[Player](../player/player.md)** - Learn about the player functionality
+- **[Event Handling](../player/events.md)** - Master player events and callbacks
+- **[VideoView Component](../video-view/video-view.md)** - Understand the video display component
+- **[Plugins](../plugins/plugins.mdx)** - Extend functionality with plugins
 - **[API Reference](../api-reference/index.md)** - Complete API documentation
 
 [![React Native Video](../../static/baners/rnv-banner.png)](https://www.thewidlarzgroup.com/react-native-video/?utm_source=rnv&utm_medium=docs&utm_campaign=intro&utm_id=rnv-banner)

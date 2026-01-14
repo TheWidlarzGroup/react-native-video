@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 2
 sidebar_label: useVideoPlayer
 ---
 
@@ -35,7 +35,7 @@ The `useVideoPlayer` hook provides several advantages over creating a `VideoPlay
 - **React-friendly**: Works seamlessly with React's component lifecycle
 
 :::info
-For most React components, `useVideoPlayer` is the recommended approach. If you need more control over the player lifecycle or are using it outside of React components, see [VideoPlayer class](./video-player.md) for direct instantiation.
+For most React components, `useVideoPlayer` is the recommended approach. If you need more control over the player lifecycle, see [VideoPlayer class](./video-player.md) for direct instantiation.
 :::
 
 ## Using the Player Instance
