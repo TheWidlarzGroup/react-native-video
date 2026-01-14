@@ -1,4 +1,5 @@
 ---
+title: installation
 sidebar_position: 2
 description: React Native Video Installation Guide and Requirements
 ---
