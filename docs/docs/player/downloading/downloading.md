@@ -4,7 +4,7 @@ sidebar_label: downloading
 description: Complete API reference for Offline Video SDK
 ---
 
-# API Reference
+# Downloading
 
 ## Authorization
 
