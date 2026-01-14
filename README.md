@@ -103,6 +103,11 @@ export default () => (
 ---
 
 ## :inbox_tray: We're building a Pro Player!
+
+<a href="https://sdk.thewidlarzgroup.com">
+  <img src="./docs/static/baners/rnv-pro-player-banner.png" alt="Offline SDK Preview" width="35%" align="right" />
+</a>
+
 We see the need for a more feature-rich video player. There is a gap between open source and commercial players, and we want to fill that gap with plugins.
 
 **Are you using a commercial player just for 1-2 features?** Maybe you are paying for a license just to get **DRM**, **Ads**, or **Analytics**? Let us know. We want to identify these missing pieces and build them, so you can switch back to open source.
@@ -113,7 +118,12 @@ We see the need for a more feature-rich video player. There is a gap between ope
 * [Background Uploader](https://sdk.thewidlarzgroup.com/background-uploader): Handles uploads even if the app is minimized (not strictly a player plugin, but super useful).
 * [Chapters](https://sdk.thewidlarzgroup.com/chapters): Visual markers on the timeline to navigate content.
 
+<br/>
+<br/>
+
 [-> Tell us what to build next ←](https://sdk.thewidlarzgroup.com/ask-for-plugin) or reach out to us sdk@thewidlarzgroup.com
+
+<br/>
 
 ---
 
