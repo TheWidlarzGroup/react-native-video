@@ -101,6 +101,9 @@ export default () => (
 ```
 
 ---
+<a href="https://www.thewidlarzgroup.com/offline-video-sdk?utm_source=rnv&utm_medium=readme&utm_id=banner">
+  <img src="./docs/static/baners/rnv-pro-player-banner.png" alt="Offline SDK Preview" width="40%" align="right" />
+</a>
 
 ## :inbox_tray: We're building a Pro Player!
 We see the need for a more feature-rich video player. There is a gap between open source and commercial players, and we want to fill that gap with plugins.
