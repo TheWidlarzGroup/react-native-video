@@ -4,6 +4,7 @@ module.exports = {
   ignorePatterns: [
     '**/node_modules',
     '**/lib',
+    '**/build',
     '**/.eslintrc.js',
     '**/.prettierrc.js',
     '**/jest.config.js',
