@@ -78,6 +78,8 @@ To change the language of the IMA SDK, pass the `adLanguage` prop within the `ad
 
 SSAI (Server-Side Ad Insertion) is a server-side ad insertion solution where ads are stitched into the video stream before it reaches the player. This provides a seamless viewing experience with no playback interruptions, as the stream appears as a single continuous video.
 
+Currently, we support **Google IMA DAI**
+
 SSAI is ideal for:
 
 - Live streaming with ad breaks
