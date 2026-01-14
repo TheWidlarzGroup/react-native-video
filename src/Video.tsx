@@ -54,6 +54,8 @@ import type {
   CmcdData,
   ReactVideoSource,
   AdConfig,
+  AdConfigDAIVod,
+  AdConfigDAILive,
 } from './types';
 import type {ISO639_1} from './types/language';
 import type {AdsConfig} from './specs/VideoNativeComponent';
@@ -68,18 +70,18 @@ function normalizeAdConfig(
     const adType = 'type' in ad ? ad.type : 'csai';
 
     if (adType === 'dai') {
+      const daiAd = ad as AdConfigDAIVod | AdConfigDAILive;
       return {
         type: 'dai',
-        streamType: 'streamType' in ad ? ad.streamType : undefined,
-        adLanguage: ad.adLanguage,
+        streamType: daiAd.streamType,
+        adLanguage: daiAd.adLanguage,
         contentSourceId:
-          'contentSourceId' in ad ? ad.contentSourceId : undefined,
-        videoId: 'videoId' in ad ? ad.videoId : undefined,
-        assetKey: 'assetKey' in ad ? ad.assetKey : undefined,
-        format: 'format' in ad ? ad.format : undefined,
-        adTagParameters:
-          'adTagParameters' in ad ? ad.adTagParameters : undefined,
-        fallbackUri: 'fallbackUri' in ad ? ad.fallbackUri : undefined,
+          'contentSourceId' in daiAd ? daiAd.contentSourceId : undefined,
+        videoId: 'videoId' in daiAd ? daiAd.videoId : undefined,
+        assetKey: 'assetKey' in daiAd ? daiAd.assetKey : undefined,
+        format: daiAd.format,
+        adTagParameters: daiAd.adTagParameters,
+        fallbackUri: daiAd.fallbackUri,
       };
     }
 
