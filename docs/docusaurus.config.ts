@@ -79,7 +79,11 @@ const config: Config = {
     },
   ],
 
-  themes: ['@widlarzgroup/docusaurus-ui'],
+  themes: ['@widlarzgroup/docusaurus-ui', '@docusaurus/theme-mermaid'],
+
+  markdown: {
+    mermaid: true,
+  },
 
   themeConfig: {
     image: 'img/twg-social-card.png',
@@ -144,6 +148,26 @@ const config: Config = {
     prism: {
       theme: prismThemes.oneLight,
       darkTheme: prismThemes.oneDark,
+    },
+    mermaid: {
+      theme: {
+        light: 'base',
+        dark: 'dark',
+      },
+      options: {
+        maxTextSize: 500,
+        flowchart: {
+          htmlLabels: true,
+          curve: 'basis',
+        },
+        themeVariables: {
+          primaryColor: '#e8f4fd',
+          primaryBorderColor: '#3578e5',
+          lineColor: '#3578e5',
+          secondaryColor: '#f5f6f7',
+          tertiaryColor: '#fff',
+        },
+      },
     },
   } satisfies Preset.ThemeConfig,
 
