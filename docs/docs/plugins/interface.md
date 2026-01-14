@@ -1,5 +1,5 @@
 ---
-title: Plugin Interface
+title: plugin interface
 description: Reference for the React Native Video plugin interface
 sidebar_position: 2
 ---
