@@ -105,18 +105,18 @@ export default () => (
 ## :inbox_tray: We're building a Pro Player!
 
 <a href="https://sdk.thewidlarzgroup.com">
-  <img src="./docs/static/baners/rnv-pro-player-banner.png" alt="Offline SDK Preview" width="35%" align="right" />
+  <img src="./docs/static/baners/rnv-pro-player-banner.png" alt="Offline SDK Preview" width="40%" align="right" />
 </a>
 
 We see the need for a more feature-rich video player. There is a gap between open source and commercial players, and we want to fill that gap with plugins.
 
-**Are you using a commercial player just for 1-2 features?** Maybe you are paying for a license just to get **DRM**, **Ads**, or **Analytics**? Let us know. We want to identify these missing pieces and build them, so you can switch back to open source.
+**Are you using a commercial player just for 1-2 features?** Maybe you are paying for a license just to get **Caching**, **Ads**, or **Analytics**? Let us know. We want to identify these missing pieces and build them, so you can switch back to open source.
 
 **This is what we have already. Check out!**
 
-* [Offline Manager](https://sdk.thewidlarzgroup.com/offline-video): Logic for downloading and watching videos offline.
+* [Offline Video](https://sdk.thewidlarzgroup.com/offline-video): Logic for downloading streams (HLS/DASH) and standard video files to enable offline playback.
 * [Background Uploader](https://sdk.thewidlarzgroup.com/background-uploader): Handles uploads even if the app is minimized (not strictly a player plugin, but super useful).
-* [Chapters](https://sdk.thewidlarzgroup.com/chapters): Visual markers on the timeline to navigate content.
+* [Chapter Markers](https://sdk.thewidlarzgroup.com/chapters): Visual markers on the timeline to navigate content.
 
 <br/>
 <br/>
