@@ -28,11 +28,6 @@ const sidebars: TypedSidebarsConfig = {
     },
     {
       type: 'link',
-      label: 'Offline Video SDK',
-      href: 'https://www.thewidlarzgroup.com/offline-video-sdk/?utm_source=rnv&utm_medium=docs&utm_campaign=sidebar&utm_id=offline-video-sdk-button',
-    },
-    {
-      type: 'link',
       label: 'Enterprise Support',
       href: 'https://www.thewidlarzgroup.com/?utm_source=rnv&utm_medium=docs&utm_campaign=navbar&utm_id=enterprise#Contact',
     },
