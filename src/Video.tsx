@@ -69,10 +69,10 @@ function normalizeAdConfig(
     // Default to 'csai' for backward compatibility with old API (ad without type)
     const adType = 'type' in ad ? ad.type : 'csai';
 
-    if (adType === 'dai') {
+    if (adType === 'ssai') {
       const daiAd = ad as AdConfigDAIVod | AdConfigDAILive;
       return {
-        type: 'dai',
+        type: 'ssai',
         streamType: daiAd.streamType,
         adLanguage: daiAd.adLanguage,
         contentSourceId:
@@ -216,7 +216,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         if (uri && uri.match(/^\//)) {
           uri = `file://${uri}`;
         }
-        if (!uri && _source.ad?.type !== 'dai') {
+        if (!uri && _source.ad?.type !== 'ssai') {
           console.log('Trying to load empty source');
         }
         const isNetwork = !!(uri && uri.match(/^(rtp|rtsp|http|https):/));

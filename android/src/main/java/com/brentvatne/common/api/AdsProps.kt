@@ -19,9 +19,9 @@ class AdsProps {
     var fallbackUri: String? = null
 
     fun isCSAI(): Boolean = type == "csai" && adTagUrl != null
-    fun isDAI(): Boolean = type == "dai" 
-    fun isDAIVod(): Boolean = type == "dai" && streamType == "vod"
-    fun isDAILive(): Boolean = type == "dai" && streamType == "live"
+    fun isDAI(): Boolean = type == "ssai" 
+    fun isDAIVod(): Boolean = type == "ssai" && streamType == "vod"
+    fun isDAILive(): Boolean = type == "ssai" && streamType == "live"
 
     override fun equals(other: Any?): Boolean {
         if (other == null || other !is AdsProps) return false

@@ -92,7 +92,7 @@ export type AdConfigCSAI = AdConfigBase &
 
 type AdConfigDAIBase = AdConfigBase &
   Readonly<{
-    type: 'dai';
+    type: 'ssai';
     streamType: DaiStreamType;
     format?: DaiFormat;
     adTagParameters?: Record<string, string>;
