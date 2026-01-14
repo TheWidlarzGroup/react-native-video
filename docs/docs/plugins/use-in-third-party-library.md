@@ -1,7 +1,7 @@
 ---
 title: Use in Third Party Library
 description: How to use React Native Video in a third party library
-sidebar_position: 8
+sidebar_position: 4
 ---
 
 # Use in Third Party Library
