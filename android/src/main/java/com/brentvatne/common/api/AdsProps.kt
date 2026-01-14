@@ -8,6 +8,7 @@ import java.util.Objects
 
 class AdsProps {
     var type: String? = null
+    var streamType: String? = null
     var adTagUrl: Uri? = null
     var adLanguage: String? = null
     var contentSourceId: String? = null
@@ -18,14 +19,15 @@ class AdsProps {
     var fallbackUri: String? = null
 
     fun isCSAI(): Boolean = type == "csai" && adTagUrl != null
-    fun isDAI(): Boolean = type == "dai" && ((contentSourceId != null && videoId != null) || assetKey != null)
-    fun isDAIVod(): Boolean = type == "dai" && contentSourceId != null && videoId != null
-    fun isDAILive(): Boolean = type == "dai" && assetKey != null
+    fun isDAI(): Boolean = type == "dai" 
+    fun isDAIVod(): Boolean = type == "dai" && streamType == "vod"
+    fun isDAILive(): Boolean = type == "dai" && streamType == "live"
 
     override fun equals(other: Any?): Boolean {
         if (other == null || other !is AdsProps) return false
         return (
             type == other.type &&
+                streamType == other.streamType &&
                 adTagUrl == other.adTagUrl &&
                 adLanguage == other.adLanguage &&
                 contentSourceId == other.contentSourceId &&
@@ -39,11 +41,12 @@ class AdsProps {
 
     override fun hashCode(): Int =
         Objects.hash(
-            type, adTagUrl, adLanguage, contentSourceId, videoId, assetKey, format, adTagParameters, fallbackUri
+            type, streamType, adTagUrl, adLanguage, contentSourceId, videoId, assetKey, format, adTagParameters, fallbackUri
         )
 
     companion object {
         private const val PROP_TYPE = "type"
+        private const val PROP_STREAM_TYPE = "streamType"
         private const val PROP_AD_TAG_URL = "adTagUrl"
         private const val PROP_AD_LANGUAGE = "adLanguage"
         private const val PROP_CONTENT_SOURCE_ID = "contentSourceId"
@@ -58,6 +61,7 @@ class AdsProps {
             val adsProps = AdsProps()
             if (src != null) {
                 adsProps.type = ReactBridgeUtils.safeGetString(src, PROP_TYPE)
+                adsProps.streamType = ReactBridgeUtils.safeGetString(src, PROP_STREAM_TYPE)
 
                 val uriString = ReactBridgeUtils.safeGetString(src, PROP_AD_TAG_URL)
                 if (!TextUtils.isEmpty(uriString)) {

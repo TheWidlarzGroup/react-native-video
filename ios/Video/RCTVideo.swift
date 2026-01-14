@@ -1885,6 +1885,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             return _source?.adParams.isDAI ?? false
         }
 
+        func isDAIVod() -> Bool {
+            return _source?.adParams.isDAIVod ?? false
+        }
+
+        func isDAILive() -> Bool {
+            return _source?.adParams.isDAILive ?? false
+        }
+
         func getContentSourceId() -> String? {
             return _source?.adParams.contentSourceId
         }

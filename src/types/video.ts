@@ -78,6 +78,7 @@ export enum DRMType {
 }
 
 export type DaiFormat = 'hls' | 'dash';
+export type DaiStreamType = 'vod' | 'live';
 
 type AdConfigBase = Readonly<{
   adLanguage?: ISO639_1;
@@ -92,6 +93,7 @@ export type AdConfigCSAI = AdConfigBase &
 type AdConfigDAIBase = AdConfigBase &
   Readonly<{
     type: 'dai';
+    streamType: DaiStreamType;
     format?: DaiFormat;
     adTagParameters?: Record<string, string>;
     fallbackUri?: string;
@@ -99,16 +101,15 @@ type AdConfigDAIBase = AdConfigBase &
 
 export type AdConfigDAIVod = AdConfigDAIBase &
   Readonly<{
+    streamType: 'vod';
     contentSourceId: string;
     videoId: string;
-    assetKey?: never;
   }>;
 
 export type AdConfigDAILive = AdConfigDAIBase &
   Readonly<{
+    streamType: 'live';
     assetKey: string;
-    contentSourceId?: never;
-    videoId?: never;
   }>;
 
 export type AdConfigDAI = AdConfigDAIVod | AdConfigDAILive;

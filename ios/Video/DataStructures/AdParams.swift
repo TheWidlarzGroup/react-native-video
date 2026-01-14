@@ -1,5 +1,6 @@
 public struct AdParams {
     let type: String?
+    let streamType: String?
     let adTagUrl: String?
     let adLanguage: String?
     let contentSourceId: String?
@@ -12,14 +13,15 @@ public struct AdParams {
     let json: NSDictionary?
 
     var isCSAI: Bool { type == "csai" && adTagUrl != nil }
-    var isDAI: Bool { type == "dai" && ((contentSourceId != nil && videoId != nil) || assetKey != nil) }
-    var isDAIVod: Bool { type == "dai" && contentSourceId != nil && videoId != nil }
-    var isDAILive: Bool { type == "dai" && assetKey != nil }
+    var isDAI: Bool { type == "dai" }
+    var isDAIVod: Bool { type == "dai" && streamType == "vod" }
+    var isDAILive: Bool { type == "dai" && streamType == "live" }
 
     init(_ json: NSDictionary!) {
         guard json != nil else {
             self.json = nil
             type = nil
+            streamType = nil
             adTagUrl = nil
             adLanguage = nil
             contentSourceId = nil
@@ -32,6 +34,7 @@ public struct AdParams {
         }
         self.json = json
         type = json["type"] as? String
+        streamType = json["streamType"] as? String
         adTagUrl = json["adTagUrl"] as? String
         adLanguage = json["adLanguage"] as? String
         contentSourceId = json["contentSourceId"] as? String

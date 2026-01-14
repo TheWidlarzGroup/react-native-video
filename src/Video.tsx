@@ -70,6 +70,7 @@ function normalizeAdConfig(
     if (adType === 'dai') {
       return {
         type: 'dai',
+        streamType: 'streamType' in ad ? ad.streamType : undefined,
         adLanguage: ad.adLanguage,
         contentSourceId:
           'contentSourceId' in ad ? ad.contentSourceId : undefined,

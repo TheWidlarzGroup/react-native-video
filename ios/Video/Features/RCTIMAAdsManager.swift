@@ -94,7 +94,7 @@
 
             // Request DAI stream for VOD (Video On Demand)
             // Requires both contentSourceId (CMS ID) and videoId to identify the content
-            if contentSourceID != nil && videoID != nil {
+            if _video.isDAIVod() {
                 let request = IMAVODStreamRequest(
                     contentSourceID: contentSourceID!,
                     videoID: videoID!,
@@ -112,7 +112,7 @@
                 adsLoader.requestStream(with: request)
                 // Request DAI stream for live content
                 // Uses assetKey to identify the live stream
-            } else if assetKey != nil {
+            } else if _video.isDAILive() {
                 let request = IMALiveStreamRequest(
                     assetKey: assetKey!,
                     adDisplayContainer: adDisplayContainer,

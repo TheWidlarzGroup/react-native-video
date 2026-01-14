@@ -2827,13 +2827,7 @@ public class ReactExoplayerView extends FrameLayout implements
             return;
         }
 
-        requestDaiStream(
-                runningSource.getAdsProps().getContentSourceId(),
-                runningSource.getAdsProps().getVideoId(),
-                runningSource.getAdsProps().getAssetKey(),
-                runningSource.getAdsProps().getFormat(),
-                runningSource.getAdsProps().getAdTagParameters()
-        );
+        requestDaiStream(runningSource);
 
         player.prepare();
         playerNeedsSource = false;
@@ -2850,13 +2844,9 @@ public class ReactExoplayerView extends FrameLayout implements
      * Builds an SSAI URI based on the provided parameters and sets it on the player.
      * Supports both VOD (contentSourceId + videoId) and Live (assetKey) streams.
      *
-     * @param contentSourceId The content source ID for VOD requests
-     * @param videoId The video ID for VOD requests
-     * @param assetKey The asset key for Live requests
-     * @param format The stream format ("hls" or "dash"), defaults to HLS if null
-     * @param adTagParameters Optional ad tag parameters to include as query parameters
+     * @param runningSource The source containing DAI properties
      */
-    private void requestDaiStream(String contentSourceId, String videoId, String assetKey, String format, Map<String, String> adTagParameters) {
+    private void requestDaiStream(Source runningSource) {
         if (daiAdsLoader == null) {
             eventEmitter.onVideoError.invoke("DaiAdsLoader is null", null, "DAI_ADS_LOADER_NULL_ERROR");
             return;
@@ -2864,21 +2854,22 @@ public class ReactExoplayerView extends FrameLayout implements
         
         daiAdsLoader.setPlayer(player);
         
-        int streamFormat = "dash".equalsIgnoreCase(format) ? CONTENT_TYPE_DASH : CONTENT_TYPE_HLS;
+        AdsProps adsProps = runningSource.getAdsProps();
+        int streamFormat = "dash".equalsIgnoreCase(adsProps.getFormat()) ? CONTENT_TYPE_DASH : CONTENT_TYPE_HLS;
         
         try {
             Uri.Builder uriBuilder;
             
-            if (assetKey != null) {
+            if (adsProps.isDAILive()) {
                 uriBuilder = new ImaServerSideAdInsertionUriBuilder()
-                        .setAssetKey(assetKey)
+                        .setAssetKey(adsProps.getAssetKey())
                         .setFormat(streamFormat)
                         .build()
                         .buildUpon();
-            } else if (contentSourceId != null && videoId != null) {
+            } else if (adsProps.isDAIVod()) {
                 uriBuilder = new ImaServerSideAdInsertionUriBuilder()
-                        .setContentSourceId(contentSourceId)
-                        .setVideoId(videoId)
+                        .setContentSourceId(adsProps.getContentSourceId())
+                        .setVideoId(adsProps.getVideoId())
                         .setFormat(streamFormat)
                         .build()
                         .buildUpon();
@@ -2886,6 +2877,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 throw new IllegalArgumentException("Either assetKey (for live) or contentSourceId+videoId (for VOD) must be provided");
             }
             
+            Map<String, String> adTagParameters = adsProps.getAdTagParameters();
             if (adTagParameters != null && !adTagParameters.isEmpty()) {
                 for (Map.Entry<String, String> entry : adTagParameters.entrySet()) {
                     uriBuilder.appendQueryParameter(entry.getKey(), entry.getValue());
