@@ -82,6 +82,8 @@ class PlayerViewProxy {
         dorisTranslationsViewModel.info = translations.info
         dorisTranslationsViewModel.adsCountdownAd = translations.adsCountdownAd
         dorisTranslationsViewModel.adsCountdownOf = translations.adsCountdownOf
+        dorisTranslationsViewModel.skipAd = translations.skipAd
+        dorisTranslationsViewModel.skipAdIn = translations.skipAdIn
         dorisTranslationsViewModel.annotations = translations.annotations
         dorisTranslationsViewModel.playingLive = translations.playingLive
         dorisTranslationsViewModel.nowPlaying = translations.nowPlaying

@@ -25,6 +25,8 @@ struct Translations: SuperCodable {
     var info: String?
     var adsCountdownAd: String?
     var adsCountdownOf: String?
+    var skipAd: String?
+    var skipAdIn: String?
     var annotations: String?
     var playingLive: String?
     var nowPlaying: String?
