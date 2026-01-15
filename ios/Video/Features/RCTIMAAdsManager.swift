@@ -2,7 +2,7 @@
     import Foundation
     import GoogleInteractiveMediaAds
 
-    class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate, IMALinkOpenerDelegate {
+    class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate, IMALinkOpenerDelegate, IMAStreamManagerDelegate {
         private weak var _video: RCTVideo?
         private var _isPictureInPictureActive: () -> Bool
 
@@ -10,6 +10,12 @@
         private var adsLoader: IMAAdsLoader!
         /* Main point of interaction with the SDK. Created by the SDK as the result of an ad request. */
         private var adsManager: IMAAdsManager!
+        /* References the stream manager from the IMA DAI SDK after successfully loading the DAI stream. */
+        private var streamManager: IMAStreamManager?
+        /* Ad container view for DAI - stored to ensure proper z-ordering */
+        private var daiAdContainerView: UIView?
+        /* Picture-in-Picture proxy for DAI - stored to ensure proper Picture-in-Picture support */
+        private var pipProxy: IMAPictureInPictureProxy?
 
         init(video: RCTVideo!, isPictureInPictureActive: @escaping () -> Bool) {
             _video = video
@@ -21,6 +27,18 @@
         func setUpAdsLoader() {
             guard let _video else { return }
             let settings = IMASettings()
+            if let adLanguage = _video.getAdLanguage() {
+                settings.language = adLanguage
+            }
+            adsLoader = IMAAdsLoader(settings: settings)
+            adsLoader.delegate = self
+        }
+
+        func setupDaiLoader() {
+            guard let _video else { return }
+            let settings = IMASettings()
+            // Enable background playback only if PiP or playInBackground is enabled
+            settings.enableBackgroundPlayback = _video.shouldEnableBackgroundPlayback()
             if let adLanguage = _video.getAdLanguage() {
                 settings.language = adLanguage
             }
@@ -54,14 +72,86 @@
             }
         }
 
+        func requestDaiStream() {
+            guard let _video else { return }
+            // fixes RCTVideo --> RCTIMAAdsManager --> IMAAdsLoader --> IMAAdDisplayContainer --> RCTVideo memory leak.
+            let adContainerView = UIView(frame: _video.bounds)
+            adContainerView.backgroundColor = .clear
+            _video.addSubview(adContainerView)
+            // Store reference for later z-ordering management. DAI requires ad container to stay on top for proper ad UI visibility
+            daiAdContainerView = adContainerView
+
+            // Create ad display container for ad rendering.
+            let adDisplayContainer = IMAAdDisplayContainer(adContainer: adContainerView, viewController: _video.reactViewController())
+
+            let contentSourceID = _video.getContentSourceId()
+            let videoID = _video.getVideoId()
+            let imaVideoDisplay = _video.getIMAVideoDisplay()
+            let assetKey = _video.getAssetKey()
+            let adTagParameters = _video.getAdTagParameters()
+
+            if let pip = _video.getPip() {
+                pipProxy = IMAPictureInPictureProxy(avPictureInPictureControllerDelegate: pip)
+            } else {
+                pipProxy = nil
+            }
+
+            // Request DAI stream for VOD (Video On Demand)
+            // Requires both contentSourceId (CMS ID) and videoId to identify the content
+            if _video.isDAIVod() {
+                let request = IMAVODStreamRequest(
+                    contentSourceID: contentSourceID!,
+                    videoID: videoID!,
+                    adDisplayContainer: adDisplayContainer,
+                    videoDisplay: imaVideoDisplay!,
+                    pictureInPictureProxy: pipProxy,
+                    userContext: nil
+                )
+
+                // Apply adTagParameters if provided
+                if let adTagParams = adTagParameters {
+                    request.adTagParameters = adTagParams
+                }
+
+                adsLoader.requestStream(with: request)
+                // Request DAI stream for live content
+                // Uses assetKey to identify the live stream
+            } else if _video.isDAILive() {
+                let request = IMALiveStreamRequest(
+                    assetKey: assetKey!,
+                    adDisplayContainer: adDisplayContainer,
+                    videoDisplay: imaVideoDisplay!,
+                    pictureInPictureProxy: pipProxy,
+                    userContext: nil
+                )
+
+                // Apply adTagParameters if provided
+                if let adTagParams = adTagParameters {
+                    request.adTagParameters = adTagParams
+                }
+
+                adsLoader.requestStream(with: request)
+            }
+        }
+
         func releaseAds() {
-            guard let adsManager else { return }
-            // Destroy AdsManager may be delayed for a few milliseconds
-            // But what we want is it stopped producing sound immediately
-            // Issue found on tvOS 17, or iOS if view detach & STARTED event happen at the same moment
-            adsManager.volume = 0
-            adsManager.pause()
-            adsManager.destroy()
+            // CSAI
+            if let adsManager {
+                // Destroy AdsManager may be delayed for a few milliseconds
+                // But what we want is it stopped producing sound immediately
+                // Issue found on tvOS 17, or iOS if view detach & STARTED event happen at the same moment
+                adsManager.volume = 0
+                adsManager.pause()
+                adsManager.destroy()
+            }
+
+            // DAI
+            if let streamManager {
+                streamManager.destroy()
+                self.streamManager = nil
+
+                daiAdContainerView = nil
+            }
         }
 
         // MARK: - Getters
@@ -78,24 +168,71 @@
 
         func adsLoader(_: IMAAdsLoader, adsLoadedWith adsLoadedData: IMAAdsLoadedData) {
             guard let _video else { return }
-            // Grab the instance of the IMAAdsManager and set yourself as the delegate.
-            adsManager = adsLoadedData.adsManager
-            adsManager?.delegate = self
 
-            // Create ads rendering settings and tell the SDK to use the in-app browser.
-            let adsRenderingSettings = IMAAdsRenderingSettings()
-            adsRenderingSettings.linkOpenerDelegate = self
-            adsRenderingSettings.linkOpenerPresentingController = _video.reactViewController()
+            // Check if this is a stream manager (DAI) or ads manager (CSAI)
+            // The adsLoadedData will contain either streamManager (for DAI) or adsManager (for CSAI)
+            if let streamMgr = adsLoadedData.streamManager {
+                streamManager = streamMgr
+                streamManager?.delegate = self
 
-            adsManager.initialize(with: adsRenderingSettings)
+                // Ensure ad container stays on top when stream initializes
+                // This is critical for DAI as ad overlays need to be visible
+                if let adContainerView = daiAdContainerView {
+                    _video.bringSubviewToFront(adContainerView)
+                }
+
+                // For DAI, the stream manager + IMAVideoDisplay automatically load content
+                // No need to extract a URL - the stream manager handles playback directly
+                // Just initialize and the player will start automatically
+                self.streamManager?.initialize(with: nil)
+            } else {
+                // CSAI: Client-side ad insertion - ads are inserted by the client app
+                self.adsManager = adsLoadedData.adsManager
+                self.adsManager?.delegate = self
+
+                // Create ads rendering settings and tell the SDK to use the in-app browser.
+                let adsRenderingSettings = IMAAdsRenderingSettings()
+                adsRenderingSettings.linkOpenerDelegate = self
+                adsRenderingSettings.linkOpenerPresentingController = _video.reactViewController()
+
+                self.adsManager?.initialize(with: adsRenderingSettings)
+            }
         }
 
         func adsLoader(_: IMAAdsLoader, failedWith adErrorData: IMAAdLoadingErrorData) {
+            guard let _video else { return }
+
             if adErrorData.adError.message != nil {
                 print("Error loading ads: " + adErrorData.adError.message!)
             }
 
-            _video?.setPaused(false)
+            // CSAI
+            if adsManager != nil {
+                _video.setPaused(false)
+            }
+
+            // DAI
+            if streamManager != nil {
+                _video.isSetSourceOngoing = false
+                _video.applyNextSource()
+
+                // Handle DAI error by falling back to backup content if available
+                // This provides resilience when DAI stream fails or is unavailable
+                if let backupStreamUri = _video.getBackupStreamUri() {
+                    print("DAI stream error occurred, falling back to backup stream URI: \(backupStreamUri)")
+                    // Clean up DAI resources before switching to backup
+                    releaseAds()
+                    // Switch to backup stream - create a simple source dictionary with the URI
+                    // The backup stream typically contains the content without ads
+                    let backupSource: NSDictionary = [
+                        "uri": backupStreamUri,
+                        "isNetwork": true,
+                    ]
+                    DispatchQueue.main.async {
+                        _video.setSrc(backupSource)
+                    }
+                }
+            }
         }
 
         // MARK: - IMAAdsManagerDelegate
@@ -165,6 +302,49 @@
             // Resume the content since the SDK is done playing ads (at least for now).
             _video?.setAdPlaying(false)
             _video?.setPaused(false)
+        }
+
+        // MARK: - IMAStreamManagerDelegate
+
+        func streamManager(_: IMAStreamManager, didReceive event: IMAAdEvent) {
+            guard let _video else { return }
+
+            if _video.onReceiveAdEvent != nil {
+                let type = convertEventToString(event: event.type)
+
+                if event.adData != nil {
+                    _video.onReceiveAdEvent?([
+                        "event": type,
+                        "data": event.adData ?? [String](),
+                        "target": _video.reactTag!,
+                    ])
+                } else {
+                    _video.onReceiveAdEvent?([
+                        "event": type,
+                        "target": _video.reactTag!,
+                    ])
+                }
+            }
+        }
+
+        func streamManager(_: IMAStreamManager, didReceive error: IMAAdError) {
+            if error.message != nil {
+                print("AdsManager error: " + error.message!)
+            }
+
+            guard let _video else { return }
+
+            if _video.onReceiveAdEvent != nil {
+                _video.onReceiveAdEvent?([
+                    "event": "ERROR",
+                    "data": [
+                        "message": error.message ?? "",
+                        "code": error.code,
+                        "type": error.type,
+                    ],
+                    "target": _video.reactTag!,
+                ])
+            }
         }
 
         // MARK: - IMALinkOpenerDelegate

@@ -18,7 +18,8 @@ Sets the VAST URI to play AVOD ads.
 **Example:**
 
 ```javascript
-adTagUrl="https://pubads.g.doubleclick.net/gampad/ads?iu=/21775744923/external/vmap_ad_samples&sz=640x480&cust_params=sample_ar%3Dpremidpostoptimizedpodbumper&ciu_szs=300x250&gdfp_req=1&ad_rule=1&output=vmap&unviewed_position_start=1&env=vp&impl=s&cmsid=496&vid=short_onecue&correlator="
+adTagUrl =
+  'https://pubads.g.doubleclick.net/gampad/ads?iu=/21775744923/external/vmap_ad_samples&sz=640x480&cust_params=sample_ar%3Dpremidpostoptimizedpodbumper&ciu_szs=300x250&gdfp_req=1&ad_rule=1&output=vmap&unviewed_position_start=1&env=vp&impl=s&cmsid=496&vid=short_onecue&correlator=';
 ```
 
 > **Note:** You need to enable IMA SDK in the Gradle or Podfile – see [Enable Client-Side Ads Insertion](/installation).
@@ -67,28 +68,28 @@ Indicates whether the player should automatically delay playback to minimize sta
 
 Adjusts the buffer settings. This prop takes an object with one or more of the following properties:
 
-| Property                         | Type   | Description                                                                                   |
-|----------------------------------|--------|-----------------------------------------------------------------------------------------------|
-| minBufferMs                      | number | Minimum duration (ms) the player will attempt to keep buffered.                             |
-| maxBufferMs                      | number | Maximum duration (ms) the player will attempt to buffer.                                   |
-| bufferForPlaybackMs              | number | Duration (ms) that must be buffered before playback starts or resumes.                      |
-| bufferForPlaybackAfterRebufferMs | number | Duration (ms) that must be buffered after a rebuffer before playback resumes.              |
-| backBufferDurationMs             | number | Duration (ms) of buffer to keep before the current position (allows rewinding).            |
-| maxHeapAllocationPercent         | number | Percentage of available heap the video can use to buffer (0 to 1).                          |
-| minBackBufferMemoryReservePercent| number | Percentage of available app memory before the back buffer is disabled (0 to 1).            |
-| minBufferMemoryReservePercent    | number | Percentage of available app memory reserved for preventing buffer usage (0 to 1).          |
-| cacheSizeMB                      | number | Cache size in MB. Set to `0` to disable caching (Android only).                            |
-| live                             | object | Object containing configuration for live playback. See below.                              |
+| Property                          | Type   | Description                                                                       |
+| --------------------------------- | ------ | --------------------------------------------------------------------------------- |
+| minBufferMs                       | number | Minimum duration (ms) the player will attempt to keep buffered.                   |
+| maxBufferMs                       | number | Maximum duration (ms) the player will attempt to buffer.                          |
+| bufferForPlaybackMs               | number | Duration (ms) that must be buffered before playback starts or resumes.            |
+| bufferForPlaybackAfterRebufferMs  | number | Duration (ms) that must be buffered after a rebuffer before playback resumes.     |
+| backBufferDurationMs              | number | Duration (ms) of buffer to keep before the current position (allows rewinding).   |
+| maxHeapAllocationPercent          | number | Percentage of available heap the video can use to buffer (0 to 1).                |
+| minBackBufferMemoryReservePercent | number | Percentage of available app memory before the back buffer is disabled (0 to 1).   |
+| minBufferMemoryReservePercent     | number | Percentage of available app memory reserved for preventing buffer usage (0 to 1). |
+| cacheSizeMB                       | number | Cache size in MB. Set to `0` to disable caching (Android only).                   |
+| live                              | object | Object containing configuration for live playback. See below.                     |
 
 #### Live Buffer Configurations
 
-| Property         | Type   | Description                                                                 |
-|-----------------|--------|-----------------------------------------------------------------------------|
-| maxPlaybackSpeed| number | Maximum playback speed for catching up to target live offset.              |
-| minPlaybackSpeed| number | Minimum playback speed for falling back to target live offset.             |
-| maxOffsetMs     | number | Maximum allowed live offset. The player won’t exceed this limit.           |
-| minOffsetMs     | number | Minimum allowed live offset. The player won’t go below this limit.         |
-| targetOffsetMs  | number | The target live offset the player will aim to maintain.                    |
+| Property         | Type   | Description                                                        |
+| ---------------- | ------ | ------------------------------------------------------------------ |
+| maxPlaybackSpeed | number | Maximum playback speed for catching up to target live offset.      |
+| minPlaybackSpeed | number | Minimum playback speed for falling back to target live offset.     |
+| maxOffsetMs      | number | Maximum allowed live offset. The player won’t exceed this limit.   |
+| minOffsetMs      | number | Minimum allowed live offset. The player won’t go below this limit. |
+| targetOffsetMs   | number | The target live offset the player will aim to maintain.            |
 
 For more details on Android live streaming, see [ExoPlayer Live Streaming](https://developer.android.com/media/media3/exoplayer/live-streaming?hl=en).
 
@@ -130,12 +131,12 @@ Configures the buffering and data loading strategy.
 
 Provides a custom chapter source for tvOS. This prop takes an array of objects with the following properties:
 
-| Property  | Type    | Description                                                                 |
-|----------|--------|-----------------------------------------------------------------------------|
-| title    | string  | The title of the chapter.                                                  |
-| startTime| number  | The start time of the chapter (seconds).                                  |
-| endTime  | number  | The end time of the chapter (seconds).                                    |
-| uri      | string? | Optional image override URL (HTTP or Base64). Some media auto-generate images. |
+| Property  | Type    | Description                                                                    |
+| --------- | ------- | ------------------------------------------------------------------------------ |
+| title     | string  | The title of the chapter.                                                      |
+| startTime | number  | The start time of the chapter (seconds).                                       |
+| endTime   | number  | The end time of the chapter (seconds).                                         |
+| uri       | string? | Optional image override URL (HTTP or Base64). Some media auto-generate images. |
 
 ---
 
@@ -171,22 +172,22 @@ See [Useful Side Projects](/projects).
 
 Adjust the control styles. This prop is needed only if `controls={true}` and is an object. See the supported properties below.
 
-| Property                            | Type    | Description                                                                                 |
-|-------------------------------------|---------|---------------------------------------------------------------------------------------------|
-| hidePosition                        | boolean | Hides the position indicator. Default is `false`.                                           |
-| hidePlayPause                       | boolean | Hides the play/pause button. Default is `false`.                                            |
-| hideForward                         | boolean | Hides the forward button. Default is `false`.                                               |
-| hideRewind                          | boolean | Hides the rewind button. Default is `false`.                                                |
-| hideNext                            | boolean | Hides the next button. Default is `false`.                                                  |
-| hidePrevious                        | boolean | Hides the previous button. Default is `false`.                                              |
-| hideFullscreen                      | boolean | Hides the fullscreen button. Default is `false`.                                            |
-| hideSeekBar                         | boolean | Hides the seek bar, useful for live broadcasts. Default is `false`.                         |
-| hideDuration                        | boolean | Hides the duration display. Default is `false`.                                             |
-| hideNavigationBarOnFullScreenMode   | boolean | Hides the navigation bar in fullscreen mode. Default is `true`.                             |
-| hideNotificationBarOnFullScreenMode | boolean | Hides the notification bar in fullscreen mode. Default is `true`.                           |
-| hideSettingButton                   | boolean | Hides the settings button. Default is `true`.                                               |
-| seekIncrementMS                     | number  | Defines the seek increment in milliseconds. Default is `10000`.                             |
-| liveLabel                           | string  | Sets a label for live video.                                                                |
+| Property                            | Type    | Description                                                         |
+| ----------------------------------- | ------- | ------------------------------------------------------------------- |
+| hidePosition                        | boolean | Hides the position indicator. Default is `false`.                   |
+| hidePlayPause                       | boolean | Hides the play/pause button. Default is `false`.                    |
+| hideForward                         | boolean | Hides the forward button. Default is `false`.                       |
+| hideRewind                          | boolean | Hides the rewind button. Default is `false`.                        |
+| hideNext                            | boolean | Hides the next button. Default is `false`.                          |
+| hidePrevious                        | boolean | Hides the previous button. Default is `false`.                      |
+| hideFullscreen                      | boolean | Hides the fullscreen button. Default is `false`.                    |
+| hideSeekBar                         | boolean | Hides the seek bar, useful for live broadcasts. Default is `false`. |
+| hideDuration                        | boolean | Hides the duration display. Default is `false`.                     |
+| hideNavigationBarOnFullScreenMode   | boolean | Hides the navigation bar in fullscreen mode. Default is `true`.     |
+| hideNotificationBarOnFullScreenMode | boolean | Hides the notification bar in fullscreen mode. Default is `true`.   |
+| hideSettingButton                   | boolean | Hides the settings button. Default is `true`.                       |
+| seekIncrementMS                     | number  | Defines the seek increment in milliseconds. Default is `10000`.     |
+| liveLabel                           | string  | Sets a label for live video.                                        |
 
 **Example with default values:**
 
@@ -231,10 +232,10 @@ Enables detailed logging.
 > [!WARNING]
 > Do not use this in production builds.
 
-| Property | Type    | Description                                  |
-| -------- | ------- | -------------------------------------------- |
-| `enable` | boolean | Enables verbose logs. Default is `false`.    |
-| `thread` | boolean | Displays logs with thread information.       |
+| Property | Type    | Description                               |
+| -------- | ------- | ----------------------------------------- |
+| `enable` | boolean | Enables verbose logs. Default is `false`. |
+| `thread` | boolean | Displays logs with thread information.    |
 
 **Example:**
 
@@ -338,26 +339,27 @@ Determines whether to enter Picture-in-Picture (PiP) mode when the user leaves t
 
 Applies a video filter.
 
-| FilterType                  | Description             |
-|-----------------------------|-------------------------|
-| `NONE (default)`            | No filter               |
-| `INVERT`                    | CIColorInvert           |
-| `MONOCHROME`                | CIColorMonochrome       |
-| `POSTERIZE`                 | CIColorPosterize        |
-| `FALSE`                     | CIFalseColor            |
-| `MAXIMUMCOMPONENT`          | CIMaximumComponent      |
-| `MINIMUMCOMPONENT`          | CIMinimumComponent      |
-| `CHROME`                    | CIPhotoEffectChrome     |
-| `FADE`                      | CIPhotoEffectFade       |
-| `INSTANT`                   | CIPhotoEffectInstant    |
-| `MONO`                      | CIPhotoEffectMono       |
-| `NOIR`                      | CIPhotoEffectNoir       |
-| `PROCESS`                   | CIPhotoEffectProcess    |
-| `TONAL`                     | CIPhotoEffectTonal      |
-| `TRANSFER`                  | CIPhotoEffectTransfer   |
-| `SEPIA`                     | CISepiaTone             |
+| FilterType         | Description           |
+| ------------------ | --------------------- |
+| `NONE (default)`   | No filter             |
+| `INVERT`           | CIColorInvert         |
+| `MONOCHROME`       | CIColorMonochrome     |
+| `POSTERIZE`        | CIColorPosterize      |
+| `FALSE`            | CIFalseColor          |
+| `MAXIMUMCOMPONENT` | CIMaximumComponent    |
+| `MINIMUMCOMPONENT` | CIMinimumComponent    |
+| `CHROME`           | CIPhotoEffectChrome   |
+| `FADE`             | CIPhotoEffectFade     |
+| `INSTANT`          | CIPhotoEffectInstant  |
+| `MONO`             | CIPhotoEffectMono     |
+| `NOIR`             | CIPhotoEffectNoir     |
+| `PROCESS`          | CIPhotoEffectProcess  |
+| `TONAL`            | CIPhotoEffectTonal    |
+| `TRANSFER`         | CIPhotoEffectTransfer |
+| `SEPIA`            | CISepiaTone           |
 
 > **Notes:**
+>
 > 1. Using a filter may increase CPU usage.
 > 2. Saving a filtered video and reloading it is a workaround for performance issues.
 > 3. Filters are not supported on HLS playlists.
@@ -551,9 +553,10 @@ An image to display while the video is loading.
 
 ```javascript
 <Video>
-  poster={{
-    source: { uri: "https://baconmockup.com/300/200/" },
-    resizeMode: "cover",
+  poster=
+  {{
+    source: {uri: 'https://baconmockup.com/300/200/'},
+    resizeMode: 'cover',
   }}
 </Video>
 ```
@@ -646,7 +649,8 @@ interface ReactVideoRenderLoaderProps {
 
 ```javascript
 <Video>
-  renderLoader={() => (
+  renderLoader=
+  {() => (
     <View>
       <Text>Custom Loader</Text>
     </View>
@@ -708,8 +712,8 @@ selectedAudioTrack={{
 | ------------------ | ------ | ------------------------------------------------------------------------------------------- |
 | "system" (default) | N/A    | Play the audio track that matches the system language. If none match, play the first track. |
 | "disabled"         | N/A    | Turn off audio.                                                                             |
-| "title"            | string | Play the audio track with the specified title, e.g., "French".                            |
-| "language"         | string | Play the audio track with the specified language, e.g., "fr".                              |
+| "title"            | string | Play the audio track with the specified title, e.g., "French".                              |
+| "language"         | string | Play the audio track with the specified language, e.g., "fr".                               |
 | "index"            | number | Play the audio track with the specified index, e.g., 0.                                     |
 
 If no matching track is found, the first available track will be played. If multiple tracks match, the first match will be used.
@@ -729,13 +733,13 @@ selectedTextTrack={{
 }}
 ```
 
-| Type               | Value  | Description                                                                   |
-| ------------------ | ------ | ----------------------------------------------------------------------------- |
-| "system" (default) | N/A    | Display captions only if the system preference for captions is enabled.       |
-| "disabled"         | N/A    | Don’t display a text track.                                                   |
-| "title"            | string | Display the text track with the specified title, e.g., "French 1".          |
-| "language"         | string | Display the text track with the specified language, e.g., "fr".             |
-| "index"            | number | Display the text track with the specified index, e.g., 0.                     |
+| Type               | Value  | Description                                                             |
+| ------------------ | ------ | ----------------------------------------------------------------------- |
+| "system" (default) | N/A    | Display captions only if the system preference for captions is enabled. |
+| "disabled"         | N/A    | Don’t display a text track.                                             |
+| "title"            | string | Display the text track with the specified title, e.g., "French 1".      |
+| "language"         | string | Display the text track with the specified language, e.g., "fr".         |
+| "index"            | number | Display the text track with the specified index, e.g., 0.               |
 
 If no matching track is found, no subtitles will be displayed. If multiple tracks match, the first match will be used.
 
@@ -754,12 +758,12 @@ selectedVideoTrack={{
 }}
 ```
 
-| Type             | Value  | Description                                                                  |
-| ---------------- | ------ | ---------------------------------------------------------------------------- |
-| "auto" (default) | N/A    | Let the player determine the best track using ABR.                           |
-| "disabled"       | N/A    | Turn off video.                                                               |
+| Type             | Value  | Description                                                                    |
+| ---------------- | ------ | ------------------------------------------------------------------------------ |
+| "auto" (default) | N/A    | Let the player determine the best track using ABR.                             |
+| "disabled"       | N/A    | Turn off video.                                                                |
 | "resolution"     | number | Play the video track with the specified height, e.g., 480 for the 480p stream. |
-| "index"          | number | Play the video track with the specified index, e.g., 0.                       |
+| "index"          | number | Play the video track with the specified index, e.g., 0.                        |
 
 If no matching track is found, ABR will be used.
 
@@ -803,7 +807,7 @@ Pass the asset directly (deprecated):
 
 ```javascript
 const sintel = require('./sintel.mp4');
-source = { sintel };
+source = {sintel};
 ```
 
 Or by using a URI (starting from `6.0.0-beta.6`):
@@ -954,20 +958,82 @@ source={{
 
 <PlatformsList types={['Android', 'iOS']} />
 
-Sets the ad configuration.
+Sets the ad configuration. Supports both Client-Side Ad Insertion (CSAI) and Server-Side Ad Insertion (SSAI) through the unified `type` field.
 
-**Example:**
+**CSAI (Client-Side Ad Insertion)**
+
+For client-side ads using VAST tags:
+
+| Property     | Type   | Required | Description                                          |
+| ------------ | ------ | -------- | ---------------------------------------------------- |
+| `type`       | string | Yes      | Must be `'csai'`                                     |
+| `adTagUrl`   | string | Yes      | VAST-compliant ad tag URL                            |
+| `adLanguage` | string | Optional | Language code for the IMA SDK (e.g., `'en'`, `'fr'`) |
+
+**CSAI Example:**
 
 ```javascript
-ad: {
-  adTagUrl="https://pubads.g.doubleclick.net/gampad/ads?iu=/21775744923/external/vmap_ad_samples&sz=640x480&cust_params=sample_ar%3Dpremidpostoptimizedpodbumper&ciu_szs=300x250&gdfp_req=1&ad_rule=1&output=vmap&unviewed_position_start=1&env=vp&impl=s&cmsid=496&vid=short_onecue&correlator="
-  adLanguage="fr"
-}
+source={{
+  uri: 'https://example.com/video.mp4',
+  ad: {
+    type: 'csai',
+    adTagUrl: 'https://pubads.g.doubleclick.net/gampad/ads?...',
+    adLanguage: 'fr'
+  }
+}}
+```
+
+**SSAI (Server-Side Ad Insertion)**
+
+For server-side ad insertion. Supports both VOD and Live streaming.
+
+| Property          | Type   | Required  | Description                                                                                                                                                                                                               |
+| ----------------- | ------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `type`            | string | Yes       | Must be `'ssai'`                                                                                                                                                                                                          |
+| `streamType`      | string | Yes       | Must be `'vod'` for VOD streams or `'live'` for live streams                                                                                                                                                              |
+| `contentSourceId` | string | VOD only  | The content source ID for VOD streams. Required for VOD, must not be used with `assetKey`.                                                                                                                                |
+| `videoId`         | string | VOD only  | The video ID for VOD streams. Required for VOD, must not be used with `assetKey`.                                                                                                                                         |
+| `assetKey`        | string | Live only | The asset key for live streams. Required for Live, must not be used with `contentSourceId` or `videoId`.                                                                                                                  |
+| `adTagParameters` | object | Optional  | Custom key-value pairs to pass as ad tag parameters to the IMA SDK. For a list of supported Ad Manager ad tag parameters, see the [Google Ad Manager documentation](https://support.google.com/admanager/answer/7320899). |
+| `fallbackUri`     | string | Optional  | Fallback stream URI. If the SSAI stream fails to load, the player will automatically fall back to this URI.                                                                                                               |
+| `adLanguage`      | string | Optional  | Language code for the IMA SDK (e.g., `'en'`, `'fr'`)                                                                                                                                                                      |
+
+**SSAI VOD Example:**
+
+```javascript
+source={{
+  ad: {
+    type: 'ssai',
+    streamType: 'vod',
+    contentSourceId: '2548831',
+    videoId: 'tears-of-steel',
+    adTagParameters: {
+      'custom_param': 'value'
+    },
+    fallbackUri: 'https://example.com/backup-stream.m3u8'
+  }
+}}
+```
+
+**SSAI Live Example:**
+
+```javascript
+source={{
+  ad: {
+    type: 'ssai',
+    streamType: 'live',
+    assetKey: 'c-rArva4ShKVIAkNfy6HUQ',
+    adTagParameters: {
+      'custom_param': 'value'
+    },
+    fallbackUri: 'https://example.com/backup-stream.m3u8'
+  }
+}}
 ```
 
 See: [ads](./ads.md) for more information.
 
-Note: You need to enable IMA SDK in the Gradle or Pod file - [enable client-side ads insertion](/installation).
+Note: You need to enable IMA SDK in the Gradle or Podfile – see [Enable Client-Side Ads Insertion](/installation).
 
 #### `contentStartTime`
 
@@ -999,19 +1065,19 @@ source={{
 
 Adjust the buffer settings. This prop takes an object with one or more of the properties listed below.
 
-| Property                         | Type   | Description                                                                                                                                    |
-|----------------------------------|--------|------------------------------------------------------------------------------------------------------------------------------------------------|
-| minBufferMs                      | number | Minimum duration of media that the player will attempt to buffer at all times, in milliseconds.                                                |
-| maxBufferMs                      | number | Maximum duration of media that the player will attempt to buffer, in milliseconds.                                                             |
-| bufferForPlaybackMs              | number | Duration of media that must be buffered for playback to start or resume following a user action, in milliseconds.                              |
-| bufferForPlaybackAfterRebufferMs | number | Duration of media that must be buffered for playback to resume after a rebuffer, in milliseconds.                                              |
-| backBufferDurationMs             | number | Duration of buffer to keep before the current position, allowing rewinding without rebuffering.                                                |
-| maxHeapAllocationPercent         | number | Percentage of available heap that the video can use to buffer, between 0 and 1.                                                                |
-| minBackBufferMemoryReservePercent| number | Percentage of available app memory at which during startup the back buffer will be disabled, between 0 and 1.                                  |
-| minBufferMemoryReservePercent    | number | Percentage of available app memory to keep in reserve, preventing buffer usage, between 0 and 1.                                               |
-| initialBitrate                   | number | Initial bitrate in bits per second (Android only). Defaults to 1_000_000. Used only at start, then ABR (Adaptive Bitrate Streaming) takes over.|
-| cacheSizeMB                      | number | Cache size in MB, preventing new src requests and saving bandwidth while repeating videos, or 0 to disable. Android only.                      |
-| live                             | object | Object containing another config set for live playback configuration.                                                                          |
+| Property                          | Type   | Description                                                                                                                                     |
+| --------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| minBufferMs                       | number | Minimum duration of media that the player will attempt to buffer at all times, in milliseconds.                                                 |
+| maxBufferMs                       | number | Maximum duration of media that the player will attempt to buffer, in milliseconds.                                                              |
+| bufferForPlaybackMs               | number | Duration of media that must be buffered for playback to start or resume following a user action, in milliseconds.                               |
+| bufferForPlaybackAfterRebufferMs  | number | Duration of media that must be buffered for playback to resume after a rebuffer, in milliseconds.                                               |
+| backBufferDurationMs              | number | Duration of buffer to keep before the current position, allowing rewinding without rebuffering.                                                 |
+| maxHeapAllocationPercent          | number | Percentage of available heap that the video can use to buffer, between 0 and 1.                                                                 |
+| minBackBufferMemoryReservePercent | number | Percentage of available app memory at which during startup the back buffer will be disabled, between 0 and 1.                                   |
+| minBufferMemoryReservePercent     | number | Percentage of available app memory to keep in reserve, preventing buffer usage, between 0 and 1.                                                |
+| initialBitrate                    | number | Initial bitrate in bits per second (Android only). Defaults to 1_000_000. Used only at start, then ABR (Adaptive Bitrate Streaming) takes over. |
+| cacheSizeMB                       | number | Cache size in MB, preventing new src requests and saving bandwidth while repeating videos, or 0 to disable. Android only.                       |
+| live                              | object | Object containing another config set for live playback configuration.                                                                           |
 
 #### `minLoadRetryCount`
 
@@ -1038,10 +1104,10 @@ Load one or more "sidecar" text tracks. This takes an array of objects represent
 
 > ⚠️ This feature does not work with HLS playlists (e.g., m3u8) on iOS.
 
-| Property | Description                                                                                                   |
-|----------|---------------------------------------------------------------------------------------------------------------|
-| title    | Descriptive name for the track.                                                                              |
-| language | 2-letter [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) representing the language.  |
+| Property | Description                                                                                                 |
+| -------- | ----------------------------------------------------------------------------------------------------------- |
+| title    | Descriptive name for the track.                                                                             |
+| language | 2-letter [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) representing the language. |
 | type     | Mime type of the track. Supports `TextTrackType.SUBRIP`, `TextTrackType.TTML`, `TextTrackType.VTT`.         |
 | uri      | URL for the text track. Only tracks hosted on a web server are supported.                                   |
 
@@ -1050,22 +1116,22 @@ Note: Due to iOS limitations, sidecar text tracks are not compatible with AirPla
 **Example:**
 
 ```javascript
-import { TextTrackType } from 'react-native-video';
+import {TextTrackType} from 'react-native-video';
 
-textTracks=[
+textTracks = [
   {
-    title: "English CC",
-    language: "en",
+    title: 'English CC',
+    language: 'en',
     type: TextTrackType.VTT, // "text/vtt"
-    uri: "https://bitdash-a.akamaihd.net/content/sintel/subtitles/subtitles_en.vtt"
+    uri: 'https://bitdash-a.akamaihd.net/content/sintel/subtitles/subtitles_en.vtt',
   },
   {
-    title: "Spanish Subtitles",
-    language: "es",
+    title: 'Spanish Subtitles',
+    language: 'es',
     type: TextTrackType.SUBRIP, // "application/x-subrip"
-    uri: "https://durian.blender.org/wp-content/content/subtitles/sintel_es.srt"
-  }
-]
+    uri: 'https://durian.blender.org/wp-content/content/subtitles/sintel_es.srt',
+  },
+];
 ```
 
 ---
@@ -1074,15 +1140,15 @@ textTracks=[
 
 <PlatformsList types={['Android', 'iOS']} />
 
-| Property      | Platform | Description                                                                                                                                                                                        | Platforms    |
-| ------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
-| fontSize      | Android  | Adjust the font size of the subtitles. Default: font size of the device                                                                                                                            | Android      |
-| paddingTop    | Android  | Adjust the top padding of the subtitles. Default: 0                                                                                                                                                | Android      |
-| paddingBottom | Android  | Adjust the bottom padding of the subtitles. Default: 0                                                                                                                                             | Android      |
-| paddingLeft   | Android  | Adjust the left padding of the subtitles. Default: 0                                                                                                                                               | Android      |
-| paddingRight  | Android  | Adjust the right padding of the subtitles. Default: 0                                                                                                                                              | Android      |
-| opacity       | Android, iOS | Adjust the visibility of subtitles with 0 hiding and 1 fully showing them. Android supports float values between 0 and 1 for varying opacity levels, whereas iOS supports only 0 or 1. Default: 1. | Android, iOS |
-| subtitlesFollowVideo | Android | Boolean to adjust position of subtitles. Default: true |
+| Property             | Platform     | Description                                                                                                                                                                                        | Platforms    |
+| -------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| fontSize             | Android      | Adjust the font size of the subtitles. Default: font size of the device                                                                                                                            | Android      |
+| paddingTop           | Android      | Adjust the top padding of the subtitles. Default: 0                                                                                                                                                | Android      |
+| paddingBottom        | Android      | Adjust the bottom padding of the subtitles. Default: 0                                                                                                                                             | Android      |
+| paddingLeft          | Android      | Adjust the left padding of the subtitles. Default: 0                                                                                                                                               | Android      |
+| paddingRight         | Android      | Adjust the right padding of the subtitles. Default: 0                                                                                                                                              | Android      |
+| opacity              | Android, iOS | Adjust the visibility of subtitles with 0 hiding and 1 fully showing them. Android supports float values between 0 and 1 for varying opacity levels, whereas iOS supports only 0 or 1. Default: 1. | Android, iOS |
+| subtitlesFollowVideo | Android      | Boolean to adjust position of subtitles. Default: true                                                                                                                                             |
 
 **Example:**
 
@@ -1101,10 +1167,10 @@ So there is a second view, the video view.
 
 Subtitles are managed in a third view.
 
-* When `subtitlesFollowVideo` is set to true, the subtitle view will adapt to the video view.
-If the video is displayed out of screen, the subtitles may also be displayed out of screen.
-* When `subtitlesFollowVideo` is set to false, the subtitle view will adapt to the main view.
-If the video is displayed out of screen, the subtitles may still remain visible within the main view.
+- When `subtitlesFollowVideo` is set to true, the subtitle view will adapt to the video view.
+  If the video is displayed out of screen, the subtitles may also be displayed out of screen.
+- When `subtitlesFollowVideo` is set to false, the subtitle view will adapt to the main view.
+  If the video is displayed out of screen, the subtitles may still remain visible within the main view.
 
 This prop can be changed at runtime.
 
@@ -1121,12 +1187,12 @@ Load one or more "sidecar" text tracks. This takes an array of objects represent
 
 > ⚠️ This feature does not work with HLS playlists (e.g., m3u8) on iOS.
 
-| Property | Description |
-|----------|-------------|
-| title    | Descriptive name for the track |
-| language | 2-letter [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) representing the language |
+| Property | Description                                                                                                                                                                         |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| title    | Descriptive name for the track                                                                                                                                                      |
+| language | 2-letter [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) representing the language                                                                          |
 | type     | Mime type of the track (TextTrackType.SUBRIP - SubRip (.srt), TextTrackType.TTML - TTML (.ttml), TextTrackType.VTT - WebVTT (.vtt)). iOS only supports VTT, Android supports all 3. |
-| uri      | URL for the text track. Currently, only tracks hosted on a web server are supported. |
+| uri      | URL for the text track. Currently, only tracks hosted on a web server are supported.                                                                                                |
 
 On iOS, sidecar text tracks are only supported for individual files, not HLS playlists. For HLS, you should include the text tracks as part of the playlist.
 
@@ -1240,8 +1306,9 @@ useTextureView can only be set at the same time you're setting the source.
 Allows explicitly specifying the view type.
 This flag replaces `useSecureView` and `useTextureView` fields.
 There are 3 available values:
+
 - 'textureView': The video is rendered in a texture view. It allows mapping the view on a texture (useful for 3D).
-DRM playback is not supported on textureView. If the DRM prop is provided, the surface will be transformed into a SurfaceView.
+  DRM playback is not supported on textureView. If the DRM prop is provided, the surface will be transformed into a SurfaceView.
 - 'surfaceView' (default): The video is rendered in a surface, taking fewer resources to render.
 - 'secureView': The video is rendered in a surface that prevents screenshots from being taken.
 
@@ -1269,22 +1336,25 @@ For detailed information about CMCD, please refer to the [CTA-5004 Final Specifi
 
 When providing an object, you can configure the following properties:
 
-| Property    | Type        | Description                                    |
-|------------|------------|------------------------------------------------|
-| `mode`     | `CmcdMode` | The mode for sending CMCD data               |
-| `request`  | `CmcdData` | Custom key-value pairs for the request object |
-| `session`  | `CmcdData` | Custom key-value pairs for the session object |
-| `object`   | `CmcdData` | Custom key-value pairs for the object metadata |
-| `status`   | `CmcdData` | Custom key-value pairs for the status information |
+| Property  | Type       | Description                                       |
+| --------- | ---------- | ------------------------------------------------- |
+| `mode`    | `CmcdMode` | The mode for sending CMCD data                    |
+| `request` | `CmcdData` | Custom key-value pairs for the request object     |
+| `session` | `CmcdData` | Custom key-value pairs for the session object     |
+| `object`  | `CmcdData` | Custom key-value pairs for the object metadata    |
+| `status`  | `CmcdData` | Custom key-value pairs for the status information |
 
 Note: The `mode` property defaults to `CmcdMode.MODE_QUERY_PARAMETER` if not specified.
 
 #### `CmcdMode`
+
 CmcdMode is an enum that defines how CMCD data should be sent:
+
 - `CmcdMode.MODE_REQUEST_HEADER` (0) - Send CMCD data in the HTTP request headers.
 - `CmcdMode.MODE_QUERY_PARAMETER` (1) - Send CMCD data as query parameters in the URL.
 
 #### `CmcdData`
+
 CmcdData is a type representing custom key-value pairs for CMCD data. It's defined as:
 
 ```typescript
@@ -1302,19 +1372,19 @@ Custom key names MUST include a hyphenated prefix to prevent namespace collision
     cmcd: {
       mode: CmcdMode.MODE_QUERY_PARAMETER,
       request: {
-        'com-custom-key': 'custom-value'
+        'com-custom-key': 'custom-value',
       },
       session: {
-        sid: 'session-id'
+        sid: 'session-id',
       },
       object: {
         br: '3000',
-        d: '4000'
+        d: '4000',
       },
       status: {
-        rtp: '1200'
-      }
-    }
+        rtp: '1200',
+      },
+    },
   }}
   // or other video props
 />

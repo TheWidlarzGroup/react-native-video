@@ -77,10 +77,44 @@ export enum DRMType {
   FAIRPLAY = 'fairplay',
 }
 
-export type AdConfig = Readonly<{
-  adTagUrl?: string;
+export type DaiFormat = 'hls' | 'dash';
+export type DaiStreamType = 'vod' | 'live';
+
+type AdConfigBase = Readonly<{
   adLanguage?: ISO639_1;
 }>;
+
+export type AdConfigCSAI = AdConfigBase &
+  Readonly<{
+    type: 'csai';
+    adTagUrl: string;
+  }>;
+
+type AdConfigDAIBase = AdConfigBase &
+  Readonly<{
+    type: 'ssai';
+    streamType: DaiStreamType;
+    format?: DaiFormat;
+    adTagParameters?: Record<string, string>;
+    fallbackUri?: string;
+  }>;
+
+export type AdConfigDAIVod = AdConfigDAIBase &
+  Readonly<{
+    streamType: 'vod';
+    contentSourceId: string;
+    videoId: string;
+  }>;
+
+export type AdConfigDAILive = AdConfigDAIBase &
+  Readonly<{
+    streamType: 'live';
+    assetKey: string;
+  }>;
+
+export type AdConfigDAI = AdConfigDAIVod | AdConfigDAILive;
+
+export type AdConfig = AdConfigCSAI | AdConfigDAI;
 
 export type Drm = Readonly<{
   type?: DRMType;

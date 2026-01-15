@@ -27,8 +27,16 @@ type VideoMetadata = Readonly<{
 }>;
 
 export type AdsConfig = Readonly<{
+  type?: string;
+  streamType?: string;
   adTagUrl?: string;
   adLanguage?: string;
+  contentSourceId?: string;
+  videoId?: string;
+  assetKey?: string;
+  format?: string;
+  adTagParameters?: Record<string, string>;
+  fallbackUri?: string;
 }>;
 
 export type VideoSrc = Readonly<{
