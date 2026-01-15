@@ -35,9 +35,13 @@
         }
 
         func setupDaiLoader() {
+            guard let _video else { return }
             let settings = IMASettings()
-            // Enable background playback for Picture-in-Picture support
-            settings.enableBackgroundPlayback = true
+            // Enable background playback only if PiP or playInBackground is enabled
+            settings.enableBackgroundPlayback = _video.shouldEnableBackgroundPlayback()
+            if let adLanguage = _video.getAdLanguage() {
+                settings.language = adLanguage
+            }
             adsLoader = IMAAdsLoader(settings: settings)
             adsLoader.delegate = self
         }
@@ -203,12 +207,12 @@
             }
 
             // CSAI
-            if let adsManager {
+            if adsManager != nil {
                 _video.setPaused(false)
             }
 
             // DAI
-            if let streamManager {
+            if streamManager != nil {
                 _video.isSetSourceOngoing = false
                 _video.applyNextSource()
 

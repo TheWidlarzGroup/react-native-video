@@ -1367,6 +1367,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         return _pip
     }
 
+    /// Returns whether background playback should be enabled.
+    /// This is true if either `playInBackground` or `enterPictureInPictureOnLeave` is enabled.
+    func shouldEnableBackgroundPlayback() -> Bool {
+        return _playInBackground || _enterPictureInPictureOnLeave
+    }
+
     #if USE_GOOGLE_IMA
         func getContentPlayhead() -> IMAAVPlayerContentPlayhead? {
             return _contentPlayhead
@@ -1631,7 +1637,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                         "" : (_playerItem.error! as NSError).localizedFailureReason) ?? "",
                     "localizedRecoverySuggestion": ((_playerItem.error! as NSError).localizedRecoverySuggestion == nil ?
                         "" : (_playerItem.error! as NSError).localizedRecoverySuggestion) ?? "",
-                    "domain": (_playerItem.error as! NSError).domain,
+                    "domain": (_playerItem.error as NSError?)?.domain ?? "",
                 ],
                 "target": reactTag as Any,
             ]
