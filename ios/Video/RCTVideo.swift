@@ -1367,8 +1367,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         return _pip
     }
 
-    /// Returns whether background playback should be enabled.
-    /// This is true if either `playInBackground` or `enterPictureInPictureOnLeave` is enabled.
+    /// Returns whether background playback should be enabled for IMA DAI SDK.
+    /// Used to configure `IMASettings.enableBackgroundPlayback` which is required for DAI streams
     func shouldEnableBackgroundPlayback() -> Bool {
         return _playInBackground || _enterPictureInPictureOnLeave
     }
