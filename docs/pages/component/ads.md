@@ -188,15 +188,3 @@ For testing and experimenting with SSAI, you can use the `expo-dai` example app 
 | Configuration          | `source.ad` with `type: 'csai'`       | `source.ad` with `type: 'ssai'`            |
 
 ---
-
-## Known Issues
-
-### Android Emulator Video Scaling
-
-Running HLS streams (including SSAI) on Android emulator can sometimes cause video scaling issues. To fix this, use an Android real device for testing.
-
-For more details, see [GitHub issue #3599](https://github.com/TheWidlarzGroup/react-native-video/issues/3599).
-
-### Controls UI Overlap with Ad UI
-
-When using the default `controls={true}` prop, the ad UI (timing, learn more) can overlap with the controls UI. To fix this, listen to ad events and display controls conditionally, or use custom controls.
