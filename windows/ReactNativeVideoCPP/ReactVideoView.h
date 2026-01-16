@@ -8,6 +8,9 @@ namespace winrt::ReactNativeVideoCPP::implementation {
 struct ReactVideoView : ReactVideoViewT<ReactVideoView> {
  public:
   ReactVideoView(winrt::Microsoft::ReactNative::IReactContext const &reactContext);
+  
+  // XAML event handlers
+  void OnApplyTemplate();
   void Set_UriString(hstring const &value);
   void Set_IsLoopingEnabled(bool value);
   void Set_Paused(bool isPaused);
@@ -34,6 +37,7 @@ struct ReactVideoView : ReactVideoViewT<ReactVideoView> {
   Windows::Media::Playback::MediaPlayer m_player = nullptr;
   Windows::UI::Core::CoreDispatcher m_uiDispatcher = nullptr;
   Microsoft::ReactNative::IReactContext m_reactContext{nullptr};
+  winrt::Microsoft::UI::Xaml::Controls::MediaPlayerElement m_mediaPlayerElement{nullptr};
 
   Windows::Media::Playback::MediaPlayer::MediaOpened_revoker m_mediaOpenedToken{};
   Windows::Media::Playback::MediaPlayer::MediaFailed_revoker m_mediaFailedToken{};

@@ -5,12 +5,14 @@
 #endif
 
 #include "ReactVideoViewManager.h"
+#include "VideoManagerModule.h"
 
 using namespace winrt::Microsoft::ReactNative;
 
 namespace winrt::ReactNativeVideoCPP::implementation {
 
 void ReactPackageProvider::CreatePackage(IReactPackageBuilder const &packageBuilder) noexcept {
+  AddAttributedModules(packageBuilder, true);
   packageBuilder.AddViewManager(L"ReactVideoViewManager", []() { return winrt::make<ReactVideoViewManager>(); });
 }
 

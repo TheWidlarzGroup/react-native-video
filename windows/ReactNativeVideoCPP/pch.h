@@ -17,4 +17,5 @@
 #include <winrt/Windows.UI.Xaml.Navigation.h>
 #include <winrt/Windows.UI.Xaml.h>
 
+#include <winrt/Microsoft.UI.Xaml.Controls.h>
 #include <winrt/Microsoft.ReactNative.h>
