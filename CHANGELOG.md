@@ -1,5 +1,17 @@
 
 
+# [6.19.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.18.0...v6.19.0) (2026-01-19)
+
+
+### Bug Fixes
+
+* **android:** correct videoTrack type definitions to match Android implementation ([#4778](https://github.com/TheWidlarzGroup/react-native-video/issues/4778)) ([commit](https://github.com/TheWidlarzGroup/react-native-video/commit/f38717778515b06c462fe75dcd94d2cce5ba3f95))
+
+
+### Features
+
+* **BREAKING CHANGE:** add DAI support ([#4816](https://github.com/TheWidlarzGroup/react-native-video/issues/4816)) ([commit](https://github.com/TheWidlarzGroup/react-native-video/commit/88ac1ae1dcdc907415f806bd64bd3d0a92ccd7d1))
+
 # [6.18.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.17.0...v6.18.0) (2025-11-18)
 
 
