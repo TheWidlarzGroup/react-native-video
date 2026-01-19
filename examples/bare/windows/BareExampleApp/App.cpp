@@ -2,79 +2,86 @@
 // Licensed under the MIT License.
 
 #include "pch.h"
+#include "App.xaml.g.h"
 
 #include "NativeModules.h"
+#include <winrt/BareExample.h>
 
-// A PackageProvider containing any turbo modules that is defined
- within this app project
-struct CompReactPackageProvider
-    : winrt::implements<CompReactPackageProvider, winrt::Microsoft::ReactNative::IReactPackageProvider> {
-  void CreatePackage(winrt::Microsoft::ReactNative::IReactPackageBuilder const &packageBuilder) noexcept {
-    // Register any native modules or view managers defined within this app project
-    packageBuilder.AddPackageProvider(winrt::BareExample::ReactPackageProvider());
-  }
-};
+using namespace winrt;
+using namespace Windows::ApplicationModel;
+using namespace Windows::ApplicationModel::Activation;
+using namespace Windows::Foundation;
+using namespace Windows::UI::Xaml;
+using namespace Windows::UI::Xaml::Controls;
+using namespace Windows::UI::Xaml::Navigation;
+using namespace Microsoft::ReactNative;
 
-// The entry point of the Win32 application
-_Use_decl_annotations_ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, PSTR /* commandLine */, int showCmd) {
-  // Initialize WinRT
-  winrt::init_apartment(winrt::apartment_type::single_threaded);
+namespace winrt::BareExampleApp::implementation
+{
+    // A PackageProvider containing any turbo modules that is defined within this app project
+    struct CompReactPackageProvider
+        : winrt::implements<CompReactPackageProvider, IReactPackageProvider> {
+        void CreatePackage(IReactPackageBuilder const &packageBuilder) noexcept {
+            // For UWP, we don't use AddPackageProvider - packages are added directly to PackageProviders collection
+        }
+    };
 
-  // Enable per monitor DPI scaling
-  SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-
-  // Find the path hosting the app exe file
-  WCHAR appDirectory[MAX_PATH];
-  GetModuleFileNameW(NULL, appDirectory, MAX_PATH);
-  PathCchRemoveFileSpec(appDirectory, MAX_PATH);
-
-  // Create a ReactNativeWin32App with the ReactNativeAppBuilder
-  auto reactNativeWin32App{winrt::Microsoft::ReactNative::ReactNativeAppBuilder().Build()};
-
-  // Configure the initial InstanceSettings for the app's ReactNativeHost
-  auto settings{reactNativeWin32App.ReactNativeHost().InstanceSettings()};
-  
-  // Register any native modules defined within this app project
-  settings.PackageProviders().Append(winrt::make<CompReactPackageProvider>());
-
+    struct App : AppT<App>
+    {
+        App()
+        {
 #if BUNDLE
-  // Load the JS bundle from a file (not Metro):
-  // Set the path (on disk) where the .bundle file is located
-  settings.BundleRootPath(std::wstring(L"file://").append(appDirectory).append(L"\\Bundle\\").c_str());
-  // Set the name of the bundle file (without the .bundle extension)
-  settings.JavaScriptBundleFile(L"index.windows");
-  // Disable hot reload
-  settings.UseFastRefresh(false);
+            JavaScriptBundleFile(L"index.windows");
+            InstanceSettings().UseFastRefresh(false);
 #else
-  // Load the JS bundle from Metro
-  settings.JavaScriptBundleFile(L"index");
-  // Enable hot reload
-  settings.UseFastRefresh(true);
+            JavaScriptBundleFile(L"index");
+            InstanceSettings().UseFastRefresh(true);
 #endif
 
 #if _DEBUG
-  // For Debug builds
-  // Enable Direct Debugging of JS
-  settings.UseDirectDebugger(true);
-  // Enable the Developer Menu
-  settings.UseDeveloperSupport(true);
+            InstanceSettings().UseDirectDebugger(true);
+            InstanceSettings().UseDeveloperSupport(true);
 #else
-  // For Release builds:
-  // Disable Direct Debugging of JS
-  settings.UseDirectDebugger(false);
-  // Disable the Developer Menu
-  settings.UseDeveloperSupport(false);
+            InstanceSettings().UseDirectDebugger(false);
+            InstanceSettings().UseDeveloperSupport(false);
 #endif
 
-  // Get the AppWindow so we can configure its initial title and size
-  auto appWindow{reactNativeWin32App.AppWindow()};
-  appWindow.Title(L"BareExample");
-  appWindow.Resize({1000, 1000});
+            // Register package providers
+            PackageProviders().Append(winrt::make<CompReactPackageProvider>());
+            PackageProviders().Append(winrt::BareExample::ReactPackageProvider());
 
-  // Get the ReactViewOptions so we can set the initial RN component to load
-  auto viewOptions{reactNativeWin32App.ReactViewOptions()};
-  viewOptions.ComponentName(L"BareExample");
+            InitializeComponent();
+        }
 
-  // Start the app
-  reactNativeWin32App.Start();
+        void OnLaunched(LaunchActivatedEventArgs const& e)
+        {
+            super::OnLaunched(e);
+            auto frame = Window::Current().Content().try_as<Frame>();
+            if (frame == nullptr)
+            {
+                frame = Frame();
+                Interop::TypeName typeName;
+                typeName.Name = L"Microsoft.ReactNative.ReactPage";
+                typeName.Kind = Interop::TypeKind::Metadata;
+                frame.Navigate(typeName, box_value(L"BareExample"));
+                Window::Current().Content(frame);
+            }
+
+            Window::Current().Activate();
+        }
+
+        void OnSuspending([[maybe_unused]] IInspectable const&, [[maybe_unused]] SuspendingEventArgs const& e)
+        {
+            // Save application state
+        }
+
+    private:
+        using super = AppT<App>;
+    };
+}
+
+int __stdcall wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
+{
+    Application::Start([](auto &&) { winrt::make<winrt::BareExampleApp::implementation::App>(); });
+    return 0;
 }

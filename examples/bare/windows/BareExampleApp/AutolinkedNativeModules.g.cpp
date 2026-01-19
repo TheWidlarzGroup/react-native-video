@@ -3,9 +3,6 @@
 #include "pch.h"
 #include "AutolinkedNativeModules.g.h"
 
-// Includes from @react-native-picker/picker
-#include <winrt/ReactNativePicker.h>
-
 // Includes from react-native-video
 #include <winrt/ReactNativeVideoCPP.h>
 
@@ -14,8 +11,6 @@ namespace winrt::Microsoft::ReactNative
 
 void RegisterAutolinkedNativeModulePackages(winrt::Windows::Foundation::Collections::IVector<winrt::Microsoft::ReactNative::IReactPackageProvider> const& packageProviders)
 { 
-    // IReactPackageProviders from @react-native-picker/picker
-    packageProviders.Append(winrt::ReactNativePicker::ReactPackageProvider());
     // IReactPackageProviders from react-native-video
     packageProviders.Append(winrt::ReactNativeVideoCPP::ReactPackageProvider());
 }

@@ -1,12 +1,12 @@
-# Bare Example - Windows (Win32)
+# Bare Example - Windows (UWP)
 
-This folder contains the Windows Win32 application for the bare example of react-native-video.
+This folder contains the Windows UWP (Universal Windows Platform) application for the bare example of react-native-video.
 
 ## Prerequisites
 
 - Visual Studio 2022 (or later) with:
-  - Desktop development with C++ workload
-  - C++ (v143) build tools
+  - Universal Windows Platform development workload
+  - C++ (v143) Universal Windows Platform tools
 - Windows 10 SDK (10.0.16299.0 or later)
 - Node.js and npm/yarn
 
@@ -52,7 +52,7 @@ This folder contains the Windows Win32 application for the bare example of react
 ## Project Structure
 
 - `BareExample.sln` - Visual Studio solution file
-- `BareExampleApp/` - Win32 application project (entry point)
+- `BareExampleApp/` - UWP application project (entry point)
 - `BareExample/` - Native module library project
 
 ## Troubleshooting
