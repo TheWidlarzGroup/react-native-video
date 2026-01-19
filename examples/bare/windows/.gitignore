@@ -1,31 +1,62 @@
+# Visual Studio
 .vs/
-
-# User-specific files
-*.suo
 *.user
+*.suo
+*.sdf
+*.opensdf
+*.VC.db
+*.VC.VC.opendb
 *.sln.docstates
 
 # Build results
-ARM64/
-AppPackages/
-[Bb]in/
 [Dd]ebug/
 [Dd]ebugPublic/
-[Oo]bj/
 [Rr]elease/
 [Rr]eleases/
-bld/
-build/
 x64/
 x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+AppPackages/
+build/
 
-# NuGet Packages Directory
+# NuGet
 packages/
+*.nupkg
+*.snupkg
 
-**/Generated Files/**
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Generated files
+**/Generated Files/
+BundleBuilder.proj
+*.jsbundle
+*.bundle
 *.binlog
 *.hprof
-*.sln
+
+# Windows Installer files
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+
+# Windows shortcuts
+*.lnk
+
+# Other
 ExperimentalFeatures.props
 NuGet.Config
 dist/
