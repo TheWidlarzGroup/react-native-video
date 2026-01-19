@@ -5,7 +5,8 @@
 
 #include "NativeModules.h"
 
-// A PackageProvider containing any turbo modules you define within this app project
+// A PackageProvider containing any turbo modules that is defined
+ within this app project
 struct CompReactPackageProvider
     : winrt::implements<CompReactPackageProvider, winrt::Microsoft::ReactNative::IReactPackageProvider> {
   void CreatePackage(winrt::Microsoft::ReactNative::IReactPackageBuilder const &packageBuilder) noexcept {

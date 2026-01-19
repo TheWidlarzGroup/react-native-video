@@ -8,10 +8,6 @@ const project = (() => {
       ios: {
         sourceDir: 'ios',
       },
-      windows: {
-        sourceDir: 'windows',
-        solutionFile: 'windows/BareExample.sln',
-      },
     });
   } catch (_) {
     return undefined;
@@ -20,4 +16,14 @@ const project = (() => {
 
 module.exports = {
   ...(project ? {project} : undefined),
+  project: {
+    ...project,
+    windows: {
+      sourceDir: 'windows',
+      solutionFile: 'BareExample.sln',
+      project: {
+        projectFile: 'BareExampleApp/BareExampleApp.vcxproj',
+      },
+    },
+  },
 };

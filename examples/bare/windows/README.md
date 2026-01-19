@@ -58,10 +58,10 @@ This folder contains the Windows Win32 application for the bare example of react
 ## Troubleshooting
 
 ### NuGet Package Errors
-If you encounter NuGet package errors, try:
+If one encounters NuGet package errors, try:
 1. Close Visual Studio
 2. Delete the `packages` folder
 3. Reopen the solution and restore packages
 
 ### Build Errors
-Make sure you have the correct Windows SDK version installed and that your Visual Studio installation includes the C++ desktop development workload.
+Make sure to have the correct Windows SDK version installed and that your Visual Studio installation includes the C++ desktop development workload.

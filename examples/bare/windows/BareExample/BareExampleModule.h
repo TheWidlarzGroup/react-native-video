@@ -17,7 +17,7 @@ namespace winrt::BareExample::implementation
             m_reactContext = reactContext;
         }
 
-        // Add your custom native methods here using REACT_METHOD macro
+        // Add a custom native methods here using REACT_METHOD macro
         // Example:
         // REACT_METHOD(CustomMethod);
         // void CustomMethod(std::string param) noexcept { ... }
