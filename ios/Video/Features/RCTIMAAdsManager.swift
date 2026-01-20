@@ -51,6 +51,7 @@
             // fixes RCTVideo --> RCTIMAAdsManager --> IMAAdsLoader --> IMAAdDisplayContainer --> RCTVideo memory leak.
             let adContainerView = UIView(frame: _video.bounds)
             adContainerView.backgroundColor = .clear
+            adContainerView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
             _video.addSubview(adContainerView)
 
             // Create ad display container for ad rendering.
