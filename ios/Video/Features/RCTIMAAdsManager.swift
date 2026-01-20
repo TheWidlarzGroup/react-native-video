@@ -49,9 +49,18 @@
         func requestAds() {
             guard let _video else { return }
             // fixes RCTVideo --> RCTIMAAdsManager --> IMAAdsLoader --> IMAAdDisplayContainer --> RCTVideo memory leak.
-            let adContainerView = UIView(frame: _video.bounds)
+            let adContainerView = UIView()
             adContainerView.backgroundColor = .clear
             _video.addSubview(adContainerView)
+
+            // Enable Auto Layout to ensure the ad container resizes with the video view.
+            adContainerView.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                adContainerView.topAnchor.constraint(equalTo: _video.topAnchor),
+                adContainerView.bottomAnchor.constraint(equalTo: _video.bottomAnchor),
+                adContainerView.leadingAnchor.constraint(equalTo: _video.leadingAnchor),
+                adContainerView.trailingAnchor.constraint(equalTo: _video.trailingAnchor),
+            ])
 
             // Create ad display container for ad rendering.
             let adDisplayContainer = IMAAdDisplayContainer(adContainer: adContainerView, viewController: _video.reactViewController())
