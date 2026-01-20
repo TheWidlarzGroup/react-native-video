@@ -55,7 +55,9 @@ object PictureInPictureUtil {
             }
         }
 
-        activity.addOnPictureInPictureModeChangedListener(onPictureInPictureModeChanged)
+        if (view.enterPictureInPictureOnLeave) {
+            activity.addOnPictureInPictureModeChangedListener(onPictureInPictureModeChanged)
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             activity.addOnUserLeaveHintListener(onUserLeaveHintCallback)
@@ -64,7 +66,10 @@ object PictureInPictureUtil {
         // @TODO convert to lambda when ReactExoplayerView migrated
         return Runnable {
             with(activity) {
-                removeOnPictureInPictureModeChangedListener(onPictureInPictureModeChanged)
+                if (view.enterPictureInPictureOnLeave) {
+                    removeOnPictureInPictureModeChangedListener(onPictureInPictureModeChanged)
+                }
+
                 removeOnUserLeaveHintListener(onUserLeaveHintCallback)
             }
         }
