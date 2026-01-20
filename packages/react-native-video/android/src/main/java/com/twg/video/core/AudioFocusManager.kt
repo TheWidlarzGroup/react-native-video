@@ -29,28 +29,30 @@ class AudioFocusManager() {
   }
 
   private val audioFocusChangeListener = AudioManager.OnAudioFocusChangeListener { focusChange ->
-    when (focusChange) {
-      AudioManager.AUDIOFOCUS_GAIN -> {
-        unDuckActivePlayers()
-      }
-      AudioManager.AUDIOFOCUS_LOSS -> {
-        pauseActivePlayers()
-        currentMixAudioMode = null
-        audioFocusRequest = null
-      }
-      AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
-        val mixAudioMode = determineRequiredMixMode()
-        if (mixAudioMode != MixAudioMode.MIXWITHOTHERS) {
+    Threading.runOnMainThread {
+      when (focusChange) {
+        AudioManager.AUDIOFOCUS_GAIN -> {
+          unDuckActivePlayers()
+        }
+        AudioManager.AUDIOFOCUS_LOSS -> {
           pauseActivePlayers()
           currentMixAudioMode = null
           audioFocusRequest = null
         }
-      }
-      AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
-        val mixAudioMode = determineRequiredMixMode()
-        when (mixAudioMode) {
-          MixAudioMode.DONOTMIX -> pauseActivePlayers()
-          else -> duckActivePlayers()
+        AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
+          val mixAudioMode = determineRequiredMixMode()
+          if (mixAudioMode != MixAudioMode.MIXWITHOTHERS) {
+            pauseActivePlayers()
+            currentMixAudioMode = null
+            audioFocusRequest = null
+          }
+        }
+        AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
+          val mixAudioMode = determineRequiredMixMode()
+          when (mixAudioMode) {
+            MixAudioMode.DONOTMIX -> pauseActivePlayers()
+            else -> duckActivePlayers()
+          }
         }
       }
     }
