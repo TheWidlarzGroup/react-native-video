@@ -11,7 +11,7 @@ import {
 export class VideoPlayerEvents {
   protected eventEmitter: VideoPlayerEventEmitter;
   protected jsEventListeners: Partial<
-    Record<keyof JSVideoPlayerEvents, Set<(...params: any[]) => void>>
+    Record<keyof JSVideoPlayerEvents, Set<(..._params: any[]) => void>>
   > = {};
 
   protected readonly supportedEvents: (keyof PlayerEvents)[] =

@@ -16,22 +16,11 @@ const STATS = [
   { value: 'TWG', label: 'Company Backed' },
 ];
 
-const containerVariants: Variants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.1,
-    },
-  },
-};
-
 export const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, ease: 'easeOut' },
   },
 };
 
@@ -40,7 +29,6 @@ const logoVariants: Variants = {
   visible: {
     opacity: 1,
     scale: 1,
-    transition: { duration: 0.5, ease: 'easeOut' },
   },
 };
 
@@ -66,9 +54,12 @@ export function Hero() {
     <header className={styles.hero}>
       <motion.div
         className={styles.content}
-        variants={containerVariants}
         initial="hidden"
         animate="visible"
+        transition={{
+          staggerChildren: 0.1,
+          delayChildren: 0.1,
+        }}
       >
         <Badge>v7 Beta Available</Badge>
 
@@ -77,13 +68,22 @@ export function Hero() {
           alt="TheWidlarzGroup logo"
           className={styles.logo}
           variants={logoVariants}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
         />
 
-        <motion.h1 className={styles.title} variants={itemVariants}>
+        <motion.h1
+          className={styles.title}
+          variants={itemVariants}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+        >
           <span className={styles.titleAccent}>Video</span> for React Native
         </motion.h1>
 
-        <motion.p className={styles.subtitle} variants={itemVariants}>
+        <motion.p
+          className={styles.subtitle}
+          variants={itemVariants}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+        >
           The most feature-rich video player for React Native. Multi-platform
           support with DRM, subtitles, and audio tracks.
         </motion.p>
