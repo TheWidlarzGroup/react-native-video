@@ -159,7 +159,19 @@ class NewPlayerView: UIView, JSInputProtocol {
             jsProps.shouldAutoStart.value = shouldAutoStart
         }
     }
-
+  
+    @objc var isPauseAdsEnabled: Bool = true {
+        didSet {
+            jsProps.isPauseAdsEnabled.value = isPauseAdsEnabled
+        }
+    }
+  
+    @objc var treatAllOverlayAdsAsPauseAds: Bool = true {
+        didSet {
+            jsProps.treatAllOverlayAdsAsPauseAds.value = treatAllOverlayAdsAsPauseAds
+        }
+    }
+  
     //FIXME: review unused variables
     @objc var selectedTextTrack: NSDictionary?
     @objc var selectedAudioTrack: NSDictionary?

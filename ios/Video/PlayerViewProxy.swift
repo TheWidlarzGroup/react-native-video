@@ -292,7 +292,9 @@ class PlayerViewProxy {
             hideAdUiElements: jsProps.hideAdUiElements.value,
             isWhyThisAdIconEnabled: jsProps.isWhyThisAdIconEnabled.value,
             isPlayPauseEnabled: jsProps.isPlayPauseEnabled.value,
-            shouldAutoStart: jsProps.shouldAutoStart.value
+            shouldAutoStart: jsProps.shouldAutoStart.value,
+            isPauseAdsEnabled: jsProps.isPauseAdsEnabled.value,
+            treatAllOverlayAdsAsPauseAds: jsProps.treatAllOverlayAdsAsPauseAds.value
         )
 
         if let rndvJSSource = rndvJSSource {

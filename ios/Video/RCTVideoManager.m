@@ -35,6 +35,8 @@ RCT_EXPORT_VIEW_PROPERTY(isWhyThisAdIconEnabled, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(locale, NSString);
 RCT_EXPORT_VIEW_PROPERTY(isPlayPauseEnabled, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(shouldAutoStart, BOOL);
+RCT_EXPORT_VIEW_PROPERTY(isPauseAdsEnabled, BOOL);
+RCT_EXPORT_VIEW_PROPERTY(treatAllOverlayAdsAsPauseAds, BOOL);
 
 /* Should support: onLoadStart, onLoad, and onError to stay consistent with Image */
 RCT_EXPORT_VIEW_PROPERTY(onVideoLoadStart, RCTBubblingEventBlock);

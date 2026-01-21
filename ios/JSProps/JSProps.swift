@@ -26,6 +26,8 @@ class JSProps {
     var locale: Dynamic<String?> = Dynamic(nil)
     var isPlayPauseEnabled: Dynamic<Bool> = Dynamic(true)
     var shouldAutoStart: Dynamic<Bool> = Dynamic(true)
+    var isPauseAdsEnabled: Dynamic<Bool> = Dynamic(false)
+    var treatAllOverlayAdsAsPauseAds: Dynamic<Bool> = Dynamic(false)
 }
 
 class Dynamic<T> {
