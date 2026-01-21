@@ -67,11 +67,18 @@ enum ExternalSubtitlesUtils {
           withMediaType: .text,
           preferredTrackID: kCMPersistentTrackID_Invalid
         ) {
-          try compositionTextTrack.insertTimeRange(
-            CMTimeRange(start: .zero, duration: textTrack.timeRange.duration),
-            of: textTrack,
-            at: .zero
-          )
+          do {
+            try compositionTextTrack.insertTimeRange(
+              CMTimeRange(start: .zero, duration: textTrack.timeRange.duration),
+              of: textTrack,
+              at: .zero
+            )
+          } catch {
+            print(
+              "[ReactNativeVideo] Failed to insert text track into composition: \(error.localizedDescription). Language: \(textTrack.languageCode ?? "unknown"). Continuing without this subtitle track."
+            )
+            continue
+          }
 
           compositionTextTrack.languageCode = textTrack.languageCode
           compositionTextTrack.isEnabled = true
