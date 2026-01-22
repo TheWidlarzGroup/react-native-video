@@ -1,5 +1,5 @@
 /**
- * Minimal Hello World app for testing UWP build
+ * Minimal Hello World app for testing Win32 build
  * @format
  */
 
@@ -9,10 +9,10 @@ import {View, Text, StyleSheet} from 'react-native';
 export default function MinimalApp() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Hello UWP!</Text>
+      <Text style={styles.title}>Hello Win32!</Text>
       <Text style={styles.subtitle}>React Native Windows Bare Example</Text>
       <Text style={styles.description}>
-        This is a minimal UWP application running React Native.
+        This is a Win32 application running React Native.
       </Text>
     </View>
   );

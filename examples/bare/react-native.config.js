@@ -20,7 +20,7 @@ module.exports = {
     ...project,
     windows: {
       sourceDir: 'windows',
-      solutionFile: 'BareExample.sln',
+      solutionFile: 'BareExampleApp.sln',
       project: {
         projectFile: 'BareExampleApp/BareExampleApp.vcxproj',
       },

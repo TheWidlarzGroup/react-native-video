@@ -15,11 +15,11 @@
     "start": "react-native start",
     "test": "jest",
     "visionos": "react-native run-visionos",
-    "windows": "react-native run-windows --sln windows/BareExample.sln"
+    "windows": "npx @react-native-community/cli run-windows",
+    "test:windows": "jest --config jest.config.windows.js"
   },
   "dependencies": {
     "@callstack/react-native-visionos": "^0.78.0",
-    
     "react": "19.0.0",
     "react-native": "^0.78.0",
     "react-native-video": "link:../..",
@@ -44,9 +44,17 @@
     "prettier": "2.8.8",
     "react-native-test-app": "^4.1.4",
     "react-test-renderer": "19.0.0",
-    "typescript": "5.0.4"
+    "typescript": "5.0.4",
+    "@rnx-kit/jest-preset": "^0.1.17"
   },
   "engines": {
     "node": ">=18"
+  },
+  "react-native-windows": {
+    "init-windows": {
+      "name": "BareExample",
+      "namespace": "BareExample",
+      "template": "cpp-app"
+    }
   }
 }

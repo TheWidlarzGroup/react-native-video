@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>wv2winrt</name>
+    </assembly>
+    <members>
+        <member name="M:wv2winrt.Program.Main(System.String[],System.String,System.String,System.Boolean,System.String[],System.String[],System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.String,System.Boolean)">
+             <summary>
+             Given WinMD files, produce C++ code that implements COM IDispatch wrappers around the types in those WinMD files.
+             </summary>
+             <remarks>
+             There are several mechanisms to filter out types from the winmd that should not have code generated. They are
+             applied in the following order of precedence:
+            
+             1. If the requireAllowForWebAttribute switch is set, then only types
+                with the AllowForWeb attribute will be considered.
+            
+             2. If the ignoreWebHostHiddenAttribute switch is set, then types with
+                the WebHostHidden attribute will still be included.
+            
+             3. Explicit include and exclude rules sorted by the length of the
+                rule string. So more general rules are applied first followed by
+                more and more specific rules. If rule text matches the type or
+                namespace name, then the type is included or excluded based on
+                the kind of rule.
+            
+             4. If the explicitIncludesOnly switch is set, only the types explicitly
+                listed by the --include switch will be included.
+                By default, wv2winrt includes all types
+                referenced by other included types. This applies recursively, so
+                a type included due to this will also include all types
+                it references.
+            
+             5. If there are no explicit include rules then a type that doesn't
+                match any previous rule (1. to 4.) is included. Otherwise it is
+                excluded.
+            
+             </remarks>
+             <param name="winmdPaths">Path(s) to winmd files containing types to generate code from/for.</param>
+             <param name="outputPath">Path to a folder into which to place generated source code. Or `--` to write all generated code to standard out.</param>
+             <param name="outputNamespace">Namespace where generated source code will be placed.</param>
+             <param name="useFullNamespace">If set, wv2winrt will use full namespace names for dispatch adapter source files. Use this option when the output namespace is different to the consuming project's root namespace.</param>
+             <param name="useJavascriptCase">If set, wv2winrt will use javascript casing for projection properties, methods, and events.</param>
+             <param name="explicitIncludesOnly">If set, wv2winrt won't automatically follow references from other included types.</param>
+             <param name="requireAllowForWebAttribute">If set, wv2winrt will only generate wrappers for runtimeclasses with the AllowForWeb attribute. By default, runtimeclasses with or without the AllowForWeb attribute will be included and will have wrapper code generated.</param>
+             <param name="ignoreWebHostHiddenAttribute">If set, wv2winrt will generate wrappers for runtimeclasses with the WebHostHidden attribute. By default, runtimeclasses with the WebHostHidden attribute will be skipped and will not have generated wrapper code.</param>
+             <param name="pch">Optional precompiled header filename of the project consuming the generated source code.</param>
+             <param name="idl">Optional flag to generate only the idl file. Run with this option before MIDL if the consuming project defines its own WinRT types.</param>
+             <param name="include">List of namespaces or runtimeclass names to be included in the generated output.</param>
+             <param name="exclude">List of namespaces or runtimeclass names to be excluded from the generated output.</param>
+             <param name="verbose">If set, generate verbose output including when a namespace or runtimeclass is excluded.</param>
+        </member>
+    </members>
+</doc>

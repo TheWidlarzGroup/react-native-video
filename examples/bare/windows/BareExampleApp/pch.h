@@ -1,5 +1,7 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
+// pch.h : include file for standard system include files,
+// or project specific include files that are used frequently, but
+// are changed infrequently
+//
 
 #pragma once
 
@@ -17,21 +19,20 @@
 
 // WinRT Header Files
 #include <winrt/base.h>
-#include <winrt/Windows.Foundation.h>
-#include <winrt/Windows.Foundation.Collections.h>
-#include <winrt/Windows.ApplicationModel.Activation.h>
-#include <winrt/Windows.UI.Xaml.h>
-#include <winrt/Windows.UI.Xaml.Controls.h>
-#include <winrt/Windows.UI.Xaml.Navigation.h>
-#include <winrt/Microsoft.ReactNative.h>
-#include <CppWinRTIncludes.h>
 
-// Microsoft.UI.Xaml - include the generated headers
-#include <winrt/Microsoft.UI.Xaml.Controls.h>
-#include <winrt/Microsoft.UI.Xaml.XamlTypeInfo.h>
+#include <CppWinRTIncludes.h>
+#include <winrt/Microsoft.ReactNative.Composition.h>
+#include <winrt/Microsoft.ReactNative.h>
+#include <winrt/Microsoft.UI.Composition.h>
+#include <winrt/Microsoft.UI.Content.h>
+#include <winrt/Microsoft.UI.Dispatching.h>
+#include <winrt/Microsoft.UI.Windowing.h>
+#include <winrt/Microsoft.UI.interop.h>
 
 // C RunTime Header Files
 #include <malloc.h>
 #include <memory.h>
 #include <stdlib.h>
 #include <tchar.h>
+
+// Reference additional headers your project requires here
