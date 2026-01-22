@@ -1,5 +1,5 @@
 ---
-title: intro
+title: Intro
 sidebar_position: 1
 description: Introduction to React Native Video library
 ---

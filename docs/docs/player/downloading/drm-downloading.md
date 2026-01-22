@@ -1,6 +1,6 @@
 ---
 sidebar_position: 5
-sidebar_label: drm downloading
+sidebar_label: DRM Downloading
 description: Downloading and playing DRM-protected content offline
 ---
 

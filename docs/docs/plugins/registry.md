@@ -1,5 +1,5 @@
 ---
-title: plugin registry  
+title: Plugin Registry  
 description: Overview of the React Native Video plugin registry and how to use it
 sidebar_position: 1
 ---

@@ -1,6 +1,6 @@
 ---
 sidebar_position: 2
-sidebar_label: props
+sidebar_label: Props
 description: VideoView component properties
 ---
 

@@ -1,7 +1,9 @@
 ---
 sidebar_position: 1
-sidebar_label: manual
+sidebar_label: Manual
 description: Manual analytics integration guide
+customProps:
+    badgeType: new
 ---
 
 # Manual Analytics

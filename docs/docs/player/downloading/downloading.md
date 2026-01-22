@@ -1,6 +1,6 @@
 ---
 sidebar_position: 2
-sidebar_label: downloading
+sidebar_label: Downloading
 description: Complete API reference for Offline Video SDK
 ---
 

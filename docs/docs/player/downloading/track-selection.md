@@ -1,6 +1,6 @@
 ---
 sidebar_position: 4
-sidebar_label: track selection
+sidebar_label: Track Selection
 description: How to select specific tracks for download
 ---
 

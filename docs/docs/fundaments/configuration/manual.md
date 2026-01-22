@@ -1,6 +1,6 @@
 ---
 sidebar_position: 2
-sidebar_label: manual configuration
+sidebar_label: Manual Configuration
 description: Manual configuration of react-native-video
 ---
 

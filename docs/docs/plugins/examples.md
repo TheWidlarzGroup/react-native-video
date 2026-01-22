@@ -1,5 +1,5 @@
 ---
-title: plugin usage examples
+title: Plugin Usage Examples
 description: Simple examples of implementing common plugin scenarios for React Native Video
 sidebar_position: 3
 ---

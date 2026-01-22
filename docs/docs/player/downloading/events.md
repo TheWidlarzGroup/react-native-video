@@ -1,6 +1,6 @@
 ---
 sidebar_position: 3
-sidebar_label: events
+sidebar_label: Events
 description: Event system for tracking download progress and status
 ---
 

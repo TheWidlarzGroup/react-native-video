@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-sidebar_label: getting started
+sidebar_label: Getting Started
 description: Installation and setup guide for Offline Video SDK
 ---
 

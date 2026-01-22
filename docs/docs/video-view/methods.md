@@ -1,6 +1,6 @@
 ---
 sidebar_position: 4
-sidebar_label: methods
+sidebar_label: Methods
 description: VideoView imperative methods
 ---
 

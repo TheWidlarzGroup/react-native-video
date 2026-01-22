@@ -1,6 +1,6 @@
 ---
 sidebar_position: 5
-sidebar_label: chapters
+sidebar_label: Chapters
 description: VideoView chapters support
 ---
 

@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-sidebar_label: introduction
+sidebar_label: Introduction
 description: Introduction to VideoView component
 ---
 

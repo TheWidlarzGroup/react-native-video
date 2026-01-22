@@ -1,5 +1,5 @@
 ---
-sidebar_label: events
+sidebar_label: Events
 sidebar_position: 5
 ---
 

@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-sidebar_label: player
+sidebar_label: Player
 ---
 
 # Player
