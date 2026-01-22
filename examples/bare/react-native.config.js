@@ -16,6 +16,14 @@ const project = (() => {
 
 module.exports = {
   ...(project ? {project} : undefined),
+  // Disable react-native-video autolink for Windows (Win32 apps need manual loading)
+  dependencies: {
+    'react-native-video': {
+      platforms: {
+        windows: null,
+      },
+    },
+  },
   project: {
     ...project,
     windows: {

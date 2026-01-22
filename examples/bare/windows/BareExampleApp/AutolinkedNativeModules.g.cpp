@@ -3,16 +3,12 @@
 #include "pch.h"
 #include "AutolinkedNativeModules.g.h"
 
-// Includes from react-native-video
-#include <winrt/ReactNativeVideoCPP.h>
-
 namespace winrt::Microsoft::ReactNative
 {
 
 void RegisterAutolinkedNativeModulePackages(winrt::Windows::Foundation::Collections::IVector<winrt::Microsoft::ReactNative::IReactPackageProvider> const& packageProviders)
 { 
-    // IReactPackageProviders from react-native-video
-    packageProviders.Append(winrt::ReactNativeVideoCPP::ReactPackageProvider());
+    UNREFERENCED_PARAMETER(packageProviders);
 }
 
 }
