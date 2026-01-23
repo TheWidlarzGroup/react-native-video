@@ -1510,6 +1510,13 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _selectedAudioTrackCriteria = SelectedTrackCriteria.none()
         _presentingViewController = nil
 
+        // BLOOMBERG BEGIN
+        // Purpose: Clean up IMA resources to prevent multiple ads playing simultaneously
+        #if USE_GOOGLE_IMA
+            _imaAdsManager.releaseAds()
+        #endif
+        // BLOOMBERG END
+
         ReactNativeVideoManager.shared.onInstanceRemoved(id: instanceId, player: _player as Any)
         _player = nil
         _drmManager = nil
