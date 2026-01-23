@@ -41,7 +41,7 @@ class MainActivity : ReactActivity() {
               this,
               mainComponentName,
               fabricEnabled
-          ){})
+          ) {})
   }
 
   /**

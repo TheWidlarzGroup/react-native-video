@@ -34,7 +34,6 @@ class VideoPluginSampleModule(reactContext: ReactApplicationContext) :
     DebugLog.e(TAG, "onPlayerError: " + error.errorCodeName)
   }
 
-
   override fun onInstanceCreated(id: String, player: ExoPlayer) {
     player.addAnalyticsListener(debugEventLogger)
     player.addListener(this)
