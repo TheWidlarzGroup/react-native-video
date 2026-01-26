@@ -65,7 +65,7 @@ The `VideoPlayer` class, through `VideoPlayerEvents`, supports the following eve
 
 Additionally, the `VideoPlayer` instance itself has an `onError` property:
 
--   `onError: (error: ` [VideoRuntimeError](../api-reference/interfaces/VideoRuntimeError.md) `) => void` — Fired when an error occurs. The callback receives the `VideoRuntimeError` object.
+-   `onError: (error: ` [VideoRuntimeError](../api-reference/interfaces/VideoRuntimeError.md) `) => void` - Fired when an error occurs. The callback receives the `VideoRuntimeError` object.
 
 **Benefits of `useEvent`**:
 

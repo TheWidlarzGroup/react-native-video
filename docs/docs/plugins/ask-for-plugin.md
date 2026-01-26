@@ -10,24 +10,24 @@ Need a custom plugin for your React Native Video application? We can build it fo
 
 ## What We Build
 
-Our team specializes in creating production-ready plugins for `react-native-video`. Whatever video functionality you need — we can build it.
+Our team specializes in creating production-ready plugins for `react-native-video`. Whatever video functionality you need - we can build it.
 
 **Examples of plugins we can build:**
 
-- **Analytics integrations** — Connect with any analytics provider (Mux, Conviva, custom solutions)
-- **Live streaming features** — Real-time chat overlays, live reactions, viewer counts
-- **Interactive video** — Clickable hotspots, branching narratives, shoppable videos
-- **Accessibility enhancements** — Audio descriptions, sign language overlays, custom captions styling
-- **AI-powered features** — Auto-generated thumbnails, content moderation, speech-to-text
-- **Social features** — Watch parties, synchronized playback, clip sharing
-- **Custom UI components** — Branded controls, gesture handlers, thumbnail previews on seek
+- **Analytics integrations** - Connect with any analytics provider (Mux, Conviva, custom solutions)
+- **Live streaming features** - Real-time chat overlays, live reactions, viewer counts
+- **Interactive video** - Clickable hotspots, branching narratives, shoppable videos
+- **Accessibility enhancements** - Audio descriptions, sign language overlays, custom captions styling
+- **AI-powered features** - Auto-generated thumbnails, content moderation, speech-to-text
+- **Social features** - Watch parties, synchronized playback, clip sharing
+- **Custom UI components** - Branded controls, gesture handlers, thumbnail previews on seek
 
 ## Why Choose Us?
 
-- **Deep expertise** — We maintain `react-native-video` and know the codebase inside out
-- **Production-ready** — Battle-tested code with proper error handling and edge cases covered
-- **Native performance** — Plugins implemented in Kotlin/Swift for optimal performance
-- **Ongoing support** — We maintain and update plugins as the library evolves
+- **Deep expertise** - We maintain `react-native-video` and know the codebase inside out
+- **Production-ready** - Battle-tested code with proper error handling and edge cases covered
+- **Native performance** - Plugins implemented in Kotlin/Swift for optimal performance
+- **Ongoing support** - We maintain and update plugins as the library evolves
 
 ## Our Existing Plugins
 

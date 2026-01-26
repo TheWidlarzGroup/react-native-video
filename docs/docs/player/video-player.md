@@ -6,8 +6,8 @@ sidebar_label: VideoPlayer
 # VideoPlayer
 
 :::tip When to Use What
-- **[`useVideoPlayer`](./use-video-player.md) hook** — Recommended for most cases. Automatically manages player lifecycle (creation, cleanup on unmount, source changes).
-- **`VideoPlayer` class** — Use when you need manual lifecycle control, e.g., preloading videos before displaying them, managing multiple players with custom logic, or deferred initialization scenarios.
+- **[`useVideoPlayer`](./use-video-player.md) hook** - Recommended for most cases. Automatically manages player lifecycle (creation, cleanup on unmount, source changes).
+- **`VideoPlayer` class** - Use when you need manual lifecycle control, e.g., preloading videos before displaying them, managing multiple players with custom logic, or deferred initialization scenarios.
 :::
 
 The `VideoPlayer` class is the primary way to control video playback. It provides methods and properties to manage the video source, playback state, volume, and other aspects of the video.
