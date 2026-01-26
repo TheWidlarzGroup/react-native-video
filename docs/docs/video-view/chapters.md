@@ -2,14 +2,16 @@
 sidebar_position: 5
 sidebar_label: Chapters
 description: VideoView chapters support
+customProps:
+  plan: pro
 ---
 
 # Chapters
 
 The `VideoView` component supports video chapters, allowing users to navigate through different segments of a video. Chapters appear as visual markers on the seekbar and can be used to jump to specific points in the video.
 
-<video controls width="100%">
-  <source src="/react-native-video/static/videos/chapters.mp4" type="video/mp4" />
+<video controls width="50%">
+  <source src="/react-native-video/videos/chapters.mp4" type="video/mp4" />
   Your browser does not support the video tag.
 </video>
 
