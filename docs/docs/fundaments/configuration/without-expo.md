@@ -61,4 +61,4 @@ If the build succeeds your manual configuration is complete.
 ---
 
 ### Need an easier way?
-Use the [Expo plugin](./expo-plugin.md) to apply exactly the same changes automatically during `expo prebuild`.
+Use the [Expo plugin](./with-expo.md) to apply exactly the same changes automatically during `expo prebuild`.

@@ -44,7 +44,7 @@ export default function App() {
 ## What's Next?
 
 - **[Installation Guide](./installation.md)** - Get started with `react-native-video`
-- **[Configuration](./configuration/expo-plugin.md)** - Configure the player
+- **[Configuration](./configuration/with-expo.md)** - Configure the player
 - **[Player](../player/player.md)** - Learn about the player functionality
 - **[Event Handling](../player/events.md)** - Master player events and callbacks
 - **[VideoView Component](../video-view/video-view.md)** - Understand the video display component

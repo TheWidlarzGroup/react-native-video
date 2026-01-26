@@ -26,8 +26,8 @@ npm install react-native-video@next react-native-nitro-modules
 
 2. Configure Library:
 You can configure the library in two ways:
-- [Using expo plugins](./configuration/expo-plugin.md)
-- [Manually editing needed files](./configuration/manual.md)
+- [With Expo](./configuration/with-expo.md)
+- [Without Expo](./configuration/without-expo.md)
 
 3. Run the project:
 If you are using Expo, you will need to generate native files:
