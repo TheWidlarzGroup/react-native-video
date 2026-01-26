@@ -51,5 +51,9 @@ export default function App() {
 - **[Plugins](../plugins/plugins.mdx)** - Extend functionality with plugins
 - **[API Reference](../api-reference/index.md)** - Complete API documentation
 
+:::tip Need Something Custom?
+If you need functionality that the library doesn't currently offer, we can build it for you. Check out [Ask for Plugin](../plugins/ask-for-plugin.md) to request a custom plugin.
+:::
+
 [![React Native Video](../../static/baners/rnv-banner.png)](https://www.thewidlarzgroup.com/react-native-video/?utm_source=rnv&utm_medium=docs&utm_campaign=intro&utm_id=rnv-banner)
 
