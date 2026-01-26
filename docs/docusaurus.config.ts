@@ -1,5 +1,6 @@
 import type * as Preset from '@docusaurus/preset-classic';
 import type { Config } from '@docusaurus/types';
+import { createSidebarWithCustomProps } from '@widlarzgroup/docusaurus-ui';
 import { themes as prismThemes } from 'prism-react-renderer';
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
@@ -47,6 +48,7 @@ const config: Config = {
               path: 'v6',
             },
           },
+          sidebarItemsGenerator: createSidebarWithCustomProps,
         },
         theme: {
           customCss: './src/css/custom.css',
