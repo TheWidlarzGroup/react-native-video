@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-sidebar_label: Expo Plugin
+sidebar_label: With Expo
 description: Expo plugin for react-native-video configuration
 ---
 

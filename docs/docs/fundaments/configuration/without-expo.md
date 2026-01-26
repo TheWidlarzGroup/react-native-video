@@ -1,6 +1,6 @@
 ---
 sidebar_position: 2
-sidebar_label: Manual Configuration
+sidebar_label: Without Expo
 description: Manual configuration of react-native-video
 ---
 
