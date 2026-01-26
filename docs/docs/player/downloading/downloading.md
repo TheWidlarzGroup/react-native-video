@@ -13,7 +13,7 @@ description: Complete API reference for Offline Video SDK
 Registers and authorizes the plugin with the provided API key. Must be called before using any other functions.
 
 **Parameters:**
-- `apiKey`: Your API key obtained from [sdk.thewidlarzgroup.com](https://sdk.thewidlarzgroup.com) or by contacting TheWidlarzGroup at [hi@thewidlarzgroup.com](mailto:hi@thewidlarzgroup.com)
+- `apiKey`: Your API key obtained from [sdk.thewidlarzgroup.com](https://sdk.thewidlarzgroup.com?utm_source=rnv&utm_medium=docs&utm_campaign=downloading&utm_id=downloading_api-key-param)
 
 **Returns:** `Promise<boolean>` - `true` if registration was successful, `false` otherwise
 

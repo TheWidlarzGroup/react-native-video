@@ -21,7 +21,7 @@ The Offline Video SDK is a commercial add-on for `react-native-video` (versions 
 - **React Native Video**: version 6.15.0 or higher (versions 6 and 7 are supported)
 - **iOS**: 15.0 or higher
 - **Android**: 6.0 or higher
-- **License**: A valid license for the Offline Video SDK is required. You can obtain this through the SDK platform or by contacting TheWidlarzGroup directly.
+- **License**: A valid license for the Offline Video SDK is required. You can obtain this through the [SDK platform](https://sdk.thewidlarzgroup.com?utm_source=rnv&utm_medium=docs&utm_campaign=downloading&utm_id=getting-started_license-requirement).
 
 ## Features
 
@@ -76,7 +76,7 @@ import { registerPlugin } from "@TheWidlarzGroup/react-native-video-stream-downl
 const success = await registerPlugin("YOUR_API_KEY");
 ```
 
-Replace `"YOUR_API_KEY"` with your actual API key obtained from [sdk.thewidlarzgroup.com](https://sdk.thewidlarzgroup.com) or by contacting TheWidlarzGroup at [hi@thewidlarzgroup.com](mailto:hi@thewidlarzgroup.com).
+Replace `"YOUR_API_KEY"` with your actual API key obtained from [sdk.thewidlarzgroup.com](https://sdk.thewidlarzgroup.com?utm_source=rnv&utm_medium=docs&utm_campaign=downloading&utm_id=getting-started_api-key-link).
 
 ## Supported Formats
 

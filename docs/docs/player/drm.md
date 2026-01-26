@@ -181,7 +181,7 @@ useVideoPlayer({
 ```
 
 ## Offline
-If you are looking for implementing offline playback with DRM, make sure to checkout our [Offline Video SDK](https://www.thewidlarzgroup.com/offline-video-sdk). It provides a comprehensive solution for downloading and playing Streams and DRM-protected content.
+If you are looking for implementing offline playback with DRM, make sure to checkout our [Offline Video SDK](https://www.thewidlarzgroup.com/offline-video-sdk?utm_source=rnv&utm_medium=docs&utm_campaign=drm&utm_id=offline-sdk-link). It provides a comprehensive solution for downloading and playing Streams and DRM-protected content.
 
 ## Troubleshooting
 
