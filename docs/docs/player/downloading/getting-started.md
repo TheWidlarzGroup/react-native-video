@@ -6,15 +6,9 @@ description: Installation and setup guide for Offline Video SDK
 
 # Getting Started
 
-:::warning API Key Required
-To use the Offline Video SDK, you need an API key. You can obtain it by:
-- Contacting TheWidlarzGroup directly at [hi@thewidlarzgroup.com](mailto:hi@thewidlarzgroup.com)
-- Logging in through the SDK platform at [sdk.thewidlarzgroup.com](https://sdk.thewidlarzgroup.com)
+This section covers the **Offline Video SDK** - a commercial extension for `react-native-video` that enables downloading and offline playback.
 
-Once you have your API key, you'll need to authorize the plugin (see Authorization section below).
-:::
-
-The Offline Video SDK is a commercial add-on for `react-native-video` (versions 6 and 7) that enables secure offline playback of HLS streams, including support for DRM, multiple audio tracks, and subtitles.
+The Offline Video SDK is a commercial add-on for `react-native-video` (versions 6 and 7) that enables secure offline playback of HLS/DASH streams or static videos like MP4, including support for DRM, multiple audio tracks, and subtitles.
 
 ## Requirements
 
