@@ -1,12 +1,12 @@
 ---
 sidebar_position: 3
-sidebar_label: Events
+sidebar_label: Events (downloading)
 description: Event system for tracking download progress and status
 ---
 
-# Events
+# Downloading Events
 
-The Offline Video SDK emits events that allow you to monitor and react to changes in download status and progress. You can subscribe to these events using the `useEvent` hook from `react-native-video`.
+The Offline Video SDK emits events that allow you to monitor and react to changes in download status and progress. You can subscribe to these events using the `useEvent` hook.
 
 ## Available Events
 
@@ -23,7 +23,7 @@ Fired when an error occurs during download.
 - `error`: Error message describing what went wrong
 
 ```tsx
-import { useEvent } from "react-native-video";
+import { useEvent } from "@TheWidlarzGroup/react-native-video-stream-downloader";
 
 useEvent("onError", (error: string) => {
   console.error("Download error:", error);
@@ -43,7 +43,7 @@ Fired periodically during downloads with current progress information.
 - `downloads`: Array of `DownloadStatus` - See [DownloadStatus structure](./downloading.md#downloadstatus) in API Reference for complete properties
 
 ```tsx
-import { useEvent } from "react-native-video";
+import { useEvent } from "@TheWidlarzGroup/react-native-video-stream-downloader";
 
 useEvent("onDownloadProgress", (downloads: DownloadStatus[]) => {
   downloads.forEach((download) => {
@@ -65,7 +65,7 @@ Fired when a download completes (successfully or with failure).
 - `download`: Final `DownloadStatus` - See [DownloadStatus structure](./downloading.md#downloadstatus) in API Reference for complete properties. When this event fires, `status` will be either `'completed'` or `'failed'`.
 
 ```tsx
-import { useEvent } from "react-native-video";
+import { useEvent } from "@TheWidlarzGroup/react-native-video-stream-downloader";
 
 useEvent("onDownloadEnd", (download: DownloadStatus) => {
   if (download.status === "completed") {
@@ -78,10 +78,10 @@ useEvent("onDownloadEnd", (download: DownloadStatus) => {
 
 ## Using Events
 
-Events are automatically typed and can be used with the `useEvent` hook from `react-native-video`:
+Events are automatically typed and can be used with the `useEvent` hook:
 
 ```tsx
-import { useEvent } from "react-native-video";
+import { useEvent } from "@TheWidlarzGroup/react-native-video-stream-downloader";
 
 function DownloadManager() {
   useEvent("onDownloadProgress", (downloads) => {
