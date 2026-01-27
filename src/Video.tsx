@@ -159,6 +159,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       localSourceEncryptionKeyScheme,
       minLoadRetryCount,
       bufferConfig,
+      pictureInPictureResizeMode,
       ...rest
     },
     ref,
@@ -951,6 +952,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
             onControlsVisibilityChange ? _onControlsVisibilityChange : undefined
           }
           viewType={_viewType}
+          pictureInPictureResizeMode={pictureInPictureResizeMode}
         />
         {_renderPoster()}
       </View>

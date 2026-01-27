@@ -125,14 +125,14 @@ export type Drm = Readonly<{
   base64Certificate?: boolean; // ios default: false
   multiDrm?: boolean; // android
   localSourceEncryptionKeyScheme?: string; // ios
-  /* eslint-disable @typescript-eslint/no-unused-vars */
+
   getLicense?: (
     spcBase64: string,
     contentId: string,
     licenseUrl: string,
     loadedLicenseUrl: string,
   ) => string | Promise<string>; // ios
-  /* eslint-enable @typescript-eslint/no-unused-vars */
+
 }>;
 
 export enum CmcdMode {
@@ -385,4 +385,5 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   allowsExternalPlayback?: boolean; // iOS
   controlsStyles?: ControlsStyles; // Android
   disableAudioSessionManagement?: boolean; // iOS
+  pictureInPictureResizeMode?: EnumValues<VideoResizeMode>; // Android
 }
