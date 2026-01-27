@@ -186,3 +186,7 @@ internal fun shouldDisableCache(source: NativeVideoPlayerSource): Boolean
 -  **Unregister plugins**: Use unregistration to prevent memory leaks.
 -  **Performance**: Minimize work in notification handlers. Cache expensive operations. Be mindful of plugin order.
 
+:::tip Need a Custom Plugin?
+If you need functionality that the library doesn't currently offer, we can build it for you. Check out [Ask for Plugin](./ask-for-plugin.md) to request a custom plugin built by our team.
+:::
+
