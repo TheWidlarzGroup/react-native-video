@@ -38,6 +38,7 @@ struct Source: SuperCodable {
     var plugins: JSPlugins?
     let resumePosition: Double?
     let is4K: Bool?
+    let preferredSmartSubtitles: [JSSmartSubtitleMapping]?
 }
 
 

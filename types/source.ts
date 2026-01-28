@@ -48,6 +48,26 @@ export enum SkipMarkerType {
   SKIP_CREDITS = 'SKIP_CREDITS',
 }
 
+export interface IVideoPlayerPreferredSmartSubtitlesChangedPayload {
+}
+
+export interface PreferredSmartSubtitle {
+  audio: AudioLanguage;
+  subtitles: SubtitleLanguage[];
+}
+
+export interface AudioLanguage {
+  code: string;
+}
+
+export interface SubtitleLanguage {
+  code: string;
+  kind: SubtitleType;
+}
+
+export type SubtitleType = 'captions' | 'subtitles' | string;
+
+
 export interface IVideoPlayerSource {
   ads?: IAdsConfiguration;
   contentType?: ContentTypes;
@@ -87,4 +107,6 @@ export interface IVideoPlayerSource {
   isAudioOnly?: boolean;
   resumePosition?: number;
   is4K?: boolean;
+  preferredSmartSubtitles?: PreferredSmartSubtitle[]
 }
+

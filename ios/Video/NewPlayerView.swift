@@ -37,6 +37,7 @@ class NewPlayerView: UIView, JSInputProtocol {
     @objc var onVideoSeek: RCTBubblingEventBlock?
     @objc var onSeekEndedEvent: RCTBubblingEventBlock?
     @objc var onPlayPauseAction: RCTBubblingEventBlock?
+    @objc var onPreferredSmartSubtitlesChanged: RCTBubblingEventBlock?
 
     //not used
     @objc var onTimedMetadata: RCTBubblingEventBlock?
@@ -250,6 +251,7 @@ class NewPlayerView: UIView, JSInputProtocol {
         jsPlayerView.onPlayPauseAction = self.onPlayPauseAction
         jsPlayerView.onVideoBuffer = self.onVideoBuffer
         jsPlayerView.onVideoAboutToEnd = self.onVideoAboutToEnd
+        jsPlayerView.onPreferredSmartSubtitlesChanged = self.onPreferredSmartSubtitlesChanged
         
         jsPlayerView.translatesAutoresizingMaskIntoConstraints = false
         jsPlayerView.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 0).isActive = true

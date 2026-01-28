@@ -70,7 +70,7 @@ RCT_EXPORT_VIEW_PROPERTY(onSubtitleTrackChanged, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onAudioTrackChanged, RCTBubblingEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onSkipMarkerButton, RCTBubblingEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onPlayPauseAction, RCTBubblingEventBlock);
-
+RCT_EXPORT_VIEW_PROPERTY(onPreferredSmartSubtitlesChanged, RCTBubblingEventBlock);
 
 RCT_EXTERN_METHOD(seekToPosition:(nonnull NSNumber *)node position:(double)position)
 RCT_EXTERN_METHOD(replaceAdTagParameters:(nonnull NSNumber *)node payload:(NSDictionary)payload)
