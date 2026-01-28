@@ -1,9 +1,8 @@
 package com.dice.messaging
 
 import android.annotation.SuppressLint
+import android.net.Uri
 import androidx.media3.common.C
-import androidx.media3.common.C.TRACK_TYPE_AUDIO
-import androidx.media3.common.C.TRACK_TYPE_TEXT
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.Player.Listener
@@ -22,7 +21,9 @@ import com.dice.dicemessaging.PlayerTextTracksInfo
 import com.dice.dicemessaging.StreamType
 import com.dice.messaging.LiveEdgeUtils.isOnLiveEdge
 import com.diceplatform.doris.Constants
+import com.diceplatform.doris.DorisPlayer
 import com.diceplatform.doris.ExoDoris
+import com.diceplatform.doris.ExoDorisTrackSelector
 import com.diceplatform.doris.entity.Source
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.MainScope
@@ -36,6 +37,7 @@ class DorisMessaging(
     private val source: Source,
 ) : Listener {
     private val messageScope = MainScope() + CoroutineName("DorisMessaging")
+    private val trackSelector: ExoDorisTrackSelector? get() = player.trackSelector
     var isLive: Boolean = false
     var title: String? = null
 
@@ -52,15 +54,30 @@ class DorisMessaging(
         is DiceMessage.PlayVideoMessage -> play(message)
         is DiceMessage.PauseVideoMessage -> pause(message)
 
-        is DiceMessage.GetPlayerVolumeMessage -> sendPlayerVolumeInfoMessage(message, volume = player.exoPlayer.volume)
+        is DiceMessage.GetPlayerVolumeMessage -> sendPlayerVolumeInfoMessage(
+            request = message,
+            volume = player.exoPlayer.volume
+        )
         is DiceMessage.SetPlayerVolumeMessage -> setVolume(message)
 
         is DiceMessage.SetPlayerPositionMessage -> seekTo(message)
 
-        is DiceMessage.GetPlayerTextTracksMessage -> sendPlayerTextTracksInfoMessage(message, player.getSelectedMessagingTextTrack(), isTextTrackEnabled())
+        is DiceMessage.GetPlayerTextTracksMessage -> {
+            val textTrack = trackSelector?.getSelectedSubtitleTrack()
+            val trackUri = textTrack?.run { player.getTextTrackUri(language)?.toString() }
+            sendPlayerTextTracksInfoMessage(
+                request = message,
+                currentTrack = textTrack?.toMessagingTextTrack(trackUri),
+                isEnabled = !(textTrack?.isOff ?: false)
+            )
+        }
         is DiceMessage.SetPlayerTextTracksMessage -> setTextTrack(message)
 
-        is DiceMessage.GetPlayerAudioTracksMessage -> sendPlayerAudioTracksInfoMessage(message, player.getSelectedMessagingAudioTrack(), isAudioTrackEnabled())
+        is DiceMessage.GetPlayerAudioTracksMessage -> sendPlayerAudioTracksInfoMessage(
+            request = message,
+            currentTrack = trackSelector?.getSelectedAudioTrack()?.toMessagingAudioTrack(),
+            isEnabled = true,
+        )
         is DiceMessage.SetPlayerAudioTracksMessage -> setAudioTrack(message)
 
         is DiceMessage.MutePlayer -> setVolume(message, volume = 0F)
@@ -110,61 +127,45 @@ class DorisMessaging(
 
     @SuppressLint("UnsafeOptInUsageError")
     private fun setTextTrack(message: DiceMessage.SetPlayerTextTracksMessage) {
-        val setTrackInfo = message.setTextTracksInfo
-        if (setTrackInfo.enabled) {
-            val track = setTrackInfo.lang
-                ?.let { player.findTextTrackFormat(it) }
-                ?.toMediaTextTrack(true)
-            if (track != null) {
-                player.selectTrack(track)
-            }
-            val messagingTrack = track
-                ?.toMessagingTextTrack(player.getTextTrackUri(track.language)?.toString())
-                ?: player.getSelectedMessagingTextTrack()
-            sendPlayerTextTracksInfoMessage(request = message, currentTrack = messagingTrack, isEnabled = true)
+        val setTracksInfo = message.setTextTracksInfo
+        val track = if (setTracksInfo.enabled) {
+            trackSelector?.getTracks()?.find { !it.isAudio && it.language == setTracksInfo.lang }
         } else {
-            val parameters = player.trackSelector?.parameters
-            val offTextTrack = createOffTextTrack()
-            if (parameters != null) {
-                val currentDisabled = parameters.disabledTrackTypes.contains(TRACK_TYPE_TEXT)
-                if (!currentDisabled) {
-                    player.selectTrack(offTextTrack)
-                }
-            }
-            val messagingTrack = offTextTrack.toMessagingTextTrack(player.getTextTrackUri(offTextTrack.language)?.toString())
-            sendPlayerTextTracksInfoMessage(request = message, currentTrack = messagingTrack, isEnabled = false)
+            trackSelector?.getTracks()?.find { !it.isAudio && it.isOff }
         }
+
+        if (track != null && !track.isSelected) {
+            trackSelector?.selectTrack(track)
+        }
+
+        val selectedTrack = track ?: trackSelector?.getSelectedSubtitleTrack()
+        val textTrackUri = player.getTextTrackUri(selectedTrack?.language)?.toString()
+        sendPlayerTextTracksInfoMessage(
+            request = message,
+            currentTrack = selectedTrack?.toMessagingTextTrack(textTrackUri),
+            isEnabled = selectedTrack?.isOff == false,
+        )
     }
 
     @SuppressLint("UnsafeOptInUsageError")
     private fun setAudioTrack(message: DiceMessage.SetPlayerAudioTracksMessage) {
         val setTracksInfo = message.setAudioTracksInfo
-        if (setTracksInfo.enabled) {
-            val track = setTracksInfo.audioTrackId
-                ?.let { player.findAudioTrackFormat(it) }
-                ?.toMediaAudioTrack(true)
-            if (track != null) {
-                player.selectTrack(track)
-            }
-
-            val messagingTrack = track?.toMessagingAudioTrack(setTracksInfo.audioTrackId ?: "")
-                ?: player.getSelectedMessagingAudioTrack()
-            sendPlayerAudioTracksInfoMessage(request = message, currentTrack = messagingTrack, isEnabled = true)
+        val track = if (setTracksInfo.enabled) {
+            trackSelector?.getTracks()?.find { it.isAudio && it.id == setTracksInfo.audioTrackId }
         } else {
-            val parameters = player.trackSelector?.parameters
-            if (parameters != null) {
-                val currentDisabled = parameters.disabledTrackTypes.contains(TRACK_TYPE_AUDIO)
-                if (!currentDisabled) {
-                    val offAudioTrack = createOffAudioTrack()
-                    player.selectTrack(offAudioTrack)
-                    sendPlayerAudioTracksInfoMessage(request = message, currentTrack = null, isEnabled = false)
-                    return
-                }
-            }
-
-            val messagingTrack = player.getSelectedMessagingAudioTrack()
-            sendPlayerAudioTracksInfoMessage(request = message, currentTrack = messagingTrack, isEnabled = false)
+            trackSelector?.getTracks()?.find { it.isAudio && it.isOff }
         }
+
+        if (track != null && !track.isSelected) {
+            trackSelector?.selectTrack(track)
+        }
+
+        val selectedTrack = track ?: trackSelector?.getSelectedAudioTrack()
+        sendPlayerAudioTracksInfoMessage(
+            request = message,
+            currentTrack = selectedTrack?.toMessagingAudioTrack(),
+            isEnabled = selectedTrack?.isOff == false,
+        )
     }
 
     override fun onPositionDiscontinuity(oldPosition: Player.PositionInfo, newPosition: Player.PositionInfo, reason: Int) {
@@ -227,7 +228,7 @@ class DorisMessaging(
     }
 
     private fun composePlayerInfo(playbackState: Int = player.playbackState): PlayerInfo {
-        val textTracks = player.getMessagingTextTracks()
+        val textTracks = getMessagingTextTracks()
         return PlayerInfo(
             id = source.nonNullId,
             type = streamType,
@@ -236,7 +237,7 @@ class DorisMessaging(
             progress = getProgress(),
             subtitles = EnableState.ENABLED,
             availableSubtitles = textTracks,
-            enabledSubtitles = textTracks?.size,
+            enabledSubtitles = textTracks.size,
             pip = false,
         )
     }
@@ -267,9 +268,6 @@ class DorisMessaging(
 
     private val Source.nonNullId: String get() = id ?: ""
     private val streamType: String get() = StreamType.getType(isLive)
-
-    private fun isTextTrackEnabled() = !player.isTrackTypeDisabled(TRACK_TYPE_TEXT)
-    private fun isAudioTrackEnabled() = !player.isTrackTypeDisabled(TRACK_TYPE_AUDIO)
 
     private fun sendPlayerInfoMessage(request: DiceMessage) = sendMessage(
         DiceMessage.PlayerInfoMessage(
@@ -358,7 +356,7 @@ class DorisMessaging(
             DiceMessage.PlayerTextTracksInfoMessage(
                 textTracksInfo = PlayerTextTracksInfo(
                     enabled = isEnabled,
-                    availableTextTracks = player.getMessagingTextTracks(),
+                    availableTextTracks = getMessagingTextTracks(),
                     enabledTextTrack = currentTrack,
                 ),
                 requestMessageId = request?.messageId
@@ -366,20 +364,42 @@ class DorisMessaging(
         )
     }
 
+    private fun getMessagingTextTracks(): List<PlayerTextTracksInfo.TextTrack> {
+        val languageUriMap = player.getTextTrackConfigurations()
+            ?.filter { it.language != null }
+            ?.associate { it.language to it.uri.toString() }
+        return trackSelector?.getTracks()
+            ?.filter { !it.isAudio }
+            ?.map { track ->
+                val src = track.language?.let { languageUriMap?.get(it) }
+                track.toMessagingTextTrack(src)
+            }
+            ?: emptyList()
+    }
+
     private fun sendPlayerAudioTracksInfoMessage(
         request: DiceMessage?,
         currentTrack: PlayerAudioTracksInfo.AudioTrack?,
         isEnabled: Boolean,
     ) {
+        val availableAudioTracks = trackSelector?.getTracks()
+            ?.filter { it.isAudio }
+            ?.map { it.toMessagingAudioTrack() }
         sendMessage(
             DiceMessage.PlayerAudioTracksInfoMessage(
                 audioTracksInfo = PlayerAudioTracksInfo(
                     enabled = isEnabled,
-                    availableAudioTracks = player.getMessagingAudioTracks(),
+                    availableAudioTracks = availableAudioTracks ?: emptyList(),
                     enabledAudioTrack = currentTrack,
                 ),
                 requestMessageId = request?.messageId
             )
         )
     }
+
+    private fun DorisPlayer.getTextTrackConfigurations() =
+        exoPlayer?.currentMediaItem?.localConfiguration?.subtitleConfigurations
+
+    private fun DorisPlayer.getTextTrackUri(language: String?): Uri? =
+        getTextTrackConfigurations()?.find { it.language == language }?.uri
 }

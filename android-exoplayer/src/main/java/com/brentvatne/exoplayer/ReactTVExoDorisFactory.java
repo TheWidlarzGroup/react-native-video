@@ -11,7 +11,7 @@ import com.diceplatform.doris.ExoDoris;
 import com.diceplatform.doris.ExoDorisBuilder;
 import com.diceplatform.doris.common.ad.ui.AdChoicesClickViewRenderer;
 import com.diceplatform.doris.entity.AdType;
-import com.diceplatform.doris.entity.TracksPolicy;
+import com.diceplatform.doris.entity.SubtitlesPolicy;
 
 public final class ReactTVExoDorisFactory {
 
@@ -23,7 +23,7 @@ public final class ReactTVExoDorisFactory {
             long rewindIncrementMs,
             @Nullable AdViewProvider adViewProvider,
             @Nullable AdChoicesClickViewRenderer adChoicesClickViewRenderer,
-            TracksPolicy tracksPolicy) {
+            SubtitlesPolicy subtitlesPolicy) {
         return createPlayer(
                 context,
                 adType,
@@ -35,7 +35,7 @@ public final class ReactTVExoDorisFactory {
                 null,
                 adViewProvider,
                 adChoicesClickViewRenderer,
-                tracksPolicy);
+                subtitlesPolicy);
     }
 
     public ExoDoris createPlayer(
@@ -49,7 +49,7 @@ public final class ReactTVExoDorisFactory {
             @Nullable Parameters.Builder parametersBuilder,
             @Nullable AdViewProvider adViewProvider,
             @Nullable AdChoicesClickViewRenderer adChoicesClickViewRenderer,
-            @Nullable TracksPolicy tracksPolicy) {
+            @Nullable SubtitlesPolicy subtitlesPolicy) {
 
         return new ExoDorisBuilder(context)
                 .setEnableManifestScte35(adType == AdType.IMA_CSAI_LIVE)
@@ -59,7 +59,7 @@ public final class ReactTVExoDorisFactory {
                 .setForwardIncrementMs(forwardIncrementMs)
                 .setRewindIncrementMs(rewindIncrementMs)
                 .setParamsBuilder(parametersBuilder)
-                .setTracksPolicy(tracksPolicy)
+                .setSubtitlesPolicy(subtitlesPolicy)
                 .setPlayerExtensionProvider(new ReactTVExoDorisExtensionFactory(adViewProvider, adChoicesClickViewRenderer))
                 .build();
     }

@@ -49,6 +49,7 @@ export enum SkipMarkerType {
 }
 
 export interface IVideoPlayerPreferredSmartSubtitlesChangedPayload {
+  preferredSmartSubtitles?: PreferredSmartSubtitle[];
 }
 
 export interface PreferredSmartSubtitle {
@@ -66,7 +67,6 @@ export interface SubtitleLanguage {
 }
 
 export type SubtitleType = 'captions' | 'subtitles' | string;
-
 
 export interface IVideoPlayerSource {
   ads?: IAdsConfiguration;
@@ -107,6 +107,6 @@ export interface IVideoPlayerSource {
   isAudioOnly?: boolean;
   resumePosition?: number;
   is4K?: boolean;
-  preferredSmartSubtitles?: PreferredSmartSubtitle[]
+  preferredSmartSubtitles?: PreferredSmartSubtitle[];
 }
 

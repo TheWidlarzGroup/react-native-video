@@ -1,5 +1,6 @@
 import { IVideoPlayerMediaTrackChangedEvent, IVideoPlayerPlayPauseEvent, IVideoPlayerSeekEndedEvent } from "./event";
 import { IVideoPlayerOnRequireAdParametersPayload } from "./ima";
+import { IVideoPlayerPreferredSmartSubtitlesChangedPayload } from "./source";
 
 export interface IVideoPlayerCallbacks {
   onAnnotationsButtonClick?: (e: any) => void;
@@ -30,4 +31,5 @@ export interface IVideoPlayerCallbacks {
   onSubtitleTrackChanged?: (e: IVideoPlayerMediaTrackChangedEvent) => void;
   onSkipMarkerButton?: (e: any) => void;
   onPlayPauseAction?: (e: IVideoPlayerPlayPauseEvent) => void;
+  onPreferredSmartSubtitlesChanged?: (e: IVideoPlayerPreferredSmartSubtitlesChangedPayload) => void;
 }

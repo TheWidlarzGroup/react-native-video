@@ -8,8 +8,9 @@ import androidx.media3.common.endeavor.LimitedSeekRange;
 
 import com.diceplatform.doris.entity.AmtSsaiProperties;
 import com.diceplatform.doris.entity.ImaCsaiProperties;
+import com.diceplatform.doris.entity.SmartSubtitleMapping;
+import com.diceplatform.doris.entity.SubtitlesPolicy;
 import com.diceplatform.doris.entity.TextTrack;
-import com.diceplatform.doris.entity.TracksPolicy;
 import com.diceplatform.doris.entity.YoSsaiProperties;
 
 import java.util.List;
@@ -30,6 +31,7 @@ public class RNSource {
     private final Map<String, Object> muxData;
     private final List<String> preferredAudioTracks;
     private final String selectedSubtitleTrack;
+    private final List<SmartSubtitleMapping> smartSubtitleMappings;
     private final String locale;
     private final String channelId;
     private final String seriesId;
@@ -43,7 +45,7 @@ public class RNSource {
     private final AmtSsaiProperties amtSsai;
     private final LimitedSeekRange limitedSeekRange;
     private final long resumePosition;
-    private final TracksPolicy tracksPolicy;
+    private final SubtitlesPolicy subtitlesPolicy;
     private final long dvrSeekForwardInterval;
     private final long dvrSeekBackwardInterval;
 
@@ -58,6 +60,7 @@ public class RNSource {
             @Nullable Map<String, Object> muxData,
             @Nullable List<String> preferredAudioTracks,
             @Nullable String selectedSubtitleTrack,
+            @Nullable List<SmartSubtitleMapping> smartSubtitleMappings,
             @Nullable String locale,
             @Nullable String channelId,
             @Nullable String seriesId,
@@ -71,7 +74,7 @@ public class RNSource {
             @Nullable AmtSsaiProperties amtSsai,
             @Nullable LimitedSeekRange limitedSeekRange,
             long resumePosition,
-            TracksPolicy tracksPolicy,
+            SubtitlesPolicy subtitlesPolicy,
             long dvrSeekForwardInterval,
             long dvrSeekBackwardInterval) {
 
@@ -85,6 +88,7 @@ public class RNSource {
         this.muxData = muxData;
         this.preferredAudioTracks = preferredAudioTracks;
         this.selectedSubtitleTrack = selectedSubtitleTrack;
+        this.smartSubtitleMappings = smartSubtitleMappings;
         this.locale = locale;
         this.channelId = channelId;
         this.seriesId = seriesId;
@@ -98,7 +102,7 @@ public class RNSource {
         this.amtSsai = amtSsai;
         this.limitedSeekRange = limitedSeekRange;
         this.resumePosition = resumePosition;
-        this.tracksPolicy = tracksPolicy;
+        this.subtitlesPolicy = subtitlesPolicy;
         this.dvrSeekForwardInterval = TimeUnit.SECONDS.toMillis(dvrSeekForwardInterval);
         this.dvrSeekBackwardInterval = TimeUnit.SECONDS.toMillis(dvrSeekBackwardInterval);
     }
@@ -175,6 +179,11 @@ public class RNSource {
     }
 
     @Nullable
+    public List<SmartSubtitleMapping> getSmartSubtitleMappings() {
+        return smartSubtitleMappings;
+    }
+
+    @Nullable
     public String getLocale() {
         return locale;
     }
@@ -231,7 +240,7 @@ public class RNSource {
         return resumePosition;
     }
 
-    public TracksPolicy getTracksPolicy() {
-        return tracksPolicy;
+    public SubtitlesPolicy getSubtitlesPolicy() {
+        return subtitlesPolicy;
     }
 }

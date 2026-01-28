@@ -7,6 +7,9 @@ import androidx.media3.common.Metadata;
 import androidx.media3.extractor.metadata.id3.Id3Frame;
 import androidx.media3.extractor.metadata.id3.TextInformationFrame;
 
+import com.diceplatform.doris.entity.SmartSubtitleMapping;
+import com.diceplatform.doris.entity.SmartSubtitleMapping.KindType;
+import com.diceplatform.doris.entity.SmartSubtitleMapping.SubtitleLanguage;
 import com.diceplatform.doris.ui.skipmarker.SkipMarker;
 import com.facebook.react.ReactApplication;
 import com.facebook.react.bridge.Arguments;
@@ -17,6 +20,7 @@ import com.facebook.react.uimanager.events.RCTEventEmitter;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
 
 class VideoEventEmitter {
 
@@ -62,6 +66,7 @@ class VideoEventEmitter {
     private static final String EVENT_FAVOURITE_BUTTON_CLICK = "onFavouriteButtonClick";
     private static final String EVENT_WATCHLIST_BUTTON_CLICK = "onWatchlistButtonClick";
     private static final String EVENT_ANNOTATIONS_BUTTON_CLICK = "onAnnotationsButtonClick";
+    private static final String EVENT_PREFERRED_SMART_SUBTITLES_CHANGED = "onPreferredSmartSubtitlesChanged";
     private static final String EVENT_SUBTITLE_TRACK_CHANGED = "onSubtitleTrackChanged";
     private static final String EVENT_AUDIO_TRACK_CHANGED = "onAudioTrackChanged";
     private static final String EVENT_SKIP_MARKER = "onSkipMarkerButton";
@@ -100,6 +105,7 @@ class VideoEventEmitter {
             EVENT_FAVOURITE_BUTTON_CLICK,
             EVENT_WATCHLIST_BUTTON_CLICK,
             EVENT_ANNOTATIONS_BUTTON_CLICK,
+            EVENT_PREFERRED_SMART_SUBTITLES_CHANGED,
             EVENT_SUBTITLE_TRACK_CHANGED,
             EVENT_AUDIO_TRACK_CHANGED,
             EVENT_REQUIRE_AD_PARAMETERS,
@@ -143,6 +149,7 @@ class VideoEventEmitter {
             EVENT_FAVOURITE_BUTTON_CLICK,
             EVENT_WATCHLIST_BUTTON_CLICK,
             EVENT_ANNOTATIONS_BUTTON_CLICK,
+            EVENT_PREFERRED_SMART_SUBTITLES_CHANGED,
             EVENT_SUBTITLE_TRACK_CHANGED,
             EVENT_AUDIO_TRACK_CHANGED,
             EVENT_REQUIRE_AD_PARAMETERS,
@@ -456,6 +463,39 @@ class VideoEventEmitter {
 
     void annotationsButtonClick() {
         receiveEvent(EVENT_ANNOTATIONS_BUTTON_CLICK, null);
+    }
+
+    void subtitlePreferenceChanged(List<SmartSubtitleMapping> mappings) {
+        WritableArray preferredSmartSubtitles = Arguments.createArray();
+        int mappingCount = mappings == null ? 0 : mappings.size();
+        for (int i = 0; i < mappingCount; i++) {
+            WritableMap itemMap = Arguments.createMap();
+            SmartSubtitleMapping mapping = mappings.get(i);
+
+            // audio: { code: "en" }
+            WritableMap audioMap = Arguments.createMap();
+            audioMap.putString("code", mapping.getAudioLanguage());
+            itemMap.putMap("audio", audioMap);
+
+            // subtitles: [{ code: "fr", kind: "captions" }]
+            WritableArray subtitles = Arguments.createArray();
+            List<SubtitleLanguage> subtitleLangs = mapping.getPreferredSubtitleLanguages();
+            int subtitleCount = subtitleLangs == null ? 0 : subtitleLangs.size();
+            for (int j = 0; j < subtitleCount; j++) {
+                WritableMap subtitleMap = Arguments.createMap();
+                SubtitleLanguage subtitleLang = subtitleLangs.get(j);
+                subtitleMap.putString("code", subtitleLang.getCode());
+                subtitleMap.putString("kind", subtitleLang.getKind() == KindType.CAPTIONS ? "captions" : "subtitles");
+                subtitles.pushMap(subtitleMap);
+            }
+            itemMap.putArray("subtitles", subtitles);
+
+            preferredSmartSubtitles.pushMap(itemMap);
+        }
+
+        WritableMap map = Arguments.createMap();
+        map.putArray("preferredSmartSubtitles", preferredSmartSubtitles);
+        receiveEvent(EVENT_PREFERRED_SMART_SUBTITLES_CHANGED, map);
     }
 
     void subtitleTrackChanged(String language, boolean userInitiated) {
