@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <!-- Suppress MSB3271 architecture mismatch error for React Native Windows UWP binaries -->
+  <!-- This is a known issue with RNW 0.78 where Microsoft.ReactNative UWP project outputs to platform-agnostic location -->
+  <!-- The winmd metadata is platform-neutral, so this mismatch can be ignored for Windows Store components -->
+  <PropertyGroup>
+    <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
+  </PropertyGroup>
+</Project>

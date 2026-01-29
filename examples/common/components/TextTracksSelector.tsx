@@ -32,7 +32,8 @@ export const TextTrackSelector = ({
           if (itemValue !== 'empty') {
             onValueChange(itemValue);
           }
-        }}>
+        }}
+      >
         {textTracks?.length <= 0 ? (
           <Picker.Item label={'empty'} value={'empty'} key={'empty'} />
         ) : (

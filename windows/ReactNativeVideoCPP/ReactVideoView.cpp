@@ -13,15 +13,23 @@ using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::Core;
 using namespace Windows::Media::Core;
 using namespace Windows::Media::Playback;
+using namespace Microsoft::UI::Xaml::Controls;
 
 namespace winrt::ReactNativeVideoCPP::implementation {
 
 ReactVideoView::ReactVideoView(winrt::Microsoft::ReactNative::IReactContext const &reactContext)
-    : m_reactContext(reactContext) {
-  // always create and set the player here instead of depending on auto-create logic
-  // in the MediaPlayerElement (only when auto play is on or URI is set)
-  m_player = winrt::Windows::Media::Playback::MediaPlayer();
-  SetMediaPlayer(m_player);
+    : m_reactContext(reactContext)
+    // Create MediaPlayerElement using Microsoft.UI.Xaml.Controls
+    , m_mediaPlayerElement(MediaPlayerElement())
+    // always create and set the player here instead of depending on auto-create logic
+    // in the MediaPlayerElement (only when auto play is on or URI is set)
+    , m_player(winrt::Windows::Media::Playback::MediaPlayer()) {
+  m_mediaPlayerElement.SetMediaPlayer(m_player);
+  m_mediaPlayerElement.AreTransportControlsEnabled(false);
+  
+  // Set the MediaPlayerElement as the content
+  this->Content(m_mediaPlayerElement);
+  
   m_uiDispatcher = CoreWindow::GetForCurrentThread().Dispatcher();
 
   m_mediaOpenedToken =
@@ -96,6 +104,18 @@ ReactVideoView::ReactVideoView(winrt::Microsoft::ReactNative::IReactContext cons
           self->m_mediaPlayerPosition = newPosition;
         }
       });
+}
+
+void ReactVideoView::OnApplyTemplate() {
+  // Call base implementation
+  __super::OnApplyTemplate();
+  
+  // Additional XAML template initialization can be done here
+  if (m_mediaPlayerElement) {
+    // Configure MediaPlayerElement properties
+    m_mediaPlayerElement.AutoPlay(false);
+    m_mediaPlayerElement.AreTransportControlsEnabled(m_useControls);
+  }
 }
 
 void ReactVideoView::OnMediaOpened(IInspectable const &, IInspectable const &) {
@@ -230,15 +250,19 @@ void ReactVideoView::Set_Muted(bool isMuted) {
 
 void ReactVideoView::Set_Controls(bool useControls) {
   m_useControls = useControls;
-  AreTransportControlsEnabled(m_useControls);
+  if (m_mediaPlayerElement) {
+    m_mediaPlayerElement.AreTransportControlsEnabled(m_useControls);
+  }
 }
 
 void ReactVideoView::Set_FullScreen(bool fullScreen) {
   m_fullScreen = fullScreen;
-  IsFullWindow(m_fullScreen);
-
-  if (m_fullScreen) {
-    Set_Controls(true); // full window will always have transport control enabled
+  if (m_mediaPlayerElement) {
+    m_mediaPlayerElement.IsFullWindow(m_fullScreen);
+    
+    if (m_fullScreen) {
+      Set_Controls(true); // full window will always have transport control enabled
+    }
   }
 }
 
