@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { NitroModules } from 'react-native-nitro-modules';
 import type {
   VideoPlayer,
@@ -10,6 +11,38 @@ import { tryParseNativeVideoError } from '../types/VideoError';
 
 const VideoPlayerFactory =
   NitroModules.createHybridObject<VideoPlayerFactory>('VideoPlayerFactory');
+
+/**
+ * Disables the internal audio session management on iOS.
+ * When disabled, react-native-video will not configure or activate the AVAudioSession,
+ * allowing other libraries (like audio recording libraries) to manage it.
+ *
+ * @param disabled - If true, audio session management is disabled
+ * @platform iOS
+ *
+ * @example
+ * ```tsx
+ * // Disable audio session management before recording
+ * setAudioSessionManagementDisabled(true);
+ *
+ * // Record audio using another library...
+ *
+ * // Re-enable audio session management after recording
+ * setAudioSessionManagementDisabled(false);
+ * ```
+ */
+export const setAudioSessionManagementDisabled = (disabled: boolean): void => {
+  if (Platform.OS !== 'ios') {
+    if (__DEV__) {
+      console.warn(
+        'setAudioSessionManagementDisabled is only supported on iOS'
+      );
+    }
+    return;
+  }
+
+  VideoPlayerFactory.setAudioSessionManagementDisabled(disabled);
+};
 
 /**
  * @internal

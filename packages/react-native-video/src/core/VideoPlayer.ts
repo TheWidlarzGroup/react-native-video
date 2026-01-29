@@ -223,6 +223,21 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     this.player.playWhenInactive = value;
   }
 
+  // Disable Audio Session Management
+  get disableAudioSessionManagement(): boolean {
+    return this.player.disableAudioSessionManagement;
+  }
+
+  set disableAudioSessionManagement(value: boolean) {
+    if (__DEV__ && !['ios'].includes(Platform.OS)) {
+      console.warn(
+        'disableAudioSessionManagement is not supported on this platform, it wont have any effect'
+      );
+    }
+
+    this.player.disableAudioSessionManagement = value;
+  }
+
   // Is Playing
   get isPlaying(): boolean {
     return this.player.isPlaying;
