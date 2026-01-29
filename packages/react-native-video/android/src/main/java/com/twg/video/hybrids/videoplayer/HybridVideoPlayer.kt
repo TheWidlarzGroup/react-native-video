@@ -191,6 +191,9 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   // iOS only property
   override var ignoreSilentSwitchMode: IgnoreSilentSwitchMode = IgnoreSilentSwitchMode.AUTO
 
+  // iOS only property - no-op on Android
+  override var disableAudioSessionManagement: Boolean = false
+
   override var playInBackground: Boolean = false
     set(value) {
       val shouldRun = (value || showNotificationControls)
