@@ -17,8 +17,14 @@ const project = (() => {
 module.exports = {
   ...(project ? {project} : undefined),
   // Disable react-native-video autolink for Windows (Win32 apps need manual loading)
+  // Disable @react-native-picker/picker for Windows (no Windows implementation)
   dependencies: {
     'react-native-video': {
+      platforms: {
+        windows: null,
+      },
+    },
+    '@react-native-picker/picker': {
       platforms: {
         windows: null,
       },
