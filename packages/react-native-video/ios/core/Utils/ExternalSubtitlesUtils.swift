@@ -13,6 +13,7 @@ enum ExternalSubtitlesUtils {
       return true
     }
 
+    print("[ReactNativeVideo] Unsupported external subtitle. Expected VTT. uri: \(subtitle.uri)")
     return false
   }
 
@@ -20,73 +21,67 @@ enum ExternalSubtitlesUtils {
     for asset: AVURLAsset,
     config: NativeVideoConfig
   ) async throws -> AVPlayerItem {
-    let subtitlesAssets = try config.externalSubtitles?.map { subtitle in
+    let supportedSubtitles = (config.externalSubtitles ?? []).filter { subtitle in
+      isSubtitleTypeSupported(subtitle: subtitle)
+    }
+
+    let subtitleAssets: [AVURLAsset] = try supportedSubtitles.map { subtitle in
       guard let url = URL(string: subtitle.uri) else {
         throw PlayerError.invalidTrackUrl(url: subtitle.uri).error()
       }
-
       return AVURLAsset(url: url)
     }
 
-    do {
-      let mainVideoTracks = asset.tracks(withMediaType: .video)
-      let mainAudioTracks = asset.tracks(withMediaType: .audio)
-      let textTracks =
-        subtitlesAssets?.flatMap { $0.tracks(withMediaType: .text) } ?? []
+    let mainDuration = try await asset.load(.duration)
 
-      let composition = AVMutableComposition()
+    let composition = AVMutableComposition()
 
-      if let videoTrack = mainVideoTracks.first(where: { $0.mediaType == .video }){
-        if let compositionVideoTrack = composition.addMutableTrack(
-          withMediaType: .video,
-          preferredTrackID: kCMPersistentTrackID_Invalid
-        ) {
-          try compositionVideoTrack.insertTimeRange(
-            CMTimeRange(start: .zero, duration: videoTrack.timeRange.duration),
-            of: videoTrack,
-            at: .zero
-          )
-        }
+    let tracks = try await asset.load(.tracks)
+    for track in tracks {
+      guard let compTrack = composition.addMutableTrack(
+        withMediaType: track.mediaType,
+        preferredTrackID: kCMPersistentTrackID_Invalid
+      ) else { continue }
+
+      do {
+        try compTrack.insertTimeRange(
+          CMTimeRange(start: .zero, duration: mainDuration),
+          of: track,
+          at: .zero
+        )
+      } catch {
+        print("[ReactNativeVideo] Error inserting main track \(track.mediaType.rawValue): \(error.localizedDescription)")
       }
-
-      if let audioTrack = mainAudioTracks.first(where: { $0.mediaType == .audio }) {
-        if let compositionAudioTrack = composition.addMutableTrack(
-          withMediaType: .audio,
-          preferredTrackID: kCMPersistentTrackID_Invalid
-        ) {
-          try compositionAudioTrack.insertTimeRange(
-            CMTimeRange(start: .zero, duration: audioTrack.timeRange.duration),
-            of: audioTrack,
-            at: .zero
-          )
-        }
-      }
-
-      for textTrack in textTracks {
-        if let compositionTextTrack = composition.addMutableTrack(
-          withMediaType: .text,
-          preferredTrackID: kCMPersistentTrackID_Invalid
-        ) {
-          do {
-            try compositionTextTrack.insertTimeRange(
-              CMTimeRange(start: .zero, duration: textTrack.timeRange.duration),
-              of: textTrack,
-              at: .zero
-            )
-          } catch {
-            print(
-              "[ReactNativeVideo] Failed to insert text track into composition: \(error.localizedDescription). Language: \(textTrack.languageCode ?? "unknown"). Continuing without this subtitle track."
-            )
-            continue
-          }
-
-          compositionTextTrack.languageCode = textTrack.languageCode
-          compositionTextTrack.isEnabled = true
-        }
-      }
-
-      return await AVPlayerItem(asset: composition)
     }
+
+    for subtitleAsset in subtitleAssets {
+      let track: AVAssetTrack? = try await subtitleAsset.loadTracks(withMediaType: .text).first
+
+      guard let track else { continue }
+
+      guard let compSubtitleTrack = composition.addMutableTrack(
+        withMediaType: track.mediaType,
+        preferredTrackID: kCMPersistentTrackID_Invalid
+      ) else { continue }
+
+      do {
+        let trackRange = try await track.load(.timeRange)
+        let effectiveDuration = CMTimeMinimum(trackRange.duration, mainDuration)
+        try compSubtitleTrack.insertTimeRange(
+          CMTimeRange(start: .zero, duration: effectiveDuration),
+          of: track,
+          at: .zero
+        )
+          
+        compSubtitleTrack.languageCode = try await track.load(.languageCode)
+        compSubtitleTrack.isEnabled = true
+      } catch {
+        print("[ReactNativeVideo] Error inserting subtitle track: \(error.localizedDescription)")
+        continue
+      }
+    }
+
+    return await AVPlayerItem(asset: composition)
   }
 
   static func modifyStreamManifestWithExternalSubtitles(
