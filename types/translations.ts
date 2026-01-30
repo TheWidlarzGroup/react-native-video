@@ -25,4 +25,13 @@ export interface IVideoPlayerTranslations {
   audioOnlyBadge: string;
   seconds: string;
   seekSpeedTooltip: string;
+  // tts labels
+  ttsForward: string;
+  ttsRewind: string;
+  ttsPlaying: string;
+  ttsPausing: string;
+  ttsFastForwardSpeed: string;
+  ttsFastForwarding: string;
+  ttsRewindSpeed: string;
+  ttsRewinding: string;
 }

@@ -38,4 +38,14 @@ struct Translations: SuperCodable {
     var unknown: String?
     var seconds: String?
     var seekSpeedTooltip: String?
+    
+    // TTS
+    var ttsForward: String?
+    var ttsRewind: String?
+    var ttsPlaying: String?
+    var ttsPausing: String?
+    var ttsFastForwardSpeed: String?
+    var ttsFastForwarding: String?
+    var ttsRewindSpeed: String?
+    var ttsRewinding: String?
 }

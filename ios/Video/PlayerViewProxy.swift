@@ -98,6 +98,16 @@ class PlayerViewProxy {
         dorisTranslationsViewModel.unknown = translations.unknown
         dorisTranslationsViewModel.seconds = translations.seconds
         dorisTranslationsViewModel.seekSpeedTooltip = translations.seekSpeedTooltip
+        
+        dorisTranslationsViewModel.ttsForward = translations.ttsForward
+        dorisTranslationsViewModel.ttsRewind = translations.ttsRewind
+        dorisTranslationsViewModel.ttsPlaying = translations.ttsPlaying
+        dorisTranslationsViewModel.ttsPausing = translations.ttsPausing
+        dorisTranslationsViewModel.ttsFastForwardSpeed = translations.ttsFastForwardSpeed
+        dorisTranslationsViewModel.ttsFastForwarding = translations.ttsFastForwarding
+        dorisTranslationsViewModel.ttsRewindSpeed = translations.ttsRewindSpeed
+        dorisTranslationsViewModel.ttsRewinding = translations.ttsRewinding
+        
         return dorisTranslationsViewModel
     }
 
