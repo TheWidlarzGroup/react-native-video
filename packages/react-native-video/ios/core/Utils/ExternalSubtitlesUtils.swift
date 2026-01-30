@@ -12,7 +12,7 @@ enum ExternalSubtitlesUtils {
     if let url = URL(string: subtitle.uri), url.pathExtension == "vtt" {
       return true
     }
-      
+
     print("[ReactNativeVideo] Unsupported external subtitle. Expected VTT. uri: \(subtitle.uri)")
     return false
   }
@@ -21,12 +21,16 @@ enum ExternalSubtitlesUtils {
     for asset: AVURLAsset,
     config: NativeVideoConfig
   ) async throws -> AVPlayerItem {
-      let subtitleAssets: [AVURLAsset] = try (config.externalSubtitles ?? []).map { subtitle in
-        guard let url = URL(string: subtitle.uri) else {
-          throw PlayerError.invalidTrackUrl(url: subtitle.uri).error()
-        }
-        return AVURLAsset(url: url)
+    let supportedSubtitles = (config.externalSubtitles ?? []).filter { subtitle in
+      isSubtitleTypeSupported(subtitle: subtitle)
+    }
+
+    let subtitleAssets: [AVURLAsset] = try supportedSubtitles.map { subtitle in
+      guard let url = URL(string: subtitle.uri) else {
+        throw PlayerError.invalidTrackUrl(url: subtitle.uri).error()
       }
+      return AVURLAsset(url: url)
+    }
 
     let mainDuration = try await asset.load(.duration)
 
