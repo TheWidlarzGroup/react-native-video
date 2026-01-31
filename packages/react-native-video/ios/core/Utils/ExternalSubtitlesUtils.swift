@@ -25,11 +25,11 @@ enum ExternalSubtitlesUtils {
       isSubtitleTypeSupported(subtitle: subtitle)
     }
 
-    let subtitleAssets: [AVURLAsset] = try supportedSubtitles.map { subtitle in
+    let subtitles: [(NativeExternalSubtitle, AVURLAsset)] = try supportedSubtitles.map { subtitle in
       guard let url = URL(string: subtitle.uri) else {
         throw PlayerError.invalidTrackUrl(url: subtitle.uri).error()
       }
-      return AVURLAsset(url: url)
+      return (subtitle, AVURLAsset(url: url))
     }
 
     let mainDuration = try await asset.load(.duration)
@@ -54,7 +54,7 @@ enum ExternalSubtitlesUtils {
       }
     }
 
-    for subtitleAsset in subtitleAssets {
+    for (subtitle, subtitleAsset) in subtitles {
       let track: AVAssetTrack? = try await subtitleAsset.loadTracks(withMediaType: .text).first
 
       guard let track else { continue }
@@ -72,8 +72,8 @@ enum ExternalSubtitlesUtils {
           of: track,
           at: .zero
         )
-          
-        compSubtitleTrack.languageCode = try await track.load(.languageCode)
+
+        compSubtitleTrack.languageCode = subtitle.language
         compSubtitleTrack.isEnabled = true
       } catch {
         print("[ReactNativeVideo] Error inserting subtitle track: \(error.localizedDescription)")
