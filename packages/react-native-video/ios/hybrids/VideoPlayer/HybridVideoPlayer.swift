@@ -209,21 +209,16 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
 
     try? _eventEmitter?.clearAllListeners()
 
-    // KVO CRASH FIX: Explicitly invalidate all observers BEFORE changing any state.
-    // The crash "Cannot remove an observer for the key path 'currentItem.status'"
-    // happens when playerItem/playerObserver changes while KVO observers are still active.
-    // By invalidating observers first, we ensure clean KVO removal before any state changes.
-    playerObserver?.invalidatePlayerItemObservers()
-    playerObserver?.invalidatePlayerObservers()
-
-    // SKIP: self.player.replaceCurrentItem(with: nil) // Causes crash on iOS
     self.playerItem = nil
 
     if let source = self.source as? HybridVideoPlayerSource {
       source.releaseAsset()
     }
 
-    // Clear player observer - observers are already invalidated above, so deinit won't crash
+    // Clear player observer
+    playerObserver?.invalidatePlayerItemObservers()
+    playerObserver?.invalidatePlayerObservers()
+    self.player.replaceCurrentItem(with: nil)
     self.playerObserver = nil
     status = .idle
 

@@ -162,8 +162,6 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
     metadataOutput.setDelegate(self, queue: .global(qos: .userInteractive))
   }
   
-  // KVO CRASH FIX: Changed from private to internal so HybridVideoPlayer.release()
-  // can explicitly invalidate these observers BEFORE changing playerItem.
   func invalidatePlayerItemObservers() {
     // Remove NotificationCenter observers
     if let playbackEndedObserver = playbackEndedObserver {
