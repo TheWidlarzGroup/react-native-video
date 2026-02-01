@@ -17,9 +17,34 @@ class VideoManager {
   
   private var isAudioSessionActive = false
   private var remoteControlEventsActive = false
-  
-  // TODO: Create Global Config, and expose it there
-  private var isAudioSessionManagementDisabled: Bool = false
+
+  /// Global flag to force disable audio session management
+  private var isAudioSessionManagementForcedDisabled: Bool = false
+
+  /// Returns true if audio session management is disabled either globally or by any player
+  private var isAudioSessionManagementDisabled: Bool {
+    if isAudioSessionManagementForcedDisabled {
+      return true
+    }
+
+    // Check if any player has audio session management disabled
+    return players.allObjects.contains { player in
+      player.disableAudioSessionManagement
+    }
+  }
+
+  func setAudioSessionManagementDisabled(_ disabled: Bool) {
+    isAudioSessionManagementForcedDisabled = disabled
+
+    if disabled {
+      // Deactivate audio session when disabling management
+      // so other libraries can take control
+      deactivateAudioSession()
+    } else {
+      // Re-enable audio session management
+      updateAudioSessionConfiguration()
+    }
+  }
   
   private init() {
     // Subscribe to audio interruption notifications
@@ -110,7 +135,7 @@ class VideoManager {
     if isAudioSessionActive {
       return
     }
-    
+
     do {
       try AVAudioSession.sharedInstance().setActive(true)
       isAudioSessionActive = true
@@ -118,12 +143,12 @@ class VideoManager {
       print("Failed to activate audio session: \(error.localizedDescription)")
     }
   }
-  
+
   private func deactivateAudioSession() {
     if !isAudioSessionActive {
       return
     }
-    
+
     do {
       try AVAudioSession.sharedInstance().setActive(
         false, options: .notifyOthersOnDeactivation
@@ -133,8 +158,12 @@ class VideoManager {
       print("Failed to deactivate audio session: \(error.localizedDescription)")
     }
   }
-  
+
   private func updateAudioSessionConfiguration() {
+    if isAudioSessionManagementDisabled {
+      return
+    }
+
     let isAnyPlayerPlaying = players.allObjects.contains { hybridPlayer in
       hybridPlayer.player.isMuted == false && hybridPlayer.player.rate != 0
     }
@@ -178,10 +207,6 @@ class VideoManager {
     
     let anyPlayerNeedsNotificationControls = players.allObjects.contains { player in
       player.showNotificationControls
-    }
-    
-    if isAudioSessionManagementDisabled {
-      return
     }
     
     let category: AVAudioSession.Category = determineAudioCategory(

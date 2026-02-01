@@ -102,6 +102,16 @@ export interface VideoPlayerBase {
   playWhenInactive: boolean;
 
   /**
+   * Disables the internal audio session management for this player.
+   * When disabled, react-native-video will not configure or activate the AVAudioSession,
+   * allowing other libraries (like audio recording libraries) to manage it.
+   *
+   * @default false
+   * @platform iOS
+   */
+  disableAudioSessionManagement: boolean;
+
+  /**
    * Whether the player is playing.
    * @note This is a read-only property.
    * @note To pause/resume the player, you need to use {@link play} and {@link pause} methods.

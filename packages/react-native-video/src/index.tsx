@@ -24,3 +24,4 @@ export {
   type VideoViewRef,
 } from './core/video-view/VideoView';
 export { VideoPlayer } from './core/VideoPlayer';
+export { setAudioSessionManagementDisabled } from './core/utils/playerFactory';
