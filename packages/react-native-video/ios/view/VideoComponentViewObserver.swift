@@ -123,9 +123,16 @@ class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
     willEndFullScreenPresentationWithAnimationCoordinator coordinator: UIViewControllerTransitionCoordinator
   ) {
     delegate?.willExitFullscreen()
-    
-    coordinator.animate(alongsideTransition: nil) { [weak self] _ in
+
+    coordinator.animate(alongsideTransition: nil) { [weak self] context in
       guard let self = self else { return }
+        
+      if context.isCancelled {
+        self.delegate?.willEnterFullscreen()
+
+        return
+      }
+
       self.delegate?.onFullscreenChange(false)
     }
   }
@@ -135,9 +142,16 @@ class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
     willBeginFullScreenPresentationWithAnimationCoordinator coordinator: UIViewControllerTransitionCoordinator
   ) {
     delegate?.willEnterFullscreen()
-    
-    coordinator.animate(alongsideTransition: nil) { [weak self] _ in
+
+    coordinator.animate(alongsideTransition: nil) { [weak self] context in
       guard let self = self else { return }
+
+      if context.isCancelled {
+        self.delegate?.willExitFullscreen()
+
+        return
+      }
+
       self.delegate?.onFullscreenChange(true)
     }
   }
