@@ -218,8 +218,9 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     // Clear player observer
     playerObserver?.invalidatePlayerItemObservers()
     playerObserver?.invalidatePlayerObservers()
-    self.player.replaceCurrentItem(with: nil)
     self.playerObserver = nil
+
+    self.player.replaceCurrentItem(with: nil)
     status = .idle
 
     VideoManager.shared.unregister(player: self)
