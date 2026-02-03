@@ -162,7 +162,7 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
     metadataOutput.setDelegate(self, queue: .global(qos: .userInteractive))
   }
   
-  private func invalidatePlayerItemObservers() {
+  func invalidatePlayerItemObservers() {
     // Remove NotificationCenter observers
     if let playbackEndedObserver = playbackEndedObserver {
       NotificationCenter.default.removeObserver(playbackEndedObserver)
