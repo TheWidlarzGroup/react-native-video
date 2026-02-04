@@ -20,7 +20,7 @@
     "@docusaurus/faster": "^3.8.1",
     "@docusaurus/preset-classic": "^3.8.1",
     "@mdx-js/react": "^3.0.0",
-    "@widlarzgroup/docusaurus-ui": "^0.0.3",
+    "@widlarzgroup/docusaurus-ui": "^0.1.3",
     "clsx": "^2.0.0",
     "docusaurus-lunr-search": "^3.6.0",
     "motion": "^12.23.26",

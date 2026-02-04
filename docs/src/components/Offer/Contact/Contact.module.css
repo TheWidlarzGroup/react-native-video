@@ -1,0 +1,148 @@
+.section {
+  padding: 3rem 0 4rem;
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 2rem;
+}
+
+.content {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 2rem;
+  align-items: start;
+}
+
+.checklist {
+  padding: 1.5rem;
+  border-radius: 16px;
+  background: var(--glass-bg);
+  border: 1px solid var(--color-border);
+}
+
+.intro {
+  margin: 0 0 1rem;
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.checkIcon {
+  width: 18px;
+  height: 18px;
+  color: var(--color-accent);
+  stroke: var(--color-accent);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.itemLabel {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+}
+
+.itemValue {
+  color: var(--color-text-secondary);
+}
+
+.cta {
+  padding: 1.5rem;
+  border-radius: 16px;
+  background: var(--color-accent-subtle);
+  border: 1px solid rgba(150, 201, 235, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.ctaIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 1rem;
+  border-radius: 50%;
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+}
+
+.mailIcon {
+  width: 28px;
+  height: 28px;
+  color: var(--color-accent);
+  stroke: var(--color-accent);
+}
+
+.ctaText {
+  margin: 0 0 1.25rem;
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.ctaButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0f0f0f !important;
+  background: var(--color-accent-bright);
+  border: none !important;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.ctaButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--color-accent-glow);
+  color: #0f0f0f !important;
+  text-decoration: none;
+  border: none !important;
+}
+
+@media (max-width: 868px) {
+  .content {
+    grid-template-columns: 1fr;
+  }
+
+  .cta {
+    order: -1;
+  }
+}
+
+@media (max-width: 480px) {
+  .item {
+    flex-wrap: wrap;
+  }
+
+  .itemValue {
+    width: 100%;
+    padding-left: calc(18px + 0.75rem);
+  }
+}

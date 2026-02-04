@@ -1,0 +1,90 @@
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
+.flows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.flowLine {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  background: var(--glass-bg);
+  border: 1px solid var(--color-border);
+  flex-wrap: wrap;
+}
+
+.flowLine.highlight {
+  border-color: rgba(250, 216, 91, 0.3);
+  background: rgba(250, 216, 91, 0.05);
+}
+
+.flowLabel {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  min-width: 160px;
+}
+
+.community .flowLabel {
+  color: var(--color-text-secondary);
+}
+
+.booster .flowLabel {
+  color: var(--color-secondary);
+}
+
+.support .flowLabel {
+  color: var(--color-accent);
+}
+
+.arrow {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.step {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  padding: 0.25rem 0.6rem;
+  background: var(--color-bg-tertiary);
+  border-radius: 6px;
+}
+
+.stepHighlight {
+  background: var(--color-secondary-subtle);
+  color: var(--color-secondary);
+  font-weight: 600;
+  border: 1px solid rgba(250, 216, 91, 0.2);
+}
+
+.note {
+  margin: 1.5rem 0 0;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .flowLine {
+    padding: 0.875rem 1rem;
+  }
+
+  .flowLabel {
+    min-width: auto;
+    width: 100%;
+    margin-bottom: 0.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .step {
+    font-size: 0.8rem;
+  }
+}
