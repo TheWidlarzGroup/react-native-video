@@ -28,8 +28,8 @@ const sidebars: TypedSidebarsConfig = {
     },
     {
       type: 'link',
-      label: 'Enterprise Support',
-      href: 'https://www.thewidlarzgroup.com/?utm_source=rnv&utm_medium=docs&utm_campaign=navbar&utm_id=enterprise#Contact',
+      label: 'Offer',
+      href: '/react-native-video/docs/v7/offer',
     },
     {
       type: 'link',

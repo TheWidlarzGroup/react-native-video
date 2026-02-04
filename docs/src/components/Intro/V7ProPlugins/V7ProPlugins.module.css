@@ -1,0 +1,150 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.plugin {
+  padding: 1.5rem;
+  border-radius: 12px;
+  background: var(--glass-bg);
+  border-left: 4px solid;
+}
+
+.plugin.pro {
+  border-left-color: var(--color-pro);
+}
+
+.plugin.accent {
+  border-left-color: var(--color-accent);
+}
+
+.plugin.secondary {
+  border-left-color: var(--color-secondary);
+}
+
+.title {
+  margin: 0 0 0.75rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.description {
+  margin: 0 0 1rem 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+.features {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.featureItem {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+  padding-left: 1rem;
+  position: relative;
+}
+
+.featureItem::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: var(--color-text-muted);
+}
+
+.featureItem strong {
+  color: var(--color-text-primary);
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.platforms {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.link {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-accent) !important;
+  text-decoration: none !important;
+}
+
+.link:hover {
+  text-decoration: underline !important;
+}
+
+/* Custom CTA */
+.customCta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, rgba(150, 201, 235, 0.1), rgba(184, 151, 255, 0.1));
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+}
+
+@media (max-width: 640px) {
+  .customCta {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+.customContent {
+  flex: 1;
+}
+
+.customTitle {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.customText {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}
+
+.customText code {
+  padding: 0.15rem 0.4rem;
+  font-size: 0.85rem;
+  background: var(--color-bg-secondary);
+  border-radius: 4px;
+}
+
+.customButton {
+  padding: 0.75rem 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #0f0f0f !important;
+  background: var(--color-accent);
+  border-radius: 8px;
+  text-decoration: none !important;
+  white-space: nowrap;
+  transition: opacity 0.2s ease;
+}
+
+.customButton:hover {
+  opacity: 0.9;
+  text-decoration: none !important;
+}

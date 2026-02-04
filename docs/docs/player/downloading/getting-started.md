@@ -15,7 +15,7 @@ The Offline Video SDK is a commercial add-on for `react-native-video` (versions 
 - **React Native Video**: version 6.15.0 or higher (versions 6 and 7 are supported)
 - **iOS**: 15.0 or higher
 - **Android**: 6.0 or higher
-- **License**: A valid license for the Offline Video SDK is required. You can obtain this through the [SDK platform](https://sdk.thewidlarzgroup.com?utm_source=rnv&utm_medium=docs&utm_campaign=downloading&utm_id=getting-started_license-requirement).
+- **Api key**: A valid api key for the Offline Video SDK is required. You can obtain this through the [SDK platform](https://sdk.thewidlarzgroup.com?utm_source=rnv&utm_medium=docs&utm_campaign=downloading&utm_id=getting-started_api-key-requirement).
 
 ## Features
 
@@ -36,7 +36,11 @@ Since this is a private package, configure npm to access GitHub Packages by addi
 //npm.pkg.github.com/:_authToken=<NPM_GITHUB_AUTH_TOKEN>
 ```
 
-Replace `<NPM_GITHUB_AUTH_TOKEN>` with your actual GitHub token. This token is different from the one used for plugin authorization.
+Replace `<NPM_GITHUB_AUTH_TOKEN>` with your GitHub token. To obtain this token, please [contact us](https://www.thewidlarzgroup.com/?utm_source=rnv&utm_medium=docs&utm_campaign=downloading&utm_id=getting-started_github-token#Contact).
+
+:::note
+This token is different from the API key used for plugin authorization.
+:::
 
 ### 2. Install the Package
 
