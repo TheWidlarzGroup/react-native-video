@@ -421,6 +421,8 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
             NowPlayingInfoCenterManager.shared.updateNowPlayingInfo()
           }
         }
+      } else if let imageUri {
+        print("[RNV] Invalid imageUri for artwork: \(imageUri)")
       }
     }
 
