@@ -1,3 +1,10 @@
+//
+//  AVMetadataItem+make.swift
+//  ReactNativeVideo
+//
+//  Created by Kamil Moskała on 06/02/2026.
+//
+
 import AVFoundation
 
 extension AVMetadataItem {
