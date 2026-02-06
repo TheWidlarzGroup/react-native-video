@@ -114,7 +114,7 @@ class NowPlayingInfoCenterManager {
     updateNowPlayingInfo()
     playbackObserver = player.addPeriodicTimeObserver(
       forInterval: CMTime(value: 1, timescale: 4),
-      queue: .global(),
+      queue: .main,
       using: { [weak self] _ in
         self?.updateNowPlayingInfo()
       }
@@ -218,10 +218,13 @@ class NowPlayingInfoCenterManager {
   }
 
   public func updateNowPlayingInfo() {
-    guard let player = currentPlayer, let currentItem = player.currentItem
-    else {
+    guard let player = currentPlayer else {
       invalidateCommandTargets()
       MPNowPlayingInfoCenter.default().nowPlayingInfo = [:]
+      return
+    }
+
+    guard let currentItem = player.currentItem else {
       return
     }
 
