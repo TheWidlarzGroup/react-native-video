@@ -218,10 +218,13 @@ class NowPlayingInfoCenterManager {
   }
 
   public func updateNowPlayingInfo() {
-    guard let player = currentPlayer, let currentItem = player.currentItem
-    else {
+    guard let player = currentPlayer else {
       invalidateCommandTargets()
       MPNowPlayingInfoCenter.default().nowPlayingInfo = [:]
+      return
+    }
+
+    guard let currentItem = player.currentItem else {
       return
     }
 
