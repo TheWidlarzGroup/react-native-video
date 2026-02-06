@@ -114,7 +114,7 @@ class NowPlayingInfoCenterManager {
     updateNowPlayingInfo()
     playbackObserver = player.addPeriodicTimeObserver(
       forInterval: CMTime(value: 1, timescale: 4),
-      queue: .global(),
+      queue: .main,
       using: { [weak self] _ in
         self?.updateNowPlayingInfo()
       }
