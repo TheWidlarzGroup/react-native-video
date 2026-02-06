@@ -414,7 +414,10 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       // Load artwork in background to not block player initialization
       if let imageUri, let imageUrl = URL(string: imageUri) {
         Task { [weak playerItem] in
-          guard let (data, _) = try? await URLSession.shared.data(from: imageUrl) else { return }
+          guard let (data, _) = try? await URLSession.shared.data(from: imageUrl) else {
+            print("[RNV] Failed to load artwork from: \(imageUrl)")
+            return
+          }
           DispatchQueue.main.async {
             guard let playerItem else { return }
             playerItem.externalMetadata = playerItem.externalMetadata + [.make(identifier: .commonIdentifierArtwork, value: data as NSData)]
