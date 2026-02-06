@@ -391,6 +391,39 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       playerItem = AVPlayerItem(asset: asset)
     }
 
+    if let metadata = source.config.metadata {
+      let title = metadata.title
+      let artist = metadata.artist
+      let imageUri = metadata.imageUri
+
+      DispatchQueue.main.async { [weak playerItem] in
+        guard let playerItem else { return }
+        var items: [AVMetadataItem] = []
+
+        if let title {
+          items.append(.make(identifier: .commonIdentifierTitle, value: title as NSString))
+        }
+        if let artist {
+          items.append(.make(identifier: .commonIdentifierArtist, value: artist as NSString))
+        }
+        if !items.isEmpty {
+          playerItem.externalMetadata = items
+        }
+      }
+
+      // Load artwork in background to not block player initialization
+      if let imageUri, let imageUrl = URL(string: imageUri) {
+        Task { [weak playerItem] in
+          guard let (data, _) = try? await URLSession.shared.data(from: imageUrl) else { return }
+          DispatchQueue.main.async {
+            guard let playerItem else { return }
+            playerItem.externalMetadata = playerItem.externalMetadata + [.make(identifier: .commonIdentifierArtwork, value: data as NSData)]
+            NowPlayingInfoCenterManager.shared.updateNowPlayingInfo()
+          }
+        }
+      }
+    }
+
     return playerItem
   }
 
