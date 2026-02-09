@@ -305,7 +305,8 @@ class PlayerViewProxy {
             isPlayPauseEnabled: jsProps.isPlayPauseEnabled.value,
             shouldAutoStart: jsProps.shouldAutoStart.value,
             isPauseAdsEnabled: jsProps.isPauseAdsEnabled.value,
-            treatAllOverlayAdsAsPauseAds: jsProps.treatAllOverlayAdsAsPauseAds.value
+            treatAllOverlayAdsAsPauseAds: jsProps.treatAllOverlayAdsAsPauseAds.value,
+            loopPauseAds: jsProps.loopPauseAds.value
         )
 
         if let rndvJSSource = rndvJSSource {

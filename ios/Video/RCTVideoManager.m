@@ -37,6 +37,7 @@ RCT_EXPORT_VIEW_PROPERTY(isPlayPauseEnabled, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(shouldAutoStart, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(isPauseAdsEnabled, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(treatAllOverlayAdsAsPauseAds, BOOL);
+RCT_EXPORT_VIEW_PROPERTY(loopPauseAds, BOOL);
 
 /* Should support: onLoadStart, onLoad, and onError to stay consistent with Image */
 RCT_EXPORT_VIEW_PROPERTY(onVideoLoadStart, RCTBubblingEventBlock);

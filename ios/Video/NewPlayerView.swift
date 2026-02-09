@@ -173,6 +173,12 @@ class NewPlayerView: UIView, JSInputProtocol {
         }
     }
   
+    @objc var loopPauseAds: Bool = true {
+        didSet {
+            jsProps.loopPauseAds.value = loopPauseAds
+        }
+    }
+  
     //FIXME: review unused variables
     @objc var selectedTextTrack: NSDictionary?
     @objc var selectedAudioTrack: NSDictionary?

@@ -49,4 +49,5 @@ export interface IVideoPlayer extends IVideoPlayerCallbacks, ViewProps {
   shouldAutoStart?: boolean;
   isPauseAdsEnabled?: boolean;
   treatAllOverlayAdsAsPauseAds?: boolean;
+  loopPauseAds?: boolean;
 }

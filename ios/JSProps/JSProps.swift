@@ -28,6 +28,7 @@ class JSProps {
     var shouldAutoStart: Dynamic<Bool> = Dynamic(true)
     var isPauseAdsEnabled: Dynamic<Bool> = Dynamic(false)
     var treatAllOverlayAdsAsPauseAds: Dynamic<Bool> = Dynamic(false)
+    var loopPauseAds: Dynamic<Bool> = Dynamic(false)
 }
 
 class Dynamic<T> {
