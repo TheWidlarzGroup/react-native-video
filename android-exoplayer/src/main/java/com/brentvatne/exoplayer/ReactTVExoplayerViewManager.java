@@ -148,6 +148,7 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     private static final String PROP_SUBTITLE_HORIZONTAL_PADDING = "subtitleHorizontalPadding";
     private static final String PROP_LOCALE = "locale";
     private static final String PROP_IS4K = "is4K";
+    private static final String PROP_IS_LOOP_PAUSE_ADS = "loopPauseAds";
     private static final String PROP_IS_PLAY_PAUSE_ENABLED = "isPlayPauseEnabled";
     private static final String PROP_SHOULD_AUTO_START = "shouldAutoStart";
     private static final String PROP_IS_PAUSE_ADS_ENABLED = "isPauseAdsEnabled";
@@ -644,6 +645,11 @@ public class ReactTVExoplayerViewManager extends ViewGroupManager<ReactTVExoplay
     @ReactProp(name = PROP_LOCALE)
     public void setLocale(final ReactTVExoplayerView videoView, final String locale) {
         videoView.setAppLanguageLocale(locale);
+    }
+
+    @ReactProp(name = PROP_IS_LOOP_PAUSE_ADS, defaultBoolean = false)
+    public void setIsLoopPauseAds(final ReactTVExoplayerView videoView, boolean isLoopPauseAds) {
+        videoView.setLoopPauseAds(isLoopPauseAds);
     }
 
     @ReactProp(name = PROP_IS_PLAY_PAUSE_ENABLED)
