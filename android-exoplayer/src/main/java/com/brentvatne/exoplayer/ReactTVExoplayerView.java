@@ -196,6 +196,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     // Props from React
     private RNSource src;
     private ContentMetadata metadata;
+    private String locale;
     private boolean repeat;
     private boolean disableFocus;
     private boolean isLive = false;
@@ -685,6 +686,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                 .setHideAdUiElements(hideAdUiElements)
                 .setWhyThisAdIconEnabled(isWhyThisAdIconEnabled)
                 .setAdLabels(adLabels)
+                .setAdLanguage(locale)
                 .setLoopPauseAdsEnabled(isLoopPauseAds)
                 .setPauseAdsEnabled(isPauseAdsEnabled && treatAllOverlayAdsAsPauseAds)
                 .build();
@@ -1702,6 +1704,7 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
     }
 
     public void setAppLanguageLocale(String locale) {
+        this.locale = locale;
         String languageCode = localizationService.getCanonicalLanguageCode(locale);
         if (languageCode != null) {
             // Update display language in LocalizationService
@@ -2047,6 +2050,11 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                 exoDorisPlayerView.onAdEvent(adEvent);
             }
             if (adEvent instanceof DorisAdEvent.AdBreakStarted) {
+                // PlayerView does not expose SurfaceView, we should call setVisibility() and setPlayer().
+                if (isCsaiLiveEvent(adEvent)) {
+                    secondaryPlayerView.setVisibility(View.VISIBLE);
+                    exoDorisPlayerView.setVisibility(View.GONE);
+                }
                 if (areControlsAllowed) {
                     setControls(false);
                 }
@@ -2059,12 +2067,6 @@ class ReactTVExoplayerView extends FrameLayout implements LifecycleEventListener
                 }
                 if (areControlsAllowed) {
                     setControls(true);
-                }
-            } else if (adEvent instanceof DorisAdEvent.AdResumed) {
-                // PlayerView does not expose SurfaceView, we should call setVisibility() and setPlayer().
-                if (isCsaiLiveEvent(adEvent)) {
-                    secondaryPlayerView.setVisibility(View.VISIBLE);
-                    exoDorisPlayerView.setVisibility(View.GONE);
                 }
             } else if (adEvent instanceof DorisAdEvent.AdLoading) {
                 // PlayerView does not expose SurfaceView, we should call setVisibility() and setPlayer().
