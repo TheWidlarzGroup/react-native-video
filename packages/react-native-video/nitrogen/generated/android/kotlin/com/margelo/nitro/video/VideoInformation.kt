@@ -42,11 +42,7 @@ data class VideoInformation(
   @Keep
   val orientation: VideoOrientation
 ) {
-  /**
-   * Create a new instance of VideoInformation from Kotlin
-   */
-  constructor(bitrate: Double, width: Double, height: Double, duration: ULong, fileSize: ULong, isHDR: Boolean, isLive: Boolean, orientation: VideoOrientation):
-         this(bitrate, width, height, duration.toLong(), fileSize.toLong(), isHDR, isLive, orientation)
+  /* primary constructor */
 
   companion object {
     /**

@@ -43,15 +43,15 @@ namespace margelo::nitro::video {
     double bitrate     SWIFT_PRIVATE;
     double width     SWIFT_PRIVATE;
     double height     SWIFT_PRIVATE;
-    uint64_t duration     SWIFT_PRIVATE;
-    uint64_t fileSize     SWIFT_PRIVATE;
+    int64_t duration     SWIFT_PRIVATE;
+    int64_t fileSize     SWIFT_PRIVATE;
     bool isHDR     SWIFT_PRIVATE;
     bool isLive     SWIFT_PRIVATE;
     VideoOrientation orientation     SWIFT_PRIVATE;
 
   public:
     VideoInformation() = default;
-    explicit VideoInformation(double bitrate, double width, double height, uint64_t duration, uint64_t fileSize, bool isHDR, bool isLive, VideoOrientation orientation): bitrate(bitrate), width(width), height(height), duration(duration), fileSize(fileSize), isHDR(isHDR), isLive(isLive), orientation(orientation) {}
+    explicit VideoInformation(double bitrate, double width, double height, int64_t duration, int64_t fileSize, bool isHDR, bool isLive, VideoOrientation orientation): bitrate(bitrate), width(width), height(height), duration(duration), fileSize(fileSize), isHDR(isHDR), isLive(isLive), orientation(orientation) {}
 
   public:
     friend bool operator==(const VideoInformation& lhs, const VideoInformation& rhs) = default;
@@ -70,8 +70,8 @@ namespace margelo::nitro {
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "bitrate"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "width"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "height"))),
-        JSIConverter<uint64_t>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "duration"))),
-        JSIConverter<uint64_t>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "fileSize"))),
+        JSIConverter<int64_t>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "duration"))),
+        JSIConverter<int64_t>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "fileSize"))),
         JSIConverter<bool>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "isHDR"))),
         JSIConverter<bool>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "isLive"))),
         JSIConverter<margelo::nitro::video::VideoOrientation>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "orientation")))
@@ -82,8 +82,8 @@ namespace margelo::nitro {
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "bitrate"), JSIConverter<double>::toJSI(runtime, arg.bitrate));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "width"), JSIConverter<double>::toJSI(runtime, arg.width));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "height"), JSIConverter<double>::toJSI(runtime, arg.height));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "duration"), JSIConverter<uint64_t>::toJSI(runtime, arg.duration));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "fileSize"), JSIConverter<uint64_t>::toJSI(runtime, arg.fileSize));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "duration"), JSIConverter<int64_t>::toJSI(runtime, arg.duration));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "fileSize"), JSIConverter<int64_t>::toJSI(runtime, arg.fileSize));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "isHDR"), JSIConverter<bool>::toJSI(runtime, arg.isHDR));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "isLive"), JSIConverter<bool>::toJSI(runtime, arg.isLive));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "orientation"), JSIConverter<margelo::nitro::video::VideoOrientation>::toJSI(runtime, arg.orientation));
@@ -100,8 +100,8 @@ namespace margelo::nitro {
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "bitrate")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "width")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "height")))) return false;
-      if (!JSIConverter<uint64_t>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "duration")))) return false;
-      if (!JSIConverter<uint64_t>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "fileSize")))) return false;
+      if (!JSIConverter<int64_t>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "duration")))) return false;
+      if (!JSIConverter<int64_t>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "fileSize")))) return false;
       if (!JSIConverter<bool>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "isHDR")))) return false;
       if (!JSIConverter<bool>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "isLive")))) return false;
       if (!JSIConverter<margelo::nitro::video::VideoOrientation>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "orientation")))) return false;
