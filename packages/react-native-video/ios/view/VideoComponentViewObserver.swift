@@ -117,6 +117,13 @@ class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
   func playerViewControllerWillStopPictureInPicture(_: AVPlayerViewController) {
     delegate?.willExitPictureInPicture()
   }
+
+  func playerViewControllerRestoreUserInterfaceForPictureInPictureStop(
+    _ playerViewController: AVPlayerViewController,
+    completionHandler: @escaping (Bool) -> Void
+  ) {
+    completionHandler(true)
+  }
   
   func playerViewController(
     _: AVPlayerViewController,
