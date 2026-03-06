@@ -252,19 +252,9 @@ class NowPlayingInfoCenterManager {
         filteredByIdentifier: .commonIdentifierArtist
       ).first?.stringValue ?? ""
 
-    // I have some issue with this - setting artworkItem when it not set dont return nil but also is crashing application
-    // this is very hacky workaround for it
-    let imgData = AVMetadataItem.metadataItems(
-      from: metadata,
-      filteredByIdentifier: .commonIdentifierArtwork
-    ).first?.dataValue
-    let image = imgData.flatMap { UIImage(data: $0) } ?? UIImage()
-    let artworkItem = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
-
     let newNowPlayingInfo: [String: Any] = [
       MPMediaItemPropertyTitle: titleItem,
       MPMediaItemPropertyArtist: artistItem,
-      MPMediaItemPropertyArtwork: artworkItem,
       MPMediaItemPropertyPlaybackDuration: currentItem.duration.seconds,
       MPNowPlayingInfoPropertyElapsedPlaybackTime: currentItem.currentTime()
         .seconds.rounded(),
@@ -278,6 +268,24 @@ class NowPlayingInfoCenterManager {
 
     MPNowPlayingInfoCenter.default().nowPlayingInfo =
       currentNowPlayingInfo.merging(newNowPlayingInfo) { _, new in new }
+
+    // Load artwork asynchronously so notification controls appear immediately
+    guard let artworkMetadataItem = AVMetadataItem.metadataItems(
+      from: metadata,
+      filteredByIdentifier: .commonIdentifierArtwork
+    ).first else { return }
+
+    artworkMetadataItem.loadValuesAsynchronously(forKeys: ["value"]) { [weak self] in
+      guard self != nil else { return }
+      let imgData = artworkMetadataItem.dataValue
+      let image = imgData.flatMap { UIImage(data: $0) } ?? UIImage()
+      let artworkItem = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
+      DispatchQueue.main.async {
+        var info = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [:]
+        info[MPMediaItemPropertyArtwork] = artworkItem
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = info
+      }
+    }
   }
 
   private func findNewCurrentPlayer() {
