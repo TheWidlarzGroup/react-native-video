@@ -76,6 +76,10 @@ class NowPlayingInfoCenterManager {
     players.remove(player)
 
     if currentPlayer == player {
+      if let playbackObserver {
+        player.removeTimeObserver(playbackObserver)
+        self.playbackObserver = nil
+      }
       currentPlayer = nil
       updateNowPlayingInfo()
     }
@@ -275,8 +279,8 @@ class NowPlayingInfoCenterManager {
       filteredByIdentifier: .commonIdentifierArtwork
     ).first else { return }
 
-    artworkMetadataItem.loadValuesAsynchronously(forKeys: ["value"]) { [weak self] in
-      guard self != nil else { return }
+    artworkMetadataItem.loadValuesAsynchronously(forKeys: ["value"]) { [weak self, weak player] in
+      guard let self, self.currentPlayer === player else { return }
       let imgData = artworkMetadataItem.dataValue
       let image = imgData.flatMap { UIImage(data: $0) } ?? UIImage()
       let artworkItem = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
