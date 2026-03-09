@@ -137,11 +137,13 @@ export const Seeker = ({
     <View
       style={styles.seekbarContainer}
       {...seekPanResponder.panHandlers}
-      {...styles.generalControls}>
+      {...styles.generalControls}
+    >
       <View
         style={styles.seekbarTrack}
-        onLayout={event => setSeekerWidth(event.nativeEvent.layout.width)}
-        pointerEvents={'none'}>
+        onLayout={(event) => setSeekerWidth(event.nativeEvent.layout.width)}
+        pointerEvents={'none'}
+      >
         <View style={seekerStyle} pointerEvents={'none'} />
       </View>
       <View style={seekerPositionStyle} pointerEvents={'none'}>
