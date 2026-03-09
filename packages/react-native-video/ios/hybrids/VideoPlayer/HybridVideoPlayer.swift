@@ -421,7 +421,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
           DispatchQueue.main.async {
             guard let playerItem else { return }
             playerItem.externalMetadata = playerItem.externalMetadata + [.make(identifier: .commonIdentifierArtwork, value: data as NSData)]
-            NowPlayingInfoCenterManager.shared.updateNowPlayingInfo()
+            NowPlayingInfoCenterManager.shared.updateStaticInfo()
           }
         }
       } else if let imageUri {

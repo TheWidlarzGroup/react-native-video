@@ -17,7 +17,6 @@ class NowPlayingInfoCenterManager {
   private var skipForwardTarget: Any?
   private var skipBackwardTarget: Any?
   private var playbackPositionTarget: Any?
-  private var seekTarget: Any?
   private var togglePlayPauseTarget: Any?
 
   private let remoteCommandCenter = MPRemoteCommandCenter.shared()
@@ -86,7 +85,7 @@ class NowPlayingInfoCenterManager {
         self.playbackObserver = nil
       }
       currentPlayer = nil
-      updateNowPlayingInfo()
+      updatePlaybackState()
     }
   }
 
@@ -124,7 +123,7 @@ class NowPlayingInfoCenterManager {
       forInterval: CMTime(value: 1, timescale: 4),
       queue: .main,
       using: { [weak self] _ in
-        self?.updateNowPlayingInfo()
+        self?.updatePlaybackState()
       }
     )
   }
@@ -226,13 +225,12 @@ class NowPlayingInfoCenterManager {
   }
 
   public func updateNowPlayingInfo() {
-    guard let player = currentPlayer else {
-      invalidateCommandTargets()
-      MPNowPlayingInfoCenter.default().nowPlayingInfo = [:]
-      return
-    }
+    updateStaticInfo()
+    updatePlaybackState()
+  }
 
-    guard let currentItem = player.currentItem else {
+  func updateStaticInfo() {
+    guard let player = currentPlayer, let currentItem = player.currentItem else {
       return
     }
 
@@ -241,42 +239,29 @@ class NowPlayingInfoCenterManager {
     // When the metadata has the tag "iTunSMPB" or "iTunNORM" then the metadata is not converted correctly and comes [nil, nil, ...]
     // This leads to a crash of the app
     let metadata: [AVMetadataItem] = {
-
       let common = processMetadataItems(currentItem.asset.commonMetadata)
       let external = processMetadataItems(currentItem.externalMetadata)
-
       return Array(common.merging(external) { _, new in new }.values)
     }()
 
-    let titleItem =
-      AVMetadataItem.metadataItems(
-        from: metadata,
-        filteredByIdentifier: .commonIdentifierTitle
-      ).first?.stringValue ?? ""
+    let title = AVMetadataItem.metadataItems(
+      from: metadata,
+      filteredByIdentifier: .commonIdentifierTitle
+    ).first?.stringValue ?? ""
 
-    let artistItem =
-      AVMetadataItem.metadataItems(
-        from: metadata,
-        filteredByIdentifier: .commonIdentifierArtist
-      ).first?.stringValue ?? ""
+    let artist = AVMetadataItem.metadataItems(
+      from: metadata,
+      filteredByIdentifier: .commonIdentifierArtist
+    ).first?.stringValue ?? ""
 
-    let newNowPlayingInfo: [String: Any] = [
-      MPMediaItemPropertyTitle: titleItem,
-      MPMediaItemPropertyArtist: artistItem,
-      MPMediaItemPropertyPlaybackDuration: currentItem.duration.seconds,
-      MPNowPlayingInfoPropertyElapsedPlaybackTime: currentItem.currentTime().seconds,
-      MPNowPlayingInfoPropertyPlaybackRate: player.rate,
-      MPNowPlayingInfoPropertyIsLiveStream: CMTIME_IS_INDEFINITE(
-        currentItem.asset.duration
-      ),
-    ]
-    let currentNowPlayingInfo =
-      MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [:]
+    var info = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [:]
+    info[MPMediaItemPropertyTitle] = title
+    info[MPMediaItemPropertyArtist] = artist
+    info[MPMediaItemPropertyPlaybackDuration] = currentItem.duration.seconds
+    info[MPNowPlayingInfoPropertyIsLiveStream] = CMTIME_IS_INDEFINITE(currentItem.asset.duration)
+    MPNowPlayingInfoCenter.default().nowPlayingInfo = info
 
-    MPNowPlayingInfoCenter.default().nowPlayingInfo =
-      currentNowPlayingInfo.merging(newNowPlayingInfo) { _, new in new }
-
-    // Load artwork asynchronously so notification controls appear immediately
+    // Load artwork asynchronously so notification controls appear immediately.
     guard let artworkMetadataItem = AVMetadataItem.metadataItems(
       from: metadata,
       filteredByIdentifier: .commonIdentifierArtwork
@@ -293,6 +278,21 @@ class NowPlayingInfoCenterManager {
         MPNowPlayingInfoCenter.default().nowPlayingInfo = info
       }
     }
+  }
+
+  func updatePlaybackState() {
+    guard let player = currentPlayer else {
+      invalidateCommandTargets()
+      MPNowPlayingInfoCenter.default().nowPlayingInfo = [:]
+      return
+    }
+
+    guard let currentItem = player.currentItem else { return }
+
+    var info = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [:]
+    info[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentItem.currentTime().seconds
+    info[MPNowPlayingInfoPropertyPlaybackRate] = player.rate
+    MPNowPlayingInfoCenter.default().nowPlayingInfo = info
   }
 
   private func findNewCurrentPlayer() {
