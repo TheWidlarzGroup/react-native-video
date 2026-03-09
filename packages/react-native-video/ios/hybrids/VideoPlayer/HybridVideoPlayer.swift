@@ -408,6 +408,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
         }
         if !items.isEmpty {
           playerItem.externalMetadata = items
+          NowPlayingInfoCenterManager.shared.updateStaticInfo()
         }
       }
 
