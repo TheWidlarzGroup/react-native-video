@@ -263,6 +263,7 @@ class NowPlayingInfoCenterManager {
     info[MPMediaItemPropertyArtist] = artist
     info[MPMediaItemPropertyPlaybackDuration] = currentItem.duration.seconds
     info[MPNowPlayingInfoPropertyIsLiveStream] = CMTIME_IS_INDEFINITE(currentItem.asset.duration)
+    info[MPMediaItemPropertyArtwork] = nil // Clear artwork from previous item; will be loaded asynchronously below
     MPNowPlayingInfoCenter.default().nowPlayingInfo = info
 
     // Load artwork asynchronously so notification controls appear immediately.
@@ -271,12 +272,13 @@ class NowPlayingInfoCenterManager {
       filteredByIdentifier: .commonIdentifierArtwork
     ).first else { return }
 
-    Task { [weak self, weak player] in
+    Task { [weak self, weak player, weak currentItem] in
       guard let data = try? await artworkMetadataItem.load(.dataValue),
             let image = UIImage(data: data) else { return }
       let artworkItem = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
       await MainActor.run {
-        guard let self, self.currentPlayer === player else { return }
+        guard let self, self.currentPlayer === player,
+              self.currentPlayer?.currentItem === currentItem else { return }
         var info = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [:]
         info[MPMediaItemPropertyArtwork] = artworkItem
         MPNowPlayingInfoCenter.default().nowPlayingInfo = info
