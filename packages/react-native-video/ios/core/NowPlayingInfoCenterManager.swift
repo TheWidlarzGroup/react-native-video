@@ -47,7 +47,7 @@ class NowPlayingInfoCenterManager {
       return
     }
 
-    if receivingRemoteControlEvents == false {
+    if !receivingRemoteControlEvents {
       receivingRemoteControlEvents = true
     }
 
