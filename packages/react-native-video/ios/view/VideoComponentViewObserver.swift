@@ -122,7 +122,8 @@ class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
     _ playerViewController: AVPlayerViewController,
     completionHandler: @escaping (Bool) -> Void
   ) {
-    completionHandler(true)
+    let isViewAttached = view?.window != nil
+    completionHandler(isViewAttached)
   }
   
   func playerViewController(
