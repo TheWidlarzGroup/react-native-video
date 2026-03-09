@@ -113,6 +113,7 @@ class NowPlayingInfoCenterManager {
 
     if let playbackObserver {
       currentPlayer?.removeTimeObserver(playbackObserver)
+      self.playbackObserver = nil
     }
 
     currentPlayer = player
