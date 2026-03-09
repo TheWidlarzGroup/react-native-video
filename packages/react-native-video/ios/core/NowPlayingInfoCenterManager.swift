@@ -267,12 +267,12 @@ class NowPlayingInfoCenterManager {
       filteredByIdentifier: .commonIdentifierArtwork
     ).first else { return }
 
-    artworkMetadataItem.loadValuesAsynchronously(forKeys: ["value"]) { [weak self, weak player] in
-      guard let self, self.currentPlayer === player else { return }
-      let imgData = artworkMetadataItem.dataValue
-      let image = imgData.flatMap { UIImage(data: $0) } ?? UIImage()
+    Task { [weak self, weak player] in
+      guard let data = try? await artworkMetadataItem.load(.dataValue),
+            let image = UIImage(data: data) else { return }
       let artworkItem = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
-      DispatchQueue.main.async {
+      await MainActor.run {
+        guard let self, self.currentPlayer === player else { return }
         var info = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [:]
         info[MPMediaItemPropertyArtwork] = artworkItem
         MPNowPlayingInfoCenter.default().nowPlayingInfo = info
