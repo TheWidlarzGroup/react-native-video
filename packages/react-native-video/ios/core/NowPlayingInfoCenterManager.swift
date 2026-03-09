@@ -85,7 +85,10 @@ class NowPlayingInfoCenterManager {
         self.playbackObserver = nil
       }
       currentPlayer = nil
-      updatePlaybackState()
+      findNewCurrentPlayer()
+      if currentPlayer == nil {
+        updatePlaybackState()
+      }
     }
   }
 
