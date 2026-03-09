@@ -408,6 +408,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
         }
         if !items.isEmpty {
           playerItem.externalMetadata = items
+          NowPlayingInfoCenterManager.shared.updateStaticInfo(ifCurrentItem: playerItem)
         }
       }
 
@@ -421,7 +422,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
           DispatchQueue.main.async {
             guard let playerItem else { return }
             playerItem.externalMetadata = playerItem.externalMetadata + [.make(identifier: .commonIdentifierArtwork, value: data as NSData)]
-            NowPlayingInfoCenterManager.shared.updateNowPlayingInfo()
+            NowPlayingInfoCenterManager.shared.updateStaticInfo(ifCurrentItem: playerItem)
           }
         }
       } else if let imageUri {

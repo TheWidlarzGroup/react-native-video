@@ -22,7 +22,7 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
 
   func onRateChanged(rate: Float) {
     _eventEmitter?.onPlaybackRateChange(Double(rate))
-    NowPlayingInfoCenterManager.shared.updateNowPlayingInfo()
+    NowPlayingInfoCenterManager.shared.updatePlaybackState()
     updateAndEmitPlaybackState()
   }
 
