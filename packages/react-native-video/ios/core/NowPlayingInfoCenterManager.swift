@@ -75,6 +75,11 @@ class NowPlayingInfoCenterManager {
     observers.removeValue(forKey: player.hashValue)
     players.remove(player)
 
+    if players.allObjects.isEmpty {
+      cleanup()
+      return
+    }
+
     if currentPlayer == player {
       if let playbackObserver {
         player.removeTimeObserver(playbackObserver)
@@ -82,10 +87,6 @@ class NowPlayingInfoCenterManager {
       }
       currentPlayer = nil
       updateNowPlayingInfo()
-    }
-
-    if players.allObjects.isEmpty {
-      cleanup()
     }
   }
 
@@ -95,7 +96,9 @@ class NowPlayingInfoCenterManager {
 
     if let playbackObserver {
       currentPlayer?.removeTimeObserver(playbackObserver)
+      self.playbackObserver = nil
     }
+    currentPlayer = nil
 
     invalidateCommandTargets()
 
