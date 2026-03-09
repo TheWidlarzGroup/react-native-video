@@ -57,7 +57,8 @@ class NowPlayingInfoCenterManager {
     observers[player.hashValue] = observePlayers(player: player)
     players.add(player)
 
-    if currentPlayer == nil {
+    // Also take over if the new player is already playing — KVO won't fire since rate hasn't changed
+    if currentPlayer == nil || player.rate != 0 {
       setCurrentPlayer(player: player)
     }
   }
