@@ -233,6 +233,11 @@ class NowPlayingInfoCenterManager {
     updatePlaybackState()
   }
 
+  func updateStaticInfo(ifCurrentItem playerItem: AVPlayerItem) {
+    guard currentPlayer?.currentItem === playerItem else { return }
+    updateStaticInfo()
+  }
+
   func updateStaticInfo() {
     guard let player = currentPlayer, let currentItem = player.currentItem else {
       return
