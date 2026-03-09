@@ -264,8 +264,7 @@ class NowPlayingInfoCenterManager {
       MPMediaItemPropertyTitle: titleItem,
       MPMediaItemPropertyArtist: artistItem,
       MPMediaItemPropertyPlaybackDuration: currentItem.duration.seconds,
-      MPNowPlayingInfoPropertyElapsedPlaybackTime: currentItem.currentTime()
-        .seconds.rounded(),
+      MPNowPlayingInfoPropertyElapsedPlaybackTime: currentItem.currentTime().seconds,
       MPNowPlayingInfoPropertyPlaybackRate: player.rate,
       MPNowPlayingInfoPropertyIsLiveStream: CMTIME_IS_INDEFINITE(
         currentItem.asset.duration
