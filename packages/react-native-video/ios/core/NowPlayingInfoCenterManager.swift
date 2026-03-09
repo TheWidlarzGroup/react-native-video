@@ -303,6 +303,7 @@ class NowPlayingInfoCenterManager {
     var info = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [:]
     info[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentItem.currentTime().seconds
     info[MPNowPlayingInfoPropertyPlaybackRate] = player.rate
+    info[MPMediaItemPropertyPlaybackDuration] = currentItem.duration.seconds
     MPNowPlayingInfoCenter.default().nowPlayingInfo = info
   }
 
