@@ -205,8 +205,8 @@ class VideoManager {
     case .duckothers:
       audioSessionCategoryOptions.insert(.duckOthers)
     case .auto, .donotmix:
-      break
       // Do nothing as we already cleared the options
+      break
     }
     
     do {
