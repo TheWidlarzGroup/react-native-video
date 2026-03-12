@@ -32,6 +32,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   }
   var playerObserver: VideoPlayerObserver?
   private let sourceLoader = SourceLoader()
+  private var isReleased = false
 
   init(source: (any HybridVideoPlayerSourceSpec)) throws {
     self.source = source
@@ -50,7 +51,9 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
           self.playerItem = try await self.sourceLoader.load {
             try await self.initializePlayerItem()
           }
-          self.player.replaceCurrentItem(with: self.playerItem)
+          await MainActor.run {
+            self.player.replaceCurrentItem(with: self.playerItem)
+          }
         } catch {
           // Ignore cancellation errors during initialization
         }
@@ -61,7 +64,27 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   }
 
   deinit {
-    release()
+    // Minimal cleanup only — ARC handles stored property deallocation.
+    // Do NOT call release() here: it may already have been called from JS,
+    // and re-entering it during deinit risks accessing partially torn-down
+    // Nitro bridge state (EXC_BREAKPOINT on iOS 26+).
+    let capturedPlayer = self.player
+    let capturedObserver = self.playerObserver
+
+    let teardown = {
+      capturedObserver?.invalidatePlayerItemObservers()
+      capturedObserver?.invalidatePlayerObservers()
+      NowPlayingInfoCenterManager.shared.removePlayer(player: capturedPlayer)
+      capturedPlayer.replaceCurrentItem(with: nil)
+    }
+
+    if Thread.isMainThread {
+      teardown()
+    } else {
+      DispatchQueue.main.sync(execute: teardown)
+    }
+
+    VideoManager.shared.unregister(player: self)
   }
 
   // MARK: - Hybrid Impl
@@ -193,7 +216,9 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
         self.playerItem = try await self.sourceLoader.load {
           try await self.initializePlayerItem()
         }
-        self.player.replaceCurrentItem(with: self.playerItem)
+        await MainActor.run {
+          self.player.replaceCurrentItem(with: self.playerItem)
+        }
       } catch {
         if error is CancellationError {
           throw PlayerError.cancelled.error()
@@ -204,25 +229,41 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   }
 
   func release() {
+    guard !isReleased else { return }
+    isReleased = true
+
     sourceLoader.cancelSync()
-    NowPlayingInfoCenterManager.shared.removePlayer(player: player)
 
     try? _eventEmitter?.clearAllListeners()
-
-    self.playerItem = nil
 
     if let source = self.source as? HybridVideoPlayerSource {
       source.releaseAsset()
     }
 
-    // Clear player observer
-    playerObserver?.invalidatePlayerItemObservers()
-    playerObserver?.invalidatePlayerObservers()
+    // AVPlayer and KVO observers must be torn down on the main thread to
+    // avoid data races with periodic/KVO callbacks dispatched to .main.
+    // release() is called from the JS thread (via Nitro bridge) while
+    // observer callbacks fire on the main thread concurrently.
+    let capturedPlayer = self.player
+    let capturedObserver = self.playerObserver
+
+    self.playerItem = nil
     self.playerObserver = nil
 
-    self.player.replaceCurrentItem(with: nil)
-    status = .idle
+    let teardown = {
+      capturedObserver?.invalidatePlayerItemObservers()
+      capturedObserver?.invalidatePlayerObservers()
+      NowPlayingInfoCenterManager.shared.removePlayer(player: capturedPlayer)
+      capturedPlayer.replaceCurrentItem(with: nil)
+    }
 
+    if Thread.isMainThread {
+      teardown()
+    } else {
+      DispatchQueue.main.sync(execute: teardown)
+    }
+
+    status = .idle
     VideoManager.shared.unregister(player: self)
   }
 
@@ -249,7 +290,9 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
         }
         self.playerItem = playerItem
 
-        self.player.replaceCurrentItem(with: playerItem)
+        await MainActor.run {
+          self.player.replaceCurrentItem(with: playerItem)
+        }
         promise.resolve(withResult: ())
       } catch {
         if error is CancellationError {
@@ -341,7 +384,9 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
           self.playerItem = try await self.sourceLoader.load {
             try await self.initializePlayerItem()
           }
-          self.player.replaceCurrentItem(with: self.playerItem)
+          await MainActor.run {
+            self.player.replaceCurrentItem(with: self.playerItem)
+          }
           NowPlayingInfoCenterManager.shared.updateNowPlayingInfo()
           promise.resolve(withResult: ())
         } catch {
