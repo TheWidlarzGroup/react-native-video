@@ -51,7 +51,9 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
           self.playerItem = try await self.sourceLoader.load {
             try await self.initializePlayerItem()
           }
-          self.player.replaceCurrentItem(with: self.playerItem)
+          await MainActor.run {
+            self.player.replaceCurrentItem(with: self.playerItem)
+          }
         } catch {
           // Ignore cancellation errors during initialization
         }
@@ -214,7 +216,9 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
         self.playerItem = try await self.sourceLoader.load {
           try await self.initializePlayerItem()
         }
-        self.player.replaceCurrentItem(with: self.playerItem)
+        await MainActor.run {
+          self.player.replaceCurrentItem(with: self.playerItem)
+        }
       } catch {
         if error is CancellationError {
           throw PlayerError.cancelled.error()
@@ -286,7 +290,9 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
         }
         self.playerItem = playerItem
 
-        self.player.replaceCurrentItem(with: playerItem)
+        await MainActor.run {
+          self.player.replaceCurrentItem(with: playerItem)
+        }
         promise.resolve(withResult: ())
       } catch {
         if error is CancellationError {
@@ -378,7 +384,9 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
           self.playerItem = try await self.sourceLoader.load {
             try await self.initializePlayerItem()
           }
-          self.player.replaceCurrentItem(with: self.playerItem)
+          await MainActor.run {
+            self.player.replaceCurrentItem(with: self.playerItem)
+          }
           NowPlayingInfoCenterManager.shared.updateNowPlayingInfo()
           promise.resolve(withResult: ())
         } catch {
