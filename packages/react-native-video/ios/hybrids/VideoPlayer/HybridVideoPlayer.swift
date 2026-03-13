@@ -158,6 +158,12 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
 
   var playWhenInactive: Bool = false
 
+  var disableAudioSessionManagement: Bool = false {
+    didSet {
+      VideoManager.shared.requestAudioSessionUpdate()
+    }
+  }
+
   var wasAutoPaused: Bool = false
 
   // Text track selection state

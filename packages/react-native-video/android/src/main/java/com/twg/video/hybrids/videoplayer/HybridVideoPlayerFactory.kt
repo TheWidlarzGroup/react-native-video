@@ -11,6 +11,10 @@ class HybridVideoPlayerFactory(): HybridVideoPlayerFactorySpec() {
     return HybridVideoPlayer(source as HybridVideoPlayerSource)
   }
 
+  override fun setAudioSessionManagementDisabled(disabled: Boolean) {
+    // No-op on Android - audio session management is iOS-specific
+  }
+
   override val memorySize: Long
     get() = 0
 }
