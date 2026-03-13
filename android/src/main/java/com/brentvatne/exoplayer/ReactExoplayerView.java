@@ -253,6 +253,7 @@ public class ReactExoplayerView extends FrameLayout implements
     protected boolean playInBackground = false;
     private boolean mReportBandwidth = false;
     private boolean controls = false;
+    private int pictureInPictureResizeMode = -1;
 
     private boolean showNotificationControls = false;
     // \ End props
@@ -2508,6 +2509,12 @@ public class ReactExoplayerView extends FrameLayout implements
                 addView(exoPlayerView, 0, layoutParams);
                 reLayoutControls();
             }
+            if (exoPlayerView != null) {
+                exoPlayerView.post(() -> {
+                    exoPlayerView.requestLayout();
+                    reLayout(exoPlayerView);
+                });
+            }
         }
     }
 
@@ -2541,6 +2548,16 @@ public class ReactExoplayerView extends FrameLayout implements
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && currentActivity.isInPictureInPictureMode()) {
             currentActivity.moveTaskToBack(false);
+        }
+    }
+
+    public void setPictureInPictureResizeModeModifier(@ResizeMode.Mode int resizeMode) {
+        this.pictureInPictureResizeMode = resizeMode;
+    }
+
+    public void setPictureInPictureMode(boolean isInPiP) {
+        if (exoPlayerView != null && isInPiP && pictureInPictureResizeMode != -1) {
+            exoPlayerView.setResizeMode(pictureInPictureResizeMode);
         }
     }
 
