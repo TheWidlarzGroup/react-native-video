@@ -86,7 +86,7 @@ class AudioSessionManager {
         configureAudioSession()
     }
 
-    // Handle remote control events from NowPlayingInfoCenterManager
+    /// Handle remote control events from NowPlayingInfoCenterManager
     func setRemoteControlEventsActive(_ active: Bool) {
         if isAudioSessionManagementDisabled {
             // AUDIO SESSION MANAGEMENT DISABLED BY USER
@@ -111,7 +111,7 @@ class AudioSessionManager {
         }
     }
 
-    // Notification that a player's properties have changed
+    /// Notification that a player's properties have changed
     func playerPropertiesChanged(view: RCTVideo) {
         // Only update if this is a registered view
         if videoViews.contains(view) {

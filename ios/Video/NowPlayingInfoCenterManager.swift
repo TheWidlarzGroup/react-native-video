@@ -261,7 +261,7 @@ class NowPlayingInfoCenterManager {
         }
     }
 
-    // We will observe players rate to find last active player that info will be displayed
+    /// We will observe players rate to find last active player that info will be displayed
     private func observePlayers(player: AVPlayer) -> NSKeyValueObservation {
         return player.observe(\.rate) { [weak self] player, change in
             guard let self else { return }

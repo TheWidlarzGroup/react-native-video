@@ -12,10 +12,21 @@ public struct AdParams {
 
     let json: NSDictionary?
 
-    var isCSAI: Bool { type == "csai" && adTagUrl != nil }
-    var isDAI: Bool { type == "ssai" }
-    var isDAIVod: Bool { type == "ssai" && streamType == "vod" }
-    var isDAILive: Bool { type == "ssai" && streamType == "live" }
+    var isCSAI: Bool {
+        type == "csai" && adTagUrl != nil
+    }
+
+    var isDAI: Bool {
+        type == "ssai"
+    }
+
+    var isDAIVod: Bool {
+        type == "ssai" && streamType == "vod"
+    }
+
+    var isDAILive: Bool {
+        type == "ssai" && streamType == "live"
+    }
 
     init(_ json: NSDictionary!) {
         guard json != nil else {

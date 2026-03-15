@@ -5,7 +5,7 @@ let RCTVideoUnset = -1
 
 // MARK: - RCTPlayerOperations
 
-/*!
+/** !
  * Collection of mutating functions
  */
 enum RCTPlayerOperations {
