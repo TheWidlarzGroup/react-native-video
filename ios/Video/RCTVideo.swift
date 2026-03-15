@@ -26,7 +26,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _pendingSeekTime: Float = 0.0
     private var _lastSeekTime: Float = 0.0
 
-    /* For sending videoProgress events */
+    /** For sending videoProgress events */
     private var _controls = false
 
     /* Keep track of any modifiers, need to be applied after each play */
@@ -85,9 +85,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     /* IMA Ads */
     #if USE_GOOGLE_IMA
         private var _imaAdsManager: RCTIMAAdsManager!
-        /* Playhead used by the SDK to track content video progress and insert mid-rolls. */
+        /** Playhead used by the SDK to track content video progress and insert mid-rolls. */
         private var _contentPlayhead: IMAAVPlayerContentPlayhead?
-        /* The reference of your video player for the IMA DAI SDK to monitor playback and handle timed metadata */
+        /** The reference of your video player for the IMA DAI SDK to monitor playback and handle timed metadata */
         private var _imaVideoDisplay: IMAAVPlayerVideoDisplay?
     #endif
     private var _didRequestAds = false
@@ -1505,7 +1505,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         ])
     }
 
-    // When timeMetadata is read the event onTimedMetadata is triggered
+    /// When timeMetadata is read the event onTimedMetadata is triggered
     func handleTimeMetadataChange(timedMetadata: [AVMetadataItem]) {
         guard onTimedMetadata != nil else { return }
 
@@ -1525,7 +1525,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         ])
     }
 
-    // Handle player item status change.
+    /// Handle player item status change.
     func handlePlayerItemStatusChange(playerItem _: AVPlayerItem, change _: NSKeyValueObservedChange<AVPlayerItem.Status>) {
         guard let _playerItem else {
             return
@@ -1544,12 +1544,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             return nil
         }
         // Map each enumerated pair to include the index in the json dictionary
-        let mappedTracks = tracks.enumerated().compactMap { index, track -> NSDictionary? in
+        return tracks.enumerated().compactMap { index, track -> NSDictionary? in
             guard let json = track.json?.mutableCopy() as? NSMutableDictionary else { return nil }
             json["index"] = index // Insert the index into the json dictionary
             return json
         }
-        return mappedTracks
     }
 
     func handleReadyToPlay() {
@@ -1648,7 +1647,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
     }
 
-    // Continue playing (or not if paused) after being paused due to hitting an unbuffered zone.
+    /// Continue playing (or not if paused) after being paused due to hitting an unbuffered zone.
     func handlePlaybackLikelyToKeepUp(playerItem _: AVPlayerItem, change _: NSKeyValueObservedChange<Bool>) {
         if _isBuffering {
             _isBuffering = false
@@ -1889,7 +1888,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
     }
 
-    // Workaround for #3418 - https://github.com/TheWidlarzGroup/react-native-video/issues/3418#issuecomment-2043508862
+    /// Workaround for #3418 - https://github.com/TheWidlarzGroup/react-native-video/issues/3418#issuecomment-2043508862
     @objc
     func setOnClick(_: Any) {}
 }

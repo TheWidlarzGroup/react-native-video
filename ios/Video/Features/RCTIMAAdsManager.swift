@@ -6,15 +6,15 @@
         private weak var _video: RCTVideo?
         private var _isPictureInPictureActive: () -> Bool
 
-        /* Entry point for the SDK. Used to make ad requests. */
+        /** Entry point for the SDK. Used to make ad requests. */
         private var adsLoader: IMAAdsLoader!
-        /* Main point of interaction with the SDK. Created by the SDK as the result of an ad request. */
+        /** Main point of interaction with the SDK. Created by the SDK as the result of an ad request. */
         private var adsManager: IMAAdsManager!
-        /* References the stream manager from the IMA DAI SDK after successfully loading the DAI stream. */
+        /** References the stream manager from the IMA DAI SDK after successfully loading the DAI stream. */
         private var streamManager: IMAStreamManager?
-        /* Ad container view for DAI - stored to ensure proper z-ordering */
+        /** Ad container view for DAI - stored to ensure proper z-ordering */
         private var daiAdContainerView: UIView?
-        /* Picture-in-Picture proxy for DAI - stored to ensure proper Picture-in-Picture support */
+        /** Picture-in-Picture proxy for DAI - stored to ensure proper Picture-in-Picture support */
         private var pipProxy: IMAPictureInPictureProxy?
 
         init(video: RCTVideo!, isPictureInPictureActive: @escaping () -> Bool) {
