@@ -1,5 +1,13 @@
 
 
+## [6.19.1](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.19.0...v6.19.1) (2026-03-15)
+
+
+### Bug Fixes
+
+* **ios:** IMA ad container resizing on orientation change ([#4771](https://github.com/TheWidlarzGroup/react-native-video/issues/4771)) ([fc936c4](https://github.com/TheWidlarzGroup/react-native-video/commit/fc936c49ef3c2734173442042b7d5038aeaef301))
+* RCTVideoManager crash in bridgeless mode RN0.84 ([#4855](https://github.com/TheWidlarzGroup/react-native-video/issues/4855)) ([92b0a0e](https://github.com/TheWidlarzGroup/react-native-video/commit/92b0a0e416c7f313120a811cd2dc972f87b1c82f))
+
 # [6.19.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.18.0...v6.19.0) (2026-01-19)
 
 
