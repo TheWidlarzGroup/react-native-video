@@ -139,10 +139,10 @@ const _Overlay = forwardRef<VideoRef, Props>((props, ref) => {
   }, []);
 
   const toggleFullscreen = () => {
-    setFullscreen(prev => !prev);
+    setFullscreen((prev) => !prev);
   };
   const toggleControls = () => {
-    setControls(prev => !prev);
+    setControls((prev) => !prev);
   };
 
   const openDecoration = () => {
@@ -150,7 +150,7 @@ const _Overlay = forwardRef<VideoRef, Props>((props, ref) => {
   };
 
   const toggleShowNotificationControls = () => {
-    setShowNotificationControls(prev => !prev);
+    setShowNotificationControls((prev) => !prev);
   };
 
   const onSelectedAudioTrackChange = (itemValue: string | number) => {
@@ -200,15 +200,15 @@ const _Overlay = forwardRef<VideoRef, Props>((props, ref) => {
     setResizeMode(value);
   };
 
-  const toggleCache = () => setUseCache(prev => !prev);
+  const toggleCache = () => setUseCache((prev) => !prev);
 
-  const togglePause = () => setPaused(prev => !prev);
+  const togglePause = () => setPaused((prev) => !prev);
 
-  const toggleRepeat = () => setRepeat(prev => !prev);
+  const toggleRepeat = () => setRepeat((prev) => !prev);
 
-  const togglePoster = () => setShowPoster(prev => !prev);
+  const togglePoster = () => setShowPoster((prev) => !prev);
 
-  const toggleMuted = () => setMuted(prev => !prev);
+  const toggleMuted = () => setMuted((prev) => !prev);
 
   return (
     <>
@@ -318,7 +318,7 @@ const _Overlay = forwardRef<VideoRef, Props>((props, ref) => {
               currentTime={currentTime}
               duration={duration}
               isLoading={isLoading}
-              videoSeek={prop => videoSeek(prop)}
+              videoSeek={(prop) => videoSeek(prop)}
               isUISeeking={isSeeking}
             />
             <View style={styles.generalControls}>

@@ -33,7 +33,8 @@ export const AudioTrackSelector = ({
             console.log('on audio value change ' + itemValue);
             onValueChange(itemValue);
           }
-        }}>
+        }}
+      >
         {audioTracks?.length <= 0 ? (
           <Picker.Item label={'empty'} value={'empty'} key={'empty'} />
         ) : (
