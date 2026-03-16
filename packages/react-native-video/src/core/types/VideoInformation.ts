@@ -20,7 +20,7 @@ export interface VideoInformation {
   /**
    * The duration of the video in seconds, or `-1` if not available.
    */
-  duration: Int64;
+  duration: number;
 
   /**
    * The file size of the video in bytes, or `-1` if not available.
