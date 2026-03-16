@@ -24,9 +24,12 @@ class NowPlayingInfoCenterManager {
   var receivingRemoteControlEvents = false {
     didSet {
       if receivingRemoteControlEvents {
-        DispatchQueue.main.async {
+        DispatchQueue.main.async { [weak self] in
           VideoManager.shared.setRemoteControlEventsActive(true)
           UIApplication.shared.beginReceivingRemoteControlEvents()
+          if self?.currentPlayer?.currentItem != nil {
+            self?.updateNowPlayingInfo()
+          }
         }
       } else {
         DispatchQueue.main.async {
@@ -317,10 +320,11 @@ class NowPlayingInfoCenterManager {
 
   // We will observe players rate to find last active player that info will be displayed
   private func observePlayers(player: AVPlayer) -> NSKeyValueObservation {
-    return player.observe(\.rate) { [weak self] player, change in
+    return player.observe(\.rate) { [weak self] player, _ in
       guard let self else { return }
 
-      let rate = change.newValue
+      // Read rate directly from player to avoid nil from missing .new option
+      let rate = player.rate
 
       // case where there is new player that is not paused
       // In this case event is triggered by non currentPlayer
