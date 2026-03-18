@@ -6,7 +6,7 @@ extension AVURLAsset {
     var bitrate = Double.nan
     var width = Double.nan
     var height = Double.nan
-    var videoDuration: Int64 = -1
+    var videoDuration: Double = -1
     var isHDR = false
     var isLive = false
     var orientation: VideoOrientation = .unknown
@@ -15,10 +15,10 @@ extension AVURLAsset {
 
     // Check if asset is live stream
     if duration.flags.contains(.indefinite) {
-      videoDuration = -1
+      videoDuration = -1.0
       isLive = true
     } else {
-      videoDuration = Int64(CMTimeGetSeconds(duration))
+      videoDuration = CMTimeGetSeconds(duration)
       isLive = false
     }
 
