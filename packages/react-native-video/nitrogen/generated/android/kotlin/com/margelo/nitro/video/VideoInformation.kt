@@ -28,7 +28,7 @@ data class VideoInformation(
   val height: Double,
   @DoNotStrip
   @Keep
-  val duration: Long,
+  val duration: Double,
   @DoNotStrip
   @Keep
   val fileSize: Long,
@@ -52,7 +52,7 @@ data class VideoInformation(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(bitrate: Double, width: Double, height: Double, duration: Long, fileSize: Long, isHDR: Boolean, isLive: Boolean, orientation: VideoOrientation): VideoInformation {
+    private fun fromCpp(bitrate: Double, width: Double, height: Double, duration: Double, fileSize: Long, isHDR: Boolean, isLive: Boolean, orientation: VideoOrientation): VideoInformation {
       return VideoInformation(bitrate, width, height, duration, fileSize, isHDR, isLive, orientation)
     }
   }

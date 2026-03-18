@@ -18,7 +18,7 @@ public extension VideoInformation {
   /**
    * Create a new instance of `VideoInformation`.
    */
-  init(bitrate: Double, width: Double, height: Double, duration: Int64, fileSize: Int64, isHDR: Bool, isLive: Bool, orientation: VideoOrientation) {
+  init(bitrate: Double, width: Double, height: Double, duration: Double, fileSize: Int64, isHDR: Bool, isLive: Bool, orientation: VideoOrientation) {
     self.init(bitrate, width, height, duration, fileSize, isHDR, isLive, orientation)
   }
 
@@ -38,7 +38,7 @@ public extension VideoInformation {
   }
   
   @inline(__always)
-  var duration: Int64 {
+  var duration: Double {
     return self.__duration
   }
   
