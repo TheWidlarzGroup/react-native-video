@@ -342,7 +342,6 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
             try await self.initializePlayerItem()
           }
           self.player.replaceCurrentItem(with: self.playerItem)
-          NowPlayingInfoCenterManager.shared.updateNowPlayingInfo()
           promise.resolve(withResult: ())
         } catch {
           if error is CancellationError {
