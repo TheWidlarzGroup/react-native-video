@@ -15,7 +15,7 @@ React Native Video is a library that allows you to play various kinds of video i
 
 ### Minimal Package Requirements
 - `react-native` `0.75.0` or higher
-- `react-native-nitro-modules` `0.27.2` or higher 
+- `react-native-nitro-modules` `0.35.0` or higher
 
 ## Installation
 
@@ -63,7 +63,7 @@ Without this patch you won't be able "recognize" errors, all will be thrown as u
 :::
 
 <details>
-  <summary>For `react-native-nitro-modules` 0.27.X or higher</summary>
+  <summary>Patch for `react-native-nitro-modules`</summary>
 
   ```diff
   diff --git a/node_modules/react-native-nitro-modules/cpp/core/HybridFunction.hpp b/node_modules/react-native-nitro-modules/cpp/core/HybridFunction.hpp
