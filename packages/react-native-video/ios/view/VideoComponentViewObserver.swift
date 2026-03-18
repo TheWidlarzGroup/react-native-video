@@ -136,8 +136,8 @@ class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
       guard let self = self else { return }
         
       if context.isCancelled {
-        // iOS bug: window.userInteractionEnabled is left as false after cancelled fullscreen dismiss
-        if let window = playerViewController.view.window, !window.isUserInteractionEnabled {
+        // iOS bug: window.isUserInteractionEnabled is left as false after cancelled fullscreen dismiss
+        if let window = self.playerViewController?.view.window, !window.isUserInteractionEnabled {
           window.isUserInteractionEnabled = true
         }
 
@@ -160,8 +160,8 @@ class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
       guard let self = self else { return }
 
       if context.isCancelled {
-        // iOS bug: window.userInteractionEnabled is left as false after cancelled fullscreen transition
-        if let window = playerViewController.view.window, !window.isUserInteractionEnabled {
+        // iOS bug: window.isUserInteractionEnabled is left as false after cancelled fullscreen transition
+        if let window = self.playerViewController?.view.window, !window.isUserInteractionEnabled {
           window.isUserInteractionEnabled = true
         }
 
