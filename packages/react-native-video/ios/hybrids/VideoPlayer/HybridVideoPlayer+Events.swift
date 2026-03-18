@@ -175,7 +175,7 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
     )
   }
 
-  func onPlayerItemChange(player: AVPlayer, playerItem: AVPlayerItem?) {
+  func onPlayerItemChange(player _: AVPlayer, playerItem: AVPlayerItem?) {
     guard showNotificationControls, let playerItem else { return }
     DispatchQueue.main.async {
       NowPlayingInfoCenterManager.shared.updateStaticInfo(ifCurrentItem: playerItem)
