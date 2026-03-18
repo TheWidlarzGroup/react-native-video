@@ -323,7 +323,6 @@ class NowPlayingInfoCenterManager {
     return player.observe(\.rate) { [weak self] player, _ in
       guard let self else { return }
 
-      // Read rate directly from player to avoid nil from missing .new option
       let rate = player.rate
 
       // case where there is new player that is not paused
