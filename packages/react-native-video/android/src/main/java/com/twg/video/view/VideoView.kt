@@ -24,7 +24,7 @@ import com.margelo.nitro.NitroModules
 import com.margelo.nitro.video.HybridVideoPlayer
 import com.margelo.nitro.video.ResizeMode
 import com.margelo.nitro.video.SurfaceType
-import com.margelo.nitro.video.VideoViewEvents
+import com.margelo.nitro.video.VideoViewEventsEmitter
 import com.twg.video.core.LibraryError
 import com.twg.video.core.VideoManager
 import com.twg.video.core.VideoViewError
@@ -124,26 +124,32 @@ class VideoView @JvmOverloads constructor(
       }
     }
 
-  var events = object : VideoViewEvents {
-    override var onPictureInPictureChange: ((Boolean) -> Unit)? = {}
-    override var onFullscreenChange: ((Boolean) -> Unit)? = {}
-    override var willEnterFullscreen: (() -> Unit)? = {}
-    override var willExitFullscreen: (() -> Unit)? = {}
-    override var willEnterPictureInPicture: (() -> Unit)? = {}
-    override var willExitPictureInPicture: (() -> Unit)? = {}
-  }
+  var eventsEmitter: VideoViewEventsEmitter? = null
 
   var onNitroIdChange: ((Int?) -> Unit)? = null
   var playerView = createPlayerView()
   var isInFullscreen: Boolean = false
     set(value) {
+      if (value != field) {
+        eventsEmitter?.onFullscreenChange(value)
+      }
       field = value
-      events.onFullscreenChange?.let { it(value) }
     }
   var isInPictureInPicture: Boolean = false
     set(value) {
       field = value
-      events.onPictureInPictureChange?.let { it(value) }
+      
+      if (value) {
+        playerView.useController = false
+        playerView.controllerAutoShow = false
+        playerView.controllerHideOnTouch = true
+      } else {
+        playerView.useController = useController
+        playerView.controllerAutoShow = true
+        playerView.controllerHideOnTouch = true
+      }
+      
+      eventsEmitter?.onPictureInPictureChange(value)
     }
   private var rootContentViews: List<View> = listOf()
   private var pictureInPictureHelperTag: String? = null
@@ -223,7 +229,7 @@ class VideoView @JvmOverloads constructor(
     }
 
     try {
-      events.willEnterFullscreen?.let { it() }
+      eventsEmitter?.willEnterFullscreen()
 
       val fragment = FullscreenVideoFragment(this)
       fullscreenFragmentTag = fragment.id
@@ -245,7 +251,7 @@ class VideoView @JvmOverloads constructor(
       return
     }
 
-    events.willExitFullscreen?.let { it() }
+    eventsEmitter?.willExitFullscreen()
 
     val currentActivity = applicationContent.currentActivity
     fullscreenFragmentTag?.let { tag ->
@@ -320,28 +326,39 @@ class VideoView @JvmOverloads constructor(
     
     Log.d("ReactNativeVideo", "Hiding root content views for PiP video nitroId: $nitroId")
     
-    // Remove playerView from parent
-    // In PiP mode, we don't want to show the controller
-    // Controls are handled by System if we have MediaSession
+    // In PiP mode, disable controls immediately - media session creates its own controls for PiP
     playerView.useController = false
+    
     playerView.setBackgroundColor(Color.BLACK)
     playerView.setShutterBackgroundColor(Color.BLACK)
+
+    val currentActivity = applicationContent.currentActivity ?: return
+    val rootContent = currentActivity.window.decorView.findViewById<ViewGroup>(android.R.id.content)
+    
+    val fullscreenContainer = fullscreenFragmentTag?.let { tag ->
+      (currentActivity as? FragmentActivity)?.supportFragmentManager?.findFragmentByTag(tag)
+        ?.view
+    }
+    
+    rootContentViews = (0 until rootContent.childCount)
+      .map { rootContent.getChildAt(it) }
+      .filter { 
+        it.isVisible && 
+        it != playerView && 
+        it != fullscreenContainer
+      }
 
     // If we're already in fullscreen, the PlayerView is inside the fullscreen container
     // and root content is already hidden. Avoid moving the PlayerView again.
     if (isInFullscreen) {
       Log.d("ReactNativeVideo", "PiP entered while in fullscreen - skipping reparent to root for nitroId: $nitroId")
+      // Still hide the views we captured, but don't move the player view
+      rootContentViews.forEach { view -> view.visibility = GONE }
       movedToRootForPiP = false
       return
     }
 
     (playerView.parent as? ViewGroup)?.removeView(playerView)
-
-    val currentActivity = applicationContent.currentActivity ?: return
-    val rootContent = currentActivity.window.decorView.findViewById<ViewGroup>(android.R.id.content)
-    rootContentViews = (0 until rootContent.childCount)
-      .map { rootContent.getChildAt(it) }
-      .filter { it.isVisible }
 
     rootContentViews.forEach { view -> view.visibility = GONE }
 
@@ -375,6 +392,16 @@ class VideoView @JvmOverloads constructor(
       rootContentViews.forEach { it.visibility = View.VISIBLE }
       rootContentViews = listOf()
       movedToRootForPiP = false
+    } else {
+      // Even if we didn't move the player view to root, we might need to restore hidden views
+      // This can happen when entering PiP from fullscreen - the fullscreen fragment might have
+      // hidden views but we didn't track them in movedToRootForPiP
+      val currentActivity = applicationContent.currentActivity
+      if (currentActivity != null && rootContentViews.isNotEmpty()) {
+        Log.d("ReactNativeVideo", "Restoring root content views that were hidden (not moved to root) for nitroId: $nitroId")
+        rootContentViews.forEach { it.visibility = View.VISIBLE }
+        rootContentViews = listOf()
+      }
     }
 
     // Add PlayerView back to this VideoView only if not already attached
@@ -410,7 +437,13 @@ class VideoView @JvmOverloads constructor(
     val currentActivity = applicationContent.currentActivity ?: return false
 
     return try {
-      events.willEnterPictureInPicture?.let { it() }
+      eventsEmitter?.willEnterPictureInPicture()
+
+      // Disable controls before entering PiP - media session creates its own controls for PiP
+      runOnMainThread {
+        playerView.useController = false
+        playerView.controllerAutoShow = false
+      }
 
       val success = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         val params = createPictureInPictureParams(this)
@@ -445,7 +478,11 @@ class VideoView @JvmOverloads constructor(
 
     VideoManager.notifyPictureInPictureExited(this)
 
-    events.willExitPictureInPicture?.let { it() }
+    eventsEmitter?.willExitPictureInPicture()
+
+    // Restore controls when exiting PiP - they were disabled because media session handles PiP controls
+    playerView.useController = useController
+    playerView.controllerAutoShow = true
 
     if (movedToRootForPiP) {
       restoreRootContentViews()
@@ -470,7 +507,12 @@ class VideoView @JvmOverloads constructor(
         Log.d("ReactNativeVideo", "Activity is in PiP mode, preparing for transition")
       }
       
-      events.willExitPictureInPicture?.let { it() }
+      eventsEmitter?.willExitPictureInPicture()
+      
+      // Restore controls when exiting PiP - they were disabled because media session handles PiP controls
+      playerView.useController = useController
+      playerView.controllerAutoShow = true
+      
       if (movedToRootForPiP) {
         restoreRootContentViews()
       } else {

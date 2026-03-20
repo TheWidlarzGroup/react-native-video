@@ -114,9 +114,11 @@ export interface VideoPlayerEvents {
   onVideoTrackChange: (track: VideoTrack | null) => void;
 }
 
-export interface AllPlayerEvents extends VideoPlayerEvents {
+export interface JSVideoPlayerEvents {
   onError: (error: VideoRuntimeError) => void;
 }
+
+export type AllPlayerEvents = VideoPlayerEvents & JSVideoPlayerEvents;
 
 export interface VideoViewEvents {
   /**
@@ -287,4 +289,14 @@ export const ALL_PLAYER_EVENTS: (keyof AllPlayerEvents)[] =
     'onVolumeChange',
     'onVideoTrackChange',
     'onStatusChange'
+  );
+
+export const ALL_VIEW_EVENTS: (keyof VideoViewEvents)[] =
+  allKeysOf<VideoViewEvents>()(
+    'onPictureInPictureChange',
+    'onFullscreenChange',
+    'willEnterFullscreen',
+    'willExitFullscreen',
+    'willEnterPictureInPicture',
+    'willExitPictureInPicture'
   );

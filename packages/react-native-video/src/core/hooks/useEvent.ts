@@ -15,8 +15,10 @@ export const useEvent = <T extends keyof AllPlayerEvents>(
   callback: AllPlayerEvents[T]
 ) => {
   useEffect(() => {
-    player.addEventListener(event, callback);
+    const subscription = player.addEventListener(event, callback);
 
-    return () => player.removeEventListener(event, callback);
+    return () => {
+      subscription.remove();
+    };
   }, [player, event, callback]);
 };

@@ -32,7 +32,7 @@ object PictureInPictureUtils {
     }
 
     return builder
-      .setAspectRatio(calculateAspectRatio(videoView.playerView))
+      .setAspectRatio(calculateAspectRatio(videoView))
       .setSourceRectHint(calculateSourceRectHint(videoView.playerView))
       .build()
   }
@@ -50,14 +50,38 @@ object PictureInPictureUtils {
     return defaultParams.build()
   }
 
-  fun calculateAspectRatio(view: View): Rational {
+  fun calculateAspectRatio(videoView: VideoView): Rational {
     // AspectRatio for PIP must be between 2.39:1 and 1:2.39
     // see: https://developer.android.com/reference/android/app/PictureInPictureParams.Builder#setAspectRatio(android.util.Rational)
 
     val maximumAspectRatio = Rational(239, 100)
     val minimumAspectRatio = Rational(100, 239)
 
-    val currentAspectRatio = Rational(view.width, view.height)
+    val player = videoView.hybridPlayer?.player
+    val videoFormat = player?.videoFormat
+    
+    var width: Int
+    var height: Int
+    
+    if (videoFormat != null && videoFormat.width > 0 && videoFormat.height > 0) {
+      width = videoFormat.width
+      height = videoFormat.height
+      
+      val rotationDegrees = videoFormat.rotationDegrees
+      if (rotationDegrees == 90 || rotationDegrees == 270) {
+        val temp = width
+        width = height
+        height = temp
+      }
+      
+      Log.d(TAG, "Using video format dimensions for PiP: ${width}x${height} (rotation: ${rotationDegrees}°)")
+    } else {
+      width = videoView.playerView.width
+      height = videoView.playerView.height
+      Log.d(TAG, "Using view dimensions for PiP: ${width}x${height}")
+    }
+
+    val currentAspectRatio = Rational(width, height)
 
     return when {
       currentAspectRatio > maximumAspectRatio -> maximumAspectRatio

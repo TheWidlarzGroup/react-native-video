@@ -45,6 +45,11 @@ sealed class PlayerError(code: String, message: String) : VideoError(code, messa
     "player/invalid-source",
     "Invalid source passed to player"
   )
+
+  object Cancelled : PlayerError(
+    "player/cancelled",
+    "Operation was cancelled"
+  )
 }
 
 // Source related errors
@@ -72,6 +77,11 @@ sealed class SourceError(code: String, message: String) : VideoError(code, messa
   class UnsupportedContentType(val uri: String) : SourceError(
     "source/unsupported-content-type",
     "type of content (${uri}) is not supported"
+  )
+
+  object Cancelled : SourceError(
+    "source/cancelled",
+    "Operation was cancelled"
   )
 }
 

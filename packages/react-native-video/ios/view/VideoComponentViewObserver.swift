@@ -28,31 +28,33 @@ final class VideoViewDelegate: NSObject, VideoComponentViewDelegate {
   }
   
   func onPictureInPictureChange(_ isActive: Bool) {
-    viewManager?.onPictureInPictureChange?(isActive)
+    viewManager?.onPictureInPictureChange(isActive)
   }
   
   func onFullscreenChange(_ isActive: Bool) {
-    viewManager?.onFullscreenChange?(isActive)
+    viewManager?.onFullscreenChange(isActive)
   }
   
   func willEnterFullscreen() {
-    viewManager?.willEnterFullscreen?()
+    viewManager?.willEnterFullscreen()
   }
   
   func willExitFullscreen() {
-    viewManager?.willExitFullscreen?()
+    viewManager?.willExitFullscreen()
   }
   
   func willEnterPictureInPicture() {
-    viewManager?.willEnterPictureInPicture?()
+    viewManager?.willEnterPictureInPicture()
   }
   
   func willExitPictureInPicture() {
-    viewManager?.willExitPictureInPicture?()
+    viewManager?.willExitPictureInPicture()
   }
   
   func onReadyToDisplay() {
-    viewManager?.player?.eventEmitter.onReadyToDisplay()
+    if let player = viewManager?.player as? HybridVideoPlayer {
+      player._eventEmitter?.onReadyToDisplay()
+    }
   }
 }
 
@@ -115,15 +117,35 @@ class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
   func playerViewControllerWillStopPictureInPicture(_: AVPlayerViewController) {
     delegate?.willExitPictureInPicture()
   }
+
+  func playerViewControllerRestoreUserInterfaceForPictureInPictureStop(
+    _ playerViewController: AVPlayerViewController,
+    completionHandler: @escaping (Bool) -> Void
+  ) {
+    let isViewAttached = view?.window != nil
+    completionHandler(isViewAttached)
+  }
   
   func playerViewController(
     _: AVPlayerViewController,
     willEndFullScreenPresentationWithAnimationCoordinator coordinator: UIViewControllerTransitionCoordinator
   ) {
     delegate?.willExitFullscreen()
-    
-    coordinator.animate(alongsideTransition: nil) { [weak self] _ in
+
+    coordinator.animate(alongsideTransition: nil) { [weak self] context in
       guard let self = self else { return }
+        
+      if context.isCancelled {
+        // iOS bug: window.isUserInteractionEnabled is left as false after cancelled fullscreen dismiss
+        if let window = self.playerViewController?.view.window, !window.isUserInteractionEnabled {
+          window.isUserInteractionEnabled = true
+        }
+
+        self.delegate?.willEnterFullscreen()
+
+        return
+      }
+
       self.delegate?.onFullscreenChange(false)
     }
   }
@@ -133,9 +155,21 @@ class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
     willBeginFullScreenPresentationWithAnimationCoordinator coordinator: UIViewControllerTransitionCoordinator
   ) {
     delegate?.willEnterFullscreen()
-    
-    coordinator.animate(alongsideTransition: nil) { [weak self] _ in
+
+    coordinator.animate(alongsideTransition: nil) { [weak self] context in
       guard let self = self else { return }
+
+      if context.isCancelled {
+        // iOS bug: window.isUserInteractionEnabled is left as false after cancelled fullscreen transition
+        if let window = self.playerViewController?.view.window, !window.isUserInteractionEnabled {
+          window.isUserInteractionEnabled = true
+        }
+
+        self.delegate?.willExitFullscreen()
+
+        return
+      }
+
       self.delegate?.onFullscreenChange(true)
     }
   }

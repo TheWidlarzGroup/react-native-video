@@ -11,6 +11,7 @@ import com.twg.video.core.player.DRMManagerSpec
 import com.twg.video.core.player.buildMediaSource
 import com.twg.video.core.player.createMediaItemFromVideoConfig
 import com.twg.video.core.plugins.PluginsRegistry
+import com.twg.video.core.utils.SourceLoader
 import com.twg.video.core.utils.VideoInformationUtils
 
 class HybridVideoPlayerSource(): HybridVideoPlayerSourceSpec() {
@@ -24,6 +25,8 @@ class HybridVideoPlayerSource(): HybridVideoPlayerSourceSpec() {
 
   @UnstableApi
   var drmSessionManager: DrmSessionManager? = null
+
+  internal val sourceLoader = SourceLoader()
 
   constructor(config: NativeVideoConfig) : this() {
     this.uri = config.uri
@@ -53,7 +56,9 @@ class HybridVideoPlayerSource(): HybridVideoPlayerSourceSpec() {
 
   override fun getAssetInformationAsync(): Promise<VideoInformation> {
     return Promise.async {
-      return@async VideoInformationUtils.fromUri(uri, config.headers ?: emptyMap())
+      return@async sourceLoader.load {
+        VideoInformationUtils.fromUri(uri, config.headers ?: emptyMap())
+      }
     }
   }
 

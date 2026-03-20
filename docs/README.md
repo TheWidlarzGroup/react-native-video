@@ -1,23 +1,65 @@
-### Build
+### Instalation
+
+To install the dependencies, run at the root of the repository:
 
 ```
-$ bun run build
+$ bun install
 ```
 
-This command generates static content into the `build` directory and can be served using any static contents hosting service.
+### Development
+
+To start a local development server with hot-reloading, run:
+
+```
+$ bun run start
+```
 
 ### Deployment
 
-Using SSH:
+Deployment is handled via GitHub Actions. Upon pushing to the `master` branch content from the `docs` directory is automatically deployed to GitHub Pages.
 
-```
-$ USE_SSH=true bun run deploy
+### Custom Props
+
+Custom props are provided by the `@widlarzgroup/docusaurus-ui` package and allow you to display badges and other UI elements. Custom props can be defined in three places:
+
+#### 1. In `_category_.json` (for entire categories)
+
+```json
+{
+  "label": "Analytics",
+  "position": 7,
+  "customProps": {
+    "badgeType": "new"
+  }
+}
 ```
 
-Not using SSH:
+#### 2. In markdown frontmatter (for individual pages)
 
-```
-$ GIT_USER=<Your GitHub username> bun run deploy
+```md
+---
+sidebar_position: 5
+sidebar_label: Chapters
+customProps:
+  plan: pro
+---
 ```
 
-If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
+#### 3. In `sidebars.ts` (for sidebar items)
+
+```ts
+{
+  type: 'doc',
+  id: 'some-doc',
+  customProps: {
+    badgeType: 'new'
+  }
+}
+```
+
+#### Available Custom Props
+
+| Prop | Values | Description |
+|------|--------|-------------|
+| `badgeType` | `"new"`, `"preview"` | Displays a "NEW" or "PREVIEW" badge next to the item |
+| `plan` | `"pro"` | Displays a "PRO" badge indicating premium/commercial feature |

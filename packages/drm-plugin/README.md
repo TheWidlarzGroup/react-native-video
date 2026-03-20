@@ -5,7 +5,7 @@ DRM plugin for react-native-video. It adds Widevine (Android) and FairPlay (iOS,
 ## Requirements
 
 - react-native-video >= 7.0.0-alpha.3
-- react-native-nitro-modules >= 0.27.2
+- react-native-nitro-modules >= 0.35.0
 
 ## Installation
 

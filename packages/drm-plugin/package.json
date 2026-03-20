@@ -1,6 +1,6 @@
 {
   "name": "@react-native-video/drm",
-  "version": "7.0.0-alpha.7",
+  "version": "7.0.0-beta.8",
   "description": "DRM plugin for react-native-video",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
@@ -41,7 +41,7 @@
     "prepare": "bun run build",
     "build": "bob build",
     "specs": "nitrogen",
-    "release": "release-it --preRelease alpha --npm.tag=next"
+    "release": "release-it --preRelease beta --npm.tag=beta"
   },
   "keywords": [
     "react-native",
@@ -72,12 +72,12 @@
     "eslint": "^8.51.0",
     "eslint-config-prettier": "9.0.0",
     "eslint-plugin-prettier": "^5.0.1",
-    "nitrogen": "^0.30.0",
+    "nitrogen": "0.35.0",
     "prettier": "^3.0.3",
     "react": "18.3.1",
     "react-native": "^0.77.0",
     "react-native-builder-bob": "^0.40.13",
-    "react-native-nitro-modules": "^0.30.0",
+    "react-native-nitro-modules": "0.35.0",
     "release-it": "^17.10.0",
     "typescript": "^5.8.3",
     "react-native-video": "*"
@@ -86,7 +86,7 @@
     "react": "*",
     "react-native": "*",
     "react-native-video": ">=7.0.0-alpha.3",
-    "react-native-nitro-modules": ">=0.27.2"
+    "react-native-nitro-modules": ">=0.35.0"
   },
   "jest": {
     "preset": "react-native",

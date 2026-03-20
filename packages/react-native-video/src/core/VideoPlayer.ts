@@ -21,7 +21,19 @@ import type { VideoTrack } from "./types/VideoTrack";
 import type { QualityLevel } from "./types/QualityLevel";
 
 class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
-  protected player: VideoPlayerImpl;
+  private _player: VideoPlayerImpl | undefined;
+  private _releaseTimeout: ReturnType<typeof setTimeout> | undefined;
+
+  protected get player(): VideoPlayerImpl {
+    if (this._player === undefined) {
+      throw new VideoRuntimeError(
+        'player/released',
+        "You can't access player after it's released"
+      );
+    }
+
+    return this._player;
+  }
 
   constructor(source: VideoSource | VideoConfig | VideoPlayerSource) {
     const hybridSource = createSource(source);
@@ -29,17 +41,39 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
 
     // Initialize events
     super(player.eventEmitter);
-    this.player = player;
+    this._player = player;
   }
 
   /**
-   * Cleans up player's native resources and releases native state.
-   * After calling this method, the player is no longer usable.
+   * Releases the player's native resources and releases native state.
    * @internal
    */
   __destroy() {
+    if (this._player === undefined) return;
+
     this.clearAllEvents();
-    this.player.dispose();
+
+    try {
+      this.player.release();
+    } catch (error) {
+      // Best effort cleanup: teardown must never crash app unmount.
+      console.error('Failed to cleanup native player resources', error);
+    }
+
+    // We leave hybrid object to be cleaned up by garbage collector
+    // So we update memory size to ensure that memory is released
+    // when needed
+    this.updateMemorySize();
+
+    // We wait for 5s to let late events that were triggered before release to be processed
+    if (this._releaseTimeout !== undefined) {
+      clearTimeout(this._releaseTimeout);
+    }
+
+    this._releaseTimeout = setTimeout(() => {
+      this._player = undefined;
+      this._releaseTimeout = undefined;
+    }, 5000);
   }
 
   /**
@@ -60,13 +94,22 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
 
     if (
       parsedError instanceof VideoRuntimeError &&
-      this.triggerEvent("onError", parsedError)
+      this.triggerJSEvent('onError', parsedError as VideoRuntimeError)
     ) {
       // We don't throw errors if onError is provided
       return;
     }
 
     throw parsedError;
+  }
+
+  /**
+   * Updates the memory size of the player and its source. Should be called after any operation that changes the memory size of the player or its source.
+   * @internal
+   */
+  private updateMemorySize() {
+    NitroModules.updateMemorySize(this.player);
+    NitroModules.updateMemorySize(this.player.source);
   }
 
   /**
@@ -199,13 +242,13 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   async initialize(): Promise<void> {
     await this.wrapPromise(this.player.initialize());
 
-    NitroModules.updateMemorySize(this.player);
+    this.updateMemorySize();
   }
 
   async preload(): Promise<void> {
     await this.wrapPromise(this.player.preload());
 
-    NitroModules.updateMemorySize(this.player);
+    this.updateMemorySize();
   }
 
   /**
@@ -257,13 +300,15 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
       | NoAutocomplete<VideoPlayerSource>
       | null,
   ): Promise<void> {
+    this.updateMemorySize();
+
     await this.wrapPromise(
       this.player.replaceSourceAsync(
         source === null ? null : createSource(source),
       ),
     );
 
-    NitroModules.updateMemorySize(this.player);
+    this.updateMemorySize();
   }
 
   // Text Track Management

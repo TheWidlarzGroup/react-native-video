@@ -1,5 +1,4 @@
 import videojs from "video.js";
-import type { VideoPlayerSource } from "../spec/nitro/VideoPlayerSource.nitro";
 import type { AudioTrack } from "./types/AudioTrack";
 import type { IgnoreSilentSwitchMode } from "./types/IgnoreSilentSwitchMode";
 import type { MixAudioMode } from "./types/MixAudioMode";
@@ -66,7 +65,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   private mediaSession: MediaSessionHandler;
   private _source: NativeVideoConfig | undefined;
 
-  constructor(source: VideoSource | VideoConfig | VideoPlayerSource) {
+  constructor(source: VideoSource | VideoConfig | VideoPlayerSourceBase) {
     const video = document.createElement("video");
     const player = videojs(video, {
       qualityLevels: true,
@@ -103,14 +102,14 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   // Source
   get source(): VideoPlayerSourceBase {
     return {
-      uri: this._source?.uri!,
+      uri: this._source!.uri,
       config: this._source!,
       getAssetInformationAsync: async () => {
         return {
           bitrate: NaN,
           width: this.player.videoWidth(),
           height: this.player.videoHeight(),
-          duration: BigInt(this.duration),
+          duration: this.duration,
           fileSize: BigInt(NaN),
           isHDR: false,
           isLive: false,
@@ -267,7 +266,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     source:
       | VideoSource
       | VideoConfig
-      | NoAutocomplete<VideoPlayerSource>
+      | NoAutocomplete<VideoPlayerSourceBase>
       | null,
   ): Promise<void> {
     if (!source) {
@@ -286,7 +285,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
       );
       return;
     }
-    this._source = source as VideoPlayerSource;
+    this._source = source as NativeVideoConfig;
     // TODO: handle start time
     this.player.src({
       src: source.uri,

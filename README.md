@@ -12,15 +12,15 @@ The most battle-tested open-source video player component for React Native with 
 
 | Feature | Status |
 |---------|--------|
-| 📱 Plays all video formats natively supported by iOS/Android | ✅ Available & Production Ready by August |
-| ▶️ Local and remote playback | ✅ Available & Production Ready by August |
-| 🔁 Streaming: HLS • DASH • SmoothStreaming | ✅ Available & Production Ready by August |
-| 🧩 Expo plugin support | ✅ Available & Production Ready by August |
-| 📴 Offline playback, video download, support for side-tracks and side-captions (via [optional SDK](https://docs.thewidlarzgroup.com/offline-video-sdk?utm_source=rnv&utm_medium=readme&utm_id=features-text)) | ✅ Available & Production Ready by August |
-| 📱 Picture in Picture | ✅ Available & Production Ready by August |
+| 📱 Plays all video formats natively supported by iOS/Android | ✅ Available |
+| ▶️ Local and remote playback | ✅ Available |
+| 🔁 Streaming: HLS • DASH • SmoothStreaming | ✅ Available |
+| 🧩 Expo plugin support | ✅ Available |
+| 📴 Offline playback, video download, support for side-tracks and side-captions (via [optional SDK](https://docs.thewidlarzgroup.com/offline-video-sdk?utm_source=rnv&utm_medium=readme&utm_id=features-text)) | ✅ Available |
+| 📱 Picture in Picture | ✅ Available |
 | 🎚️ Fine-grained control over tracks, buffering & events | 🏗️ In Development |
-| 🧠 Advanced control over playback and buffering | 📝 [TODO](https://github.com/TheWidlarzGroup/react-native-video/issues/4604) |
-| 🔐 DRM: Widevine & FairPlay ([See free DRM stream example](https://www.thewidlarzgroup.com/services/free-drm-token-generator-for-video?utm_source=rnv&utm_medium=readme&utm_id=free-drm)) | 📝 [TODO](https://github.com/TheWidlarzGroup/react-native-video/issues/4606) |
+| 🧠 Advanced control over playback and buffering | ✅ Available |
+| 🔐 DRM: Widevine & FairPlay ([See free DRM stream example](https://www.thewidlarzgroup.com/services/free-drm-token-generator-for-video?utm_source=rnv&utm_medium=readme&utm_id=free-drm)) | ✅ Available |
 | 🌐 Basic Web Support | 📝 [TODO](https://github.com/TheWidlarzGroup/react-native-video/issues/4605) |
 | 📺 TV Support | 📝 [TODO](https://github.com/TheWidlarzGroup/react-native-video/issues/4607) |
 | 🥽 VisionOS Support | 📝 [TODO](https://github.com/TheWidlarzGroup/react-native-video/issues/4608) |
@@ -41,21 +41,20 @@ The most battle-tested open-source video player component for React Native with 
 
 ## 📚 Documentation & Examples
 
-- 📖 [Documentation](https://docs.thewidlarzgroup.com/react-native-video)
+- 📖 [Documentation](https://docs.thewidlarzgroup.com/react-native-video/docs/v7/intro)
 - 📦 [Example: Basic Usage](https://github.com/TheWidlarzGroup/react-native-video/tree/v7/example)
 - 📦 [Example: Free DRM Stream](https://www.thewidlarzgroup.com/services/free-drm-token-generator-for-video?utm_source=rnv&utm_medium=readme&utm_id=free-drm)
-- 📦 Example: Offline SDK integration - In Progress 🏗️, will be available soon
 
 ## 🚀 Quick Start
 
 ### Requirements
 
 - React Native 0.75 or higher
-- `react-native-nitro-modules` (>=0.27.2) - Please see [nitro requirements](https://nitro.margelo.com/docs/minimum-requirements)
+- `react-native-nitro-modules` (>=0.31.10) - Please see [nitro requirements](https://nitro.margelo.com/docs/minimum-requirements)
 
 ### Install
 
-`react-native-video` requires `react-native-nitro-modules` (>=0.27.2) in your project.
+`react-native-video` requires `react-native-nitro-modules` (>=0.31.10) in your project.
 ```bash
 npm install react-native-nitro-modules
 ```
@@ -63,8 +62,8 @@ npm install react-native-nitro-modules
 Then install `react-native-video`
 
 ```bash
-# Install the alpha version of react-native-video v7
-npm install react-native-video@next
+# Install the beta version of react-native-video v7
+npm install react-native-video@beta
 
 # Install pods
 cd ios && pod install
@@ -103,26 +102,28 @@ export default () => (
 
 ---
 
-## 🧩 Plugins
+## :inbox_tray: We're building a Pro Player!
 
-<a href="https://www.thewidlarzgroup.com/offline-video-sdk?utm_source=rnv&utm_medium=readme&utm_id=banner">
-  <img src="./docs/static/baners/sdk-banner.png" alt="Offline SDK Preview" width="40%" align="right" />
+<a href="https://sdk.thewidlarzgroup.com">
+  <img src="./docs/static/baners/rnv-pro-player-banner.png" alt="Offline SDK Preview" width="40%" align="right" />
 </a>
 
-### 1 · 📥 Offline SDK
+We see the need for a more feature-rich video player. There is a gap between open source and commercial players, and we want to fill that gap with plugins.
 
-Enable offline streaming with full control over downloads, license lifecycle, secure storage, and media access.
+**Are you using a commercial player just for 1-2 features?** Maybe you are paying for a license just to get **Caching**, **Ads**, or **Analytics**? Let us know. We want to identify these missing pieces and build them, so you can switch back to open source.
 
-- Track selection (bitrate, audio, subtitles)
-- Pause / resume & background queueing
-- Expiration & auto-cleanup
-- Built for Android & iOS
-- → [Read the SDK Docs](https://docs.thewidlarzgroup.com/offline-video-sdk?utm_source=rnv&utm_medium=readme&utm_id=modules-sdk-text)
+**This is what we have already. Check out!**
 
-### 2 · 🧪 Architecture
+* [Offline Video](https://sdk.thewidlarzgroup.com/offline-video): Logic for downloading streams (HLS/DASH) and standard video files to enable offline playback.
+* [Background Uploader](https://sdk.thewidlarzgroup.com/background-uploader): Handles uploads even if the app is minimized (not strictly a player plugin, but super useful).
+* [Chapter Markers](https://sdk.thewidlarzgroup.com/chapters): Visual markers on the timeline to navigate content.
 
-Write your own plugins to extend library logic, attach analytics or add custom workflows - **without forking** the core SDK.  
-→ [Plugin documentation](https://docs.thewidlarzgroup.com/react-native-video/other/plugin)
+<br/>
+<br/>
+
+[-> Tell us what to build next ←](https://sdk.thewidlarzgroup.com/ask-for-plugin) or reach out to us sdk@thewidlarzgroup.com
+
+<br/>
 
 ---
 

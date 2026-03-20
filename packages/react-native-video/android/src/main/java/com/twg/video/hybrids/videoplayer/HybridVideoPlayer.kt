@@ -43,7 +43,7 @@ import kotlin.math.max
 
 @UnstableApi
 @DoNotStrip
-class HybridVideoPlayer() : HybridVideoPlayerSpec() {
+class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   override lateinit var source: HybridVideoPlayerSourceSpec
   override var eventEmitter = HybridVideoPlayerEventEmitter()
     set(value) {
@@ -60,7 +60,11 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
     throw LibraryError.ApplicationContextNotFound
   }
 
-  lateinit var player: ExoPlayer
+  var player: ExoPlayer = runOnMainThreadSync {
+    // Build Temporary player that will be replaced when source is loaded
+    return@runOnMainThreadSync ExoPlayer.Builder(context).build()
+  }
+
   var loadedWithSource = false
   private var currentPlayerView: WeakReference<PlayerView>? = null
 
@@ -277,8 +281,6 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
       if (source.config.initializeOnCreation == true) {
         initializePlayer()
         player.prepare()
-      } else {
-        player = ExoPlayer.Builder(context).build()
       }
     }
 
@@ -305,14 +307,19 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
     currentTime = time.coerceIn(0.0, duration)
   }
 
-  override fun replaceSourceAsync(source: HybridVideoPlayerSourceSpec?): Promise<Unit> {
+  override fun replaceSourceAsync(source: Variant_NullType_HybridVideoPlayerSourceSpec?): Promise<Unit> {
     return Promise.async {
+      val source = source?.asSecondOrNull()
+
       if (source == null) {
         release()
         return@async
       }
 
       val hybridSource = source as? HybridVideoPlayerSource ?: throw PlayerError.InvalidSource
+
+      val oldSource = this.source as? HybridVideoPlayerSource
+      oldSource?.sourceLoader?.cancel()
 
       runOnMainThreadSync {
         // Update source
@@ -341,15 +348,18 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
     }
   }
 
-  private fun release() {
+  override fun release() {
     if (playInBackground || showNotificationControls) {
       VideoPlaybackService.stopService(this, videoPlaybackServiceConnection)
     }
 
-    VideoManager.unregisterPlayer(this)
-    stopProgressUpdates()
-    loadedWithSource = false
     runOnMainThread {
+      VideoManager.unregisterPlayer(this)
+      stopProgressUpdates()
+      loadedWithSource = false
+
+      eventEmitter.clearAllListeners()
+
       player.removeListener(playerListener)
       player.removeAnalyticsListener(analyticsListener)
       player.release() // Release player
@@ -376,8 +386,13 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
     release()
   }
 
+  override fun close() {
+    release()
+  }
+
   override val memorySize: Long
-    get() = allocator?.totalBytesAllocated?.toLong() ?: 0L
+    // 1 MiB by default
+    get() = allocator?.totalBytesAllocated?.toLong() ?: (1024L * 1024L)
 
   private fun startProgressUpdates() {
     stopProgressUpdates() // Ensure no multiple runnables
@@ -592,10 +607,10 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec() {
     return TextTrackUtils.getAvailableTextTracks(player, source)
   }
 
-  override fun selectTextTrack(textTrack: TextTrack?) {
+  override fun selectTextTrack(textTrack: Variant_NullType_TextTrack?) {
     selectedExternalTrackIndex = TextTrackUtils.selectTextTrack(
       player = player,
-      textTrack = textTrack,
+      textTrack = textTrack?.asSecondOrNull(),
       source = source,
       onTrackChange = { track -> eventEmitter.onTrackChange(track) }
     )

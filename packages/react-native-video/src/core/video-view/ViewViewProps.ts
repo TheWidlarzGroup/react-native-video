@@ -1,5 +1,6 @@
 import type { ViewProps, ViewStyle } from "react-native";
 import type { SurfaceType } from "../../spec/nitro/VideoViewViewManager.nitro";
+import type { ListenerSubscription } from "../types/EventEmitter";
 import type { VideoViewEvents } from "../types/Events";
 import type { ResizeMode } from "../types/ResizeMode";
 import type { VideoPlayer } from "../VideoPlayer";
@@ -73,4 +74,14 @@ export interface VideoViewRef {
    * @returns true if picture in picture mode is supported, false otherwise
    */
   canEnterPictureInPicture: () => boolean;
+  /**
+   * Adds a listener for a view event.
+   * @param event - The event to add a listener for.
+   * @param callback - The callback to call when the event is triggered.
+   * @returns A subscription object that can be used to remove the listener.
+   */
+  addEventListener: <Event extends keyof VideoViewEvents>(
+    event: Event,
+    callback: VideoViewEvents[Event]
+  ) => ListenerSubscription;
 }

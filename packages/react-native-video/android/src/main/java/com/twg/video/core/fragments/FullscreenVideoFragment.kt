@@ -83,17 +83,29 @@ class FullscreenVideoFragment(private val videoView: VideoView) : Fragment() {
     }
   }
 
-  override fun onConfigurationChanged(newConfig: Configuration) {
-    super.onConfigurationChanged(newConfig)
-
-    // Handle PiP mode changes
-    val isInPictureInPictureMode =
-      requireActivity().isInPictureInPictureMode
+  override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean) {
+    super.onPictureInPictureModeChanged(isInPictureInPictureMode)
 
     if (isInPictureInPictureMode) {
       videoView.playerView.useController = false
+      videoView.playerView.controllerAutoShow = false
     } else {
       videoView.playerView.useController = videoView.useController
+      videoView.playerView.controllerAutoShow = true
+    }
+  }
+
+  override fun onConfigurationChanged(newConfig: Configuration) {
+    super.onConfigurationChanged(newConfig)
+
+    val isInPictureInPictureMode = requireActivity().isInPictureInPictureMode
+
+    if (isInPictureInPictureMode) {
+      videoView.playerView.useController = false
+      videoView.playerView.controllerAutoShow = false
+    } else {
+      videoView.playerView.useController = videoView.useController
+      videoView.playerView.controllerAutoShow = true
     }
   }
 
@@ -197,7 +209,11 @@ class FullscreenVideoFragment(private val videoView: VideoView) : Fragment() {
 
     restoreSystemUI()
 
-    if (videoView.useController == false) {
+    // Keep controls disabled if in PiP mode - media session creates its own controls for PiP
+    val isInPictureInPictureMode = requireActivity().isInPictureInPictureMode
+    if (isInPictureInPictureMode) {
+      videoView.playerView.useController = false
+    } else if (videoView.useController == false) {
       videoView.playerView.useController = false
     }
 

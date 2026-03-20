@@ -8,6 +8,8 @@ import {
 } from "react";
 import { View, type ViewStyle } from "react-native";
 import type { VideoPlayer } from "../VideoPlayer.web";
+import type { VideoViewEvents } from "../types/Events";
+import type { ListenerSubscription } from "../types/EventEmitter";
 import type { VideoViewProps, VideoViewRef } from "./ViewViewProps";
 
 /**
@@ -59,6 +61,13 @@ const VideoView = forwardRef<VideoViewRef, VideoViewProps>(
           document.exitPictureInPicture();
         },
         canEnterPictureInPicture: () => document.pictureInPictureEnabled,
+        addEventListener: <Event extends keyof VideoViewEvents>(
+          _event: Event,
+          _callback: VideoViewEvents[Event],
+        ): ListenerSubscription => {
+          // View events are not supported on web
+          return { remove: () => {} };
+        },
       }),
       [player],
     );

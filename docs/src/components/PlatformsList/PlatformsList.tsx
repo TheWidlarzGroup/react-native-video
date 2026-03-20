@@ -14,7 +14,7 @@ interface Platforms {
   types: Platform[];
 }
 
-function PlatformsList({types}: Platforms) {
+function PlatformsList({ types }: Platforms) {
   return (
     <p className={styles.paragraphStyle}>
       {types.length === 1 && !types.includes('All')

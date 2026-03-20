@@ -6,7 +6,6 @@ import type {
   onPlaybackStateChangeData,
   onProgressData,
   onVolumeChangeData,
-  AllPlayerEvents as PlayerEvents,
   TimedMetadata,
 } from "../types/Events";
 import type { TextTrack } from "../types/TextTrack";
@@ -23,11 +22,16 @@ import type { AudioTrack } from "../types/AudioTrack";
 import type { VideoJsTracks, VideoJsQualityArray } from "../VideoPlayer.web";
 import type { VideoTrack } from "../types/VideoTrack";
 import type { QualityLevel } from "../types/QualityLevel";
+import type {
+  ListenerSubscription,
+  VideoPlayerEventEmitterBase,
+} from "../types/EventEmitter";
 
 type VideoJsPlayer = ReturnType<typeof videojs>;
 
-export class WebEventEmiter implements PlayerEvents {
+export class WebEventEmiter implements VideoPlayerEventEmitterBase {
   private _isBuferring = false;
+  private _listeners: Map<string, Set<(...args: any[]) => void>> = new Map();
 
   constructor(private player: VideoJsPlayer) {
     // TODO: add `onBandwithUpdate`
@@ -128,8 +132,163 @@ export class WebEventEmiter implements PlayerEvents {
     this.player.qualityLevels().off("change", this._onQualityChange);
   }
 
+  private _addListener(
+    event: string,
+    listener: (...args: any[]) => void,
+  ): ListenerSubscription {
+    if (!this._listeners.has(event)) {
+      this._listeners.set(event, new Set());
+    }
+    this._listeners.get(event)!.add(listener);
+    return {
+      remove: () => {
+        this._listeners.get(event)?.delete(listener);
+      },
+    };
+  }
+
+  private _emit(event: string, ...args: any[]) {
+    this._listeners.get(event)?.forEach((fn) => fn(...args));
+  }
+
+  addOnAudioBecomingNoisyListener(listener: () => void): ListenerSubscription {
+    return this._addListener("onAudioBecomingNoisy", listener);
+  }
+
+  addOnAudioFocusChangeListener(
+    listener: (hasAudioFocus: boolean) => void,
+  ): ListenerSubscription {
+    return this._addListener("onAudioFocusChange", listener);
+  }
+
+  addOnBandwidthUpdateListener(
+    listener: (data: BandwidthData) => void,
+  ): ListenerSubscription {
+    return this._addListener("onBandwidthUpdate", listener);
+  }
+
+  addOnBufferListener(
+    listener: (buffering: boolean) => void,
+  ): ListenerSubscription {
+    return this._addListener("onBuffer", listener);
+  }
+
+  addOnControlsVisibleChangeListener(
+    listener: (visible: boolean) => void,
+  ): ListenerSubscription {
+    return this._addListener("onControlsVisibleChange", listener);
+  }
+
+  addOnEndListener(listener: () => void): ListenerSubscription {
+    return this._addListener("onEnd", listener);
+  }
+
+  addOnExternalPlaybackChangeListener(
+    listener: (externalPlaybackActive: boolean) => void,
+  ): ListenerSubscription {
+    return this._addListener("onExternalPlaybackChange", listener);
+  }
+
+  addOnLoadListener(
+    listener: (data: onLoadData) => void,
+  ): ListenerSubscription {
+    return this._addListener("onLoad", listener);
+  }
+
+  addOnLoadStartListener(
+    listener: (data: onLoadStartData) => void,
+  ): ListenerSubscription {
+    return this._addListener("onLoadStart", listener);
+  }
+
+  addOnPlaybackStateChangeListener(
+    listener: (data: onPlaybackStateChangeData) => void,
+  ): ListenerSubscription {
+    return this._addListener("onPlaybackStateChange", listener);
+  }
+
+  addOnPlaybackRateChangeListener(
+    listener: (rate: number) => void,
+  ): ListenerSubscription {
+    return this._addListener("onPlaybackRateChange", listener);
+  }
+
+  addOnProgressListener(
+    listener: (data: onProgressData) => void,
+  ): ListenerSubscription {
+    return this._addListener("onProgress", listener);
+  }
+
+  addOnReadyToDisplayListener(listener: () => void): ListenerSubscription {
+    return this._addListener("onReadyToDisplay", listener);
+  }
+
+  addOnSeekListener(
+    listener: (position: number) => void,
+  ): ListenerSubscription {
+    return this._addListener("onSeek", listener);
+  }
+
+  addOnStatusChangeListener(
+    listener: (status: VideoPlayerStatus) => void,
+  ): ListenerSubscription {
+    return this._addListener("onStatusChange", listener);
+  }
+
+  addOnTimedMetadataListener(
+    listener: (data: TimedMetadata) => void,
+  ): ListenerSubscription {
+    return this._addListener("onTimedMetadata", listener);
+  }
+
+  addOnTextTrackDataChangedListener(
+    listener: (data: string[]) => void,
+  ): ListenerSubscription {
+    return this._addListener("onTextTrackDataChanged", listener);
+  }
+
+  addOnTrackChangeListener(
+    listener: (track: TextTrack | null) => void,
+  ): ListenerSubscription {
+    return this._addListener("onTrackChange", listener);
+  }
+
+  addOnVolumeChangeListener(
+    listener: (data: onVolumeChangeData) => void,
+  ): ListenerSubscription {
+    return this._addListener("onVolumeChange", listener);
+  }
+
+  clearAllListeners(): void {
+    this._listeners.clear();
+  }
+
+  addOnErrorListener(
+    listener: (error: VideoRuntimeError) => void,
+  ): ListenerSubscription {
+    return this._addListener("onError", listener);
+  }
+
+  addOnAudioTrackChangeListener(
+    listener: (track: AudioTrack | null) => void,
+  ): ListenerSubscription {
+    return this._addListener("onAudioTrackChange", listener);
+  }
+
+  addOnVideoTrackChangeListener(
+    listener: (track: VideoTrack | null) => void,
+  ): ListenerSubscription {
+    return this._addListener("onVideoTrackChange", listener);
+  }
+
+  addOnQualityChangeListener(
+    listener: (quality: QualityLevel) => void,
+  ): ListenerSubscription {
+    return this._addListener("onQualityChange", listener);
+  }
+
   _onTimeUpdate() {
-    this.onProgress({
+    this._emit("onProgress", {
       currentTime: this.player.currentTime() ?? 0,
       bufferDuration: this.player.bufferedEnd(),
     });
@@ -137,17 +296,17 @@ export class WebEventEmiter implements PlayerEvents {
 
   _onCanPlay() {
     this._isBuferring = false;
-    this.onBuffer(false);
-    this.onStatusChange("readyToPlay");
+    this._emit("onBuffer", false);
+    this._emit("onStatusChange", "readyToPlay");
   }
   _onWaiting() {
     this._isBuferring = true;
-    this.onBuffer(true);
-    this.onStatusChange("loading");
+    this._emit("onBuffer", true);
+    this._emit("onStatusChange", "loading");
   }
 
   _onDurationChange() {
-    this.onLoad({
+    this._emit("onLoad", {
       currentTime: this.player.currentTime() ?? 0,
       duration: this.player.duration() ?? NaN,
       width: this.player.width() ?? NaN,
@@ -157,12 +316,12 @@ export class WebEventEmiter implements PlayerEvents {
   }
 
   _onEnded() {
-    this.onEnd();
-    this.onStatusChange("idle");
+    this._emit("onEnd");
+    this._emit("onStatusChange", "idle");
   }
 
   _onLoadStart() {
-    this.onLoadStart({
+    this._emit("onLoadStart", {
       sourceType: "network",
       source: {
         uri: this.player.src(undefined)!,
@@ -172,7 +331,7 @@ export class WebEventEmiter implements PlayerEvents {
         },
         getAssetInformationAsync: async () => {
           return {
-            duration: BigInt(this.player.duration() ?? NaN),
+            duration: this.player.duration() ?? NaN,
             height: this.player.height() ?? NaN,
             width: this.player.width() ?? NaN,
             orientation: "unknown",
@@ -187,40 +346,40 @@ export class WebEventEmiter implements PlayerEvents {
   }
 
   _onPlay() {
-    this.onPlaybackStateChange({
+    this._emit("onPlaybackStateChange", {
       isPlaying: true,
       isBuffering: this._isBuferring,
     });
   }
 
   _onPause() {
-    this.onPlaybackStateChange({
+    this._emit("onPlaybackStateChange", {
       isPlaying: false,
       isBuffering: this._isBuferring,
     });
   }
 
   _onRateChange() {
-    this.onPlaybackRateChange(this.player.playbackRate() ?? 1);
+    this._emit("onPlaybackRateChange", this.player.playbackRate() ?? 1);
   }
 
   _onLoadedData() {
-    this.onReadyToDisplay();
+    this._emit("onReadyToDisplay");
   }
 
   _onSeeked() {
-    this.onSeek(this.player.currentTime() ?? 0);
+    this._emit("onSeek", this.player.currentTime() ?? 0);
   }
 
   _onVolumeChange() {
-    this.onVolumeChange({
+    this._emit("onVolumeChange", {
       muted: this.player.muted() ?? false,
       volume: this.player.volume() ?? 1,
     });
   }
 
   _onError() {
-    this.onStatusChange("error");
+    this._emit("onStatusChange", "error");
     const err = this.player.error();
     if (!err) {
       console.error("Unknown error occured in player");
@@ -240,7 +399,7 @@ export class WebEventEmiter implements PlayerEvents {
       number,
       LibraryError | PlayerError | SourceError | UnknownError
     >;
-    this.onError(new VideoError(codeMap[err.code]!, err.message));
+    this._emit("onError", new VideoError(codeMap[err.code]!, err.message));
   }
 
   _onTextTrackChange() {
@@ -255,7 +414,7 @@ export class WebEventEmiter implements PlayerEvents {
       }))
       .find((x) => x.selected);
 
-    this.onTrackChange(selected ?? null);
+    this._emit("onTrackChange", selected ?? null);
   }
 
   _onAudioTrackChange() {
@@ -270,7 +429,7 @@ export class WebEventEmiter implements PlayerEvents {
       }))
       .find((x) => x.selected);
 
-    this.onAudioTrackChange(selected ?? null);
+    this._emit("onAudioTrackChange", selected ?? null);
   }
 
   _onVideoTrackChange() {
@@ -285,7 +444,7 @@ export class WebEventEmiter implements PlayerEvents {
       }))
       .find((x) => x.selected);
 
-    this.onVideoTrackChange(selected ?? null);
+    this._emit("onVideoTrackChange", selected ?? null);
   }
 
   _onQualityChange() {
@@ -293,7 +452,7 @@ export class WebEventEmiter implements PlayerEvents {
     const levels: VideoJsQualityArray = this.player.qualityLevels();
     const quality = levels[levels.selectedIndex]!;
 
-    this.onQualityChange({
+    this._emit("onQualityChange", {
       id: quality.id,
       width: quality.width,
       height: quality.height,
@@ -301,31 +460,4 @@ export class WebEventEmiter implements PlayerEvents {
       selected: true,
     });
   }
-
-  NOOP = () => {};
-
-  onError: (error: VideoRuntimeError) => void = this.NOOP;
-  onAudioBecomingNoisy: () => void = this.NOOP;
-  onAudioFocusChange: (hasAudioFocus: boolean) => void = this.NOOP;
-  onAudioTrackChange: (track: AudioTrack | null) => void = this.NOOP;
-  onBandwidthUpdate: (data: BandwidthData) => void = this.NOOP;
-  onBuffer: (buffering: boolean) => void = this.NOOP;
-  onControlsVisibleChange: (visible: boolean) => void = this.NOOP;
-  onEnd: () => void = this.NOOP;
-  onExternalPlaybackChange: (externalPlaybackActive: boolean) => void =
-    this.NOOP;
-  onLoad: (data: onLoadData) => void = this.NOOP;
-  onLoadStart: (data: onLoadStartData) => void = this.NOOP;
-  onPlaybackStateChange: (data: onPlaybackStateChangeData) => void = this.NOOP;
-  onPlaybackRateChange: (rate: number) => void = this.NOOP;
-  onProgress: (data: onProgressData) => void = this.NOOP;
-  onReadyToDisplay: () => void = this.NOOP;
-  onSeek: (seekTime: number) => void = this.NOOP;
-  onTimedMetadata: (metadata: TimedMetadata) => void = this.NOOP;
-  onTextTrackDataChanged: (texts: string[]) => void = this.NOOP;
-  onTrackChange: (track: TextTrack | null) => void = this.NOOP;
-  onVolumeChange: (data: onVolumeChangeData) => void = this.NOOP;
-  onStatusChange: (status: VideoPlayerStatus) => void = this.NOOP;
-  onVideoTrackChange: (track: VideoTrack | null) => void = this.NOOP;
-  onQualityChange: (quality: QualityLevel) => void = this.NOOP;
 }
