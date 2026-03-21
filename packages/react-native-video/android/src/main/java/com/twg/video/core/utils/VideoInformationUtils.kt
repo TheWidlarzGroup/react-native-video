@@ -25,11 +25,11 @@ object VideoInformationUtils {
     val width = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toDoubleOrNull() ?: Double.NaN
     val height = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toDoubleOrNull() ?: Double.NaN
 
-    // Get duration in milliseconds, convert to long
-    val duration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull() ?: -1L
+    // Get duration in milliseconds
+    val duration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toDoubleOrNull() ?: -1.0
 
     // If we have some valid info, but there is no duration it might be live
-    val isLive = !width.isNaN() && !height.isNaN() && duration <= 0
+    val isLive = !width.isNaN() && !height.isNaN() && duration <= 0.0
 
     // Get bitrate
     val bitrate = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE)?.toDoubleOrNull() ?: Double.NaN
