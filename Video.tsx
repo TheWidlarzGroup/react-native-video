@@ -166,6 +166,10 @@ export default class Video extends React.PureComponent<IVideoPlayer, IState> {
     this.props.onSubtitleTrackChanged?.(event.nativeEvent);
   }
 
+  onPreferredSmartSubtitlesChanged = (event) => {
+    this.props.onPreferredSmartSubtitlesChanged?.(event.nativeEvent);
+  }
+
   /**
    * @description seeks to a specified time in the video
    * @param time video time in seconds
@@ -224,6 +228,7 @@ export default class Video extends React.PureComponent<IVideoPlayer, IState> {
       onPlayPauseAction: this.onPlayPauseAction,
       onAudioTrackChanged: this.onAudioTrackChanged,
       onSubtitleTrackChanged: this.onSubtitleTrackChanged,
+      onPreferredSmartSubtitlesChanged: this.onPreferredSmartSubtitlesChanged,
     };
   };
 
