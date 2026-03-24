@@ -80,6 +80,11 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     this.player = player;
     this.mediaSession = new MediaSessionHandler(this.player);
 
+    // Bridge web errors to JS event system so consumers receive them via addEventListener.
+    (this.eventEmitter as WebEventEmitter).addOnErrorListener((error) => {
+      this.triggerJSEvent("onError", error);
+    });
+
     this.replaceSourceAsync(source);
   }
 
@@ -89,6 +94,9 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
    * @internal
    */
   __destroy() {
+    this.mediaSession.disable();
+    (this.eventEmitter as WebEventEmitter).destroy();
+    this.clearAllEvents();
     this.player.dispose();
   }
 
