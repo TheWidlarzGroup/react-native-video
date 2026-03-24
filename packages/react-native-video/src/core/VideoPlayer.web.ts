@@ -74,9 +74,6 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
         nativeTextTracks: true,
       },
     });
-    // @ts-ignore used for debugging or extending purposes
-    window.videojs = videojs;
-
     super(new WebEventEmitter(player));
 
     this.video = video;
@@ -110,7 +107,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
           width: this.player.videoWidth(),
           height: this.player.videoHeight(),
           duration: this.duration,
-          fileSize: BigInt(NaN),
+          fileSize: -1n,
           isHDR: false,
           isLive: false,
           orientation: "landscape",

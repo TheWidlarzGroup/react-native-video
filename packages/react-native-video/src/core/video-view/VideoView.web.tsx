@@ -80,7 +80,7 @@ const VideoView = forwardRef<VideoViewRef, VideoViewProps>(
       const vid = player.__getNativeRef();
       const objectFit: CSSProperties["objectFit"] =
         resizeMode === "stretch" ? "fill" : resizeMode;
-      vid.style = `position: absolute; inset: 0; width: 100%; height: 100%; object-fit: ${objectFit}`;
+      vid.style.cssText = `position: absolute; inset: 0; width: 100%; height: 100%; object-fit: ${objectFit}`;
     }, [player, resizeMode]);
 
     return (

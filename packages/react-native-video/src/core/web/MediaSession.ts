@@ -3,7 +3,10 @@ import type { CustomVideoMetadata } from "../types/VideoConfig";
 
 type VideoJsPlayer = ReturnType<typeof videojs>;
 
-const mediaSession = window.navigator.mediaSession;
+function getMediaSession(): MediaSession | undefined {
+  if (typeof window === "undefined") return undefined;
+  return window.navigator?.mediaSession;
+}
 
 export class MediaSessionHandler {
   enabled: boolean = false;
@@ -11,6 +14,9 @@ export class MediaSessionHandler {
   constructor(private player: VideoJsPlayer) {}
 
   enable() {
+    const mediaSession = getMediaSession();
+    if (!mediaSession) return;
+
     this.enabled = true;
 
     const defaultSkipTime = 15;
@@ -133,6 +139,9 @@ export class MediaSessionHandler {
   disable() {}
 
   updateMediaSession(metadata: CustomVideoMetadata | undefined) {
+    const mediaSession = getMediaSession();
+    if (!mediaSession) return;
+
     if (!metadata) {
       mediaSession.metadata = null;
       return;

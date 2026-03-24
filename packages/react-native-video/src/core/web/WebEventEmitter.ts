@@ -106,6 +106,8 @@ export class WebEventEmitter implements VideoPlayerEventEmitterBase {
 
     this.player.off("durationchange", this._onDurationChange);
 
+    this.player.off("loadstart", this._onLoadStart);
+
     this.player.off("play", this._onPlay);
     this.player.off("pause", this._onPause);
 
@@ -127,7 +129,6 @@ export class WebEventEmitter implements VideoPlayerEventEmitterBase {
 
     this.player.videoTracks().off("change", this._onVideoTrackChange);
 
-    this._onQualityChange = this._onQualityChange.bind(this);
     // @ts-expect-error this isn't typed
     this.player.qualityLevels().off("change", this._onQualityChange);
   }
@@ -309,8 +310,8 @@ export class WebEventEmitter implements VideoPlayerEventEmitterBase {
     this._emit("onLoad", {
       currentTime: this.player.currentTime() ?? 0,
       duration: this.player.duration() ?? NaN,
-      width: this.player.width() ?? NaN,
-      height: this.player.height() ?? NaN,
+      width: this.player.videoWidth() ?? NaN,
+      height: this.player.videoHeight() ?? NaN,
       orientation: "unknown",
     });
   }
@@ -324,19 +325,19 @@ export class WebEventEmitter implements VideoPlayerEventEmitterBase {
     this._emit("onLoadStart", {
       sourceType: "network",
       source: {
-        uri: this.player.src(undefined)!,
+        uri: this.player.currentSrc(),
         config: {
-          uri: this.player.src(undefined)!,
+          uri: this.player.currentSrc(),
           externalSubtitles: [],
         },
         getAssetInformationAsync: async () => {
           return {
             duration: this.player.duration() ?? NaN,
-            height: this.player.height() ?? NaN,
-            width: this.player.width() ?? NaN,
+            height: this.player.videoHeight() ?? NaN,
+            width: this.player.videoWidth() ?? NaN,
             orientation: "unknown",
             bitrate: NaN,
-            fileSize: BigInt(NaN),
+            fileSize: -1n,
             isHDR: false,
             isLive: false,
           };
@@ -399,7 +400,7 @@ export class WebEventEmitter implements VideoPlayerEventEmitterBase {
       number,
       LibraryError | PlayerError | SourceError | UnknownError
     >;
-    this._emit("onError", new VideoError(codeMap[err.code]!, err.message));
+    this._emit("onError", new VideoError(codeMap[err.code] ?? "unknown/unknown", err.message));
   }
 
   _onTextTrackChange() {
@@ -450,7 +451,9 @@ export class WebEventEmitter implements VideoPlayerEventEmitterBase {
   _onQualityChange() {
     // @ts-expect-error this isn't typed
     const levels: VideoJsQualityArray = this.player.qualityLevels();
-    const quality = levels[levels.selectedIndex]!;
+    if (levels.selectedIndex < 0) return;
+    const quality = levels[levels.selectedIndex];
+    if (!quality) return;
 
     this._emit("onQualityChange", {
       id: quality.id,
