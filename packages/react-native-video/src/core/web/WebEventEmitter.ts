@@ -29,12 +29,12 @@ import type {
 
 type VideoJsPlayer = ReturnType<typeof videojs>;
 
-export class WebEventEmiter implements VideoPlayerEventEmitterBase {
-  private _isBuferring = false;
+export class WebEventEmitter implements VideoPlayerEventEmitterBase {
+  private _isBuffering = false;
   private _listeners: Map<string, Set<(...args: any[]) => void>> = new Map();
 
   constructor(private player: VideoJsPlayer) {
-    // TODO: add `onBandwithUpdate`
+    // TODO: add `onBandwidthUpdate`
 
     // on buffer
     this._onCanPlay = this._onCanPlay.bind(this);
@@ -295,12 +295,12 @@ export class WebEventEmiter implements VideoPlayerEventEmitterBase {
   }
 
   _onCanPlay() {
-    this._isBuferring = false;
+    this._isBuffering = false;
     this._emit("onBuffer", false);
     this._emit("onStatusChange", "readyToPlay");
   }
   _onWaiting() {
-    this._isBuferring = true;
+    this._isBuffering = true;
     this._emit("onBuffer", true);
     this._emit("onStatusChange", "loading");
   }
@@ -348,14 +348,14 @@ export class WebEventEmiter implements VideoPlayerEventEmitterBase {
   _onPlay() {
     this._emit("onPlaybackStateChange", {
       isPlaying: true,
-      isBuffering: this._isBuferring,
+      isBuffering: this._isBuffering,
     });
   }
 
   _onPause() {
     this._emit("onPlaybackStateChange", {
       isPlaying: false,
-      isBuffering: this._isBuferring,
+      isBuffering: this._isBuffering,
     });
   }
 
@@ -382,7 +382,7 @@ export class WebEventEmiter implements VideoPlayerEventEmitterBase {
     this._emit("onStatusChange", "error");
     const err = this.player.error();
     if (!err) {
-      console.error("Unknown error occured in player");
+      console.error("Unknown error occurred in player");
       return;
     }
     const codeMap = {

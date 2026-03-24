@@ -10,7 +10,7 @@ import { View, type ViewStyle } from "react-native";
 import type { VideoPlayer } from "../VideoPlayer.web";
 import type { VideoViewEvents } from "../types/Events";
 import type { ListenerSubscription } from "../types/EventEmitter";
-import type { VideoViewProps, VideoViewRef } from "./ViewViewProps";
+import type { VideoViewProps, VideoViewRef } from "./VideoViewProps";
 
 /**
  * VideoView is a component that allows you to display a video from a {@link VideoPlayer}.

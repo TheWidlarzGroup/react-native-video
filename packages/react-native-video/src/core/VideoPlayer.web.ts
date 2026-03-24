@@ -14,7 +14,7 @@ import type { VideoPlayerSourceBase } from "./types/VideoPlayerSourceBase";
 import type { VideoPlayerStatus } from "./types/VideoPlayerStatus";
 import { VideoPlayerEvents } from "./VideoPlayerEvents";
 import { MediaSessionHandler } from "./web/MediaSession";
-import { WebEventEmiter } from "./web/WebEventEmiter";
+import { WebEventEmitter } from "./web/WebEventEmitter";
 import type { VideoTrack } from "./types/VideoTrack";
 import type { QualityLevel } from "./types/QualityLevel";
 
@@ -77,7 +77,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     // @ts-ignore used for debugging or extending purposes
     window.videojs = videojs;
 
-    super(new WebEventEmiter(player));
+    super(new WebEventEmitter(player));
 
     this.video = video;
     this.player = player;

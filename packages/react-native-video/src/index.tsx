@@ -27,4 +27,4 @@ export { default as VideoView } from "./core/video-view/VideoView";
 export type {
   VideoViewProps,
   VideoViewRef,
-} from "./core/video-view/ViewViewProps";
+} from "./core/video-view/VideoViewProps";

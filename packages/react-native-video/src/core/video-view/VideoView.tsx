@@ -14,7 +14,7 @@ import {
 } from '../types/VideoError';
 import type { VideoPlayer } from '../VideoPlayer';
 import { NativeVideoView } from './NativeVideoView';
-import type { VideoViewProps, VideoViewRef } from './ViewViewProps';
+import type { VideoViewProps, VideoViewRef } from './VideoViewProps';
 
 let nitroIdCounter = 1;
 const VideoViewViewManagerFactory =
