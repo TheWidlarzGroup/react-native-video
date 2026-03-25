@@ -13,6 +13,7 @@ import type { ListenerSubscription } from "../types/EventEmitter";
 import type { VideoViewProps, VideoViewRef } from "./VideoViewProps";
 import { createPlayer, videoFeatures, usePlayerContext, useMediaAttach } from "@videojs/react";
 import { VideoSkin } from "@videojs/react/video";
+import "@videojs/react/video/skin.css";
 
 const Player = createPlayer({ features: videoFeatures });
 
