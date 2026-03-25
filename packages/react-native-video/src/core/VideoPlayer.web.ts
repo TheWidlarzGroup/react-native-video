@@ -118,6 +118,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     if (this._store) { this._store.seek(v); } else { this.video.currentTime = v; }
   }
   get muted(): boolean { return this.media.muted; }
+  // v10 store has toggleMuted() but no direct setter — always use video element
   set muted(v: boolean) { this.video.muted = v; }
   get loop(): boolean { return this.video.loop; }
   set loop(v: boolean) { this.video.loop = v; }

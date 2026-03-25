@@ -12,6 +12,7 @@ export class MediaSessionHandler {
   constructor(private store: MediaSessionStore) {}
 
   enable() {
+    if (this.enabled) return;
     const mediaSession = getMediaSession();
     if (!mediaSession) return;
 

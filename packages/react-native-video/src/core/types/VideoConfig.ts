@@ -15,11 +15,6 @@ export type VideoConfig = {
    */
   uri: VideoSource;
   /**
-   * complete mime type, used to select a backend for playback.
-   * if not specified, the extension of the url might be used
-   */
-  mimeType?: string
-  /**
    * The headers to be sent with the request.
    */
   headers?: Record<string, string>;

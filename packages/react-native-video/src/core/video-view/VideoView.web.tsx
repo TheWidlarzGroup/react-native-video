@@ -4,6 +4,7 @@ import {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useRef,
   type CSSProperties,
 } from "react";
 import { View } from "react-native";
@@ -80,6 +81,7 @@ const VideoView = forwardRef<VideoViewRef, VideoViewProps>(
     ref,
   ) => {
     const player = nPlayer as unknown as VideoPlayer;
+    const containerRef = useRef<HTMLDivElement>(null);
 
     const objectFitMap: Record<string, CSSProperties["objectFit"]> = {
       contain: "contain",
@@ -93,7 +95,7 @@ const VideoView = forwardRef<VideoViewRef, VideoViewProps>(
       ref,
       () => ({
         enterFullscreen: () => {
-          document.documentElement.requestFullscreen?.();
+          containerRef.current?.requestFullscreen?.();
         },
         exitFullscreen: () => {
           document.exitFullscreen?.();
@@ -123,6 +125,7 @@ const VideoView = forwardRef<VideoViewRef, VideoViewProps>(
         <Player.Provider>
           <PlayerBridge player={player} />
           <Player.Container
+            ref={containerRef}
             style={{
               position: "absolute",
               inset: "0",
