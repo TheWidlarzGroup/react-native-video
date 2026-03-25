@@ -6,9 +6,9 @@ import type {
   onProgressData,
   onVolumeChangeData,
   TimedMetadata,
-} from "./Events";
-import type { TextTrack } from "./TextTrack";
-import type { VideoPlayerStatus } from "./VideoPlayerStatus";
+} from './Events';
+import type { TextTrack } from './TextTrack';
+import type { VideoPlayerStatus } from './VideoPlayerStatus';
 
 /**
  * A subscription that can be used to remove a listener.

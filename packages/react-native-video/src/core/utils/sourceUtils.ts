@@ -1,4 +1,4 @@
-import type { VideoPlayerSource } from "../../spec/nitro/VideoPlayerSource.nitro";
+import type { VideoPlayerSource } from '../../spec/nitro/VideoPlayerSource.nitro';
 
 export const isVideoPlayerSource = (obj: any): obj is VideoPlayerSource => {
   return (

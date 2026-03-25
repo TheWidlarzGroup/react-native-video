@@ -1,6 +1,6 @@
-import type { AllPlayerEvents as PlayerEvents } from "../types/Events";
-import type { ListenerSubscription } from "../types/EventEmitter";
-import { VideoPlayerEventsBase } from "./VideoPlayerEventsBase";
+import type { AllPlayerEvents as PlayerEvents } from '../types/Events';
+import type { ListenerSubscription } from '../types/EventEmitter';
+import { VideoPlayerEventsBase } from './VideoPlayerEventsBase';
 
 export class VideoPlayerEvents extends VideoPlayerEventsBase {
   addEventListener<Event extends keyof PlayerEvents>(

@@ -1,9 +1,9 @@
-import type { ViewProps, ViewStyle } from "react-native";
-import type { SurfaceType } from "../../spec/nitro/VideoViewViewManager.nitro";
-import type { ListenerSubscription } from "../types/EventEmitter";
-import type { VideoViewEvents } from "../types/Events";
-import type { ResizeMode } from "../types/ResizeMode";
-import type { VideoPlayer } from "../VideoPlayer";
+import type { ViewProps, ViewStyle } from 'react-native';
+import type { SurfaceType } from '../../spec/nitro/VideoViewViewManager.nitro';
+import type { ListenerSubscription } from '../types/EventEmitter';
+import type { VideoViewEvents } from '../types/Events';
+import type { ResizeMode } from '../types/ResizeMode';
+import type { VideoPlayer } from '../VideoPlayer';
 
 export interface VideoViewProps extends Partial<VideoViewEvents>, ViewProps {
   /**
