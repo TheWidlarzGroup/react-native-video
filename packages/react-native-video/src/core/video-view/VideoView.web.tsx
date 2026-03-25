@@ -51,7 +51,7 @@ function PlayerBridge({ player }: { player: VideoPlayer }) {
  * source and event listeners attached.
  */
 function VideoElement({ player, objectFit }: { player: VideoPlayer; objectFit: string }) {
-  const ref = useCallback(
+  const mountRef = useCallback(
     (container: HTMLDivElement | null) => {
       if (!container) return;
       const video = player.__getMedia();
@@ -63,7 +63,7 @@ function VideoElement({ player, objectFit }: { player: VideoPlayer; objectFit: s
     [player, objectFit],
   );
 
-  return <div ref={ref} style={{ width: "100%", height: "100%" }} />;
+  return <div ref={mountRef} style={{ width: "100%", height: "100%" }} />;
 }
 
 const VideoView = forwardRef<VideoViewRef, VideoViewProps>(
@@ -81,8 +81,13 @@ const VideoView = forwardRef<VideoViewRef, VideoViewProps>(
   ) => {
     const player = nPlayer as unknown as VideoPlayer;
 
-    const objectFit: CSSProperties["objectFit"] =
-      resizeMode === "stretch" ? "fill" : resizeMode;
+    const objectFitMap: Record<string, CSSProperties["objectFit"]> = {
+      contain: "contain",
+      cover: "cover",
+      stretch: "fill",
+      none: "contain",
+    };
+    const objectFit = objectFitMap[resizeMode] ?? "contain";
 
     useImperativeHandle(
       ref,
