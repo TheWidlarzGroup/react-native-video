@@ -153,7 +153,10 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   }
 
   async initialize(): Promise<void> {}
-  async preload(): Promise<void> { this.video.load(); }
+  async preload(): Promise<void> {
+    this.video.preload = "auto";
+    this.video.load();
+  }
   release(): void { this.__destroy(); }
 
   play(): void {
