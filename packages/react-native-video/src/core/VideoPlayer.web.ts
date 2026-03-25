@@ -10,7 +10,7 @@ import type {
 import type { VideoPlayerBase } from "./types/VideoPlayerBase";
 import type { VideoPlayerSourceBase } from "./types/VideoPlayerSourceBase";
 import type { VideoPlayerStatus } from "./types/VideoPlayerStatus";
-import { VideoPlayerEvents } from "./VideoPlayerEvents";
+import { VideoPlayerEvents } from "./events/VideoPlayerEvents";
 import { MediaSessionHandler } from "./web/MediaSession";
 import { WebEventEmitter, type VideoStore } from "./web/WebEventEmitter";
 

@@ -14,6 +14,7 @@ import type { VideoViewProps, VideoViewRef } from "./VideoViewProps";
 import { createPlayer, videoFeatures, usePlayerContext, useMediaAttach } from "@videojs/react";
 import { VideoSkin } from "@videojs/react/video";
 import "@videojs/react/video/skin.css";
+import type { VideoStore } from "../web/WebEventEmitter";
 
 const Player = createPlayer({ features: videoFeatures });
 
@@ -22,7 +23,8 @@ const Player = createPlayer({ features: videoFeatures });
  * then passes the ready store to the adapter.
  */
 function PlayerBridge({ player }: { player: VideoPlayer }) {
-  const { store, container } = usePlayerContext();
+  const { store: rawStore, container } = usePlayerContext();
+  const store = rawStore as unknown as VideoStore;
   const setMedia = useMediaAttach();
 
   useEffect(() => {

@@ -15,7 +15,7 @@ import type { VideoPlayerBase } from "./types/VideoPlayerBase";
 import type { VideoPlayerStatus } from "./types/VideoPlayerStatus";
 import { createPlayer } from "./utils/playerFactory";
 import { createSource } from "./utils/sourceFactory";
-import { VideoPlayerEvents } from "./VideoPlayerEvents";
+import { VideoPlayerEvents } from "./events/VideoPlayerEvents";
 
 class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   private _player: VideoPlayerImpl | undefined;

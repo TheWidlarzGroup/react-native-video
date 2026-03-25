@@ -2,11 +2,11 @@ import {
   ALL_PLAYER_EVENTS,
   type JSVideoPlayerEvents,
   type AllPlayerEvents as PlayerEvents,
-} from "./types/Events";
+} from "../types/Events";
 import type {
   ListenerSubscription,
   VideoPlayerEventEmitterBase,
-} from "./types/EventEmitter";
+} from "../types/EventEmitter";
 
 export class VideoPlayerEventsBase {
   protected eventEmitter: VideoPlayerEventEmitterBase;

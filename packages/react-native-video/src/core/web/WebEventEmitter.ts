@@ -40,7 +40,11 @@ export interface VideoStore {
   readonly buffered: [number, number][];
   readonly error: { code: number; message: string } | null;
   readonly textTrackList: Array<{ kind: string; label: string; language: string; mode: string }>;
+  readonly destroyed: boolean;
+  readonly target: unknown;
   subscribe(callback: () => void): () => void;
+  attach(target: { media: HTMLVideoElement; container: HTMLElement | null }): () => void;
+  destroy(): void;
   loadSource(src: string): string;
   play(): Promise<void>;
   pause(): void;
@@ -51,6 +55,7 @@ export interface VideoStore {
   exitFullscreen(): Promise<void>;
   requestPictureInPicture(): Promise<void>;
   exitPictureInPicture(): Promise<void>;
+  readonly pipAvailability: string;
 }
 
 /**
@@ -213,7 +218,7 @@ export class WebEventEmitter implements VideoPlayerEventEmitterBase {
       }
       const codeMap: Record<number, LibraryError | PlayerError | SourceError | UnknownError> = {
         1: "player/asset-not-initialized",
-        2: "player/network",
+        2: "player/not-initialized",
         3: "player/invalid-source",
         4: "source/unsupported-content-type",
       };
