@@ -22,41 +22,7 @@ import type {
   VideoPlayerEventEmitterBase,
 } from "../types/EventEmitter";
 
-/**
- * video.js store interface — optional, used for enhanced buffering info when available.
- */
-export interface VideoStore {
-  readonly paused: boolean;
-  readonly ended: boolean;
-  readonly waiting: boolean;
-  readonly seeking: boolean;
-  readonly canPlay: boolean;
-  readonly currentTime: number;
-  readonly duration: number;
-  readonly volume: number;
-  readonly muted: boolean;
-  readonly playbackRate: number;
-  readonly source: string | null;
-  readonly buffered: [number, number][];
-  readonly error: { code: number; message: string } | null;
-  readonly textTrackList: Array<{ kind: string; label: string; language: string; mode: string }>;
-  readonly destroyed: boolean;
-  readonly target: unknown;
-  subscribe(callback: () => void): () => void;
-  attach(target: { media: HTMLVideoElement; container: HTMLElement | null }): () => void;
-  destroy(): void;
-  loadSource(src: string): string;
-  play(): Promise<void>;
-  pause(): void;
-  seek(time: number): Promise<number>;
-  setVolume(volume: number): number;
-  setPlaybackRate(rate: number): void;
-  requestFullscreen(): Promise<void>;
-  exitFullscreen(): Promise<void>;
-  requestPictureInPicture(): Promise<void>;
-  exitPictureInPicture(): Promise<void>;
-  readonly pipAvailability: string;
-}
+import type { VideoStore } from "./VideoStore";
 
 /**
  * WebEventEmitter bridges HTML5 media events to our event system.

@@ -12,7 +12,8 @@ import type { VideoPlayerSourceBase } from "./types/VideoPlayerSourceBase";
 import type { VideoPlayerStatus } from "./types/VideoPlayerStatus";
 import { VideoPlayerEvents } from "./events/VideoPlayerEvents";
 import { MediaSessionHandler } from "./web/MediaSession";
-import { WebEventEmitter, type VideoStore } from "./web/WebEventEmitter";
+import { WebEventEmitter } from "./web/WebEventEmitter";
+import type { VideoStore } from "./web/VideoStore";
 
 class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   private video: HTMLVideoElement;
@@ -90,40 +91,34 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     };
   }
 
-  // Store when available, video element fallback.
-  // Store may provide more accurate values for HLS/DASH/DRM content.
+  /** Store when available, video element fallback. */
+  private get media(): VideoStore | HTMLVideoElement {
+    return this._store ?? this.video;
+  }
 
   get status(): VideoPlayerStatus {
-    const s = this._store;
-    if (s) {
-      if (s.error) return "error";
-      if (s.canPlay) return "readyToPlay";
-      if (s.waiting) return "loading";
-      if (s.source) return "loading";
-      return "idle";
-    }
-    if (this.video.error) return "error";
+    if (this.media.error) return "error";
     if (this.video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) return "readyToPlay";
     if (this.video.readyState > HTMLMediaElement.HAVE_NOTHING) return "loading";
     if (this.video.src) return "loading";
     return "idle";
   }
 
-  get duration(): number { return this._store?.duration || this.video.duration || NaN; }
-  get volume(): number { return this._store?.volume ?? this.video.volume; }
+  get duration(): number { return this.media.duration || NaN; }
+  get volume(): number { return this.media.volume; }
   set volume(v: number) {
     const clamped = Math.max(0, Math.min(1, v));
     if (this._store) { this._store.setVolume(clamped); } else { this.video.volume = clamped; }
   }
-  get currentTime(): number { return this._store?.currentTime ?? this.video.currentTime; }
+  get currentTime(): number { return this.media.currentTime; }
   set currentTime(v: number) {
     if (this._store) { this._store.seek(v); } else { this.video.currentTime = v; }
   }
-  get muted(): boolean { return this._store?.muted ?? this.video.muted; }
+  get muted(): boolean { return this.media.muted; }
   set muted(v: boolean) { this.video.muted = v; }
   get loop(): boolean { return this.video.loop; }
   set loop(v: boolean) { this.video.loop = v; }
-  get rate(): number { return this._store?.playbackRate ?? this.video.playbackRate; }
+  get rate(): number { return this.media.playbackRate; }
   set rate(v: number) {
     if (this._store) { this._store.setPlaybackRate(v); } else { this.video.playbackRate = v; }
   }
@@ -137,9 +132,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   get playWhenInactive(): boolean { return true; }
   set playWhenInactive(_: boolean) {}
 
-  get isPlaying(): boolean {
-    return this._store ? !this._store.paused : !this.video.paused && !this.video.ended;
-  }
+  get isPlaying(): boolean { return !this.media.paused; }
 
   get showNotificationControls(): boolean {
     return this.mediaSession?.enabled ?? false;
@@ -159,16 +152,11 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   }
   release(): void { this.__destroy(); }
 
-  play(): void {
-    if (this._store) { this._store.play()?.catch(() => {}); } else { this.video.play()?.catch(() => {}); }
-  }
-
-  pause(): void {
-    if (this._store) { this._store.pause(); } else { this.video.pause(); }
-  }
+  play(): void { this.media.play()?.catch(() => {}); }
+  pause(): void { this.media.pause(); }
 
   seekBy(time: number): void {
-    const now = this._store?.currentTime ?? this.video.currentTime;
+    const now = this.media.currentTime;
     if (this._store) { this._store.seek(now + time); } else { this.video.currentTime = now + time; }
   }
 

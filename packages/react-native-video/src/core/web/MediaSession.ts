@@ -1,22 +1,9 @@
 import type { CustomVideoMetadata } from "../types/VideoConfig";
+import type { MediaSessionStore } from "./VideoStore";
 
 function getMediaSession(): MediaSession | undefined {
   if (typeof window === "undefined") return undefined;
   return window.navigator?.mediaSession;
-}
-
-/**
- * video.js store interface — the subset MediaSession needs.
- */
-interface MediaSessionStore {
-  readonly paused: boolean;
-  readonly currentTime: number;
-  readonly duration: number;
-  readonly playbackRate: number;
-  play(): Promise<void>;
-  pause(): void;
-  seek(time: number): Promise<number>;
-  subscribe(callback: () => void): () => void;
 }
 
 export class MediaSessionHandler {

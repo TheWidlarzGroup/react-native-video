@@ -14,7 +14,7 @@ import type { VideoViewProps, VideoViewRef } from "./VideoViewProps";
 import { createPlayer, videoFeatures, usePlayerContext, useMediaAttach } from "@videojs/react";
 import { VideoSkin } from "@videojs/react/video";
 import "@videojs/react/video/skin.css";
-import type { VideoStore } from "../web/WebEventEmitter";
+import type { VideoStore } from "../web/VideoStore";
 
 const Player = createPlayer({ features: videoFeatures });
 
