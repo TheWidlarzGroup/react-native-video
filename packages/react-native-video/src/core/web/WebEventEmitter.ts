@@ -95,15 +95,6 @@ export class WebEventEmitter implements VideoPlayerEventEmitterBase {
     this._mediaCleanup = null;
   }
 
-  /**
-   * Re-attach media listeners. Called when the video element might have changed.
-   * @internal
-   */
-  reattach() {
-    this._mediaCleanup?.();
-    this._attachMediaListeners();
-  }
-
   private _attachMediaListeners() {
     const video = this.getMedia();
     if (!video) return;
