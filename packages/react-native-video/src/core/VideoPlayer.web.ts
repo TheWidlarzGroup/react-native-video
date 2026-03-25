@@ -18,8 +18,6 @@ import { WebEventEmitter } from "./web/WebEventEmitter";
 import type { VideoTrack } from "./types/VideoTrack";
 import type { QualityLevel } from "./types/QualityLevel";
 import type { SupportedFeatures } from "./types/SupportedFeatures";
-import type { ListenerSubscription } from "./types/EventEmitter";
-import type { AllPlayerEvents as PlayerEvents } from "./types/Events";
 import {
   mapVideoJsTracks,
   type VideoJsPlayer,
@@ -409,27 +407,6 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     };
   }
 
-  addEventListener<Event extends keyof PlayerEvents>(
-    event: Event,
-    callback: PlayerEvents[Event],
-  ): ListenerSubscription {
-    switch (event) {
-      case "onAudioTrackChange":
-        return (this.eventEmitter as WebEventEmitter).addOnAudioTrackChangeListener(
-          callback as PlayerEvents["onAudioTrackChange"],
-        );
-      case "onVideoTrackChange":
-        return (this.eventEmitter as WebEventEmitter).addOnVideoTrackChangeListener(
-          callback as PlayerEvents["onVideoTrackChange"],
-        );
-      case "onQualityChange":
-        return (this.eventEmitter as WebEventEmitter).addOnQualityChangeListener(
-          callback as PlayerEvents["onQualityChange"],
-        );
-      default:
-        return super.addEventListener(event, callback);
-    }
-  }
 }
 
 export { VideoPlayer };
