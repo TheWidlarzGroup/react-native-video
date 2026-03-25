@@ -8,6 +8,7 @@ export type { TextTrack } from "./core/types/TextTrack";
 export type { AudioTrack } from "./core/types/AudioTrack";
 export type { VideoTrack } from "./core/types/VideoTrack";
 export type { QualityLevel } from "./core/types/QualityLevel";
+export type { SupportedFeatures } from "./core/types/SupportedFeatures";
 export type { VideoConfig, VideoSource } from "./core/types/VideoConfig";
 export type {
   LibraryError,

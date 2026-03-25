@@ -19,6 +19,16 @@ import { VideoPlayerEvents } from "./VideoPlayerEvents";
 import type { AudioTrack } from "./types/AudioTrack";
 import type { VideoTrack } from "./types/VideoTrack";
 import type { QualityLevel } from "./types/QualityLevel";
+import type { SupportedFeatures } from "./types/SupportedFeatures";
+
+function warnUnsupported(method: string, feature: keyof SupportedFeatures) {
+  if (__DEV__) {
+    console.warn(
+      `[react-native-video] ${method}() is not yet implemented on native platforms. ` +
+        `Check player.supportedFeatures.${feature} before calling.`,
+    );
+  }
+}
 
 class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   private _player: VideoPlayerImpl | undefined;
@@ -334,34 +344,40 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     return this.player.selectedTrack;
   }
 
-  // TODO: implement this
   getAvailableAudioTracks(): AudioTrack[] {
+    warnUnsupported("getAvailableAudioTracks", "audioTrackSelection");
     return [];
   }
 
-  selectAudioTrack(_: AudioTrack | null): void {}
+  selectAudioTrack(_: AudioTrack | null): void {
+    warnUnsupported("selectAudioTrack", "audioTrackSelection");
+  }
 
   get selectedAudioTrack(): AudioTrack | undefined {
     return undefined;
   }
 
   getAvailableVideoTracks(): VideoTrack[] {
+    warnUnsupported("getAvailableVideoTracks", "videoTrackSelection");
     return [];
   }
 
-  selectVideoTrack(_: VideoTrack | null): void {}
+  selectVideoTrack(_: VideoTrack | null): void {
+    warnUnsupported("selectVideoTrack", "videoTrackSelection");
+  }
 
   get selectedVideoTrack(): VideoTrack | undefined {
     return undefined;
   }
 
-  // quality
-
   getAvailableQualities(): QualityLevel[] {
+    warnUnsupported("getAvailableQualities", "qualitySelection");
     return [];
   }
 
-  selectQuality(_: QualityLevel | null): void {}
+  selectQuality(_: QualityLevel | null): void {
+    warnUnsupported("selectQuality", "qualitySelection");
+  }
 
   get currentQuality(): QualityLevel | undefined {
     return undefined;
@@ -369,6 +385,14 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
 
   get autoQualityEnabled(): boolean {
     return true;
+  }
+
+  get supportedFeatures(): SupportedFeatures {
+    return {
+      audioTrackSelection: false,
+      videoTrackSelection: false,
+      qualitySelection: false,
+    };
   }
 }
 

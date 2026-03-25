@@ -17,6 +17,7 @@ import { MediaSessionHandler } from "./web/MediaSession";
 import { WebEventEmitter } from "./web/WebEventEmitter";
 import type { VideoTrack } from "./types/VideoTrack";
 import type { QualityLevel } from "./types/QualityLevel";
+import type { SupportedFeatures } from "./types/SupportedFeatures";
 import {
   mapVideoJsTracks,
   type VideoJsPlayer,
@@ -396,6 +397,14 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
       if (!levels[i]!.enabled) return false;
     }
     return true;
+  }
+
+  get supportedFeatures(): SupportedFeatures {
+    return {
+      audioTrackSelection: true,
+      videoTrackSelection: true,
+      qualitySelection: true,
+    };
   }
 }
 
