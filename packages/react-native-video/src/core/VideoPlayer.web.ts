@@ -1,5 +1,4 @@
 import videojs from "video.js";
-import type { AudioTrack } from "./types/AudioTrack";
 import type { IgnoreSilentSwitchMode } from "./types/IgnoreSilentSwitchMode";
 import type { MixAudioMode } from "./types/MixAudioMode";
 import type { TextTrack } from "./types/TextTrack";
@@ -15,15 +14,10 @@ import type { VideoPlayerStatus } from "./types/VideoPlayerStatus";
 import { VideoPlayerEvents } from "./VideoPlayerEvents";
 import { MediaSessionHandler } from "./web/MediaSession";
 import { WebEventEmitter } from "./web/WebEventEmitter";
-import type { VideoTrack } from "./types/VideoTrack";
-import type { QualityLevel } from "./types/QualityLevel";
-import type { SupportedFeatures } from "./types/SupportedFeatures";
 import {
   mapVideoJsTracks,
   type VideoJsPlayer,
   type VideoJsTextTracks,
-  type VideoJsTracks,
-  type VideoJsQualityArray,
 } from "./web/WebVideoJsTypes";
 
 class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
@@ -306,105 +300,6 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   // Selected Text Track
   get selectedTrack(): TextTrack | undefined {
     return this.getAvailableTextTracks().find((x) => x.selected);
-  }
-
-  // audio tracks
-
-  getAvailableAudioTracks(): AudioTrack[] {
-    // @ts-expect-error they define length & index properties via prototype
-    const tracks: VideoJsTracks = this.player.audioTracks();
-
-    return mapVideoJsTracks(tracks, (track) => ({
-      id: track.id,
-      label: track.label,
-      language: track.language,
-      selected: track.enabled,
-    }));
-  }
-
-  selectAudioTrack(track: AudioTrack | null): void {
-    // @ts-expect-error they define length & index properties via prototype
-    const tracks: VideoJsTracks = this.player.audioTracks();
-
-    for (let i = 0; i < tracks.length; i++) {
-      tracks[i]!.enabled = tracks[i]!.id === track?.id;
-    }
-  }
-
-  get selectedAudioTrack(): AudioTrack | undefined {
-    return this.getAvailableAudioTracks().find((x) => x.selected);
-  }
-
-  // video tracks
-
-  getAvailableVideoTracks(): VideoTrack[] {
-    // @ts-expect-error they define length & index properties via prototype
-    const tracks: VideoJsTracks = this.player.videoTracks();
-
-    return mapVideoJsTracks(tracks, (track) => ({
-      id: track.id,
-      label: track.label,
-      language: track.language,
-      selected: track.enabled,
-    }));
-  }
-
-  selectVideoTrack(track: VideoTrack | null): void {
-    // @ts-expect-error they define length & index properties via prototype
-    const tracks: VideoJsTracks = this.player.videoTracks();
-
-    for (let i = 0; i < tracks.length; i++) {
-      tracks[i]!.enabled = tracks[i]!.id === track?.id;
-    }
-  }
-
-  get selectedVideoTrack(): VideoTrack | undefined {
-    return this.getAvailableVideoTracks().find((x) => x.selected);
-  }
-
-  // quality
-
-  getAvailableQualities(): QualityLevel[] {
-    // @ts-expect-error this isn't typed
-    const levels: VideoJsQualityArray = this.player.qualityLevels();
-    return mapVideoJsTracks(levels, (level, i) => ({
-      id: level.id,
-      width: level.width,
-      height: level.height,
-      bitrate: level.bitrate,
-      selected: levels.selectedIndex === i,
-    }));
-  }
-
-  selectQuality(quality: QualityLevel | null): void {
-    // @ts-expect-error this isn't typed
-    const levels: VideoJsQualityArray = this.player.qualityLevels();
-
-    for (let i = 0; i < levels.length; i++) {
-      // if quality is null, enable back auto-quality switch (so enable all lvls)
-      levels[i]!.enabled = !quality || levels[i]!.id === quality.id;
-    }
-  }
-
-  get currentQuality(): QualityLevel | undefined {
-    return this.getAvailableQualities().find((x) => x.selected);
-  }
-  get autoQualityEnabled(): boolean {
-    // @ts-expect-error this isn't typed
-    const levels: VideoJsQualityArray = this.player.qualityLevels();
-    // if we have a quality disabled that means we manually disabled it & disabled auto quality
-    for (let i = 0; i < levels.length; i++) {
-      if (!levels[i]!.enabled) return false;
-    }
-    return true;
-  }
-
-  get supportedFeatures(): SupportedFeatures {
-    return {
-      audioTrackSelection: true,
-      videoTrackSelection: true,
-      qualitySelection: true,
-    };
   }
 
 }

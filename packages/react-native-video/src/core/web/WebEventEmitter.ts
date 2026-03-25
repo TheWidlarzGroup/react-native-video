@@ -17,9 +17,6 @@ import {
   type VideoRuntimeError,
 } from "../types/VideoError";
 import type { VideoPlayerStatus } from "../types/VideoPlayerStatus";
-import type { AudioTrack } from "../types/AudioTrack";
-import type { VideoTrack } from "../types/VideoTrack";
-import type { QualityLevel } from "../types/QualityLevel";
 import type {
   ListenerSubscription,
   VideoPlayerEventEmitterBase,
@@ -249,24 +246,6 @@ export class WebEventEmitter implements VideoPlayerEventEmitterBase {
     listener: (error: VideoRuntimeError) => void,
   ): ListenerSubscription {
     return this._addListener("onError", listener);
-  }
-
-  addOnAudioTrackChangeListener(
-    listener: (track: AudioTrack | null) => void,
-  ): ListenerSubscription {
-    return this._addListener("onAudioTrackChange", listener);
-  }
-
-  addOnVideoTrackChangeListener(
-    listener: (track: VideoTrack | null) => void,
-  ): ListenerSubscription {
-    return this._addListener("onVideoTrackChange", listener);
-  }
-
-  addOnQualityChangeListener(
-    listener: (quality: QualityLevel) => void,
-  ): ListenerSubscription {
-    return this._addListener("onQualityChange", listener);
   }
 
   private _onTimeUpdate() {

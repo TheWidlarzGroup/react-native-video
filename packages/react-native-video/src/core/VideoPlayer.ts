@@ -16,19 +16,6 @@ import type { VideoPlayerStatus } from "./types/VideoPlayerStatus";
 import { createPlayer } from "./utils/playerFactory";
 import { createSource } from "./utils/sourceFactory";
 import { VideoPlayerEvents } from "./VideoPlayerEvents";
-import type { AudioTrack } from "./types/AudioTrack";
-import type { VideoTrack } from "./types/VideoTrack";
-import type { QualityLevel } from "./types/QualityLevel";
-import type { SupportedFeatures } from "./types/SupportedFeatures";
-
-function warnUnsupported(method: string, feature: keyof SupportedFeatures) {
-  if (__DEV__) {
-    console.warn(
-      `[react-native-video] ${method}() is not yet implemented on native platforms. ` +
-        `Check player.supportedFeatures.${feature} before calling.`,
-    );
-  }
-}
 
 class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   private _player: VideoPlayerImpl | undefined;
@@ -344,56 +331,6 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     return this.player.selectedTrack;
   }
 
-  getAvailableAudioTracks(): AudioTrack[] {
-    warnUnsupported("getAvailableAudioTracks", "audioTrackSelection");
-    return [];
-  }
-
-  selectAudioTrack(_: AudioTrack | null): void {
-    warnUnsupported("selectAudioTrack", "audioTrackSelection");
-  }
-
-  get selectedAudioTrack(): AudioTrack | undefined {
-    return undefined;
-  }
-
-  getAvailableVideoTracks(): VideoTrack[] {
-    warnUnsupported("getAvailableVideoTracks", "videoTrackSelection");
-    return [];
-  }
-
-  selectVideoTrack(_: VideoTrack | null): void {
-    warnUnsupported("selectVideoTrack", "videoTrackSelection");
-  }
-
-  get selectedVideoTrack(): VideoTrack | undefined {
-    return undefined;
-  }
-
-  getAvailableQualities(): QualityLevel[] {
-    warnUnsupported("getAvailableQualities", "qualitySelection");
-    return [];
-  }
-
-  selectQuality(_: QualityLevel | null): void {
-    warnUnsupported("selectQuality", "qualitySelection");
-  }
-
-  get currentQuality(): QualityLevel | undefined {
-    return undefined;
-  }
-
-  get autoQualityEnabled(): boolean {
-    return true;
-  }
-
-  get supportedFeatures(): SupportedFeatures {
-    return {
-      audioTrackSelection: false,
-      videoTrackSelection: false,
-      qualitySelection: false,
-    };
-  }
 }
 
 export { VideoPlayer };

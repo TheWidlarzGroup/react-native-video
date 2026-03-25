@@ -1,6 +1,5 @@
 import type { IgnoreSilentSwitchMode } from './IgnoreSilentSwitchMode';
 import type { MixAudioMode } from './MixAudioMode';
-import type { SupportedFeatures } from './SupportedFeatures';
 import type { TextTrack } from './TextTrack';
 import type { VideoPlayerSourceBase } from './VideoPlayerSourceBase';
 import type { VideoPlayerStatus } from './VideoPlayerStatus';
@@ -172,17 +171,4 @@ export interface VideoPlayerBase {
    * @returns The currently selected text track, or undefined if none is selected
    */
   readonly selectedTrack?: TextTrack;
-
-  /**
-   * Describes which optional features are supported on the current platform.
-   * Use this to check availability before calling platform-specific methods.
-   *
-   * @example
-   * ```ts
-   * if (player.supportedFeatures.qualitySelection) {
-   *   const qualities = player.getAvailableQualities();
-   * }
-   * ```
-   */
-  readonly supportedFeatures: SupportedFeatures;
 }

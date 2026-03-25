@@ -1,11 +1,8 @@
-import type { AudioTrack } from './AudioTrack';
-import type { QualityLevel } from './QualityLevel';
 import type { TextTrack } from './TextTrack';
 import type { VideoRuntimeError } from './VideoError';
 import type { VideoOrientation } from './VideoOrientation';
 import type { VideoPlayerSourceBase } from './VideoPlayerSourceBase';
 import type { VideoPlayerStatus } from './VideoPlayerStatus';
-import type { VideoTrack } from './VideoTrack';
 
 export interface VideoPlayerEvents {
   /**
@@ -19,11 +16,6 @@ export interface VideoPlayerEvents {
    * @platform Android
    */
   onAudioFocusChange: (hasAudioFocus: boolean) => void;
-  /**
-   * Called when the audio track changes
-   * @param track The new audio track
-   */
-  onAudioTrackChange: (track: AudioTrack | null) => void;
   /**
    * Called when the bandwidth of the video changes.
    */
@@ -72,10 +64,6 @@ export interface VideoPlayerEvents {
    */
   onProgress: (data: onProgressData) => void;
   /**
-   * Called when the player quality changes.
-   */
-  onQualityChange: (quality: QualityLevel) => void;
-  /**
    * Called when the video is ready to display.
    */
   onReadyToDisplay: () => void;
@@ -107,11 +95,6 @@ export interface VideoPlayerEvents {
    * Called when the player status changes.
    */
   onStatusChange: (status: VideoPlayerStatus) => void;
-  /**
-   * Called when the video track changes
-   * @param track The new video track
-   */
-  onVideoTrackChange: (track: VideoTrack | null) => void;
 }
 
 export interface JSVideoPlayerEvents {
@@ -268,7 +251,6 @@ export const ALL_PLAYER_EVENTS: (keyof AllPlayerEvents)[] =
   allKeysOf<AllPlayerEvents>()(
     'onAudioBecomingNoisy',
     'onAudioFocusChange',
-    'onAudioTrackChange',
     'onBandwidthUpdate',
     'onBuffer',
     'onControlsVisibleChange',
@@ -280,14 +262,12 @@ export const ALL_PLAYER_EVENTS: (keyof AllPlayerEvents)[] =
     'onPlaybackStateChange',
     'onPlaybackRateChange',
     'onProgress',
-    'onQualityChange',
     'onReadyToDisplay',
     'onSeek',
     'onTimedMetadata',
     'onTextTrackDataChanged',
     'onTrackChange',
     'onVolumeChange',
-    'onVideoTrackChange',
     'onStatusChange'
   );
 
