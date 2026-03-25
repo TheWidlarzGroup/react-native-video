@@ -1,7 +1,5 @@
-import type videojs from "video.js";
 import type { CustomVideoMetadata } from "../types/VideoConfig";
-
-type VideoJsPlayer = ReturnType<typeof videojs>;
+import type { VideoJsPlayer } from "./WebVideoJsTypes";
 
 function getMediaSession(): MediaSession | undefined {
   if (typeof window === "undefined") return undefined;

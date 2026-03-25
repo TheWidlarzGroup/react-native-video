@@ -1,4 +1,3 @@
-import type videojs from "video.js";
 import type {
   BandwidthData,
   onLoadData,
@@ -19,19 +18,19 @@ import {
 } from "../types/VideoError";
 import type { VideoPlayerStatus } from "../types/VideoPlayerStatus";
 import type { AudioTrack } from "../types/AudioTrack";
-import type { VideoJsTracks, VideoJsQualityArray } from "../VideoPlayer.web";
 import type { VideoTrack } from "../types/VideoTrack";
 import type { QualityLevel } from "../types/QualityLevel";
 import type {
   ListenerSubscription,
   VideoPlayerEventEmitterBase,
 } from "../types/EventEmitter";
-
-type VideoJsPlayer = ReturnType<typeof videojs>;
+import type { VideoJsPlayer } from "./WebVideoJsTypes";
+import { attachTrackHandlers } from "./WebTrackHandler";
 
 export class WebEventEmitter implements VideoPlayerEventEmitterBase {
   private _isBuffering = false;
   private _listeners: Map<string, Set<(...args: any[]) => void>> = new Map();
+  private detachTracks: () => void;
 
   constructor(private player: VideoJsPlayer) {
     // TODO: add `onBandwidthUpdate`
@@ -84,18 +83,7 @@ export class WebEventEmitter implements VideoPlayerEventEmitterBase {
     this._onError = this._onError.bind(this);
     this.player.on("error", this._onError);
 
-    this._onTextTrackChange = this._onTextTrackChange.bind(this);
-    this.player.textTracks().on("change", this._onTextTrackChange);
-
-    this._onAudioTrackChange = this._onAudioTrackChange.bind(this);
-    this.player.audioTracks().on("change", this._onAudioTrackChange);
-
-    this._onVideoTrackChange = this._onVideoTrackChange.bind(this);
-    this.player.videoTracks().on("change", this._onVideoTrackChange);
-
-    this._onQualityChange = this._onQualityChange.bind(this);
-    // @ts-expect-error this isn't typed
-    this.player.qualityLevels().on("change", this._onQualityChange);
+    this.detachTracks = attachTrackHandlers(player, this._emit.bind(this));
   }
 
   destroy() {
@@ -123,14 +111,7 @@ export class WebEventEmitter implements VideoPlayerEventEmitterBase {
 
     this.player.off("error", this._onError);
 
-    this.player.textTracks().off("change", this._onTextTrackChange);
-
-    this.player.audioTracks().off("change", this._onAudioTrackChange);
-
-    this.player.videoTracks().off("change", this._onVideoTrackChange);
-
-    // @ts-expect-error this isn't typed
-    this.player.qualityLevels().off("change", this._onQualityChange);
+    this.detachTracks();
   }
 
   private _addListener(
@@ -288,25 +269,25 @@ export class WebEventEmitter implements VideoPlayerEventEmitterBase {
     return this._addListener("onQualityChange", listener);
   }
 
-  _onTimeUpdate() {
+  private _onTimeUpdate() {
     this._emit("onProgress", {
       currentTime: this.player.currentTime() ?? 0,
       bufferDuration: this.player.bufferedEnd(),
     });
   }
 
-  _onCanPlay() {
+  private _onCanPlay() {
     this._isBuffering = false;
     this._emit("onBuffer", false);
     this._emit("onStatusChange", "readyToPlay");
   }
-  _onWaiting() {
+  private _onWaiting() {
     this._isBuffering = true;
     this._emit("onBuffer", true);
     this._emit("onStatusChange", "loading");
   }
 
-  _onDurationChange() {
+  private _onDurationChange() {
     this._emit("onLoad", {
       currentTime: this.player.currentTime() ?? 0,
       duration: this.player.duration() ?? NaN,
@@ -316,12 +297,12 @@ export class WebEventEmitter implements VideoPlayerEventEmitterBase {
     });
   }
 
-  _onEnded() {
+  private _onEnded() {
     this._emit("onEnd");
     this._emit("onStatusChange", "idle");
   }
 
-  _onLoadStart() {
+  private _onLoadStart() {
     this._emit("onLoadStart", {
       sourceType: "network",
       source: {
@@ -346,40 +327,40 @@ export class WebEventEmitter implements VideoPlayerEventEmitterBase {
     });
   }
 
-  _onPlay() {
+  private _onPlay() {
     this._emit("onPlaybackStateChange", {
       isPlaying: true,
       isBuffering: this._isBuffering,
     });
   }
 
-  _onPause() {
+  private _onPause() {
     this._emit("onPlaybackStateChange", {
       isPlaying: false,
       isBuffering: this._isBuffering,
     });
   }
 
-  _onRateChange() {
+  private _onRateChange() {
     this._emit("onPlaybackRateChange", this.player.playbackRate() ?? 1);
   }
 
-  _onLoadedData() {
+  private _onLoadedData() {
     this._emit("onReadyToDisplay");
   }
 
-  _onSeeked() {
+  private _onSeeked() {
     this._emit("onSeek", this.player.currentTime() ?? 0);
   }
 
-  _onVolumeChange() {
+  private _onVolumeChange() {
     this._emit("onVolumeChange", {
       muted: this.player.muted() ?? false,
       volume: this.player.volume() ?? 1,
     });
   }
 
-  _onError() {
+  private _onError() {
     this._emit("onStatusChange", "error");
     const err = this.player.error();
     if (!err) {
@@ -401,66 +382,5 @@ export class WebEventEmitter implements VideoPlayerEventEmitterBase {
       LibraryError | PlayerError | SourceError | UnknownError
     >;
     this._emit("onError", new VideoError(codeMap[err.code] ?? "unknown/unknown", err.message));
-  }
-
-  _onTextTrackChange() {
-    // @ts-expect-error they define length & index properties via prototype
-    const tracks: VideoJsTextTracks = this.player.textTracks();
-    const selected = [...Array(tracks.length)]
-      .map((_, i) => ({
-        id: tracks[i]!.id,
-        label: tracks[i]!.label,
-        language: tracks[i]!.language,
-        selected: tracks[i]!.mode === "showing",
-      }))
-      .find((x) => x.selected);
-
-    this._emit("onTrackChange", selected ?? null);
-  }
-
-  _onAudioTrackChange() {
-    // @ts-expect-error they define length & index properties via prototype
-    const tracks: VideoJsTracks = this.player.audioTracks();
-    const selected = [...Array(tracks.length)]
-      .map((_, i) => ({
-        id: tracks[i]!.id,
-        label: tracks[i]!.label,
-        language: tracks[i]!.language,
-        selected: tracks[i]!.enabled,
-      }))
-      .find((x) => x.selected);
-
-    this._emit("onAudioTrackChange", selected ?? null);
-  }
-
-  _onVideoTrackChange() {
-    // @ts-expect-error they define length & index properties via prototype
-    const tracks: VideoJsTracks = this.player.videoTracks();
-    const selected = [...Array(tracks.length)]
-      .map((_, i) => ({
-        id: tracks[i]!.id,
-        label: tracks[i]!.label,
-        language: tracks[i]!.language,
-        selected: tracks[i]!.enabled,
-      }))
-      .find((x) => x.selected);
-
-    this._emit("onVideoTrackChange", selected ?? null);
-  }
-
-  _onQualityChange() {
-    // @ts-expect-error this isn't typed
-    const levels: VideoJsQualityArray = this.player.qualityLevels();
-    if (levels.selectedIndex < 0) return;
-    const quality = levels[levels.selectedIndex];
-    if (!quality) return;
-
-    this._emit("onQualityChange", {
-      id: quality.id,
-      width: quality.width,
-      height: quality.height,
-      bitrate: quality.bitrate,
-      selected: true,
-    });
   }
 }

@@ -17,47 +17,13 @@ import { MediaSessionHandler } from "./web/MediaSession";
 import { WebEventEmitter } from "./web/WebEventEmitter";
 import type { VideoTrack } from "./types/VideoTrack";
 import type { QualityLevel } from "./types/QualityLevel";
-
-type VideoJsPlayer = ReturnType<typeof videojs>;
-
-// declared https://github.com/videojs/video.js/blob/main/src/js/tracks/track-list.js#L58
-export type VideoJsTextTracks = {
-  length: number;
-  [i: number]: {
-    // declared: https://github.com/videojs/video.js/blob/main/src/js/tracks/track.js
-    id: string;
-    label: string;
-    language: string;
-    // declared https://github.com/videojs/video.js/blob/20f8d76cd24325a97ccedf0b013cd1a90ad0bcd7/src/js/tracks/text-track.js
-    default: boolean;
-    mode: "showing" | "disabled" | "hidden";
-  };
-};
-
-export type VideoJsTracks = {
-  length: number;
-  [i: number]: {
-    id: string;
-    label: string;
-    language: string;
-    enabled: boolean;
-  };
-};
-
-// declared https://github.com/videojs/videojs-contrib-quality-levels/blob/main/src/quality-level.js#L32
-export type VideoJsQualityArray = {
-  length: number;
-  selectedIndex: number;
-  [i: number]: {
-    id: string;
-    label: string;
-    width: number;
-    height: number;
-    bitrate: number;
-    frameRate: number;
-    enabled: boolean;
-  };
-};
+import {
+  mapVideoJsTracks,
+  type VideoJsPlayer,
+  type VideoJsTextTracks,
+  type VideoJsTracks,
+  type VideoJsQualityArray,
+} from "./web/WebVideoJsTypes";
 
 class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   protected video: HTMLVideoElement;
@@ -318,11 +284,11 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     // @ts-expect-error they define length & index properties via prototype
     const tracks: VideoJsTextTracks = this.player.textTracks();
 
-    return [...Array(tracks.length)].map((_, i) => ({
-      id: tracks[i]!.id,
-      label: tracks[i]!.label,
-      language: tracks[i]!.language,
-      selected: tracks[i]!.mode === "showing",
+    return mapVideoJsTracks(tracks, (track) => ({
+      id: track.id,
+      label: track.label,
+      language: track.language,
+      selected: track.mode === "showing",
     }));
   }
 
@@ -347,11 +313,11 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     // @ts-expect-error they define length & index properties via prototype
     const tracks: VideoJsTracks = this.player.audioTracks();
 
-    return [...Array(tracks.length)].map((_, i) => ({
-      id: tracks[i]!.id,
-      label: tracks[i]!.label,
-      language: tracks[i]!.language,
-      selected: tracks[i]!.enabled,
+    return mapVideoJsTracks(tracks, (track) => ({
+      id: track.id,
+      label: track.label,
+      language: track.language,
+      selected: track.enabled,
     }));
   }
 
@@ -374,11 +340,11 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     // @ts-expect-error they define length & index properties via prototype
     const tracks: VideoJsTracks = this.player.videoTracks();
 
-    return [...Array(tracks.length)].map((_, i) => ({
-      id: tracks[i]!.id,
-      label: tracks[i]!.label,
-      language: tracks[i]!.language,
-      selected: tracks[i]!.enabled,
+    return mapVideoJsTracks(tracks, (track) => ({
+      id: track.id,
+      label: track.label,
+      language: track.language,
+      selected: track.enabled,
     }));
   }
 
@@ -400,11 +366,11 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   getAvailableQualities(): QualityLevel[] {
     // @ts-expect-error this isn't typed
     const levels: VideoJsQualityArray = this.player.qualityLevels();
-    return [...Array(levels.length)].map((_, i) => ({
-      id: levels[i]!.id,
-      width: levels[i]!.width,
-      height: levels[i]!.height,
-      bitrate: levels[i]!.bitrate,
+    return mapVideoJsTracks(levels, (level, i) => ({
+      id: level.id,
+      width: level.width,
+      height: level.height,
+      bitrate: level.bitrate,
       selected: levels.selectedIndex === i,
     }));
   }
