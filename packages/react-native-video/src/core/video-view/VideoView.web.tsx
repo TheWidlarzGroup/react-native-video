@@ -21,13 +21,15 @@ const Player = createPlayer({ features: videoFeatures });
  * then passes the ready store to the adapter.
  */
 function PlayerBridge({ player }: { player: VideoPlayer }) {
-  const { store } = usePlayerContext();
+  const { store, container } = usePlayerContext();
   const setMedia = useMediaAttach();
 
   useEffect(() => {
+    if (!container) return;
+
     const video = player.__getMedia();
     setMedia?.(video);
-    const detach = store.attach({ media: video, container: null });
+    const detach = store.attach({ media: video, container });
     player.__setStore(store);
 
     return () => {
@@ -35,7 +37,7 @@ function PlayerBridge({ player }: { player: VideoPlayer }) {
       detach?.();
       setMedia?.(null);
     };
-  }, [store, player, setMedia]);
+  }, [store, player, setMedia, container]);
 
   return null;
 }

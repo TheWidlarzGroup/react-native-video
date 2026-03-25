@@ -61,6 +61,11 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     this.mediaSession?.disable();
     (this.eventEmitter as WebEventEmitter).destroy();
     this.clearAllEvents();
+    // Store destroy calls detach internally — safe here since player is dead
+    if (this._store?.destroyed === false) {
+      this._store.destroy();
+    }
+    this._store = null;
   }
 
   /** @internal */
