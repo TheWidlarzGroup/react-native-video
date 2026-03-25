@@ -37,7 +37,7 @@ function PlayerBridge({ player }: { player: VideoPlayer }) {
 
     return () => {
       player.__setStore(null);
-      detach?.();
+      try { detach?.(); } catch { /* store may already be destroyed by Provider */ }
       setMedia?.(null);
     };
   }, [store, player, setMedia, container]);

@@ -17,9 +17,16 @@ import type { VideoStore } from "./web/VideoStore";
 
 class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   private video: HTMLVideoElement;
-  private _store: VideoStore | null = null;
+  private _storeRef: WeakRef<VideoStore> | null = null;
   private mediaSession: MediaSessionHandler | null = null;
   private _source: NativeVideoConfig | undefined;
+
+  /** Returns store if alive, null if destroyed or disconnected. */
+  private get _store(): VideoStore | null {
+    const store = this._storeRef?.deref() ?? null;
+    if (store?.destroyed) return null;
+    return store;
+  }
 
   /**
    * Creates a detached <video> element that works immediately.
@@ -47,7 +54,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
 
   /** @internal */
   __setStore(store: VideoStore | null) {
-    this._store = store;
+    this._storeRef = store ? new WeakRef(store) : null;
     (this.eventEmitter as WebEventEmitter).setStore(store);
     if (store) {
       this.mediaSession = new MediaSessionHandler(store);
@@ -62,11 +69,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     this.mediaSession?.disable();
     (this.eventEmitter as WebEventEmitter).destroy();
     this.clearAllEvents();
-    // Store destroy calls detach internally — safe here since player is dead
-    if (this._store?.destroyed === false) {
-      this._store.destroy();
-    }
-    this._store = null;
+    this._storeRef = null;
   }
 
   /** @internal */
