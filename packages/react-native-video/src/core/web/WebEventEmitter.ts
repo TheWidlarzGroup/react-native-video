@@ -23,10 +23,9 @@ import type {
 } from "../types/EventEmitter";
 
 /**
- * v10 store interface — the subset we use for event bridging.
- * Avoids importing v10 types directly to keep this file framework-agnostic.
+ * video.js store interface — optional, used for enhanced buffering info when available.
  */
-interface VideoStore {
+export interface VideoStore {
   readonly paused: boolean;
   readonly ended: boolean;
   readonly waiting: boolean;
@@ -42,171 +41,159 @@ interface VideoStore {
   readonly error: { code: number; message: string } | null;
   readonly textTrackList: Array<{ kind: string; label: string; language: string; mode: string }>;
   subscribe(callback: () => void): () => void;
+  loadSource(src: string): string;
+  play(): Promise<void>;
+  pause(): void;
+  seek(time: number): Promise<number>;
+  setVolume(volume: number): number;
+  setPlaybackRate(rate: number): void;
+  requestFullscreen(): Promise<void>;
+  exitFullscreen(): Promise<void>;
+  requestPictureInPicture(): Promise<void>;
+  exitPictureInPicture(): Promise<void>;
 }
 
-export type { VideoStore };
-
+/**
+ * WebEventEmitter bridges HTML5 media events to our event system.
+ * Works with or without a video.js store — video element events are the primary source.
+ * When a video.js store is connected, it provides enhanced buffering info.
+ */
 export class WebEventEmitter implements VideoPlayerEventEmitterBase {
   private _listeners: Map<string, Set<(...args: any[]) => void>> = new Map();
-  private _unsubscribe: (() => void) | null = null;
-  private store: VideoStore | null = null;
-  private _prevState = {
-    paused: true,
-    waiting: false,
-    ended: false,
-    seeking: false,
-    canPlay: false,
-    currentTime: 0,
-    duration: 0,
-    volume: 1,
-    muted: false,
-    playbackRate: 1,
-    source: null as string | null,
-    error: null as { code: number; message: string } | null,
-  };
+  private _mediaCleanup: (() => void) | null = null;
+  private _storeUnsubscribe: (() => void) | null = null;
+  private _store: VideoStore | null = null;
+  private _isBuffering = false;
 
   constructor(
     store: VideoStore | null,
     private getMedia: () => HTMLVideoElement | null,
   ) {
+    // Attach to video element immediately if available
+    this._attachMediaListeners();
     if (store) this.setStore(store);
   }
 
   /**
-   * Connect or disconnect the v10 store.
-   * Called by VideoPlayer.__setStore() when VideoView mounts/unmounts.
+   * Connect or disconnect the video.js store (optional enhancement).
    */
   setStore(store: VideoStore | null) {
-    this._unsubscribe?.();
-    this._unsubscribe = null;
-    this.store = store;
-
-    if (store) {
-      this._prevState = {
-        paused: store.paused,
-        waiting: store.waiting,
-        ended: store.ended,
-        seeking: store.seeking,
-        canPlay: store.canPlay,
-        currentTime: store.currentTime,
-        duration: store.duration,
-        volume: store.volume,
-        muted: store.muted,
-        playbackRate: store.playbackRate,
-        source: store.source,
-        error: store.error,
-      };
-      this._unsubscribe = store.subscribe(() => this._onStateChange());
-    }
+    this._storeUnsubscribe?.();
+    this._storeUnsubscribe = null;
+    this._store = store;
   }
 
   destroy() {
-    this._unsubscribe?.();
-    this._unsubscribe = null;
+    this._storeUnsubscribe?.();
+    this._storeUnsubscribe = null;
+    this._mediaCleanup?.();
+    this._mediaCleanup = null;
   }
 
-  private _onStateChange() {
-    const s = this.store;
-    if (!s) return;
-    const prev = this._prevState;
+  /**
+   * Re-attach media listeners. Called when the video element might have changed.
+   * @internal
+   */
+  reattach() {
+    this._mediaCleanup?.();
+    this._attachMediaListeners();
+  }
 
-    // Playback state (play/pause)
-    if (s.paused !== prev.paused) {
+  private _attachMediaListeners() {
+    const video = this.getMedia();
+    if (!video) return;
+
+    const on = (event: string, handler: () => void) => {
+      video.addEventListener(event, handler);
+      return () => video.removeEventListener(event, handler);
+    };
+
+    const cleanups: Array<() => void> = [];
+
+    cleanups.push(on("play", () => {
       this._emit("onPlaybackStateChange", {
-        isPlaying: !s.paused,
-        isBuffering: s.waiting,
+        isPlaying: true,
+        isBuffering: this._isBuffering,
       });
-    }
+    }));
 
-    // Buffering
-    if (s.waiting !== prev.waiting) {
-      this._emit("onBuffer", s.waiting);
-      this._emit("onStatusChange", s.waiting ? "loading" : "readyToPlay");
-    }
+    cleanups.push(on("pause", () => {
+      this._emit("onPlaybackStateChange", {
+        isPlaying: false,
+        isBuffering: this._isBuffering,
+      });
+    }));
 
-    // Progress (currentTime changed)
-    if (s.currentTime !== prev.currentTime) {
-      const lastBuffered = s.buffered.length > 0
-        ? s.buffered[s.buffered.length - 1]![1]
-        : 0;
+    cleanups.push(on("waiting", () => {
+      this._isBuffering = true;
+      this._emit("onBuffer", true);
+      this._emit("onStatusChange", "loading");
+    }));
+
+    cleanups.push(on("canplay", () => {
+      this._isBuffering = false;
+      this._emit("onBuffer", false);
+      this._emit("onStatusChange", "readyToPlay");
+    }));
+
+    cleanups.push(on("timeupdate", () => {
+      const buffered = video.buffered;
+      const lastBuffered = buffered.length > 0 ? buffered.end(buffered.length - 1) : 0;
       this._emit("onProgress", {
-        currentTime: s.currentTime,
+        currentTime: video.currentTime,
         bufferDuration: lastBuffered,
       });
-    }
+    }));
 
-    // Duration changed → onLoad
-    if (s.duration !== prev.duration && s.duration > 0) {
-      const media = this.getMedia();
-      this._emit("onLoad", {
-        currentTime: s.currentTime,
-        duration: s.duration,
-        width: media?.videoWidth ?? NaN,
-        height: media?.videoHeight ?? NaN,
-        orientation: "unknown",
-      });
-    }
+    cleanups.push(on("durationchange", () => {
+      if (video.duration > 0) {
+        this._emit("onLoad", {
+          currentTime: video.currentTime,
+          duration: video.duration,
+          width: video.videoWidth,
+          height: video.videoHeight,
+          orientation: "unknown",
+        });
+      }
+    }));
 
-    // Can play → ready
-    if (s.canPlay && !prev.canPlay) {
-      this._emit("onStatusChange", "readyToPlay");
-      this._emit("onReadyToDisplay");
-    }
-
-    // Error
-    if (s.error && !prev.error) {
-      this._emit("onStatusChange", "error");
-      const codeMap: Record<number, LibraryError | PlayerError | SourceError | UnknownError> = {
-        1: "player/asset-not-initialized",
-        2: "player/network",
-        3: "player/invalid-source",
-        4: "source/unsupported-content-type",
-      };
-      this._emit(
-        "onError",
-        new VideoError(codeMap[s.error.code] ?? "unknown/unknown", s.error.message),
-      );
-    }
-
-    // Ended
-    if (s.ended && !prev.ended) {
+    cleanups.push(on("ended", () => {
       this._emit("onEnd");
       this._emit("onStatusChange", "idle");
-    }
+    }));
 
-    // Playback rate
-    if (s.playbackRate !== prev.playbackRate) {
-      this._emit("onPlaybackRateChange", s.playbackRate);
-    }
+    cleanups.push(on("ratechange", () => {
+      this._emit("onPlaybackRateChange", video.playbackRate);
+    }));
 
-    // Volume / muted
-    if (s.volume !== prev.volume || s.muted !== prev.muted) {
+    cleanups.push(on("loadeddata", () => {
+      this._emit("onReadyToDisplay");
+    }));
+
+    cleanups.push(on("seeked", () => {
+      this._emit("onSeek", video.currentTime);
+    }));
+
+    cleanups.push(on("volumechange", () => {
       this._emit("onVolumeChange", {
-        volume: s.volume,
-        muted: s.muted,
+        volume: video.volume,
+        muted: video.muted,
       });
-    }
+    }));
 
-    // Seek completed
-    if (!s.seeking && prev.seeking) {
-      this._emit("onSeek", s.currentTime);
-    }
-
-    // Source changed → onLoadStart
-    if (s.source !== prev.source && s.source) {
-      const media = this.getMedia();
+    cleanups.push(on("loadstart", () => {
       this._emit("onLoadStart", {
         sourceType: "network",
         source: {
-          uri: s.source,
+          uri: video.currentSrc || video.src,
           config: {
-            uri: s.source,
+            uri: video.currentSrc || video.src,
             externalSubtitles: [],
           },
           getAssetInformationAsync: async () => ({
-            duration: s.duration,
-            width: media?.videoWidth ?? NaN,
-            height: media?.videoHeight ?? NaN,
+            duration: video.duration || NaN,
+            width: video.videoWidth,
+            height: video.videoHeight,
             orientation: "unknown",
             bitrate: NaN,
             fileSize: -1n,
@@ -215,41 +202,28 @@ export class WebEventEmitter implements VideoPlayerEventEmitterBase {
           }),
         },
       });
-    }
+    }));
 
-    // Text track changes
-    const currentTrack = s.textTrackList.find(
-      (t) => t.mode === "showing" && (t.kind === "subtitles" || t.kind === "captions"),
-    );
-    // Simple comparison — emit on every state change that includes textTrackList
-    // This is acceptable since _emit only notifies if listeners exist
-    if (currentTrack) {
-      this._emit("onTrackChange", {
-        id: currentTrack.label,
-        label: currentTrack.label,
-        language: currentTrack.language,
-        selected: true,
-      });
-    }
+    cleanups.push(on("error", () => {
+      this._emit("onStatusChange", "error");
+      const err = video.error;
+      if (!err) {
+        console.error("Unknown error occurred in player");
+        return;
+      }
+      const codeMap: Record<number, LibraryError | PlayerError | SourceError | UnknownError> = {
+        1: "player/asset-not-initialized",
+        2: "player/network",
+        3: "player/invalid-source",
+        4: "source/unsupported-content-type",
+      };
+      this._emit("onError", new VideoError(codeMap[err.code] ?? "unknown/unknown", err.message));
+    }));
 
-    // Update prev state
-    this._prevState = {
-      paused: s.paused,
-      waiting: s.waiting,
-      ended: s.ended,
-      seeking: s.seeking,
-      canPlay: s.canPlay,
-      currentTime: s.currentTime,
-      duration: s.duration,
-      volume: s.volume,
-      muted: s.muted,
-      playbackRate: s.playbackRate,
-      source: s.source,
-      error: s.error,
-    };
+    this._mediaCleanup = () => { cleanups.forEach((fn) => fn()); };
   }
 
-  // --- Listener infrastructure (unchanged) ---
+  // --- Listener infrastructure ---
 
   private _addListener(
     event: string,

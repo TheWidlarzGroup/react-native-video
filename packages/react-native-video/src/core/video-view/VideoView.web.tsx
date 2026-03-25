@@ -1,9 +1,9 @@
 import {
   forwardRef,
   memo,
+  useCallback,
   useEffect,
   useImperativeHandle,
-  useRef,
   type CSSProperties,
 } from "react";
 import { View } from "react-native";
@@ -14,58 +14,51 @@ import type { VideoViewProps, VideoViewRef } from "./VideoViewProps";
 import { createPlayer, videoFeatures, usePlayerContext, useMediaAttach } from "@videojs/react";
 import { VideoSkin } from "@videojs/react/video";
 
-// Create Player factory once at module level (v10 pattern)
 const Player = createPlayer({ features: videoFeatures });
 
 /**
- * Connects the VideoPlayer adapter's store to our adapter class
- * and mounts the existing HTMLVideoElement into the v10 Provider.
+ * Attaches the adapter's pre-existing <video> element to the video.js store,
+ * then passes the ready store to the adapter.
  */
 function PlayerBridge({ player }: { player: VideoPlayer }) {
   const { store } = usePlayerContext();
   const setMedia = useMediaAttach();
-  const videoRef = useRef<HTMLVideoElement | null>(null);
 
-  // Connect store to adapter
-  useEffect(() => {
-    player.__setStore(store);
-    return () => player.__setStore(null);
-  }, [store, player]);
-
-  // Mount our existing video element and register with Provider
   useEffect(() => {
     const video = player.__getMedia();
-    videoRef.current = video;
     setMedia?.(video);
-    return () => setMedia?.(null);
-  }, [player, setMedia]);
+    const detach = store.attach({ media: video, container: null });
+    player.__setStore(store);
+
+    return () => {
+      player.__setStore(null);
+      detach?.();
+      setMedia?.(null);
+    };
+  }, [store, player, setMedia]);
 
   return null;
 }
 
 /**
- * Mounts our video element into the DOM within the v10 Container.
+ * Mounts the adapter's <video> element into the DOM via ref callback.
+ * The element is created in VideoPlayer constructor so it already has
+ * source and event listeners attached.
  */
 function VideoElement({ player, objectFit }: { player: VideoPlayer; objectFit: string }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const video = player.__getMedia();
-    Object.assign(video.style, {
-      width: "100%",
-      height: "100%",
-      objectFit,
-    });
-    video.playsInline = true;
-    containerRef.current?.appendChild(video);
-    return () => {
-      if (video.parentNode === containerRef.current) {
-        containerRef.current?.removeChild(video);
+  const ref = useCallback(
+    (container: HTMLDivElement | null) => {
+      if (!container) return;
+      const video = player.__getMedia();
+      Object.assign(video.style, { width: "100%", height: "100%", objectFit });
+      if (video.parentNode !== container) {
+        container.appendChild(video);
       }
-    };
-  }, [player, objectFit]);
+    },
+    [player, objectFit],
+  );
 
-  return <div ref={containerRef} style={{ width: "100%", height: "100%" }} />;
+  return <div ref={ref} style={{ width: "100%", height: "100%" }} />;
 }
 
 const VideoView = forwardRef<VideoViewRef, VideoViewProps>(
@@ -113,6 +106,8 @@ const VideoView = forwardRef<VideoViewRef, VideoViewProps>(
       [player],
     );
 
+    const videoContent = <VideoElement player={player} objectFit={objectFit} />;
+
     return (
       <View {...props}>
         <Player.Provider>
@@ -125,13 +120,7 @@ const VideoView = forwardRef<VideoViewRef, VideoViewProps>(
               height: "100%",
             }}
           >
-            {controls ? (
-              <VideoSkin>
-                <VideoElement player={player} objectFit={objectFit} />
-              </VideoSkin>
-            ) : (
-              <VideoElement player={player} objectFit={objectFit} />
-            )}
+            {controls ? <VideoSkin>{videoContent}</VideoSkin> : videoContent}
           </Player.Container>
         </Player.Provider>
       </View>

@@ -6,7 +6,7 @@ function getMediaSession(): MediaSession | undefined {
 }
 
 /**
- * v10 store interface — the subset MediaSession needs.
+ * video.js store interface — the subset MediaSession needs.
  */
 interface MediaSessionStore {
   readonly paused: boolean;

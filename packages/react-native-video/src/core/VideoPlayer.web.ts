@@ -20,19 +20,23 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   private mediaSession: MediaSessionHandler | null = null;
   private _source: NativeVideoConfig | undefined;
 
+  /**
+   * Creates a detached <video> element that works immediately.
+   * VideoView later mounts it into the DOM and connects the video.js store.
+   */
   constructor(source: VideoSource | VideoConfig | VideoPlayerSourceBase) {
     if (typeof window === "undefined") {
       throw new Error("[react-native-video] VideoPlayer cannot be created in SSR environment.");
     }
 
     const video = document.createElement("video");
-    // Emitter starts without store — will be connected via __setStore
-    const emitter = new WebEventEmitter(null, () => this.video);
+    video.playsInline = true;
+
+    const emitter = new WebEventEmitter(null, () => video);
     super(emitter);
 
     this.video = video;
 
-    // Bridge web errors to JS event system
     (this.eventEmitter as WebEventEmitter).addOnErrorListener((error) => {
       this.triggerJSEvent("onError", error);
     });
@@ -40,11 +44,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     this.replaceSourceAsync(source);
   }
 
-  /**
-   * Called by VideoView's StoreBridge when the v10 Provider mounts.
-   * Connects the v10 store to the adapter, enabling store-based features.
-   * @internal
-   */
+  /** @internal */
   __setStore(store: VideoStore | null) {
     this._store = store;
     (this.eventEmitter as WebEventEmitter).setStore(store);
@@ -63,12 +63,11 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     this.clearAllEvents();
   }
 
-  /** Returns the HTMLVideoElement. @internal */
+  /** @internal */
   __getMedia(): HTMLVideoElement {
     return this.video;
   }
 
-  // Source
   get source(): VideoPlayerSourceBase {
     return {
       uri: this._source?.uri ?? "",
@@ -86,8 +85,18 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     };
   }
 
-  // Status — works with or without store
+  // Store when available, video element fallback.
+  // Store may provide more accurate values for HLS/DASH/DRM content.
+
   get status(): VideoPlayerStatus {
+    const s = this._store;
+    if (s) {
+      if (s.error) return "error";
+      if (s.canPlay) return "readyToPlay";
+      if (s.waiting) return "loading";
+      if (s.source) return "loading";
+      return "idle";
+    }
     if (this.video.error) return "error";
     if (this.video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) return "readyToPlay";
     if (this.video.readyState > HTMLMediaElement.HAVE_NOTHING) return "loading";
@@ -95,64 +104,36 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     return "idle";
   }
 
-  get duration(): number {
-    return this.video.duration || NaN;
+  get duration(): number { return this._store?.duration || this.video.duration || NaN; }
+  get volume(): number { return this._store?.volume ?? this.video.volume; }
+  set volume(v: number) {
+    const clamped = Math.max(0, Math.min(1, v));
+    if (this._store) { this._store.setVolume(clamped); } else { this.video.volume = clamped; }
   }
-
-  get volume(): number {
-    return this.video.volume;
+  get currentTime(): number { return this._store?.currentTime ?? this.video.currentTime; }
+  set currentTime(v: number) {
+    if (this._store) { this._store.seek(v); } else { this.video.currentTime = v; }
   }
-
-  set volume(value: number) {
-    this.video.volume = Math.max(0, Math.min(1, value));
-  }
-
-  get currentTime(): number {
-    return this.video.currentTime;
-  }
-
-  set currentTime(value: number) {
-    this.video.currentTime = value;
-  }
-
-  get muted(): boolean {
-    return this.video.muted;
-  }
-
-  set muted(value: boolean) {
-    this.video.muted = value;
-  }
-
-  get loop(): boolean {
-    return this.video.loop;
-  }
-
-  set loop(value: boolean) {
-    this.video.loop = value;
-  }
-
-  get rate(): number {
-    return this.video.playbackRate;
-  }
-
-  set rate(value: number) {
-    this.video.playbackRate = value;
+  get muted(): boolean { return this._store?.muted ?? this.video.muted; }
+  set muted(v: boolean) { this.video.muted = v; }
+  get loop(): boolean { return this.video.loop; }
+  set loop(v: boolean) { this.video.loop = v; }
+  get rate(): number { return this._store?.playbackRate ?? this.video.playbackRate; }
+  set rate(v: number) {
+    if (this._store) { this._store.setPlaybackRate(v); } else { this.video.playbackRate = v; }
   }
 
   get mixAudioMode(): MixAudioMode { return "auto"; }
   set mixAudioMode(_: MixAudioMode) {}
-
   get ignoreSilentSwitchMode(): IgnoreSilentSwitchMode { return "auto"; }
   set ignoreSilentSwitchMode(_: IgnoreSilentSwitchMode) {}
-
   get playInBackground(): boolean { return true; }
   set playInBackground(_: boolean) {}
-
   get playWhenInactive(): boolean { return true; }
   set playWhenInactive(_: boolean) {}
 
   get isPlaying(): boolean {
-    return !this.video.paused && !this.video.ended;
+    return this._store ? !this._store.paused : !this.video.paused && !this.video.ended;
   }
 
   get showNotificationControls(): boolean {
@@ -161,40 +142,30 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
 
   set showNotificationControls(value: boolean) {
     if (!this.mediaSession) return;
-    if (!value) {
-      this.mediaSession.disable();
-      return;
-    }
+    if (!value) { this.mediaSession.disable(); return; }
     this.mediaSession.enable();
     this.mediaSession.updateMediaSession(this._source?.metadata);
   }
 
-  async initialize(): Promise<void> {
-    // noop on web
-  }
-
-  async preload(): Promise<void> {
-    this.video.load();
-  }
-
-  release(): void {
-    this.__destroy();
-  }
+  async initialize(): Promise<void> {}
+  async preload(): Promise<void> { this.video.load(); }
+  release(): void { this.__destroy(); }
 
   play(): void {
-    this.video.play()?.catch(() => {});
+    if (this._store) { this._store.play()?.catch(() => {}); } else { this.video.play()?.catch(() => {}); }
   }
 
   pause(): void {
-    this.video.pause();
+    if (this._store) { this._store.pause(); } else { this.video.pause(); }
   }
 
   seekBy(time: number): void {
-    this.video.currentTime += time;
+    const now = this._store?.currentTime ?? this.video.currentTime;
+    if (this._store) { this._store.seek(now + time); } else { this.video.currentTime = now + time; }
   }
 
   seekTo(time: number): void {
-    this.video.currentTime = time;
+    if (this._store) { this._store.seek(time); } else { this.video.currentTime = time; }
   }
 
   async replaceSourceAsync(
@@ -221,17 +192,19 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     }
 
     this._source = source as NativeVideoConfig;
-    this.video.src = source.uri;
+    if (this._store) {
+      this._store.loadSource(source.uri);
+    } else {
+      this.video.src = source.uri;
+    }
 
     if (this.mediaSession?.enabled) {
       this.mediaSession.updateMediaSession(source.metadata);
     }
 
-    // Remove old subtitle tracks
     const existingTracks = this.video.querySelectorAll("track");
     existingTracks.forEach((t) => t.remove());
 
-    // Add external subtitles as <track> elements
     for (const sub of source.externalSubtitles ?? []) {
       const track = document.createElement("track");
       track.kind = "subtitles";
@@ -244,19 +217,12 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     if (source.initializeOnCreation) await this.preload();
   }
 
-  // Text Track Management
-
   getAvailableTextTracks(): TextTrack[] {
     const tracks = this.video.textTracks;
     const result: TextTrack[] = [];
     for (let i = 0; i < tracks.length; i++) {
       const t = tracks[i]!;
-      result.push({
-        id: t.id || t.label,
-        label: t.label,
-        language: t.language,
-        selected: t.mode === "showing",
-      });
+      result.push({ id: t.id || t.label, label: t.label, language: t.language, selected: t.mode === "showing" });
     }
     return result;
   }
@@ -265,8 +231,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     const tracks = this.video.textTracks;
     for (let i = 0; i < tracks.length; i++) {
       const t = tracks[i]!;
-      const id = t.id || t.label;
-      t.mode = id === textTrack?.id ? "showing" : "disabled";
+      t.mode = (t.id || t.label) === textTrack?.id ? "showing" : "disabled";
     }
   }
 
