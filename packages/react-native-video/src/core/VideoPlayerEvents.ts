@@ -7,8 +7,6 @@ import type {
   ListenerSubscription,
   VideoPlayerEventEmitterBase,
 } from "./types/EventEmitter";
-import type { WebEventEmitter } from "./web/WebEventEmitter";
-import { Platform } from "react-native";
 
 export class VideoPlayerEvents {
   protected eventEmitter: VideoPlayerEventEmitterBase;
@@ -132,22 +130,6 @@ export class VideoPlayerEvents {
       case 'onStatusChange':
         return this.eventEmitter.addOnStatusChangeListener(
           callback as PlayerEvents['onStatusChange']
-        );
-      // ----------------- Web Events -----------------
-      case 'onAudioTrackChange':
-        if (Platform.OS !== "web") return { remove:()=>{} };
-        return (this.eventEmitter as WebEventEmitter).addOnAudioTrackChangeListener(
-          callback as PlayerEvents['onAudioTrackChange']
-        );
-      case 'onVideoTrackChange':
-        if (Platform.OS !== "web") return { remove:()=>{} };
-        return (this.eventEmitter as WebEventEmitter).addOnVideoTrackChangeListener(
-          callback as PlayerEvents['onVideoTrackChange']
-        );
-      case 'onQualityChange':
-        if (Platform.OS !== "web") return { remove:()=>{} };
-        return (this.eventEmitter as WebEventEmitter).addOnQualityChangeListener(
-          callback as PlayerEvents['onQualityChange']
         );
       default:
         throw new Error(`[React Native Video] Unsupported event: ${event}`);
