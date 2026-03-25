@@ -1,15 +1,28 @@
 import type { CustomVideoMetadata } from "../types/VideoConfig";
-import type { VideoJsPlayer } from "./WebVideoJsTypes";
 
 function getMediaSession(): MediaSession | undefined {
   if (typeof window === "undefined") return undefined;
   return window.navigator?.mediaSession;
 }
 
+/**
+ * v10 store interface — the subset MediaSession needs.
+ */
+interface MediaSessionStore {
+  readonly paused: boolean;
+  readonly currentTime: number;
+  readonly duration: number;
+  readonly playbackRate: number;
+  play(): Promise<void>;
+  pause(): void;
+  seek(time: number): Promise<number>;
+  subscribe(callback: () => void): () => void;
+}
+
 export class MediaSessionHandler {
   enabled: boolean = false;
 
-  constructor(private player: VideoJsPlayer) {}
+  constructor(private store: MediaSessionStore) {}
 
   enable() {
     const mediaSession = getMediaSession();
@@ -19,114 +32,57 @@ export class MediaSessionHandler {
 
     const defaultSkipTime = 15;
 
-    const actionHandlers = [
-      [
-        "play",
-        () => {
-          this.player.play();
-        },
-      ],
-      [
-        "pause",
-        () => {
-          this.player.pause();
-        },
-      ],
-      [
-        "stop",
-        () => {
-          this.player.pause();
-          this.player.currentTime(0);
-        },
-      ],
-      // videojs-contrib-ads
-      [
-        "seekbackward",
-        (details: MediaSessionActionDetails) => {
-          // @ts-expect-error ads is in an optional plugin that isn't typed.
-          if (this.player.usingPlugin("ads") && this.player.ads.inAdBreak()) {
-            return;
-          }
-          this.player.currentTime(
-            Math.max(
-              0,
-              (this.player.currentTime() ?? 0) -
-                (details.seekOffset || defaultSkipTime),
-            ),
-          );
-        },
-      ],
-      [
-        "seekforward",
-        (details: MediaSessionActionDetails) => {
-          // @ts-expect-error ads is in an optional plugin that isn't typed.
-          if (this.player.usingPlugin("ads") && this.player.ads.inAdBreak()) {
-            return;
-          }
-          this.player.currentTime(
-            Math.min(
-              this.player.duration() ?? 0,
-              (this.player.currentTime() ?? 0) +
-                (details.seekOffset || defaultSkipTime),
-            ),
-          );
-        },
-      ],
-      [
-        "seekto",
-        (details: MediaSessionActionDetails) => {
-          // @ts-expect-error ads is in an optional plugin that isn't typed.
-          if (this.player.usingPlugin("ads") && this.player.ads.inAdBreak()) {
-            return;
-          }
-          this.player.currentTime(details.seekTime);
-        },
-      ],
-    ] as const;
+    const actionHandlers: Array<[MediaSessionAction, MediaSessionActionHandler]> = [
+      ["play", () => { this.store.play(); }],
+      ["pause", () => { this.store.pause(); }],
+      ["stop", () => {
+        this.store.pause();
+        this.store.seek(0);
+      }],
+      ["seekbackward", (details) => {
+        const offset = (details as MediaSessionActionDetails).seekOffset || defaultSkipTime;
+        this.store.seek(Math.max(0, this.store.currentTime - offset));
+      }],
+      ["seekforward", (details) => {
+        const offset = (details as MediaSessionActionDetails).seekOffset || defaultSkipTime;
+        this.store.seek(Math.min(this.store.duration, this.store.currentTime + offset));
+      }],
+      ["seekto", (details) => {
+        const seekTime = (details as MediaSessionActionDetails).seekTime;
+        if (seekTime != null) this.store.seek(seekTime);
+      }],
+    ];
 
     for (const [action, handler] of actionHandlers) {
       try {
         mediaSession.setActionHandler(action, handler);
       } catch {
-        this.player.log.debug(
-          `Couldn't register media session action "${action}".`,
-        );
+        // Action not supported by browser
       }
     }
 
-    const onPlaying = () => {
-      mediaSession.playbackState = "playing";
-    };
-    const onPaused = () => {
-      mediaSession.playbackState = "paused";
-    };
-    const onTimeUpdate = () => {
-      const dur = this.player.duration();
+    // Subscribe to store for playback state and position updates
+    const unsubscribe = this.store.subscribe(() => {
+      mediaSession.playbackState = this.store.paused ? "paused" : "playing";
 
-      if (Number.isFinite(dur)) {
-        mediaSession.setPositionState({
-          duration: dur,
-          playbackRate: this.player.playbackRate(),
-          position: this.player.currentTime(),
-        });
+      if ("setPositionState" in mediaSession && Number.isFinite(this.store.duration)) {
+        try {
+          mediaSession.setPositionState({
+            duration: this.store.duration,
+            playbackRate: this.store.playbackRate,
+            position: this.store.currentTime,
+          });
+        } catch {
+          // position > duration can throw
+        }
       }
-    };
-
-    this.player.on("playing", onPlaying);
-    this.player.on("paused", onPaused);
-    if ("setPositionState" in mediaSession) {
-      this.player.on("timeupdate", onTimeUpdate);
-    }
+    });
 
     this.disable = () => {
       this.enabled = false;
-      this.player.off("playing", onPlaying);
-      this.player.off("paused", onPaused);
-      if ("setPositionState" in mediaSession) {
-        this.player.off("timeupdate", onTimeUpdate);
-      }
+      unsubscribe();
       mediaSession.metadata = null;
-      for (const [action, _] of actionHandlers) {
+      for (const [action] of actionHandlers) {
         try {
           mediaSession.setActionHandler(action, null);
         } catch {}

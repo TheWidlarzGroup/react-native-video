@@ -1,4 +1,3 @@
-import videojs from "video.js";
 import type { IgnoreSilentSwitchMode } from "./types/IgnoreSilentSwitchMode";
 import type { MixAudioMode } from "./types/MixAudioMode";
 import type { TextTrack } from "./types/TextTrack";
@@ -13,35 +12,27 @@ import type { VideoPlayerSourceBase } from "./types/VideoPlayerSourceBase";
 import type { VideoPlayerStatus } from "./types/VideoPlayerStatus";
 import { VideoPlayerEvents } from "./VideoPlayerEvents";
 import { MediaSessionHandler } from "./web/MediaSession";
-import { WebEventEmitter } from "./web/WebEventEmitter";
-import {
-  mapVideoJsTracks,
-  type VideoJsPlayer,
-  type VideoJsTextTracks,
-} from "./web/WebVideoJsTypes";
+import { WebEventEmitter, type VideoStore } from "./web/WebEventEmitter";
 
 class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
-  protected video: HTMLVideoElement;
-  public player: VideoJsPlayer;
-  private mediaSession: MediaSessionHandler;
+  private video: HTMLVideoElement;
+  private _store: VideoStore | null = null;
+  private mediaSession: MediaSessionHandler | null = null;
   private _source: NativeVideoConfig | undefined;
 
   constructor(source: VideoSource | VideoConfig | VideoPlayerSourceBase) {
+    if (typeof window === "undefined") {
+      throw new Error("[react-native-video] VideoPlayer cannot be created in SSR environment.");
+    }
+
     const video = document.createElement("video");
-    const player = videojs(video, {
-      qualityLevels: true,
-      html5: {
-        preloadTextTracks: false,
-        nativeTextTracks: true,
-      },
-    });
-    super(new WebEventEmitter(player));
+    // Emitter starts without store — will be connected via __setStore
+    const emitter = new WebEventEmitter(null, () => this.video);
+    super(emitter);
 
     this.video = video;
-    this.player = player;
-    this.mediaSession = new MediaSessionHandler(this.player);
 
-    // Bridge web errors to JS event system so consumers receive them via addEventListener.
+    // Bridge web errors to JS event system
     (this.eventEmitter as WebEventEmitter).addOnErrorListener((error) => {
       this.triggerJSEvent("onError", error);
     });
@@ -50,140 +41,126 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   }
 
   /**
-   * Cleans up player's native resources and releases native state.
-   * After calling this method, the player is no longer usable.
+   * Called by VideoView's StoreBridge when the v10 Provider mounts.
+   * Connects the v10 store to the adapter, enabling store-based features.
    * @internal
    */
-  __destroy() {
-    this.mediaSession.disable();
-    (this.eventEmitter as WebEventEmitter).destroy();
-    this.clearAllEvents();
-    this.player.dispose();
+  __setStore(store: VideoStore | null) {
+    this._store = store;
+    (this.eventEmitter as WebEventEmitter).setStore(store);
+    if (store) {
+      this.mediaSession = new MediaSessionHandler(store);
+    } else {
+      this.mediaSession?.disable();
+      this.mediaSession = null;
+    }
   }
 
-  __getNativeRef() {
+  /** @internal */
+  __destroy() {
+    this.mediaSession?.disable();
+    (this.eventEmitter as WebEventEmitter).destroy();
+    this.clearAllEvents();
+  }
+
+  /** Returns the HTMLVideoElement. @internal */
+  __getMedia(): HTMLVideoElement {
     return this.video;
   }
 
   // Source
   get source(): VideoPlayerSourceBase {
     return {
-      uri: this._source!.uri,
-      config: this._source!,
-      getAssetInformationAsync: async () => {
-        return {
-          bitrate: NaN,
-          width: this.player.videoWidth(),
-          height: this.player.videoHeight(),
-          duration: this.duration,
-          fileSize: -1n,
-          isHDR: false,
-          isLive: false,
-          orientation: "landscape",
-        };
-      },
+      uri: this._source?.uri ?? "",
+      config: this._source ?? { uri: "" },
+      getAssetInformationAsync: async () => ({
+        bitrate: NaN,
+        width: this.video.videoWidth,
+        height: this.video.videoHeight,
+        duration: this.video.duration || NaN,
+        fileSize: -1n,
+        isHDR: false,
+        isLive: false,
+        orientation: "landscape" as const,
+      }),
     };
   }
 
-  // Status
+  // Status — works with or without store
   get status(): VideoPlayerStatus {
     if (this.video.error) return "error";
-    if (this.video.readyState === HTMLMediaElement.HAVE_NOTHING) return "idle";
-    if (
-      this.video.readyState === HTMLMediaElement.HAVE_ENOUGH_DATA ||
-      this.video.readyState === HTMLMediaElement.HAVE_FUTURE_DATA
-    )
-      return "readyToPlay";
-    return "loading";
+    if (this.video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) return "readyToPlay";
+    if (this.video.readyState > HTMLMediaElement.HAVE_NOTHING) return "loading";
+    if (this.video.src) return "loading";
+    return "idle";
   }
 
-  // Duration
   get duration(): number {
-    return this.player.duration() ?? NaN;
+    return this.video.duration || NaN;
   }
 
-  // Volume
   get volume(): number {
-    return this.player.volume() ?? 1;
+    return this.video.volume;
   }
 
   set volume(value: number) {
-    this.player.volume(value);
+    this.video.volume = Math.max(0, Math.min(1, value));
   }
 
-  // Current Time
   get currentTime(): number {
-    return this.player.currentTime() ?? NaN;
+    return this.video.currentTime;
   }
 
   set currentTime(value: number) {
-    this.player.currentTime(value);
+    this.video.currentTime = value;
   }
 
-  // Muted
   get muted(): boolean {
-    return this.player.muted() ?? false;
+    return this.video.muted;
   }
 
   set muted(value: boolean) {
-    this.player.muted(value);
+    this.video.muted = value;
   }
 
-  // Loop
   get loop(): boolean {
-    return this.player.loop() ?? false;
+    return this.video.loop;
   }
 
   set loop(value: boolean) {
-    this.player.loop(value);
+    this.video.loop = value;
   }
 
-  // Rate
   get rate(): number {
-    return this.player.playbackRate() ?? 1;
+    return this.video.playbackRate;
   }
 
   set rate(value: number) {
-    this.player.playbackRate(value);
+    this.video.playbackRate = value;
   }
 
-  // Mix Audio Mode
-  get mixAudioMode(): MixAudioMode {
-    return "auto";
-  }
-
+  get mixAudioMode(): MixAudioMode { return "auto"; }
   set mixAudioMode(_: MixAudioMode) {}
 
-  // Ignore Silent Switch Mode
-  get ignoreSilentSwitchMode(): IgnoreSilentSwitchMode {
-    return "auto";
-  }
-
+  get ignoreSilentSwitchMode(): IgnoreSilentSwitchMode { return "auto"; }
   set ignoreSilentSwitchMode(_: IgnoreSilentSwitchMode) {}
 
-  // Play In Background
-  get playInBackground(): boolean {
-    return true;
-  }
-
+  get playInBackground(): boolean { return true; }
   set playInBackground(_: boolean) {}
 
-  // Play When Inactive
-  get playWhenInactive(): boolean {
-    return true;
-  }
-
+  get playWhenInactive(): boolean { return true; }
   set playWhenInactive(_: boolean) {}
 
   get isPlaying(): boolean {
-    return !this.player.paused();
+    return !this.video.paused && !this.video.ended;
   }
 
   get showNotificationControls(): boolean {
-    return this.mediaSession.enabled;
+    return this.mediaSession?.enabled ?? false;
   }
 
   set showNotificationControls(value: boolean) {
+    if (!this.mediaSession) return;
     if (!value) {
       this.mediaSession.disable();
       return;
@@ -197,35 +174,27 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   }
 
   async preload(): Promise<void> {
-    this.player.load();
+    this.video.load();
   }
 
-  /**
-   * Releases the player's native resources and releases native state.
-   * After calling this method, the player is no longer usable.
-   * Accessing any properties or methods of the player after calling this method will throw an error.
-   * If you want to clean player resource use `replaceSourceAsync` with `null` instead.
-   */
   release(): void {
     this.__destroy();
   }
 
   play(): void {
-    // error are already handled by the `onError` callback, no need to catch it here.
-    this.player.play()?.catch();
+    this.video.play()?.catch(() => {});
   }
 
   pause(): void {
-    this.player.pause();
+    this.video.pause();
   }
 
   seekBy(time: number): void {
-    const now = this.player.currentTime() ?? 0;
-    this.player.currentTime(now + time);
+    this.video.currentTime += time;
   }
 
   seekTo(time: number): void {
-    this.player.currentTime(time);
+    this.video.currentTime = time;
   }
 
   async replaceSourceAsync(
@@ -236,8 +205,9 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
       | null,
   ): Promise<void> {
     if (!source) {
-      this.player.src([]);
-      this.player.reset();
+      this.video.removeAttribute("src");
+      this.video.load();
+      this._source = undefined;
       return;
     }
 
@@ -246,28 +216,29 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     }
 
     if (typeof source === "number" || typeof source.uri === "number") {
-      console.error(
-        "A source uri must be a string. Numbers are only supported on native.",
-      );
+      console.error("A source uri must be a string. Numbers are only supported on native.");
       return;
     }
-    this._source = source as NativeVideoConfig;
-    // TODO: handle start time
-    this.player.src({
-      src: source.uri,
-      type: source.mimeType,
-    });
-    if (this.mediaSession.enabled)
-      this.mediaSession.updateMediaSession(source.metadata);
 
+    this._source = source as NativeVideoConfig;
+    this.video.src = source.uri;
+
+    if (this.mediaSession?.enabled) {
+      this.mediaSession.updateMediaSession(source.metadata);
+    }
+
+    // Remove old subtitle tracks
+    const existingTracks = this.video.querySelectorAll("track");
+    existingTracks.forEach((t) => t.remove());
+
+    // Add external subtitles as <track> elements
     for (const sub of source.externalSubtitles ?? []) {
-      this.player.addRemoteTextTrack({
-        id: sub.uri,
-        kind: "subtitles",
-        label: sub.label,
-        src: sub.uri,
-        srclang: sub.language,
-      });
+      const track = document.createElement("track");
+      track.kind = "subtitles";
+      track.src = sub.uri;
+      track.srclang = sub.language ?? "und";
+      track.label = sub.label;
+      this.video.appendChild(track);
     }
 
     if (source.initializeOnCreation) await this.preload();
@@ -276,32 +247,32 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   // Text Track Management
 
   getAvailableTextTracks(): TextTrack[] {
-    // @ts-expect-error they define length & index properties via prototype
-    const tracks: VideoJsTextTracks = this.player.textTracks();
-
-    return mapVideoJsTracks(tracks, (track) => ({
-      id: track.id,
-      label: track.label,
-      language: track.language,
-      selected: track.mode === "showing",
-    }));
+    const tracks = this.video.textTracks;
+    const result: TextTrack[] = [];
+    for (let i = 0; i < tracks.length; i++) {
+      const t = tracks[i]!;
+      result.push({
+        id: t.id || t.label,
+        label: t.label,
+        language: t.language,
+        selected: t.mode === "showing",
+      });
+    }
+    return result;
   }
 
   selectTextTrack(textTrack: TextTrack | null): void {
-    // @ts-expect-error they define length & index properties via prototype
-    const tracks: VideoJsTextTracks = this.player.textTracks();
-
+    const tracks = this.video.textTracks;
     for (let i = 0; i < tracks.length; i++) {
-      tracks[i]!.mode =
-        tracks[i]!.id === textTrack?.id ? "showing" : "disabled";
+      const t = tracks[i]!;
+      const id = t.id || t.label;
+      t.mode = id === textTrack?.id ? "showing" : "disabled";
     }
   }
 
-  // Selected Text Track
   get selectedTrack(): TextTrack | undefined {
     return this.getAvailableTextTracks().find((x) => x.selected);
   }
-
 }
 
 export { VideoPlayer };

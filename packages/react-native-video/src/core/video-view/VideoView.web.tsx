@@ -6,30 +6,74 @@ import {
   useRef,
   type CSSProperties,
 } from "react";
-import { View, type ViewStyle } from "react-native";
+import { View } from "react-native";
 import type { VideoPlayer } from "../VideoPlayer.web";
 import type { VideoViewEvents } from "../types/Events";
 import type { ListenerSubscription } from "../types/EventEmitter";
 import type { VideoViewProps, VideoViewRef } from "./VideoViewProps";
+import { createPlayer, videoFeatures, usePlayerContext, useMediaAttach } from "@videojs/react";
+import { VideoSkin } from "@videojs/react/video";
+
+// Create Player factory once at module level (v10 pattern)
+const Player = createPlayer({ features: videoFeatures });
 
 /**
- * VideoView is a component that allows you to display a video from a {@link VideoPlayer}.
- *
- * @param player - The player to play the video - {@link VideoPlayer}
- * @param controls - Whether to show the controls. Defaults to false.
- * @param style - The style of the video view - {@link ViewStyle}
- * @param pictureInPicture - Whether to show the picture in picture button. Defaults to false.
- * @param autoEnterPictureInPicture - Whether to automatically enter picture in picture mode
- * when the video is playing. Defaults to false.
- * @param resizeMode - How the video should be resized to fit the view. Defaults to 'none'.
+ * Connects the VideoPlayer adapter's store to our adapter class
+ * and mounts the existing HTMLVideoElement into the v10 Provider.
  */
+function PlayerBridge({ player }: { player: VideoPlayer }) {
+  const { store } = usePlayerContext();
+  const setMedia = useMediaAttach();
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  // Connect store to adapter
+  useEffect(() => {
+    player.__setStore(store);
+    return () => player.__setStore(null);
+  }, [store, player]);
+
+  // Mount our existing video element and register with Provider
+  useEffect(() => {
+    const video = player.__getMedia();
+    videoRef.current = video;
+    setMedia?.(video);
+    return () => setMedia?.(null);
+  }, [player, setMedia]);
+
+  return null;
+}
+
+/**
+ * Mounts our video element into the DOM within the v10 Container.
+ */
+function VideoElement({ player, objectFit }: { player: VideoPlayer; objectFit: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const video = player.__getMedia();
+    Object.assign(video.style, {
+      width: "100%",
+      height: "100%",
+      objectFit,
+    });
+    video.playsInline = true;
+    containerRef.current?.appendChild(video);
+    return () => {
+      if (video.parentNode === containerRef.current) {
+        containerRef.current?.removeChild(video);
+      }
+    };
+  }, [player, objectFit]);
+
+  return <div ref={containerRef} style={{ width: "100%", height: "100%" }} />;
+}
+
 const VideoView = forwardRef<VideoViewRef, VideoViewProps>(
   (
     {
       player: nPlayer,
       controls = false,
       resizeMode = "none",
-      // auto pip is unsupported
       pictureInPicture = false,
       autoEnterPictureInPicture = false,
       keepScreenAwake = true,
@@ -38,60 +82,58 @@ const VideoView = forwardRef<VideoViewRef, VideoViewProps>(
     ref,
   ) => {
     const player = nPlayer as unknown as VideoPlayer;
-    const vRef = useRef<HTMLDivElement>(null);
-    useEffect(() => {
-      const videoElement = player.__getNativeRef();
-      vRef.current?.appendChild(videoElement);
-      return () => vRef.current?.replaceChildren();
-    }, [player]);
+
+    const objectFit: CSSProperties["objectFit"] =
+      resizeMode === "stretch" ? "fill" : resizeMode;
 
     useImperativeHandle(
       ref,
       () => ({
         enterFullscreen: () => {
-          player.player.requestFullscreen({ navigationUI: "hide" });
+          document.documentElement.requestFullscreen?.();
         },
         exitFullscreen: () => {
-          document.exitFullscreen();
+          document.exitFullscreen?.();
         },
         enterPictureInPicture: () => {
-          player.player.requestPictureInPicture();
+          player.__getMedia()?.requestPictureInPicture?.();
         },
         exitPictureInPicture: () => {
-          document.exitPictureInPicture();
+          document.exitPictureInPicture?.();
         },
-        canEnterPictureInPicture: () => document.pictureInPictureEnabled,
+        canEnterPictureInPicture: () =>
+          document.pictureInPictureEnabled ?? false,
         addEventListener: <Event extends keyof VideoViewEvents>(
           _event: Event,
           _callback: VideoViewEvents[Event],
         ): ListenerSubscription => {
-          // View events are not supported on web
           return { remove: () => {} };
         },
       }),
       [player],
     );
 
-    useEffect(() => {
-      player.player.controls(controls);
-    }, [player, controls]);
-
-    useEffect(() => {
-      const vid = player.__getNativeRef();
-      const objectFit: CSSProperties["objectFit"] =
-        resizeMode === "stretch" ? "fill" : resizeMode;
-      vid.style.cssText = `position: absolute; inset: 0; width: 100%; height: 100%; object-fit: ${objectFit}`;
-    }, [player, resizeMode]);
-
     return (
       <View {...props}>
-        <div
-          ref={vRef}
-          style={{
-            position: "absolute",
-            inset: 0,
-          }}
-        />
+        <Player.Provider>
+          <PlayerBridge player={player} />
+          <Player.Container
+            style={{
+              position: "absolute",
+              inset: "0",
+              width: "100%",
+              height: "100%",
+            }}
+          >
+            {controls ? (
+              <VideoSkin>
+                <VideoElement player={player} objectFit={objectFit} />
+              </VideoSkin>
+            ) : (
+              <VideoElement player={player} objectFit={objectFit} />
+            )}
+          </Player.Container>
+        </Player.Provider>
       </View>
     );
   },
