@@ -52,16 +52,12 @@ function Player() {
 
 ### Web-enhanced player
 
-The web platform may offer additional features not available on native (such as audio and video track selection). To access them, cast the player to `WebVideoPlayer`:
+The web platform may offer additional features not available on native. To access them, cast the player to [`WebVideoPlayer`](/docs/api-reference/interfaces/WebVideoPlayer):
 
 ```tsx
 import { useVideoPlayer, type WebVideoPlayer } from 'react-native-video';
 
 const player = useVideoPlayer(source) as WebVideoPlayer;
-
-// Now you have access to web-specific methods like:
-// player.getAvailableAudioTracks()
-// player.selectAudioTrack(track)
 ```
 
 This is optional - the standard `useVideoPlayer` works perfectly on web. The cast simply gives you typed access to extra capabilities when building web-specific features.
@@ -94,31 +90,9 @@ Web support uses the same API as native - `useVideoPlayer` for creating a player
 | DRM | ❌ | Not yet available |
 | Ads | ❌ |
 
-## Audio & Video tracks (experimental)
+## Web-only features
 
-:::warning Limited Browser Support
-Audio and video track selection works out of the box in **Safari**. Chrome and Firefox support this API experimentally - users need to enable it manually in browser settings (e.g. `chrome://flags`)
-:::
-
-To access audio/video track methods, use the `WebVideoPlayer` type:
-
-```tsx
-import { useVideoPlayer, type WebVideoPlayer } from 'react-native-video';
-
-const player = useVideoPlayer(source) as WebVideoPlayer;
-
-// List available audio tracks
-const audioTracks = player.getAvailableAudioTracks();
-
-// Select a specific audio track
-player.selectAudioTrack(audioTracks[0]);
-
-// Same for video tracks
-const videoTracks = player.getAvailableVideoTracks();
-player.selectVideoTrack(videoTracks[0]);
-```
-
-These methods return empty arrays on browsers that don't support the API.
+See the [WebVideoPlayer](/docs/api-reference/interfaces/WebVideoPlayer) API reference for web-specific methods.
 
 ## Known limitations
 
