@@ -1,0 +1,127 @@
+---
+title: Web Support
+sidebar_position: 4
+sidebar_label: Web Support
+description: Guide to using React Native Video on the web platform
+customProps:
+  badgeType: new
+---
+
+import PlatformsList from '@site/src/components/PlatformsList/PlatformsList';
+
+# Web Support
+
+<PlatformsList types={['Web']} />
+
+:::warning Preview
+Web support is in **preview**. The API is stable and matches the native platforms, but some features are not yet available. We recommend testing thoroughly before using in production.
+:::
+
+React Native Video supports the web platform through [video.js](https://videojs.org/) (v10), providing the same `VideoPlayer` and `VideoView` API you use on iOS and Android.
+
+## Setup
+
+Configure your project for web support:
+
+- [With Expo](https://docs.expo.dev/workflow/web/)
+- [Without Expo (bare React Native)](https://necolas.github.io/react-native-web/docs/multi-platform/)
+
+React Native Video handles video.js internally - no additional CSS imports or configuration needed beyond standard React Native Web setup.
+
+## Usage
+
+The API is identical to native:
+
+```tsx
+import { useVideoPlayer, VideoView } from 'react-native-video';
+
+function Player() {
+  const player = useVideoPlayer({
+    uri: 'https://example.com/video.mp4',
+  });
+
+  return (
+    <VideoView
+      player={player}
+      controls
+      style={{ width: '100%', aspectRatio: 16 / 9 }}
+    />
+  );
+}
+```
+
+### Web-enhanced player
+
+The web platform may offer additional features not available on native (such as audio and video track selection). To access them, cast the player to `WebVideoPlayer`:
+
+```tsx
+import { useVideoPlayer, type WebVideoPlayer } from 'react-native-video';
+
+const player = useVideoPlayer(source) as WebVideoPlayer;
+
+// Now you have access to web-specific methods like:
+// player.getAvailableAudioTracks()
+// player.selectAudioTrack(track)
+```
+
+This is optional - the standard `useVideoPlayer` works perfectly on web. The cast simply gives you typed access to extra capabilities when building web-specific features.
+
+## How it works
+
+Web support uses the same API as native - `useVideoPlayer` for creating a player and `VideoView` for displaying video. You can use the player with or without a view:
+
+- **With `VideoView`** - displays video with optional built-in controls (powered by [video.js](https://videojs.org/))
+- **Without `VideoView`** - audio-only playback
+
+## Supported features
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Play / Pause / Seek | ✅ | Full support |
+| Volume / Mute | ✅ | Full support |
+| Loop | ✅ | Full support |
+| Playback rate | ✅ | Full support |
+| Text tracks (subtitles) | ✅ | Including external subtitles |
+| Resize mode | ✅ | contain, cover, stretch, none |
+| Fullscreen | ✅ | Full support |
+| Picture-in-Picture | ✅ | Depends on browser |
+| Media Session | ✅ | Lock screen controls |
+| Preload | ✅ | Full support |
+| Events | ✅ | All player events |
+| HLS streaming | ✅ | Via video.js engine |
+| Audio tracks | ⚠️ | Safari only (experimental in other browsers) |
+| Video tracks | ⚠️ | Safari only (experimental in other browsers) |
+| DRM | ❌ | Not yet available |
+| Ads | ❌ |
+
+## Audio & Video tracks (experimental)
+
+:::warning Limited Browser Support
+Audio and video track selection works out of the box in **Safari**. Chrome and Firefox support this API experimentally - users need to enable it manually in browser settings (e.g. `chrome://flags`)
+:::
+
+To access audio/video track methods, use the `WebVideoPlayer` type:
+
+```tsx
+import { useVideoPlayer, type WebVideoPlayer } from 'react-native-video';
+
+const player = useVideoPlayer(source) as WebVideoPlayer;
+
+// List available audio tracks
+const audioTracks = player.getAvailableAudioTracks();
+
+// Select a specific audio track
+player.selectAudioTrack(audioTracks[0]);
+
+// Same for video tracks
+const videoTracks = player.getAvailableVideoTracks();
+player.selectVideoTrack(videoTracks[0]);
+```
+
+These methods return empty arrays on browsers that don't support the API.
+
+## Known limitations
+
+- `mixAudioMode`, `ignoreSilentSwitchMode`, `playInBackground`, `playWhenInactive` are no-ops on web
+- Video sources must be URLs (strings) - `require('./video.mp4')` is not supported on web
+- DRM and Ads are not yet supported
