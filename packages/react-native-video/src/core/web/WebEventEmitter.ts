@@ -19,46 +19,29 @@ import type {
   VideoPlayerEventEmitterBase,
 } from '../types/EventEmitter';
 
-import type { VideoStore } from './VideoStore';
+import type { WebMediaProxy } from './WebMediaProxy';
 
 /**
  * WebEventEmitter bridges HTML5 media events to our event system.
- * Works with or without a video.js store — video element events are the primary source.
- * When a video.js store is connected, it provides enhanced buffering info.
+ * Reads state from WebMediaProxy (store when available, video element fallback).
  */
 export class WebEventEmitter implements VideoPlayerEventEmitterBase {
   private _listeners: Map<string, Set<(...args: any[]) => void>> = new Map();
   private _mediaCleanup: (() => void) | null = null;
-  private _storeUnsubscribe: (() => void) | null = null;
   private _isBuffering = false;
 
-  constructor(
-    store: VideoStore | null,
-    private getMedia: () => HTMLVideoElement | null
-  ) {
-    // Attach to video element immediately if available
+  constructor(private _media: WebMediaProxy) {
     this._attachMediaListeners();
-    if (store) this.setStore(store);
-  }
-
-  /**
-   * Connect or disconnect the video.js store (optional enhancement).
-   */
-  setStore(_store: VideoStore | null) {
-    this._storeUnsubscribe?.();
-    this._storeUnsubscribe = null;
   }
 
   destroy() {
-    this._storeUnsubscribe?.();
-    this._storeUnsubscribe = null;
     this._mediaCleanup?.();
     this._mediaCleanup = null;
   }
 
   private _attachMediaListeners() {
-    const video = this.getMedia();
-    if (!video) return;
+    const video = this._media.video;
+    const media = this._media;
 
     const on = (event: string, handler: () => void) => {
       video.addEventListener(event, handler);
@@ -70,7 +53,7 @@ export class WebEventEmitter implements VideoPlayerEventEmitterBase {
     cleanups.push(
       on('play', () => {
         this._emit('onPlaybackStateChange', {
-          isPlaying: true,
+          isPlaying: !media.paused,
           isBuffering: this._isBuffering,
         });
       })
@@ -79,7 +62,7 @@ export class WebEventEmitter implements VideoPlayerEventEmitterBase {
     cleanups.push(
       on('pause', () => {
         this._emit('onPlaybackStateChange', {
-          isPlaying: false,
+          isPlaying: !media.paused,
           isBuffering: this._isBuffering,
         });
       })
@@ -103,22 +86,19 @@ export class WebEventEmitter implements VideoPlayerEventEmitterBase {
 
     cleanups.push(
       on('timeupdate', () => {
-        const buffered = video.buffered;
-        const lastBuffered =
-          buffered.length > 0 ? buffered.end(buffered.length - 1) : 0;
         this._emit('onProgress', {
-          currentTime: video.currentTime,
-          bufferDuration: lastBuffered,
+          currentTime: media.currentTime,
+          bufferDuration: media.bufferEnd,
         });
       })
     );
 
     cleanups.push(
       on('durationchange', () => {
-        if (video.duration > 0) {
+        if (media.duration > 0) {
           this._emit('onLoad', {
-            currentTime: video.currentTime,
-            duration: video.duration,
+            currentTime: media.currentTime,
+            duration: media.duration,
             width: video.videoWidth,
             height: video.videoHeight,
             orientation: 'unknown',
@@ -136,7 +116,7 @@ export class WebEventEmitter implements VideoPlayerEventEmitterBase {
 
     cleanups.push(
       on('ratechange', () => {
-        this._emit('onPlaybackRateChange', video.playbackRate);
+        this._emit('onPlaybackRateChange', media.playbackRate);
       })
     );
 
@@ -148,15 +128,15 @@ export class WebEventEmitter implements VideoPlayerEventEmitterBase {
 
     cleanups.push(
       on('seeked', () => {
-        this._emit('onSeek', video.currentTime);
+        this._emit('onSeek', media.currentTime);
       })
     );
 
     cleanups.push(
       on('volumechange', () => {
         this._emit('onVolumeChange', {
-          volume: video.volume,
-          muted: video.muted,
+          volume: media.volume,
+          muted: media.muted,
         });
       })
     );
@@ -172,7 +152,7 @@ export class WebEventEmitter implements VideoPlayerEventEmitterBase {
               externalSubtitles: [],
             },
             getAssetInformationAsync: async () => ({
-              duration: video.duration || NaN,
+              duration: media.duration || NaN,
               width: video.videoWidth,
               height: video.videoHeight,
               orientation: 'unknown',
