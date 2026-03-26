@@ -131,7 +131,8 @@ const VideoView = forwardRef<VideoViewRef, VideoViewProps>(
               inset: "0",
               width: "100%",
               height: "100%",
-            }}
+              "--media-border-radius": "0",
+            } as CSSProperties}
           >
             {controls ? <VideoSkin>{videoContent}</VideoSkin> : videoContent}
           </Player.Container>
