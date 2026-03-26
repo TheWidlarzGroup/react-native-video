@@ -5,4 +5,5 @@ module.exports = {
     tsconfigRootDir: __dirname,
     project: true,
   },
+  ignorePatterns: ["web/webpack.config.js", "index.web.js"],
 };
