@@ -43,14 +43,17 @@ export class WebMediaProxy {
     return (this.store ?? this.video).error;
   }
 
-  get bufferEnd(): number {
+  get bufferAhead(): number {
     const store = this.store;
+    let end = 0;
     if (store) {
       const ranges = store.buffered;
-      return ranges.length > 0 ? ranges[ranges.length - 1]![1] : 0;
+      if (ranges.length > 0) end = ranges[ranges.length - 1]![1];
+    } else {
+      const ranges = this.video.buffered;
+      if (ranges.length > 0) end = ranges.end(ranges.length - 1);
     }
-    const ranges = this.video.buffered;
-    return ranges.length > 0 ? ranges.end(ranges.length - 1) : 0;
+    return Math.max(0, end - this.currentTime);
   }
 
   // --- Write (route to store or video) ---

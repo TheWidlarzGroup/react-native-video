@@ -88,7 +88,7 @@ export class WebEventEmitter implements VideoPlayerEventEmitterBase {
       on('timeupdate', () => {
         this._emit('onProgress', {
           currentTime: media.currentTime,
-          bufferDuration: media.bufferEnd,
+          bufferDuration: media.bufferAhead,
         });
       })
     );
