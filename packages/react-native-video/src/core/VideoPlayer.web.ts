@@ -104,12 +104,10 @@ class VideoPlayer extends VideoPlayerEvents implements WebVideoPlayer {
     video.playsInline = true;
 
     const media = new WebMediaProxy(video);
-    super(new WebEventEmitter(media));
+    const emitter = new WebEventEmitter(media);
+    // WebEventEmitter uses generic dispatch, cast to satisfy base class
+    super(emitter as any);
     this._media = media;
-
-    (this.eventEmitter as WebEventEmitter).addOnErrorListener((error) => {
-      this.triggerJSEvent('onError', error);
-    });
 
     this.replaceSourceAsync(source);
   }
@@ -133,6 +131,11 @@ class VideoPlayer extends VideoPlayerEvents implements WebVideoPlayer {
     (this.eventEmitter as WebEventEmitter).destroy();
     this.clearAllEvents();
     this._media.setStore(null);
+  }
+
+  /** @internal */
+  __getEmitter(): WebEventEmitter {
+    return this.eventEmitter as WebEventEmitter;
   }
 
   /** @internal */

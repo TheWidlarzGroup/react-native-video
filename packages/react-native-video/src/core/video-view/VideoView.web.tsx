@@ -21,13 +21,17 @@ import {
 import { VideoSkin } from '@videojs/react/video';
 import '@videojs/react/video/skin.css';
 import type { VideoStore } from '../web/VideoStore';
+import { useViewEvents, addViewEventListener } from './useViewEvents.web';
 
 const Player = createPlayer({ features: videoFeatures });
 
-/**
- * Attaches the adapter's pre-existing <video> element to the video.js store,
- * then passes the ready store to the adapter.
- */
+const OBJECT_FIT_MAP: Record<string, CSSProperties['objectFit']> = {
+  contain: 'contain',
+  cover: 'cover',
+  stretch: 'fill',
+  none: 'contain',
+};
+
 function PlayerBridge({ player }: { player: VideoPlayer }) {
   const { store: rawStore, container } = usePlayerContext();
   const store = rawStore as unknown as VideoStore;
@@ -55,11 +59,6 @@ function PlayerBridge({ player }: { player: VideoPlayer }) {
   return null;
 }
 
-/**
- * Mounts the adapter's <video> element into the DOM via ref callback.
- * The element is created in VideoPlayer constructor so it already has
- * source and event listeners attached.
- */
 function VideoElement({
   player,
   objectFit,
@@ -88,7 +87,12 @@ const VideoView = forwardRef<VideoViewRef, VideoViewProps>(
       player: nPlayer,
       controls = false,
       resizeMode = 'none',
-      // Destructured to exclude from ...props (not used on web)
+      onFullscreenChange,
+      onPictureInPictureChange,
+      willEnterFullscreen,
+      willExitFullscreen,
+      willEnterPictureInPicture,
+      willExitPictureInPicture,
       pictureInPicture: _pip = false,
       autoEnterPictureInPicture: _autoPip = false,
       keepScreenAwake: _keepAwake = true,
@@ -98,14 +102,16 @@ const VideoView = forwardRef<VideoViewRef, VideoViewProps>(
   ) => {
     const player = nPlayer as unknown as VideoPlayer;
     const containerRef = useRef<HTMLDivElement>(null);
+    const objectFit = OBJECT_FIT_MAP[resizeMode] ?? 'contain';
 
-    const objectFitMap: Record<string, CSSProperties['objectFit']> = {
-      contain: 'contain',
-      cover: 'cover',
-      stretch: 'fill',
-      none: 'contain',
-    };
-    const objectFit = objectFitMap[resizeMode] ?? 'contain';
+    useViewEvents(player, containerRef, {
+      onFullscreenChange,
+      onPictureInPictureChange,
+      willEnterFullscreen,
+      willExitFullscreen,
+      willEnterPictureInPicture,
+      willExitPictureInPicture,
+    });
 
     useImperativeHandle(
       ref,
@@ -125,11 +131,10 @@ const VideoView = forwardRef<VideoViewRef, VideoViewProps>(
         canEnterPictureInPicture: () =>
           document.pictureInPictureEnabled ?? false,
         addEventListener: <Event extends keyof VideoViewEvents>(
-          _event: Event,
-          _callback: VideoViewEvents[Event]
-        ): ListenerSubscription => {
-          return { remove: () => {} };
-        },
+          event: Event,
+          callback: VideoViewEvents[Event]
+        ): ListenerSubscription =>
+          addViewEventListener(player, event, callback),
       }),
       [player]
     );
