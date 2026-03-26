@@ -14,6 +14,7 @@ public protocol HybridVideoPlayerFactorySpec_protocol: HybridObject {
 
   // Methods
   func createPlayer(source: (any HybridVideoPlayerSourceSpec)) throws -> (any HybridVideoPlayerSpec)
+  func setAudioSessionManagementDisabled(disabled: Bool) throws -> Void
 }
 
 public extension HybridVideoPlayerFactorySpec_protocol {

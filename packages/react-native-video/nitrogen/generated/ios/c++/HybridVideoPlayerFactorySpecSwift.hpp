@@ -79,6 +79,12 @@ namespace margelo::nitro::video {
       auto __value = std::move(__result.value());
       return __value;
     }
+    inline void setAudioSessionManagementDisabled(bool disabled) override {
+      auto __result = _swiftPart.setAudioSessionManagementDisabled(std::forward<decltype(disabled)>(disabled));
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+    }
 
   private:
     ReactNativeVideo::HybridVideoPlayerFactorySpec_cxx _swiftPart;

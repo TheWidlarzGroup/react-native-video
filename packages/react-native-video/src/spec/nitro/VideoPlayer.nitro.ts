@@ -53,4 +53,14 @@ export interface VideoPlayerFactory extends HybridObject<{
   android: 'kotlin';
 }> {
   createPlayer(source: VideoPlayerSource): VideoPlayer;
+
+  /**
+   * Disables the internal audio session management.
+   * When disabled, react-native-video will not configure or activate the AVAudioSession,
+   * allowing other libraries (like audio recording libraries) to manage it.
+   *
+   * @param disabled - If true, audio session management is disabled
+   * @platform iOS
+   */
+  setAudioSessionManagementDisabled(disabled: boolean): void;
 }

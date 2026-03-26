@@ -55,6 +55,7 @@ namespace margelo::nitro::video {
   public:
     // Methods
     std::shared_ptr<HybridVideoPlayerSpec> createPlayer(const std::shared_ptr<HybridVideoPlayerSourceSpec>& source) override;
+    void setAudioSessionManagementDisabled(bool disabled) override;
 
   private:
     jni::global_ref<JHybridVideoPlayerFactorySpec::JavaPart> _javaPart;

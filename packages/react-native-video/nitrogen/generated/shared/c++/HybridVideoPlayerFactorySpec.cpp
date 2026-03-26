@@ -15,6 +15,7 @@ namespace margelo::nitro::video {
     // load custom methods/properties
     registerHybrids(this, [](Prototype& prototype) {
       prototype.registerHybridMethod("createPlayer", &HybridVideoPlayerFactorySpec::createPlayer);
+      prototype.registerHybridMethod("setAudioSessionManagementDisabled", &HybridVideoPlayerFactorySpec::setAudioSessionManagementDisabled);
     });
   }
 

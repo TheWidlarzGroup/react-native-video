@@ -142,4 +142,15 @@ open class HybridVideoPlayerFactorySpec_cxx {
       return bridge.create_Result_std__shared_ptr_HybridVideoPlayerSpec__(__exceptionPtr)
     }
   }
+  
+  @inline(__always)
+  public final func setAudioSessionManagementDisabled(disabled: Bool) -> bridge.Result_void_ {
+    do {
+      try self.__implementation.setAudioSessionManagementDisabled(disabled: disabled)
+      return bridge.create_Result_void_()
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_void_(__exceptionPtr)
+    }
+  }
 }

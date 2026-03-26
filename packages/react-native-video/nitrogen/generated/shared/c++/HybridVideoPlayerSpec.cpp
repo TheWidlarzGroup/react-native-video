@@ -38,6 +38,8 @@ namespace margelo::nitro::video {
       prototype.registerHybridSetter("playInBackground", &HybridVideoPlayerSpec::setPlayInBackground);
       prototype.registerHybridGetter("playWhenInactive", &HybridVideoPlayerSpec::getPlayWhenInactive);
       prototype.registerHybridSetter("playWhenInactive", &HybridVideoPlayerSpec::setPlayWhenInactive);
+      prototype.registerHybridGetter("disableAudioSessionManagement", &HybridVideoPlayerSpec::getDisableAudioSessionManagement);
+      prototype.registerHybridSetter("disableAudioSessionManagement", &HybridVideoPlayerSpec::setDisableAudioSessionManagement);
       prototype.registerHybridGetter("isPlaying", &HybridVideoPlayerSpec::getIsPlaying);
       prototype.registerHybridGetter("selectedTrack", &HybridVideoPlayerSpec::getSelectedTrack);
       prototype.registerHybridMethod("replaceSourceAsync", &HybridVideoPlayerSpec::replaceSourceAsync);

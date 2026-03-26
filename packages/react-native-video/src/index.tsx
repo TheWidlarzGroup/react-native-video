@@ -28,3 +28,4 @@ export type {
   VideoViewProps,
   VideoViewRef,
 } from './core/video-view/VideoViewProps';
+export { setAudioSessionManagementDisabled } from './core/utils/playerFactory';
