@@ -56,5 +56,9 @@ namespace margelo::nitro::video {
     auto __result = method(_javaPart, std::dynamic_pointer_cast<JHybridVideoPlayerSourceSpec>(source)->getJavaPart());
     return __result->getJHybridVideoPlayerSpec();
   }
+  void JHybridVideoPlayerFactorySpec::setAudioSessionManagementDisabled(bool disabled) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jboolean /* disabled */)>("setAudioSessionManagementDisabled");
+    method(_javaPart, disabled);
+  }
 
 } // namespace margelo::nitro::video

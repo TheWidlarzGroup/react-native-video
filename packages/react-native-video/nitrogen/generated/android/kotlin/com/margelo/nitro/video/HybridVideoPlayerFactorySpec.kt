@@ -31,6 +31,10 @@ abstract class HybridVideoPlayerFactorySpec: HybridObject() {
   @DoNotStrip
   @Keep
   abstract fun createPlayer(source: HybridVideoPlayerSourceSpec): HybridVideoPlayerSpec
+  
+  @DoNotStrip
+  @Keep
+  abstract fun setAudioSessionManagementDisabled(disabled: Boolean): Unit
 
   // Default implementation of `HybridObject.toString()`
   override fun toString(): String {

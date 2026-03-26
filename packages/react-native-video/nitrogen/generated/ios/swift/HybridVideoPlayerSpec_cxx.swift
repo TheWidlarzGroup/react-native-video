@@ -265,6 +265,17 @@ open class HybridVideoPlayerSpec_cxx {
     }
   }
   
+  public final var disableAudioSessionManagement: Bool {
+    @inline(__always)
+    get {
+      return self.__implementation.disableAudioSessionManagement
+    }
+    @inline(__always)
+    set {
+      self.__implementation.disableAudioSessionManagement = newValue
+    }
+  }
+  
   public final var isPlaying: Bool {
     @inline(__always)
     get {
