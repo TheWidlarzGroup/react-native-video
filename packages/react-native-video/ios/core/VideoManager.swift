@@ -184,7 +184,7 @@ class VideoManager {
     
     configureAudioSession()
   }
-  
+
   private func configureAudioSession() {
     let audioSession = AVAudioSession.sharedInstance()
     var audioSessionCategoryOptions: AVAudioSession.CategoryOptions = audioSession.categoryOptions
@@ -219,17 +219,19 @@ class VideoManager {
     )
     
     let audioMixingMode = determineAudioMixingMode()
-    
+
+  
+    audioSessionCategoryOptions.remove(.duckOthers)
+    audioSessionCategoryOptions.remove(.mixWithOthers)
+
     switch audioMixingMode {
     case .mixwithothers:
       audioSessionCategoryOptions.insert(.mixWithOthers)
-    case .donotmix:
-      audioSessionCategoryOptions.remove(.mixWithOthers)
     case .duckothers:
       audioSessionCategoryOptions.insert(.duckOthers)
-    case .auto:
-      audioSessionCategoryOptions.remove(.mixWithOthers)
-      audioSessionCategoryOptions.remove(.duckOthers)
+    case .auto, .donotmix:
+      // Do nothing as we already cleared the options
+      break
     }
     
     do {

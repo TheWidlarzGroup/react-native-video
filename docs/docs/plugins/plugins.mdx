@@ -9,7 +9,7 @@ sidebar_position: 6
 The **React Native Video** library offers a robust plugin system to extend and customize video functionality on Android and iOS. With plugins, you can override source handling, implement custom DRM, modify media factories, and respond to player lifecycle events.
 
 :::tip Use in Third Party Library Guide
-If you are looking how to import React Native Video in your native code to use plugins, you can checkout [Use in Third Party Library](../use-in-third-party-library) page.
+If you are looking how to import React Native Video in your native code to use plugins, you can checkout [Use in Third Party Library](./use-in-third-party-library) page.
 :::
 
 ## What Are Plugins?
@@ -42,11 +42,11 @@ Plugins are automatically registered when you instantiate a class that extends `
 
 Plugins receive notifications for key events:
 
--  **Player creation/destruction** — react to player instance lifecycle
--  **Video view creation/destruction** — handle UI component lifecycle
--  **Source processing** — modify video sources before playback
--  **DRM requests** — provide custom DRM handling
--  **Media factory overrides** — customize ExoPlayer components (Android)
+-  **Player creation/destruction** - react to player instance lifecycle
+-  **Video view creation/destruction** - handle UI component lifecycle
+-  **Source processing** - modify video sources before playback
+-  **DRM requests** - provide custom DRM handling
+-  **Media factory overrides** - customize ExoPlayer components (Android)
 
 :::caution
 All player and view references passed to plugins are **weak references** to prevent memory leaks.
@@ -94,9 +94,10 @@ class MyPlugin: ReactNativeVideoPlugin {
 
 ## Next Steps
 
--  [**Plugin Registry**](./registry) — Learn about plugin management and registration
--  [**Plugin Interface**](./interface) — Complete API reference for plugin methods
--  [**Usage Examples**](./examples) — Practical implementations and common patterns
+-  [**Plugin Registry**](./registry) - Learn about plugin management and registration
+-  [**Plugin Interface**](./interface) - Complete API reference for plugin methods
+-  [**Usage Examples**](./examples) - Practical implementations and common patterns
+-  [**Ask for Plugin**](./ask-for-plugin) - Request a custom plugin built by our team
 
 
 

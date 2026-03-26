@@ -1,0 +1,45 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.text {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+  margin: 0;
+  max-width: 700px;
+}
+
+.text strong {
+  color: var(--color-text-primary);
+}
+
+.note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: var(--color-accent-subtle);
+  border: 1px solid rgba(150, 201, 235, 0.2);
+  border-radius: 8px;
+  max-width: 700px;
+}
+
+.noteIcon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.noteText {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.noteText strong {
+  color: var(--color-text-primary);
+}

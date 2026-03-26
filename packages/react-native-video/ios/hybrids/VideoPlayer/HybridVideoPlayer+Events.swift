@@ -22,7 +22,7 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
 
   func onRateChanged(rate: Float) {
     _eventEmitter?.onPlaybackRateChange(Double(rate))
-    NowPlayingInfoCenterManager.shared.updateNowPlayingInfo()
+    NowPlayingInfoCenterManager.shared.updatePlaybackState()
     updateAndEmitPlaybackState()
   }
 
@@ -173,6 +173,13 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
     _eventEmitter?.onBandwidthUpdate(
       .init(bitrate: bitrate, width: nil, height: nil)
     )
+  }
+
+  func onPlayerItemChange(player _: AVPlayer, playerItem: AVPlayerItem?) {
+    guard showNotificationControls, let playerItem else { return }
+    DispatchQueue.main.async {
+      NowPlayingInfoCenterManager.shared.updateStaticInfo(ifCurrentItem: playerItem)
+    }
   }
 
   func onPlayerItemWillChange(hasNewPlayerItem: Bool) {

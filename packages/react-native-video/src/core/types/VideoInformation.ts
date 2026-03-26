@@ -1,3 +1,4 @@
+import type { Int64 } from 'react-native-nitro-modules';
 import type { VideoOrientation } from './VideoOrientation';
 
 export interface VideoInformation {
@@ -17,14 +18,14 @@ export interface VideoInformation {
   height: number;
 
   /**
-   * The duration of the video in seconds.
+   * The duration of the video in seconds, or `-1` if not available.
    */
-  duration: bigint;
+  duration: number;
 
   /**
-   * The file size of the video in bytes.
+   * The file size of the video in bytes, or `-1` if not available.
    */
-  fileSize: bigint;
+  fileSize: Int64;
 
   /**
    * Whether the video is HDR.

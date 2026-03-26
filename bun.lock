@@ -1,5 +1,6 @@
 {
   "lockfileVersion": 1,
+  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "react-native-video-monorepo",
@@ -34,7 +35,7 @@
         "@docusaurus/faster": "^3.8.1",
         "@docusaurus/preset-classic": "^3.8.1",
         "@mdx-js/react": "^3.0.0",
-        "@widlarzgroup/docusaurus-ui": "^0.0.3",
+        "@widlarzgroup/docusaurus-ui": "^0.1.3",
         "clsx": "^2.0.0",
         "docusaurus-lunr-search": "^3.6.0",
         "motion": "^12.23.26",
@@ -55,13 +56,13 @@
     },
     "example": {
       "name": "react-native-video-example",
-      "version": "7.0.0-beta.2",
+      "version": "7.0.0-beta.7",
       "dependencies": {
         "@react-native-community/slider": "^4.5.6",
         "@react-native-video/drm": "*",
         "react": "18.3.1",
         "react-native": "^0.77.0",
-        "react-native-nitro-modules": "^0.31.0",
+        "react-native-nitro-modules": "0.35.0",
         "react-native-video": "*",
       },
       "devDependencies": {
@@ -83,7 +84,7 @@
     },
     "packages/drm-plugin": {
       "name": "@react-native-video/drm",
-      "version": "7.0.0-beta.2",
+      "version": "7.0.0-beta.8",
       "devDependencies": {
         "@react-native/babel-preset": "0.79.2",
         "@release-it/conventional-changelog": "^9.0.2",
@@ -92,12 +93,12 @@
         "eslint": "^8.51.0",
         "eslint-config-prettier": "9.0.0",
         "eslint-plugin-prettier": "^5.0.1",
-        "nitrogen": "^0.31.0",
+        "nitrogen": "0.35.0",
         "prettier": "^3.0.3",
         "react": "18.3.1",
         "react-native": "^0.77.0",
         "react-native-builder-bob": "^0.40.13",
-        "react-native-nitro-modules": "^0.31.0",
+        "react-native-nitro-modules": "0.35.0",
         "react-native-video": "*",
         "release-it": "^17.10.0",
         "typescript": "^5.8.3",
@@ -105,13 +106,13 @@
       "peerDependencies": {
         "react": "*",
         "react-native": "*",
-        "react-native-nitro-modules": ">=0.27.2",
+        "react-native-nitro-modules": ">=0.35.0",
         "react-native-video": ">=7.0.0-alpha.3",
       },
     },
     "packages/react-native-video": {
       "name": "react-native-video",
-      "version": "7.0.0-beta.2",
+      "version": "7.0.0-beta.8",
       "devDependencies": {
         "@expo/config-plugins": "^10.0.2",
         "@react-native/eslint-config": "^0.77.0",
@@ -120,18 +121,18 @@
         "eslint": "^8.51.0",
         "eslint-config-prettier": "^9.0.0",
         "eslint-plugin-prettier": "^5.0.1",
-        "nitrogen": "^0.31.0",
+        "nitrogen": "0.35.0",
         "prettier": "^3.0.3",
         "react": "18.3.1",
         "react-native": "^0.77.0",
         "react-native-builder-bob": "^0.40.0",
-        "react-native-nitro-modules": "^0.31.0",
+        "react-native-nitro-modules": "0.35.0",
         "typescript": "^5.2.2",
       },
       "peerDependencies": {
         "react": "*",
         "react-native": "*",
-        "react-native-nitro-modules": ">=0.27.2",
+        "react-native-nitro-modules": ">=0.35.0",
       },
     },
   },
@@ -1186,7 +1187,7 @@
 
     "@webassemblyjs/wast-printer": ["@webassemblyjs/wast-printer@1.14.1", "", { "dependencies": { "@webassemblyjs/ast": "1.14.1", "@xtuc/long": "4.2.2" } }, "sha512-kPSSXE6De1XOR820C90RIo2ogvZG+c3KiHzqUoO/F34Y2shGzesfqv7o57xrxovZJH/MetF5UjroJ/R/3isoiw=="],
 
-    "@widlarzgroup/docusaurus-ui": ["@widlarzgroup/docusaurus-ui@0.0.3", "", { "peerDependencies": { "@docusaurus/core": "^3.9.2", "@docusaurus/theme-classic": "^3.9.2", "react": "^18.0.0 || ^19.0.0", "react-dom": "^18.0.0 || ^19.0.0" } }, "sha512-Yf6RAG9phlapVlDQDRp6NvTr67GrSDNC4VpFEtBYGhfC5gR7UKX79+iBkJQlBFCSKQC4KR8kmNpDqxz4UQAnBQ=="],
+    "@widlarzgroup/docusaurus-ui": ["@widlarzgroup/docusaurus-ui@0.1.3", "", { "peerDependencies": { "@docusaurus/core": "^3.9.2", "@docusaurus/theme-classic": "^3.9.2", "react": "^18.0.0 || ^19.0.0", "react-dom": "^18.0.0 || ^19.0.0" } }, "sha512-71hy+NFHckhhSKA/ez5rHlt7oQCXg2WkGhKiI0f/ywfOzcIJqzpaFjj0dOELiwuBd4828gJM41EfC7QRPNUlqQ=="],
 
     "@widlarzgroup/eslint-plugin-docusaurus": ["@widlarzgroup/eslint-plugin-docusaurus@0.0.1", "", { "peerDependencies": { "@widlarzgroup/docusaurus-ui": "*", "eslint": ">=8.0.0" } }, "sha512-LKvLrUS5mqenAM3vgMPhcUR1dL2oc20xGJY3/zQX3NJuxWwnQf+qZQb04yE3QHoT1o/yup0M59Xfb0/pm/AnWQ=="],
 
@@ -2702,7 +2703,7 @@
 
     "new-github-release-url": ["new-github-release-url@2.0.0", "", { "dependencies": { "type-fest": "^2.5.1" } }, "sha512-NHDDGYudnvRutt/VhKFlX26IotXe1w0cmkDm6JGquh5bz/bDTw0LufSmH/GxTjEdpHEO+bVKFTwdrcGa/9XlKQ=="],
 
-    "nitrogen": ["nitrogen@0.31.10", "", { "dependencies": { "chalk": "^5.3.0", "react-native-nitro-modules": "^0.31.10", "ts-morph": "^27.0.0", "yargs": "^18.0.0", "zod": "^4.0.5" }, "bin": { "nitrogen": "lib/index.js" } }, "sha512-Z77c1lj4IeyCigxiO59fW4fnHgfvOZvksTTwfESAJBnHG2DnS28VQ2oCAWL+fPIEvMozLFi+cRyTQu63eJMCSA=="],
+    "nitrogen": ["nitrogen@0.35.0", "", { "dependencies": { "chalk": "^5.3.0", "react-native-nitro-modules": "^0.35.0", "ts-morph": "^27.0.0", "yargs": "^18.0.0", "zod": "^4.0.5" }, "bin": { "nitrogen": "lib/index.js" } }, "sha512-K8/4h9bCQahi3qEheWZx5joLFsAW3QjK0dVSC3gNLlQhlSJN42UFmffAouOZXYjg9rBDpVlrVo+Hsja45swsJQ=="],
 
     "no-case": ["no-case@3.0.4", "", { "dependencies": { "lower-case": "^2.0.2", "tslib": "^2.0.3" } }, "sha512-fgAN3jGAh+RoxUGZHTSOLJIqUc2wmoBwGR4tbpNAKmmovFoWq0OdRkb0VkldReO2a2iBT/OEulG9XSUc10r3zg=="],
 
@@ -3082,7 +3083,7 @@
 
     "react-native-monorepo-config": ["react-native-monorepo-config@0.1.10", "", { "dependencies": { "escape-string-regexp": "^5.0.0", "fast-glob": "^3.3.3" } }, "sha512-v0rlaLZiCUg95Mpw6xNRQce5k9yio0qscKjNQaPtFYMNL75YugS2UPUItIPLIRbZubK+s2/LRzBjX+mdyUgh4g=="],
 
-    "react-native-nitro-modules": ["react-native-nitro-modules@0.31.10", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-hcvjTu9YJE9fMmnAUvhG8CxvYLpOuMQ/2eyi/S6GyrecezF6Rmk/uRQEL6v09BRFWA/xRVZNQVulQPS+2HS3mQ=="],
+    "react-native-nitro-modules": ["react-native-nitro-modules@0.35.0", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-Eho1yEcLbsteGpBFn2XZOp5FIptnEciWzuYBW49S0jo41Un2LeyesIO/MqYLY/c5o7D9Fw9th4pxGtV7OAb0+g=="],
 
     "react-native-video": ["react-native-video@workspace:packages/react-native-video"],
 
