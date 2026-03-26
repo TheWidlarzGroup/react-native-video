@@ -3,6 +3,6 @@ module.exports = {
   extends: ["../../config/.eslintrc.js"],
   parserOptions: {
     tsconfigRootDir: __dirname,
-    project: true,
+    project: ['./tsconfig.json', './tsconfig.web.json'],
   },
 };

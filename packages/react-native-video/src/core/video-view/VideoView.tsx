@@ -1,5 +1,4 @@
 import * as React from 'react';
-import type { ViewStyle } from 'react-native';
 import { NitroModules } from 'react-native-nitro-modules';
 import type { ListenerSubscription } from '../../spec/nitro/VideoPlayerEventEmitter.nitro';
 import type {

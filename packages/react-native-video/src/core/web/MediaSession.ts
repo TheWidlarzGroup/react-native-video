@@ -1,8 +1,8 @@
-import type { CustomVideoMetadata } from "../types/VideoConfig";
-import type { MediaSessionStore } from "./VideoStore";
+import type { CustomVideoMetadata } from '../types/VideoConfig';
+import type { MediaSessionStore } from './VideoStore';
 
 function getMediaSession(): MediaSession | undefined {
-  if (typeof window === "undefined") return undefined;
+  if (typeof window === 'undefined') return undefined;
   return window.navigator?.mediaSession;
 }
 
@@ -20,25 +20,55 @@ export class MediaSessionHandler {
 
     const defaultSkipTime = 15;
 
-    const actionHandlers: Array<[MediaSessionAction, MediaSessionActionHandler]> = [
-      ["play", () => { this.store.play(); }],
-      ["pause", () => { this.store.pause(); }],
-      ["stop", () => {
-        this.store.pause();
-        this.store.seek(0);
-      }],
-      ["seekbackward", (details) => {
-        const offset = (details as MediaSessionActionDetails).seekOffset || defaultSkipTime;
-        this.store.seek(Math.max(0, this.store.currentTime - offset));
-      }],
-      ["seekforward", (details) => {
-        const offset = (details as MediaSessionActionDetails).seekOffset || defaultSkipTime;
-        this.store.seek(Math.min(this.store.duration, this.store.currentTime + offset));
-      }],
-      ["seekto", (details) => {
-        const seekTime = (details as MediaSessionActionDetails).seekTime;
-        if (seekTime != null) this.store.seek(seekTime);
-      }],
+    const actionHandlers: Array<
+      [MediaSessionAction, MediaSessionActionHandler]
+    > = [
+      [
+        'play',
+        () => {
+          this.store.play();
+        },
+      ],
+      [
+        'pause',
+        () => {
+          this.store.pause();
+        },
+      ],
+      [
+        'stop',
+        () => {
+          this.store.pause();
+          this.store.seek(0);
+        },
+      ],
+      [
+        'seekbackward',
+        (details) => {
+          const offset =
+            (details as MediaSessionActionDetails).seekOffset ||
+            defaultSkipTime;
+          this.store.seek(Math.max(0, this.store.currentTime - offset));
+        },
+      ],
+      [
+        'seekforward',
+        (details) => {
+          const offset =
+            (details as MediaSessionActionDetails).seekOffset ||
+            defaultSkipTime;
+          this.store.seek(
+            Math.min(this.store.duration, this.store.currentTime + offset)
+          );
+        },
+      ],
+      [
+        'seekto',
+        (details) => {
+          const seekTime = (details as MediaSessionActionDetails).seekTime;
+          if (seekTime != null) this.store.seek(seekTime);
+        },
+      ],
     ];
 
     for (const [action, handler] of actionHandlers) {
@@ -51,9 +81,12 @@ export class MediaSessionHandler {
 
     // Subscribe to store for playback state and position updates
     const unsubscribe = this.store.subscribe(() => {
-      mediaSession.playbackState = this.store.paused ? "paused" : "playing";
+      mediaSession.playbackState = this.store.paused ? 'paused' : 'playing';
 
-      if ("setPositionState" in mediaSession && Number.isFinite(this.store.duration)) {
+      if (
+        'setPositionState' in mediaSession &&
+        Number.isFinite(this.store.duration)
+      ) {
         try {
           mediaSession.setPositionState({
             duration: this.store.duration,

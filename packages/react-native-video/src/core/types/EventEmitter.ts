@@ -24,50 +24,50 @@ export interface ListenerSubscription {
 export interface VideoPlayerEventEmitterBase {
   addOnAudioBecomingNoisyListener(listener: () => void): ListenerSubscription;
   addOnAudioFocusChangeListener(
-    listener: (hasAudioFocus: boolean) => void,
+    listener: (hasAudioFocus: boolean) => void
   ): ListenerSubscription;
   addOnBandwidthUpdateListener(
-    listener: (data: BandwidthData) => void,
+    listener: (data: BandwidthData) => void
   ): ListenerSubscription;
   addOnBufferListener(
-    listener: (buffering: boolean) => void,
+    listener: (buffering: boolean) => void
   ): ListenerSubscription;
   addOnControlsVisibleChangeListener(
-    listener: (visible: boolean) => void,
+    listener: (visible: boolean) => void
   ): ListenerSubscription;
   addOnEndListener(listener: () => void): ListenerSubscription;
   addOnExternalPlaybackChangeListener(
-    listener: (externalPlaybackActive: boolean) => void,
+    listener: (externalPlaybackActive: boolean) => void
   ): ListenerSubscription;
   addOnLoadListener(listener: (data: onLoadData) => void): ListenerSubscription;
   addOnLoadStartListener(
-    listener: (data: onLoadStartData) => void,
+    listener: (data: onLoadStartData) => void
   ): ListenerSubscription;
   addOnPlaybackStateChangeListener(
-    listener: (data: onPlaybackStateChangeData) => void,
+    listener: (data: onPlaybackStateChangeData) => void
   ): ListenerSubscription;
   addOnPlaybackRateChangeListener(
-    listener: (rate: number) => void,
+    listener: (rate: number) => void
   ): ListenerSubscription;
   addOnProgressListener(
-    listener: (data: onProgressData) => void,
+    listener: (data: onProgressData) => void
   ): ListenerSubscription;
   addOnReadyToDisplayListener(listener: () => void): ListenerSubscription;
   addOnSeekListener(listener: (position: number) => void): ListenerSubscription;
   addOnStatusChangeListener(
-    listener: (status: VideoPlayerStatus) => void,
+    listener: (status: VideoPlayerStatus) => void
   ): ListenerSubscription;
   addOnTimedMetadataListener(
-    listener: (data: TimedMetadata) => void,
+    listener: (data: TimedMetadata) => void
   ): ListenerSubscription;
   addOnTextTrackDataChangedListener(
-    listener: (data: string[]) => void,
+    listener: (data: string[]) => void
   ): ListenerSubscription;
   addOnTrackChangeListener(
-    listener: (track: TextTrack | null) => void,
+    listener: (track: TextTrack | null) => void
   ): ListenerSubscription;
   addOnVolumeChangeListener(
-    listener: (data: onVolumeChangeData) => void,
+    listener: (data: onVolumeChangeData) => void
   ): ListenerSubscription;
   clearAllListeners(): void;
 }

@@ -8,4 +8,3 @@ export const isVideoPlayerSource = (obj: any): obj is VideoPlayerSource => {
     obj.name === 'VideoPlayerSource' // obj.name is 'VideoPlayerSource'
   );
 };
-

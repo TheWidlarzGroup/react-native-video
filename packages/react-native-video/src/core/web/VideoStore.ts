@@ -19,7 +19,12 @@ export interface VideoStore {
   readonly source: string | null;
   readonly buffered: [number, number][];
   readonly error: { code: number; message: string } | null;
-  readonly textTrackList: Array<{ kind: string; label: string; language: string; mode: string }>;
+  readonly textTrackList: Array<{
+    kind: string;
+    label: string;
+    language: string;
+    mode: string;
+  }>;
   readonly destroyed: boolean;
   readonly target: unknown;
   readonly pipAvailability: string;
@@ -38,7 +43,10 @@ export interface VideoStore {
 
   // Lifecycle
   subscribe(callback: () => void): () => void;
-  attach(target: { media: HTMLVideoElement; container: HTMLElement | null }): () => void;
+  attach(target: {
+    media: HTMLVideoElement;
+    container: HTMLElement | null;
+  }): () => void;
   destroy(): void;
 }
 
@@ -47,5 +55,12 @@ export interface VideoStore {
  */
 export type MediaSessionStore = Pick<
   VideoStore,
-  "paused" | "currentTime" | "duration" | "playbackRate" | "play" | "pause" | "seek" | "subscribe"
+  | 'paused'
+  | 'currentTime'
+  | 'duration'
+  | 'playbackRate'
+  | 'play'
+  | 'pause'
+  | 'seek'
+  | 'subscribe'
 >;

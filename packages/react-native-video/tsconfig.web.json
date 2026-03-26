@@ -3,5 +3,6 @@
   "compilerOptions": {
     "lib": ["ESNext", "dom"]
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"]
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": []
 }

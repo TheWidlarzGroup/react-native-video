@@ -5,7 +5,7 @@ import { VideoPlayerEventsBase } from './VideoPlayerEventsBase';
 export class VideoPlayerEvents extends VideoPlayerEventsBase {
   addEventListener<Event extends keyof PlayerEvents>(
     event: Event,
-    callback: PlayerEvents[Event],
+    callback: PlayerEvents[Event]
   ): ListenerSubscription {
     switch (event) {
       // ----------------- Native-only Events -----------------

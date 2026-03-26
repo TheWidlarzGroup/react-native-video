@@ -326,7 +326,6 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   get selectedTrack(): TextTrack | undefined {
     return this.player.selectedTrack;
   }
-
 }
 
 export { VideoPlayer };
