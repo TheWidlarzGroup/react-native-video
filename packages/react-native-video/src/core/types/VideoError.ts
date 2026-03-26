@@ -20,6 +20,12 @@ export type VideoViewError =
   | 'view/deallocated'
   | 'view/picture-in-picture-not-supported';
 
+export type WebError =
+  | 'web/aborted'
+  | 'web/network'
+  | 'web/decode'
+  | 'web/unsupported-source';
+
 export type UnknownError = 'unknown/unknown';
 
 export type VideoErrorCode =
@@ -27,6 +33,7 @@ export type VideoErrorCode =
   | PlayerError
   | SourceError
   | VideoViewError
+  | WebError
   | UnknownError;
 
 export class VideoError<TCode extends VideoErrorCode> extends Error {

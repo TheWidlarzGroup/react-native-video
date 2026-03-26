@@ -19,6 +19,7 @@ export type {
   VideoErrorCode,
   VideoRuntimeError,
   VideoViewError,
+  WebError,
 } from './core/types/VideoError';
 export type { VideoPlayerStatus } from './core/types/VideoPlayerStatus';
 

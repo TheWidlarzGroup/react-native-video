@@ -9,10 +9,7 @@ import type {
 } from '../types/Events';
 import type { TextTrack } from '../types/TextTrack';
 import {
-  type LibraryError,
-  type PlayerError,
-  type SourceError,
-  type UnknownError,
+  type WebError,
   VideoError,
   type VideoRuntimeError,
 } from '../types/VideoError';
@@ -33,7 +30,6 @@ export class WebEventEmitter implements VideoPlayerEventEmitterBase {
   private _listeners: Map<string, Set<(...args: any[]) => void>> = new Map();
   private _mediaCleanup: (() => void) | null = null;
   private _storeUnsubscribe: (() => void) | null = null;
-  private _store: VideoStore | null = null;
   private _isBuffering = false;
 
   constructor(
@@ -48,10 +44,9 @@ export class WebEventEmitter implements VideoPlayerEventEmitterBase {
   /**
    * Connect or disconnect the video.js store (optional enhancement).
    */
-  setStore(store: VideoStore | null) {
+  setStore(_store: VideoStore | null) {
     this._storeUnsubscribe?.();
     this._storeUnsubscribe = null;
-    this._store = store;
   }
 
   destroy() {
@@ -199,14 +194,11 @@ export class WebEventEmitter implements VideoPlayerEventEmitterBase {
           console.error('Unknown error occurred in player');
           return;
         }
-        const codeMap: Record<
-          number,
-          LibraryError | PlayerError | SourceError | UnknownError
-        > = {
-          1: 'player/asset-not-initialized',
-          2: 'player/not-initialized',
-          3: 'player/invalid-source',
-          4: 'source/unsupported-content-type',
+        const codeMap: Record<number, WebError> = {
+          1: 'web/aborted',
+          2: 'web/network',
+          3: 'web/decode',
+          4: 'web/unsupported-source',
         };
         this._emit(
           'onError',
