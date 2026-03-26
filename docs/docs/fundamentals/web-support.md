@@ -83,7 +83,7 @@ Web support uses the same API as native - `useVideoPlayer` for creating a player
 | Picture-in-Picture | ✅ | Depends on browser |
 | Media Session | ✅ | Lock screen controls |
 | Preload | ✅ | Full support |
-| Events | ✅ | All player events |
+| Events | ✅ | Core playback events (play/pause, buffering, errors). Some native-only events are not available on web. |
 | HLS streaming | ✅ | Via video.js engine |
 | Audio tracks | ⚠️ | Safari only (experimental in other browsers) |
 | Video tracks | ⚠️ | Safari only (experimental in other browsers) |
