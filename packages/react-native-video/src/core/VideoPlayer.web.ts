@@ -20,7 +20,7 @@ import type { VideoStore } from './web/VideoStore';
 
 function setExternalSubtitles(
   video: HTMLVideoElement,
-  subtitles: NativeVideoConfig['externalSubtitles']
+  subtitles: Array<{ uri: string; language?: string; label: string }> | undefined
 ) {
   video.querySelectorAll('track').forEach((t) => t.remove());
   for (const sub of subtitles ?? []) {
@@ -128,14 +128,14 @@ class VideoPlayer extends VideoPlayerEvents implements WebVideoPlayer {
   /** @internal */
   __destroy() {
     this.mediaSession?.disable();
-    (this.eventEmitter as WebEventEmitter).destroy();
+    (this.eventEmitter as unknown as WebEventEmitter).destroy();
     this.clearAllEvents();
     this._media.setStore(null);
   }
 
   /** @internal */
   __getEmitter(): WebEventEmitter {
-    return this.eventEmitter as WebEventEmitter;
+    return this.eventEmitter as unknown as WebEventEmitter;
   }
 
   /** @internal */
@@ -234,6 +234,10 @@ class VideoPlayer extends VideoPlayerEvents implements WebVideoPlayer {
     return true;
   }
   set playWhenInactive(_: boolean) {}
+  get disableAudioSessionManagement(): boolean {
+    return false;
+  }
+  set disableAudioSessionManagement(_: boolean) {}
 
   // --- Media Session ---
 
