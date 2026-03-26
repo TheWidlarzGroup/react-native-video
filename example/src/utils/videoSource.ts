@@ -70,9 +70,7 @@ const getDRMSource = (): VideoConfig => {
     } as VideoConfig;
   }
 
-  throw new Error(
-    'DRM is not Supported or Configured on Platform not supported'
-  );
+  throw new Error('DRM is not supported on this platform');
 };
 
 export type VideoType = 'hls' | 'mp4' | 'drm';

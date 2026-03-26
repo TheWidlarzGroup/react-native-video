@@ -4,8 +4,11 @@ export type * from './core/types/Events';
 export type { IgnoreSilentSwitchMode } from './core/types/IgnoreSilentSwitchMode';
 export type { MixAudioMode } from './core/types/MixAudioMode';
 export type { ResizeMode } from './core/types/ResizeMode';
+export type { AudioTrack } from './core/types/AudioTrack';
 export type { TextTrack } from './core/types/TextTrack';
+export type { VideoTrack } from './core/types/VideoTrack';
 export type { VideoConfig, VideoSource } from './core/types/VideoConfig';
+export type { WebVideoPlayer } from './core/types/WebVideoPlayer';
 export type {
   LibraryError,
   PlayerError,

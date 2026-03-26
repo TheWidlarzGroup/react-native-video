@@ -1,13 +1,15 @@
+import type { AudioTrack } from "./types/AudioTrack";
 import type { IgnoreSilentSwitchMode } from "./types/IgnoreSilentSwitchMode";
 import type { MixAudioMode } from "./types/MixAudioMode";
 import type { TextTrack } from "./types/TextTrack";
+import type { VideoTrack } from "./types/VideoTrack";
 import type { NoAutocomplete } from "./types/Utils";
 import type {
   NativeVideoConfig,
   VideoConfig,
   VideoSource,
 } from "./types/VideoConfig";
-import type { VideoPlayerBase } from "./types/VideoPlayerBase";
+import type { WebVideoPlayer } from "./types/WebVideoPlayer";
 import type { VideoPlayerSourceBase } from "./types/VideoPlayerSourceBase";
 import type { VideoPlayerStatus } from "./types/VideoPlayerStatus";
 import { VideoPlayerEvents } from "./events/VideoPlayerEvents";
@@ -15,7 +17,65 @@ import { MediaSessionHandler } from "./web/MediaSession";
 import { WebEventEmitter } from "./web/WebEventEmitter";
 import type { VideoStore } from "./web/VideoStore";
 
-class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
+function setExternalSubtitles(
+  video: HTMLVideoElement,
+  subtitles: NativeVideoConfig["externalSubtitles"],
+) {
+  video.querySelectorAll("track").forEach((t) => t.remove());
+  for (const sub of subtitles ?? []) {
+    const track = document.createElement("track");
+    track.kind = "subtitles";
+    track.src = sub.uri;
+    track.srclang = sub.language ?? "und";
+    track.label = sub.label;
+    video.appendChild(track);
+  }
+}
+
+type TrackType = "textTracks" | "audioTracks" | "videoTracks";
+
+/**
+ * Reads tracks from HTMLVideoElement.
+ * textTracks: 100% browser support. Uses .mode === "showing" for selection.
+ * audioTracks/videoTracks: ~16% support (Safari only, flags in Chrome/Firefox). Uses .enabled/.selected.
+ */
+function getTracks(
+  video: HTMLVideoElement,
+  prop: TrackType,
+): Array<{ id: string; label: string; language?: string; selected: boolean }> {
+  const tracks = (video as any)[prop];
+  if (!tracks) return [];
+  const result = [];
+  for (let i = 0; i < tracks.length; i++) {
+    const t = tracks[i]!;
+    const selected = prop === "textTracks"
+      ? t.mode === "showing"
+      : prop === "audioTracks" ? t.enabled : t.selected;
+    result.push({ id: t.id || t.label, label: t.label, language: t.language, selected });
+  }
+  return result;
+}
+
+function selectTrack(
+  video: HTMLVideoElement,
+  prop: TrackType,
+  trackId: string | null,
+): void {
+  const tracks = (video as any)[prop];
+  if (!tracks) return;
+  for (let i = 0; i < tracks.length; i++) {
+    const id = tracks[i]!.id || tracks[i]!.label;
+    if (prop === "textTracks") {
+      tracks[i]!.mode = id === trackId ? "showing" : "disabled";
+    } else if (prop === "audioTracks") {
+      tracks[i]!.enabled = id === trackId;
+    } else {
+      tracks[i]!.selected = id === trackId;
+    }
+  }
+}
+
+class VideoPlayer extends VideoPlayerEvents implements WebVideoPlayer {
   private video: HTMLVideoElement;
   private _storeRef: WeakRef<VideoStore> | null = null;
   private mediaSession: MediaSessionHandler | null = null;
@@ -24,8 +84,12 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   /** Returns store if alive, null if destroyed or disconnected. */
   private get _store(): VideoStore | null {
     const store = this._storeRef?.deref() ?? null;
-    if (store?.destroyed) return null;
-    return store;
+    return store?.destroyed ? null : store;
+  }
+
+  /** Store when available, video element fallback. */
+  private get media(): VideoStore | HTMLVideoElement {
+    return this._store ?? this.video;
   }
 
   /**
@@ -40,9 +104,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     const video = document.createElement("video");
     video.playsInline = true;
 
-    const emitter = new WebEventEmitter(null, () => video);
-    super(emitter);
-
+    super(new WebEventEmitter(null, () => video));
     this.video = video;
 
     (this.eventEmitter as WebEventEmitter).addOnErrorListener((error) => {
@@ -51,6 +113,8 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
 
     this.replaceSourceAsync(source);
   }
+
+  // --- Internal (used by VideoView) ---
 
   /** @internal */
   __setStore(store: VideoStore | null) {
@@ -77,6 +141,8 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     return this.video;
   }
 
+  // --- Playback state (read from store or video element) ---
+
   get source(): VideoPlayerSourceBase {
     return {
       uri: this._source?.uri ?? "",
@@ -94,11 +160,6 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     };
   }
 
-  /** Store when available, video element fallback. */
-  private get media(): VideoStore | HTMLVideoElement {
-    return this._store ?? this.video;
-  }
-
   get status(): VideoPlayerStatus {
     if (this.media.error) return "error";
     if (this.video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) return "readyToPlay";
@@ -108,24 +169,33 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   }
 
   get duration(): number { return this.media.duration || NaN; }
+  get currentTime(): number { return this.media.currentTime; }
   get volume(): number { return this.media.volume; }
+  get muted(): boolean { return this.media.muted; }
+  get loop(): boolean { return this.video.loop; }
+  get rate(): number { return this.media.playbackRate; }
+  get isPlaying(): boolean { return !this.media.paused; }
+
+  // --- Playback state (write through store or video element) ---
+
   set volume(v: number) {
     const clamped = Math.max(0, Math.min(1, v));
-    if (this._store) { this._store.setVolume(clamped); } else { this.video.volume = clamped; }
+    this._store ? this._store.setVolume(clamped) : (this.video.volume = clamped);
   }
-  get currentTime(): number { return this.media.currentTime; }
+
   set currentTime(v: number) {
-    if (this._store) { this._store.seek(v); } else { this.video.currentTime = v; }
+    this._store ? this._store.seek(v) : (this.video.currentTime = v);
   }
-  get muted(): boolean { return this.media.muted; }
-  // v10 store has toggleMuted() but no direct setter — always use video element
+
+  // video.js store has toggleMuted() but no direct setter
   set muted(v: boolean) { this.video.muted = v; }
-  get loop(): boolean { return this.video.loop; }
   set loop(v: boolean) { this.video.loop = v; }
-  get rate(): number { return this.media.playbackRate; }
+
   set rate(v: number) {
-    if (this._store) { this._store.setPlaybackRate(v); } else { this.video.playbackRate = v; }
+    this._store ? this._store.setPlaybackRate(v) : (this.video.playbackRate = v);
   }
+
+  // --- Unsupported on web (no-op) ---
 
   get mixAudioMode(): MixAudioMode { return "auto"; }
   set mixAudioMode(_: MixAudioMode) {}
@@ -136,7 +206,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   get playWhenInactive(): boolean { return true; }
   set playWhenInactive(_: boolean) {}
 
-  get isPlaying(): boolean { return !this.media.paused; }
+  // --- Media Session ---
 
   get showNotificationControls(): boolean {
     return this.mediaSession?.enabled ?? false;
@@ -149,24 +219,28 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     this.mediaSession.updateMediaSession(this._source?.metadata);
   }
 
+  // --- Playback actions ---
+
   async initialize(): Promise<void> {}
+
   async preload(): Promise<void> {
     this.video.preload = "auto";
     this.video.load();
   }
-  release(): void { this.__destroy(); }
 
+  release(): void { this.__destroy(); }
   play(): void { this.media.play()?.catch(() => {}); }
   pause(): void { this.media.pause(); }
 
-  seekBy(time: number): void {
-    const now = this.media.currentTime;
-    if (this._store) { this._store.seek(now + time); } else { this.video.currentTime = now + time; }
+  seekTo(time: number): void {
+    this._store ? this._store.seek(time) : (this.video.currentTime = time);
   }
 
-  seekTo(time: number): void {
-    if (this._store) { this._store.seek(time); } else { this.video.currentTime = time; }
+  seekBy(time: number): void {
+    this.seekTo(this.media.currentTime + time);
   }
+
+  // --- Source management ---
 
   async replaceSourceAsync(
     source:
@@ -192,52 +266,31 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     }
 
     this._source = source as NativeVideoConfig;
-    if (this._store) {
-      this._store.loadSource(source.uri);
-    } else {
-      this.video.src = source.uri;
-    }
+    this._store ? this._store.loadSource(source.uri) : (this.video.src = source.uri);
 
     if (this.mediaSession?.enabled) {
       this.mediaSession.updateMediaSession(source.metadata);
     }
 
-    const existingTracks = this.video.querySelectorAll("track");
-    existingTracks.forEach((t) => t.remove());
-
-    for (const sub of source.externalSubtitles ?? []) {
-      const track = document.createElement("track");
-      track.kind = "subtitles";
-      track.src = sub.uri;
-      track.srclang = sub.language ?? "und";
-      track.label = sub.label;
-      this.video.appendChild(track);
-    }
+    setExternalSubtitles(this.video, source.externalSubtitles);
 
     if (source.initializeOnCreation) await this.preload();
   }
 
-  getAvailableTextTracks(): TextTrack[] {
-    const tracks = this.video.textTracks;
-    const result: TextTrack[] = [];
-    for (let i = 0; i < tracks.length; i++) {
-      const t = tracks[i]!;
-      result.push({ id: t.id || t.label, label: t.label, language: t.language, selected: t.mode === "showing" });
-    }
-    return result;
-  }
+  // --- Tracks ---
 
-  selectTextTrack(textTrack: TextTrack | null): void {
-    const tracks = this.video.textTracks;
-    for (let i = 0; i < tracks.length; i++) {
-      const t = tracks[i]!;
-      t.mode = (t.id || t.label) === textTrack?.id ? "showing" : "disabled";
-    }
-  }
+  getAvailableTextTracks(): TextTrack[] { return getTracks(this.video, "textTracks"); }
+  selectTextTrack(t: TextTrack | null): void { selectTrack(this.video, "textTracks", t?.id ?? null); }
+  get selectedTrack(): TextTrack | undefined { return this.getAvailableTextTracks().find((x) => x.selected); }
 
-  get selectedTrack(): TextTrack | undefined {
-    return this.getAvailableTextTracks().find((x) => x.selected);
-  }
+  // Audio/video tracks: web-only, ~16% browser support (Safari only, flags in Chrome/Firefox)
+  getAvailableAudioTracks(): AudioTrack[] { return getTracks(this.video, "audioTracks"); }
+  selectAudioTrack(t: AudioTrack | null): void { selectTrack(this.video, "audioTracks", t?.id ?? null); }
+  get selectedAudioTrack(): AudioTrack | undefined { return this.getAvailableAudioTracks().find((x) => x.selected); }
+
+  getAvailableVideoTracks(): VideoTrack[] { return getTracks(this.video, "videoTracks"); }
+  selectVideoTrack(t: VideoTrack | null): void { selectTrack(this.video, "videoTracks", t?.id ?? null); }
+  get selectedVideoTrack(): VideoTrack | undefined { return this.getAvailableVideoTracks().find((x) => x.selected); }
 }
 
 export { VideoPlayer };
