@@ -1,11 +1,12 @@
+import type { ListenerSubscription } from './EventEmitter';
+import type { AllPlayerEvents } from './Events';
 import type { IgnoreSilentSwitchMode } from './IgnoreSilentSwitchMode';
 import type { MixAudioMode } from './MixAudioMode';
 import type { TextTrack } from './TextTrack';
 import type { VideoPlayerSourceBase } from './VideoPlayerSourceBase';
 import type { VideoPlayerStatus } from './VideoPlayerStatus';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { VideoConfig } from './VideoConfig';
+import type { VideoConfig, VideoSource } from './VideoConfig';
 
 export interface VideoPlayerBase {
   /**
@@ -152,7 +153,9 @@ export interface VideoPlayerBase {
    * @note If you want to clear the source, you can pass null.
    * see {@link VideoPlayerSourceBase}
    */
-  replaceSourceAsync(source: VideoPlayerSourceBase | null): Promise<void>;
+  replaceSourceAsync(
+    source: VideoSource | VideoConfig | VideoPlayerSourceBase | null
+  ): Promise<void>;
 
   /**
    * Get all available text tracks for the current source.
@@ -171,4 +174,19 @@ export interface VideoPlayerBase {
    * @returns The currently selected text track, or undefined if none is selected
    */
   readonly selectedTrack?: TextTrack;
+
+  /**
+   * Whether to show notification controls (lock screen / control center).
+   */
+  showNotificationControls: boolean;
+
+  /**
+   * Releases the player's resources. After calling this, the player is no longer usable.
+   */
+  release(): void;
+
+  addEventListener<Event extends keyof AllPlayerEvents>(
+    event: Event,
+    callback: AllPlayerEvents[Event]
+  ): ListenerSubscription;
 }

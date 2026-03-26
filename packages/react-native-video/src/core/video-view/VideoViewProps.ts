@@ -3,13 +3,13 @@ import type { SurfaceType } from '../../spec/nitro/VideoViewViewManager.nitro';
 import type { ListenerSubscription } from '../types/EventEmitter';
 import type { VideoViewEvents } from '../types/Events';
 import type { ResizeMode } from '../types/ResizeMode';
-import type { VideoPlayer } from '../VideoPlayer';
+import type { VideoPlayerBase } from '../types/VideoPlayerBase';
 
 export interface VideoViewProps extends Partial<VideoViewEvents>, ViewProps {
   /**
-   * The player to play the video - {@link VideoPlayer}
+   * The player to play the video
    */
-  player: VideoPlayer;
+  player: VideoPlayerBase;
   /**
    * The style of the video view - {@link ViewStyle}
    */
