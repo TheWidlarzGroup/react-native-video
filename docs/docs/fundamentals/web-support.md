@@ -52,7 +52,7 @@ function Player() {
 
 ### Web-enhanced player
 
-The web platform may offer additional features not available on native. To access them, cast the player to [`WebVideoPlayer`](/docs/api-reference/interfaces/WebVideoPlayer):
+The web platform may offer additional features not available on native. To access them, cast the player to [`WebVideoPlayer`](../api-reference/interfaces/WebVideoPlayer):
 
 ```tsx
 import { useVideoPlayer, type WebVideoPlayer } from 'react-native-video';
@@ -92,7 +92,7 @@ Web support uses the same API as native - `useVideoPlayer` for creating a player
 
 ## Web-only features
 
-See the [WebVideoPlayer](/docs/api-reference/interfaces/WebVideoPlayer) API reference for web-specific methods.
+See the [WebVideoPlayer](../api-reference/interfaces/WebVideoPlayer) API reference for web-specific methods.
 
 ## Known limitations
 
