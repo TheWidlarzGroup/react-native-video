@@ -37,6 +37,8 @@ const config: Config = {
           sidebarPath: './sidebars.ts',
           lastVersion: '6.x',
           includeCurrentVersion: true,
+          showLastUpdateTime: true,
+          showLastUpdateAuthor: true,
           versions: {
             'current': {
               label: 'v7 Beta',
@@ -50,6 +52,11 @@ const config: Config = {
           },
           sidebarItemsGenerator: createSidebarWithCustomProps,
         },
+        sitemap: {
+          lastmod: 'date',
+          changefreq: 'weekly',
+          priority: 0.5,
+        },
         theme: {
           customCss: './src/css/custom.css',
         },
@@ -58,6 +65,29 @@ const config: Config = {
   ],
 
   headTags: [
+    {
+      tagName: 'script',
+      attributes: { type: 'application/ld+json' },
+      innerHTML: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'SoftwareSourceCode',
+        name: 'React Native Video',
+        description:
+          'A cross-platform video player for React Native with DRM support, plugin architecture, and offline playback.',
+        url: 'https://github.com/TheWidlarzGroup/react-native-video',
+        codeRepository:
+          'https://github.com/TheWidlarzGroup/react-native-video',
+        programmingLanguage: [
+          'TypeScript',
+          'Java',
+          'Kotlin',
+          'Swift',
+          'Objective-C',
+        ],
+        runtimePlatform: 'React Native',
+        license: 'https://opensource.org/licenses/MIT',
+      }),
+    },
     {
       tagName: 'link',
       attributes: {
@@ -85,6 +115,10 @@ const config: Config = {
 
   themeConfig: {
     image: 'img/twg-social-card.png',
+    metadata: [
+      { name: 'twitter:card', content: 'summary_large_image' },
+      { property: 'og:site_name', content: 'React Native Video Documentation' },
+    ],
     navbar: {
       title: 'React Native Video',
       logo: {
@@ -178,8 +212,8 @@ const config: Config = {
       'docusaurus-plugin-llms',
       {
         id: 'llms-v6',
-        generateLLMsTxt: false,
-        generateLLMsFullTxt: false,
+        generateLLMsTxt: true,
+        generateLLMsFullTxt: true,
         docsDir: 'versioned_docs/version-6.x',
         pathTransformation: {
           ignorePaths: ['docs'],
@@ -209,8 +243,8 @@ const config: Config = {
       'docusaurus-plugin-llms',
       {
         id: 'llms-v7',
-        generateLLMsTxt: false,
-        generateLLMsFullTxt: false,
+        generateLLMsTxt: true,
+        generateLLMsFullTxt: true,
         docsDir: 'docs',
         pathTransformation: {
           ignorePaths: ['docs'],
@@ -222,14 +256,14 @@ const config: Config = {
             filename: 'llms-v7.txt',
             title: 'React Native Video v7 Documentation',
             description: 'Complete documentation for React Native Video v7',
-            includePatterns: ['docs/**/*.md'],
+            includePatterns: ['docs/**/*.md', 'docs/**/*.mdx'],
             fullContent: false,
           },
           {
             filename: 'llms-v7-full.txt',
             title: 'React Native Video v7 Documentation',
             description: 'Complete documentation for React Native Video v7',
-            includePatterns: ['docs/**/*.md'],
+            includePatterns: ['docs/**/*.md', 'docs/**/*.mdx'],
             fullContent: true,
           },
         ],
