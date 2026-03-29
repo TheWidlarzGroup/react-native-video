@@ -2,6 +2,7 @@
 title: Updating
 description: React Native Video Updating Guide
 sidebar_class_name: hidden
+keywords: [updating, migration, upgrade guide, breaking changes, react native video]
 ---
 
 ## Upgrading from react-native-video v6 to v7

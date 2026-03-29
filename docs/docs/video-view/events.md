@@ -1,7 +1,9 @@
 ---
+title: VideoView Events
 sidebar_position: 3
 sidebar_label: Events
-description: VideoView event callbacks
+description: VideoView event callbacks for fullscreen changes, picture-in-picture transitions, and UI state updates in React Native Video.
+keywords: [VideoView events, onFullscreenChange, onPictureInPictureChange, fullscreen, PiP, react native video]
 ---
 
 # Events

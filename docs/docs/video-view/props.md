@@ -1,7 +1,9 @@
 ---
+title: VideoView Props
 sidebar_position: 2
 sidebar_label: Props
-description: VideoView component properties
+description: Full reference of VideoView component props — player binding, controls, picture-in-picture, resize mode, and surface type options.
+keywords: [VideoView props, player, controls, resizeMode, surfaceType, picture-in-picture, react native video]
 ---
 
 # Props

@@ -1,7 +1,9 @@
 ---
+title: DRM Offline Downloading
 sidebar_position: 5
 sidebar_label: DRM Downloading
 description: Downloading and playing DRM-protected content offline
+keywords: [DRM offline, offline DRM, persistent licenses, Widevine offline, FairPlay offline, react native video]
 ---
 
 # DRM Downloading

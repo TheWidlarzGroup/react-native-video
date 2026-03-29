@@ -1,7 +1,9 @@
 ---
+title: Configuration with Expo
 sidebar_position: 1
 sidebar_label: With Expo
 description: Expo plugin for react-native-video configuration
+keywords: [Expo, expo plugin, configuration, react native video, setup]
 ---
 
 # Expo Plugin

@@ -1,7 +1,9 @@
 ---
+title: Getting Started with Offline Video SDK
 sidebar_position: 1
 sidebar_label: Getting Started
 description: Installation and setup guide for Offline Video SDK
+keywords: [offline video, Offline Video SDK, downloading, offline playback, react native video]
 ---
 
 # Getting Started

@@ -1,7 +1,9 @@
 ---
+title: Manual Analytics Integration
 sidebar_position: 2
 sidebar_label: Manual (Native)
 description: Manual analytics integration guide using native plugins
+keywords: [video analytics, manual analytics, native plugins, tracking, react native video]
 ---
 
 # Manual Analytics

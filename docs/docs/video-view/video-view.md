@@ -1,7 +1,9 @@
 ---
+title: VideoView Component
 sidebar_position: 1
 sidebar_label: Introduction
-description: Introduction to VideoView component
+description: Render video content with the VideoView component — native controls, fullscreen, and picture-in-picture support in React Native Video.
+keywords: [VideoView, component, video rendering, native controls, fullscreen, picture-in-picture, react native video]
 ---
 
 # VideoView Component

@@ -1,7 +1,9 @@
 ---
+title: VideoView Methods
 sidebar_position: 4
 sidebar_label: Methods
-description: VideoView imperative methods
+description: Imperative methods for VideoView — programmatic control of fullscreen, picture-in-picture, and other view-level operations.
+keywords: [VideoView methods, ref, enterFullscreen, exitFullscreen, enterPictureInPicture, imperative API, react native video]
 ---
 
 # Refs and Imperative Methods

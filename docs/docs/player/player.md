@@ -1,6 +1,9 @@
 ---
+title: Player Overview
 sidebar_position: 1
 sidebar_label: Player
+description: Learn how to use the VideoPlayer class in React Native Video v7 to control video playback, manage sources, and handle player lifecycle.
+keywords: [react native video, video player, VideoPlayer, mobile video, react native]
 ---
 
 # Player
