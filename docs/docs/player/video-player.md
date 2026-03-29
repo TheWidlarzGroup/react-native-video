@@ -1,6 +1,9 @@
 ---
+title: VideoPlayer Class API
 sidebar_position: 3
 sidebar_label: VideoPlayer
+description: Complete API reference for the VideoPlayer class — playback control, properties, buffering, DRM, and lifecycle management.
+keywords: [VideoPlayer, API reference, playback control, buffering, player lifecycle, react native video]
 ---
 
 # VideoPlayer

@@ -2,6 +2,7 @@
 title: Plugin Usage Examples
 description: Simple examples of implementing common plugin scenarios for React Native Video
 sidebar_position: 3
+keywords: [plugin examples, plugin implementation, plugin usage, react native video]
 ---
 
 # Plugin Usage Examples

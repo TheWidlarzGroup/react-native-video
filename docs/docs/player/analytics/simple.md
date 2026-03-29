@@ -1,7 +1,9 @@
 ---
+title: Simple Analytics with JavaScript Events
 sidebar_position: 0
 sidebar_label: Simple (JS Events)
 description: Simple analytics using JavaScript events
+keywords: [video analytics, JavaScript events, simple tracking, onProgress, react native video]
 ---
 
 # Simple Analytics

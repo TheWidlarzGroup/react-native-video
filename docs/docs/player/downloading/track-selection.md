@@ -1,7 +1,9 @@
 ---
+title: Track Selection for Downloads
 sidebar_position: 4
 sidebar_label: Track Selection
 description: How to select specific tracks for download
+keywords: [track selection, audio tracks, video tracks, subtitle tracks, download optimization, react native video]
 ---
 
 # Track Selection

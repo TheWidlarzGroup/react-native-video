@@ -1,7 +1,9 @@
 ---
+title: Manual Configuration without Expo
 sidebar_position: 2
 sidebar_label: Without Expo
 description: Manual configuration of react-native-video
+keywords: [manual configuration, bare React Native, iOS setup, Android setup, native config, react native video]
 ---
 
 # Manual Configuration

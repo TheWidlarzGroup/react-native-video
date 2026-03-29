@@ -1,7 +1,9 @@
 ---
+title: Download Events
 sidebar_position: 3
 sidebar_label: Events (downloading)
 description: Event system for tracking download progress and status
+keywords: [download events, progress tracking, download status, onDownloadProgress, react native video]
 ---
 
 # Downloading Events
