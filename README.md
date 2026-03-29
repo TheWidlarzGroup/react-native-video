@@ -1,4 +1,4 @@
-[![React Native Video Component](./docs/static/baners/rnv-banner.png)](https://thewidlarzgroup.com/?utm_source=rnv&utm_medium=readme&utm_id=banner)
+[![React Native Video Component](./docs/static/banners/rnv-banner.png)](https://thewidlarzgroup.com/?utm_source=rnv&utm_medium=readme&utm_id=banner)
 
 The most battle-tested open-source video player component for React Native with support for DRM, offline playback, HLS/DASH streaming, and more.
 
@@ -105,7 +105,7 @@ export default () => (
 ## :inbox_tray: We're building a Pro Player!
 
 <a href="https://sdk.thewidlarzgroup.com">
-  <img src="./docs/static/baners/rnv-pro-player-banner.png" alt="Offline SDK Preview" width="40%" align="right" />
+  <img src="./docs/static/banners/rnv-pro-player-banner.png" alt="Offline SDK Preview" width="40%" align="right" />
 </a>
 
 We see the need for a more feature-rich video player. There is a gap between open source and commercial players, and we want to fill that gap with plugins.
