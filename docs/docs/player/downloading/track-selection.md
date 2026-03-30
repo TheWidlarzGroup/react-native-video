@@ -1,5 +1,5 @@
 ---
-title: Track Selection for Downloads
+title: Track Selection for Offline Downloads
 sidebar_position: 4
 sidebar_label: Track Selection
 description: How to select specific tracks for download

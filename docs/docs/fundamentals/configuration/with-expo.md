@@ -2,7 +2,7 @@
 title: Configuration with Expo
 sidebar_position: 1
 sidebar_label: With Expo
-description: Expo plugin for react-native-video configuration
+description: Configure React Native Video with the Expo plugin — automatic native setup for iOS and Android with app.json config options.
 keywords: [Expo, expo plugin, configuration, react native video, setup]
 ---
 

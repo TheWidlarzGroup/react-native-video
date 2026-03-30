@@ -1,5 +1,5 @@
 ---
-title: VideoView Props
+title: VideoView Props — Controls, PiP & Resize Mode
 sidebar_position: 2
 sidebar_label: Props
 description: Full reference of VideoView component props — player binding, controls, picture-in-picture, resize mode, and surface type options.

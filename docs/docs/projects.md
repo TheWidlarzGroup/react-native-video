@@ -1,5 +1,6 @@
 ---
-title: Useful Projects
+title: Useful Projects & Community Resources
+sidebar_label: Useful Projects
 description: React Native Video Useful Projects
 sidebar_class_name: hidden
 keywords: [useful projects, community projects, related libraries, react native video]

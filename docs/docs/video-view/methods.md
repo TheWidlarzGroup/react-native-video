@@ -1,5 +1,5 @@
 ---
-title: VideoView Methods
+title: VideoView Methods — Fullscreen & PiP Control
 sidebar_position: 4
 sidebar_label: Methods
 description: Imperative methods for VideoView — programmatic control of fullscreen, picture-in-picture, and other view-level operations.
