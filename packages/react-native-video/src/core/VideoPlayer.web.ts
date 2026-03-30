@@ -88,6 +88,7 @@ class VideoPlayer extends VideoPlayerEvents implements WebVideoPlayer {
   private _media: WebMediaProxy;
   private mediaSession: MediaSessionHandler | null = null;
   private _source: NativeVideoConfig | undefined;
+  private _showNotificationControls = false;
 
   /**
    * Creates a detached <video> element that works immediately.
@@ -119,6 +120,12 @@ class VideoPlayer extends VideoPlayerEvents implements WebVideoPlayer {
     this._media.setStore(store);
     if (store) {
       this.mediaSession = new MediaSessionHandler(store);
+      // If showNotificationControls was set before store was available,
+      // mediaSession.enabled tracks that — apply it now.
+      if (this._showNotificationControls) {
+        this.mediaSession.enable();
+        this.mediaSession.updateMediaSession(this._source?.metadata);
+      }
     } else {
       this.mediaSession?.disable();
       this.mediaSession = null;
@@ -242,10 +249,11 @@ class VideoPlayer extends VideoPlayerEvents implements WebVideoPlayer {
   // --- Media Session ---
 
   get showNotificationControls(): boolean {
-    return this.mediaSession?.enabled ?? false;
+    return this._showNotificationControls;
   }
 
   set showNotificationControls(value: boolean) {
+    this._showNotificationControls = value;
     if (!this.mediaSession) return;
     if (!value) {
       this.mediaSession.disable();
