@@ -1,5 +1,5 @@
 ---
-title: DRM Offline Downloading
+title: DRM Offline — Widevine & FairPlay Downloads
 sidebar_position: 5
 sidebar_label: DRM Downloading
 description: Downloading and playing DRM-protected content offline

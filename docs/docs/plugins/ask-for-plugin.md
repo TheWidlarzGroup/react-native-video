@@ -1,5 +1,6 @@
 ---
-title: Ask for Plugin
+title: Request a Custom Plugin
+sidebar_label: Ask for Plugin
 description: Request a custom plugin for your React Native Video application
 sidebar_position: 7
 keywords: [custom plugin, request plugin, plugin development, react native video]

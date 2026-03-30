@@ -1,5 +1,5 @@
 ---
-title: useVideoPlayer Hook
+title: useVideoPlayer — React Hook for Video Playback
 sidebar_position: 2
 sidebar_label: useVideoPlayer
 description: Use the useVideoPlayer React hook to create and manage video playback with automatic lifecycle handling in React Native Video.

@@ -1,5 +1,5 @@
 ---
-title: VideoPlayer Class API
+title: VideoPlayer Class — Full API Reference
 sidebar_position: 3
 sidebar_label: VideoPlayer
 description: Complete API reference for the VideoPlayer class — playback control, properties, buffering, DRM, and lifecycle management.

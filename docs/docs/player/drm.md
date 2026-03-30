@@ -1,5 +1,5 @@
 ---
-title: DRM Protection - Widevine & FairPlay
+title: DRM — Widevine & FairPlay Content Protection
 sidebar_position: 4
 sidebar_label: DRM
 description: Set up DRM-protected video playback with Widevine (Android) and FairPlay (iOS/visionOS) using the official React Native Video DRM plugin.

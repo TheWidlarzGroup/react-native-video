@@ -1,5 +1,5 @@
 ---
-title: Downloading API Reference
+title: Download API Reference
 sidebar_position: 2
 sidebar_label: Downloading
 description: Complete API reference for Offline Video SDK

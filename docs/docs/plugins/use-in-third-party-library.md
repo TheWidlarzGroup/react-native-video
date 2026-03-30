@@ -1,5 +1,6 @@
 ---
-title: Use in Third Party Library
+title: Using Plugins in Third-Party Libraries
+sidebar_label: Third Party Library
 description: How to use React Native Video in a third party library
 sidebar_position: 4
 keywords: [third party library, library integration, plugin integration, react native video]

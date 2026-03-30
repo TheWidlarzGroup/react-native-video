@@ -1,5 +1,6 @@
 ---
-title: Installation - iOS, Android, tvOS
+title: Installation — iOS, Android, tvOS
+sidebar_label: Installation
 sidebar_position: 2
 description: Step-by-step guide to install React Native Video with Expo or bare React Native — system requirements, package setup, and platform configuration.
 keywords: [installation, setup, Expo, React Native CLI, npm, requirements, react native video]

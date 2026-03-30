@@ -1,5 +1,6 @@
 ---
-title: Plugin Interface
+title: Plugin Interface Reference
+sidebar_label: Interface
 description: Reference for the React Native Video plugin interface
 sidebar_position: 2
 keywords: [plugin interface, plugin API, plugin development, react native video]

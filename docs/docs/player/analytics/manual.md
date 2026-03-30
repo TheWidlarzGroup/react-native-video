@@ -1,5 +1,5 @@
 ---
-title: Manual Analytics Integration
+title: Manual Analytics with Native Plugins
 sidebar_position: 2
 sidebar_label: Manual (Native)
 description: Manual analytics integration guide using native plugins

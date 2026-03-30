@@ -1,5 +1,5 @@
 ---
-title: Player Events
+title: Player Events — onLoad, onProgress, onError
 sidebar_label: Events
 sidebar_position: 5
 description: Handle video player events like onLoad, onProgress, onError, and onEnd using the useEvent hook in React Native Video.

@@ -1,5 +1,5 @@
 ---
-title: Download Events
+title: Download Events — Progress & Status Tracking
 sidebar_position: 3
 sidebar_label: Events (downloading)
 description: Event system for tracking download progress and status

@@ -1,9 +1,12 @@
 ---
-title: Updating
+title: Migration Guide — Upgrading from v6 to v7
+sidebar_label: Updating
 description: React Native Video Updating Guide
 sidebar_class_name: hidden
 keywords: [updating, migration, upgrade guide, breaking changes, react native video]
 ---
+
+# Updating
 
 ## Upgrading from react-native-video v6 to v7
 

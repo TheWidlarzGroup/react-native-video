@@ -2,7 +2,7 @@
 title: Manual Configuration without Expo
 sidebar_position: 2
 sidebar_label: Without Expo
-description: Manual configuration of react-native-video
+description: Manually configure React Native Video in a bare React Native project — iOS and Android native setup without the Expo plugin.
 keywords: [manual configuration, bare React Native, iOS setup, Android setup, native config, react native video]
 ---
 

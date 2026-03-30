@@ -1,5 +1,5 @@
 ---
-title: Getting Started with Offline Video SDK
+title: Getting Started with Offline Video
 sidebar_position: 1
 sidebar_label: Getting Started
 description: Installation and setup guide for Offline Video SDK
