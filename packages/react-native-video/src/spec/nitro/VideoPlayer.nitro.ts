@@ -5,8 +5,7 @@ import type { VideoPlayerEventEmitter } from './VideoPlayerEventEmitter.nitro';
 import type { VideoPlayerSource } from './VideoPlayerSource.nitro';
 
 export interface VideoPlayer
-  extends HybridObject<{ ios: 'swift'; android: 'kotlin' }>,
-    VideoPlayerBase {
+  extends HybridObject<{ ios: 'swift'; android: 'kotlin' }>, VideoPlayerBase {
   // Override with (hybrid) VideoPlayerSource
   readonly source: VideoPlayerSource;
 
@@ -49,8 +48,10 @@ export interface VideoPlayer
   release(): void;
 }
 
-export interface VideoPlayerFactory
-  extends HybridObject<{ ios: 'swift'; android: 'kotlin' }> {
+export interface VideoPlayerFactory extends HybridObject<{
+  ios: 'swift';
+  android: 'kotlin';
+}> {
   createPlayer(source: VideoPlayerSource): VideoPlayer;
 
   /**

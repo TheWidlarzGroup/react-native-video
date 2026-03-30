@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import { VideoPlayer } from '../VideoPlayer';
-import { type AllPlayerEvents } from '../types/Events';
+import type { AllPlayerEvents } from '../types/Events';
+import type { VideoPlayerBase } from '../types/VideoPlayerBase';
 
 /**
  * Attaches an event listener to a `VideoPlayer` instance for a specified event.
@@ -10,7 +10,7 @@ import { type AllPlayerEvents } from '../types/Events';
  * @param callback - The callback for the event
  */
 export const useEvent = <T extends keyof AllPlayerEvents>(
-  player: VideoPlayer,
+  player: VideoPlayerBase,
   event: T,
   callback: AllPlayerEvents[T]
 ) => {

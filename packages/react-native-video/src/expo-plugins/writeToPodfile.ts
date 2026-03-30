@@ -1,6 +1,6 @@
 import { mergeContents } from '@expo/config-plugins/build/utils/generateCode';
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 
 export const writeToPodfile = (
   projectRoot: string,

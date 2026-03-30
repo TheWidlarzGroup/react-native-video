@@ -6,8 +6,10 @@ import type { ListenerSubscription } from './VideoPlayerEventEmitter.nitro';
 export type SurfaceType = 'surface' | 'texture';
 
 // @internal
-export interface VideoViewViewManager
-  extends HybridObject<{ ios: 'swift'; android: 'kotlin' }> {
+export interface VideoViewViewManager extends HybridObject<{
+  ios: 'swift';
+  android: 'kotlin';
+}> {
   player?: VideoPlayer;
   controls: boolean;
   pictureInPicture: boolean;
@@ -86,7 +88,9 @@ export interface VideoViewViewManager
 }
 
 // @internal
-export interface VideoViewViewManagerFactory
-  extends HybridObject<{ ios: 'swift'; android: 'kotlin' }> {
+export interface VideoViewViewManagerFactory extends HybridObject<{
+  ios: 'swift';
+  android: 'kotlin';
+}> {
   createViewManager(nitroId: number): VideoViewViewManager;
 }

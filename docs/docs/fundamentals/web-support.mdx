@@ -1,0 +1,98 @@
+---
+title: Web Support — Play Video in Browser with React Native
+sidebar_position: 4
+sidebar_label: Web Support
+description: Use React Native Video on the web with video.js v10. Same useVideoPlayer and VideoView API as iOS and Android — HLS, subtitles, fullscreen, Picture-in-Picture, and notification controls.
+keywords: [web, react native video, video.js, browser, HLS, streaming, react native web]
+customProps:
+  badgeType: new
+---
+
+import PlatformsList from '@site/src/components/PlatformsList/PlatformsList';
+
+# Web Support
+
+<PlatformsList types={['Web']} />
+
+React Native Video supports the web platform through [video.js](https://videojs.org/) (v10), providing the same `VideoPlayer` and `VideoView` API you use on iOS and Android.
+
+## Setup
+
+Configure your project for web support:
+
+- [With Expo](https://docs.expo.dev/workflow/web/)
+- [Without Expo (bare React Native)](https://necolas.github.io/react-native-web/docs/multi-platform/)
+
+React Native Video handles video.js internally - no additional CSS imports or configuration needed beyond standard React Native Web setup.
+
+## Usage
+
+The API is identical to native:
+
+```tsx
+import { useVideoPlayer, VideoView } from 'react-native-video';
+
+function Player() {
+  const player = useVideoPlayer({
+    uri: 'https://example.com/video.mp4',
+  });
+
+  return (
+    <VideoView
+      player={player}
+      controls
+      style={{ width: '100%', aspectRatio: 16 / 9 }}
+    />
+  );
+}
+```
+
+### Web-enhanced player
+
+The web platform may offer additional features not available on native. To access them, cast the player to [`WebVideoPlayer`](../api-reference/interfaces/WebVideoPlayer):
+
+```tsx
+import { useVideoPlayer, type WebVideoPlayer } from 'react-native-video';
+
+const player = useVideoPlayer(source) as WebVideoPlayer;
+```
+
+This is optional - the standard `useVideoPlayer` works perfectly on web. The cast simply gives you typed access to extra capabilities when building web-specific features.
+
+## How it works
+
+Web support uses the same API as native - `useVideoPlayer` for creating a player and `VideoView` for displaying video. You can use the player with or without a view:
+
+- **With `VideoView`** - displays video with optional built-in controls (powered by [video.js](https://videojs.org/))
+- **Without `VideoView`** - audio-only playback
+
+## Supported features
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Play / Pause / Seek | ✅ | Full support |
+| Volume / Mute | ✅ | Full support |
+| Loop | ✅ | Full support |
+| Playback rate | ✅ | Full support |
+| Text tracks (subtitles) | ✅ | Including external subtitles |
+| Resize mode | ✅ | contain, cover, stretch, none |
+| Fullscreen | ✅ | Full support |
+| Picture-in-Picture | ✅ | Depends on browser |
+| Media Session | ✅ | Lock screen controls |
+| Preload | ✅ | Full support |
+| Events | ✅ | Core playback events (play/pause, buffering, errors). Some native-only events are not available on web. |
+| HLS streaming | ✅ | Via video.js engine |
+| Audio tracks | ⚠️ | Safari only (experimental in other browsers) |
+| Video tracks | ⚠️ | Safari only (experimental in other browsers) |
+| DRM | ❌ | Not yet available |
+| Ads | ❌ |
+
+## Web-only features
+
+See the [WebVideoPlayer](../api-reference/interfaces/WebVideoPlayer) API reference for web-specific methods.
+
+## Known limitations
+
+- `mixAudioMode`, `ignoreSilentSwitchMode`, `playInBackground`, `playWhenInactive` are no-ops on web
+- Video sources must be URLs (strings) - `require('./video.mp4')` is not supported on web
+- DRM and Ads are not yet supported

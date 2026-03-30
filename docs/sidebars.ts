@@ -1,4 +1,4 @@
-import { TypedSidebarsConfig } from '@widlarzgroup/docusaurus-ui';
+import type { TypedSidebarsConfig } from '@widlarzgroup/docusaurus-ui';
 
 const sidebars: TypedSidebarsConfig = {
   docsSidebar: [

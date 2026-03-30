@@ -48,6 +48,7 @@
   "scripts": {
     "postinstall": "bun run build || exit 0;",
     "typecheck": "tsc",
+    "typecheck:web": "tsc -p tsconfig.web.json",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
     "prepare": "bun run build",
@@ -73,9 +74,14 @@
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
+  "dependencies": {
+    "@videojs/react": "^10.0.0-beta.11"
+  },
   "devDependencies": {
     "@expo/config-plugins": "^10.0.2",
+    "@react-native/eslint-config": "^0.77.0",
     "@types/react": "^18.2.44",
+    "@types/react-native-web": "^0.19.2",
     "del-cli": "^5.1.0",
     "eslint": "^8.51.0",
     "eslint-config-prettier": "^9.0.0",
@@ -84,7 +90,6 @@
     "prettier": "^3.0.3",
     "react": "18.3.1",
     "react-native": "^0.77.0",
-    "@react-native/eslint-config": "^0.77.0",
     "react-native-builder-bob": "^0.40.0",
     "react-native-nitro-modules": "0.35.0",
     "typescript": "^5.2.2"

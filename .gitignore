@@ -84,4 +84,4 @@ android/keystores/debug.keystore
 lib/
 
 # TypeScript
-tsconfig.tsbuildinfo
+*.tsbuildinfo

@@ -18,8 +18,10 @@ export interface ListenerSubscription {
   remove(): void;
 }
 
-export interface VideoPlayerEventEmitter
-  extends HybridObject<{ ios: 'swift'; android: 'kotlin' }> {
+export interface VideoPlayerEventEmitter extends HybridObject<{
+  ios: 'swift';
+  android: 'kotlin';
+}> {
   /**
    * Adds a listener for the `onAudioBecomingNoisy` event.
    * @see {@link VideoPlayerEvents.onAudioBecomingNoisy}

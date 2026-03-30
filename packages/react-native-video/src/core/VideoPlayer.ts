@@ -1,6 +1,6 @@
 import { Platform } from 'react-native';
 import { NitroModules } from 'react-native-nitro-modules';
-import { type VideoPlayer as VideoPlayerImpl } from '../spec/nitro/VideoPlayer.nitro';
+import type { VideoPlayer as VideoPlayerImpl } from '../spec/nitro/VideoPlayer.nitro';
 import type { VideoPlayerSource } from '../spec/nitro/VideoPlayerSource.nitro';
 import type { IgnoreSilentSwitchMode } from './types/IgnoreSilentSwitchMode';
 import type { MixAudioMode } from './types/MixAudioMode';
@@ -15,7 +15,7 @@ import type { VideoPlayerBase } from './types/VideoPlayerBase';
 import type { VideoPlayerStatus } from './types/VideoPlayerStatus';
 import { createPlayer } from './utils/playerFactory';
 import { createSource } from './utils/sourceFactory';
-import { VideoPlayerEvents } from './VideoPlayerEvents';
+import { VideoPlayerEvents } from './events/VideoPlayerEvents';
 
 class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   private _player: VideoPlayerImpl | undefined;

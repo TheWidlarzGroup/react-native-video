@@ -8,11 +8,14 @@ import type { VideoPlayerSourceBase } from '../../core/types/VideoPlayerSourceBa
  * It provides functions to get information about the asset.
  */
 export interface VideoPlayerSource
-  extends HybridObject<{ ios: 'swift'; android: 'kotlin' }>,
+  extends
+    HybridObject<{ ios: 'swift'; android: 'kotlin' }>,
     VideoPlayerSourceBase {}
 
-export interface VideoPlayerSourceFactory
-  extends HybridObject<{ ios: 'swift'; android: 'kotlin' }> {
+export interface VideoPlayerSourceFactory extends HybridObject<{
+  ios: 'swift';
+  android: 'kotlin';
+}> {
   fromUri(uri: string): VideoPlayerSource;
   fromVideoConfig(config: NativeVideoConfig): VideoPlayerSource;
 }

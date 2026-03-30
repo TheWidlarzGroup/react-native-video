@@ -9,12 +9,16 @@
     "typecheck": "tsc",
     "start": "react-native start --client-logs",
     "bundle-install": "bundle install",
-    "pods": "cd ios && pod install && cd .."
+    "pods": "cd ios && pod install && cd ..",
+    "web": "webpack serve --mode development --config web/webpack.config.js",
+    "build:web": "webpack --mode production --config web/webpack.config.js"
   },
   "dependencies": {
     "@react-native-community/slider": "^4.5.6",
     "react": "18.3.1",
+    "react-dom": "18.3.1",
     "react-native": "^0.77.0",
+    "react-native-web": "^0.19.13",
     "react-native-nitro-modules": "0.35.0",
     "react-native-video": "*",
     "@react-native-video/drm": "*"
@@ -33,7 +37,16 @@
     "@types/react": "^18.2.44",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "webpack": "^5.97.0",
+    "webpack-cli": "^6.0.0",
+    "webpack-dev-server": "^5.2.0",
+    "babel-loader": "^9.2.1",
+    "babel-plugin-react-native-web": "^0.19.13",
+    "url-loader": "^4.1.1",
+    "html-webpack-plugin": "^5.6.3",
+    "style-loader": "^4.0.0",
+    "css-loader": "^7.1.2"
   },
   "engines": {
     "node": ">=18"
