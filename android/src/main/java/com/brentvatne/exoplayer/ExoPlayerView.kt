@@ -4,6 +4,8 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
+import android.view.LayoutInflater
+import android.view.SurfaceView
 import android.view.View
 import android.view.View.MeasureSpec
 import android.widget.FrameLayout
@@ -17,6 +19,8 @@ import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerView
 import com.brentvatne.common.api.ResizeMode
 import com.brentvatne.common.api.SubtitleStyle
+import com.brentvatne.common.api.ViewType
+import com.brentvatne.react.R
 
 @UnstableApi
 class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
@@ -24,6 +28,18 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
 
     private var localStyle = SubtitleStyle()
     private var pendingResizeMode: Int? = null
+    private var currentPlayer: ExoPlayer? = null
+    private var currentViewType = ViewType.VIEW_TYPE_SURFACE
+    private var currentShutterColor = Color.TRANSPARENT
+    private var useController = true
+    private var controllerAutoShow = true
+    private var controllerHideOnTouch = true
+    private var controllerShowTimeoutMs = 5000
+    private var showSubtitleButton = false
+    private var isPlayerFocusable = true
+    private var controllerVisibilityListener: PlayerView.ControllerVisibilityListener? = null
+    private var fullscreenButtonClickListener: PlayerView.FullscreenButtonClickListener? = null
+    private val playerViewLayoutChangeListeners = mutableListOf<View.OnLayoutChangeListener>()
     private val liveBadge: TextView = TextView(context).apply {
         text = "LIVE"
         setTextColor(Color.WHITE)
@@ -36,26 +52,10 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
         visibility = View.GONE
     }
 
-    private val playerView = PlayerView(context).apply {
-        layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
-        setShutterBackgroundColor(Color.TRANSPARENT)
-        useController = true
-        controllerAutoShow = true
-        controllerHideOnTouch = true
-        controllerShowTimeoutMs = 5000
-        // Don't show subtitle button by default - will be enabled when tracks are available
-        setShowSubtitleButton(false)
-        // Enable proper surface view handling to prevent rendering issues
-        setUseArtwork(false)
-        setDefaultArtwork(null)
-        // Ensure proper video scaling - start with FIT mode
-        resizeMode = androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT
-    }
+    private var playerView = createPlayerView(currentViewType)
 
     init {
-        // Add PlayerView with explicit layout parameters
-        val playerViewLayoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
-        addView(playerView, playerViewLayoutParams)
+        attachPlayerView(playerView)
 
         // Add live badge with its own layout parameters
         val liveBadgeLayoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
@@ -64,12 +64,8 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
     }
 
     fun setPlayer(player: ExoPlayer?) {
-        val currentPlayer = playerView.player
-
-        if (currentPlayer != null) {
-            currentPlayer.removeListener(playerListener)
-        }
-
+        currentPlayer?.removeListener(playerListener)
+        currentPlayer = player
         playerView.player = player
 
         if (player != null) {
@@ -108,7 +104,169 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
     }
 
     fun setSubtitleStyle(style: SubtitleStyle) {
-        playerView.subtitleView?.let { subtitleView ->
+        localStyle = style
+        applySubtitleStyle(playerView, style)
+    }
+
+    fun setShutterColor(color: Int) {
+        currentShutterColor = color
+        playerView.setShutterBackgroundColor(color)
+    }
+
+    fun updateSurfaceView(viewType: Int) {
+        if (currentViewType == viewType) {
+            applySecureSurface(playerView, viewType)
+            return
+        }
+
+        currentViewType = viewType
+        recreatePlayerView()
+    }
+
+    val isPlaying: Boolean
+        get() = currentPlayer?.isPlaying ?: false
+
+    fun invalidateAspectRatio() {
+        // PlayerView handles aspect ratio automatically through its internal AspectRatioFrameLayout
+        playerView.requestLayout()
+
+        // Reapply the current resize mode to ensure it's properly set
+        pendingResizeMode?.let { resizeMode ->
+            playerView.resizeMode = resizeMode
+        }
+    }
+
+    fun setUseController(useController: Boolean) {
+        this.useController = useController
+        playerView.useController = useController
+        if (useController) {
+            // Ensure proper touch handling when controls are enabled
+            playerView.controllerAutoShow = true
+            playerView.controllerHideOnTouch = true
+            // Show controls immediately when enabled
+            playerView.showController()
+        }
+    }
+
+    fun showController() {
+        playerView.showController()
+    }
+
+    fun hideController() {
+        playerView.hideController()
+    }
+
+    fun setControllerShowTimeoutMs(showTimeoutMs: Int) {
+        controllerShowTimeoutMs = showTimeoutMs
+        playerView.controllerShowTimeoutMs = showTimeoutMs
+    }
+
+    fun setControllerAutoShow(autoShow: Boolean) {
+        controllerAutoShow = autoShow
+        playerView.controllerAutoShow = autoShow
+    }
+
+    fun setControllerHideOnTouch(hideOnTouch: Boolean) {
+        controllerHideOnTouch = hideOnTouch
+        playerView.controllerHideOnTouch = hideOnTouch
+    }
+
+    fun setFullscreenButtonClickListener(listener: PlayerView.FullscreenButtonClickListener?) {
+        fullscreenButtonClickListener = listener
+        playerView.setFullscreenButtonClickListener(listener)
+    }
+
+    fun setShowSubtitleButton(show: Boolean) {
+        showSubtitleButton = show
+        playerView.setShowSubtitleButton(show)
+    }
+
+    fun isControllerVisible(): Boolean = playerView.isControllerFullyVisible
+
+    fun setControllerVisibilityListener(listener: PlayerView.ControllerVisibilityListener?) {
+        controllerVisibilityListener = listener
+        playerView.setControllerVisibilityListener(listener)
+    }
+
+    override fun addOnLayoutChangeListener(listener: View.OnLayoutChangeListener) {
+        if (!playerViewLayoutChangeListeners.contains(listener)) {
+            playerViewLayoutChangeListeners.add(listener)
+        }
+        playerView.addOnLayoutChangeListener(listener)
+    }
+
+    override fun setFocusable(focusable: Boolean) {
+        isPlayerFocusable = focusable
+        playerView.isFocusable = focusable
+    }
+
+    private fun createPlayerView(viewType: Int): PlayerView {
+        val createdPlayerView =
+            if (viewType == ViewType.VIEW_TYPE_TEXTURE) {
+                LayoutInflater.from(context)
+                    .inflate(R.layout.exo_texture_player_view, this, false) as PlayerView
+            } else {
+                PlayerView(context)
+            }
+
+        configurePlayerView(createdPlayerView, viewType)
+
+        return createdPlayerView
+    }
+
+    private fun configurePlayerView(targetPlayerView: PlayerView, viewType: Int) {
+        targetPlayerView.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+        targetPlayerView.setShutterBackgroundColor(currentShutterColor)
+        targetPlayerView.useController = useController
+        targetPlayerView.controllerAutoShow = controllerAutoShow
+        targetPlayerView.controllerHideOnTouch = controllerHideOnTouch
+        targetPlayerView.controllerShowTimeoutMs = controllerShowTimeoutMs
+        targetPlayerView.setShowSubtitleButton(showSubtitleButton)
+        targetPlayerView.setUseArtwork(false)
+        targetPlayerView.setDefaultArtwork(null)
+        targetPlayerView.resizeMode =
+            pendingResizeMode ?: androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT
+        targetPlayerView.player = currentPlayer
+        targetPlayerView.isFocusable = isPlayerFocusable
+
+        controllerVisibilityListener?.let(targetPlayerView::setControllerVisibilityListener)
+        fullscreenButtonClickListener?.let(targetPlayerView::setFullscreenButtonClickListener)
+        playerViewLayoutChangeListeners.forEach(targetPlayerView::addOnLayoutChangeListener)
+
+        applySecureSurface(targetPlayerView, viewType)
+        applySubtitleStyle(targetPlayerView, localStyle)
+    }
+
+    private fun attachPlayerView(targetPlayerView: PlayerView) {
+        val playerViewLayoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+        addView(targetPlayerView, 0, playerViewLayoutParams)
+    }
+
+    private fun recreatePlayerView() {
+        val previousPlayerView = playerView
+        val wasControllerVisible = previousPlayerView.isControllerFullyVisible
+
+        previousPlayerView.player = null
+        removeView(previousPlayerView)
+
+        playerView = createPlayerView(currentViewType)
+        attachPlayerView(playerView)
+
+        if (wasControllerVisible && useController) {
+            playerView.showController()
+        }
+
+        requestLayout()
+        updateLiveUi()
+    }
+
+    private fun applySecureSurface(targetPlayerView: PlayerView, viewType: Int) {
+        val surfaceView = targetPlayerView.videoSurfaceView as? SurfaceView ?: return
+        surfaceView.setSecure(viewType == ViewType.VIEW_TYPE_SURFACE_SECURE)
+    }
+
+    private fun applySubtitleStyle(targetPlayerView: PlayerView, style: SubtitleStyle) {
+        targetPlayerView.subtitleView?.let { subtitleView ->
             // Reset to defaults
             subtitleView.setUserDefaultStyle()
             subtitleView.setUserDefaultTextSize()
@@ -132,81 +290,6 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
                 subtitleView.visibility = android.view.View.GONE
             }
         }
-        localStyle = style
-    }
-
-    fun setShutterColor(color: Int) {
-        playerView.setShutterBackgroundColor(color)
-    }
-
-    fun updateSurfaceView(viewType: Int) {
-        // TODO: Implement proper surface type switching if needed
-    }
-
-    val isPlaying: Boolean
-        get() = playerView.player?.isPlaying ?: false
-
-    fun invalidateAspectRatio() {
-        // PlayerView handles aspect ratio automatically through its internal AspectRatioFrameLayout
-        playerView.requestLayout()
-
-        // Reapply the current resize mode to ensure it's properly set
-        pendingResizeMode?.let { resizeMode ->
-            playerView.resizeMode = resizeMode
-        }
-    }
-
-    fun setUseController(useController: Boolean) {
-        playerView.useController = useController
-        if (useController) {
-            // Ensure proper touch handling when controls are enabled
-            playerView.controllerAutoShow = true
-            playerView.controllerHideOnTouch = true
-            // Show controls immediately when enabled
-            playerView.showController()
-        }
-    }
-
-    fun showController() {
-        playerView.showController()
-    }
-
-    fun hideController() {
-        playerView.hideController()
-    }
-
-    fun setControllerShowTimeoutMs(showTimeoutMs: Int) {
-        playerView.controllerShowTimeoutMs = showTimeoutMs
-    }
-
-    fun setControllerAutoShow(autoShow: Boolean) {
-        playerView.controllerAutoShow = autoShow
-    }
-
-    fun setControllerHideOnTouch(hideOnTouch: Boolean) {
-        playerView.controllerHideOnTouch = hideOnTouch
-    }
-
-    fun setFullscreenButtonClickListener(listener: PlayerView.FullscreenButtonClickListener?) {
-        playerView.setFullscreenButtonClickListener(listener)
-    }
-
-    fun setShowSubtitleButton(show: Boolean) {
-        playerView.setShowSubtitleButton(show)
-    }
-
-    fun isControllerVisible(): Boolean = playerView.isControllerFullyVisible
-
-    fun setControllerVisibilityListener(listener: PlayerView.ControllerVisibilityListener?) {
-        playerView.setControllerVisibilityListener(listener)
-    }
-
-    override fun addOnLayoutChangeListener(listener: View.OnLayoutChangeListener) {
-        playerView.addOnLayoutChangeListener(listener)
-    }
-
-    override fun setFocusable(focusable: Boolean) {
-        playerView.isFocusable = focusable
     }
 
     private fun updateLiveUi() {
