@@ -64,10 +64,7 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
     }
 
     fun setPlayer(player: ExoPlayer?) {
-        if (currentPlayer != null) {
-            currentPlayer.removeListener(playerListener)
-        }
-
+        currentPlayer?.removeListener(playerListener)
         currentPlayer = player
         playerView.player = player
 
