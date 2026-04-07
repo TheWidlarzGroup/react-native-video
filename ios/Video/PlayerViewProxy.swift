@@ -75,7 +75,8 @@ class PlayerViewProxy {
         dorisTranslationsViewModel.stats = translations.playerStatsButton
         dorisTranslationsViewModel.audioAndSubtitles = translations.playerAudioAndSubtitlesButton
         dorisTranslationsViewModel.live = translations.goLive
-        dorisTranslationsViewModel.favourites = translations.favourite
+        dorisTranslationsViewModel.addToFavourites = translations.favourite
+        dorisTranslationsViewModel.removeFromFavourites = translations.favourite
         dorisTranslationsViewModel.addToWatchlist = translations.addToWatchlist
         dorisTranslationsViewModel.moreVideos = translations.moreVideos
         dorisTranslationsViewModel.audio = translations.audioTracks
@@ -94,7 +95,7 @@ class PlayerViewProxy {
         dorisTranslationsViewModel.fastForward = translations.fastForward
         dorisTranslationsViewModel.off = translations.off
         dorisTranslationsViewModel.audioOnlyBadge = translations.audioOnlyBadge
-        dorisTranslationsViewModel.schedule = translations.tvPlayerEPG
+        dorisTranslationsViewModel.tvPlayerEPG = translations.tvPlayerEPG
         dorisTranslationsViewModel.unknown = translations.unknown
         dorisTranslationsViewModel.seconds = translations.seconds
         dorisTranslationsViewModel.seekSpeedTooltip = translations.seekSpeedTooltip
