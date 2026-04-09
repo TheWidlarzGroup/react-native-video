@@ -815,7 +815,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       // poster style
       const baseStyle: StyleProp<ImageStyle> = [
         StyleSheet.absoluteFill,
-        { resizeMode: _posterResizeMode },
+        {resizeMode: _posterResizeMode},
       ];
 
       let posterStyle: StyleProp<ImageStyle> = baseStyle;
@@ -866,9 +866,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     ]);
 
     const _style: StyleProp<ViewStyle> = useMemo(
-      () => [
-        StyleSheet.absoluteFill,
-      ],
+      () => [StyleSheet.absoluteFill],
       [],
     );
 
