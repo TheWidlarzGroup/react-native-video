@@ -20,7 +20,9 @@ import type { VideoStore } from './web/VideoStore';
 
 function setExternalSubtitles(
   video: HTMLVideoElement,
-  subtitles: Array<{ uri: string; language?: string; label: string }> | undefined
+  subtitles:
+    | Array<{ uri: string; language?: string; label: string }>
+    | undefined
 ) {
   video.querySelectorAll('track').forEach((t) => t.remove());
   for (const sub of subtitles ?? []) {

@@ -15,36 +15,36 @@ function on(target: EventTarget, event: string, handler: () => void): Cleanup {
 export function attachPlaybackListeners(
   video: HTMLVideoElement,
   media: WebMediaProxy,
-  emit: Emit,
-  getIsBuffering: () => boolean,
-  setIsBuffering: (v: boolean) => void
+  emit: Emit
 ): Cleanup[] {
+  // Read directly from video element — store may not have synced yet
+  // when the DOM event fires, causing a stale (previous) value.
+  const isBuffering = () => video.readyState < video.HAVE_FUTURE_DATA;
+
   return [
     on(video, 'play', () => {
       emit('onPlaybackStateChange', {
-        isPlaying: !media.paused,
-        isBuffering: getIsBuffering(),
+        isPlaying: !video.paused,
+        isBuffering: isBuffering(),
       });
     }),
     on(video, 'pause', () => {
       emit('onPlaybackStateChange', {
-        isPlaying: !media.paused,
-        isBuffering: getIsBuffering(),
+        isPlaying: !video.paused,
+        isBuffering: isBuffering(),
       });
     }),
     on(video, 'waiting', () => {
-      setIsBuffering(true);
       emit('onBuffer', true);
       emit('onStatusChange', 'loading');
     }),
     on(video, 'canplay', () => {
-      setIsBuffering(false);
       emit('onBuffer', false);
       emit('onStatusChange', 'readyToPlay');
     }),
     on(video, 'timeupdate', () => {
       emit('onProgress', {
-        currentTime: media.currentTime,
+        currentTime: video.currentTime,
         bufferDuration: media.bufferAhead,
       });
     }),
@@ -58,7 +58,7 @@ export function attachPlaybackListeners(
       emit('onPlaybackRateChange', video.playbackRate);
     }),
     on(video, 'seeked', () => {
-      emit('onSeek', media.currentTime);
+      emit('onSeek', video.currentTime);
     }),
   ];
 }
@@ -72,10 +72,10 @@ export function attachMediaInfoListeners(
 ): Cleanup[] {
   return [
     on(video, 'durationchange', () => {
-      if (media.duration > 0) {
+      if (video.duration > 0) {
         emit('onLoad', {
-          currentTime: media.currentTime,
-          duration: media.duration,
+          currentTime: video.currentTime,
+          duration: video.duration,
           width: video.videoWidth,
           height: video.videoHeight,
           orientation: 'unknown',
@@ -107,10 +107,12 @@ export function attachMediaInfoListeners(
     on(video, 'loadeddata', () => {
       emit('onReadyToDisplay');
     }),
+    // Read directly from video element — store may not have synced yet
+    // when the DOM event fires, causing a stale (previous) value.
     on(video, 'volumechange', () => {
       emit('onVolumeChange', {
-        volume: media.volume,
-        muted: media.muted,
+        volume: video.volume,
+        muted: video.muted,
       });
     }),
     on(video, 'error', () => {

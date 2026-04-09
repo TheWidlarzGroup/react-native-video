@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useInsertionEffect, useRef } from 'react';
 import type { VideoPlayer } from '../VideoPlayer.web';
 import type { VideoViewEvents } from '../types/Events';
 import type { ListenerSubscription } from '../types/EventEmitter';
@@ -46,6 +46,10 @@ export function useViewEvents(
   props: Partial<VideoViewEvents>
 ) {
   const emitter = player.__getEmitter();
+  const callbacksRef = useRef(props);
+  useInsertionEffect(() => {
+    callbacksRef.current = props;
+  });
 
   useEffect(() => {
     const unbindDOM = bindViewDOMEvents(
@@ -55,27 +59,19 @@ export function useViewEvents(
     );
 
     const subs: ListenerSubscription[] = [];
-    for (const [event, callback] of Object.entries(props)) {
-      if (callback) {
-        subs.push(emitter.__addListener(event, callback));
-      }
+    for (const event of Object.keys(callbacksRef.current)) {
+      subs.push(
+        emitter.__addListener(event, (...args: unknown[]) => {
+          callbacksRef.current[event as keyof VideoViewEvents]?.(...args);
+        })
+      );
     }
 
     return () => {
       unbindDOM();
       subs.forEach((sub) => sub.remove());
     };
-  }, [
-    player,
-    emitter,
-    containerRef,
-    props.onFullscreenChange,
-    props.onPictureInPictureChange,
-    props.willEnterFullscreen,
-    props.willExitFullscreen,
-    props.willEnterPictureInPicture,
-    props.willExitPictureInPicture,
-  ]);
+  }, [player, emitter, containerRef]);
 }
 
 export function addViewEventListener<Event extends keyof VideoViewEvents>(

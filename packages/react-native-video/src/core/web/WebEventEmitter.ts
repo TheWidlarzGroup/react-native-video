@@ -13,7 +13,6 @@ import {
 export class WebEventEmitter {
   private _listeners: Map<string, Set<(...args: any[]) => void>> = new Map();
   private _cleanup: (() => void) | null = null;
-  private _isBuffering = false;
 
   constructor(private _media: WebMediaProxy) {
     this._bindDOMEvents();
@@ -66,15 +65,7 @@ export class WebEventEmitter {
     const emit = this._emit.bind(this);
 
     const cleanups = [
-      ...attachPlaybackListeners(
-        video,
-        media,
-        emit,
-        () => this._isBuffering,
-        (v) => {
-          this._isBuffering = v;
-        }
-      ),
+      ...attachPlaybackListeners(video, media, emit),
       ...attachMediaInfoListeners(video, media, emit),
       ...attachTrackListeners(video, emit),
     ];
