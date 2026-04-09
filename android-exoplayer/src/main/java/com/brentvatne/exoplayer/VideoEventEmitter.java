@@ -1,6 +1,6 @@
 package com.brentvatne.exoplayer;
 
-import android.support.annotation.StringDef;
+import androidx.annotation.StringDef;
 import android.view.View;
 
 import com.facebook.react.bridge.Arguments;
@@ -242,9 +242,11 @@ class VideoEventEmitter {
         WritableArray metadataArray = Arguments.createArray();
 
         for (int i = 0; i < metadata.length(); i++) {
-
-
-            Id3Frame frame = (Id3Frame) metadata.get(i);
+            com.google.android.exoplayer2.metadata.Metadata.Entry entry = metadata.get(i);
+            if (!(entry instanceof Id3Frame)) {
+                continue;
+            }
+            Id3Frame frame = (Id3Frame) entry;
 
             String value = "";
 

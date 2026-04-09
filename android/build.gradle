@@ -5,22 +5,28 @@ def safeExtGet(prop, fallback) {
 }
 
 android {
-    compileSdkVersion safeExtGet('compileSdkVersion', 27)
-    buildToolsVersion safeExtGet('buildToolsVersion', '27.0.3')
+    namespace 'com.brentvatne.react'
+    compileSdkVersion safeExtGet('compileSdkVersion', 35)
 
     defaultConfig {
-        minSdkVersion safeExtGet('minSdkVersion', 16)
-        targetSdkVersion safeExtGet('targetSdkVersion', 27)
+        minSdkVersion safeExtGet('minSdkVersion', 24)
+        targetSdkVersion safeExtGet('targetSdkVersion', 35)
         versionCode 1
         versionName "1.0"
         ndk {
-            abiFilters "armeabi-v7a", "x86"
+            abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
         }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
 dependencies {
     //noinspection GradleDynamicVersion
-    provided "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
-    compile 'com.yqritc:android-scalablevideoview:1.0.4'
+    compileOnly "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
+    implementation 'com.yqritc:android-scalablevideoview:1.0.4'
+    implementation 'androidx.annotation:annotation:1.7.1'
 }

@@ -5,32 +5,32 @@ def safeExtGet(prop, fallback) {
 }
 
 android {
-    compileSdkVersion safeExtGet('compileSdkVersion', 27)
-    buildToolsVersion safeExtGet('buildToolsVersion', '27.0.3')
+    namespace 'com.brentvatne.react'
+    compileSdkVersion safeExtGet('compileSdkVersion', 35)
 
     defaultConfig {
-        minSdkVersion safeExtGet('minSdkVersion', 16)
-        targetSdkVersion safeExtGet('targetSdkVersion', 27)
+        minSdkVersion safeExtGet('minSdkVersion', 24)
+        targetSdkVersion safeExtGet('targetSdkVersion', 35)
         versionCode 1
         versionName "1.0"
+        consumerProguardFiles 'consumer-rules.pro'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
 dependencies {
     //noinspection GradleDynamicVersion
-    provided "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
-    compile('com.google.android.exoplayer:exoplayer:2.8.2') {
-        exclude group: 'com.android.support'
-    }
+    compileOnly "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
 
-    // All support libs must use the same version
-    compile "com.android.support:support-annotations:${safeExtGet('supportLibVersion', '+')}"
-    compile "com.android.support:support-compat:${safeExtGet('supportLibVersion', '+')}"
-    compile "com.android.support:support-media-compat:${safeExtGet('supportLibVersion', '+')}"
+    def exoVersion = safeExtGet('exoplayerVersion', '2.19.1')
+    implementation "com.google.android.exoplayer:exoplayer:${exoVersion}"
+    implementation "com.google.android.exoplayer:exoplayer-ui:${exoVersion}"
+    implementation "com.google.android.exoplayer:extension-okhttp:${exoVersion}"
 
-    compile('com.google.android.exoplayer:extension-okhttp:2.8.2') {
-        exclude group: 'com.squareup.okhttp3', module: 'okhttp'
-    }
-    compile 'com.squareup.okhttp3:okhttp:3.11.0'
-
+    implementation 'androidx.annotation:annotation:1.7.1'
+    implementation 'androidx.core:core:1.13.1'
 }
