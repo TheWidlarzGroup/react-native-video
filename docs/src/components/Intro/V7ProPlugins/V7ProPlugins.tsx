@@ -35,7 +35,7 @@ export function V7ProPlugins() {
         <div className={styles.footer}>
           <span className={styles.platforms}>iOS, Android</span>
           <Link
-            to="https://www.thewidlarzgroup.com/offline-video-sdk?utm_source=rnv&utm_medium=docs&utm_campaign=intro&utm_id=offline-video-sdk"
+            to="https://sdk.thewidlarzgroup.com/offline-video?utm_source=rnv&utm_medium=docs&utm_campaign=intro&utm_id=offline-video-sdk"
             className={styles.link}
           >
             Learn more →
