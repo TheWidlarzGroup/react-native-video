@@ -37,7 +37,7 @@ We've already built several production-ready plugins:
 
 | Plugin | Description |
 |--------|-------------|
-| [Offline Video SDK](https://www.thewidlarzgroup.com/offline-video-sdk?utm_source=rnv&utm_medium=docs&utm_campaign=ask-for-plugin&utm_id=offline-video-sdk) | Download and play HLS, MPEG-DASH, MP4 streams offline with DRM support |
+| [Offline Video SDK](https://sdk.thewidlarzgroup.com/offline-video?utm_source=rnv&utm_medium=docs&utm_campaign=ask-for-plugin&utm_id=offline-video-sdk) | Download and play HLS, MPEG-DASH, MP4 streams offline with DRM support |
 | [Background Uploader](https://sdk.thewidlarzgroup.com/background-uploader?utm_source=rnv&utm_medium=docs&utm_campaign=ask-for-plugin&utm_id=background-uploader) | Upload files in the background with retry support and progress tracking |
 | [Chapters Plugin](https://sdk.thewidlarzgroup.com/chapters?utm_source=rnv&utm_medium=docs&utm_campaign=ask-for-plugin&utm_id=chapters-plugin) | Chapter markers and navigation on the seekbar |
 

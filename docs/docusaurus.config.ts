@@ -152,7 +152,7 @@ const config: Config = {
           position: 'right',
         },
         {
-          href: 'https://www.thewidlarzgroup.com/react-native-video?utm_source=rnv&utm_medium=docs&utm_campaign=navbar&utm_id=offer-button',
+          href: 'https://sdk.thewidlarzgroup.com/?utm_source=rnv&utm_medium=docs&utm_campaign=navbar&utm_id=offer-button',
           label: 'Offer',
           position: 'right',
         },

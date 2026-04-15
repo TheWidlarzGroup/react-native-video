@@ -25,17 +25,17 @@
     {
       "type": "link",
       "label": "Offline Video SDK",
-      "href": "https://www.thewidlarzgroup.com/offline-video-sdk/?utm_source=rnv&utm_medium=docs&utm_campaign=sidebar&utm_id=offline-video-sdk-button"
+      "href": "https://sdk.thewidlarzgroup.com/offline-video?utm_source=rnv&utm_medium=docs&utm_campaign=sidebar&utm_id=offline-video-sdk-button"
     },
     {
       "type": "link",
       "label": "Enterprise Support",
-      "href": "https://www.thewidlarzgroup.com/?utm_source=rnv&utm_medium=docs&utm_campaign=navbar&utm_id=enterprise#Contact"
+      "href": "https://sdk.thewidlarzgroup.com/?utm_source=rnv&utm_medium=docs&utm_campaign=navbar&utm_id=enterprise&contact=true"
     },
     {
       "type": "link",
       "label": "Boost Your Issue",
-      "href": "https://www.thewidlarzgroup.com/issue-boost/?utm_source=rnv&utm_medium=docs&utm_campaign=sidebar&utm_id=issue-boost-button"
+      "href": "https://sdk.thewidlarzgroup.com/issue-booster?utm_source=rnv&utm_medium=docs&utm_campaign=sidebar&utm_id=issue-boost-button"
     },
     {
       "type": "html",
