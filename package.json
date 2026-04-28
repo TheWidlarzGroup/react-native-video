@@ -16,7 +16,7 @@
         "@expo/config-plugins": "^8.0.5",
         "@jamesacarr/eslint-formatter-github-actions": "^0.2.0",
         "@react-native/eslint-config": "^0.72.2",
-        "@release-it/conventional-changelog": "^7.0.2",
+        "@release-it/conventional-changelog": "^11.0.0",
         "@types/jest": "^28.1.2",
         "@types/react": "^19.0.0",
         "@types/react-native-web": "^0.19.1",
@@ -31,7 +31,7 @@
         "react-native": "^0.78.0",
         "react-native-web": "0.20.0",
         "react-native-windows": "^0.78.0",
-        "release-it": "^16.2.1",
+        "release-it": "^20.0.1",
         "typescript": "5.0.4"
     },
     "peerDependencies": {
