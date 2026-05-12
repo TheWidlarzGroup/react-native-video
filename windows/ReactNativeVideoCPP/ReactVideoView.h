@@ -9,6 +9,7 @@ struct ReactVideoView : ReactVideoViewT<ReactVideoView> {
  public:
   ReactVideoView(winrt::Microsoft::ReactNative::IReactContext const &reactContext);
   void Set_UriString(hstring const &value);
+  void Clear_Source();
   void Set_IsLoopingEnabled(bool value);
   void Set_Paused(bool isPaused);
   void Set_Muted(bool isMuted);
