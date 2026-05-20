@@ -44,11 +44,13 @@ export type ReactVideoSourceProperties = {
   bufferConfig?: BufferConfig;
 };
 
-export type ReactVideoSource = Readonly<
-  Omit<ReactVideoSourceProperties, 'uri'> & {
-    uri?: string | NodeRequire;
-  }
->;
+export type ReactVideoSource =
+  | ImageRequireSource
+  | Readonly<
+      Omit<ReactVideoSourceProperties, 'uri'> & {
+        uri?: string | ImageRequireSource;
+      }
+    >;
 
 export type ReactVideoPosterSource = ImageURISource | ImageRequireSource;
 
