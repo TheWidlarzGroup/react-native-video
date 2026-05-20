@@ -88,6 +88,9 @@ import androidx.media3.exoplayer.source.ClippingMediaSource;
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
 import androidx.media3.exoplayer.source.MediaSource;
 import androidx.media3.exoplayer.source.MergingMediaSource;
+import androidx.media3.extractor.Extractor;
+import androidx.media3.extractor.text.DefaultSubtitleParserFactory;
+import androidx.media3.extractor.text.SubtitleExtractor;
 import androidx.media3.exoplayer.source.ProgressiveMediaSource;
 import androidx.media3.exoplayer.source.TrackGroupArray;
 import androidx.media3.exoplayer.source.ads.AdsMediaSource;
@@ -1150,6 +1153,30 @@ public class ReactExoplayerView extends FrameLayout implements
                         config.buildLoadErrorHandlingPolicy(source.getMinLoadRetryCount())
                 )
                 .createMediaSource(mediaItem);
+
+        // ProgressiveMediaSource.Factory (and HLS/DASH variants) silently ignore
+        // MediaItem.SubtitleConfiguration entries. Manually merge sideloaded subtitle
+        // sources so they appear in MappedTrackInfo and can be selected via setSelectedTextTrack.
+        if (mediaItem.localConfiguration != null && !mediaItem.localConfiguration.subtitleConfigurations.isEmpty()) {
+            DataSource.Factory subtitleDataSourceFactory = buildDataSourceFactory(false);
+            DefaultSubtitleParserFactory subtitleParserFactory = new DefaultSubtitleParserFactory();
+            int subtitleCount = mediaItem.localConfiguration.subtitleConfigurations.size();
+            MediaSource[] mergedSources = new MediaSource[1 + subtitleCount];
+            mergedSources[0] = mediaSource;
+            for (int i = 0; i < subtitleCount; i++) {
+                MediaItem.SubtitleConfiguration subtitleConfig = mediaItem.localConfiguration.subtitleConfigurations.get(i);
+                Format subtitleFormat = new Format.Builder()
+                        .setSampleMimeType(subtitleConfig.mimeType)
+                        .setLanguage(subtitleConfig.language)
+                        .setLabel(subtitleConfig.label)
+                        .build();
+                mergedSources[i + 1] = new ProgressiveMediaSource.Factory(
+                        subtitleDataSourceFactory,
+                        () -> new Extractor[]{new SubtitleExtractor(subtitleParserFactory.create(subtitleFormat), subtitleFormat)}
+                ).createMediaSource(MediaItem.fromUri(subtitleConfig.uri));
+            }
+            mediaSource = new MergingMediaSource(mergedSources);
+        }
 
         if (cropStartMs >= 0 && cropEndMs >= 0) {
             return new ClippingMediaSource(mediaSource, cropStartMs * 1000, cropEndMs * 1000);
