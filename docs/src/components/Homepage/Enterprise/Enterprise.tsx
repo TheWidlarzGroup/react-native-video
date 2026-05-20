@@ -12,7 +12,7 @@ const LightningIcon =
   require('@site/static/img/homepage/enterprise/lightning-icon.svg').default;
 
 const CONTACT_URL =
-  'https://www.thewidlarzgroup.com/?utm_source=rnv&utm_medium=docs&utm_campaign=landing-enterprise-solutions&utm_id=enterprise#Contact';
+  'https://sdk.thewidlarzgroup.com/?utm_source=rnv&utm_medium=docs&utm_campaign=landing-enterprise-solutions&utm_id=enterprise&contact=true';
 
 const FEATURE_LIST: FeatureCardItem[] = [
   {

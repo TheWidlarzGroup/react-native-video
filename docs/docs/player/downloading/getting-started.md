@@ -38,7 +38,7 @@ Since this is a private package, configure npm to access GitHub Packages by addi
 //npm.pkg.github.com/:_authToken=<NPM_GITHUB_AUTH_TOKEN>
 ```
 
-Replace `<NPM_GITHUB_AUTH_TOKEN>` with your GitHub token. To obtain this token, please [contact us](https://www.thewidlarzgroup.com/?utm_source=rnv&utm_medium=docs&utm_campaign=downloading&utm_id=getting-started_github-token#Contact).
+Replace `<NPM_GITHUB_AUTH_TOKEN>` with your GitHub token. To obtain this token, please [contact us](https://sdk.thewidlarzgroup.com/?utm_source=rnv&utm_medium=docs&utm_campaign=downloading&utm_id=getting-started_github-token&contact=true).
 
 :::note
 This token is different from the API key used for plugin authorization.

@@ -34,7 +34,7 @@ const sidebars: TypedSidebarsConfig = {
     {
       type: 'link',
       label: 'Boost Your Issue',
-      href: 'https://www.thewidlarzgroup.com/issue-boost/?utm_source=rnv&utm_medium=docs&utm_campaign=sidebar&utm_id=issue-boost-button',
+      href: 'https://sdk.thewidlarzgroup.com/issue-booster?utm_source=rnv&utm_medium=docs&utm_campaign=sidebar&utm_id=issue-boost-button',
     },
     {
       type: 'html',

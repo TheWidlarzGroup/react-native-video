@@ -1,4 +1,4 @@
-[![React Native Video Component](./docs/static/banners/rnv-banner.png)](https://thewidlarzgroup.com/?utm_source=rnv&utm_medium=readme&utm_id=banner)
+[![React Native Video Component](./docs/static/banners/rnv-banner.png)](https://sdk.thewidlarzgroup.com/?utm_source=rnv&utm_medium=readme&utm_id=banner)
 
 The most battle-tested open-source video player component for React Native with support for DRM, offline playback, HLS/DASH streaming, and more.
 
@@ -131,15 +131,15 @@ We see the need for a more feature-rich video player. There is a gap between ope
 
 | Offering | Description |
 |----------|-------------|
-| [**Professional Support Packages**](https://www.thewidlarzgroup.com/issue-boost?utm_source=rnv&utm_medium=readme&utm_campaign=professional-support-packages#Contact) | Priority bug-fixes, guaranteed SLAs, [roadmap influence](https://github.com/orgs/TheWidlarzGroup/projects/6) |
-| [**Issue Booster**](https://www.thewidlarzgroup.com/issue-boost?utm_source=rnv&utm_medium=readme) | Fast-track urgent fixes with a pay‑per‑issue model |
-| [**Offline Video SDK**](https://www.thewidlarzgroup.com/offline-video-sdk/?utm_source=rnv&utm_medium=readme&utm_campaign=downloading&utm_id=offline-video-sdk-link) | Plug‑and‑play secure download solution for iOS & Android |
-| [**Integration Support**](https://www.thewidlarzgroup.com/?utm_source=rnv&utm_medium=readme&utm_campaign=integration-support#Contact) | Hands‑on help integrating video, DRM & offline into your app |
+| [**Professional Support Packages**](https://sdk.thewidlarzgroup.com/issue-booster?utm_source=rnv&utm_medium=readme&utm_campaign=professional-support-packages&contact=true) | Priority bug-fixes, guaranteed SLAs, [roadmap influence](https://github.com/orgs/TheWidlarzGroup/projects/6) |
+| [**Issue Booster**](https://sdk.thewidlarzgroup.com/issue-booster?utm_source=rnv&utm_medium=readme) | Fast-track urgent fixes with a pay‑per‑issue model |
+| [**Offline Video SDK**](https://sdk.thewidlarzgroup.com/offline-video?utm_source=rnv&utm_medium=readme&utm_campaign=downloading&utm_id=offline-video-sdk-link) | Plug‑and‑play secure download solution for iOS & Android |
+| [**Integration Support**](https://sdk.thewidlarzgroup.com/?utm_source=rnv&utm_medium=readme&utm_campaign=integration-support&contact=true) | Hands‑on help integrating video, DRM & offline into your app |
 | [**Free DRM Token Generator**](https://www.thewidlarzgroup.com/services/free-drm-token-generator-for-video?utm_source=rnv&utm_medium=readme&utm_id=free-drm) | Generate Widevine / FairPlay tokens for testing |
-| [**Ready Boilerplates**](https://www.thewidlarzgroup.com/showcases?utm_source=rnv&utm_medium=readme) | Ready-to-use apps with offline HLS/DASH DRM, video frame scrubbing, TikTok-style video feed, background uploads, Skia-based frame processor (R&D phase), and more |
-| [**React Native Video Upgrade Guide**](https://www.thewidlarzgroup.com/blog/react-native-video-upgrade-challenges-custom-maintenance-support?utm_source=rnv&utm_medium=readme&utm_id=upgrade-blog&utm_campaign=v7) | Common upgrade pitfalls & how to solve them |
+| [**Ready Boilerplates**](https://sdk.thewidlarzgroup.com/showcases?utm_source=rnv&utm_medium=readme) | Ready-to-use apps with offline HLS/DASH DRM, video frame scrubbing, TikTok-style video feed, background uploads, Skia-based frame processor (R&D phase), and more |
+| [**React Native Video Upgrade Guide**](https://sdk.thewidlarzgroup.com/v7-migration?utm_source=rnv&utm_medium=readme&utm_id=upgrade-blog&utm_campaign=v7) | Common upgrade pitfalls & how to solve them |
 
-*See how [TWG](https://www.thewidlarzgroup.com/?utm_source=rnv&utm_medium=readme&utm_id=services-text) helped **Learnn** ship a world‑class player in record time -  [case study](https://gitnation.com/contents/a-4-year-retrospective-lessons-learned-from-building-a-video-player-from-scratch-with-react-native).*
+*See how [TWG](https://sdk.thewidlarzgroup.com/?utm_source=rnv&utm_medium=readme&utm_id=services-text) helped **Learnn** ship a world‑class player in record time -  [case study](https://gitnation.com/contents/a-4-year-retrospective-lessons-learned-from-building-a-video-player-from-scratch-with-react-native).*
 
 Contact us at [hi@thewidlarzgroup.com](mailto:hi@thewidlarzgroup.com)
 
