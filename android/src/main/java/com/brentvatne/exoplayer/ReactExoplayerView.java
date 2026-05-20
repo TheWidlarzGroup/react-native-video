@@ -1147,12 +1147,18 @@ public class ReactExoplayerView extends FrameLayout implements
                 ? overridenMediaItemBuilder.build()
                 : mediaItemBuilder.build();
 
+        // Strip subtitle configurations before handing the MediaItem to the factory so that
+        // no factory variant (including overridden DefaultMediaSourceFactory) creates its own
+        // subtitle sources via legacy paths. We handle all subtitle merging below.
+        MediaItem mediaItemForSource = mediaItem.buildUpon()
+                .setSubtitleConfigurations(ImmutableList.of())
+                .build();
         MediaSource mediaSource = mediaSourceFactory
                 .setDrmSessionManagerProvider(drmProvider)
                 .setLoadErrorHandlingPolicy(
                         config.buildLoadErrorHandlingPolicy(source.getMinLoadRetryCount())
                 )
-                .createMediaSource(mediaItem);
+                .createMediaSource(mediaItemForSource);
 
         // ProgressiveMediaSource.Factory (and HLS/DASH variants) silently ignore
         // MediaItem.SubtitleConfiguration entries. Manually merge sideloaded subtitle
@@ -1160,22 +1166,28 @@ public class ReactExoplayerView extends FrameLayout implements
         if (mediaItem.localConfiguration != null && !mediaItem.localConfiguration.subtitleConfigurations.isEmpty()) {
             DataSource.Factory subtitleDataSourceFactory = buildDataSourceFactory(false);
             DefaultSubtitleParserFactory subtitleParserFactory = new DefaultSubtitleParserFactory();
-            int subtitleCount = mediaItem.localConfiguration.subtitleConfigurations.size();
-            MediaSource[] mergedSources = new MediaSource[1 + subtitleCount];
-            mergedSources[0] = mediaSource;
-            for (int i = 0; i < subtitleCount; i++) {
-                MediaItem.SubtitleConfiguration subtitleConfig = mediaItem.localConfiguration.subtitleConfigurations.get(i);
+            List<MediaSource> mergedSources = new ArrayList<>();
+            mergedSources.add(mediaSource);
+            for (MediaItem.SubtitleConfiguration subtitleConfig : mediaItem.localConfiguration.subtitleConfigurations) {
                 Format subtitleFormat = new Format.Builder()
                         .setSampleMimeType(subtitleConfig.mimeType)
                         .setLanguage(subtitleConfig.language)
                         .setLabel(subtitleConfig.label)
+                        .setSelectionFlags(subtitleConfig.selectionFlags)
+                        .setRoleFlags(subtitleConfig.roleFlags)
                         .build();
-                mergedSources[i + 1] = new ProgressiveMediaSource.Factory(
+                if (!subtitleParserFactory.supportsFormat(subtitleFormat)) {
+                    DebugLog.w(TAG, "Skipping sideloaded subtitle track with unsupported format: " + subtitleConfig.mimeType);
+                    continue;
+                }
+                mergedSources.add(new ProgressiveMediaSource.Factory(
                         subtitleDataSourceFactory,
                         () -> new Extractor[]{new SubtitleExtractor(subtitleParserFactory.create(subtitleFormat), subtitleFormat)}
-                ).createMediaSource(MediaItem.fromUri(subtitleConfig.uri));
+                ).createMediaSource(MediaItem.fromUri(subtitleConfig.uri)));
             }
-            mediaSource = new MergingMediaSource(mergedSources);
+            if (mergedSources.size() > 1) {
+                mediaSource = new MergingMediaSource(mergedSources.toArray(new MediaSource[0]));
+            }
         }
 
         if (cropStartMs >= 0 && cropEndMs >= 0) {
