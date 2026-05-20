@@ -1483,7 +1483,7 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     private void videoLoaded() {
-        if (!player.isPlayingAd() && loadVideoStarted) {
+        if (player != null && !player.isPlayingAd() && loadVideoStarted) {
             loadVideoStarted = false;
             if (audioTrackType != null) {
                 setSelectedAudioTrack(audioTrackType, audioTrackValue);
