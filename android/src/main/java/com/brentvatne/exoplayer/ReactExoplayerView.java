@@ -451,20 +451,18 @@ public class ReactExoplayerView extends FrameLayout implements
 
     private void updateControllerConfig() {
         if (exoPlayerView == null) return;
-        
-        // Extra configuration for proper touch handling
+
         exoPlayerView.setControllerShowTimeoutMs(5000);
         exoPlayerView.setControllerAutoShow(true);
         exoPlayerView.setControllerHideOnTouch(true);
-        
+
         updateControllerVisibility();
     }
 
     private void updateControllerVisibility() {
         if (exoPlayerView == null) return;
-        
-        boolean shouldShowControls = controls || isFullscreen;
-        exoPlayerView.setUseController(shouldShowControls);
+
+        exoPlayerView.setUseController(controls || isFullscreen);
     }
 
     private void openSettings() {
@@ -520,7 +518,6 @@ public class ReactExoplayerView extends FrameLayout implements
 
     private void refreshControlsStyles() {
         if (exoPlayerView == null || player == null) return;
-        // Always update controller visibility to ensure it matches current state
         updateControllerVisibility();
     }
 
@@ -2663,10 +2660,7 @@ public class ReactExoplayerView extends FrameLayout implements
                     setFullscreen(false);
                 }
             }, controlsConfig);
-            updateControllerConfig();
-            if (exoPlayerView != null) {
-                exoPlayerView.showController();
-            }
+            refreshControlsStyles();
             eventEmitter.onVideoFullscreenPlayerWillPresent.invoke();
             if (fullScreenPlayerView != null) {
                 fullScreenPlayerView.show();
