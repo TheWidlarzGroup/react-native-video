@@ -419,21 +419,27 @@ class VideoManager {
     // Pause all players when the app enters background
     for player in players.allObjects {
       if player.playInBackground || player.player.isExternalPlaybackActive == true || !player.isPlaying {
+        player.wasPlayingInBackground = player.playInBackground && player.isPlaying
         continue
       }
-      
+
       try? player.pause()
       player.wasAutoPaused = true
     }
   }
-  
+
   @objc func applicationWillEnterForeground(notification: Notification) {
     // Resume all players when the app enters foreground
     for player in players.allObjects {
       if player.wasAutoPaused {
         try? player.play()
         player.wasAutoPaused = false
+      } else if player.wasPlayingInBackground && !player.isPlaying {
+        // Was playing when backgrounded but the system paused it — resume.
+        try? player.play()
       }
+
+      player.wasPlayingInBackground = false
     }
   }
 }
