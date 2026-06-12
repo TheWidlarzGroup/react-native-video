@@ -14,6 +14,9 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
   func onPlayedToEnd(player: AVPlayer) {
     _eventEmitter?.onEnd()
 
+    // Finished — don't resume it on return.
+    wasPlayingInBackground = false
+
     if loop {
       currentTime = 0
       try? play()

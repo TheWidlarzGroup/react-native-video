@@ -119,7 +119,15 @@ class VideoManager {
   func requestAudioSessionUpdate() {
     updateAudioSessionConfiguration()
   }
-  
+
+  /// Clears the resume intent for the player backing `avPlayer` — for remote
+  /// (lock screen / Control Center / headset) pauses, which bypass `pause()`.
+  func clearBackgroundResumeIntent(for avPlayer: AVPlayer) {
+    for player in players.allObjects where player.player === avPlayer {
+      player.wasPlayingInBackground = false
+    }
+  }
+
   // MARK: - Remote Control Events
   func setRemoteControlEventsActive(_ active: Bool) {
     if isAudioSessionManagementDisabled || remoteControlEventsActive == active {
@@ -360,6 +368,10 @@ class VideoManager {
     case .began:
       // The interruption deactivated our session — keep the cache honest.
       isAudioSessionActive = false
+      // Not a system background pause; don't auto-resume after an interruption.
+      for player in players.allObjects {
+        player.wasPlayingInBackground = false
+      }
       break
       
     case .ended:
@@ -386,7 +398,13 @@ class VideoManager {
     }
     
     switch reason {
-    case .categoryChange, .override, .wakeFromSleep, .newDeviceAvailable, .oldDeviceUnavailable:
+    case .oldDeviceUnavailable:
+      // Output device removed (e.g. headphones) — iOS pauses; don't resume onto the speaker.
+      for player in players.allObjects {
+        player.wasPlayingInBackground = false
+      }
+      updateAudioSessionConfiguration()
+    case .categoryChange, .override, .wakeFromSleep, .newDeviceAvailable:
       // Reconfigure audio session when route changes
       updateAudioSessionConfiguration()
     default:

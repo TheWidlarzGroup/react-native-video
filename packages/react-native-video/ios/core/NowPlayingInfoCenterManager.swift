@@ -157,6 +157,7 @@ class NowPlayingInfoCenterManager {
 
       if player.rate != 0 {
         player.pause()
+        VideoManager.shared.clearBackgroundResumeIntent(for: player)
       }
 
       return .success
@@ -212,6 +213,7 @@ class NowPlayingInfoCenterManager {
         player.play()
       } else {
         player.pause()
+        VideoManager.shared.clearBackgroundResumeIntent(for: player)
       }
 
       return .success
