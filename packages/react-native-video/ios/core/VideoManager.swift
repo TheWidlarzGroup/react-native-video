@@ -358,7 +358,8 @@ class VideoManager {
     
     switch type {
     case .began:
-      // Audio session interrupted, nothing to do as players will pause automatically
+      // The interruption deactivated our session — keep the cache honest.
+      isAudioSessionActive = false
       break
       
     case .ended:
@@ -441,5 +442,10 @@ class VideoManager {
 
       player.wasPlayingInBackground = false
     }
+
+    // Force re-activation: the session may have been deactivated while
+    // backgrounded, leaving the cached `isAudioSessionActive` stale.
+    isAudioSessionActive = false
+    updateAudioSessionConfiguration()
   }
 }
