@@ -24,13 +24,18 @@ import com.brentvatne.common.toolbox.DebugLog
 import com.brentvatne.receiver.PictureInPictureReceiver
 import com.facebook.react.uimanager.ThemedReactContext
 
-internal fun Context.findActivity(): ComponentActivity {
+internal fun Context.findActivity(): ComponentActivity? {
     var context = this
     while (context is ContextWrapper) {
         if (context is ComponentActivity) return context
         context = context.baseContext
     }
-    throw IllegalStateException("Picture in picture should be called in the context of an Activity")
+    // Fallback: ThemedReactContext stores the activity separately from the ContextWrapper chain
+    if (this is ThemedReactContext) {
+        val activity = this.getCurrentActivity()
+        if (activity is ComponentActivity) return activity
+    }
+    return null
 }
 
 object PictureInPictureUtil {
@@ -39,7 +44,7 @@ object PictureInPictureUtil {
 
     @JvmStatic
     fun addLifecycleEventListener(context: ThemedReactContext, view: ReactExoplayerView): Runnable {
-        val activity = context.findActivity()
+        val activity = context.findActivity() ?: return Runnable {}
 
         val onPictureInPictureModeChanged = Consumer<PictureInPictureModeChangedInfo> { info ->
             view.setIsInPictureInPicture(info.isInPictureInPictureMode)
@@ -73,16 +78,17 @@ object PictureInPictureUtil {
     @JvmStatic
     fun enterPictureInPictureMode(context: ThemedReactContext, pictureInPictureParams: PictureInPictureParams?) {
         if (!isSupportPictureInPicture(context)) return
+        val activity = context.findActivity() ?: return
         if (isSupportPictureInPictureAction() && pictureInPictureParams != null) {
             try {
-                context.findActivity().enterPictureInPictureMode(pictureInPictureParams)
+                activity.enterPictureInPictureMode(pictureInPictureParams)
             } catch (e: IllegalStateException) {
                 DebugLog.e(TAG, e.toString())
             }
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             try {
                 @Suppress("DEPRECATION")
-                context.findActivity().enterPictureInPictureMode()
+                activity.enterPictureInPictureMode()
             } catch (e: IllegalStateException) {
                 DebugLog.e(TAG, e.toString())
             }
@@ -119,8 +125,9 @@ object PictureInPictureUtil {
     private fun updatePictureInPictureActions(context: ThemedReactContext, pipParams: PictureInPictureParams) {
         if (!isSupportPictureInPictureAction()) return
         if (!isSupportPictureInPicture(context)) return
+        val activity = context.findActivity() ?: return
         try {
-            context.findActivity().setPictureInPictureParams(pipParams)
+            activity.setPictureInPictureParams(pipParams)
         } catch (e: IllegalStateException) {
             DebugLog.e(TAG, e.toString())
         }
@@ -196,7 +203,7 @@ object PictureInPictureUtil {
     }
 
     private fun checkIsUserAllowPIP(context: ThemedReactContext): Boolean {
-        val activity = context.currentActivity ?: return false
+        val activity = context.getCurrentActivity() ?: return false
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             @SuppressLint("InlinedApi")
             val result = AppOpsManagerCompat.noteOpNoThrow(
