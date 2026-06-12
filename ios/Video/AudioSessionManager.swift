@@ -160,14 +160,16 @@ class AudioSessionManager {
             return view._mixWithOthers == "mix" || view._mixWithOthers == "duck"
         }
 
-        let canAllowMixing = anyPlayerWantsMixing || (!anyPlayerShowNotificationControls && !anyPlayerNeedsBackgroundPlayback)
+        let anyPlayerUsesNotificationControlFeature = anyPlayerShowNotificationControls && anyPlayerNeedsBackgroundPlayback
+
+        let canAllowMixing = anyPlayerWantsMixing || !anyPlayerUsesNotificationControlFeature
 
         if isAudioSessionManagementDisabled {
             // AUDIO SESSION MANAGEMENT DISABLED BY USER
             return
         }
 
-        if !anyPlayerPlaying {
+        if !anyPlayerPlaying && !anyPlayerUsesNotificationControlFeature {
             options.insert(.mixWithOthers)
         } else if canAllowMixing {
             let shouldEnableMixing = videoViews.allObjects.contains { view in
