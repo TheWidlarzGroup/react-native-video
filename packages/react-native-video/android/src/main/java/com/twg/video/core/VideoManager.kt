@@ -217,6 +217,8 @@ object VideoManager : LifecycleEventListener {
     players.keys.forEach { player ->
       if (player.wasAutoPaused) {
         player.play()
+        // Clear so a later manual pause isn't wrongly auto-resumed on the next foreground.
+        player.wasAutoPaused = false
       }
     }
   }
@@ -224,7 +226,7 @@ object VideoManager : LifecycleEventListener {
   private fun onAppEnterBackground() {
     players.keys.forEach { player ->
       if (!player.playInBackground && player.isPlaying) {
-        player.wasAutoPaused = player.isPlaying
+        player.wasAutoPaused = true
         player.pause()
       }
     }
