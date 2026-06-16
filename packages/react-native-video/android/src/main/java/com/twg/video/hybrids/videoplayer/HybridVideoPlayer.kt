@@ -523,6 +523,8 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
           stopProgressUpdates()
         }
       }
+      // Keep the activity's auto-enter-PiP flag in sync with the last-played video.
+      VideoManager.refreshPictureInPictureParams()
     }
 
     override fun onPlayerError(error: PlaybackException) {

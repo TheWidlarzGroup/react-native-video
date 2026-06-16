@@ -9,6 +9,7 @@ import com.margelo.nitro.NitroModules
 import com.margelo.nitro.video.HybridVideoPlayer
 import com.margelo.nitro.video.MixAudioMode
 import com.twg.video.core.plugins.PluginsRegistry
+import com.twg.video.core.utils.PictureInPictureUtils
 import com.twg.video.view.VideoView
 import java.lang.ref.WeakReference
 
@@ -211,6 +212,23 @@ object VideoManager : LifecycleEventListener {
 
   fun getVideoViewWeakReferenceByNitroId(nitroId: Int): WeakReference<VideoView>? {
     return views[nitroId]
+  }
+
+  // Keep the activity's auto-enter-PiP flag in sync, following the same authority as the
+  // rest of PiP: the last-played video (the user's last interaction). PiP is per-activity,
+  // so only that one video drives auto-enter — not whichever player last changed state.
+  // Gating on its playWhenReady (so a paused video doesn't auto-enter) happens inside
+  // createPictureInPictureParams.
+  fun refreshPictureInPictureParams() {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+      return
+    }
+
+    val view = getLastPlayedVideoView()?.takeIf {
+      it.pictureInPictureEnabled && it.autoEnterPictureInPicture
+    } ?: return
+
+    PictureInPictureUtils.safeSetPictureInPictureParams(PictureInPictureUtils.createPictureInPictureParams(view))
   }
 
   // ------------ Lifecycle Handler ------------
