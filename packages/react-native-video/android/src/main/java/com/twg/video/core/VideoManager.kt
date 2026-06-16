@@ -1,5 +1,6 @@
 package com.twg.video.core
 
+import android.os.Build
 import android.util.Log
 import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
@@ -224,6 +225,13 @@ object VideoManager : LifecycleEventListener {
   }
 
   private fun onAppEnterBackground() {
+    // Entering PiP also pauses the activity, but the video must keep playing in the
+    // PiP window — so never auto-pause while the activity is (entering) PiP.
+    val activity = try { NitroModules.applicationContext?.currentActivity } catch (_: Exception) { null }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && activity?.isInPictureInPictureMode == true) {
+      return
+    }
+
     players.keys.forEach { player ->
       if (!player.playInBackground && player.isPlaying) {
         player.wasAutoPaused = true
