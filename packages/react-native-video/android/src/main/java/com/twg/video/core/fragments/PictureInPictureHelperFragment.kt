@@ -7,6 +7,7 @@ import android.os.Looper
 import android.util.Log
 import androidx.annotation.OptIn
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.media3.common.util.UnstableApi
 import com.twg.video.core.VideoManager
 import com.twg.video.view.VideoView
@@ -79,6 +80,13 @@ class PictureInPictureHelperFragment(private val videoView: VideoView) : Fragmen
     } else {
       if (videoView.isInPictureInPicture) {
         videoView.exitPictureInPicture()
+      }
+
+      // Closing PiP (X) leaves the activity stopped (lifecycle CREATED); expanding
+      // back to the app keeps it STARTED/RESUMED. On close, pause — don't keep
+      // playing once the user dismissed the window.
+      if (lifecycle.currentState == Lifecycle.State.CREATED) {
+        videoView.hybridPlayer?.pause()
       }
     }
   }
