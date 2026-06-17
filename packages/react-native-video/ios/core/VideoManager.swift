@@ -140,10 +140,8 @@ class VideoManager {
   
   // MARK: - Audio Session Management
   private func activateAudioSession() {
-    if isAudioSessionActive {
-      return
-    }
-
+    // No early-return: there's no public `isActive` getter, so the cached flag goes stale
+    // when the system deactivates the session (e.g. while suspended). setActive(true) is idempotent.
     do {
       try AVAudioSession.sharedInstance().setActive(true)
       isAudioSessionActive = true
@@ -461,9 +459,7 @@ class VideoManager {
       player.wasPlayingInBackground = false
     }
 
-    // Force re-activation: the session may have been deactivated while
-    // backgrounded, leaving the cached `isAudioSessionActive` stale.
-    isAudioSessionActive = false
+    // Re-assert the session — it may have been deactivated by the system while backgrounded.
     updateAudioSessionConfiguration()
   }
 }
