@@ -214,23 +214,20 @@ object VideoManager : LifecycleEventListener {
     return views[nitroId]
   }
 
-  // Keep the activity's auto-enter-PiP flag in sync, following the same authority as the
-  // rest of PiP: the last-played video (the user's last interaction). PiP is per-activity,
-  // so only that one video drives auto-enter — not whichever player last changed state.
-  // setPictureInPictureParams merges, so set params explicitly every time: when the
-  // last-played view shouldn't drive auto-enter we actively disable it, otherwise a value an
-  // earlier view enabled would linger. (Gating on playWhenReady happens in createPictureInPictureParams.)
+  // Keep the activity's auto-enter-PiP flag synced to the last-played video (the PiP
+  // authority — per-activity, only one video drives auto-enter). setPictureInPictureParams
+  // merges, so always set params explicitly: disable auto-enter when there is no last-played
+  // video or it shouldn't drive PiP, otherwise a flag an earlier view enabled would linger.
+  // (Gating on playWhenReady happens in createPictureInPictureParams.)
   fun refreshPictureInPictureParams() {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
       return
     }
 
-    val view = getLastPlayedVideoView() ?: return
-
-    val params = if (view.pictureInPictureEnabled) {
-      PictureInPictureUtils.createPictureInPictureParams(view)
-    } else {
-      PictureInPictureUtils.createDisabledPictureInPictureParams(view)
+    val view = getLastPlayedVideoView()
+    val params = when {
+      view == null || !view.pictureInPictureEnabled -> PictureInPictureUtils.createDisabledPictureInPictureParams()
+      else -> PictureInPictureUtils.createPictureInPictureParams(view)
     }
 
     PictureInPictureUtils.safeSetPictureInPictureParams(params)

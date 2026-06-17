@@ -45,7 +45,7 @@ object PictureInPictureUtils {
   }
 
   @RequiresApi(Build.VERSION_CODES.O)
-  fun createDisabledPictureInPictureParams(videoView: VideoView): PictureInPictureParams {
+  fun createDisabledPictureInPictureParams(): PictureInPictureParams {
     val defaultParams = PictureInPictureParams.Builder()
       .setAspectRatio(null) // Clear aspect ratio
       .setSourceRectHint(null) // Clear source rect hint
