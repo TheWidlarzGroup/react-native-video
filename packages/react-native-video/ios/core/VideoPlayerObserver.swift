@@ -59,7 +59,8 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
   var playerTimedMetadataObserver: NSKeyValueObservation?
   var playerStatusObserver: NSKeyValueObservation?
   var playerProgressPeriodicObserver: Any?
-  
+  var playerRateReasonObserver: NSObjectProtocol?
+
   // Player item observers
   var playbackEndedObserver: NSObjectProtocol?
   var playbackBufferEmptyObserver: NSKeyValueObservation?
@@ -100,7 +101,22 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
       guard let rate = change.newValue else { return }
       self?.delegate?.onRateChanged(rate: rate)
     }
-    
+
+    // A deliberate pause (PiP controls, app UI, lock screen) sets rate to 0 via setRate, reported
+    // as .setRateCalled; a system background pause reports .appBackgrounded. Only the former should
+    // cancel the background-resume intent, so a video paused inside PiP isn't auto-resumed on return.
+    playerRateReasonObserver = NotificationCenter.default.addObserver(
+      forName: AVPlayer.rateDidChangeNotification,
+      object: player,
+      queue: .main
+    ) { [weak self] notification in
+      guard let self, let player = self.player, player.rate == 0 else { return }
+      let reason = notification.userInfo?[AVPlayer.rateDidChangeReasonKey] as? AVPlayer.RateDidChangeReason
+      if reason == .setRateCalled {
+        VideoManager.shared.clearBackgroundResumeIntent(for: player)
+      }
+    }
+
     playerTimeControlStatusObserver = player.observe(\.timeControlStatus, options: [.new]) { [weak self] _, change in
       guard let status = change.newValue else { return }
       self?.delegate?.onTimeControlStatusChanged(status: status)
@@ -204,6 +220,10 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
     playerVolumeObserver = nil
     playerStatusObserver?.invalidate()
     playerStatusObserver = nil
+    if let playerRateReasonObserver {
+      NotificationCenter.default.removeObserver(playerRateReasonObserver)
+      self.playerRateReasonObserver = nil
+    }
     // Remove periodic time observer from player
     if let player = player, let periodicObserver = playerProgressPeriodicObserver {
       player.removeTimeObserver(periodicObserver)
