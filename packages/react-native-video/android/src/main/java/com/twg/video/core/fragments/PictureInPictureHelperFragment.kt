@@ -82,10 +82,10 @@ class PictureInPictureHelperFragment(private val videoView: VideoView) : Fragmen
         videoView.exitPictureInPicture()
       }
 
-      // Closing PiP (X) leaves the activity stopped (lifecycle CREATED); expanding
-      // back to the app keeps it STARTED/RESUMED. On close, pause — don't keep
-      // playing once the user dismissed the window.
-      if (lifecycle.currentState == Lifecycle.State.CREATED) {
+      // Expanding back to the app leaves the fragment STARTED/RESUMED; closing (X) stops and
+      // finishes it (CREATED → DESTROYED). Pause whenever it is no longer started — the user
+      // dismissed the window rather than expanding it.
+      if (!lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
         videoView.hybridPlayer?.pause()
       }
     }
