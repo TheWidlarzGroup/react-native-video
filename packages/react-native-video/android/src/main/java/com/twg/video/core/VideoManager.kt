@@ -217,18 +217,23 @@ object VideoManager : LifecycleEventListener {
   // Keep the activity's auto-enter-PiP flag in sync, following the same authority as the
   // rest of PiP: the last-played video (the user's last interaction). PiP is per-activity,
   // so only that one video drives auto-enter — not whichever player last changed state.
-  // Gating on its playWhenReady (so a paused video doesn't auto-enter) happens inside
-  // createPictureInPictureParams.
+  // setPictureInPictureParams merges, so set params explicitly every time: when the
+  // last-played view shouldn't drive auto-enter we actively disable it, otherwise a value an
+  // earlier view enabled would linger. (Gating on playWhenReady happens in createPictureInPictureParams.)
   fun refreshPictureInPictureParams() {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
       return
     }
 
-    val view = getLastPlayedVideoView()?.takeIf {
-      it.pictureInPictureEnabled && it.autoEnterPictureInPicture
-    } ?: return
+    val view = getLastPlayedVideoView() ?: return
 
-    PictureInPictureUtils.safeSetPictureInPictureParams(PictureInPictureUtils.createPictureInPictureParams(view))
+    val params = if (view.pictureInPictureEnabled) {
+      PictureInPictureUtils.createPictureInPictureParams(view)
+    } else {
+      PictureInPictureUtils.createDisabledPictureInPictureParams(view)
+    }
+
+    PictureInPictureUtils.safeSetPictureInPictureParams(params)
   }
 
   // ------------ Lifecycle Handler ------------
