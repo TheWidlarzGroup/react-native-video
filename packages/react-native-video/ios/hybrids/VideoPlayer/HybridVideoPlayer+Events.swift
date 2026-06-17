@@ -23,10 +23,17 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
     }
   }
 
-  func onRateChanged(rate: Float) {
+  func onRateChanged(rate: Float, reason: AVPlayer.RateDidChangeReason?) {
     _eventEmitter?.onPlaybackRateChange(Double(rate))
     NowPlayingInfoCenterManager.shared.updatePlaybackState()
     updateAndEmitPlaybackState()
+
+    // A deliberate pause (PiP controls, app UI, lock screen) reports .setRateCalled; a system
+    // background pause reports .appBackgrounded. Only the former cancels the background-resume
+    // intent, so a video paused inside PiP isn't auto-resumed on return.
+    if rate == 0, reason == .setRateCalled {
+      wasPlayingInBackground = false
+    }
   }
 
   func onVolumeChanged(volume: Float) {

@@ -14,7 +14,7 @@ protocol VideoPlayerObserverDelegate: AnyObject {
   func onPlayerItemWillChange(hasNewPlayerItem: Bool)
   func onTextTrackDataChanged(texts: [NSAttributedString])
   func onTimedMetadataChanged(timedMetadata: [AVMetadataItem])
-  func onRateChanged(rate: Float)
+  func onRateChanged(rate: Float, reason: AVPlayer.RateDidChangeReason?)
   func onPlaybackBufferEmpty()
   func onPlaybackLikelyToKeepUp()
   func onVolumeChanged(volume: Float)
@@ -32,7 +32,7 @@ extension VideoPlayerObserverDelegate {
   func onPlayerItemWillChange(hasNewPlayerItem: Bool) {}
   func onTextTrackDataChanged(texts: [NSAttributedString]) {}
   func onTimedMetadataChanged(timedMetadata: [AVMetadataItem]) {}
-  func onRateChanged(rate: Float) {}
+  func onRateChanged(rate: Float, reason: AVPlayer.RateDidChangeReason?) {}
   func onPlaybackBufferEmpty() {}
   func onPlaybackLikelyToKeepUp() {}
   func onVolumeChanged(volume: Float) {}
@@ -52,14 +52,13 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
   
   // Player observers
   var playerCurrentItemObserver: NSKeyValueObservation?
-  var playerRateObserver: NSKeyValueObservation?
+  var playerRateObserver: NSObjectProtocol?
   var playerTimeControlStatusObserver: NSKeyValueObservation?
   var playerExternalPlaybackActiveObserver: NSKeyValueObservation?
   var playerVolumeObserver: NSKeyValueObservation?
   var playerTimedMetadataObserver: NSKeyValueObservation?
   var playerStatusObserver: NSKeyValueObservation?
   var playerProgressPeriodicObserver: Any?
-  var playerRateReasonObserver: NSObjectProtocol?
 
   // Player item observers
   var playbackEndedObserver: NSObjectProtocol?
@@ -97,24 +96,17 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
       self?.onPlayerCurrentItemChanged(player: player, change: change)
     }
     
-    playerRateObserver = player.observe(\.rate, options: [.new]) { [weak self] _, change in
-      guard let rate = change.newValue else { return }
-      self?.delegate?.onRateChanged(rate: rate)
-    }
-
-    // A deliberate pause (PiP controls, app UI, lock screen) sets rate to 0 via setRate, reported
-    // as .setRateCalled; a system background pause reports .appBackgrounded. Only the former should
-    // cancel the background-resume intent, so a video paused inside PiP isn't auto-resumed on return.
-    playerRateReasonObserver = NotificationCenter.default.addObserver(
+    // Observe rate via the rate-change notification instead of KVO of \.rate: it fires on the same
+    // rate changes but also carries the reason (.setRateCalled vs .appBackgrounded), which the
+    // delegate uses for background-resume decisions. Available since iOS 15.
+    playerRateObserver = NotificationCenter.default.addObserver(
       forName: AVPlayer.rateDidChangeNotification,
       object: player,
       queue: .main
     ) { [weak self] notification in
-      guard let self, let player = self.player, player.rate == 0 else { return }
+      guard let self, let player = self.player else { return }
       let reason = notification.userInfo?[AVPlayer.rateDidChangeReasonKey] as? AVPlayer.RateDidChangeReason
-      if reason == .setRateCalled {
-        VideoManager.shared.clearBackgroundResumeIntent(for: player)
-      }
+      self.delegate?.onRateChanged(rate: player.rate, reason: reason)
     }
 
     playerTimeControlStatusObserver = player.observe(\.timeControlStatus, options: [.new]) { [weak self] _, change in
@@ -210,8 +202,10 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
     // Invalidate KVO observers
     playerCurrentItemObserver?.invalidate()
     playerCurrentItemObserver = nil
-    playerRateObserver?.invalidate()
-    playerRateObserver = nil
+    if let playerRateObserver {
+      NotificationCenter.default.removeObserver(playerRateObserver)
+      self.playerRateObserver = nil
+    }
     playerTimeControlStatusObserver?.invalidate()
     playerTimeControlStatusObserver = nil
     playerExternalPlaybackActiveObserver?.invalidate()
@@ -220,10 +214,6 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
     playerVolumeObserver = nil
     playerStatusObserver?.invalidate()
     playerStatusObserver = nil
-    if let playerRateReasonObserver {
-      NotificationCenter.default.removeObserver(playerRateReasonObserver)
-      self.playerRateReasonObserver = nil
-    }
     // Remove periodic time observer from player
     if let player = player, let periodicObserver = playerProgressPeriodicObserver {
       player.removeTimeObserver(periodicObserver)
