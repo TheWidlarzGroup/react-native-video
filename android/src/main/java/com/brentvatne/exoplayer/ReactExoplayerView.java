@@ -1739,24 +1739,26 @@ public class ReactExoplayerView extends FrameLayout implements
         }
 
         TrackGroupArray groups = info.getTrackGroups(index);
-        
+        TrackSelectionArray selectionArray = player.getCurrentTrackSelections();
+        TrackSelection selection = selectionArray.get(C.TRACK_TYPE_AUDIO);
+
         for (int groupIndex = 0; groupIndex < groups.length; ++groupIndex) {
             TrackGroup group = groups.get(groupIndex);
             Format format = group.getFormat(0);
-            
-            // Create track without trying to determine selection status
+
             Track track = new Track();
             track.setIndex(groupIndex);
             track.setLanguage(format.language != null ? format.language : "unknown");
             track.setTitle(format.label != null ? format.label : "Track " + (groupIndex + 1));
-            track.setSelected(false); // Don't report selection status - let PlayerView handle it
+            // Report the actual selection state so JS stays in sync with the native picker
+            track.setSelected(selection != null && selection.getTrackGroup() == group);
             if (format.sampleMimeType != null) track.setMimeType(format.sampleMimeType);
             track.setBitrate(format.bitrate == Format.NO_VALUE ? 0 : format.bitrate);
-            
+
             tracks.add(track);
         }
-        
-        DebugLog.d(TAG, "getBasicAudioTrackInfo: returning " + tracks.size() + " audio tracks (no selection status)");
+
+        DebugLog.d(TAG, "getBasicAudioTrackInfo: returning " + tracks.size() + " audio tracks");
         return tracks;
     }
 
@@ -1773,19 +1775,21 @@ public class ReactExoplayerView extends FrameLayout implements
         }
         
         TrackGroupArray groups = info.getTrackGroups(index);
+        TrackSelectionArray selectionArray = player.getCurrentTrackSelections();
+        TrackSelection selection = selectionArray.get(C.TRACK_TYPE_TEXT);
 
         for (int groupIndex = 0; groupIndex < groups.length; ++groupIndex) {
             TrackGroup group = groups.get(groupIndex);
             for (int trackIndex = 0; trackIndex < group.length; trackIndex++) {
                 Format format = group.getFormat(trackIndex);
-                
+
                 Track textTrack = new Track();
                 textTrack.setIndex(textTracks.size());
                 if (format.sampleMimeType != null) textTrack.setMimeType(format.sampleMimeType);
                 if (format.language != null) textTrack.setLanguage(format.language);
-                
+
                 boolean isExternal = format.id != null && format.id.startsWith("external-subtitle-");
-                
+
                 if (format.label != null && !format.label.isEmpty()) {
                     textTrack.setTitle(format.label);
                 } else if (isExternal) {
@@ -1793,8 +1797,9 @@ public class ReactExoplayerView extends FrameLayout implements
                 } else {
                     textTrack.setTitle("Track " + (textTracks.size() + 1));
                 }
-                
-                textTrack.setSelected(false); // Don't report selection status - let PlayerView handle it
+
+                // Report the actual selection state so JS stays in sync with the native picker (#4918)
+                textTrack.setSelected(isTrackSelected(selection, group, trackIndex));
                 textTracks.add(textTrack);
             }
         }
