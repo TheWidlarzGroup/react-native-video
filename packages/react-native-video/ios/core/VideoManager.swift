@@ -240,6 +240,14 @@ class VideoManager {
       break
     }
     
+    // setCategory is a relatively expensive IPC and this runs on every audio-session refresh —
+    // skip it when nothing changed (category/mode/options are readable, unlike the active state).
+    if audioSession.category == category
+      && audioSession.mode == .moviePlayback
+      && audioSession.categoryOptions == audioSessionCategoryOptions {
+      return
+    }
+
     do {
       try audioSession.setCategory(category, mode: .moviePlayback, options: audioSessionCategoryOptions)
     } catch {
