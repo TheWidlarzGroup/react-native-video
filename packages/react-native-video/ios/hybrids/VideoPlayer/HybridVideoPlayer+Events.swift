@@ -93,6 +93,11 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
     }
 
     updateAndEmitPlaybackState()
+
+    // Keep the audio session in sync with playback: starting/stopping changes whether we hold
+    // the session and the mix mode (mix-with-others vs interrupt), which is otherwise only
+    // recomputed on prop/lifecycle changes — not on play/pause.
+    VideoManager.shared.requestAudioSessionUpdate()
   }
 
   func onPlayerStatusChanged(status: AVPlayer.Status) {
