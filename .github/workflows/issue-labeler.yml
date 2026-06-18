@@ -46,13 +46,13 @@ jobs:
 
             // Platforms -> platform:* labels
             const PLATFORM = {
-              'iOS': 'platform: iOS',
-              'Android': 'platform: Android',
-              'Web': 'platform: Web',
-              'visionOS': 'platform: visionOS',
-              'Apple tvOS': 'platform: tvOS',
-              'Android TV': 'platform: Android TV',
-              'Windows': 'platform: Windows',
+              'iOS': 'Platform: iOS',
+              'Android': 'Platform: Android',
+              'Web': 'Platform: Web',
+              'visionOS': 'Platform: visionOS',
+              'Apple tvOS': 'Platform: tvOS',
+              'Android TV': 'Platform: Android TV',
+              'Windows': 'Platform: Windows',
             };
             const platforms = get('Platforms');
             if (!isEmpty(platforms)) {
@@ -64,20 +64,20 @@ jobs:
             // Reproduction repository -> repro provided / missing repro (bidirectional)
             const repro = get('Reproduction repository');
             if (!isEmpty(repro) && /https?:\/\/\S+/.test(repro)) {
-              toAdd.add('repro provided');
-              toRemove.add('missing repro');
+              toAdd.add('Repro Provided');
+              toRemove.add('Missing Repro');
             } else {
-              toAdd.add('missing repro');
-              toRemove.add('repro provided');
+              toAdd.add('Missing Repro');
+              toRemove.add('Repro Provided');
             }
 
             // react-native-video version major -> v5 / v6 / v7
             const version = get('react-native-video version');
             const major = (version.match(/^\s*v?(\d+)\./) || [])[1];
             let isV5 = false;
-            if (major === '7') toAdd.add('v7');
-            else if (major === '6') toAdd.add('v6');
-            else if (major === '5') { toAdd.add('v5'); isV5 = true; }
+            if (major === '7') toAdd.add('V7');
+            else if (major === '6') toAdd.add('V6');
+            else if (major === '5') { toAdd.add('V5'); isV5 = true; }
 
             const currentLabels = (issue.labels || []).map((l) => (typeof l === 'string' ? l : l.name));
 
@@ -111,7 +111,7 @@ jobs:
             }
 
             // v5 is unsupported: comment + close as not planned (only once).
-            if (isV5 && issue.state === 'open' && !currentLabels.includes('v5')) {
+            if (isV5 && issue.state === 'open' && !currentLabels.includes('V5')) {
               await github.rest.issues.createComment({
                 owner,
                 repo,
