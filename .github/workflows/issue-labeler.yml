@@ -95,8 +95,7 @@ jobs:
             }
 
             // Tidy the rendered issue body: drop the Prerequisites checkboxes section
-            // (it is a submit-time gate, not useful in the created issue). Everything
-            // else, including empty optional fields, is left untouched.
+            // (it is a submit-time gate, not useful in the created issue).
             const blocks = [];
             let blk = null;
             for (const line of body.split(/\r?\n/)) {
