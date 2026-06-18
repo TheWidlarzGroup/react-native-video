@@ -139,6 +139,7 @@ body:
     attributes:
       label: Media / source type
       description: What kind of media are you playing?
+      multiple: true
       options:
         - HLS (.m3u8)
         - DASH (.mpd)
