@@ -523,6 +523,20 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
           stopProgressUpdates()
         }
       }
+      // Keep the activity's auto-enter-PiP flag in sync with the last-played video.
+      VideoManager.refreshPictureInPictureParams()
+    }
+
+    override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+      super.onPlayWhenReadyChanged(playWhenReady, reason)
+
+      // A resume cancels a pending auto-pause, so the next foreground won't force-resume it.
+      if (playWhenReady) {
+        this@HybridVideoPlayer.wasAutoPaused = false
+      }
+
+      // playWhenReady can change without isPlaying (pause while buffering), so refresh here too.
+      VideoManager.refreshPictureInPictureParams()
     }
 
     override fun onPlayerError(error: PlaybackException) {

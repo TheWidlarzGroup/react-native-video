@@ -119,7 +119,15 @@ class VideoManager {
   func requestAudioSessionUpdate() {
     updateAudioSessionConfiguration()
   }
-  
+
+  /// Clears the resume intent for the player backing `avPlayer` — for remote
+  /// (lock screen / Control Center / headset) pauses, which bypass `pause()`.
+  func clearBackgroundResumeIntent(for avPlayer: AVPlayer) {
+    for player in players.allObjects where player.player === avPlayer {
+      player.wasPlayingInBackground = false
+    }
+  }
+
   // MARK: - Remote Control Events
   func setRemoteControlEventsActive(_ active: Bool) {
     if isAudioSessionManagementDisabled || remoteControlEventsActive == active {
@@ -132,10 +140,8 @@ class VideoManager {
   
   // MARK: - Audio Session Management
   private func activateAudioSession() {
-    if isAudioSessionActive {
-      return
-    }
-
+    // No early-return: there's no public `isActive` getter, so the cached flag goes stale
+    // when the system deactivates the session (e.g. while suspended). setActive(true) is idempotent.
     do {
       try AVAudioSession.sharedInstance().setActive(true)
       isAudioSessionActive = true
@@ -234,6 +240,14 @@ class VideoManager {
       break
     }
     
+    // setCategory is a relatively expensive IPC and this runs on every audio-session refresh —
+    // skip it when nothing changed (category/mode/options are readable, unlike the active state).
+    if audioSession.category == category
+      && audioSession.mode == .moviePlayback
+      && audioSession.categoryOptions == audioSessionCategoryOptions {
+      return
+    }
+
     do {
       try audioSession.setCategory(category, mode: .moviePlayback, options: audioSessionCategoryOptions)
     } catch {
@@ -358,7 +372,12 @@ class VideoManager {
     
     switch type {
     case .began:
-      // Audio session interrupted, nothing to do as players will pause automatically
+      // The interruption deactivated our session — keep the cache honest.
+      isAudioSessionActive = false
+      // Not a system background pause; don't auto-resume after an interruption.
+      for player in players.allObjects {
+        player.wasPlayingInBackground = false
+      }
       break
       
     case .ended:
@@ -385,7 +404,13 @@ class VideoManager {
     }
     
     switch reason {
-    case .categoryChange, .override, .wakeFromSleep, .newDeviceAvailable, .oldDeviceUnavailable:
+    case .oldDeviceUnavailable:
+      // Output device removed (e.g. headphones) — iOS pauses; don't resume onto the speaker.
+      for player in players.allObjects {
+        player.wasPlayingInBackground = false
+      }
+      updateAudioSessionConfiguration()
+    case .categoryChange, .override, .wakeFromSleep, .newDeviceAvailable:
       // Reconfigure audio session when route changes
       updateAudioSessionConfiguration()
     default:
@@ -419,21 +444,30 @@ class VideoManager {
     // Pause all players when the app enters background
     for player in players.allObjects {
       if player.playInBackground || player.player.isExternalPlaybackActive == true || !player.isPlaying {
+        player.wasPlayingInBackground = player.playInBackground && player.isPlaying
         continue
       }
-      
+
       try? player.pause()
       player.wasAutoPaused = true
     }
   }
-  
+
   @objc func applicationWillEnterForeground(notification: Notification) {
     // Resume all players when the app enters foreground
     for player in players.allObjects {
       if player.wasAutoPaused {
         try? player.play()
         player.wasAutoPaused = false
+      } else if player.wasPlayingInBackground && !player.isPlaying {
+        // Was playing when backgrounded but the system paused it — resume.
+        try? player.play()
       }
+
+      player.wasPlayingInBackground = false
     }
+
+    // Re-assert the session — it may have been deactivated by the system while backgrounded.
+    updateAudioSessionConfiguration()
   }
 }

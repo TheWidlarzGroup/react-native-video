@@ -1,5 +1,6 @@
 package com.twg.video.core
 
+import android.os.Build
 import android.util.Log
 import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
@@ -8,6 +9,7 @@ import com.margelo.nitro.NitroModules
 import com.margelo.nitro.video.HybridVideoPlayer
 import com.margelo.nitro.video.MixAudioMode
 import com.twg.video.core.plugins.PluginsRegistry
+import com.twg.video.core.utils.PictureInPictureUtils
 import com.twg.video.view.VideoView
 import java.lang.ref.WeakReference
 
@@ -212,19 +214,54 @@ object VideoManager : LifecycleEventListener {
     return views[nitroId]
   }
 
+  // Keep the activity's auto-enter-PiP flag synced to the last-played video (the PiP
+  // authority — per-activity, only one video drives auto-enter). setPictureInPictureParams
+  // merges, so always set params explicitly: disable auto-enter when there is no last-played
+  // video or it shouldn't drive PiP, otherwise a flag an earlier view enabled would linger.
+  // (Gating on playWhenReady happens in createPictureInPictureParams.)
+  fun refreshPictureInPictureParams() {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+      return
+    }
+
+    val view = getLastPlayedVideoView()
+    val params = when {
+      view == null || !view.pictureInPictureEnabled -> PictureInPictureUtils.createDisabledPictureInPictureParams()
+      else -> PictureInPictureUtils.createPictureInPictureParams(view)
+    }
+
+    PictureInPictureUtils.safeSetPictureInPictureParams(params)
+  }
+
   // ------------ Lifecycle Handler ------------
   private fun onAppEnterForeground() {
     players.keys.forEach { player ->
       if (player.wasAutoPaused) {
         player.play()
+        // Clear so a later manual pause isn't wrongly auto-resumed on the next foreground.
+        player.wasAutoPaused = false
       }
     }
   }
 
   private fun onAppEnterBackground() {
+    // Keep the PiP video playing, but still auto-pause every other non-background player. If no
+    // PiP player is designated yet (auto-enter can race it), pause nothing rather than risk it.
+    val activity = try { NitroModules.applicationContext?.currentActivity } catch (_: Exception) { null }
+    val inPip = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && activity?.isInPictureInPictureMode == true
+    val pipPlayer = if (inPip) {
+      getCurrentPictureInPictureVideo()?.hybridPlayer ?: return
+    } else {
+      null
+    }
+
     players.keys.forEach { player ->
+      if (player == pipPlayer) {
+        return@forEach
+      }
+
       if (!player.playInBackground && player.isPlaying) {
-        player.wasAutoPaused = player.isPlaying
+        player.wasAutoPaused = true
         player.pause()
       }
     }

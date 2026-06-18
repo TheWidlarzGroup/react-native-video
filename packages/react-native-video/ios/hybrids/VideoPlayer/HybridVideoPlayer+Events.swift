@@ -14,16 +14,26 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
   func onPlayedToEnd(player: AVPlayer) {
     _eventEmitter?.onEnd()
 
+    // Finished — don't resume it on return.
+    wasPlayingInBackground = false
+
     if loop {
       currentTime = 0
       try? play()
     }
   }
 
-  func onRateChanged(rate: Float) {
+  func onRateChanged(rate: Float, reason: AVPlayer.RateDidChangeReason?) {
     _eventEmitter?.onPlaybackRateChange(Double(rate))
     NowPlayingInfoCenterManager.shared.updatePlaybackState()
     updateAndEmitPlaybackState()
+
+    // A deliberate pause (PiP controls, app UI, lock screen) reports .setRateCalled; a system
+    // background pause reports .appBackgrounded. Only the former cancels the background-resume
+    // intent, so a video paused inside PiP isn't auto-resumed on return.
+    if rate == 0, reason == .setRateCalled {
+      wasPlayingInBackground = false
+    }
   }
 
   func onVolumeChanged(volume: Float) {
@@ -90,6 +100,11 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
     }
 
     updateAndEmitPlaybackState()
+
+    // Keep the audio session in sync with playback: starting/stopping changes whether we hold
+    // the session and the mix mode (mix-with-others vs interrupt), which is otherwise only
+    // recomputed on prop/lifecycle changes — not on play/pause.
+    VideoManager.shared.requestAudioSessionUpdate()
   }
 
   func onPlayerStatusChanged(status: AVPlayer.Status) {

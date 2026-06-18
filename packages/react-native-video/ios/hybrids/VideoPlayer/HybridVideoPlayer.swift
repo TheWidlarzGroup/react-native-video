@@ -166,6 +166,10 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
 
   var wasAutoPaused: Bool = false
 
+  /// Whether the player was playing when backgrounded — used to resume it on
+  /// return if the system paused background playback.
+  var wasPlayingInBackground: Bool = false
+
   // Text track selection state
   private var selectedExternalTrackIndex: Int? = nil
 
@@ -274,6 +278,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   }
 
   func pause() throws {
+    wasPlayingInBackground = false
     player.pause()
   }
 

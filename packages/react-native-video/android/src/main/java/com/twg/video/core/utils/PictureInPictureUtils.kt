@@ -27,8 +27,15 @@ object PictureInPictureUtils {
   fun createPictureInPictureParams(videoView: VideoView): PictureInPictureParams {
     val builder = PictureInPictureParams.Builder()
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && videoView.autoEnterPictureInPicture) {
-      builder.setAutoEnterEnabled(videoView.autoEnterPictureInPicture)
+    // Auto-enter PiP only when the user intends playback — matches iOS, which never
+    // auto-enters PiP for a paused player. Gate on playWhenReady (not isPlaying) so a
+    // buffering-but-intending-to-play video still enters PiP. Refreshed on play/pause
+    // via VideoManager. Must set explicitly (also false): setPictureInPictureParams
+    // merges, so omitting it would leave a previously-enabled value in place.
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+      builder.setAutoEnterEnabled(
+        videoView.autoEnterPictureInPicture && videoView.hybridPlayer?.player?.playWhenReady == true
+      )
     }
 
     return builder
@@ -38,7 +45,7 @@ object PictureInPictureUtils {
   }
 
   @RequiresApi(Build.VERSION_CODES.O)
-  fun createDisabledPictureInPictureParams(videoView: VideoView): PictureInPictureParams {
+  fun createDisabledPictureInPictureParams(): PictureInPictureParams {
     val defaultParams = PictureInPictureParams.Builder()
       .setAspectRatio(null) // Clear aspect ratio
       .setSourceRectHint(null) // Clear source rect hint

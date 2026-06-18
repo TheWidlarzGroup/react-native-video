@@ -79,7 +79,7 @@ class VideoView @JvmOverloads constructor(
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         PictureInPictureUtils.safeSetPictureInPictureParams(
           if (value) createPictureInPictureParams(this)
-          else createDisabledPictureInPictureParams(this)
+          else createDisabledPictureInPictureParams()
         )
       }
     }
@@ -537,7 +537,7 @@ class VideoView @JvmOverloads constructor(
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       PictureInPictureUtils.safeSetPictureInPictureParams(
-        createDisabledPictureInPictureParams(this)
+        createDisabledPictureInPictureParams()
       )
     }
 
