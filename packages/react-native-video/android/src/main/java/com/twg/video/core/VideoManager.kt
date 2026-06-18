@@ -245,14 +245,21 @@ object VideoManager : LifecycleEventListener {
   }
 
   private fun onAppEnterBackground() {
-    // Entering PiP also pauses the activity, but the video must keep playing in the
-    // PiP window — so never auto-pause while the activity is (entering) PiP.
+    // Keep the PiP video playing, but still auto-pause every other non-background player. If no
+    // PiP player is designated yet (auto-enter can race it), pause nothing rather than risk it.
     val activity = try { NitroModules.applicationContext?.currentActivity } catch (_: Exception) { null }
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && activity?.isInPictureInPictureMode == true) {
-      return
+    val inPip = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && activity?.isInPictureInPictureMode == true
+    val pipPlayer = if (inPip) {
+      getCurrentPictureInPictureVideo()?.hybridPlayer ?: return
+    } else {
+      null
     }
 
     players.keys.forEach { player ->
+      if (player == pipPlayer) {
+        return@forEach
+      }
+
       if (!player.playInBackground && player.isPlaying) {
         player.wasAutoPaused = true
         player.pause()
