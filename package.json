@@ -1,7 +1,7 @@
 {
   "name": "react-native-video-monorepo",
   "packageManager": "bun@1.1.42",
-  "version": "7.0.0-beta.8",
+  "version": "7.0.0-beta.9",
   "private": true,
   "repository": "https://github.com/TheWidlarzGroup/react-native-video",
   "author": "TheWidlarzGroup <hi@thewidlarzgroup.com> (https://github.com/TheWidlarzGroup)",
@@ -30,21 +30,21 @@
     "@eslint/js": "^9.10.0",
     "@evilmartians/lefthook": "^1.5.0",
     "@react-native/eslint-config": "^0.77.0",
-    "@release-it-plugins/workspaces": "^4.2.0",
-    "@release-it/bumper": "^6.0.1",
-    "@release-it/conventional-changelog": "^8.0.2",
+    "@release-it/bumper": "^7.0.6",
+    "@release-it/conventional-changelog": "^11.0.1",
     "@tsconfig/react-native": "^2.0.2",
     "@types/eslint__js": "^8.42.3",
     "@types/node": "^24.9.1",
     "@types/react": "^18.2.44",
     "commitlint": "^17.0.2",
+    "conventional-changelog-conventionalcommits": "^9.3.1",
     "eslint": "^8.51.0",
     "eslint-plugin-prettier": "^5.0.1",
     "patch-package": "^8.0.0",
     "prettier": "^3.0.3",
     "react": "18.3.1",
     "react-native": "^0.77.0",
-    "release-it": "^17.10.0",
+    "release-it": "^20.2.0",
     "typescript": "^5.2.2",
     "typescript-eslint": "^8.13.0"
   },
@@ -111,6 +111,11 @@
               "section": "Documentation 📚"
             }
           ]
+        },
+        "context": {
+          "host": "https://github.com",
+          "owner": "TheWidlarzGroup",
+          "repository": "react-native-video"
         }
       }
     }
