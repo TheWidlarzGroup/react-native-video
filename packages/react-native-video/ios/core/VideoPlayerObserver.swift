@@ -96,13 +96,12 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
       self?.onPlayerCurrentItemChanged(player: player, change: change)
     }
     
-    // Observe rate via the rate-change notification instead of KVO of \.rate: it fires on the same
-    // rate changes but also carries the reason (.setRateCalled vs .appBackgrounded), which the
-    // delegate uses for background-resume decisions. Available since iOS 15.
+    // Rate-change notification (not KVO of \.rate) carries the reason (.setRateCalled vs
+    // .appBackgrounded), used for background-resume decisions.
     playerRateObserver = NotificationCenter.default.addObserver(
       forName: AVPlayer.rateDidChangeNotification,
       object: player,
-      queue: .main
+      queue: nil
     ) { [weak self] notification in
       guard let self, let player = self.player else { return }
       let reason = notification.userInfo?[AVPlayer.rateDidChangeReasonKey] as? AVPlayer.RateDidChangeReason
