@@ -1,0 +1,115 @@
+name: Issue labeler
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  issues: write
+
+jobs:
+  label:
+    if: ${{ github.repository == 'TheWidlarzGroup/react-native-video' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const issue = context.payload.issue;
+            if (!issue) return;
+            const number = issue.number;
+            const body = issue.body || '';
+
+            // Parse the "### Header\n value" sections produced by GitHub issue forms.
+            const sections = {};
+            let header = null;
+            for (const line of body.split(/\r?\n/)) {
+              const m = line.match(/^###\s+(.+?)\s*$/);
+              if (m) { header = m[1].trim(); sections[header] = ''; continue; }
+              if (header != null) sections[header] += line + '\n';
+            }
+
+            // Only act on our bug-report form; ignore free-form / maintainer issues.
+            if (!('Platforms' in sections) && !('react-native-video version' in sections)) {
+              return;
+            }
+
+            const get = (h) => (sections[h] || '').trim();
+            const isEmpty = (v) => !v || v === '_No response_';
+
+            const toAdd = new Set();
+            const toRemove = new Set();
+
+            // Platforms -> platform:* labels
+            const PLATFORM = {
+              'iOS': 'platform: iOS',
+              'Android': 'platform: Android',
+              'Web': 'platform: Web',
+              'visionOS': 'platform: visionOS',
+              'Apple tvOS': 'platform: tvOS',
+              'Android TV': 'platform: Android TV',
+              'Windows': 'platform: Windows',
+            };
+            const platforms = get('Platforms');
+            if (!isEmpty(platforms)) {
+              for (const p of platforms.split(/[,\n]/).map((s) => s.trim()).filter(Boolean)) {
+                if (PLATFORM[p]) toAdd.add(PLATFORM[p]);
+              }
+            }
+
+            // Reproduction repository -> repro provided / missing repro (bidirectional)
+            const repro = get('Reproduction repository');
+            if (!isEmpty(repro) && /https?:\/\/\S+/.test(repro)) {
+              toAdd.add('repro provided');
+              toRemove.add('missing repro');
+            } else {
+              toAdd.add('missing repro');
+              toRemove.add('repro provided');
+            }
+
+            // react-native-video version major -> v5 / v6 / v7
+            const version = get('react-native-video version');
+            const major = (version.match(/^\s*v?(\d+)\./) || [])[1];
+            let isV5 = false;
+            if (major === '7') toAdd.add('v7');
+            else if (major === '6') toAdd.add('v6');
+            else if (major === '5') { toAdd.add('v5'); isV5 = true; }
+
+            const currentLabels = (issue.labels || []).map((l) => (typeof l === 'string' ? l : l.name));
+
+            // Apply / remove labels.
+            const labelsToAdd = [...toAdd].filter((l) => !currentLabels.includes(l));
+            if (labelsToAdd.length) {
+              await github.rest.issues.addLabels({ owner, repo, issue_number: number, labels: labelsToAdd });
+            }
+            for (const l of toRemove) {
+              if (currentLabels.includes(l)) {
+                try {
+                  await github.rest.issues.removeLabel({ owner, repo, issue_number: number, name: l });
+                } catch (e) { /* label already absent — ignore */ }
+              }
+            }
+
+            // v5 is unsupported: comment + close as not planned (only once).
+            if (isV5 && issue.state === 'open' && !currentLabels.includes('v5')) {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: number,
+                body: [
+                  "👋 Thanks for the report — but **react-native-video v5 and older are no longer maintained**.",
+                  "",
+                  "Please upgrade to **v6 or v7**, where we actively fix issues. If you must stay on v5, [TheWidlarzGroup offers commercial support](https://sdk.thewidlarzgroup.com/issue-booster?contact=true&utm_source=rnv&utm_medium=issue&utm_campaign=v5-support&utm_id=v5-support).",
+                  "",
+                  "Closing as not planned — feel free to re-open on a supported version. 🙏",
+                ].join("\n"),
+              });
+              await github.rest.issues.update({
+                owner,
+                repo,
+                issue_number: number,
+                state: 'closed',
+                state_reason: 'not_planned',
+              });
+            }

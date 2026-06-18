@@ -1,0 +1,168 @@
+name: 🐛 Bug report
+description: Report a bug or unexpected behavior in react-native-video
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! 🙏
+
+        **Before you continue:**
+        - 🔎 Search [existing issues](https://github.com/TheWidlarzGroup/react-native-video/issues) — your problem may already be reported.
+        - ⬆️ Reproduce on the **latest** release. Fixes land on `v7` (and `v6` maintenance).
+        - 🛑 **v5 and older are no longer maintained.** Please upgrade to **v6/v7** (where we fix issues), or use [commercial support](https://sdk.thewidlarzgroup.com/issue-booster?contact=true&utm_source=rnv&utm_medium=issue&utm_campaign=v5-support&utm_id=v5-support) if you must stay on v5. v5 reports are closed automatically.
+        - 💡 Feature idea or usage question? This is **not** the place — use the links on the "New issue" screen (Discussions).
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      description: Please confirm the following before submitting.
+      options:
+        - label: I searched existing issues and didn't find a duplicate.
+          required: true
+        - label: I reproduced this on the latest release of react-native-video.
+          required: true
+        - label: This is a bug report, not a usage question (questions belong in Discussions → Q&A).
+          required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug and what you expected instead. Screenshots or a screen recording help a lot.
+      placeholder: "Playing an HLS stream on Android, the video freezes after ~3s while audio keeps playing. I expected smooth playback."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Exact steps for us to reproduce the bug.
+      placeholder: |
+        1. Render <Video source={{ uri: '...' }} />
+        2. Start playback
+        3. Observe the freeze after a few seconds
+    validations:
+      required: true
+
+  - type: input
+    id: reproduction-repo
+    attributes:
+      label: Reproduction repository
+      description: A link to a minimal repo (or the example app modified) that reproduces the bug. Reports without a reproduction are much harder to fix.
+      placeholder: https://github.com/your-username/rnv-bug-repro
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Required information
+
+  - type: input
+    id: rnv-version
+    attributes:
+      label: react-native-video version
+      description: The exact version from your package.json.
+      placeholder: 7.0.0
+    validations:
+      required: true
+
+  - type: input
+    id: react-native-version
+    attributes:
+      label: React Native version
+      description: The exact version from your package.json.
+      placeholder: 0.81.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platforms
+    attributes:
+      label: Platforms
+      description: Which platforms does the bug occur on?
+      multiple: true
+      options:
+        - iOS
+        - Android
+        - Web
+        - visionOS
+        - Apple tvOS
+        - Android TV
+        - Windows
+    validations:
+      required: true
+
+  - type: input
+    id: system-version
+    attributes:
+      label: OS version
+      description: The OS version of the device/simulator where you see the bug.
+      placeholder: iOS 18.2 / Android 15
+    validations:
+      required: true
+
+  - type: dropdown
+    id: device
+    attributes:
+      label: Device
+      description: Where are you running the app?
+      multiple: true
+      options:
+        - Real device
+        - Simulator / Emulator
+    validations:
+      required: true
+
+  - type: dropdown
+    id: architecture
+    attributes:
+      label: Architecture
+      description: Which React Native architecture are you using?
+      options:
+        - New Architecture
+        - Old Architecture
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Additional information (optional)
+
+        The more you provide, the faster we can help.
+
+  - type: dropdown
+    id: source-type
+    attributes:
+      label: Media / source type
+      description: What kind of media are you playing?
+      options:
+        - HLS (.m3u8)
+        - DASH (.mpd)
+        - MP4 / progressive
+        - Local file
+        - Other
+    validations:
+      required: false
+
+  - type: dropdown
+    id: expo
+    attributes:
+      label: Expo
+      description: "Are you using Expo? (Note: react-native-video doesn't work in Expo Go — you need a Dev Client.)"
+      options:
+        - No (bare / React Native CLI)
+        - Yes (Expo Dev Client)
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        🚀 **Need this fixed fast, or want dedicated support?** [TheWidlarzGroup](https://sdk.thewidlarzgroup.com/issue-booster?contact=true&utm_source=rnv&utm_medium=issue&utm_campaign=bug-report&utm_id=fix-it-fast) — the maintainers of react-native-video — offer priority support and custom development.

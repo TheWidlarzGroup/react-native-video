@@ -1,0 +1,17 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💼 Priority / commercial support
+    url: https://sdk.thewidlarzgroup.com/issue-booster?contact=true&utm_source=rnv&utm_medium=issue&utm_campaign=issue-chooser&utm_id=commercial-support
+    about: Need it fixed fast or want dedicated help? TheWidlarzGroup (the maintainers) offer priority support and custom development.
+  - name: 💡 Feature request
+    url: https://github.com/TheWidlarzGroup/react-native-video/discussions/categories/ideas
+    about: Have an idea? Propose and discuss new features in Discussions → Ideas.
+  - name: ❓ Question / Help
+    url: https://github.com/TheWidlarzGroup/react-native-video/discussions/categories/q-a
+    about: Usage questions and how-to help — ask the community in Discussions → Q&A.
+  - name: 💬 Discord (TheWidlarzGroup)
+    url: https://discord.gg/7Y6eE62hXM
+    about: Chat with the community and maintainers on Discord.
+  - name: 💬 VideoDev Slack (#react-native-video)
+    url: https://join.slack.com/t/video-dev/shared_invite/zt-24kgmctuv-2z0O9J_v6q_rg~x1RujdOA
+    about: Find us in the #react-native-video channel on the VideoDev Slack.
