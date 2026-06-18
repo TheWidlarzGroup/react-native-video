@@ -9,8 +9,11 @@ permissions:
 
 jobs:
   label:
-    if: ${{ github.repository == 'TheWidlarzGroup/react-native-video' }}
+    if: ${{ github.repository == 'TheWidlarzGroup/react-native-video' || github.repository == 'moskalakamil/react-native-video' }}
     runs-on: ubuntu-latest
+    concurrency:
+      group: issue-labeler-${{ github.event.issue.number }}
+      cancel-in-progress: false
     steps:
       - uses: actions/github-script@v7
         with:
@@ -88,6 +91,23 @@ jobs:
                 try {
                   await github.rest.issues.removeLabel({ owner, repo, issue_number: number, name: l });
                 } catch (e) { /* label already absent - ignore */ }
+              }
+            }
+
+            // Tidy the rendered issue body: drop the Prerequisites checkboxes section
+            // (it is a submit-time gate, not useful in the created issue). Everything
+            // else, including empty optional fields, is left untouched.
+            const blocks = [];
+            let blk = null;
+            for (const line of body.split(/\r?\n/)) {
+              if (/^###\s+/.test(line)) { blk = { head: line.replace(/^###\s+/, '').trim(), lines: [line] }; blocks.push(blk); }
+              else if (blk) blk.lines.push(line);
+            }
+            const kept = blocks.filter((b) => b.head.toLowerCase() !== 'prerequisites');
+            if (kept.length !== blocks.length) {
+              const tidied = kept.map((b) => b.lines.join('\n').replace(/\s+$/, '')).join('\n\n') + '\n';
+              if (tidied !== body) {
+                await github.rest.issues.update({ owner, repo, issue_number: number, body: tidied });
               }
             }
 
