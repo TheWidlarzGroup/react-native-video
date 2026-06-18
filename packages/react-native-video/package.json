@@ -103,7 +103,12 @@
     "npm": {
       "publish": true
     },
-    "git": false,
+    "git": {
+      "commit": false,
+      "tag": false,
+      "push": false,
+      "requireUpstream": false
+    },
     "github": {
       "release": false
     },
