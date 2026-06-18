@@ -1,4 +1,4 @@
-name: 🐛 Bug report
+name: Bug report
 description: Report a bug or unexpected behavior in react-native-video
 title: "[Bug]: "
 labels: ["bug"]
@@ -6,13 +6,13 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to report a bug! 🙏
+        Thanks for taking the time to report a bug!
 
         **Before you continue:**
-        - 🔎 Search [existing issues](https://github.com/TheWidlarzGroup/react-native-video/issues) — your problem may already be reported.
-        - ⬆️ Reproduce on the **latest** release. Fixes land on `v7` (and `v6` maintenance).
-        - 🛑 **v5 and older are no longer maintained.** Please upgrade to **v6/v7** (where we fix issues), or use [commercial support](https://sdk.thewidlarzgroup.com/issue-booster?contact=true&utm_source=rnv&utm_medium=issue&utm_campaign=v5-support&utm_id=v5-support) if you must stay on v5. v5 reports are closed automatically.
-        - 💡 Feature idea or usage question? This is **not** the place — use the links on the "New issue" screen (Discussions).
+        - Search [existing issues](https://github.com/TheWidlarzGroup/react-native-video/issues) - your problem may already be reported.
+        - Reproduce on the **latest** release. Fixes land on `v7` (and `v6` maintenance).
+        - **v5 and older are no longer maintained.** Please upgrade to **v6/v7** (where we fix issues), or use [commercial support](https://sdk.thewidlarzgroup.com/issue-booster?contact=true&utm_source=rnv&utm_medium=issue&utm_campaign=v5-support&utm_id=v5-support) if you must stay on v5. These reports will be closed automatically.
+        - Feature idea or usage question? This is **not** the place - use the links on the "New issue" screen (Discussions).
 
   - type: checkboxes
     id: prerequisites
@@ -23,8 +23,6 @@ body:
         - label: I searched existing issues and didn't find a duplicate.
           required: true
         - label: I reproduced this on the latest release of react-native-video.
-          required: true
-        - label: This is a bug report, not a usage question (questions belong in Discussions → Q&A).
           required: true
 
   - type: textarea
@@ -42,7 +40,7 @@ body:
       label: Steps to reproduce
       description: Exact steps for us to reproduce the bug.
       placeholder: |
-        1. Render <Video source={{ uri: '...' }} />
+        1. Render the Video component
         2. Start playback
         3. Observe the freeze after a few seconds
     validations:
@@ -154,7 +152,7 @@ body:
     id: expo
     attributes:
       label: Expo
-      description: "Are you using Expo? (Note: react-native-video doesn't work in Expo Go — you need a Dev Client.)"
+      description: "Are you using Expo? (Note: react-native-video doesn't work in Expo Go - you need a Dev Client.)"
       options:
         - No (bare / React Native CLI)
         - Yes (Expo Dev Client)
@@ -165,4 +163,4 @@ body:
     attributes:
       value: |
         ---
-        🚀 **Need this fixed fast, or want dedicated support?** [TheWidlarzGroup](https://sdk.thewidlarzgroup.com/issue-booster?contact=true&utm_source=rnv&utm_medium=issue&utm_campaign=bug-report&utm_id=fix-it-fast) — the maintainers of react-native-video — offer priority support and custom development.
+        **Need this fixed fast, or want dedicated support?** TheWidlarzGroup - the maintainers of react-native-video - offer [commercial support](https://sdk.thewidlarzgroup.com/issue-booster?contact=true&utm_source=rnv&utm_medium=issue&utm_campaign=bug-report&utm_id=fix-it-fast) and custom development.

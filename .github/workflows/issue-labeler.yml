@@ -87,7 +87,7 @@ jobs:
               if (currentLabels.includes(l)) {
                 try {
                   await github.rest.issues.removeLabel({ owner, repo, issue_number: number, name: l });
-                } catch (e) { /* label already absent — ignore */ }
+                } catch (e) { /* label already absent - ignore */ }
               }
             }
 
@@ -98,11 +98,11 @@ jobs:
                 repo,
                 issue_number: number,
                 body: [
-                  "👋 Thanks for the report — but **react-native-video v5 and older are no longer maintained**.",
+                  "Thanks for the report - but **react-native-video v5 and older are no longer maintained**.",
                   "",
                   "Please upgrade to **v6 or v7**, where we actively fix issues. If you must stay on v5, [TheWidlarzGroup offers commercial support](https://sdk.thewidlarzgroup.com/issue-booster?contact=true&utm_source=rnv&utm_medium=issue&utm_campaign=v5-support&utm_id=v5-support).",
                   "",
-                  "Closing as not planned — feel free to re-open on a supported version. 🙏",
+                  "Closing as not planned - feel free to re-open on a supported version.",
                 ].join("\n"),
               });
               await github.rest.issues.update({

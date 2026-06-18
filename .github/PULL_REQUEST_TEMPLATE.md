@@ -1,8 +1,8 @@
 <!--
-Thanks for opening a pull request! 🙏
+Thanks for opening a pull request!
 
 To help us review and merge it quickly:
-- Keep the PR focused on a single concern — split unrelated changes into separate PRs.
+- Keep the PR focused on a single concern - split unrelated changes into separate PRs.
 - Update the docs (`docs/`) and the README when you change or add public API, props, or events.
 - Link the issue this PR addresses with "Fixes #<number>".
 -->
