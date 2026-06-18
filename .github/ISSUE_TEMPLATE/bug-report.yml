@@ -9,28 +9,28 @@ body:
         Thanks for taking the time to report a bug!
 
         **Before you continue:**
-        - Search [existing issues](https://github.com/TheWidlarzGroup/react-native-video/issues) - your problem may already be reported.
-        - Reproduce on the **latest** release. Fixes land on `v7` (and `v6` maintenance).
-        - **v5 and older are no longer maintained.** Please upgrade to **v6/v7** (where we fix issues), or use [commercial support](https://sdk.thewidlarzgroup.com/issue-booster?contact=true&utm_source=rnv&utm_medium=issue&utm_campaign=v5-support&utm_id=v5-support) if you must stay on v5. These reports will be closed automatically.
-        - Feature idea or usage question? This is **not** the place - use the links on the "New issue" screen (Discussions).
+        - Search [existing issues](https://github.com/TheWidlarzGroup/react-native-video/issues) - your problem may already be reported
+        - Reproduce on the **latest** release. Fixes land on `v7` (and `v6` maintenance)
+        - **v5 and older are no longer maintained.** Please upgrade to **v6/v7** (where we fix issues), or use [commercial support](https://sdk.thewidlarzgroup.com/issue-booster?contact=true&utm_source=rnv&utm_medium=issue&utm_campaign=v5-support&utm_id=v5-support) if you must stay on v5. These reports will be closed automatically
+        - Feature idea or usage question? This is **not** the place - use the links on the "New issue" screen (Discussions)
 
   - type: checkboxes
     id: prerequisites
     attributes:
       label: Prerequisites
-      description: Please confirm the following before submitting.
+      description: Please confirm the following before submitting
       options:
-        - label: I searched existing issues and didn't find a duplicate.
+        - label: I searched existing issues and didn't find a duplicate
           required: true
-        - label: I reproduced this on the latest release of react-native-video.
+        - label: I reproduced this on the latest release of react-native-video
           required: true
 
   - type: textarea
     id: what-happened
     attributes:
       label: What happened?
-      description: A clear description of the bug and what you expected instead. Screenshots or a screen recording help a lot.
-      placeholder: "Playing an HLS stream on Android, the video freezes after ~3s while audio keeps playing. I expected smooth playback."
+      description: A clear description of the bug and what you expected instead. Screenshots or a screen recording help a lot
+      placeholder: "Playing an HLS stream on Android, the video freezes after ~3s while audio keeps playing. I expected smooth playback"
     validations:
       required: true
 
@@ -38,7 +38,7 @@ body:
     id: steps-to-reproduce
     attributes:
       label: Steps to reproduce
-      description: Exact steps for us to reproduce the bug.
+      description: Exact steps for us to reproduce the bug
       placeholder: |
         1. Render the Video component
         2. Start playback
@@ -50,7 +50,7 @@ body:
     id: reproduction-repo
     attributes:
       label: Reproduction repository
-      description: A link to a minimal repo (or the example app modified) that reproduces the bug. Reports without a reproduction are much harder to fix.
+      description: A link to a minimal repo (or the example app modified) that reproduces the bug. Reports without a reproduction are much harder to fix
       placeholder: https://github.com/your-username/rnv-bug-repro
     validations:
       required: false
@@ -64,7 +64,7 @@ body:
     id: rnv-version
     attributes:
       label: react-native-video version
-      description: The exact version from your package.json.
+      description: The exact version from your package.json
       placeholder: 7.0.0
     validations:
       required: true
@@ -73,7 +73,7 @@ body:
     id: react-native-version
     attributes:
       label: React Native version
-      description: The exact version from your package.json.
+      description: The exact version from your package.json
       placeholder: 0.81.0
     validations:
       required: true
@@ -99,7 +99,7 @@ body:
     id: system-version
     attributes:
       label: OS version
-      description: The OS version of the device/simulator where you see the bug.
+      description: The OS version of the device/simulator where you see the bug
       placeholder: iOS 18.2 / Android 15
     validations:
       required: true
@@ -132,7 +132,7 @@ body:
       value: |
         ## Additional information (optional)
 
-        The more you provide, the faster we can help.
+        The more you provide, the faster we can help
 
   - type: dropdown
     id: source-type
@@ -153,7 +153,7 @@ body:
     id: expo
     attributes:
       label: Expo
-      description: "Are you using Expo? (Note: react-native-video doesn't work in Expo Go - you need a Dev Client.)"
+      description: "Are you using Expo? (Note: react-native-video doesn't work in Expo Go - you need a Dev Client)"
       options:
         - No (bare / React Native CLI)
         - Yes (Expo Dev Client)
@@ -164,4 +164,4 @@ body:
     attributes:
       value: |
         ---
-        **Need this fixed fast, or want dedicated support?** TheWidlarzGroup - the maintainers of react-native-video - offer [commercial support](https://sdk.thewidlarzgroup.com/issue-booster?contact=true&utm_source=rnv&utm_medium=issue&utm_campaign=bug-report&utm_id=fix-it-fast) and custom development.
+        **Need this fixed fast, or want dedicated support?** TheWidlarzGroup - the maintainers of react-native-video - offer [commercial support](https://sdk.thewidlarzgroup.com/issue-booster?contact=true&utm_source=rnv&utm_medium=issue&utm_campaign=bug-report&utm_id=fix-it-fast) and custom development
