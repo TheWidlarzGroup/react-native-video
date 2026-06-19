@@ -74,7 +74,7 @@ body:
     attributes:
       label: React Native version
       description: The exact version from your package.json
-      placeholder: 0.81.0
+      placeholder: 0.86.0
     validations:
       required: true
 
