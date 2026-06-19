@@ -72,7 +72,7 @@ body:
   - type: input
     id: react-native-version
     attributes:
-      label: React Native version
+      label: react-native version
       description: The exact version from your package.json
       placeholder: 0.86.0
     validations:
