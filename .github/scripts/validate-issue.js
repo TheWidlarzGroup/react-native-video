@@ -113,7 +113,9 @@ function parseVersionTuple(v) {
 function parseSemver(v) {
   const m = String(v || '').match(/v?(\d+)\.(\d+)\.(\d+)(?:[-.]([0-9A-Za-z.-]+))?/);
   if (!m) return null;
-  return { main: [Number(m[1]), Number(m[2]), Number(m[3])], pre: m[4] ? m[4].split('.') : [] };
+  // Split prerelease ids on "." or "-" so malformed inputs like "7.0.0.beta-9"
+  // still compare correctly (real-world reporters fumble the separators).
+  return { main: [Number(m[1]), Number(m[2]), Number(m[3])], pre: m[4] ? m[4].split(/[-.]/) : [] };
 }
 
 /**
