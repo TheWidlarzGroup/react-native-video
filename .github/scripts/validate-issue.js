@@ -329,7 +329,7 @@ async function handleIssue({ github, context }) {
         '',
         `Please upgrade to **v6 or v7**, where we actively fix issues. If you must stay on v5, [TheWidlarzGroup offers commercial support](https://sdk.thewidlarzgroup.com/issue-booster?contact=true&utm_source=rnv&utm_medium=issue&utm_campaign=v5-support&utm_id=${number}).`,
         '',
-        'Closing as not planned - feel free to re-open on a supported version.',
+        'Closing as not planned - if it still happens on a supported version, please open a new issue.',
       ].join('\n'),
     });
     await github.rest.issues.update({ owner, repo, issue_number: number, state: 'closed', state_reason: 'not_planned' });
