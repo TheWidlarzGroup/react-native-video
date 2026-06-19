@@ -134,6 +134,24 @@ body:
 
         The more you provide, the faster we can help
 
+  - type: input
+    id: last-working-version
+    attributes:
+      label: Last working version
+      description: Did this work on a previous version? If so, which react-native-video version was the last that worked?
+      placeholder: 6.15.0
+    validations:
+      required: false
+
+  - type: input
+    id: nitro-modules-version
+    attributes:
+      label: react-native-nitro-modules version
+      description: The react-native-nitro-modules version from your package.json (v7 only, skip if not applicable)
+      placeholder: 0.35.9
+    validations:
+      required: false
+
   - type: dropdown
     id: source-type
     attributes:
