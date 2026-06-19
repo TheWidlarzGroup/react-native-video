@@ -15,15 +15,28 @@ const PLATFORM = {
   'Windows': 'Platform: Windows',
 };
 
-// Labels this bot owns: cleared and recomputed on every run.
+// Issue-form section headers we read (the form contract, in one place).
+const SECTION = {
+  platforms: 'Platforms',
+  repro: 'Reproduction repository',
+  version: 'react-native-video version',
+  prerequisites: 'Prerequisites',
+};
+
+const REPRO_PROVIDED = 'Repro Provided';
+const MISSING_REPRO = 'Missing Repro';
+const OUTDATED = 'Newer Version Available';
+const VERSION_MAJORS = [5, 6, 7];
+/** @param {number} major */
+const versionLabel = (major) => `V${major}`;
+
+// Labels this bot owns: cleared and recomputed on every run (derived, not hand-listed).
 const BOT_LABELS = [
-  'Repro Provided',
-  'Missing Repro',
-  'Newer Version Available',
-  'V5',
-  'V6',
-  'V7',
   ...Object.values(PLATFORM),
+  REPRO_PROVIDED,
+  MISSING_REPRO,
+  OUTDATED,
+  ...VERSION_MAJORS.map(versionLabel),
 ];
 
 const SKIP_LABEL = 'No Validation';
@@ -88,8 +101,8 @@ function isReproUrl(v) {
  * @returns {number[] | null} [major, minor, patch] or null
  */
 function parseVersionTuple(v) {
-  const m = String(v || '').match(/v?(\d+)\.(\d+)\.(\d+)/);
-  return m ? [Number(m[1]), Number(m[2]), Number(m[3])] : null;
+  const s = parseSemver(v);
+  return s ? s.main : null;
 }
 
 /**
@@ -170,7 +183,7 @@ function computeTriage(sections, versions) {
   let outdated = null;
 
   // Platforms -> Platform: * labels
-  const plat = get('Platforms');
+  const plat = get(SECTION.platforms);
   if (!isEmpty(plat)) {
     for (const p of plat.split(/[,\n]/).map((s) => s.trim()).filter(Boolean)) {
       if (PLATFORM[p]) labels.add(PLATFORM[p]);
@@ -178,24 +191,22 @@ function computeTriage(sections, versions) {
   }
 
   // Reproduction repository -> Repro Provided / Missing Repro
-  labels.add(isReproUrl(get('Reproduction repository')) ? 'Repro Provided' : 'Missing Repro');
+  labels.add(isReproUrl(get(SECTION.repro)) ? REPRO_PROVIDED : MISSING_REPRO);
 
-  // react-native-video version -> V5/V6/V7 (+ outdated check for v6/v7)
-  const verRaw = get('react-native-video version');
+  // react-native-video version -> V<major> (+ outdated check; v5 is unsupported)
+  const verRaw = get(SECTION.version);
   const tuple = parseVersionTuple(verRaw);
   if (tuple) {
     const maj = tuple[0];
+    if (VERSION_MAJORS.includes(maj)) labels.add(versionLabel(maj));
     if (maj === 5) {
-      labels.add('V5');
       isV5 = true;
     } else {
-      if (maj === 6) labels.add('V6');
-      else if (maj === 7) labels.add('V7');
       // Newest release in the reporter's own major line (prereleases included),
       // so e.g. 7.0.0-alpha.1 is nudged to 7.0.0-beta.10.
       const newest = highestForMajor(versions, maj);
       if (newest && compareSemver(verRaw, newest) < 0) {
-        labels.add('Newer Version Available');
+        labels.add(OUTDATED);
         outdated = { from: verRaw, to: newest };
       }
     }
@@ -218,7 +229,7 @@ function tidyBody(body) {
     if (/^###\s+/.test(line)) { blk = { head: line.replace(/^###\s+/, '').trim(), lines: [line] }; blocks.push(blk); }
     else if (blk) blk.lines.push(line);
   }
-  const kept = blocks.filter((b) => b.head.toLowerCase() !== 'prerequisites');
+  const kept = blocks.filter((b) => b.head.toLowerCase() !== SECTION.prerequisites.toLowerCase());
   if (kept.length === blocks.length) return null;
   return kept.map((b) => b.lines.join('\n').replace(/\s+$/, '')).join('\n\n') + '\n';
 }
@@ -270,7 +281,7 @@ async function handleIssue({ github, context }) {
 
   const sections = parseSections(body);
   // Only act on our bug-report form.
-  if (!('Platforms' in sections) && !('react-native-video version' in sections)) return;
+  if (!(SECTION.platforms in sections) && !(SECTION.version in sections)) return;
 
   const existing = (issue.labels || []).map((l) => (typeof l === 'string' ? l : l.name));
   if (existing.includes(SKIP_LABEL)) {
@@ -286,7 +297,6 @@ async function handleIssue({ github, context }) {
   const finalLabels = Array.from(new Set([...keep, ...desired]));
   const changed =
     finalLabels.length !== existing.length ||
-    finalLabels.some((l) => !existing.includes(l)) ||
     existing.some((l) => !finalLabels.includes(l));
   if (changed) {
     await github.rest.issues.setLabels({ owner, repo, issue_number: number, labels: finalLabels });
@@ -299,7 +309,7 @@ async function handleIssue({ github, context }) {
   }
 
   // Outdated version: nudge to retest on the latest (skip for v5, which is closed below).
-  if (outdated && !isV5 && !existing.includes('Newer Version Available')) {
+  if (outdated && !isV5 && !existing.includes(OUTDATED)) {
     await comment({
       github,
       context,
@@ -310,7 +320,7 @@ async function handleIssue({ github, context }) {
   }
 
   // v5 is unsupported: comment + close as not planned (only once).
-  if (isV5 && issue.state === 'open' && !existing.includes('V5')) {
+  if (isV5 && issue.state === 'open' && !existing.includes(versionLabel(5))) {
     await comment({
       github,
       context,
