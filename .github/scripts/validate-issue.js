@@ -15,7 +15,7 @@ const PLATFORM = {
   'Windows': 'Platform: Windows',
 };
 
-// Issue-form section headers we read (the form contract, in one place).
+// Issue-form section headers we read.
 const SECTION = {
   platforms: 'Platforms',
   repro: 'Reproduction repository',
@@ -30,7 +30,7 @@ const VERSION_MAJORS = [5, 6, 7];
 /** @param {number} major */
 const versionLabel = (major) => `V${major}`;
 
-// Labels this bot owns: cleared and recomputed on every run (derived, not hand-listed).
+// Labels this bot owns - cleared and recomputed every run.
 const BOT_LABELS = [
   ...Object.values(PLATFORM),
   REPRO_PROVIDED,
@@ -42,8 +42,7 @@ const BOT_LABELS = [
 const SKIP_LABEL = 'No Validation';
 const BOT_MARK = '<!-- rnv-triage-bot -->';
 
-// The injected `github` is a github-script Octokit (real type below); `context`
-// is typed locally because its payload is loosely typed upstream.
+// `context` is typed locally below - github-script's payload type is too loose.
 /** @typedef {import('@octokit/rest').Octokit} Octokit */
 /**
  * @typedef {Object} IssueLabel
@@ -184,7 +183,6 @@ function computeTriage(sections, versions) {
   /** @type {{ from: string, to: string } | null} */
   let outdated = null;
 
-  // Platforms -> Platform: * labels
   const plat = get(SECTION.platforms);
   if (!isEmpty(plat)) {
     for (const p of plat.split(/[,\n]/).map((s) => s.trim()).filter(Boolean)) {
@@ -192,10 +190,8 @@ function computeTriage(sections, versions) {
     }
   }
 
-  // Reproduction repository -> Repro Provided / Missing Repro
   labels.add(isReproUrl(get(SECTION.repro)) ? REPRO_PROVIDED : MISSING_REPRO);
 
-  // react-native-video version -> V<major> (+ outdated check; v5 is unsupported)
   const verRaw = get(SECTION.version);
   const tuple = parseVersionTuple(verRaw);
   if (tuple) {
@@ -204,8 +200,7 @@ function computeTriage(sections, versions) {
     if (maj === 5) {
       isV5 = true;
     } else {
-      // Newest release in the reporter's own major line (prereleases included),
-      // so e.g. 7.0.0-alpha.1 is nudged to 7.0.0-beta.10.
+      // newest in the reporter's major line, so e.g. an alpha is nudged to the latest beta
       const newest = highestForMajor(versions, maj);
       if (newest && compareSemver(verRaw, newest) < 0) {
         labels.add(OUTDATED);
@@ -304,7 +299,6 @@ async function handleIssue({ github, context }) {
     await github.rest.issues.setLabels({ owner, repo, issue_number: number, labels: finalLabels });
   }
 
-  // Strip the Prerequisites section from the created issue.
   const tidied = tidyBody(body);
   if (tidied && tidied !== body) {
     await github.rest.issues.update({ owner, repo, issue_number: number, body: tidied });
