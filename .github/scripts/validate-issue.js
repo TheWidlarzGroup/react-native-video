@@ -1,8 +1,10 @@
+// @ts-check
 // Deterministic issue validator + labeler for react-native-video bug reports.
 // Pure helpers (parsing, label computation) are exported for local testing;
 // handleIssue() does the GitHub IO. No marketing/Issue Boost here on purpose -
 // that is handled by the separate AI routine.
 
+/** @type {Record<string, string>} */
 const PLATFORM = {
   'iOS': 'Platform: iOS',
   'Android': 'Platform: Android',
@@ -27,11 +29,18 @@ const BOT_LABELS = [
 const SKIP_LABEL = 'No Validation';
 const BOT_MARK = '<!-- rnv-triage-bot -->';
 
+/** @param {string} v */
 const isEmpty = (v) => !v || v === '_No response_';
 
-// Parse the "### Header\n value" sections produced by GitHub issue forms.
+/**
+ * Parse the "### Header\n value" sections produced by GitHub issue forms.
+ * @param {string} body
+ * @returns {Record<string, string>}
+ */
 function parseSections(body) {
+  /** @type {Record<string, string>} */
   const sections = {};
+  /** @type {string | null} */
   let header = null;
   for (const line of String(body || '').split(/\r?\n/)) {
     const m = line.match(/^###\s+(.+?)\s*$/);
@@ -42,28 +51,45 @@ function parseSections(body) {
   return sections;
 }
 
-// A reproduction is "provided" only when the field contains a real http(s) URL.
+/**
+ * A reproduction is "provided" only when the field contains a real http(s) URL.
+ * @param {string} v
+ * @returns {boolean}
+ */
 function isReproUrl(v) {
   if (isEmpty(v)) return false;
   return /\bhttps?:\/\/[^\s)]+/i.test(v);
 }
 
-// Extract the first x.y.z from a version string (ignores a leading v and any
-// prerelease suffix). Returns [major, minor, patch] or null.
+/**
+ * Extract the first x.y.z from a version string (ignores a leading v and any
+ * prerelease suffix).
+ * @param {string} v
+ * @returns {number[] | null} [major, minor, patch] or null
+ */
 function parseVersionTuple(v) {
   const m = String(v || '').match(/v?(\d+)\.(\d+)\.(\d+)/);
   return m ? [Number(m[1]), Number(m[2]), Number(m[3])] : null;
 }
 
-// Full semver parse incl. prerelease identifiers. Generic for -alpha/-beta/-rc/etc.
+/**
+ * Full semver parse incl. prerelease identifiers. Generic for -alpha/-beta/-rc/etc.
+ * @param {string} v
+ * @returns {{ main: number[], pre: string[] } | null}
+ */
 function parseSemver(v) {
   const m = String(v || '').match(/v?(\d+)\.(\d+)\.(\d+)(?:[-.]([0-9A-Za-z.-]+))?/);
   if (!m) return null;
   return { main: [Number(m[1]), Number(m[2]), Number(m[3])], pre: m[4] ? m[4].split('.') : [] };
 }
 
-// Compare two prerelease identifier arrays per semver precedence.
-// [] (stable) ranks higher than any prerelease.
+/**
+ * Compare two prerelease identifier arrays per semver precedence.
+ * [] (stable) ranks higher than any prerelease.
+ * @param {string[]} a
+ * @param {string[]} b
+ * @returns {number}
+ */
 function comparePre(a, b) {
   if (a.length === 0 && b.length === 0) return 0;
   if (a.length === 0) return 1;
@@ -82,7 +108,12 @@ function comparePre(a, b) {
   return 0;
 }
 
-// Full semver comparison: -1 if a < b, 0 if equal, 1 if a > b.
+/**
+ * Full semver comparison: -1 if a < b, 0 if equal, 1 if a > b.
+ * @param {string} a
+ * @param {string} b
+ * @returns {number}
+ */
 function compareSemver(a, b) {
   const pa = parseSemver(a), pb = parseSemver(b);
   if (!pa || !pb) return 0;
@@ -90,20 +121,32 @@ function compareSemver(a, b) {
   return comparePre(pa.pre, pb.pre);
 }
 
-// Highest version among `versions` that shares the given major (the newest the
-// reporter could upgrade to within their own version line).
+/**
+ * Highest version among `versions` that shares the given major (the newest the
+ * reporter could upgrade to within their own version line).
+ * @param {string[]} versions
+ * @param {number} major
+ * @returns {string | null}
+ */
 function highestForMajor(versions, major) {
   const same = (versions || []).filter((v) => { const t = parseVersionTuple(v); return t && t[0] === major; });
   if (!same.length) return null;
   return same.reduce((hi, v) => (compareSemver(v, hi) > 0 ? v : hi), same[0]);
 }
 
-// Compute the desired bot labels + actions from parsed sections.
-// versions: array of candidate "newest" version strings (npm dist-tags).
+/**
+ * Compute the desired bot labels + actions from parsed sections.
+ * @param {Record<string, string>} sections
+ * @param {string[]} versions array of candidate "newest" version strings (npm dist-tags)
+ * @returns {{ labels: Set<string>, isV5: boolean, outdated: { from: string, to: string } | null }}
+ */
 function computeTriage(sections, versions) {
+  /** @param {string} h */
   const get = (h) => (sections[h] || '').trim();
+  /** @type {Set<string>} */
   const labels = new Set();
   let isV5 = false;
+  /** @type {{ from: string, to: string } | null} */
   let outdated = null;
 
   // Platforms -> Platform: * labels
@@ -141,10 +184,15 @@ function computeTriage(sections, versions) {
   return { labels, isV5, outdated };
 }
 
-// Remove the Prerequisites checkboxes section from the rendered issue body.
-// Returns the new body, or null if there was nothing to strip.
+/**
+ * Remove the Prerequisites checkboxes section from the rendered issue body.
+ * @param {string} body
+ * @returns {string | null} the new body, or null if there was nothing to strip
+ */
 function tidyBody(body) {
+  /** @type {{ head: string, lines: string[] }[]} */
   const blocks = [];
+  /** @type {{ head: string, lines: string[] } | null} */
   let blk = null;
   for (const line of String(body || '').split(/\r?\n/)) {
     if (/^###\s+/.test(line)) { blk = { head: line.replace(/^###\s+/, '').trim(), lines: [line] }; blocks.push(blk); }
@@ -155,29 +203,32 @@ function tidyBody(body) {
   return kept.map((b) => b.lines.join('\n').replace(/\s+$/, '')).join('\n\n') + '\n';
 }
 
+/** @returns {Promise<string[]>} */
 async function fetchLatestVersions() {
   try {
     const res = await fetch('https://registry.npmjs.org/-/package/react-native-video/dist-tags');
     if (!res.ok) return [];
     const tags = await res.json();
-    return Object.values(tags).filter(Boolean);
+    return Object.values(tags).filter(Boolean).map(String);
   } catch (e) {
-    console.error('npm dist-tags fetch failed:', e && e.message);
+    console.error('npm dist-tags fetch failed:', e && /** @type {Error} */ (e).message);
     return [];
   }
 }
 
+/** @param {{ github: any, context: any }} args */
 async function hidePreviousBotComments({ github, context }) {
   const { owner, repo } = context.repo;
   const number = context.payload.issue.number;
   const comments = await github.rest.issues.listComments({ owner, repo, issue_number: number });
-  const ours = comments.data.filter((c) => c.body && c.body.includes(BOT_MARK) && !c.body.includes('<summary>Previous bot comment'));
+  const ours = comments.data.filter((/** @type {any} */ c) => c.body && c.body.includes(BOT_MARK) && !c.body.includes('<summary>Previous bot comment'));
   for (const c of ours) {
     const hidden = `<details>\n<summary>Previous bot comment (click to expand)</summary>\n\n${c.body}\n\n</details>`;
     await github.rest.issues.updateComment({ owner, repo, comment_id: c.id, body: hidden });
   }
 }
 
+/** @param {{ github: any, context: any, body: string }} args */
 async function comment({ github, context, body }) {
   const { owner, repo } = context.repo;
   await hidePreviousBotComments({ github, context });
@@ -189,6 +240,7 @@ async function comment({ github, context, body }) {
   });
 }
 
+/** @param {{ github: any, context: any }} args */
 async function handleIssue({ github, context }) {
   const { owner, repo } = context.repo;
   const issue = context.payload.issue;
@@ -200,7 +252,7 @@ async function handleIssue({ github, context }) {
   // Only act on our bug-report form.
   if (!('Platforms' in sections) && !('react-native-video version' in sections)) return;
 
-  const existing = (issue.labels || []).map((l) => (typeof l === 'string' ? l : l.name));
+  const existing = (issue.labels || []).map((/** @type {any} */ l) => (typeof l === 'string' ? l : l.name));
   if (existing.includes(SKIP_LABEL)) {
     console.log('No Validation label present -> skipping');
     return;
@@ -210,12 +262,12 @@ async function handleIssue({ github, context }) {
   const { labels: desired, isV5, outdated } = computeTriage(sections, versions);
 
   // Reconcile: keep non-bot labels, set bot labels to the freshly computed set.
-  const keep = existing.filter((l) => !BOT_LABELS.includes(l));
+  const keep = existing.filter((/** @type {string} */ l) => !BOT_LABELS.includes(l));
   const finalLabels = Array.from(new Set([...keep, ...desired]));
   const changed =
     finalLabels.length !== existing.length ||
     finalLabels.some((l) => !existing.includes(l)) ||
-    existing.some((l) => !finalLabels.includes(l));
+    existing.some((/** @type {string} */ l) => !finalLabels.includes(l));
   if (changed) {
     await github.rest.issues.setLabels({ owner, repo, issue_number: number, labels: finalLabels });
   }
