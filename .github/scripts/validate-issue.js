@@ -29,6 +29,42 @@ const BOT_LABELS = [
 const SKIP_LABEL = 'No Validation';
 const BOT_MARK = '<!-- rnv-triage-bot -->';
 
+// Minimal types for the subset of the github-script API we touch (no @octokit dep).
+/**
+ * @typedef {Object} GithubComment
+ * @property {number} id
+ * @property {string} body
+ * @property {{ type: string }} user
+ */
+/**
+ * @typedef {Object} IssuesApi
+ * @property {(p: { owner: string, repo: string, issue_number: number }) => Promise<{ data: GithubComment[] }>} listComments
+ * @property {(p: { owner: string, repo: string, comment_id: number, body: string }) => Promise<unknown>} updateComment
+ * @property {(p: { owner: string, repo: string, issue_number: number, body: string }) => Promise<unknown>} createComment
+ * @property {(p: { owner: string, repo: string, issue_number: number, labels: string[] }) => Promise<unknown>} setLabels
+ * @property {(p: { owner: string, repo: string, issue_number: number, body?: string, state?: string, state_reason?: string }) => Promise<unknown>} update
+ */
+/**
+ * @typedef {Object} GithubApi
+ * @property {{ issues: IssuesApi }} rest
+ */
+/**
+ * @typedef {Object} IssueLabel
+ * @property {string} name
+ */
+/**
+ * @typedef {Object} Issue
+ * @property {number} number
+ * @property {string} [body]
+ * @property {string} state
+ * @property {Array<string | IssueLabel>} [labels]
+ */
+/**
+ * @typedef {Object} Context
+ * @property {{ owner: string, repo: string }} repo
+ * @property {{ issue: Issue }} payload
+ */
+
 /** @param {string} v */
 const isEmpty = (v) => !v || v === '_No response_';
 
@@ -208,27 +244,27 @@ async function fetchLatestVersions() {
   try {
     const res = await fetch('https://registry.npmjs.org/-/package/react-native-video/dist-tags');
     if (!res.ok) return [];
-    const tags = await res.json();
-    return Object.values(tags).filter(Boolean).map(String);
+    const tags = /** @type {Record<string, string>} */ (await res.json());
+    return Object.values(tags).filter(Boolean);
   } catch (e) {
-    console.error('npm dist-tags fetch failed:', e && /** @type {Error} */ (e).message);
+    console.error('npm dist-tags fetch failed:', e instanceof Error ? e.message : e);
     return [];
   }
 }
 
-/** @param {{ github: any, context: any }} args */
+/** @param {{ github: GithubApi, context: Context }} args */
 async function hidePreviousBotComments({ github, context }) {
   const { owner, repo } = context.repo;
   const number = context.payload.issue.number;
   const comments = await github.rest.issues.listComments({ owner, repo, issue_number: number });
-  const ours = comments.data.filter((/** @type {any} */ c) => c.body && c.body.includes(BOT_MARK) && !c.body.includes('<summary>Previous bot comment'));
+  const ours = comments.data.filter((c) => c.body && c.body.includes(BOT_MARK) && !c.body.includes('<summary>Previous bot comment'));
   for (const c of ours) {
     const hidden = `<details>\n<summary>Previous bot comment (click to expand)</summary>\n\n${c.body}\n\n</details>`;
     await github.rest.issues.updateComment({ owner, repo, comment_id: c.id, body: hidden });
   }
 }
 
-/** @param {{ github: any, context: any, body: string }} args */
+/** @param {{ github: GithubApi, context: Context, body: string }} args */
 async function comment({ github, context, body }) {
   const { owner, repo } = context.repo;
   await hidePreviousBotComments({ github, context });
@@ -240,7 +276,7 @@ async function comment({ github, context, body }) {
   });
 }
 
-/** @param {{ github: any, context: any }} args */
+/** @param {{ github: GithubApi, context: Context }} args */
 async function handleIssue({ github, context }) {
   const { owner, repo } = context.repo;
   const issue = context.payload.issue;
@@ -252,7 +288,7 @@ async function handleIssue({ github, context }) {
   // Only act on our bug-report form.
   if (!('Platforms' in sections) && !('react-native-video version' in sections)) return;
 
-  const existing = (issue.labels || []).map((/** @type {any} */ l) => (typeof l === 'string' ? l : l.name));
+  const existing = (issue.labels || []).map((l) => (typeof l === 'string' ? l : l.name));
   if (existing.includes(SKIP_LABEL)) {
     console.log('No Validation label present -> skipping');
     return;
@@ -262,12 +298,12 @@ async function handleIssue({ github, context }) {
   const { labels: desired, isV5, outdated } = computeTriage(sections, versions);
 
   // Reconcile: keep non-bot labels, set bot labels to the freshly computed set.
-  const keep = existing.filter((/** @type {string} */ l) => !BOT_LABELS.includes(l));
+  const keep = existing.filter((l) => !BOT_LABELS.includes(l));
   const finalLabels = Array.from(new Set([...keep, ...desired]));
   const changed =
     finalLabels.length !== existing.length ||
     finalLabels.some((l) => !existing.includes(l)) ||
-    existing.some((/** @type {string} */ l) => !finalLabels.includes(l));
+    existing.some((l) => !finalLabels.includes(l));
   if (changed) {
     await github.rest.issues.setLabels({ owner, repo, issue_number: number, labels: finalLabels });
   }
