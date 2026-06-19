@@ -141,7 +141,6 @@ body:
     attributes:
       label: Expo
       description: "Are you using Expo? (Note: react-native-video doesn't work in Expo Go - you need a Dev Client)"
-      default: 1
       options:
         - No (bare / React Native CLI)
         - Yes (Expo Dev Client)
