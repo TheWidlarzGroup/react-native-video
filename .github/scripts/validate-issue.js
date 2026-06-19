@@ -29,25 +29,9 @@ const BOT_LABELS = [
 const SKIP_LABEL = 'No Validation';
 const BOT_MARK = '<!-- rnv-triage-bot -->';
 
-// Minimal types for the subset of the github-script API we touch (no @octokit dep).
-/**
- * @typedef {Object} GithubComment
- * @property {number} id
- * @property {string} body
- * @property {{ type: string }} user
- */
-/**
- * @typedef {Object} IssuesApi
- * @property {(p: { owner: string, repo: string, issue_number: number }) => Promise<{ data: GithubComment[] }>} listComments
- * @property {(p: { owner: string, repo: string, comment_id: number, body: string }) => Promise<unknown>} updateComment
- * @property {(p: { owner: string, repo: string, issue_number: number, body: string }) => Promise<unknown>} createComment
- * @property {(p: { owner: string, repo: string, issue_number: number, labels: string[] }) => Promise<unknown>} setLabels
- * @property {(p: { owner: string, repo: string, issue_number: number, body?: string, state?: string, state_reason?: string }) => Promise<unknown>} update
- */
-/**
- * @typedef {Object} GithubApi
- * @property {{ issues: IssuesApi }} rest
- */
+// The injected `github` is a github-script Octokit (real type below); `context`
+// is typed locally because its payload is loosely typed upstream.
+/** @typedef {import('@octokit/rest').Octokit} Octokit */
 /**
  * @typedef {Object} IssueLabel
  * @property {string} name
@@ -252,7 +236,7 @@ async function fetchLatestVersions() {
   }
 }
 
-/** @param {{ github: GithubApi, context: Context }} args */
+/** @param {{ github: Octokit, context: Context }} args */
 async function hidePreviousBotComments({ github, context }) {
   const { owner, repo } = context.repo;
   const number = context.payload.issue.number;
@@ -264,7 +248,7 @@ async function hidePreviousBotComments({ github, context }) {
   }
 }
 
-/** @param {{ github: GithubApi, context: Context, body: string }} args */
+/** @param {{ github: Octokit, context: Context, body: string }} args */
 async function comment({ github, context, body }) {
   const { owner, repo } = context.repo;
   await hidePreviousBotComments({ github, context });
@@ -276,7 +260,7 @@ async function comment({ github, context, body }) {
   });
 }
 
-/** @param {{ github: GithubApi, context: Context }} args */
+/** @param {{ github: Octokit, context: Context }} args */
 async function handleIssue({ github, context }) {
   const { owner, repo } = context.repo;
   const issue = context.payload.issue;
