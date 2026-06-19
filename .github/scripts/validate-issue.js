@@ -317,7 +317,7 @@ async function handleIssue({ github, context }) {
       body: [
         'Thanks for the report - but **react-native-video v5 and older are no longer maintained**.',
         '',
-        'Please upgrade to **v6 or v7**, where we actively fix issues.',
+        'Please upgrade to **v6 or v7**, where we actively fix issues. If you must stay on v5, [TheWidlarzGroup offers commercial support](https://sdk.thewidlarzgroup.com/issue-booster?contact=true&utm_source=rnv&utm_medium=issue&utm_campaign=v5-support&utm_id=v5-support).',
         '',
         'Closing as not planned - feel free to re-open on a supported version.',
       ].join('\n'),
