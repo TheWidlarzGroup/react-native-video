@@ -136,6 +136,17 @@ body:
     validations:
       required: true
 
+  - type: dropdown
+    id: expo
+    attributes:
+      label: Expo
+      description: "Are you using Expo? (Note: react-native-video doesn't work in Expo Go - you need a Dev Client)"
+      options:
+        - No (bare / React Native CLI)
+        - Yes (Expo Dev Client)
+    validations:
+      required: true
+
   - type: markdown
     attributes:
       value: |
@@ -164,17 +175,6 @@ body:
         - MP4 / progressive
         - Local file
         - Other
-    validations:
-      required: false
-
-  - type: dropdown
-    id: expo
-    attributes:
-      label: Expo
-      description: "Are you using Expo? (Note: react-native-video doesn't work in Expo Go - you need a Dev Client)"
-      options:
-        - No (bare / React Native CLI)
-        - Yes (Expo Dev Client)
     validations:
       required: false
 
