@@ -55,16 +55,52 @@ function parseVersionTuple(v) {
   return m ? [Number(m[1]), Number(m[2]), Number(m[3])] : null;
 }
 
-function cmpTuple(a, b) {
-  for (let i = 0; i < 3; i++) {
-    if (a[i] !== b[i]) return a[i] < b[i] ? -1 : 1;
+// Full semver parse incl. prerelease identifiers. Generic for -alpha/-beta/-rc/etc.
+function parseSemver(v) {
+  const m = String(v || '').match(/v?(\d+)\.(\d+)\.(\d+)(?:[-.]([0-9A-Za-z.-]+))?/);
+  if (!m) return null;
+  return { main: [Number(m[1]), Number(m[2]), Number(m[3])], pre: m[4] ? m[4].split('.') : [] };
+}
+
+// Compare two prerelease identifier arrays per semver precedence.
+// [] (stable) ranks higher than any prerelease.
+function comparePre(a, b) {
+  if (a.length === 0 && b.length === 0) return 0;
+  if (a.length === 0) return 1;
+  if (b.length === 0) return -1;
+  const n = Math.max(a.length, b.length);
+  for (let i = 0; i < n; i++) {
+    if (i >= a.length) return -1;
+    if (i >= b.length) return 1;
+    const x = a[i], y = b[i];
+    const xn = /^\d+$/.test(x), yn = /^\d+$/.test(y);
+    if (xn && yn) { if (Number(x) !== Number(y)) return Number(x) < Number(y) ? -1 : 1; }
+    else if (xn) return -1;
+    else if (yn) return 1;
+    else if (x !== y) return x < y ? -1 : 1;
   }
   return 0;
 }
 
+// Full semver comparison: -1 if a < b, 0 if equal, 1 if a > b.
+function compareSemver(a, b) {
+  const pa = parseSemver(a), pb = parseSemver(b);
+  if (!pa || !pb) return 0;
+  for (let i = 0; i < 3; i++) if (pa.main[i] !== pb.main[i]) return pa.main[i] < pb.main[i] ? -1 : 1;
+  return comparePre(pa.pre, pb.pre);
+}
+
+// Highest version among `versions` that shares the given major (the newest the
+// reporter could upgrade to within their own version line).
+function highestForMajor(versions, major) {
+  const same = (versions || []).filter((v) => { const t = parseVersionTuple(v); return t && t[0] === major; });
+  if (!same.length) return null;
+  return same.reduce((hi, v) => (compareSemver(v, hi) > 0 ? v : hi), same[0]);
+}
+
 // Compute the desired bot labels + actions from parsed sections.
-// latestVersion: npm "latest" version string, or null if unknown.
-function computeTriage(sections, latestVersion) {
+// versions: array of candidate "newest" version strings (npm dist-tags).
+function computeTriage(sections, versions) {
   const get = (h) => (sections[h] || '').trim();
   const labels = new Set();
   let isV5 = false;
@@ -92,10 +128,12 @@ function computeTriage(sections, latestVersion) {
     } else {
       if (maj === 6) labels.add('V6');
       else if (maj === 7) labels.add('V7');
-      const latestTuple = latestVersion ? parseVersionTuple(latestVersion) : null;
-      if (latestTuple && cmpTuple(tuple, latestTuple) < 0) {
+      // Newest release in the reporter's own major line (prereleases included),
+      // so e.g. 7.0.0-alpha.1 is nudged to 7.0.0-beta.10.
+      const newest = highestForMajor(versions, maj);
+      if (newest && compareSemver(verRaw, newest) < 0) {
         labels.add('Newer Version Available');
-        outdated = { from: verRaw, to: latestVersion };
+        outdated = { from: verRaw, to: newest };
       }
     }
   }
@@ -117,15 +155,15 @@ function tidyBody(body) {
   return kept.map((b) => b.lines.join('\n').replace(/\s+$/, '')).join('\n\n') + '\n';
 }
 
-async function fetchLatestVersion() {
+async function fetchLatestVersions() {
   try {
-    const res = await fetch('https://registry.npmjs.org/react-native-video/latest');
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data && data.version ? data.version : null;
+    const res = await fetch('https://registry.npmjs.org/-/package/react-native-video/dist-tags');
+    if (!res.ok) return [];
+    const tags = await res.json();
+    return Object.values(tags).filter(Boolean);
   } catch (e) {
-    console.error('npm latest fetch failed:', e && e.message);
-    return null;
+    console.error('npm dist-tags fetch failed:', e && e.message);
+    return [];
   }
 }
 
@@ -168,8 +206,8 @@ async function handleIssue({ github, context }) {
     return;
   }
 
-  const latestVersion = await fetchLatestVersion();
-  const { labels: desired, isV5, outdated } = computeTriage(sections, latestVersion);
+  const versions = await fetchLatestVersions();
+  const { labels: desired, isV5, outdated } = computeTriage(sections, versions);
 
   // Reconcile: keep non-bot labels, set bot labels to the freshly computed set.
   const keep = existing.filter((l) => !BOT_LABELS.includes(l));
@@ -194,8 +232,8 @@ async function handleIssue({ github, context }) {
       github,
       context,
       body:
-        `Heads up: you reported **${outdated.from}**, but the latest react-native-video is **${outdated.to}**. ` +
-        `Please retest on the latest version and update the report if the issue persists - many problems are already fixed there.`,
+        `Heads up: you reported **${outdated.from}**, but a newer version (**${outdated.to}**) is available. ` +
+        `Please retest on it and update the report if the issue persists - many problems are already fixed there.`,
     });
   }
 
@@ -220,7 +258,9 @@ module.exports = handleIssue;
 module.exports.parseSections = parseSections;
 module.exports.isReproUrl = isReproUrl;
 module.exports.parseVersionTuple = parseVersionTuple;
-module.exports.cmpTuple = cmpTuple;
+module.exports.parseSemver = parseSemver;
+module.exports.compareSemver = compareSemver;
+module.exports.highestForMajor = highestForMajor;
 module.exports.computeTriage = computeTriage;
 module.exports.tidyBody = tidyBody;
 module.exports.PLATFORM = PLATFORM;
