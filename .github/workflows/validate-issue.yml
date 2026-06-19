@@ -1,0 +1,24 @@
+name: Validate issue
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  issues: write
+
+jobs:
+  validate:
+    if: ${{ github.repository == 'TheWidlarzGroup/react-native-video' || github.repository == 'moskalakamil/react-native-video' }}
+    runs-on: ubuntu-latest
+    concurrency:
+      group: validate-issue-${{ github.event.issue.number }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const handleIssue = require('./.github/scripts/validate-issue.js')
+            await handleIssue({ github, context })
