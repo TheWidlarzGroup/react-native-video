@@ -36,6 +36,6 @@ By default the player **pauses when the app goes to the background** (`playInBac
 
 ## Feeds: only the active item plays
 
-Several players can be alive at once — in a feed you'll keep a few around to preload neighbors — the rule is just that **only one plays**. Track the active item in app state and pause the others. (v6 **Android**: `disableFocus` defaults to `false`, so a new video already pauses the previous via audio focus; `disableFocus={true}` lets them overlap. iOS: pause others manually. v7: `onAudioFocusChange` (Android) signals focus loss.)
+Several players can be alive at once — in a feed you'll keep a few around to preload neighbors — the rule is just that **only one plays**. Track the active item in app state and pause the others — the same approach works on iOS and Android (v6 and v7).
 
 > Pausing on blur (or in the screen's unmount cleanup) stops playback. **If audio ever keeps playing after the screen is gone**, pause/`release()` the player explicitly. Separately, whether the *video* stops/blacks/restarts on tab switches depends on navigator type, `detachInactiveScreens`, platform, and version — test your setup.
