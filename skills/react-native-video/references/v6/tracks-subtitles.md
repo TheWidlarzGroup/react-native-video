@@ -30,6 +30,6 @@ Selector `type` for **audio/text**: `'system' | 'disabled' | 'title' | 'language
 />
 ```
 
-> iOS sidecar subtitles are limited to `.vtt`. Audio/text track events fire on both platforms; **video-track reporting/selection (`onVideoTracks` / `selectedVideoTrack`) is Android-only.**
+> iOS sidecar subtitles are limited to `.vtt`. `subtitleStyle` `fontSize`/`paddingBottom` are Android-only (`opacity` works on both). Audio/text track events fire on both platforms; **video-track reporting/selection (`onVideoTracks` / `selectedVideoTrack`) is Android-only.**
 
 > **v7 note:** selection moves to player methods (`getAvailableTextTracks()` / `selectTextTrack()`), external subs move into the `useVideoPlayer` config, and native audio/video-track switching is no longer in core. See `../v7/tracks-subtitles.md`.

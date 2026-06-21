@@ -8,6 +8,7 @@ cd ios && pod install
 ```
 
 - React Native **≥ 0.75**; `react-native-nitro-modules` is a required peer dep.
+- iOS **15.0+**, Android **minSdkVersion 24**.
 - RN **< 0.80** on Android: a small `react-native-nitro-modules` patch is recommended so errors are surfaced instead of thrown as unknown (see the v7 install docs).
 - Works on New and Old Architecture.
 

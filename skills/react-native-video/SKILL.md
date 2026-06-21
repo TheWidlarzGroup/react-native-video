@@ -50,7 +50,7 @@ Full decision guide: `references/choosing-version.md`. Migration: `references/mi
 
 ## Quick start
 
-**v7** (player model — verified against 7.0.0-beta.10):
+**v7** (player model — verified against 7.0.0-beta.x):
 
 ```tsx
 import { useVideoPlayer, VideoView, useEvent } from 'react-native-video';

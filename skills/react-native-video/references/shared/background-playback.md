@@ -11,7 +11,7 @@ The OS-level setup is the same; the JS surface differs.
 
 - **`playInBackground`** — keep playing when the app is sent to the **background** (home / app switcher).
 - **`playWhenInactive`** (iOS) — keep playing while the app is **inactive but still on screen** (Notification/Control Center pulled over the video, incoming-call banner).
-- **`showNotificationControls`** — show media controls on the **lock screen / notification shade**; set `metadata` (`{ title, subtitle, artist, imageUri, ... }`) on the source for the title/artwork shown there.
+- **`showNotificationControls`** — show media controls on the **lock screen / notification shade**; set `metadata` (`{ title, subtitle, artist, imageUri, ... }`) for the title/artwork shown there.
 - **`disableFocus`** (v6) — don't grab audio focus, so other apps' audio isn't paused.
 
 ## v7

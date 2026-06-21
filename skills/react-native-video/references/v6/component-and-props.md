@@ -30,7 +30,7 @@
 | `progressUpdateInterval` | `number` | ms between `onProgress` (default 250). |
 | `reportBandwidth` | `boolean` | Enable `onBandwidthUpdate`. |
 | `adTagUrl` | `string` | **VAST/IMA ad tag** (v6 has ads; v7 core does not). |
-| `viewType` | `ViewType` enum | Rendering surface (`TEXTURE` / `SURFACE` / `SURFACE_SECURE`). |
+| `viewType` | `ViewType` (`'textureView'` / `'surfaceView'` / `'secureView'`) | Rendering surface (default `surfaceView`). |
 
 ## Minimal example
 
@@ -47,7 +47,7 @@
 />
 ```
 
-> This is the common set. In v6, `bufferConfig` / `drm` / `adTagUrl` / `textTracks` are now preferred **inside `source`** (e.g. `source.drm`, `source.ad.adTagUrl`) — the top-level props still work but are deprecated. `fullscreen` works on **both** platforms; only `fullscreenOrientation` / `fullscreenAutorotate` are iOS-only. Full prop list: https://docs.thewidlarzgroup.com/react-native-video/docs/v6/component/props/
+> This is the common set. In v6, `bufferConfig` / `drm` / `adTagUrl` / `textTracks` are now preferred **inside `source`** (e.g. `source.drm`, `source.ad.adTagUrl`) — the top-level props still work but are deprecated. `fullscreen` works on **both** platforms. Full prop list: https://docs.thewidlarzgroup.com/react-native-video/docs/v6/component/props/
 
 ## Audio-only
 

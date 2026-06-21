@@ -47,7 +47,7 @@ Native players/decoders are a scarce resource — **don't mount one per list ite
 
 **Key v6 ↔ v7 difference:** in **v7** the player is decoupled from the view, so you can **start loading/preloading a video without mounting a `VideoView`** — preloading neighbors is cheap and fully under your control. In **v6** the player *is* the `<Video>` view, so to preload you must mount (hidden/paused) `<Video>` instances and watch the live count carefully — **especially on Android**. This is a big reason v7 fits feeds better.
 
-- Free a player's source **without** destroying it via `player.replaceSourceAsync(null)` (lighter than `release()`); reuse the instance later.
+- Release players you no longer need with `player.release()` (or let `useVideoPlayer` auto-release on unmount).
 - Lower `bufferConfig` for offscreen/neighbor players so they don't over-buffer.
 - Use FlashList/FlatList windowing (`windowSize`, `removeClippedSubviews`) and unmount far-off items.
 

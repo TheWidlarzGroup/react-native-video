@@ -30,7 +30,7 @@ const sub = player.addEventListener('onEnd', () => {});
 | `onTimedMetadata` | `{ metadata: { value, identifier }[] }` | iOS/Android. |
 | `onTextTrackDataChanged` | `string[]` | Currently displayed subtitle text. |
 | `onTrackChange` | `TextTrack \| null` | Selected text track changed. |
-| `onBandwidthUpdate` | `{ bitrate, width?, height? }` | |
+| `onBandwidthUpdate` | `{ bitrate, width?, height? }` | `width`/`height` Android-only. |
 | `onControlsVisibleChange` | `visible: boolean` | |
 | `onAudioBecomingNoisy` | — | Android. |
 | `onAudioFocusChange` | `hasAudioFocus: boolean` | Android. |

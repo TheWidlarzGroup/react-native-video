@@ -15,13 +15,13 @@ const ref = useRef<VideoRef>(null);
 | `seek(seconds)` | Seek to position. *(v7: `player.seekTo()`)* |
 | `pause()` / `resume()` | Imperative play/pause (or use the `paused` prop). |
 | `setVolume(value)` | 0.0–1.0. |
-| `getCurrentPosition()` | Returns a Promise of the current time. |
+| `getCurrentPosition()` | Returns a Promise of the current time (seconds). |
 | `setSource(source)` | Change source at runtime. |
 | `setFullScreen(bool)` | Toggle fullscreen (preferred). |
 | `presentFullscreenPlayer()` / `dismissFullscreenPlayer()` | Deprecated — use `setFullScreen`. |
 | `enterPictureInPicture()` / `exitPictureInPicture()` | PiP. |
 | `restoreUserInterfaceForPictureInPictureStopCompleted(bool)` | iOS PiP restore. |
-| `save()` | iOS: export the current item to an `.mp4` in the app cache dir; resolves `{ uri }`. |
+| `save()` | iOS: save the current item to the **Photos app** (exports an `.mp4` to the cache dir, applies the current filter); resolves `{ uri }`. |
 
 ## Static methods
 

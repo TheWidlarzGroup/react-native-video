@@ -41,7 +41,7 @@ const source = Platform.OS === 'android'
       uri: 'https://example.com/master.m3u8',
       headers: { Authorization: 'Bearer <token>' },       // iOS: used for the default license request
       drm: {
-        // type defaults to 'fairplay' on Apple
+        type: 'fairplay',   // set explicitly on iOS
         certificateUrl: 'https://license.example.com/fps-cert',
         licenseUrl: 'https://license.example.com/fps',
       },
@@ -57,7 +57,7 @@ function Player() {
 
 | Field | Type | Platform | Notes |
 |---|---|---|---|
-| `type` | `'widevine' \| 'fairplay' \| string` | all | Default: Android→widevine, Apple→fairplay. |
+| `type` | `'widevine' \| 'fairplay' \| string` | all | Android defaults to `widevine`; on iOS set `'fairplay'` explicitly. |
 | `licenseUrl` | `string` | all | License server URL (required for the default license flow on both platforms). |
 | `certificateUrl` | `string` | iOS/visionOS | FairPlay app certificate (**required for FairPlay**). |
 | `contentId` | `string` | iOS/visionOS | Derived from the `skd://` key URL if omitted. |
