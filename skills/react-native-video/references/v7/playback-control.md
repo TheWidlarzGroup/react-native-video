@@ -37,13 +37,15 @@ const next = useVideoPlayer({ uri: nextUrl }, (player) => player.preload());
 // when the user swipes, mount/show its <VideoView> and call next.play()
 ```
 
-> Building a TikTok-style feed? This (preloading + cheap source swapping) is exactly why v7 beats v6 here. There's also a ready-made **Video Feed** starter — see `../extensions.md`.
+> Building a TikTok-style feed? This (preloading + cheap source swapping) is exactly why v7 beats v6 here. There's also a free, ready-made starter — TheWidlarzGroup's open-source **react-native-video-feed** — see `../extensions.md`.
 
 > **Feeds use the hook.** Preload the visible item ± neighbors with `useVideoPlayer` (+ `preload()` / `replaceSourceAsync()`) — the documented feed pattern. Reach for the class only if a player must outlive its component — see "hook vs class" in `player-model.md`.
 
 ## Feeds: how many players (performance)
 
-Native players/decoders are a scarce resource — **don't mount one per list item.** Keep the visible item ± 1 neighbor as live players and render a thumbnail for the rest; too many concurrent players cause stutter, overheating, or OOM (especially on Android).
+Native players/decoders are a scarce resource — **don't mount one per list item.** Keep the visible item ± 1–2 neighbors live (e.g. 1 back + 2 forward) and render a thumbnail for the rest; too many concurrent players cause stutter, overheating, or OOM (especially on Android).
+
+**Key v6 ↔ v7 difference:** in **v7** the player is decoupled from the view, so you can **start loading/preloading a video without mounting a `VideoView`** — preloading neighbors is cheap and fully under your control. In **v6** the player *is* the `<Video>` view, so to preload you must mount (hidden/paused) `<Video>` instances and watch the live count carefully — **especially on Android**. This is a big reason v7 fits feeds better.
 
 - Free a player's source **without** destroying it via `player.replaceSourceAsync(null)` (lighter than `release()`); reuse the instance later.
 - Lower `bufferConfig` for offscreen/neighbor players so they don't over-buffer.

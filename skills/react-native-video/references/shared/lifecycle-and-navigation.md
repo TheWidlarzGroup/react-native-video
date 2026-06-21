@@ -32,24 +32,10 @@ Seen on **tab navigators + Android** with `detachInactiveScreens` (default): the
 
 ## App backgrounded
 
-Pausing on background is a reasonable default:
+By default the player **pauses when the app goes to the background** (`playInBackground` is `false`) — you don't need to wire this up yourself. If the media matters (a movie, a podcast, a call), keep it playing instead via **background audio** (`playInBackground` + `showNotificationControls`) or **Picture-in-Picture** — pick by use case. See `background-playback.md` and your version's `pip-fullscreen-controls`.
 
-```tsx
-import { AppState } from 'react-native';
-import { useEffect } from 'react';
+## One video *playing* at a time (feeds)
 
-useEffect(() => {
-  const sub = AppState.addEventListener('change', (s) => {
-    if (s !== 'active') player.pause();   // v6: set paused = true
-  });
-  return () => sub.remove();
-}, [player]);
-```
-
-But if the media matters (a movie, a podcast, a call), keep it going via **background audio** (`playInBackground` + `showNotificationControls`) or **Picture-in-Picture** instead of pausing — pick by use case. See `background-playback.md` and your version's `pip-fullscreen-controls`.
-
-## Only one video at a time (feeds)
-
-No built-in exclusive playback — track the active item in app state and pause the others. (v6 **Android**: `disableFocus` defaults to `false`, so a new video already pauses the previous via audio focus; `disableFocus={true}` lets them overlap. iOS: pause others manually. v7: `onAudioFocusChange` (Android) signals focus loss.)
+Several players can be alive at once — in a feed you'll keep a few around to preload neighbors — the rule is just that **only one plays**. There's no built-in exclusive playback, so track the active item in app state and pause the others. (v6 **Android**: `disableFocus` defaults to `false`, so a new video already pauses the previous via audio focus; `disableFocus={true}` lets them overlap. iOS: pause others manually. v7: `onAudioFocusChange` (Android) signals focus loss.)
 
 > Pausing on blur (or in the screen's unmount cleanup) stops playback. **If audio ever keeps playing after the screen is gone**, pause/`release()` the player explicitly. Separately, whether the *video* stops/blacks/restarts on tab switches depends on navigator type, `detachInactiveScreens`, platform, and version — test your setup.
