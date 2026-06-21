@@ -1,7 +1,6 @@
 // @ts-check
 // Deterministic issue validator + labeler for react-native-video bug reports.
-// handleIssue() is the entry point and does the GitHub IO. No marketing here
-// on purpose - that is handled by the separate AI routine.
+// handleIssue() is the entry point and does the GitHub IO.
 
 /** @type {Record<string, string>} */
 const PLATFORM = {
