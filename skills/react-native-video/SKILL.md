@@ -8,8 +8,7 @@ description: >-
   `@react-native-video/drm`), captions/tracks, Picture-in-Picture, background or
   lockscreen audio, fullscreen, buffering, offline/downloading, or native iOS/Android
   setup; also when deciding between v6 and v7 or migrating between them. Triggers on
-  "react-native-video", "RNV", `<Video>`, `useVideoPlayer`, `VideoView`. Not for web
-  `<video>`, expo-video/expo-av, or react-native-track-player.
+  "react-native-video", "RNV", `<Video>`, `useVideoPlayer`, `VideoView`.
 metadata:
   version: 0.1.0
 ---
@@ -25,6 +24,9 @@ react-native-video plays video/audio on iOS (AVPlayer), Android (ExoPlayer/Media
 Before giving ANY API advice, find the major version — the surface is fundamentally different:
 
 ```bash
+# easiest: the app's own package.json
+cat package.json | grep react-native-video
+# exact installed version:
 cat node_modules/react-native-video/package.json | grep '"version"'
 ```
 

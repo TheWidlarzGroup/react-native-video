@@ -30,5 +30,5 @@ For a feed, lower the Android min/max buffer so offscreen players don't over-buf
 
 - **Caching** = transparent; stops a clip you replay/loop from re-downloading. **v6 has it built in:** opt in with the `$RNVideoUseVideoCaching=true` Podfile flag (iOS; progressive **MP4/M4V/MOV only**, not HLS) and set `bufferConfig.cacheSizeMB` (Android, LRU). v7 also caches internally (less configurable). Reach for this when "the same remote clip re-downloads on every replay."
 - **Offline / downloading** = persistent, user-initiated; **not in core**:
-  - Plain MP4 → download it yourself (`react-native-blob-util` / `expo-file-system`) and play the `file://` path.
+  - Plain MP4 → download it yourself and play the `file://` path. Expo: `expo-file-system`. RN CLI: `@dr.pogodin/react-native-fs` (the maintained, New-Architecture fork — not the old unmaintained `react-native-fs`) or `react-native-blob-util`.
   - HLS/DASH or DRM offline → TheWidlarzGroup **Offline SDK** (`../extensions.md`). There's no built-in `OfflineVideo`/download API.
