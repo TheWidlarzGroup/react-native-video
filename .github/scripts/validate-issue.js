@@ -182,7 +182,10 @@ function computeTriage(sections, versions) {
 
   const plat = get(SECTION.platforms);
   if (!isEmpty(plat)) {
-    for (const p of plat.split(/[,\n]/).map((s) => s.trim()).filter(Boolean)) {
+    // Multi-select values may arrive comma-separated ("iOS, Android") or as a
+    // Markdown list ("- iOS"), so split on both and strip any leading list marker.
+    for (const entry of plat.split(/[,\n]/)) {
+      const p = entry.replace(/^\s*[-*]\s+/, '').trim();
       if (PLATFORM[p]) labels.add(PLATFORM[p]);
     }
   }
