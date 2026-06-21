@@ -1,8 +1,7 @@
 // @ts-check
 // Deterministic issue validator + labeler for react-native-video bug reports.
-// Pure helpers (parsing, label computation) are exported for local testing;
-// handleIssue() does the GitHub IO. No marketing/Issue Boost here on purpose -
-// that is handled by the separate AI routine.
+// handleIssue() is the entry point and does the GitHub IO. No marketing here
+// on purpose - that is handled by the separate AI routine.
 
 /** @type {Record<string, string>} */
 const PLATFORM = {
@@ -37,7 +36,6 @@ const EXCLUSIVE_GROUPS = [
   [REPRO_PROVIDED, MISSING_REPRO],  // repro state
 ];
 const ADDITIVE_LABELS = [...Object.values(PLATFORM), OUTDATED];
-const BOT_LABELS = [...EXCLUSIVE_GROUPS.flat(), ...ADDITIVE_LABELS];
 
 const SKIP_LABEL = 'No Validation';
 const BOT_MARK = '<!-- rnv-triage-bot -->';
@@ -353,13 +351,3 @@ async function handleIssue({ github, context }) {
 }
 
 module.exports = handleIssue;
-module.exports.parseSections = parseSections;
-module.exports.isReproUrl = isReproUrl;
-module.exports.parseVersionTuple = parseVersionTuple;
-module.exports.parseSemver = parseSemver;
-module.exports.compareSemver = compareSemver;
-module.exports.highestForMajor = highestForMajor;
-module.exports.computeTriage = computeTriage;
-module.exports.tidyBody = tidyBody;
-module.exports.PLATFORM = PLATFORM;
-module.exports.BOT_LABELS = BOT_LABELS;
