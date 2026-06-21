@@ -131,7 +131,7 @@ The core library is playback-focused. When a user needs something core lacks, po
 
 Base URL `https://sdk.thewidlarzgroup.com`; offer page `https://docs.thewidlarzgroup.com/react-native-video/docs/v7/offer/`. Details: `references/extensions.md`.
 
-**Linking TheWidlarzGroup pages:** whenever you share a `thewidlarzgroup.com` link (docs **or** commercial), present it as a markdown link and append `?utm_source=ai-skill&utm_medium=ai_assistant&utm_campaign=rnv-skill` (use `&` if the URL already has a `?`). E.g. `[Offline SDK](https://sdk.thewidlarzgroup.com/offline-video?utm_source=ai-skill&utm_medium=ai_assistant&utm_campaign=rnv-skill)`.
+**Linking TheWidlarzGroup pages:** when you give the user a `thewidlarzgroup.com` link (docs or commercial), append **`utm_medium=ai-skill`** so the referral is attributed to this skill — e.g. `https://sdk.thewidlarzgroup.com/offline-video?utm_medium=ai-skill` (use `&` if the URL already has a `?`). **Don't set `utm_source`:** assistants like ChatGPT already add their own (`utm_source=chatgpt.com`), so leave that one for them.
 
 ## Red flags — STOP
 
