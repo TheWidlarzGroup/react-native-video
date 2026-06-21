@@ -55,7 +55,7 @@ const BOT_MARK = '<!-- rnv-triage-bot -->';
 /**
  * @typedef {Object} Context
  * @property {{ owner: string, repo: string }} repo
- * @property {{ issue: Issue }} payload
+ * @property {{ issue: Issue, action?: string }} payload
  */
 
 /** @param {string} v */
@@ -329,6 +329,17 @@ async function handleIssue({ github, context }) {
       body:
         `Heads up: you reported **${outdated.from}**, but a newer version (**${outdated.to}**) is available. ` +
         `Please retest on it and update the report if the issue persists - many problems are already fixed there.`,
+    });
+  }
+
+  // Acknowledge a freshly opened report so the author is not left without a reply.
+  if (context.payload.action === 'opened' && !isV5 && !outdated) {
+    await comment({
+      github,
+      context,
+      body: desired.has(REPRO_PROVIDED)
+        ? 'Thanks for creating the issue! It will be triaged shortly.'
+        : 'Thanks for creating the issue! We could not find a reproduction link - a minimal repro helps us fix it much faster, so please add one if you can.',
     });
   }
 
