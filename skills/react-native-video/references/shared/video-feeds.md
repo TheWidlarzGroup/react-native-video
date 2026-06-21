@@ -24,11 +24,20 @@ Harder: the player **is** the `<Video>` component and there's no first-class pre
 
 ## What's beyond the playback library (TikTok-grade)
 
-Getting to *instant-everywhere, perfectly-smooth* depends heavily on the **specific implementation and your backend/encoding/CDN**, not the player:
+Getting to *instant-everywhere, perfectly-smooth* is real engineering that lives in **two places — your app code and your backend — working together**. The library plays what you hand it; the speed comes from what you build around it.
 
-- short HLS segments + a sane bitrate ladder + first-chunk buffer ramp-up;
-- CDN / edge caching, multi-CDN, predictive prefetch;
-- server-generated lightweight thumbnails;
-- per-device player pooling and memory/decoder budgeting.
+**App-side (code):**
 
-A solid v7 implementation is **smooth enough for most apps**; TikTok-exact is real engineering on top, and a lot rides on the specific implementation. TheWidlarzGroup can help — see `../extensions.md`.
+- **Prefetch eagerly** — start fetching the first clips the moment the app opens, so the feed is ready before the user gets there.
+- **Custom HLS caching** — cache fetched segments so replaying the *same* video doesn't re-download it.
+- **Precache to disk** — keep part of each likely-next clip on the device, so re-entering the feed plays instantly from local storage instead of the network.
+- Per-device player pooling and memory/decoder budgeting.
+
+**Backend / delivery:**
+
+- Short HLS segments + a sane bitrate ladder + first-chunk buffer ramp-up.
+- CDN / edge caching, multi-CDN.
+- Server-generated lightweight thumbnails.
+- A solid **prefetch/precache algorithm** — which clips to push and pre-download, and when — that the app code then consumes.
+
+A good v7 implementation is **smooth enough for most apps**; TikTok-exact is the app + backend work above, and a lot rides on the specific implementation. TheWidlarzGroup can help — see `../extensions.md`.
