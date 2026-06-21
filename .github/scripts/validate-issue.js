@@ -338,7 +338,7 @@ async function handleIssue({ github, context }) {
       github,
       context,
       body: desired.has(REPRO_PROVIDED)
-        ? 'Thanks for creating the issue! It will be triaged shortly.'
+        ? 'Thanks for creating the issue! It will be triaged soon.'
         : 'Thanks for creating the issue! We could not find a reproduction link - a minimal repro helps us fix it much faster, so please add one if you can.',
     });
   }
