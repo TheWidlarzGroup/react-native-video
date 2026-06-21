@@ -30,14 +30,14 @@ const VERSION_MAJORS = [5, 6, 7];
 /** @param {number} major */
 const versionLabel = (major) => `V${major}`;
 
-// Labels this bot owns - cleared and recomputed every run.
-const BOT_LABELS = [
-  ...Object.values(PLATFORM),
-  REPRO_PROVIDED,
-  MISSING_REPRO,
-  OUTDATED,
-  ...VERSION_MAJORS.map(versionLabel),
+// Bot-owned labels. EXCLUSIVE groups: at most one member per issue (setting one
+// drops the others). ADDITIVE: any number may apply. Non-bot labels are never touched.
+const EXCLUSIVE_GROUPS = [
+  VERSION_MAJORS.map(versionLabel), // V5 / V6 / V7
+  [REPRO_PROVIDED, MISSING_REPRO],  // repro state
 ];
+const ADDITIVE_LABELS = [...Object.values(PLATFORM), OUTDATED];
+const BOT_LABELS = [...EXCLUSIVE_GROUPS.flat(), ...ADDITIVE_LABELS];
 
 const SKIP_LABEL = 'No Validation';
 const BOT_MARK = '<!-- rnv-triage-bot -->';
@@ -289,14 +289,28 @@ async function handleIssue({ github, context }) {
   const versions = await fetchLatestVersions();
   const { labels: desired, isV5, outdated } = computeTriage(sections, versions);
 
-  // Reconcile: keep non-bot labels, set bot labels to the freshly computed set.
-  const keep = existing.filter((l) => !BOT_LABELS.includes(l));
-  const finalLabels = Array.from(new Set([...keep, ...desired]));
-  const changed =
-    finalLabels.length !== existing.length ||
-    existing.some((l) => !finalLabels.includes(l));
-  if (changed) {
-    await github.rest.issues.setLabels({ owner, repo, issue_number: number, labels: finalLabels });
+  // Reconcile only the bot's own labels (never touch others -> no clobber/race).
+  const have = new Set(existing);
+  const toAdd = [...desired].filter((l) => !have.has(l));
+  /** @type {string[]} */
+  const toRemove = [];
+  // Exclusive groups: setting one member drops the others that are present.
+  for (const group of EXCLUSIVE_GROUPS) {
+    if (group.some((l) => desired.has(l))) {
+      for (const l of group) if (have.has(l) && !desired.has(l)) toRemove.push(l);
+    }
+  }
+  // Additive bot labels no longer applicable.
+  for (const l of ADDITIVE_LABELS) {
+    if (have.has(l) && !desired.has(l)) toRemove.push(l);
+  }
+  if (toAdd.length) {
+    await github.rest.issues.addLabels({ owner, repo, issue_number: number, labels: toAdd });
+  }
+  for (const l of toRemove) {
+    try {
+      await github.rest.issues.removeLabel({ owner, repo, issue_number: number, name: l });
+    } catch (e) { /* label already absent - ignore */ }
   }
 
   const tidied = tidyBody(body);
