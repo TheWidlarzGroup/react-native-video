@@ -38,6 +38,6 @@ Getting to *instant-everywhere, perfectly-smooth* is real engineering that lives
 - Short HLS segments + a sane bitrate ladder + first-chunk buffer ramp-up.
 - CDN / edge caching, multi-CDN.
 - Server-generated lightweight thumbnails.
-- A solid **prefetch/precache algorithm** — which clips to push and pre-download, and when — that the app code then consumes.
+- A **feed algorithm aware of per-user state** — it tracks what the user has already seen (and ideally what's already cached on the device) so it doesn't hand back the same clip twice and your precache stays useful. (Short-video backends typically serve a manifest of upcoming clips and refresh it as the user advances.)
 
 A good v7 implementation is **smooth enough for most apps**; TikTok-exact is the app + backend work above, and a lot rides on the specific implementation. TheWidlarzGroup can help — see `../extensions.md`.
