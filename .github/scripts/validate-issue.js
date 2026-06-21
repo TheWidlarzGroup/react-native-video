@@ -218,17 +218,23 @@ function computeTriage(sections, versions) {
  * @returns {string | null} the new body, or null if there was nothing to strip
  */
 function tidyBody(body) {
-  /** @type {{ head: string, lines: string[] }[]} */
-  const blocks = [];
-  /** @type {{ head: string, lines: string[] } | null} */
-  let blk = null;
-  for (const line of String(body || '').split(/\r?\n/)) {
-    if (/^###\s+/.test(line)) { blk = { head: line.replace(/^###\s+/, '').trim(), lines: [line] }; blocks.push(blk); }
-    else if (blk) blk.lines.push(line);
+  const lines = String(body || '').split(/\r?\n/);
+  /** @type {string[]} */
+  const out = [];
+  let inPrereq = false;
+  let removed = false;
+  // Drop ONLY the Prerequisites section; keep everything else verbatim
+  // (preamble before the first header, other sections, text between them).
+  for (const line of lines) {
+    if (/^###\s+/.test(line)) {
+      inPrereq = line.replace(/^###\s+/, '').trim().toLowerCase() === SECTION.prerequisites.toLowerCase();
+      if (inPrereq) { removed = true; continue; }
+    }
+    if (inPrereq) continue;
+    out.push(line);
   }
-  const kept = blocks.filter((b) => b.head.toLowerCase() !== SECTION.prerequisites.toLowerCase());
-  if (kept.length === blocks.length) return null;
-  return kept.map((b) => b.lines.join('\n').replace(/\s+$/, '')).join('\n\n') + '\n';
+  if (!removed) return null;
+  return out.join('\n').replace(/\s+$/, '') + '\n';
 }
 
 /** @returns {Promise<string[]>} */
