@@ -28,7 +28,7 @@ Getting to *instant-everywhere, perfectly-smooth* is real engineering that lives
 
 **App-side (code):**
 
-- **Prefetch eagerly** — start fetching the first clips the moment the app opens, so the feed is ready before the user gets there.
+- **Prefetch before the feed mounts** — the biggest win is firing the first requests **natively at app launch, before the JS bundle even loads** (so network latency overlaps with startup instead of waiting for it). By the time the feed renders, the first clips' manifests/segments are already fetched. A JS-level prefetch just before you navigate to the feed helps too; native auth (a cold-start token refresh) lets prefetches hit secured endpoints.
 - **Custom HLS caching** — cache fetched segments so replaying the *same* video doesn't re-download it.
 - **Precache to disk** — keep part of each likely-next clip on the device, so re-entering the feed plays instantly from local storage instead of the network.
 - Per-device player pooling and memory/decoder budgeting.
