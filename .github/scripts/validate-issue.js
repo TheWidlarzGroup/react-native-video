@@ -321,26 +321,21 @@ async function handleIssue({ github, context }) {
     await github.rest.issues.update({ owner, repo, issue_number: number, body: tidied });
   }
 
-  // Outdated version: nudge to retest on the latest (skip for v5, which is closed below).
-  if (outdated && !isV5 && !existing.includes(OUTDATED)) {
-    await comment({
-      github,
-      context,
-      body:
-        `Heads up: you reported **${outdated.from}**, but a newer version (**${outdated.to}**) is available. ` +
-        `Please retest on it and update the report if the issue persists - many problems are already fixed there.`,
-    });
-  }
-
-  // Acknowledge a freshly opened report so the author is not left without a reply.
-  if (context.payload.action === 'opened' && !isV5 && !outdated) {
-    await comment({
-      github,
-      context,
-      body: desired.has(REPRO_PROVIDED)
-        ? 'Thanks for creating the issue! It will be triaged soon.'
-        : 'Thanks for creating the issue! We could not find a reproduction link - a minimal repro helps us fix it much faster, so please add one if you can.',
-    });
+  // On a freshly opened issue, post one welcome comment: a thanks intro plus any
+  // nudges that apply (outdated version, missing reproduction). v5 has its own
+  // message below, so it is excluded here.
+  if (context.payload.action === 'opened' && !isV5) {
+    const parts = ['Thanks for creating the issue! It will be triaged soon.'];
+    if (outdated) {
+      parts.push(
+        `You reported **${outdated.from}**, but a newer version (**${outdated.to}**) is available - ` +
+          `please retest on it and update the report if it still happens; many problems are already fixed there.`,
+      );
+    }
+    if (desired.has(MISSING_REPRO)) {
+      parts.push('We could not find a reproduction link - a minimal repro helps us fix it much faster, so please add one if you can.');
+    }
+    await comment({ github, context, body: parts.join('\n\n') });
   }
 
   // v5 is unsupported: comment + close as not planned (only once).
