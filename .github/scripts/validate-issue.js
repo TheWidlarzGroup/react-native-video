@@ -337,8 +337,8 @@ async function handleIssue({ github, context }) {
       nudges.push('We could not find a reproduction link - a minimal repro helps us fix it much faster, so please add one if you can.');
     }
     const intro = 'Thanks for creating the issue! It will be triaged soon.';
-    const body = nudges.length ? `${intro}\n\n${nudges.map((n) => `- ${n}`).join('\n')}` : intro;
-    await comment({ github, context, body });
+    const text = nudges.length ? `${intro}\n\n${nudges.map((n) => `- ${n}`).join('\n')}` : intro;
+    await comment({ github, context, body: text });
   }
 
   // v5 is unsupported: comment + close as not planned (only once).
