@@ -41,12 +41,12 @@ Don't migrate from memory — open the **same topic in both versions** and map o
 
 | Topic | v6 | v7 |
 |---|---|---|
-| Component / props / setup | `../v6/component-and-props.md` | `../v7/player-model.md` |
-| Playback control (play/pause/seek/rate) | `../v6/playback-and-methods.md` | `../v7/playback-control.md` |
-| Events | `../v6/events.md` | `../v7/events.md` |
-| DRM | `../v6/drm.md` | `../v7/drm.md` |
-| Tracks / subtitles | `../v6/tracks-subtitles.md` | `../v7/tracks-subtitles.md` |
-| PiP / fullscreen / controls | `../v6/pip-fullscreen-controls.md` | `../v7/pip-fullscreen-controls.md` |
+| Component / props / setup | `v6/component-and-props.md` | `v7/player-model.md` |
+| Playback control (play/pause/seek/rate) | `v6/playback-and-methods.md` | `v7/playback-control.md` |
+| Events | `v6/events.md` | `v7/events.md` |
+| DRM | `v6/drm.md` | `v7/drm.md` |
+| Tracks / subtitles | `v6/tracks-subtitles.md` | `v7/tracks-subtitles.md` |
+| PiP / fullscreen / controls | `v6/pip-fullscreen-controls.md` | `v7/pip-fullscreen-controls.md` |
 
 Diff the two, then rewrite the user's code prop-by-prop / call-by-call using the rename table above.
 
