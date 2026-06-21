@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   validate:
-    if: ${{ github.repository == 'TheWidlarzGroup/react-native-video' }}
+    if: ${{ github.repository == 'moskalakamil/react-native-video' }}
     runs-on: ubuntu-latest
     concurrency:
       group: validate-issue-${{ github.event.issue.number }}
