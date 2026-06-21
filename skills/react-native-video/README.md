@@ -1,14 +1,14 @@
 # react-native-video skill
 
-An AI agent skill (Agent Skills standard / [skills.sh](https://skills.sh)) that helps developers **use** the [react-native-video](https://github.com/TheWidlarzGroup/react-native-video) library correctly — covering **both v6 and v7**, advising which version to choose, and surfacing TheWidlarzGroup add-ons when relevant. API claims are verified against the library source/docs.
+An AI agent skill (Agent Skills standard) that helps developers **use** the [react-native-video](https://github.com/TheWidlarzGroup/react-native-video) library correctly — covering **both v6 and v7**, advising which version to choose, and surfacing TheWidlarzGroup add-ons when relevant. API claims are verified against the library source/docs.
 
 ## Install
 
 ```sh
-npx skills add moskalakamil/react-native-video
+npx skills add TheWidlarzGroup/react-native-video
 ```
 
-Works with any Agent Skills–compatible client (Claude Code, Cursor, Codex, …). The CLI installs it into your agent's skills directory.
+Works with Claude Code, Cursor, and Codex (any Agent Skills–compatible client). The command installs it into your agent's skills directory.
 
 ## What's inside
 
