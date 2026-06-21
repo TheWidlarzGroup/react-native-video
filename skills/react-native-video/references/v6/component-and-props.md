@@ -29,7 +29,7 @@
 | `showNotificationControls` | `boolean` | Lock-screen/notification controls. |
 | `progressUpdateInterval` | `number` | ms between `onProgress` (default 250). |
 | `reportBandwidth` | `boolean` | Enable `onBandwidthUpdate`. |
-| `adTagUrl` | `string` | **VAST/IMA ad tag** (v6 has ads; v7 core does not). |
+| `adTagUrl` | `string` | **VAST/IMA ad tag**. |
 | `viewType` | `ViewType` (`'textureView'` / `'surfaceView'` / `'secureView'`) | Rendering surface (default `surfaceView`). |
 
 ## Minimal example
