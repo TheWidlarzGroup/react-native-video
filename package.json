@@ -29,6 +29,7 @@
     "@commitlint/config-conventional": "^17.0.2",
     "@eslint/js": "^9.10.0",
     "@evilmartians/lefthook": "^1.5.0",
+    "@octokit/rest": "22.0.1",
     "@react-native/eslint-config": "^0.77.0",
     "@release-it/bumper": "^7.0.6",
     "@release-it/conventional-changelog": "^11.0.1",
