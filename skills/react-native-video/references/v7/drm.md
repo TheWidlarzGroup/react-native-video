@@ -1,6 +1,6 @@
 # v7 — DRM (separate `@react-native-video/drm` package)
 
-> **v7 DRM is completely different from v6.** In v6, DRM is the built-in `<Video drm>` prop. In v7 it's a **separate plugin** you install, `enable()` at startup, and configure via `source.drm`. v6 tutorials will not work.
+> **v7 DRM is completely different from v6.** In v6, DRM is the built-in `<Video drm>` prop; in v7 it's a **separate plugin** you install, `enable()` at startup, and configure via `source.drm`. Follow the v7 setup below — v6 `drm`-prop guides don't apply.
 
 ## 1. Install
 

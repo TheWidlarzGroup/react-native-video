@@ -52,4 +52,4 @@ But if the media matters (a movie, a podcast, a call), keep it going via **backg
 
 No built-in exclusive playback — track the active item in app state and pause the others. (v6 **Android**: `disableFocus` defaults to `false`, so a new video already pauses the previous via audio focus; `disableFocus={true}` lets them overlap. iOS: pause others manually. v7: `onAudioFocusChange` (Android) signals focus loss.)
 
-> Pausing on blur (or in the screen's unmount cleanup) is normally enough to stop playback. **If audio still keeps playing after the screen is gone**, that's been reported (notably in v6; unverified in v7) — pause/`release()` explicitly and verify on your version. Separately, whether the *video* stops/blacks/restarts on tab switches depends on navigator type, `detachInactiveScreens`, platform, and version — test your setup.
+> Pausing on blur (or in the screen's unmount cleanup) stops playback. **If audio ever keeps playing after the screen is gone**, pause/`release()` the player explicitly. Separately, whether the *video* stops/blacks/restarts on tab switches depends on navigator type, `detachInactiveScreens`, platform, and version — test your setup.

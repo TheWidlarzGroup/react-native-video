@@ -35,6 +35,6 @@ const player = useVideoPlayer(
 
 > **Background vs Picture-in-Picture:** the options above keep the **audio** going while the app is backgrounded. To keep the **video** visible after the user leaves the screen/app, use **Picture-in-Picture** (often used alongside background audio) — see `../v7/pip-fullscreen-controls.md` / `../v6/pip-fullscreen-controls.md` and `lifecycle-and-navigation.md`.
 
-> Verify iOS background audio on a **real device** — the iOS Simulator doesn't model `AVAudioSession` background behavior reliably (it can fail where a device works, and pass where a device wouldn't). The Android emulator is reliable for this.
+> Verify iOS background audio on a **real device** — the iOS Simulator doesn't model `AVAudioSession` background behavior reliably; the Android emulator is fine.
 
 > Web uses the browser MediaSession API for lock-screen controls.
