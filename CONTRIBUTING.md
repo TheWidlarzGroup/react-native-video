@@ -111,6 +111,7 @@ When you're sending a pull request:
 - Prefer small pull requests focused on one change.
 - Verify that linters and tests are passing.
 - Review the documentation to make sure it looks good.
+- If your change affects how the library is **used** (API, props, events, or behavior), update the AI agent skill in `skills/react-native-video/` to match — keep it in sync just like the docs.
 - Follow the pull request template when opening a pull request.
 - For pull requests that change the API or implementation, discuss with maintainers first by opening an issue.
 
