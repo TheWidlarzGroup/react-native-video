@@ -31,6 +31,8 @@ const ref = useRef<VideoViewRef>(null);
 
 Android needs `android:supportsPictureInPicture="true"` on the activity and `minSdkVersion 26` (Expo: `enableAndroidPictureInPicture`). See `../shared/platform-setup.md`.
 
+> **PiP testing:** not supported on the **iOS Simulator** — test on a real iOS device. PiP *does* work on the **Android emulator** (API 26+, Google Play image).
+
 ## Fullscreen
 
 ```tsx

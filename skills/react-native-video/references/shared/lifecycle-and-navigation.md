@@ -1,23 +1,38 @@
-# Lifecycle: pausing on navigation & app background (v6 & v7)
+# Lifecycle: video across navigation & app background (v6 & v7)
 
-**Neither version auto-pauses when you navigate away.** React Navigation keeps screens *mounted* (just hidden) when you push another screen, so the video keeps playing — and you keep hearing audio — until you handle it yourself. The v7 `useVideoPlayer` hook only releases on a real **unmount**, not on blur. This is the single most common react-native-video bug.
+## How React Navigation treats screens
 
-## Pause when the screen loses focus (React Navigation)
+React Navigation does **not unmount** a screen when you navigate away — on a **stack** it stays fully mounted; on **tabs** it stays mounted but its native view is **detached/frozen** (`detachInactiveScreens`, default on). Detach ≠ unmount — your component and its state survive, so mount/unmount won't fire on navigate. Drive playback off **focus/blur** instead (`useFocusEffect` / `useIsFocused`).
+
+## If audio keeps playing after you navigate away
+
+Common on a **stack** (and on iOS). Pause on blur:
 
 ```tsx
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
 
-// v7 — pause on blur, resume on focus
+// v7
 useFocusEffect(useCallback(() => {
   player.play();
-  return () => player.pause();
+  return () => player.pause();   // runs on blur
 }, [player]));
 ```
 
-v6: drive the `paused` prop from focus — `const isFocused = useIsFocused(); <Video paused={!isFocused} />`.
+v6: bind the `paused` prop to focus — `const isFocused = useIsFocused(); <Video paused={!isFocused} />`.
 
-## Pause when the app is backgrounded
+## If the video instead stops / goes black / restarts when switching screens
+
+Seen on **tab navigators + Android** with `detachInactiveScreens` (default): the native view is detached and Android may drop playback/position. Options: save the position and `seekTo` it on focus; keep that screen from detaching; or lift the player out of the screen (below).
+
+## Keep a video alive across screens (mini / global player)
+
+- Render the player **above the navigator** (app root / context) so no single screen owns it; or
+- **v7:** create a `VideoPlayer` **class instance** outside any screen (e.g. a context/provider), pass it to whichever `VideoView` is mounted, and `release()` it on teardown. This is the "player outlives the component" case — see `../v7/player-model.md`.
+
+## App backgrounded
+
+Pausing on background is a reasonable default:
 
 ```tsx
 import { AppState } from 'react-native';
@@ -31,12 +46,10 @@ useEffect(() => {
 }, [player]);
 ```
 
-> **Decide by use case — don't reflexively stop content the user cares about.** Pausing on background is a sensible *default*, but if the video matters (a movie, a podcast/lecture, a meeting) it shouldn't just stop when the user leaves the app — keep it going via **Picture-in-Picture** (`autoEnterPictureInPicture`) or **play-in-background** (`playInBackground` + `showNotificationControls`). For incidental/decorative video, pausing on exit is fine. Pick PiP vs background by the use case. See your version's `pip-fullscreen-controls` + `background-playback.md`.
+But if the media matters (a movie, a podcast, a call), keep it going via **background audio** (`playInBackground` + `showNotificationControls`) or **Picture-in-Picture** instead of pausing — pick by use case. See `background-playback.md` and your version's `pip-fullscreen-controls`.
 
-## Only one video playing at a time (feeds)
+## Only one video at a time (feeds)
 
-There's no built-in exclusive playback — track the active item in app state and pause the others.
+No built-in exclusive playback — track the active item in app state and pause the others. (v6 **Android**: `disableFocus` defaults to `false`, so a new video already pauses the previous via audio focus; `disableFocus={true}` lets them overlap. iOS: pause others manually. v7: `onAudioFocusChange` (Android) signals focus loss.)
 
-- **v6 Android:** `disableFocus` defaults to `false`, so starting a new video already pauses the previous one via audio focus; set `disableFocus={true}` to let them overlap.
-- **iOS:** no audio-focus equivalent — pause the others manually.
-- **v7:** `onAudioFocusChange` (Android) lets you react to focus loss.
+> Behavior depends on navigator type, `detachInactiveScreens`, platform, and version — test your exact setup. (Whether a v7 player keeps emitting audio while only its `VideoView` is detached isn't documented — verify it, don't assume.)

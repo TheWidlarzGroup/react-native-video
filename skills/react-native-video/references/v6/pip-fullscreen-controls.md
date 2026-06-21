@@ -27,4 +27,6 @@ const ref = useRef<VideoRef>(null);
 // ref.current?.setFullScreen(true);
 ```
 
+> **PiP testing:** not supported on the **iOS Simulator** — test on a real iOS device. PiP *does* work on the **Android emulator** (API 26+, Google Play image).
+
 > **v7 note:** these move to the `VideoView` ref (`enterFullscreen`/`enterPictureInPicture`) and view props/events (`onFullscreenChange`, `onPictureInPictureChange`). See `../v7/pip-fullscreen-controls.md`.
