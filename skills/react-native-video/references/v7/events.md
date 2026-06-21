@@ -3,7 +3,7 @@
 Events are **subscriptions on the player**, not JSX props. Two ways:
 
 ```tsx
-// 1) hook — auto-removed on unmount
+// 1) hook — auto-removed on unmount (recommended)
 useEvent(player, 'onProgress', ({ currentTime }) => {});
 
 // 2) imperative — returns { remove() }
