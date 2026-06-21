@@ -8,6 +8,7 @@
         "@commitlint/config-conventional": "^17.0.2",
         "@eslint/js": "^9.10.0",
         "@evilmartians/lefthook": "^1.5.0",
+        "@octokit/rest": "22.0.1",
         "@react-native/eslint-config": "^0.77.0",
         "@release-it/bumper": "^7.0.6",
         "@release-it/conventional-changelog": "^11.0.1",
@@ -57,7 +58,7 @@
     },
     "example": {
       "name": "react-native-video-example",
-      "version": "7.0.0-beta.9",
+      "version": "7.0.0-beta.10",
       "dependencies": {
         "@react-native-community/slider": "^4.5.6",
         "@react-native-video/drm": "*",
@@ -96,7 +97,7 @@
     },
     "packages/drm-plugin": {
       "name": "@react-native-video/drm",
-      "version": "7.0.0-beta.9",
+      "version": "7.0.0-beta.10",
       "devDependencies": {
         "@react-native/babel-preset": "0.79.2",
         "@types/react": "^18.3.0",
@@ -122,7 +123,7 @@
     },
     "packages/react-native-video": {
       "name": "react-native-video",
-      "version": "7.0.0-beta.9",
+      "version": "7.0.0-beta.10",
       "dependencies": {
         "@videojs/react": "^10.0.0-beta.11",
       },
