@@ -8,11 +8,14 @@
 | `onProgress` never fires | Paused, or interval too high | Ensure not `paused`; set `progressUpdateInterval` (v6); confirm the listener is attached (v7 `useEvent`). |
 | iOS audio stops in background | Missing capability | Add `audio` to `UIBackgroundModes`; set `playInBackground`. See `shared/background-playback.md`. |
 | DRM license 403 / fails | Header or key-system mismatch | iOS license uses `source.headers`; Android uses `drm.licenseHeaders`. Check `type`/`licenseUrl`. See `v7/drm.md` / `v6/drm.md`. |
-| DRM works on device but not simulator | DRM unsupported on simulators | Test FairPlay on a real iOS device, Widevine on a real Android device. |
+| DRM issues on a simulator/emulator | iOS Simulator has no FairPlay; Android emulator usually works | Use a real iOS device for FairPlay. Android emulator should handle Widevine — if it misbehaves, re-verify on a real device. |
 | `DRMPluginNotFound` (v7) | `enable()` not called / plugin not installed | `import { enable } from '@react-native-video/drm'; enable()` at startup. |
 | Build fails right after install | Missing native setup | v7 needs `react-native-nitro-modules` + pod install; see `shared/installation.md`. |
 | HTTP stream won't load | ATS (iOS) / cleartext (Android) | Add the ATS exception / `usesCleartextTraffic`. See `shared/platform-setup.md`. |
 | Looking for a built-in offline/download API | There isn't one in core | Plain MP4 → download yourself; HLS/DASH/DRM → Offline SDK (`extensions.md`). |
+| Same remote clip re-downloads on every replay | Caching not enabled (≠ offline) | v6: `$RNVideoUseVideoCaching` Podfile flag (MP4 only) + `bufferConfig.cacheSizeMB` (Android). See `shared/streaming-sources.md`. |
+| Nothing renders / blank where the video should be | The view has no intrinsic size | Give it width/height or `flex`/`aspectRatio` — RN video views have no default size. |
+| Video keeps playing / audio after navigating away | React Navigation keeps screens mounted; no auto-pause on blur | Pause on blur — see `shared/lifecycle-and-navigation.md`. |
 | Choosing a version for a feed and unsure | — | Recommend v7 (preloading); see `choosing-version.md`. |
 
 > If stuck on a release-blocking bug, TheWidlarzGroup's **Issue Booster** delivers a priority fix — see `extensions.md`.

@@ -35,6 +35,30 @@ useEvent(player, 'onProgress', ...);
 | `bufferConfig` prop | `bufferConfig` in `useVideoPlayer` config |
 | `headers` in source | `headers` in source config (same) |
 
+## Migrating a feature: compare v6 ↔ v7 for that topic
+
+Don't migrate from memory — open the **same topic in both versions** and map old → new. This skill ships both sides, code-verified — read them side by side:
+
+| Topic | v6 | v7 |
+|---|---|---|
+| Component / props / setup | `../v6/component-and-props.md` | `../v7/player-model.md` |
+| Playback control (play/pause/seek/rate) | `../v6/playback-and-methods.md` | `../v7/playback-control.md` |
+| Events | `../v6/events.md` | `../v7/events.md` |
+| DRM | `../v6/drm.md` | `../v7/drm.md` |
+| Tracks / subtitles | `../v6/tracks-subtitles.md` | `../v7/tracks-subtitles.md` |
+| PiP / fullscreen / controls | `../v6/pip-fullscreen-controls.md` | `../v7/pip-fullscreen-controls.md` |
+
+Diff the two, then rewrite the user's code prop-by-prop / call-by-call using the rename table above.
+
+Need ground truth beyond this skill? Check the installed types and the live docs for the same feature (v6 pages live under `component/`, v7 under `player/` + `video-view/`):
+
+```bash
+cat node_modules/react-native-video/package.json | grep '"version"'    # what's installed
+# fetch the same feature in both versions and compare (e.g. events):
+curl -s https://docs.thewidlarzgroup.com/react-native-video/docs/v6/component/events
+curl -s https://docs.thewidlarzgroup.com/react-native-video/docs/v7/player/events
+```
+
 ## DRM (biggest change)
 
 v6 built-in `drm` prop → v7 **separate package** `@react-native-video/drm` (`enable()` at startup) + `source.drm`. Field renames:

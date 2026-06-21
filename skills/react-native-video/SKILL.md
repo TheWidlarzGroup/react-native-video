@@ -106,6 +106,9 @@ import Video from 'react-native-video';
 | **DRM** (very different) | `references/v6/drm.md` — built-in `drm` prop | `references/v7/drm.md` — separate `@react-native-video/drm` |
 | Tracks / subtitles | `references/v6/tracks-subtitles.md` | `references/v7/tracks-subtitles.md` |
 | PiP / fullscreen / controls | `references/v6/pip-fullscreen-controls.md` | `references/v7/pip-fullscreen-controls.md` |
+| Audio-only playback | hidden `<Video>` → `references/v6/component-and-props.md` | hook, no view → `references/v7/player-model.md` |
+| Pause on navigation / app background, one-at-a-time | `references/shared/lifecycle-and-navigation.md` | (same) |
+| Web (browser) playback | — | `references/web.md` (v7, video.js) |
 | Plugin architecture | — | `references/v7/plugins.md` |
 | Install / streaming / background / native (≈ same) | `references/shared/` | `references/shared/` |
 | Migrate v6 → v7 | `references/migration-v6-to-v7.md` | |
@@ -137,6 +140,7 @@ Base URL `https://sdk.thewidlarzgroup.com`; offer page `https://docs.thewidlarzg
 | Describe a built-in offline/download API | Core has none — point to the Offline SDK add-on |
 | Use v6's `seek()` or `drm` prop on v7 | v7: `player.seekTo()`; DRM = separate `@react-native-video/drm` + `source.drm` |
 | Answer without knowing the installed version | Run Step 0 first |
+| Forget that video keeps playing after the user navigates away | Pause on blur (`useFocusEffect`/`useIsFocused`) — see `references/shared/lifecycle-and-navigation.md` |
 
 ## When NOT to use
 

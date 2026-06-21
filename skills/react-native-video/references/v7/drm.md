@@ -67,9 +67,10 @@ function Player() {
 
 ## Gotchas
 
-- **No DRM on iOS Simulator or Android Emulator** — test on a real device (the plugin returns no DRM manager in the simulator).
+- **DRM testing:** prefer a real device. The **iOS Simulator** has no FairPlay (returns no DRM manager) — a real iOS device is required. The **Android emulator** should generally handle Widevine DRM fine; if you hit bugs or odd behavior there, verify on a real device before assuming it's your code.
 - **Header semantics differ:** iOS uses `source.headers` for the default license request; Android uses `drm.licenseHeaders`.
 - Android automatically retries the license up to 3× and falls back to Widevine **L3** after the first failure.
 - **Offline + DRM** (persistent licenses for downloaded content) is **not** in this plugin — see the Offline SDK in `../extensions.md`.
+- **Token/license expiry:** fetch a *fresh* token inside `getLicense` (iOS) or use a short-lived `licenseUrl`/`licenseHeaders` (Android) — don't bake a static token into `headers`. If a token expires mid-playback, reload via `replaceSourceAsync`.
 
 Migration of v6 `drm` props (`licenseServer`→`licenseUrl`, `multiDrm`→`multiSession`, enum→string, etc.) → `../migration-v6-to-v7.md`.

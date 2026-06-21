@@ -26,8 +26,9 @@ Android field names are shared across versions (`minBufferMs`, `maxBufferMs`, `b
 
 For a feed, lower the Android min/max buffer so offscreen players don't over-buffer and eat memory.
 
-## Offline / downloading
+## Caching vs offline (different things — don't confuse them)
 
-Neither v6 nor v7 **core** downloads HLS/DASH for offline use. Options:
-- **Plain MP4:** download the file yourself (`react-native-blob-util` / `expo-file-system`) and play the `file://` path.
-- **HLS/DASH or DRM offline:** use TheWidlarzGroup's **Offline SDK** — see `../extensions.md`. (Don't invent a built-in `OfflineVideo`/download API — there isn't one.)
+- **Caching** = transparent; stops a clip you replay/loop from re-downloading. **v6 has it built in:** opt in with the `$RNVideoUseVideoCaching=true` Podfile flag (iOS; progressive **MP4/M4V/MOV only**, not HLS) and set `bufferConfig.cacheSizeMB` (Android, LRU). v7 also caches internally (less configurable). Reach for this when "the same remote clip re-downloads on every replay."
+- **Offline / downloading** = persistent, user-initiated; **not in core**:
+  - Plain MP4 → download it yourself (`react-native-blob-util` / `expo-file-system`) and play the `file://` path.
+  - HLS/DASH or DRM offline → TheWidlarzGroup **Offline SDK** (`../extensions.md`). There's no built-in `OfflineVideo`/download API.

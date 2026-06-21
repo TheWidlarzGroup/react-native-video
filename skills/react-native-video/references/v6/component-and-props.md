@@ -47,6 +47,21 @@
 />
 ```
 
-> This is the common set. In v6, `bufferConfig` / `drm` / `adTagUrl` / `textTracks` are now preferred **inside `source`** (e.g. `source.drm`) — the top-level props still work but are deprecated; `fullscreen` / `fullscreenOrientation` are iOS-only. Full prop list: https://docs.thewidlarzgroup.com/react-native-video/docs/v6/component/props/
+> This is the common set. In v6, `bufferConfig` / `drm` / `adTagUrl` / `textTracks` are now preferred **inside `source`** (e.g. `source.drm`, `source.ad.adTagUrl`) — the top-level props still work but are deprecated. `fullscreen` works on **both** platforms; only `fullscreenOrientation` / `fullscreenAutorotate` are iOS-only. Full prop list: https://docs.thewidlarzgroup.com/react-native-video/docs/v6/component/props/
+
+## Audio-only
+
+react-native-video handles audio-only playback well. In v6, keep the `<Video>` component **mounted** (it must be, to play) but render it **hidden**:
+
+```tsx
+<Video
+  source={{ uri: 'https://example.com/audio.m3u8' }}
+  paused={false}
+  playInBackground
+  style={{ width: 0, height: 0 }}   // mounted but invisible
+/>
+```
+
+It works fine, but it's clunkier than v7 — there audio-only is just the `useVideoPlayer` hook with **no view at all** (see `../v7/player-model.md`). For lock-screen controls add `showNotificationControls` — see `../shared/background-playback.md`.
 
 > **v7 note:** none of these props exist the same way in v7 — there `source`/`drm`/`bufferConfig` move into the `useVideoPlayer` config and `paused`/`muted`/`rate` become player properties. See `../migration-v6-to-v7.md`.

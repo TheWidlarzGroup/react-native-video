@@ -33,8 +33,7 @@ useVideoPlayer({
 
 ## Audio / video track selection
 
-- **Native (iOS/Android):** the core player exposes **text** track selection only; there are no audio/video-track selection methods on `VideoPlayer`.
-- **Web only:** cast the player to `WebVideoPlayer` for `getAvailableAudioTracks()/selectAudioTrack()` and `getAvailableVideoTracks()/selectVideoTrack()` (experimental, limited browser support):
+Audio/video **track selection** is a **web** capability (experimental — Safari-leaning). On native, the player handles **text** track selection (above). Cast to `WebVideoPlayer` for `getAvailableAudioTracks()/selectAudioTrack()` and `getAvailableVideoTracks()/selectVideoTrack()`:
 
 ```tsx
 import type { WebVideoPlayer } from 'react-native-video';
@@ -42,4 +41,4 @@ const web = player as WebVideoPlayer;
 web.selectVideoTrack(web.getAvailableVideoTracks()[0]);
 ```
 
-The `AudioTrack` / `VideoTrack` types are exported (`{ id, label, language?, selected }`) but native audio/video-track switching is not in the core player.
+The `AudioTrack` / `VideoTrack` types (`{ id, label, language?, selected }`) are exported for use with these web APIs.

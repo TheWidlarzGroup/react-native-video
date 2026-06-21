@@ -60,4 +60,4 @@ On the view (props or `ref.addEventListener`):
 />
 ```
 
-> There is no player-level `fullscreen` prop in v7 — fullscreen/PiP are view concerns (ref + view props/events).
+> Fullscreen and PiP **are** available in v7 — they live on the **view**: use the `VideoView` ref + view props/events (above).

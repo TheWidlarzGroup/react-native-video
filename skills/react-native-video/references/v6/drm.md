@@ -31,6 +31,8 @@ import Video, { DRMType } from 'react-native-video';
 
 Full reference: https://docs.thewidlarzgroup.com/react-native-video/docs/v6/component/drm
 
+> **Token/license expiry:** fetch a *fresh* token in `getLicense` (iOS) or use a short-lived `licenseServer` token / `headers` — don't hardcode a static one. If a token expires mid-playback, reload via `ref.setSource(...)` or remount.
+
 > **v7 is completely different here:** DRM moves to the separate `@react-native-video/drm` package (`enable()` + `source.drm`), with renamed fields (`licenseServer`→`licenseUrl`, `multiDrm`→`multiSession`, enum→string union, changed `getLicense` signature, `base64Certificate`/`localSourceEncryptionKeyScheme` dropped). If you're setting up DRM fresh on a modern stack, prefer v7. See `../v7/drm.md` and `../migration-v6-to-v7.md`.
 
-> DRM doesn't work on the iOS Simulator / Android Emulator — test on a real device (both versions).
+> **DRM testing (both versions):** the iOS Simulator has no FairPlay; the Android emulator generally handles Widevine — if it misbehaves there, verify on a real device.

@@ -45,3 +45,5 @@ const sub = player.addEventListener('onEnd', () => {});
 ```
 
 > Error handling: subscribing to `onError` switches v7 from "throw" to "callback" mode — wire it up so playback errors don't crash.
+
+> **Retry on error:** on `onError`, reload the source — `player.replaceSourceAsync(currentSource)` (or remount via a `key`) — with your own backoff and a retry button.

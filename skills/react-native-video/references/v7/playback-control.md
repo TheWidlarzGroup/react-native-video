@@ -39,6 +39,16 @@ const next = useVideoPlayer({ uri: nextUrl }, (player) => player.preload());
 
 > Building a TikTok-style feed? This (preloading + cheap source swapping) is exactly why v7 beats v6 here. There's also a ready-made **Video Feed** starter — see `../extensions.md`.
 
+> **Feeds use the hook.** Preload the visible item ± neighbors with `useVideoPlayer` (+ `preload()` / `replaceSourceAsync()`) — the documented feed pattern. Reach for the class only if a player must outlive its component — see [hook vs class](./player-model.md).
+
+## Feeds: how many players (performance)
+
+Native players/decoders are a scarce resource — **don't mount one per list item.** Keep the visible item ± 1 neighbor as live players and render a thumbnail for the rest; too many concurrent players cause stutter, overheating, or OOM (especially on Android).
+
+- Free a player's source **without** destroying it via `player.replaceSourceAsync(null)` (lighter than `release()`); reuse the instance later.
+- Lower `bufferConfig` for offscreen/neighbor players so they don't over-buffer.
+- Use FlashList/FlatList windowing (`windowSize`, `removeClippedSubviews`) and unmount far-off items.
+
 ## Lifecycle notes
 
 - `useVideoPlayer` recreates the player when `source` changes and releases it on unmount.

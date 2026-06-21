@@ -38,4 +38,6 @@ In v6, events are **callback props** on `<Video>` (not subscriptions like v7).
 
 > The full event list is at https://docs.thewidlarzgroup.com/react-native-video/docs/v6/component/events/.
 
+> **Retry on error:** on `onError`, `ref.setSource(...)` or remount with backoff; on Android, `disableDisconnectError` keeps buffering through brief network loss.
+
 > **v7 note:** event *names and shapes differ* and they're delivered via `useEvent`/`player.addEventListener`, not props (e.g. v6 `onPlaybackStateChanged` → v7 `onPlaybackStateChange`). See `../v7/events.md` and `../migration-v6-to-v7.md`.

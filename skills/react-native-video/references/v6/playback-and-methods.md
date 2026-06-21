@@ -21,7 +21,7 @@ const ref = useRef<VideoRef>(null);
 | `presentFullscreenPlayer()` / `dismissFullscreenPlayer()` | Deprecated — use `setFullScreen`. |
 | `enterPictureInPicture()` / `exitPictureInPicture()` | PiP. |
 | `restoreUserInterfaceForPictureInPictureStopCompleted(bool)` | iOS PiP restore. |
-| `save()` | iOS: save the asset to Photos. |
+| `save()` | iOS: export the current item to an `.mp4` in the app cache dir; resolves `{ uri }`. |
 
 ## Static methods
 
