@@ -193,10 +193,15 @@ function computeTriage(sections, versions) {
   const tuple = parseVersionTuple(verRaw);
   if (tuple) {
     const maj = tuple[0];
-    if (VERSION_MAJORS.includes(maj)) labels.add(versionLabel(maj));
-    if (maj === 5) {
+    // rnv majors are 1..7; major 0 here means a confused reporter pasted their
+    // React Native version (0.x) into this field, so do not treat it as unsupported.
+    if (maj >= 1 && maj <= 5) {
+      // v5 and older are unsupported; bucket them all under the V5 label so the
+      // close stays idempotent (the close guard keys off this label).
       isV5 = true;
+      labels.add(versionLabel(5));
     } else {
+      if (VERSION_MAJORS.includes(maj)) labels.add(versionLabel(maj));
       // newest in the reporter's major line, so e.g. an alpha is nudged to the latest beta
       const newest = highestForMajor(versions, maj);
       if (newest && compareSemver(verRaw, newest) < 0) {
