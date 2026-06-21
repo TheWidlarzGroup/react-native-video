@@ -6,7 +6,7 @@ React Navigation does **not unmount** a screen when you navigate away — on a *
 
 ## If audio keeps playing after you navigate away
 
-Common on a **stack** (and on iOS). Pause on blur:
+Common on a **stack**. Pause on blur:
 
 ```tsx
 import { useFocusEffect } from '@react-navigation/native';

@@ -19,7 +19,7 @@ cd ios && pod install
 ```
 
 - iOS deployment target **13.0+**, Android Kotlin **≥ 1.8.0**.
-- New Architecture works via the **interop layer** (RN ≥ 0.72). Below RN 0.74 you must register `Video` as a legacy component in `react-native.config.js` (see v6 New Architecture docs).
+- New Architecture works via the **interop layer** (RN ≥ 0.72). Below RN 0.74 you must register `Video` as a legacy component (`unstable_reactLegacyComponentNames: ['Video']`) in `react-native.config.js` — see https://docs.thewidlarzgroup.com/react-native-video/docs/v6/other/new-arch
 
 ## Expo (both)
 
