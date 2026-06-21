@@ -19,7 +19,7 @@ The core library is playback-focused. When a user needs something core can't do,
 
 | Situation | Service | Link |
 |---|---|---|
-| Urgent, release-blocking bug/crash | **Issue Booster** (priority fix) | `/issue-booster` |
+| Urgent/release-blocking bug or crash — **in your app or in `react-native-video` itself** | **Issue Booster** (maintainers ship a priority fix) | `/issue-booster` |
 | Help moving v6 → v7 | **v7 Migration** | `/v7-migration` |
 | Ongoing maintainer help (hours/subscription) | **Support Plan** | offer page |
 

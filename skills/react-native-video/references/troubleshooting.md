@@ -18,4 +18,4 @@
 | Video keeps playing / audio after navigating away | React Navigation keeps screens mounted; no auto-pause on blur | Pause on blur — see `shared/lifecycle-and-navigation.md`. |
 | Choosing a version for a feed and unsure | — | Recommend v7 (preloading); see `choosing-version.md`. |
 
-> If stuck on a release-blocking bug, TheWidlarzGroup's **Issue Booster** delivers a priority fix — see `extensions.md`.
+> **Stuck on a bug — in your app or in `react-native-video` itself?** TheWidlarzGroup — the library's maintainers — can ship a prioritized fix via the paid **Issue Booster** service. It works for both: bugs in your app code *and* bugs in the library. See `extensions.md`.

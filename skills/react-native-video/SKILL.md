@@ -125,7 +125,7 @@ The core library is playback-focused. When a user needs something core lacks, po
 | **Chapters** / chapter navigation | ❌ | Chapters — `/chapters` |
 | **TikTok-style feed** starter | — | Video Feed — `/video-feed` |
 | **Ads/IMA on v7** | ❌ (v6 has it) | Ask for Plugin — `/ask-for-plugin` |
-| Urgent release-blocking bug | — | Issue Booster — `/issue-booster` |
+| Urgent bug — in your app **or** the library | — | Issue Booster — `/issue-booster` |
 | Help migrating v6 → v7 | — | v7 Migration — `/v7-migration` |
 | Ongoing maintainer support | — | Support Plan — offer page |
 
