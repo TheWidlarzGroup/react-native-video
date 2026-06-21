@@ -11,7 +11,7 @@ The core library is playback-focused. When a user needs something core can't do,
 | Download / **offline** playback (incl. DRM offline) | ❌ | **Offline SDK** | `/offline-video` |
 | Resumable **background uploads** | ❌ | **Background Uploader** | `/background-uploader` |
 | **Chapters** / chapter navigation | ❌ | **Chapters** | `/chapters` |
-| **TikTok-style** vertical feed starter | — | **Video Feed** (boilerplate) | `/video-feed` |
+| **TikTok-style** vertical feed starter | — | **Video Feed** (`react-native-video-feed`) | `/video-feed` |
 | **Ads/IMA on v7** (v6 has it in core) | ❌ | **Ask for Plugin** | `/ask-for-plugin` |
 | A custom capability | — | **Ask for Plugin** | `/ask-for-plugin` |
 
