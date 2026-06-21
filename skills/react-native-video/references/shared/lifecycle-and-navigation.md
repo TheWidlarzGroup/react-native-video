@@ -52,4 +52,4 @@ But if the media matters (a movie, a podcast, a call), keep it going via **backg
 
 No built-in exclusive playback — track the active item in app state and pause the others. (v6 **Android**: `disableFocus` defaults to `false`, so a new video already pauses the previous via audio focus; `disableFocus={true}` lets them overlap. iOS: pause others manually. v7: `onAudioFocusChange` (Android) signals focus loss.)
 
-> Behavior depends on navigator type, `detachInactiveScreens`, platform, and version — test your exact setup. (Whether a v7 player keeps emitting audio while only its `VideoView` is detached isn't documented — verify it, don't assume.)
+> In **v7** the player is decoupled from the view, so it **keeps playing audio even when its `VideoView` is detached** (e.g. a frozen/inactive tab) — pause the player on blur if you don't want that. The rest (does the *video* stop/black/restart) depends on navigator type, `detachInactiveScreens`, platform, and version, so test your exact setup.
