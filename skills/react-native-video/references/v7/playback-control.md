@@ -43,13 +43,9 @@ const next = useVideoPlayer({ uri: nextUrl }, (player) => player.preload());
 
 ## Feeds: how many players (performance)
 
-Native players/decoders are a scarce resource — **don't mount one per list item.** Only a few hardware video decoders can run at once (especially on Android), so keep the visible item ± 1–2 neighbors live (e.g. 1 back + 2 forward), **play only the active one**, and render a thumbnail/poster for the rest; too many concurrent players cause stutter, overheating, or OOM.
+Native players/decoders are scarce (Android especially — only a few concurrent HD streams), so **don't mount one per list item.** In **v7** the player is decoupled from the view, so you can `preload()` **without mounting a `VideoView`**; let `useVideoPlayer` auto-release on unmount, call `player.release()` on any player you no longer need, and give neighbor players a smaller `bufferConfig`.
 
-**Key v6 ↔ v7 difference:** in **v7** the player is decoupled from the view, so you can **start loading/preloading a video without mounting a `VideoView`** — preloading neighbors is cheap and fully under your control. In **v6** the player *is* the `<Video>` view, so to preload you must mount (hidden/paused) `<Video>` instances and watch the live count carefully — **especially on Android**. This is a big reason v7 fits feeds better.
-
-- Release players you no longer need with `player.release()` (or let `useVideoPlayer` auto-release on unmount).
-- Lower `bufferConfig` for offscreen/neighbor players so they don't over-buffer.
-- A virtualized/recycling list bounds mounted rows and memory, but **not** decoders: `FlatList` virtualizes (`windowSize`, `removeClippedSubviews`); `FlashList`/`LegendList` (the feed starter uses LegendList) recycle view instances. Every mounted row with a live `VideoView` still decodes — so drive playback off **viewability** (`viewabilityConfig` → `itemVisiblePercentThreshold`): play the on-screen item, preload its neighbors, keep the rest as thumbnails.
+→ Full feed architecture (recycling list, preload window, viewability-gated playback, thumbnails, and what's realistically beyond the library): `../shared/video-feeds.md`.
 
 ## Lifecycle notes
 

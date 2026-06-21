@@ -108,6 +108,7 @@ import Video from 'react-native-video';
 | PiP / fullscreen / controls | `references/v6/pip-fullscreen-controls.md` | `references/v7/pip-fullscreen-controls.md` |
 | Audio-only playback | hidden `<Video>` → `references/v6/component-and-props.md` | hook, no view → `references/v7/player-model.md` |
 | Pause on navigation / app background, one-at-a-time | `references/shared/lifecycle-and-navigation.md` | (same) |
+| Building a video feed (TikTok-style) | `references/shared/video-feeds.md` | (same; v7 recommended) |
 | Web (browser) playback | — | `references/web.md` (v7, video.js) |
 | Plugin architecture | — | `references/v7/plugins.md` |
 | Install / streaming / background / native (≈ same) | `references/shared/` | `references/shared/` |
