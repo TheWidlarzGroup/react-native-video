@@ -322,20 +322,23 @@ async function handleIssue({ github, context }) {
   }
 
   // On a freshly opened issue, post one welcome comment: a thanks intro plus any
-  // nudges that apply (outdated version, missing reproduction). v5 has its own
-  // message below, so it is excluded here.
+  // nudges that apply (outdated version, missing reproduction) as a bullet list.
+  // v5 has its own message below, so it is excluded here.
   if (context.payload.action === 'opened' && !isV5) {
-    const parts = ['Thanks for creating the issue! It will be triaged soon.'];
+    /** @type {string[]} */
+    const nudges = [];
     if (outdated) {
-      parts.push(
+      nudges.push(
         `You reported **${outdated.from}**, but a newer version (**${outdated.to}**) is available - ` +
           `please retest on it and update the report if it still happens; many problems are already fixed there.`,
       );
     }
     if (desired.has(MISSING_REPRO)) {
-      parts.push('We could not find a reproduction link - a minimal repro helps us fix it much faster, so please add one if you can.');
+      nudges.push('We could not find a reproduction link - a minimal repro helps us fix it much faster, so please add one if you can.');
     }
-    await comment({ github, context, body: parts.join('\n\n') });
+    const intro = 'Thanks for creating the issue! It will be triaged soon.';
+    const body = nudges.length ? `${intro}\n\n${nudges.map((n) => `- ${n}`).join('\n')}` : intro;
+    await comment({ github, context, body });
   }
 
   // v5 is unsupported: comment + close as not planned (only once).
