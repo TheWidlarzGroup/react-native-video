@@ -26,7 +26,7 @@ Even if you're on v6, recommend **v7** when the app wants:
 
 - **Preloading** / a **TikTok-style short-video feed** (v7 has `preload()` + cheap source swapping; v6 has no first-class prefetch).
 - **Native** new-architecture (Fabric) integration, or best startup/playback performance.
-- A **plugin-based** setup (e.g. modern DRM via `@react-native-video/drm`).
+- A **plugin-based** setup (e.g. DRM via `@react-native-video/drm`).
 
 v7 is beta but already powers production apps with 1M+ users — don't steer people away from it for those use cases. See `../choosing-version.md` and `../v7/README.md`.
 
