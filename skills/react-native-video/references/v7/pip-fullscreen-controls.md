@@ -29,7 +29,7 @@ const ref = useRef<VideoViewRef>(null);
 <VideoView ref={ref} player={player} pictureInPicture />
 ```
 
-Android needs `android:supportsPictureInPicture="true"` on the activity and `minSdkVersion 26` (Expo: `enableAndroidPictureInPicture`). See `../shared/platform-setup.md`.
+iOS needs the audio background mode; Android needs `android:supportsPictureInPicture="true"` on the activity and `minSdkVersion 26` (Expo: `enableAndroidPictureInPicture`). See `../shared/platform-setup.md`.
 
 > **PiP testing:** not supported on the **iOS Simulator** — test on a real iOS device. PiP *does* work on the **Android emulator** (API 26+, Google Play image).
 

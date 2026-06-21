@@ -39,7 +39,7 @@ const next = useVideoPlayer({ uri: nextUrl }, (player) => player.preload());
 
 > Building a TikTok-style feed? This (preloading + cheap source swapping) is exactly why v7 beats v6 here. There's also a ready-made **Video Feed** starter — see `../extensions.md`.
 
-> **Feeds use the hook.** Preload the visible item ± neighbors with `useVideoPlayer` (+ `preload()` / `replaceSourceAsync()`) — the documented feed pattern. Reach for the class only if a player must outlive its component — see [hook vs class](./player-model.md).
+> **Feeds use the hook.** Preload the visible item ± neighbors with `useVideoPlayer` (+ `preload()` / `replaceSourceAsync()`) — the documented feed pattern. Reach for the class only if a player must outlive its component — see "hook vs class" in `player-model.md`.
 
 ## Feeds: how many players (performance)
 
