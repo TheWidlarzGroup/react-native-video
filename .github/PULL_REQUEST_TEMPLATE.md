@@ -4,6 +4,7 @@ Thanks for opening a pull request!
 To help us review and merge it quickly:
 - Keep the PR focused on a single concern - split unrelated changes into separate PRs.
 - Update the docs (`docs/`) and the README when you change or add public API, props, or events.
+- Update the AI agent skill (`skills/react-native-video/`) the same way when you change how the library is used (API, props, events, behavior).
 - Link the issue this PR addresses with "Fixes #<number>".
 -->
 
@@ -47,5 +48,6 @@ To help us review and merge it quickly:
 
 - [ ] I read the [contributing guidelines](https://github.com/TheWidlarzGroup/react-native-video/blob/master/CONTRIBUTING.md).
 - [ ] I updated the documentation / README where relevant.
+- [ ] If this changes how the library is used (API, props, events, behavior), I updated the AI agent skill (`skills/react-native-video/`) to match.
 - [ ] This PR is focused on a single concern.
 - [ ] I tested my changes on at least one platform.
