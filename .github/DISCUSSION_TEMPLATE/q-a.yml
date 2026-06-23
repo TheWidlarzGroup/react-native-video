@@ -1,0 +1,71 @@
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reaching out! A few details help us answer faster.
+
+        **Before you post:**
+        - Search [existing Q&A](https://github.com/TheWidlarzGroup/react-native-video/discussions/categories/q-a) and the [docs](https://sdk.thewidlarzgroup.com/) - your question may already be answered
+        - Hitting a bug or crash? [Open a bug report](https://github.com/TheWidlarzGroup/react-native-video/issues/new?template=bug-report.yml) instead
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: What are you trying to do?
+      description: Describe your question or the goal you want to achieve with react-native-video
+      placeholder: "Play an HLS stream and switch audio tracks from a custom button."
+    validations:
+      required: true
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: What have you tried?
+      description: What you've attempted so far, and what actually happens (optional)
+    validations:
+      required: false
+
+  - type: textarea
+    id: code
+    attributes:
+      label: Relevant code
+      description: A minimal snippet of how you set up the player / Video component (optional)
+      render: tsx
+    validations:
+      required: false
+
+  - type: dropdown
+    id: version-line
+    attributes:
+      label: Version
+      description: Which version of react-native-video is your question about?
+      options:
+        - Not version-specific / not sure
+        - v7
+        - v6
+    validations:
+      required: false
+
+  - type: dropdown
+    id: platforms
+    attributes:
+      label: Platforms
+      description: Which platforms does your question concern? (optional)
+      multiple: true
+      options:
+        - iOS
+        - Android
+        - Web
+        - visionOS
+        - Apple tvOS
+        - Android TV
+        - Windows
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        **Need a faster answer or hands-on help?** TheWidlarzGroup - the maintainers of react-native-video - offer [commercial support](https://sdk.thewidlarzgroup.com/issue-booster?contact=true&utm_source=rnv&utm_medium=discussion&utm_campaign=question&utm_id=get-help).

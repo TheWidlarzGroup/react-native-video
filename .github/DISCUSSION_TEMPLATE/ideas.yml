@@ -1,0 +1,80 @@
+labels: ["feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for sharing an idea for react-native-video!
+
+        **Before you post:**
+        - Search [existing ideas](https://github.com/TheWidlarzGroup/react-native-video/discussions/categories/ideas) - if it's already there, add a 👍 instead of a duplicate
+        - This is for **feature ideas**, not bugs. Found a bug? [Open a bug report](https://github.com/TheWidlarzGroup/react-native-video/issues/new?template=bug-report.yml)
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem are you trying to solve?
+      description: The use case or pain point behind this idea. What are you building, and what gets in the way today?
+      placeholder: "In a TikTok-style feed I want the next video ready instantly, but there's no way to warm up a player before its view is shown."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: What would you like to happen? A rough API shape, prop, or behavior is enough
+      placeholder: "A preload() method on the player, or a prefetch prop that starts buffering before the view mounts."
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any workarounds you use today, or other approaches you've thought about
+    validations:
+      required: false
+
+  - type: dropdown
+    id: platforms
+    attributes:
+      label: Platforms
+      description: Which platforms is this idea relevant to?
+      multiple: true
+      options:
+        - iOS
+        - Android
+        - Web
+        - visionOS
+        - Apple tvOS
+        - Android TV
+        - Windows
+    validations:
+      required: false
+
+  - type: dropdown
+    id: version-line
+    attributes:
+      label: Version line
+      description: Which version of react-native-video is this for?
+      options:
+        - v7
+        - v6
+        - Both
+        - Not sure
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Mockups, links, references, or anything else that helps explain the idea
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        **Want this built, or need it sooner?** TheWidlarzGroup - the maintainers of react-native-video - offer [commercial support and custom development](https://sdk.thewidlarzgroup.com/issue-booster?contact=true&utm_source=rnv&utm_medium=discussion&utm_campaign=idea&utm_id=build-it).
