@@ -1,0 +1,39 @@
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Built something with react-native-video? We'd love to see it! 🎬
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What did you build?
+      description: Tell us about your app, feature, or experiment
+    validations:
+      required: true
+
+  - type: input
+    id: link
+    attributes:
+      label: Link / demo
+      description: App Store / Play Store / website / video / screenshots
+      placeholder: https://...
+    validations:
+      required: false
+
+  - type: input
+    id: version
+    attributes:
+      label: react-native-video version used
+      description: Which version powered it
+      placeholder: 7.0.0
+    validations:
+      required: false
+
+  - type: textarea
+    id: notable
+    attributes:
+      label: Anything notable?
+      description: Tricky problems you solved, tips, or feedback for the maintainers
+    validations:
+      required: false
