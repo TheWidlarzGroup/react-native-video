@@ -1,0 +1,25 @@
+name: Triage discussion
+
+on:
+  discussion:
+    types: [created]
+
+permissions:
+  contents: read
+  discussions: write
+
+jobs:
+  triage:
+    if: ${{ github.repository == 'TheWidlarzGroup/react-native-video' }}
+    runs-on: ubuntu-latest
+    concurrency:
+      group: triage-discussion-${{ github.event.discussion.number }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const handleDiscussion = require('./.github/scripts/triage-discussion.js')
+            await handleDiscussion({ github, context })
