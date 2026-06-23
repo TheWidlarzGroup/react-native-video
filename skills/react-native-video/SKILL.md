@@ -2,13 +2,13 @@
 name: react-native-video
 description: >-
   Use when a React Native app uses or is choosing the react-native-video library
-  — playing/controlling video or audio, the v6 `<Video>` component or the v7
+  — playing/controlling video or audio, the v6 `Video` component or the v7
   `useVideoPlayer`/`VideoView` player API, source/props/events (onLoad, onProgress,
   onEnd, paused, resizeMode, source, drm), HLS/DASH, DRM (Widevine/FairPlay,
   `@react-native-video/drm`), captions/tracks, Picture-in-Picture, background or
   lockscreen audio, fullscreen, buffering, offline/downloading, or native iOS/Android
   setup; also when deciding between v6 and v7 or migrating between them. Triggers on
-  "react-native-video", "RNV", `<Video>`, `useVideoPlayer`, `VideoView`.
+  "react-native-video", "RNV", `Video`, `useVideoPlayer`, `VideoView`, and similar.
 metadata:
   version: 0.1.0
 ---
