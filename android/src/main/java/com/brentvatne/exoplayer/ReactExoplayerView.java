@@ -2484,9 +2484,11 @@ public class ReactExoplayerView extends FrameLayout implements
 
         if (isInPictureInPicture) {
             ViewGroup parent = (ViewGroup)exoPlayerView.getParent();
+            if (!enterPictureInPictureOnLeave) return;
             if (parent != null) {
                 parent.removeView(exoPlayerView);
             }
+            rootViewChildrenOriginalVisibility.clear();
             for (int i = 0; i < rootView.getChildCount(); i++) {
                 if (rootView.getChildAt(i) != exoPlayerView) {
                     rootViewChildrenOriginalVisibility.add(rootView.getChildAt(i).getVisibility());
@@ -2497,9 +2499,13 @@ public class ReactExoplayerView extends FrameLayout implements
         } else {
             rootView.removeView(exoPlayerView);
             if (!rootViewChildrenOriginalVisibility.isEmpty()) {
-                for (int i = 0; i < rootView.getChildCount(); i++) {
-                    rootView.getChildAt(i).setVisibility(rootViewChildrenOriginalVisibility.get(i));
+                int childCount = rootView.getChildCount();
+                int visibilityCount = rootViewChildrenOriginalVisibility.size();
+                for (int i = 0; i < childCount; i++) {
+                    int visibility = i < visibilityCount ? rootViewChildrenOriginalVisibility.get(i) : View.VISIBLE;
+                    rootView.getChildAt(i).setVisibility(visibility);
                 }
+                rootViewChildrenOriginalVisibility.clear();
                 addView(exoPlayerView, 0, layoutParams);
                 reLayoutControls();
             }
