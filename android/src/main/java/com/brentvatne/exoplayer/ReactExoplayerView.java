@@ -557,6 +557,7 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     private class RNVLoadControl extends DefaultLoadControl {
+        private final DefaultAllocator allocator;
         private final int availableHeapInBytes;
         private final Runtime runtime;
         public RNVLoadControl(DefaultAllocator allocator, BufferConfig config) {
@@ -564,21 +565,35 @@ public class ReactExoplayerView extends FrameLayout implements
                     config.getMinBufferMs() != BufferConfig.Companion.getBufferConfigPropUnsetInt()
                             ? config.getMinBufferMs()
                             : DefaultLoadControl.DEFAULT_MIN_BUFFER_MS,
+                    config.getMinBufferMs() != BufferConfig.Companion.getBufferConfigPropUnsetInt()
+                            ? config.getMinBufferMs()
+                            : DefaultLoadControl.DEFAULT_MIN_BUFFER_FOR_LOCAL_PLAYBACK_MS,
                     config.getMaxBufferMs() != BufferConfig.Companion.getBufferConfigPropUnsetInt()
                             ? config.getMaxBufferMs()
                             : DefaultLoadControl.DEFAULT_MAX_BUFFER_MS,
+                    config.getMaxBufferMs() != BufferConfig.Companion.getBufferConfigPropUnsetInt()
+                            ? config.getMaxBufferMs()
+                            : DefaultLoadControl.DEFAULT_MAX_BUFFER_FOR_LOCAL_PLAYBACK_MS,
                     config.getBufferForPlaybackMs() != BufferConfig.Companion.getBufferConfigPropUnsetInt()
                             ? config.getBufferForPlaybackMs()
                             : DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS ,
+                    config.getBufferForPlaybackMs() != BufferConfig.Companion.getBufferConfigPropUnsetInt()
+                            ? config.getBufferForPlaybackMs()
+                            : DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_FOR_LOCAL_PLAYBACK_MS,
                     config.getBufferForPlaybackAfterRebufferMs() != BufferConfig.Companion.getBufferConfigPropUnsetInt()
                             ? config.getBufferForPlaybackAfterRebufferMs()
                             : DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS,
-                    -1,
+                    config.getBufferForPlaybackAfterRebufferMs() != BufferConfig.Companion.getBufferConfigPropUnsetInt()
+                            ? config.getBufferForPlaybackAfterRebufferMs()
+                            : DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_FOR_LOCAL_PLAYBACK_MS,
+                    DefaultLoadControl.DEFAULT_TARGET_BUFFER_BYTES,
+                    true,
                     true,
                     config.getBackBufferDurationMs() != BufferConfig.Companion.getBufferConfigPropUnsetInt()
                             ? config.getBackBufferDurationMs()
                             : DefaultLoadControl.DEFAULT_BACK_BUFFER_DURATION_MS,
                     DefaultLoadControl.DEFAULT_RETAIN_BACK_BUFFER_FROM_KEYFRAME);
+            this.allocator = allocator;
             runtime = Runtime.getRuntime();
             ActivityManager activityManager = (ActivityManager) themedReactContext.getSystemService(ThemedReactContext.ACTIVITY_SERVICE);
             double maxHeap = config.getMaxHeapAllocationPercent() != BufferConfig.Companion.getBufferConfigPropUnsetDouble()
@@ -594,7 +609,7 @@ public class ReactExoplayerView extends FrameLayout implements
             } else if (bufferingStrategy == BufferingStrategy.BufferingStrategyEnum.DependingOnMemory) {
                 // The goal of this algorithm is to pause video loading (increasing the buffer)
                 // when available memory on device become low.
-                int loadedBytes = getAllocator().getTotalBytesAllocated();
+                int loadedBytes = allocator.getTotalBytesAllocated();
                 boolean isHeapReached = availableHeapInBytes > 0 && loadedBytes >= availableHeapInBytes;
                 if (isHeapReached) {
                     return false;
