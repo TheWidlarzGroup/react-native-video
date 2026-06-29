@@ -146,7 +146,7 @@ Contact us at [hi@thewidlarzgroup.com](mailto:hi@thewidlarzgroup.com)
 
 ## 🌍 Social
 
-- 🐦 **X / Twitter** - [follow product & release updates](https://x.com/TheWidlarzGroup)
+- 🐦 **X / Twitter** - [follow product & release updates](https://x.com/WidlarzGroup)
 - 💬 **Discord** - [talk to the community and us](https://discord.gg/9WPq6Yx)
 - 💼 **LinkedIn** - [see TWG flexing](https://linkedin.com/company/the-widlarz-group)
 
