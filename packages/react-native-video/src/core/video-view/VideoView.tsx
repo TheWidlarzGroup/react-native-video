@@ -77,25 +77,30 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
   ) => {
     const nitroId = React.useMemo(() => nitroIdCounter++, []);
     const nitroViewManager = React.useRef<VideoViewViewManager | null>(null);
-    const [isManagerReady, setIsManagerReady] = React.useState(false);
+    // Counts native view generations: the native view can be deleted and
+    // recreated while this component stays mounted (for example
+    // react-native-screens detaches covered screens, deleting their Fabric
+    // views). Every onNitroIdChange marks a freshly created native view, so
+    // the manager must be recreated and all imperative bindings (player,
+    // listeners) re-applied - the previous manager points at the deallocated
+    // view.
+    const [managerGeneration, setManagerGeneration] = React.useState(0);
 
     const setupViewManager = React.useCallback(
       (id: number) => {
         try {
-          if (nitroViewManager.current === null) {
-            nitroViewManager.current =
-              VideoViewViewManagerFactory.createViewManager(id);
+          nitroViewManager.current =
+            VideoViewViewManagerFactory.createViewManager(id);
 
-            // Should never happen
-            if (!nitroViewManager.current) {
-              throw new VideoError(
-                'view/not-found',
-                'Failed to create View Manager'
-              );
-            }
+          // Should never happen
+          if (!nitroViewManager.current) {
+            throw new VideoError(
+              'view/not-found',
+              'Failed to create View Manager'
+            );
           }
 
-          setIsManagerReady(true);
+          setManagerGeneration((generation) => generation + 1);
         } catch (error) {
           const parsedError = tryParseNativeVideoError(error);
 
@@ -214,7 +219,7 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
       return () => {
         if (nitroViewManager.current) {
           nitroViewManager.current.clearAllListeners();
-          setIsManagerReady(false);
+          setManagerGeneration(0);
         }
       };
     }, []);
@@ -280,7 +285,7 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
       willExitFullscreen,
       willEnterPictureInPicture,
       willExitPictureInPicture,
-      isManagerReady,
+      managerGeneration,
     ]);
 
     // Update non-event props
@@ -305,7 +310,7 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
       autoEnterPictureInPicture,
       resizeMode,
       props,
-      isManagerReady,
+      managerGeneration,
     ]);
 
     return (
