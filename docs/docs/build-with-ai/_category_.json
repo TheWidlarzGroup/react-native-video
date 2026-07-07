@@ -1,0 +1,8 @@
+{
+  "label": "Build with AI",
+  "position": 2,
+  "collapsed": false,
+  "customProps": {
+    "badgeType": "new"
+  }
+}

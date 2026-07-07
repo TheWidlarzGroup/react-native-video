@@ -1,0 +1,60 @@
+---
+title: llms.txt
+sidebar_label: llms.txt
+sidebar_position: 2
+description: The llms.txt files react-native-video publishes for AI coding agents. How Cursor, Claude Code, Copilot and Context7 actually use them (URL-based, no copy-paste), plus every file and when to reach for it.
+keywords: [llms.txt, llms-full.txt, AI coding agent, Cursor, Claude Code, Context7, MCP, react native video]
+---
+
+# llms.txt
+
+[`llms.txt`](https://llmstxt.org) is a standard for exposing documentation to AI in a clean, plain-text form: a curated index of the docs (titles, links, descriptions) plus a full-text bundle. Think `robots.txt`, but for LLMs.
+
+We generate these on **every build**, so they always match the current docs.
+
+The main file (current v7 docs):
+
+```
+https://docs.thewidlarzgroup.com/react-native-video/llms.txt
+```
+
+Full-text and version-specific variants are in [Files we publish](#files-we-publish) below.
+
+## How it's actually used
+
+Not by pasting it into a chat. In practice llms.txt is a **Business-to-Agent** format, and the real consumers are **coding agents**:
+
+- **Your coding agent fetches it on demand.** Point Cursor, Claude Code, GitHub Copilot, Windsurf, Cline, or Aider at the URL (via Cursor's **@Docs**, or by listing it in a rules file like `.cursor/rules/…`, `CLAUDE.md`, or `AGENTS.md`), and the agent pulls `llms.txt` when it's relevant and follows the links it needs. It's URL-based: no copy-paste, no token bloat.
+- **Context7 (MCP) already has our docs.** react-native-video is indexed on [Context7](https://context7.com), including the v7 documentation. With the Context7 MCP configured, just add **`use context7`** to your prompt and your assistant gets up-to-date, version-specific react-native-video docs injected automatically, so you never touch a `.txt` file.
+- **The skill is the turnkey version.** [Install the skill](./skills.mdx) and you get all of the above wrapped with automatic version detection. Nothing to wire up.
+- **Plain chat? Paste as a fallback.** In a chat that can't fetch URLs (a basic ChatGPT/Claude window), paste `llms-full.txt`. Note: general web-crawling models don't reliably auto-load llms.txt, so treat this as a fallback, not the main path.
+
+:::note Honest take
+IDE and coding agents use llms.txt today; the big web-search LLMs mostly don't yet, and it isn't an SEO trick. We publish it for the coding-agent workflow above.
+:::
+
+## Files we publish
+
+Served from the docs root. **Point your agent at `llms.txt`**; the rest are variants for specific needs.
+
+| File | What it is |
+|------|-----------|
+| [`llms.txt`](https://docs.thewidlarzgroup.com/react-native-video/llms.txt) | **The one to link.** Curated index of the current (v7) docs (titles, descriptions, links); the generated API reference is left out for signal. |
+| [`llms-full.txt`](https://docs.thewidlarzgroup.com/react-native-video/llms-full.txt) | The same curated docs as **one full-text file** for a single paste into a large-context chat. |
+| [`llms-v7.txt`](https://docs.thewidlarzgroup.com/react-native-video/llms-v7.txt) / [`llms-v7-full.txt`](https://docs.thewidlarzgroup.com/react-native-video/llms-v7-full.txt) | v7 **including the full API reference** (bigger and noisier; use when you need exact TypeScript signatures). |
+| [`llms-v6.txt`](https://docs.thewidlarzgroup.com/react-native-video/llms-v6.txt) / [`llms-v6-full.txt`](https://docs.thewidlarzgroup.com/react-native-video/llms-v6-full.txt) | Legacy v6 index / full text. |
+
+## Set it up
+
+- **Cursor** - add the URL to Cursor's indexed docs (**Settings → Indexing & Docs**, or `@Docs → Add new doc` in the chat; see [Cursor's docs](https://cursor.com/docs/context/@-symbols/@-docs)), or list it in a `.cursor/rules/*.md` file.
+- **Claude Code / Codex** - add the URL to `CLAUDE.md` / `AGENTS.md`, or just [install the skill](./skills.mdx).
+- **Copilot / Windsurf / Cline / Aider** - reference the URL in the tool's rules or context file.
+- **Context7** - with the MCP set up, add `use context7` to your prompt; it resolves react-native-video automatically.
+- **Plain chat (fallback)** - paste `llms-full.txt`.
+
+## Which file?
+
+- **Link one URL:** `llms.txt` (current v7, curated).
+- **Need exact API signatures:** `llms-v7.txt` / `llms-v7-full.txt`.
+- **App is on v6:** `llms-v6.txt` / `llms-v6-full.txt`. (Check `package.json` → `react-native-video`: `7.x` incl. `7.0.0-beta.x` is v7; `6.x` is v6.)
+- **Want zero setup:** [install the skill](./skills.mdx), with version detection and routing built in.

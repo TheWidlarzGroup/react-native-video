@@ -1,0 +1,93 @@
+---
+title: Build with AI
+sidebar_label: Overview
+sidebar_position: 1
+description: Use AI assistants like Claude Code, Cursor, and ChatGPT to build with react-native-video. Install the agent skill in one command, point tools at llms.txt, and give your assistant version-aware (v6/v7) context.
+keywords: [react native video, AI, LLM, llms.txt, Claude Code, Cursor, agent skill, AI assistant, Codex]
+---
+
+# Build with AI
+
+AI assistants are great at React Native, right up until they guess at react-native-video. The library has **two very different APIs** (v6's `<Video>` component and v7's `useVideoPlayer` + `VideoView` player model), and an assistant with no context will happily mix them, invent props, or reach for a `drm` prop that only exists in one of them.
+
+The fix is simple: **give your assistant the right context.** This page shows the three ways to do that, from "drop-in for agents" to "paste into a chat," and points you to the deep-dive pages.
+
+## Give your AI context
+
+Pick the option that matches your tool. You can combine them.
+
+### 1. Install the skill (best for coding agents)
+
+Our agent skill teaches the assistant to detect your installed version first, then use the matching API, plus DRM, offline, PiP, background audio, native setup, and v6→v7 migration. **One command installs it for every agent you use** (Claude Code, Cursor, Codex, Copilot, Windsurf, Gemini, VS Code, and dozens more):
+
+```sh
+npx skills add TheWidlarzGroup/react-native-video
+```
+
+No per-tool config. The [skills.sh](https://skills.sh) CLI writes the skill into each agent's directory for you.
+
+→ Full details on the **[Skills](./skills.mdx)** page.
+
+### 2. Point your coding agent at `llms.txt` (or Context7)
+
+This is how llms.txt is actually used: give the URL to your agent and it fetches on demand. Add it to Cursor's **@Docs**, or list it in a rules file (`.cursor/rules/…`, `CLAUDE.md`) for Claude Code, Copilot, Windsurf, Cline, or Aider. It's all URL-based, so no copy-paste and no token bloat.
+
+```
+https://docs.thewidlarzgroup.com/react-native-video/llms.txt
+```
+
+Already using **[Context7](https://context7.com)**? react-native-video is indexed there, so just add `use context7` to your prompt and up-to-date docs are injected automatically.
+
+→ Every file and how to wire it up on the **[llms.txt](./llms-txt.mdx)** page.
+
+### 3. Paste the docs (quick fallback for plain chat)
+
+No integration? In a plain ChatGPT, Claude, or Gemini window, paste a `llms.txt` file before you ask your question. Fastest way to unblock a one-off.
+
+## Set up your tool
+
+**Claude Code** - Install the skill (option 1); it activates automatically when your prompt mentions react-native-video, `useVideoPlayer`, `VideoView`, and friends. To pin context for a whole project, add the `llms.txt` URL to your `CLAUDE.md`.
+
+**Cursor** - Install the skill (option 1), or add the `llms.txt` URL to Cursor's indexed docs (**Settings → Indexing & Docs**, or `@Docs → Add new doc` in the chat; the exact spot moves between versions, so see [Cursor's docs](https://cursor.com/docs/context/@-symbols/@-docs)). Version-proof alternative: list the URL in a `.cursor/rules/*.md` file.
+
+**Context7 (MCP)** - Add `use context7` to your prompt. react-native-video is already indexed, so current, version-specific docs are injected automatically.
+
+**ChatGPT / Claude.ai / Gemini** - The fallback for plain chat: paste a `llms.txt` file (option 3). For a persistent setup, add the `llms.txt` URL to a Project's custom instructions or knowledge.
+
+**Codex, Copilot, Windsurf, Gemini, VS Code, and more** - Install the skill (option 1). The same `npx skills add` command sets it up for each. One command covers dozens of agents.
+
+**Anything else** - Reference the `llms.txt` URL in whatever context or rules file your tool supports.
+
+## Why version context matters
+
+react-native-video v6 and v7 are **not** the same API:
+
+- **v6**: one imperative component (`<Video source paused ... />`), controlled through props and a `ref`.
+- **v7**: a player object (`const player = useVideoPlayer(source)`) rendered with `<VideoView player={player} />`, controlled through the player instance.
+
+An assistant that doesn't know which one you're on will produce code that simply doesn't exist in your version. The skill solves this by detecting your version first; the `llms.txt` files are version-labelled so you can point the assistant at exactly v6 or v7. When in doubt, tell your assistant which major version you use.
+
+## Example prompts
+
+With the skill installed (or `llms.txt` loaded), paste any of these to get going:
+
+```text
+Build a video player screen with react-native-video v7 (useVideoPlayer + VideoView)
+that plays an HLS stream, shows native controls, and pauses when the screen loses focus.
+```
+
+```text
+Migrate this v6 <Video> component to the v7 useVideoPlayer + VideoView API.
+```
+
+```text
+Add Picture-in-Picture and fullscreen support to my VideoView in react-native-video v7.
+```
+
+```text
+Set up Widevine (Android) and FairPlay (iOS) DRM playback with react-native-video v7.
+```
+
+## What's next
+
+We're exploring more ways to make react-native-video first-class for AI workflows, starting with an **MCP server**. Have a request, or a setup that works well for you? Tell us in **[GitHub Discussions](https://github.com/TheWidlarzGroup/react-native-video/discussions)**.

@@ -1,0 +1,57 @@
+---
+title: Skills
+sidebar_label: Skills
+sidebar_position: 3
+description: Install the react-native-video agent skill with one command (npx skills add) for Claude Code, Cursor, Codex, and dozens more AI agents. Version-aware, source-verified guidance for v6 and v7.
+keywords: [agent skill, skills.sh, Claude Code, Cursor, Codex, AI, react native video, Copilot]
+---
+
+# Skills
+
+An **agent skill** is a reusable instruction set: a `SKILL.md` file your AI assistant loads automatically when it's relevant. Ours teaches your assistant to use react-native-video *correctly*, across **both v6 and v7**.
+
+`SKILL.md` is an open standard supported natively by Claude Code, Codex, Cursor, GitHub Copilot, and VS Code, among others. Ours is distributed through [skills.sh](https://skills.sh), Vercel Labs' open skills registry, so **one command installs it into every agent you have**, no per-tool setup.
+
+## Install
+
+```sh
+npx skills add TheWidlarzGroup/react-native-video
+```
+
+That's the whole setup. The `npx skills` CLI **auto-detects the coding agents on your machine** and writes the skill into each one's skills directory (`.claude/skills/`, `.cursor/`, and so on). If it can't detect any, it asks which to install to. No config, no API keys, no pasting into rules files.
+
+## What it does
+
+### Detects your version first
+
+The most common AI mistake with this library is mixing v6 and v7. The skill checks your installed version **before** giving any API advice, then uses the matching model, never handing a v7 user a `<Video source>` example or telling a v6 user to call `useVideoPlayer`.
+
+### Activates on
+
+Playing or controlling video/audio, the v6 `Video` component or the v7 `useVideoPlayer` / `VideoView` API, source / props / events (`onLoad`, `onProgress`, `onEnd`, `paused`, `resizeMode`, `drm`), HLS/DASH, DRM (Widevine / FairPlay, `@react-native-video/drm`), captions & tracks, Picture-in-Picture, background / lockscreen audio, fullscreen, buffering, offline / downloading, native iOS/Android setup, and deciding between v6 and v7 or migrating between them.
+
+Trigger words include `react-native-video`, `RNV`, `Video`, `useVideoPlayer`, `VideoView`.
+
+### Covers
+
+- **Version choice & migration** - an honest v6-vs-v7 decision guide and a v6→v7 migration path.
+- **Correct API per version** - component model (v6) vs player model (v7): setup, playback control, events.
+- **Hard topics** - DRM, tracks/subtitles, PiP, fullscreen, background audio, offline, video feeds.
+- **Native setup & troubleshooting** - install, streaming, background modes, and a troubleshooting reference.
+
+### Output you can trust
+
+API claims are **verified against the library source and docs**, not guessed. The skill presents v7's beta status honestly (it's beta, but ships in production apps with 1M+ users) and points to TheWidlarzGroup add-ons only when the open-source core genuinely can't do the job, helpfully and never salesy.
+
+## Compatibility
+
+The same `npx skills add` command works across the open skills ecosystem, covering **dozens of agents**, including:
+
+Claude Code · Cursor · Codex · GitHub Copilot · Windsurf · Gemini CLI · Amp · Antigravity · Goose · Kilo · Kiro CLI · OpenCode · Roo · Trae · Droid · VS Code, and many more.
+
+If your agent supports the `SKILL.md` standard, this skill works in it.
+
+## Learn more
+
+- Skill source & `SKILL.md`: [`skills/react-native-video`](https://github.com/TheWidlarzGroup/react-native-video/tree/master/skills/react-native-video)
+- Prefer plain context instead of a skill? See **[llms.txt](./llms-txt.mdx)**.

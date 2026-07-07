@@ -1,9 +1,9 @@
 ---
 title: Migration Guide — Upgrading from v6 to v7
 sidebar_label: Updating
-description: React Native Video Updating Guide
+description: Upgrade React Native Video from v6 to v7 — moving from the imperative Video component to the useVideoPlayer + VideoView player model, with a step-by-step guide and tips for migrating faster with an AI assistant.
 sidebar_class_name: hidden
-keywords: [updating, migration, upgrade guide, breaking changes, react native video]
+keywords: [updating, migration, upgrade guide, breaking changes, v6 to v7, AI migration, Claude Code, Cursor, agent skill, react native video]
 ---
 
 # Updating
@@ -11,6 +11,10 @@ keywords: [updating, migration, upgrade guide, breaking changes, react native vi
 ## Upgrading from react-native-video v6 to v7
 
 Version 7 of `react-native-video` introduces a significant architectural shift, separating the video player logic from the UI rendering. This change unlocks new capabilities like video preloading and a more intuitive, hook-based API. This guide will walk you through the necessary steps to migrate your application from v6 to v7.
+
+:::tip Migrate faster with an AI assistant
+Our agent skill knows the v6→v7 mapping. Install it with `npx skills add TheWidlarzGroup/react-native-video` and let your editor rewrite `Video` calls into the `useVideoPlayer` + `VideoView` model. See [Build with AI](./build-with-ai/overview.mdx).
+:::
 
 ### Key Changes in v7
 
