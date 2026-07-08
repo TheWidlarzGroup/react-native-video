@@ -32,6 +32,8 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   }
   var playerObserver: VideoPlayerObserver?
   private let sourceLoader = SourceLoader()
+  private let releaseLock = NSLock()
+  private var hasReleased = false
 
   init(source: (any HybridVideoPlayerSourceSpec)) throws {
     self.source = source
@@ -50,7 +52,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
           self.playerItem = try await self.sourceLoader.load {
             try await self.initializePlayerItem()
           }
-          self.player.replaceCurrentItem(with: self.playerItem)
+          await self.replaceCurrentItemOnMain(with: self.playerItem)
         } catch {
           // Ignore cancellation errors during initialization
         }
@@ -203,7 +205,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
         self.playerItem = try await self.sourceLoader.load {
           try await self.initializePlayerItem()
         }
-        self.player.replaceCurrentItem(with: self.playerItem)
+        await self.replaceCurrentItemOnMain(with: self.playerItem)
       } catch {
         if error is CancellationError {
           throw PlayerError.cancelled.error()
@@ -213,7 +215,45 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     }
   }
 
+  private func claimRelease() -> Bool {
+    releaseLock.lock()
+    defer { releaseLock.unlock() }
+
+    if hasReleased {
+      return false
+    }
+
+    hasReleased = true
+    return true
+  }
+
+  private func replaceCurrentItemOnMain(with playerItem: AVPlayerItem?) async {
+    let player = self.player
+    await MainActor.run {
+      player.replaceCurrentItem(with: playerItem)
+    }
+  }
+
+  private func removeCurrentItemForRelease() {
+    let player = self.player
+    let removeCurrentItem = {
+      player.pause()
+      player.replaceCurrentItem(with: nil)
+    }
+
+    if Thread.isMainThread {
+      removeCurrentItem()
+      return
+    }
+
+    DispatchQueue.main.async(execute: removeCurrentItem)
+  }
+
   func release() {
+    guard claimRelease() else {
+      return
+    }
+
     sourceLoader.cancelSync()
     NowPlayingInfoCenterManager.shared.removePlayer(player: player)
 
@@ -230,7 +270,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     playerObserver?.invalidatePlayerObservers()
     self.playerObserver = nil
 
-    self.player.replaceCurrentItem(with: nil)
+    removeCurrentItemForRelease()
     status = .idle
 
     VideoManager.shared.unregister(player: self)
@@ -259,7 +299,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
         }
         self.playerItem = playerItem
 
-        self.player.replaceCurrentItem(with: playerItem)
+        await self.replaceCurrentItemOnMain(with: playerItem)
         promise.resolve(withResult: ())
       } catch {
         if error is CancellationError {
@@ -352,7 +392,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
           self.playerItem = try await self.sourceLoader.load {
             try await self.initializePlayerItem()
           }
-          self.player.replaceCurrentItem(with: self.playerItem)
+          await self.replaceCurrentItemOnMain(with: self.playerItem)
           promise.resolve(withResult: ())
         } catch {
           if error is CancellationError {
