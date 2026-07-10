@@ -4,6 +4,8 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
+import android.view.SurfaceView
+import android.view.TextureView
 import android.view.View
 import android.view.View.MeasureSpec
 import android.widget.FrameLayout
@@ -17,6 +19,7 @@ import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerView
 import com.brentvatne.common.api.ResizeMode
 import com.brentvatne.common.api.SubtitleStyle
+import com.brentvatne.common.api.ViewType as RNVViewType
 
 @UnstableApi
 class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
@@ -24,6 +27,7 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
 
     private var localStyle = SubtitleStyle()
     private var pendingResizeMode: Int? = null
+    private var appliedSurfaceViewType: Int? = null
     private val liveBadge: TextView = TextView(context).apply {
         text = "LIVE"
         setTextColor(Color.WHITE)
@@ -140,7 +144,52 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
     }
 
     fun updateSurfaceView(viewType: Int) {
-        // TODO: Implement proper surface type switching if needed
+        if (appliedSurfaceViewType == viewType) {
+            return
+        }
+
+        val currentSurfaceView = playerView.videoSurfaceView ?: return
+        val shouldUseTextureView = viewType == RNVViewType.VIEW_TYPE_TEXTURE
+        val isCurrentTextureView = currentSurfaceView is TextureView
+
+        if (shouldUseTextureView == isCurrentTextureView) {
+            if (!shouldUseTextureView && currentSurfaceView is SurfaceView) {
+                currentSurfaceView.setSecure(viewType == RNVViewType.VIEW_TYPE_SURFACE_SECURE)
+            }
+            appliedSurfaceViewType = viewType
+            return
+        }
+
+        val contentFrame =
+            playerView.findViewById<AspectRatioFrameLayout>(androidx.media3.ui.R.id.exo_content_frame)
+                ?: return
+        val replacementSurfaceView: View = if (shouldUseTextureView) {
+            TextureView(context).apply {
+                isOpaque = false
+            }
+        } else {
+            SurfaceView(context).apply {
+                if (viewType == RNVViewType.VIEW_TYPE_SURFACE_SECURE) {
+                    setSecure(true)
+                }
+            }
+        }
+        val insertIndex = contentFrame.indexOfChild(currentSurfaceView).coerceAtLeast(0)
+        val player = playerView.player
+
+        clearVideoSurface(player, currentSurfaceView)
+        contentFrame.removeView(currentSurfaceView)
+        replacementSurfaceView.layoutParams = FrameLayout.LayoutParams(
+            LayoutParams.MATCH_PARENT,
+            LayoutParams.MATCH_PARENT,
+        )
+        contentFrame.addView(replacementSurfaceView, insertIndex)
+        setInternalSurfaceViewField(replacementSurfaceView)
+        attachVideoSurface(player, replacementSurfaceView)
+
+        appliedSurfaceViewType = viewType
+        playerView.requestLayout()
+        requestLayout()
     }
 
     val isPlaying: Boolean
@@ -254,6 +303,28 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
 
     companion object {
         private const val TAG = "ExoPlayerView"
+    }
+
+    private fun clearVideoSurface(player: Player?, surfaceView: View) {
+        when (surfaceView) {
+            is TextureView -> player?.clearVideoTextureView(surfaceView)
+            is SurfaceView -> player?.clearVideoSurfaceView(surfaceView)
+        }
+    }
+
+    private fun attachVideoSurface(player: Player?, surfaceView: View) {
+        when (surfaceView) {
+            is TextureView -> player?.setVideoTextureView(surfaceView)
+            is SurfaceView -> player?.setVideoSurfaceView(surfaceView)
+        }
+    }
+
+    private fun setInternalSurfaceViewField(surfaceView: View) {
+        runCatching {
+            val surfaceField = PlayerView::class.java.getDeclaredField("surfaceView")
+            surfaceField.isAccessible = true
+            surfaceField.set(playerView, surfaceView)
+        }
     }
 
     /**
