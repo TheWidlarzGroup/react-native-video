@@ -12,8 +12,8 @@ class VideoManager {
   // MARK: - Singleton
   static let shared = VideoManager()
   
-  private var players = NSHashTable<HybridVideoPlayer>.weakObjects()
-  private var videoView = NSHashTable<VideoComponentView>.weakObjects()
+  private let players = SynchronizedHashTable<HybridVideoPlayer>(weakObjects: true)
+  private let videoView = SynchronizedHashTable<VideoComponentView>(weakObjects: true)
   
   private var isAudioSessionActive = false
   private var remoteControlEventsActive = false
