@@ -70,12 +70,16 @@ class NowPlayingInfoCenterManager {
   }
 
   func removePlayer(player: AVPlayer) {
-    // Take the removal and the emptiness answer in one acquisition. Split across two, a
+    // Take the removal and the emptiness answer in one acquisition; split across two, a
     // player removed from the JS thread and one removed from a `deinit` on another thread
-    // can both see an empty table and both run cleanup(), unbalancing the remote-control
-    // begin/end pairing.
+    // could both see an empty table and both run cleanup(), unbalancing remote-control begin/end.
     let (wasRegistered, noPlayersLeft) = players.removeReportingEmpty(player)
     if !wasRegistered {
+      return
+    }
+
+    if noPlayersLeft {
+      cleanup()
       return
     }
 
@@ -83,11 +87,6 @@ class NowPlayingInfoCenterManager {
     let observer = observers.removeValue(forKey: player.hashValue)
     observersLock.unlock()
     observer?.invalidate()
-
-    if noPlayersLeft {
-      cleanup()
-      return
-    }
 
     if currentPlayer == player {
       if let playbackObserver {

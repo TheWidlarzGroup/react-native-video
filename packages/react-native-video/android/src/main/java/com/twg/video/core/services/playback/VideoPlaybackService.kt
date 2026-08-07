@@ -93,10 +93,9 @@ class VideoPlaybackService : MediaSessionService() {
 
     val mediaSession = builder.build()
 
-    // Put-if-absent under one acquisition: registerPlayer is reached from the JS thread
-    // (property setters -> updatePlayerPreferences) and from main (onServiceConnected), so
-    // both can pass the containsKey check above and build a session. The loser releases the
-    // session it built and never calls addSession.
+    // Put-if-absent under one acquisition: registerPlayer can be reached concurrently from
+    // the JS thread and from main (onServiceConnected). Without one lock both could pass the
+    // containsKey check; the loser here releases its session instead of calling addSession.
     val didRegister = synchronized(sessionsLock) {
       if (mediaSessionsList.containsKey(player)) {
         false
