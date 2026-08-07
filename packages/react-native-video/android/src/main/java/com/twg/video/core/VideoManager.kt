@@ -17,9 +17,9 @@ import java.lang.ref.WeakReference
 object VideoManager : LifecycleEventListener {
   private const val TAG = "VideoManager"
   
-  // Guards `views`, `players` and `playersPausedForPip`: mutated from the JS thread,
-  // iterated from the UI thread. Iterate snapshots, never the live collections, so player
-  // callbacks cannot re-enter the lock.
+  // Guards `views`, `players`, `playersPausedForPip` and `lastPlayedNitroId`: mutated from the
+  // JS thread, iterated from the UI thread. Iterate snapshots, never the live collections, so
+  // player callbacks cannot re-enter the lock.
   private val registryLock = Any()
 
   // nitroId -> weak VideoView
@@ -124,8 +124,8 @@ object VideoManager : LifecycleEventListener {
 
   fun maybePassPlayerToView(player: HybridVideoPlayer) {
     val nitroIds = synchronized(registryLock) { players[player]?.toList() } ?: return
-    val views = nitroIds.mapNotNull { getVideoViewWeakReferenceByNitroId(it)?.get() }
-    val latestView = views.lastOrNull() ?: return
+    val resolvedViews = nitroIds.mapNotNull { getVideoViewWeakReferenceByNitroId(it)?.get() }
+    val latestView = resolvedViews.lastOrNull() ?: return
 
     player.movePlayerToVideoView(latestView)
   }
@@ -304,8 +304,11 @@ object VideoManager : LifecycleEventListener {
       // Pause only if it is currently playing
       if (player.isPlaying && player.mixAudioMode != MixAudioMode.MIXWITHOTHERS) {
         player.pause()
-        synchronized(registryLock) { playersPausedForPip.add(player) }
-        Log.v(TAG, "Paused player for PiP")
+        val ids = synchronized(registryLock) {
+          playersPausedForPip.add(player)
+          players[player]?.toList()
+        }
+        Log.v(TAG, "Paused player for PiP, nitroIds: $ids")
       }
     }
   }
@@ -323,7 +326,8 @@ object VideoManager : LifecycleEventListener {
 
       if (!player.isPlaying) {
         player.play()
-        Log.v(TAG, "Resumed player after PiP exit")
+        val ids = synchronized(registryLock) { players[player]?.toList() }
+        Log.v(TAG, "Resumed player after PiP exit, nitroIds: $ids")
       }
     }
   }
