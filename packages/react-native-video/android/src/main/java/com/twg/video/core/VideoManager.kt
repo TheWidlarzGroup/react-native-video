@@ -17,19 +17,30 @@ import java.lang.ref.WeakReference
 object VideoManager : LifecycleEventListener {
   private const val TAG = "VideoManager"
   
+  // Guards `views`, `players` and `playersPausedForPip`: mutated from the JS thread,
+  // iterated from the UI thread. Iterate snapshots, never the live collections, so player
+  // callbacks cannot re-enter the lock.
+  private val registryLock = Any()
+
   // nitroId -> weak VideoView
   private val views = mutableMapOf<Int, WeakReference<VideoView>>()
   // player -> list of nitroIds of views that are using this player
   private val players = mutableMapOf<HybridVideoPlayer, MutableList<Int>>()
-  
+
   // Keep track of players that were paused due to PiP so that they can be resumed later
   private val playersPausedForPip = mutableSetOf<HybridVideoPlayer>()
-  
+
   private var currentPipVideoView: WeakReference<VideoView>? = null
 
   var audioFocusManager = AudioFocusManager()
 
   private var lastPlayedNitroId: Int? = null
+
+  private fun playersSnapshot(): List<HybridVideoPlayer> =
+    synchronized(registryLock) { players.keys.toList() }
+
+  private fun viewsSnapshot(): List<WeakReference<VideoView>> =
+    synchronized(registryLock) { views.values.toList() }
 
   init {
     NitroModules.applicationContext?.apply {
@@ -112,14 +123,15 @@ object VideoManager : LifecycleEventListener {
   }
 
   fun maybePassPlayerToView(player: HybridVideoPlayer) {
-    val views = players[player]?.mapNotNull { getVideoViewWeakReferenceByNitroId(it)?.get() } ?: return
+    val nitroIds = synchronized(registryLock) { players[player]?.toList() } ?: return
+    val views = nitroIds.mapNotNull { getVideoViewWeakReferenceByNitroId(it)?.get() }
     val latestView = views.lastOrNull() ?: return
 
     player.movePlayerToVideoView(latestView)
   }
 
   fun registerView(view: VideoView) {
-    views[view.nitroId] = WeakReference<VideoView>(view)
+    synchronized(registryLock) { views[view.nitroId] = WeakReference<VideoView>(view) }
     PluginsRegistry.shared.notifyVideoViewCreated(WeakReference(view))
   }
 
@@ -135,36 +147,40 @@ object VideoManager : LifecycleEventListener {
       }
     }
 
-    views.remove(view.nitroId)
+    synchronized(registryLock) { views.remove(view.nitroId) }
     PluginsRegistry.shared.notifyVideoViewDestroyed(WeakReference(view))
   }
 
   fun addViewToPlayer(view: VideoView, player: HybridVideoPlayer) {
-    // Add player to list if it doesn't exist (should not happen)
-    if(!players.containsKey(player)) players[player] = mutableListOf()
-
-    // Check if view is already added to player
-    if(players[player]?.contains(view.nitroId) == true) return
-
-    // Add view to player
-    players[player]?.add(view.nitroId)
+    synchronized(registryLock) {
+      val nitroIds = players.getOrPut(player) { mutableListOf() }
+      if (nitroIds.contains(view.nitroId)) return
+      nitroIds.add(view.nitroId)
+    }
   }
 
   fun removeViewFromPlayer(view: VideoView, player: HybridVideoPlayer) {
-    players[player]?.remove(view.nitroId)
+    val playerBecameOrphaned = synchronized(registryLock) {
+      players[player]?.remove(view.nitroId)
+      if (players[player]?.isEmpty() == true) {
+        players.remove(player)
+        true
+      } else {
+        false
+      }
+    }
 
-    // If this was the last view using this player, clean up
-    if (players[player]?.isEmpty() == true) {
-      players.remove(player)
-    } else {
-      // If there are other views using this player, move to the latest one
+    // If there are other views using this player, move to the latest one
+    if (!playerBecameOrphaned) {
       maybePassPlayerToView(player)
     }
   }
 
   fun registerPlayer(player: HybridVideoPlayer) {
-    if (!players.containsKey(player)) {
-      players[player] = mutableListOf()
+    synchronized(registryLock) {
+      if (!players.containsKey(player)) {
+        players[player] = mutableListOf()
+      }
     }
 
     audioFocusManager.registerPlayer(player)
@@ -176,42 +192,40 @@ object VideoManager : LifecycleEventListener {
     PluginsRegistry.shared.notifyPlayerDestroyed(WeakReference(player))
 
     // Remove player from any views that were using it
-    players[player]?.forEach { nitroId ->
-      views[nitroId]?.get()?.let { view ->
-        view.hybridPlayer = null
-      }
+    val orphanedViews = synchronized(registryLock) {
+      val nitroIds = players.remove(player) ?: emptyList<Int>()
+      nitroIds.mapNotNull { views[it]?.get() }
     }
-
-    players.remove(player)
+    orphanedViews.forEach { view -> view.hybridPlayer = null }
   }
 
   fun getPlayerByNitroId(nitroId: Int): HybridVideoPlayer? {
-    return players.keys.find { player ->
-      players[player]?.contains(nitroId) == true
+    return synchronized(registryLock) {
+      players.entries.find { (_, nitroIds) -> nitroIds.contains(nitroId) }?.key
     }
   }
 
   fun updateVideoViewNitroId(oldNitroId: Int, newNitroId: Int, view: VideoView) {
-    // Remove old mapping
-    if (oldNitroId != -1) {
-      views.remove(oldNitroId)
+    synchronized(registryLock) {
+      // Remove old mapping
+      if (oldNitroId != -1) {
+        views.remove(oldNitroId)
 
-      // Update player mappings
-      players.keys.forEach { player ->
-        players[player]?.let { nitroIds ->
+        // Update player mappings
+        players.values.forEach { nitroIds ->
           if (nitroIds.remove(oldNitroId)) {
             nitroIds.add(newNitroId)
-    }
+          }
         }
       }
-    }
 
-    // Add new mapping
-    views[newNitroId] = WeakReference(view)
+      // Add new mapping
+      views[newNitroId] = WeakReference(view)
+    }
   }
 
   fun getVideoViewWeakReferenceByNitroId(nitroId: Int): WeakReference<VideoView>? {
-    return views[nitroId]
+    return synchronized(registryLock) { views[nitroId] }
   }
 
   // Keep the activity's auto-enter-PiP flag synced to the last-played video (the PiP
@@ -235,7 +249,7 @@ object VideoManager : LifecycleEventListener {
 
   // ------------ Lifecycle Handler ------------
   private fun onAppEnterForeground() {
-    players.keys.forEach { player ->
+    playersSnapshot().forEach { player ->
       if (player.wasAutoPaused) {
         player.play()
         // Clear so a later manual pause isn't wrongly auto-resumed on the next foreground.
@@ -255,7 +269,7 @@ object VideoManager : LifecycleEventListener {
       null
     }
 
-    players.keys.forEach { player ->
+    playersSnapshot().forEach { player ->
       if (player == pipPlayer) {
         return@forEach
       }
@@ -281,49 +295,56 @@ object VideoManager : LifecycleEventListener {
 
   fun pauseOtherPlayers(pipVideoView: VideoView) {
     val pipPlayer = pipVideoView.hybridPlayer
-    playersPausedForPip.clear()
+    synchronized(registryLock) { playersPausedForPip.clear() }
 
-    players.keys.forEach { player ->
+    playersSnapshot().forEach { player ->
       // Skip the player that is used for the PiP view
       if (player == pipPlayer) return@forEach
 
       // Pause only if it is currently playing
       if (player.isPlaying && player.mixAudioMode != MixAudioMode.MIXWITHOTHERS) {
         player.pause()
-        playersPausedForPip.add(player)
-        Log.v(TAG, "Paused player for PiP (nitroIds: ${players[player]})")
+        synchronized(registryLock) { playersPausedForPip.add(player) }
+        Log.v(TAG, "Paused player for PiP")
       }
     }
   }
 
   private fun resumePlayersPausedForPip() {
-    playersPausedForPip.forEach { player ->
+    val paused = synchronized(registryLock) {
+      val snapshot = playersPausedForPip.toList()
+      playersPausedForPip.clear()
+      snapshot
+    }
+
+    paused.forEach { player ->
       // Ensure the player is attached to the latest visible VideoView before resuming
       maybePassPlayerToView(player)
 
       if (!player.isPlaying) {
         player.play()
-        Log.v(TAG, "Resumed player after PiP exit (nitroIds: ${players[player]})")
+        Log.v(TAG, "Resumed player after PiP exit")
       }
     }
-    playersPausedForPip.clear()
   }
 
   fun getAnyPlayingVideoView(): VideoView? {
-    return views.values.firstOrNull { ref ->
+    return viewsSnapshot().firstOrNull { ref ->
       ref.get()?.hybridPlayer?.isPlaying == true
     }?.get()
   }
 
   fun setLastPlayedPlayer(player: HybridVideoPlayer) {
     // Resolve to the latest view using this player (usually the last one in the list)
-    val nitroIds = players[player] ?: return
-    if (nitroIds.isNotEmpty()) {
-      lastPlayedNitroId = nitroIds.last()
+    synchronized(registryLock) {
+      val nitroIds = players[player] ?: return
+      if (nitroIds.isNotEmpty()) {
+        lastPlayedNitroId = nitroIds.last()
+      }
     }
   }
 
   fun getLastPlayedVideoView(): VideoView? {
-    return lastPlayedNitroId?.let { views[it]?.get() }
+    return synchronized(registryLock) { lastPlayedNitroId?.let { views[it]?.get() } }
   }
 }
