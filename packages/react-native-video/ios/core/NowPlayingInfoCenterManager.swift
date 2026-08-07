@@ -7,8 +7,9 @@ class NowPlayingInfoCenterManager {
   private let SEEK_INTERVAL_SECONDS: Double = 10
 
   private weak var currentPlayer: AVPlayer?
-  private var players = NSHashTable<AVPlayer>.weakObjects()
+  private let players = SynchronizedHashTable<AVPlayer>(weakObjects: true)
 
+  private let observersLock = NSLock()
   private var observers: [Int: NSKeyValueObservation] = [:]
   private var playbackObserver: Any?
 
@@ -53,11 +54,13 @@ class NowPlayingInfoCenterManager {
       receivingRemoteControlEvents = true
     }
 
-    if let oldObserver = observers[player.hashValue] {
-      oldObserver.invalidate()
-    }
+    let newObserver = observePlayers(player: player)
+    observersLock.lock()
+    let oldObserver = observers[player.hashValue]
+    observers[player.hashValue] = newObserver
+    observersLock.unlock()
+    oldObserver?.invalidate()
 
-    observers[player.hashValue] = observePlayers(player: player)
     players.add(player)
 
     // Also take over if the new player is already playing — KVO won't fire since rate hasn't changed
@@ -71,11 +74,10 @@ class NowPlayingInfoCenterManager {
       return
     }
 
-    if let observer = observers[player.hashValue] {
-      observer.invalidate()
-    }
-
-    observers.removeValue(forKey: player.hashValue)
+    observersLock.lock()
+    let observer = observers.removeValue(forKey: player.hashValue)
+    observersLock.unlock()
+    observer?.invalidate()
     players.remove(player)
 
     if players.allObjects.isEmpty {
@@ -97,7 +99,11 @@ class NowPlayingInfoCenterManager {
   }
 
   public func cleanup() {
+    observersLock.lock()
+    let staleObservers = observers
     observers.removeAll()
+    observersLock.unlock()
+    staleObservers.values.forEach { $0.invalidate() }
     players.removeAllObjects()
 
     if let playbackObserver {
