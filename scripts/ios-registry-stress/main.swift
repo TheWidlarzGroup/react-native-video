@@ -23,7 +23,7 @@ let safeTable = SynchronizedHashTable<StressPlayer>(weakObjects: true)
   if arm == "unsafe" { unsafeTable.remove(p) } else { safeTable.remove(p) }
 }
 
-// Mirrors VideoManager.configureAudioSession (VideoManager.swift:202)
+// Mirrors the audio-session refresh's read of the registry.
 @inline(never) func configureAudioSession() {
   if arm == "unsafe" {
     _ = unsafeTable.allObjects.contains { $0.ignoreSilentSwitchMode == 1 }
@@ -32,10 +32,8 @@ let safeTable = SynchronizedHashTable<StressPlayer>(weakObjects: true)
   }
 }
 
-// Writer == HybridVideoPlayer.init -> register (JS thread) and
-//           HybridVideoPlayer.deinit -> release -> unregister (JS or Hermes GC thread).
-// Half the players are explicitly unregistered, half are only deallocated, because both
-// paths mutate the table.
+// Writer == registration on the JS thread, release from whichever thread drops the last
+// reference. Half are explicitly unregistered, half only deallocated — both mutate the table.
 let jsThread = DispatchQueue(label: "com.facebook.react.runtime.JavaScript")
 jsThread.async {
   var keep: [StressPlayer] = []
@@ -52,8 +50,7 @@ jsThread.async {
   }
 }
 
-// Reader == VideoManager.configureAudioSession invoked from a Swift closure on the main
-// queue, exactly as NowPlayingInfoCenterManager.swift:35 does.
+// Reader == the audio-session refresh, from a Swift closure on the main queue.
 func tick() {
   if Date() >= deadline {
     FileHandle.standardError.write("[\(arm)] SURVIVED\n".data(using: .utf8)!)

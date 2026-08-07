@@ -5,14 +5,9 @@
 
 import Foundation
 
-/// Thread-safe `NSHashTable`. `allObjects` enumerates the table internally, so calling it
-/// while another thread adds, removes, or deallocates a member is a data race — players are
-/// registered from the JS thread and released from whichever thread drops the last
-/// reference, while the audio session is refreshed from main.
-///
-/// `allObjects` returns a strong-referencing snapshot and releases the lock before
-/// returning, so callers iterate outside the lock. `NSLock` is not recursive — never call
-/// back into this type from within it.
+/// Thread-safe `NSHashTable`. Registries are written from the JS thread and read from main,
+/// and `allObjects` enumerates internally — unguarded that is a data race. The snapshot it
+/// returns holds strong refs, and the lock is dropped before returning; `NSLock` is not recursive.
 final class SynchronizedHashTable<T: AnyObject> {
   private let lock = NSLock()
   private let hashTable: NSHashTable<T>
