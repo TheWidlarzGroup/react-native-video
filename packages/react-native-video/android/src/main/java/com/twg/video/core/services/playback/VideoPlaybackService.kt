@@ -27,7 +27,11 @@ class VideoPlaybackServiceBinder(val service: VideoPlaybackService): Binder()
 
 @OptIn(UnstableApi::class)
 class VideoPlaybackService : MediaSessionService() {
-  private var mediaSessionsList = mutableMapOf<HybridVideoPlayer, MediaSession>()
+  // Guards `mediaSessionsList`. register/unregister are reached from the JS thread while
+  // onDestroy/onTaskRemoved run on main; iterating the live map threw
+  // ConcurrentModificationException in production.
+  private val sessionsLock = Any()
+  private val mediaSessionsList = mutableMapOf<HybridVideoPlayer, MediaSession>()
   private var binder = VideoPlaybackServiceBinder(this)
   private var sourceActivity: Class<Activity>? = null // retained for future deep-links; currently unused
   private var isForeground = false
@@ -55,7 +59,7 @@ class VideoPlaybackService : MediaSessionService() {
 
   // Player Registry
   fun registerPlayer(player: HybridVideoPlayer, from: Class<Activity>) {
-    if (mediaSessionsList.containsKey(player)) {
+    if (synchronized(sessionsLock) { mediaSessionsList.containsKey(player) }) {
       return
     }
     sourceActivity = from
@@ -89,18 +93,18 @@ class VideoPlaybackService : MediaSessionService() {
 
     val mediaSession = builder.build()
 
-    mediaSessionsList[player] = mediaSession
+    synchronized(sessionsLock) { mediaSessionsList[player] = mediaSession }
     addSession(mediaSession)
   }
 
   fun unregisterPlayer(player: HybridVideoPlayer) {
-    val session = mediaSessionsList.remove(player)
+    val session = synchronized(sessionsLock) { mediaSessionsList.remove(player) }
     session?.release()
     stopIfNoPlayers()
   }
 
   fun updatePlayerPreferences(player: HybridVideoPlayer) {
-    val session = mediaSessionsList[player]
+    val session = synchronized(sessionsLock) { mediaSessionsList[player] }
     if (session == null) {
       // If not registered but now needs it, register
       if (player.playInBackground || player.showNotificationControls) {
@@ -150,15 +154,20 @@ class VideoPlaybackService : MediaSessionService() {
   private fun cleanup() {
     stopForegroundSafely()
     stopSelf()
-    mediaSessionsList.forEach { (_, session) ->
-      session.release()
+
+    // Take and empty in one step, then release outside the lock.
+    val sessions = synchronized(sessionsLock) {
+      val snapshot = mediaSessionsList.values.toList()
+      mediaSessionsList.clear()
+      snapshot
     }
-    mediaSessionsList.clear()
+
+    sessions.forEach { session -> session.release() }
   }
 
   // Stop the service if there are no active media sessions (no players need it)
   fun stopIfNoPlayers() {
-    if (mediaSessionsList.isEmpty()) {
+    if (synchronized(sessionsLock) { mediaSessionsList.isEmpty() }) {
       // Remove placeholder notification and stop the service when no active players exist
       try {
         if (isForeground) {
