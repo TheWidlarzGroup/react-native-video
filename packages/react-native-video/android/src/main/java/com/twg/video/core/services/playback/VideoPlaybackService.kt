@@ -93,7 +93,24 @@ class VideoPlaybackService : MediaSessionService() {
 
     val mediaSession = builder.build()
 
-    synchronized(sessionsLock) { mediaSessionsList[player] = mediaSession }
+    // Put-if-absent under one acquisition: registerPlayer is reached from the JS thread
+    // (property setters -> updatePlayerPreferences) and from main (onServiceConnected), so
+    // both can pass the containsKey check above and build a session. The loser releases the
+    // session it built and never calls addSession.
+    val didRegister = synchronized(sessionsLock) {
+      if (mediaSessionsList.containsKey(player)) {
+        false
+      } else {
+        mediaSessionsList[player] = mediaSession
+        true
+      }
+    }
+
+    if (!didRegister) {
+      mediaSession.release()
+      return
+    }
+
     addSession(mediaSession)
   }
 
@@ -167,18 +184,16 @@ class VideoPlaybackService : MediaSessionService() {
 
   // Stop the service if there are no active media sessions (no players need it)
   fun stopIfNoPlayers() {
-    if (synchronized(sessionsLock) { mediaSessionsList.isEmpty() }) {
-      // Remove placeholder notification and stop the service when no active players exist
-      try {
-        if (isForeground) {
-          stopForegroundSafely()
-          isForeground = false
-        }
-      } catch (_: Exception) {
-        Log.e(TAG, "Failed to stop foreground service!")
-      }
-      cleanup()
+    if (!synchronized(sessionsLock) { mediaSessionsList.isEmpty() }) {
+      return
     }
+
+    // Deliberately not cleanup(): it re-takes the lock and drains the registry, so a player
+    // that registered since the check above would have its fresh session released. With the
+    // registry empty there is nothing to drain anyway.
+    stopForegroundSafely()
+    isForeground = false
+    stopSelf()
   }
 
   companion object {
