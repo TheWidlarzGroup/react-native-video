@@ -34,6 +34,18 @@ final class SynchronizedHashTable<T: AnyObject> {
     hashTable.remove(object)
   }
 
+  /// Removes `object` and reports whether it was present and whether the table is now empty.
+  /// Callers that tear down on emptiness must use this rather than a second `allObjects` read,
+  /// otherwise concurrent removals can both observe an empty table and both tear down.
+  func removeReportingEmpty(_ object: T) -> (wasPresent: Bool, isEmpty: Bool) {
+    lock.lock()
+    defer { lock.unlock() }
+    let wasPresent = hashTable.contains(object)
+    hashTable.remove(object)
+    // `count` includes zeroed-out weak entries; `allObjects` does not.
+    return (wasPresent, hashTable.allObjects.isEmpty)
+  }
+
   func contains(_ object: T?) -> Bool {
     lock.lock()
     defer { lock.unlock() }
