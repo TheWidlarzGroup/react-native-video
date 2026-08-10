@@ -1,6 +1,5 @@
 package com.twg.video.core.services.playback
 
-import android.app.Activity
 import android.app.PendingIntent
 import android.content.Intent
 import android.os.Binder
@@ -17,23 +16,26 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
+import androidx.annotation.MainThread
 import androidx.core.app.NotificationCompat
-import com.margelo.nitro.NitroModules
 import com.margelo.nitro.video.HybridVideoPlayer
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
+import com.twg.video.core.utils.Threading
+import java.lang.ref.WeakReference
 
 class VideoPlaybackServiceBinder(val service: VideoPlaybackService): Binder()
 
 @OptIn(UnstableApi::class)
 class VideoPlaybackService : MediaSessionService() {
-  // Guards `mediaSessionsList`. register/unregister are reached from the JS thread while
-  // onDestroy/onTaskRemoved run on main; iterating the live map threw
-  // ConcurrentModificationException in production.
-  private val sessionsLock = Any()
+  // All map access is confined to the main looper.
   private val mediaSessionsList = mutableMapOf<HybridVideoPlayer, MediaSession>()
+  private val startTicketLock = Any()
+  private var nextStartTicketId = 0L
+  private var preparedStartTicket: StartTicket? = null
+  private var acceptedStartTicketId: Long? = null
+  private var isDestroyed = false
+  private var isServiceActive = false
+  private var isCleanedUp = false
   private var binder = VideoPlaybackServiceBinder(this)
-  private var sourceActivity: Class<Activity>? = null // retained for future deep-links; currently unused
   private var isForeground = false
   private var cachedLaunchIntent: Intent? = null
 
@@ -43,6 +45,22 @@ class VideoPlaybackService : MediaSessionService() {
   }
 
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    val ticketId = intent?.takeIf { candidate ->
+      candidate.hasExtra(START_TICKET_ID_EXTRA)
+    }?.getLongExtra(START_TICKET_ID_EXTRA, NO_START_TICKET_ID)
+    val acceptance = acceptStartCommandOnMain(ticketId)
+    if (!acceptance.accepted) {
+      stopSelf(startId)
+      return START_NOT_STICKY
+    }
+
+    activateServiceOnMain()
+    acceptance.preparedPlayers?.let { players -> reconcilePreparedPlayersOnMain(players) }
+    if (!isServiceActive) {
+      stopSelf(startId)
+      return START_NOT_STICKY
+    }
+
     // Ensure we call startForeground quickly on newer Android versions to avoid
     // ForegroundServiceDidNotStartInTimeException when startForegroundService(...) was used.
     try {
@@ -58,11 +76,226 @@ class VideoPlaybackService : MediaSessionService() {
   }
 
   // Player Registry
-  fun registerPlayer(player: HybridVideoPlayer, from: Class<Activity>) {
-    if (synchronized(sessionsLock) { mediaSessionsList.containsKey(player) }) {
+  fun unregisterPlayer(player: HybridVideoPlayer) =
+    Threading.runOnMainThread { unregisterPlayerOnMain(player) }
+
+  @MainThread
+  private fun unregisterPlayerOnMain(player: HybridVideoPlayer) {
+    reconcilePlayerOnMain(player)
+  }
+
+  fun updatePlayerPreferences(player: HybridVideoPlayer) =
+    Threading.runOnMainThread { updatePlayerPreferencesOnMain(player) }
+
+  @MainThread
+  private fun updatePlayerPreferencesOnMain(player: HybridVideoPlayer) {
+    reconcilePlayerOnMain(player)
+  }
+
+  fun detachPlayer(player: HybridVideoPlayer) =
+    Threading.runOnMainThread { detachPlayerOnMain(player) }
+
+  @MainThread
+  private fun detachPlayerOnMain(player: HybridVideoPlayer) {
+    mediaSessionsList.remove(player)?.release()
+    removePlayerFromPreparedStartTicketOnMain(player)
+    stopIfNoPlayersOnMain()
+  }
+
+  // Callbacks
+
+  override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? = null
+
+  override fun onBind(intent: Intent?): IBinder {
+    super.onBind(intent)
+    return binder
+  }
+
+  override fun onTaskRemoved(rootIntent: Intent?) {
+    stopAndInvalidateOnMain()
+  }
+
+  override fun onDestroy() {
+    stopAndInvalidateOnMain(destroyed = true)
+    super.onDestroy()
+  }
+
+  @MainThread
+  private fun stopForegroundSafely() {
+    try {
+      stopForeground(STOP_FOREGROUND_REMOVE)
+    } catch (_: Exception) {
+      Log.e(TAG, "Failed to stop foreground service!")
+    }
+  }
+
+  @MainThread
+  private fun cleanupOnMain() {
+    if (isCleanedUp) {
       return
     }
-    sourceActivity = from
+    isCleanedUp = true
+
+    stopForegroundSafely()
+    isForeground = false
+    stopSelf()
+
+    val sessions = mediaSessionsList.values.toList()
+    mediaSessionsList.clear()
+
+    sessions.forEach { session -> session.release() }
+  }
+
+  // Stop the service if there are no active media sessions (no players need it)
+  fun stopIfNoPlayers() = Threading.runOnMainThread { stopIfNoPlayersOnMain() }
+
+  @MainThread
+  private fun stopIfNoPlayersOnMain() {
+    if (!isServiceActive || mediaSessionsList.isNotEmpty() || hasPreparedStartTicket()) {
+      return
+    }
+
+    isServiceActive = false
+    invalidateStartTicketsOnMain()
+    cleanupOnMain()
+  }
+
+  @MainThread
+  private fun stopAndInvalidateOnMain(destroyed: Boolean = false) {
+    invalidateStartTicketsOnMain(destroyed)
+    isServiceActive = false
+    cleanupOnMain()
+  }
+
+  /**
+   * Adds a player to the bounded weak-reference batch for the next explicit system start.
+   */
+  internal fun prepareForStart(player: HybridVideoPlayer): Long? = synchronized(startTicketLock) {
+    if (isDestroyed || player.isReleasedForService) {
+      return@synchronized null
+    }
+
+    val ticket = preparedStartTicket ?: StartTicket(++nextStartTicketId).also {
+      preparedStartTicket = it
+    }
+    ticket.requestCount += 1
+    ticket.players.removeAll { it.get() == null }
+    if (ticket.players.none { it.get() === player }) {
+      ticket.players.add(WeakReference(player))
+    }
+    ticket.id
+  }
+
+  /**
+   * Completes one request paired with [prepareForStart] on the main looper. The start helper
+   * calls this before returning, so its following binder command is ordered after promotion.
+   */
+  internal fun completePreparedStart(ticketId: Long, startRequested: Boolean) {
+    Threading.runOnMainThread { completePreparedStartOnMain(ticketId, startRequested) }
+  }
+
+  @MainThread
+  private fun completePreparedStartOnMain(ticketId: Long, startRequested: Boolean) {
+    var preparedPlayers: List<HybridVideoPlayer>? = null
+    var discarded = false
+    synchronized(startTicketLock) {
+      val ticket = preparedStartTicket
+      when {
+        ticket?.id == ticketId -> {
+          if (ticket.requestCount > 0) {
+            ticket.requestCount -= 1
+          }
+
+          if (startRequested) {
+            preparedPlayers = consumePreparedStartTicketLocked(ticket)
+          } else if (ticket.requestCount == 0) {
+            preparedStartTicket = null
+            discarded = true
+          }
+        }
+        acceptedStartTicketId == ticketId -> return
+        else -> return
+      }
+    }
+
+    if (preparedPlayers != null) {
+      activateServiceOnMain()
+      reconcilePreparedPlayersOnMain(preparedPlayers)
+    } else if (discarded) {
+      stopIfNoPlayersOnMain()
+    }
+  }
+
+  @MainThread
+  private fun acceptStartCommandOnMain(ticketId: Long?): StartCommandAcceptance {
+    return synchronized(startTicketLock) {
+      if (isDestroyed) {
+        return@synchronized StartCommandAcceptance.REJECTED
+      }
+
+      val ticket = preparedStartTicket
+      when {
+        ticketId == null -> StartCommandAcceptance.REJECTED
+        ticket?.id == ticketId -> StartCommandAcceptance(
+          accepted = true,
+          preparedPlayers = consumePreparedStartTicketLocked(ticket)
+        )
+        acceptedStartTicketId == ticketId -> StartCommandAcceptance(accepted = true)
+        else -> StartCommandAcceptance.REJECTED
+      }
+    }
+  }
+
+  @MainThread
+  private fun activateServiceOnMain() {
+    if (!isServiceActive) {
+      isServiceActive = true
+      isCleanedUp = false
+      isForeground = false
+    }
+  }
+
+  @MainThread
+  private fun reconcilePlayerOnMain(player: HybridVideoPlayer) {
+    reconcilePlayerOnMain(player, checkIdleAfterwards = true)
+  }
+
+  @MainThread
+  private fun reconcilePreparedPlayersOnMain(players: List<HybridVideoPlayer>) {
+    players.forEach { player ->
+      reconcilePlayerOnMain(player, checkIdleAfterwards = false)
+    }
+    stopIfNoPlayersOnMain()
+  }
+
+  @MainThread
+  private fun reconcilePlayerOnMain(
+    player: HybridVideoPlayer,
+    checkIdleAfterwards: Boolean
+  ) {
+    if (
+      player.isReleasedForService ||
+      isDestroyedOnMain() ||
+      !isServiceActive
+    ) {
+      return
+    }
+
+    if (player.playInBackground || player.showNotificationControls) {
+      ensurePlayerSessionOnMain(player)
+    } else {
+      mediaSessionsList.remove(player)?.release()
+      if (checkIdleAfterwards) {
+        stopIfNoPlayersOnMain()
+      }
+    }
+  }
+
+  @MainThread
+  private fun ensurePlayerSessionOnMain(player: HybridVideoPlayer) {
+    if (mediaSessionsList.containsKey(player)) {
+      return
+    }
 
     val builder = MediaSession.Builder(this, player.player)
       .setId("RNVideoPlaybackService_" + player.hashCode())
@@ -90,116 +323,68 @@ class VideoPlaybackService : MediaSessionService() {
       }
     } catch (_: Exception) {}
 
-
     val mediaSession = builder.build()
-
-    // Put-if-absent under one acquisition: registerPlayer can be reached concurrently from
-    // the JS thread and from main (onServiceConnected). Without one lock both could pass the
-    // containsKey check; the loser here releases its session instead of calling addSession.
-    val didRegister = synchronized(sessionsLock) {
-      if (mediaSessionsList.containsKey(player)) {
-        false
-      } else {
-        mediaSessionsList[player] = mediaSession
-        true
-      }
-    }
-
-    if (!didRegister) {
-      mediaSession.release()
-      return
-    }
-
+    mediaSessionsList[player] = mediaSession
     addSession(mediaSession)
   }
 
-  fun unregisterPlayer(player: HybridVideoPlayer) {
-    val session = synchronized(sessionsLock) { mediaSessionsList.remove(player) }
-    session?.release()
-    stopIfNoPlayers()
+  private fun hasPreparedStartTicket(): Boolean = synchronized(startTicketLock) {
+    preparedStartTicket != null
   }
 
-  fun updatePlayerPreferences(player: HybridVideoPlayer) {
-    val session = synchronized(sessionsLock) { mediaSessionsList[player] }
-    if (session == null) {
-      // If not registered but now needs it, register
-      if (player.playInBackground || player.showNotificationControls) {
-        val activity = try { NitroModules.applicationContext?.currentActivity } catch (_: Exception) { null }
-        if (activity != null) registerPlayer(player, activity.javaClass)
+  @MainThread
+  private fun removePlayerFromPreparedStartTicketOnMain(player: HybridVideoPlayer) {
+    synchronized(startTicketLock) {
+      preparedStartTicket?.players?.removeAll { reference ->
+        val preparedPlayer = reference.get()
+        preparedPlayer == null || preparedPlayer === player
       }
-      return
-    }
-
-    // If no longer needs registration, unregister and possibly stop service
-    if (!player.playInBackground && !player.showNotificationControls) {
-      unregisterPlayer(player)
-      stopIfNoPlayers()
-      return
     }
   }
 
-  // Callbacks
-
-  override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? = null
-
-  override fun onBind(intent: Intent?): IBinder {
-    super.onBind(intent)
-    return binder
-  }
-
-  override fun onTaskRemoved(rootIntent: Intent?) {
-    stopForegroundSafely()
-    cleanup()
-    stopSelf()
-  }
-
-  override fun onDestroy() {
-    stopForegroundSafely()
-    cleanup()
-    super.onDestroy()
-  }
-
-  private fun stopForegroundSafely() {
-    try {
-      stopForeground(STOP_FOREGROUND_REMOVE)
-    } catch (_: Exception) {
-      Log.e(TAG, "Failed to stop foreground service!")
+  @MainThread
+  private fun invalidateStartTicketsOnMain(destroyed: Boolean = false) {
+    synchronized(startTicketLock) {
+      if (destroyed) {
+        isDestroyed = true
+      }
+      preparedStartTicket = null
+      acceptedStartTicketId = null
     }
   }
 
-  private fun cleanup() {
-    stopForegroundSafely()
-    stopSelf()
-
-    // Take and empty in one step, then release outside the lock.
-    val sessions = synchronized(sessionsLock) {
-      val snapshot = mediaSessionsList.values.toList()
-      mediaSessionsList.clear()
-      snapshot
-    }
-
-    sessions.forEach { session -> session.release() }
+  @MainThread
+  private fun isDestroyedOnMain(): Boolean = synchronized(startTicketLock) {
+    isDestroyed
   }
 
-  // Stop the service if there are no active media sessions (no players need it)
-  fun stopIfNoPlayers() {
-    if (!synchronized(sessionsLock) { mediaSessionsList.isEmpty() }) {
-      return
-    }
-
-    // Deliberately not cleanup(): it re-takes the lock and drains the registry, so a player
-    // that registered since the check above would have its fresh session released. With the
-    // registry empty there is nothing to drain anyway.
-    stopForegroundSafely()
-    isForeground = false
-    stopSelf()
+  private fun consumePreparedStartTicketLocked(ticket: StartTicket): List<HybridVideoPlayer> {
+    preparedStartTicket = null
+    acceptedStartTicketId = ticket.id
+    return ticket.players.mapNotNull { reference -> reference.get() }
   }
 
   companion object {
     const val TAG = "VideoPlaybackService"
     const val VIDEO_PLAYBACK_SERVICE_INTERFACE = SERVICE_INTERFACE
+    internal const val START_TICKET_ID_EXTRA = "com.twg.video.START_TICKET_ID"
     private const val PLACEHOLDER_NOTIFICATION_ID = 1729
     private const val NOTIFICATION_CHANNEL_ID = "twg_video_playback"
+    private const val NO_START_TICKET_ID = -1L
+  }
+
+  private data class StartCommandAcceptance(
+    val accepted: Boolean,
+    val preparedPlayers: List<HybridVideoPlayer>? = null
+  ) {
+    companion object {
+      val REJECTED = StartCommandAcceptance(accepted = false)
+    }
+  }
+
+  private class StartTicket(val id: Long) {
+    var requestCount = 0
+    val players = mutableListOf<WeakReference<HybridVideoPlayer>>()
   }
 
   private fun createPlaceholderNotification(): Notification {
