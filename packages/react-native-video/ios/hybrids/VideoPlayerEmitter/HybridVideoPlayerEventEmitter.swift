@@ -15,20 +15,30 @@ struct ListenerPair {
 }
 
 class HybridVideoPlayerEventEmitter: HybridVideoPlayerEventEmitterSpec {
-  var listeners: [ListenerPair] = []
+  private let listenersLock = NSLock()
+  private var _listeners: [ListenerPair] = []
 
   // MARK: - Private helpers
 
   private func addListener<T>(eventName: String, listener: T) -> ListenerSubscription {
     let id = UUID()
-    listeners.append(ListenerPair(id: id, eventName: eventName, callback: listener))
+    listenersLock.lock()
+    _listeners.append(ListenerPair(id: id, eventName: eventName, callback: listener))
+    listenersLock.unlock()
     return ListenerSubscription(remove: { [weak self] in
-      self?.listeners.removeAll { $0.id == id }
+      guard let self else { return }
+      self.listenersLock.lock()
+      self._listeners.removeAll { $0.id == id }
+      self.listenersLock.unlock()
     })
   }
 
   private func emitEvent<T>(eventName: String, invoke: (T) throws -> Void) {
-    for pair in listeners where pair.eventName == eventName {
+    listenersLock.lock()
+    let snapshot = _listeners
+    listenersLock.unlock()
+
+    for pair in snapshot where pair.eventName == eventName {
       if let callback = pair.callback as? T {
         do {
           try invoke(callback)
@@ -120,7 +130,9 @@ class HybridVideoPlayerEventEmitter: HybridVideoPlayerEventEmitterSpec {
   }
 
   func clearAllListeners() throws {
-    listeners.removeAll()
+    listenersLock.lock()
+    _listeners.removeAll()
+    listenersLock.unlock()
   }
 
   // MARK: - Event emission methods
