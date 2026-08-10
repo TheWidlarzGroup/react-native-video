@@ -27,17 +27,13 @@ class NowPlayingInfoCenterManager {
         UIApplication.shared.beginReceivingRemoteControlEvents()
         VideoManager.shared.setRemoteControlEventsActive(true)
         if currentPlayer?.currentItem != nil {
-          updateNowPlayingInfoOnMain()
+          updateNowPlayingInfo()
         }
       } else {
         UIApplication.shared.endReceivingRemoteControlEvents()
         VideoManager.shared.setRemoteControlEventsActive(false)
       }
     }
-  }
-
-  deinit {
-    cleanup()
   }
 
   func registerPlayer(player: AVPlayer) {
@@ -90,7 +86,7 @@ class NowPlayingInfoCenterManager {
     }
 
     if noPlayersLeft {
-      cleanupOnMain()
+      cleanup()
       return
     }
 
@@ -105,22 +101,12 @@ class NowPlayingInfoCenterManager {
       currentPlayer = nil
       findNewCurrentPlayer()
       if currentPlayer == nil {
-        updatePlaybackStateOnMain()
+        updatePlaybackState()
       }
     }
   }
 
-  public func cleanup() {
-    if Thread.isMainThread {
-      cleanupOnMain()
-    } else {
-      DispatchQueue.main.async { [weak self] in
-        self?.cleanupOnMain()
-      }
-    }
-  }
-
-  private func cleanupOnMain() {
+  private func cleanup() {
     let staleObservers = observers
     observers.removeAll()
     staleObservers.values.forEach { $0.invalidate() }
@@ -151,12 +137,12 @@ class NowPlayingInfoCenterManager {
     currentPlayer = player
     registerCommandTargets()
 
-    updateNowPlayingInfoOnMain()
+    updateNowPlayingInfo()
     playbackObserver = player.addPeriodicTimeObserver(
       forInterval: CMTime(value: 1, timescale: 4),
       queue: .main,
       using: { [weak self] _ in
-        self?.updatePlaybackStateOnMain()
+        self?.updatePlaybackState()
       }
     )
   }
@@ -257,26 +243,16 @@ class NowPlayingInfoCenterManager {
   }
 
   func updateStaticInfo(ifCurrentItem playerItem: AVPlayerItem) {
-    if Thread.isMainThread {
-      updateStaticInfoOnMain(ifCurrentItem: playerItem)
-    } else {
-      DispatchQueue.main.async { [weak self, playerItem] in
-        self?.updateStaticInfoOnMain(ifCurrentItem: playerItem)
-      }
-    }
-  }
-
-  private func updateStaticInfoOnMain(ifCurrentItem playerItem: AVPlayerItem) {
     guard currentPlayer?.currentItem === playerItem else { return }
-    updateStaticInfoOnMain()
+    updateStaticInfo()
   }
 
-  private func updateNowPlayingInfoOnMain() {
-    updateStaticInfoOnMain()
-    updatePlaybackStateOnMain()
+  private func updateNowPlayingInfo() {
+    updateStaticInfo()
+    updatePlaybackState()
   }
 
-  private func updateStaticInfoOnMain() {
+  private func updateStaticInfo() {
     guard let player = currentPlayer, let currentItem = player.currentItem else {
       return
     }
@@ -330,16 +306,6 @@ class NowPlayingInfoCenterManager {
   }
 
   func updatePlaybackState() {
-    if Thread.isMainThread {
-      updatePlaybackStateOnMain()
-    } else {
-      DispatchQueue.main.async { [weak self] in
-        self?.updatePlaybackStateOnMain()
-      }
-    }
-  }
-
-  private func updatePlaybackStateOnMain() {
     guard let player = currentPlayer else {
       invalidateCommandTargets()
       MPNowPlayingInfoCenter.default().nowPlayingInfo = [:]

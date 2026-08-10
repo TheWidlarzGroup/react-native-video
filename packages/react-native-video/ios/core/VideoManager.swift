@@ -150,16 +150,6 @@ class VideoManager {
 
   // MARK: - Remote Control Events
   func setRemoteControlEventsActive(_ active: Bool) {
-    if Thread.isMainThread {
-      setRemoteControlEventsActiveOnMain(active)
-    } else {
-      DispatchQueue.main.async { [weak self] in
-        self?.setRemoteControlEventsActiveOnMain(active)
-      }
-    }
-  }
-
-  private func setRemoteControlEventsActiveOnMain(_ active: Bool) {
     if isAudioSessionManagementDisabled || remoteControlEventsActive == active {
       return
     }
@@ -404,20 +394,6 @@ class VideoManager {
       AVAudioSession.InterruptionOptions(rawValue: $0)
     }
 
-    if Thread.isMainThread {
-      handleAudioSessionInterruptionOnMain(type: type, options: options)
-    } else {
-      DispatchQueue.main.async { [weak self] in
-        self?.handleAudioSessionInterruptionOnMain(type: type, options: options)
-      }
-    }
-  }
-
-  private func handleAudioSessionInterruptionOnMain(
-    type: AVAudioSession.InterruptionType,
-    options: AVAudioSession.InterruptionOptions?
-  ) {
-    
     switch type {
     case .began:
       // The interruption deactivated our session — keep the cache honest.
