@@ -33,6 +33,139 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   var playerObserver: VideoPlayerObserver?
   private let sourceLoader = SourceLoader()
 
+  private enum LifecycleState: Equatable {
+    case active
+    case releasing
+    case released
+  }
+
+  private struct LoadContext {
+    let source: any HybridVideoPlayerSourceSpec
+    let sourceLoaderReservation: SourceLoader.LoadReservation
+  }
+
+  private struct LoadedPlayerItem {
+    let item: AVPlayerItem
+    let context: LoadContext
+  }
+
+  private let lifecycleLock = NSRecursiveLock()
+  private var lifecycleState: LifecycleState = .active
+  private var currentLoadContext: LoadContext?
+
+  private func beginRelease() -> Bool {
+    lifecycleLock.lock()
+    defer { lifecycleLock.unlock() }
+    guard lifecycleState == .active else { return false }
+    lifecycleState = .releasing
+    currentLoadContext = nil
+    return true
+  }
+
+  private func beginLoad() throws -> LoadContext {
+    lifecycleLock.lock()
+    defer { lifecycleLock.unlock() }
+    guard lifecycleState == .active else {
+      throw CancellationError()
+    }
+    return makeLoadContext(for: source)
+  }
+
+  private func beginLoadIfPlayerItemMissing() throws -> LoadContext? {
+    lifecycleLock.lock()
+    defer { lifecycleLock.unlock() }
+    guard lifecycleState == .active else {
+      throw CancellationError()
+    }
+    guard playerItem == nil else {
+      return nil
+    }
+    return makeLoadContext(for: source)
+  }
+
+  private func beginPreloadIfNeeded() throws -> LoadContext? {
+    lifecycleLock.lock()
+    defer { lifecycleLock.unlock() }
+    guard lifecycleState == .active else {
+      throw CancellationError()
+    }
+    guard status == .idle else {
+      return nil
+    }
+    return makeLoadContext(for: source)
+  }
+
+  private func replaceSourceAndBeginLoad(
+    with newSource: any HybridVideoPlayerSourceSpec
+  ) throws -> (previousSource: any HybridVideoPlayerSourceSpec, context: LoadContext) {
+    lifecycleLock.lock()
+    defer { lifecycleLock.unlock() }
+    guard lifecycleState == .active else {
+      throw CancellationError()
+    }
+    let previousSource = source
+    source = newSource
+    let context = makeLoadContext(for: newSource)
+    return (previousSource, context)
+  }
+
+  private func makeLoadContext(for source: any HybridVideoPlayerSourceSpec) -> LoadContext {
+    let context = LoadContext(
+      source: source,
+      sourceLoaderReservation: sourceLoader.reserveLoad()
+    )
+    currentLoadContext = context
+    return context
+  }
+
+  private func ensureCurrentLoad(_ context: LoadContext) throws {
+    lifecycleLock.lock()
+    defer { lifecycleLock.unlock() }
+    guard lifecycleState == .active,
+      currentLoadContext?.sourceLoaderReservation === context.sourceLoaderReservation
+    else {
+      throw CancellationError()
+    }
+  }
+
+  private func releaseCurrentReplacementAssetIfOwned(_ context: LoadContext) {
+    lifecycleLock.lock()
+    defer { lifecycleLock.unlock() }
+    guard lifecycleState == .active,
+      currentLoadContext?.sourceLoaderReservation === context.sourceLoaderReservation
+    else {
+      return
+    }
+    releaseAsset(for: context.source)
+  }
+
+  private func releaseAssetIfNotUsedByCurrentLoad(
+    for source: any HybridVideoPlayerSourceSpec
+  ) {
+    lifecycleLock.lock()
+    defer { lifecycleLock.unlock() }
+    guard lifecycleState != .active || currentLoadContext?.source !== source else {
+      return
+    }
+    releaseAsset(for: source)
+  }
+
+  private func currentSource() -> any HybridVideoPlayerSourceSpec {
+    lifecycleLock.lock()
+    defer { lifecycleLock.unlock() }
+    return source
+  }
+
+  private func releaseAsset(for source: any HybridVideoPlayerSourceSpec) {
+    (source as? HybridVideoPlayerSource)?.releaseAsset()
+  }
+
+  private func finishRelease() {
+    lifecycleLock.lock()
+    lifecycleState = .released
+    lifecycleLock.unlock()
+  }
+
   init(source: (any HybridVideoPlayerSourceSpec)) throws {
     self.source = source
     self.eventEmitter = HybridVideoPlayerEventEmitter()
@@ -44,13 +177,12 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     self.playerObserver = VideoPlayerObserver(delegate: self)
     self.playerObserver?.initializePlayerObservers()
 
-    Task {
-      if source.config.initializeOnCreation == true {
+    if source.config.initializeOnCreation == true {
+      let initialLoadContext = try beginLoad()
+      Task {
         do {
-          self.playerItem = try await self.sourceLoader.load {
-            try await self.initializePlayerItem()
-          }
-          self.player.replaceCurrentItem(with: self.playerItem)
+          let loadedPlayerItem = try await self.loadPlayerItem(for: initialLoadContext)
+          try await self.commitPlayerItem(loadedPlayerItem)
         } catch {
           // Ignore cancellation errors during initialization
         }
@@ -61,7 +193,19 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   }
 
   deinit {
-    release()
+    if beginRelease() {
+      sourceLoader.requestCancellation()
+      VideoManager.shared.unregister(player: self)
+
+      let capturedPlayer = player
+      let capturedObserver = playerObserver
+      DispatchQueue.main.async {
+        capturedObserver?.invalidatePlayerItemObservers()
+        capturedObserver?.invalidatePlayerObservers()
+        NowPlayingInfoCenterManager.shared.removePlayer(player: capturedPlayer)
+        capturedPlayer.replaceCurrentItem(with: nil)
+      }
+    }
   }
 
   // MARK: - Hybrid Impl
@@ -190,20 +334,29 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   }
 
   func initialize() throws -> Promise<Void> {
+    let context: LoadContext?
+    do {
+      context = try beginLoadIfPlayerItemMissing()
+    } catch {
+      let promise = Promise<Void>()
+      promise.reject(withError: PlayerError.cancelled.error())
+      return promise
+    }
+
+    guard let context else {
+      let promise = Promise<Void>()
+      promise.resolve(withResult: ())
+      return promise
+    }
+
     return Promise.async { [weak self] in
       guard let self else {
         throw LibraryError.deallocated(objectName: "HybridVideoPlayer").error()
       }
 
-      if self.playerItem != nil {
-        return
-      }
-
       do {
-        self.playerItem = try await self.sourceLoader.load {
-          try await self.initializePlayerItem()
-        }
-        self.player.replaceCurrentItem(with: self.playerItem)
+        let loadedPlayerItem = try await self.loadPlayerItem(for: context)
+        try await self.commitPlayerItem(loadedPlayerItem)
       } catch {
         if error is CancellationError {
           throw PlayerError.cancelled.error()
@@ -214,32 +367,101 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   }
 
   func release() {
-    sourceLoader.cancelSync()
-    NowPlayingInfoCenterManager.shared.removePlayer(player: player)
+    guard beginRelease() else { return }
+    releaseAfterClaim()
+  }
+
+  private func releaseAfterClaim() {
+    sourceLoader.requestCancellation()
 
     try? _eventEmitter?.clearAllListeners()
 
-    self.playerItem = nil
+    releaseAsset(for: currentSource())
 
-    if let source = self.source as? HybridVideoPlayerSource {
-      source.releaseAsset()
+    if Thread.isMainThread {
+      releaseOnMainThread()
+    } else {
+      DispatchQueue.main.async { [self] in
+        releaseOnMainThread()
+      }
     }
+  }
 
-    // Clear player observer
+  private func releaseOnMainThread() {
     playerObserver?.invalidatePlayerItemObservers()
     playerObserver?.invalidatePlayerObservers()
-    self.playerObserver = nil
+    playerObserver = nil
 
-    self.player.replaceCurrentItem(with: nil)
+    NowPlayingInfoCenterManager.shared.removePlayer(player: player)
+    playerItem = nil
+    player.replaceCurrentItem(with: nil)
     status = .idle
 
     VideoManager.shared.unregister(player: self)
+    finishRelease()
+  }
+
+  private func commitPlayerItem(_ loadedPlayerItem: LoadedPlayerItem) async throws {
+    try await MainActor.run {
+      // AVPlayer callbacks can synchronously re-enter release().
+      self.lifecycleLock.lock()
+      defer {
+        self.lifecycleLock.unlock()
+      }
+
+      guard self.isCurrentLoad(loadedPlayerItem.context) else {
+        throw CancellationError()
+      }
+      self.playerItem = loadedPlayerItem.item
+      guard self.isCurrentLoad(loadedPlayerItem.context) else {
+        self.rollbackPlayerItemCommit()
+        throw CancellationError()
+      }
+      self.player.replaceCurrentItem(with: loadedPlayerItem.item)
+      guard self.isCurrentLoad(loadedPlayerItem.context) else {
+        self.rollbackPlayerItemCommit()
+        throw CancellationError()
+      }
+    }
+  }
+
+  private func isCurrentLoad(_ context: LoadContext) -> Bool {
+    lifecycleLock.lock()
+    defer { lifecycleLock.unlock() }
+    return lifecycleState == .active
+      && currentLoadContext?.sourceLoaderReservation === context.sourceLoaderReservation
+  }
+
+  private func rollbackPlayerItemCommit() {
+    playerItem = nil
+    player.replaceCurrentItem(with: nil)
+  }
+
+  private func loadPlayerItem(for context: LoadContext) async throws -> LoadedPlayerItem {
+    try ensureCurrentLoad(context)
+    let playerItem = try await sourceLoader.load(
+      reservation: context.sourceLoaderReservation,
+      isCurrent: { self.isCurrentLoad(context) }
+    ) {
+      try self.ensureCurrentLoad(context)
+      return try await self.initializePlayerItem(source: context.source, context: context)
+    }
+    try ensureCurrentLoad(context)
+    return LoadedPlayerItem(item: playerItem, context: context)
   }
 
   func preload() throws -> NitroModules.Promise<Void> {
     let promise = Promise<Void>()
 
-    if status != .idle {
+    let context: LoadContext?
+    do {
+      context = try beginPreloadIfNeeded()
+    } catch {
+      promise.reject(withError: PlayerError.cancelled.error())
+      return promise
+    }
+
+    guard let context else {
       promise.resolve(withResult: ())
       return promise
     }
@@ -254,12 +476,8 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       }
 
       do {
-        let playerItem = try await self.sourceLoader.load {
-          try await self.initializePlayerItem()
-        }
-        self.playerItem = playerItem
-
-        self.player.replaceCurrentItem(with: playerItem)
+        let loadedPlayerItem = try await self.loadPlayerItem(for: context)
+        try await self.commitPlayerItem(loadedPlayerItem)
         promise.resolve(withResult: ())
       } catch {
         if error is CancellationError {
@@ -331,6 +549,15 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       promise.resolve(withResult: ())
       return promise
     case .second(let newSource):
+      let replacement: (previousSource: any HybridVideoPlayerSourceSpec, context: LoadContext)
+      do {
+        replacement = try replaceSourceAndBeginLoad(with: newSource)
+      } catch {
+        promise.reject(withError: PlayerError.cancelled.error())
+        return promise
+      }
+      releaseAssetIfNotUsedByCurrentLoad(for: replacement.previousSource)
+
       Task.detached(priority: .userInitiated) { [weak self] in
         guard let self else {
           promise.reject(
@@ -340,21 +567,12 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
           return
         }
 
-        await self.sourceLoader.cancel()
-
-        if let oldSource = self.source as? HybridVideoPlayerSource {
-          oldSource.releaseAsset()
-        }
-
-        self.source = newSource
-
         do {
-          self.playerItem = try await self.sourceLoader.load {
-            try await self.initializePlayerItem()
-          }
-          self.player.replaceCurrentItem(with: self.playerItem)
+          let loadedPlayerItem = try await self.loadPlayerItem(for: replacement.context)
+          try await self.commitPlayerItem(loadedPlayerItem)
           promise.resolve(withResult: ())
         } catch {
+          self.releaseCurrentReplacementAssetIfOwned(replacement.context)
           if error is CancellationError {
             promise.reject(withError: PlayerError.cancelled.error())
           } else {
@@ -370,23 +588,41 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   // MARK: - Methods
 
   func initializePlayerItem() async throws -> AVPlayerItem {
+    let context = try beginLoad()
+    return try await initializePlayerItem(source: context.source, context: context)
+  }
+
+  private func initializePlayerItem(
+    source: any HybridVideoPlayerSourceSpec,
+    context: LoadContext
+  ) async throws -> AVPlayerItem {
     // Ensure the source is a valid HybridVideoPlayerSource
-    guard let _hybridSource = source as? HybridVideoPlayerSource else {
+    guard let hybridSource = source as? HybridVideoPlayerSource else {
       status = .error
       throw PlayerError.invalidSource.error()
     }
 
     // (maybe) Override source with plugins
     let _source = await PluginsRegistry.shared.overrideSource(
-      source: _hybridSource
+      source: hybridSource
     )
+    try ensureCurrentLoad(context)
 
     let isNetworkSource = _source.url.isFileURL == false
     _eventEmitter?.onLoadStart(
       .init(sourceType: isNetworkSource ? .network : .local, source: _source)
     )
 
-    let asset = try await _source.getAsset()
+    let asset: AVURLAsset
+    if let source = _source as? HybridVideoPlayerSource {
+      asset = try await source.getAsset(
+        isCurrent: { self.isCurrentLoad(context) }
+      )
+    } else {
+      try ensureCurrentLoad(context)
+      asset = try await _source.getAsset()
+    }
+    try ensureCurrentLoad(context)
 
     let playerItem: AVPlayerItem
 
@@ -400,6 +636,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     } else {
       playerItem = AVPlayerItem(asset: asset)
     }
+    try ensureCurrentLoad(context)
 
     if let metadata = source.config.metadata {
       let title = metadata.title

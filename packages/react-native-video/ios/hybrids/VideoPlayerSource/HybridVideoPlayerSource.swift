@@ -10,14 +10,54 @@ import Foundation
 import NitroModules
 
 class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec, NativeVideoPlayerSourceSpec {
-  var asset: AVURLAsset?
   var uri: String
   var config: NativeVideoConfig
 
-  var drmManager: DRMManagerSpec?
-
   let url: URL
   private let sourceLoader = SourceLoader()
+  private let assetLoadLock = NSLock()
+  private var _asset: AVURLAsset?
+  private var _drmManager: DRMManagerSpec?
+  private var currentAssetLoadReservation: SourceLoader.LoadReservation?
+
+  private enum AssetRequest {
+    case existing(AVURLAsset)
+    case load(SourceLoader.LoadReservation)
+  }
+
+  private struct InformationRequest {
+    let reservation: SourceLoader.LoadReservation
+    let asset: AVURLAsset?
+  }
+
+  private struct LoadedAssetInformation {
+    let information: VideoInformation
+    let asset: AVURLAsset
+  }
+
+  var asset: AVURLAsset? {
+    get {
+      assetLoadLock.lock()
+      defer { assetLoadLock.unlock() }
+      return _asset
+    }
+    set {
+      setAssetFromPlugin(newValue)
+    }
+  }
+
+  var drmManager: DRMManagerSpec? {
+    get {
+      assetLoadLock.lock()
+      defer { assetLoadLock.unlock() }
+      return _drmManager
+    }
+    set {
+      assetLoadLock.lock()
+      defer { assetLoadLock.unlock() }
+      _drmManager = newValue
+    }
+  }
 
   init(config: NativeVideoConfig) throws {
     self.uri = config.uri
@@ -44,6 +84,7 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec, NativeVideoPlayerSou
 
   func getAssetInformationAsync() -> Promise<VideoInformation> {
     let promise = Promise<VideoInformation>()
+    let request = beginInformationRequest()
 
     Task.detached(priority: .utility) { [weak self] in
       guard let self else {
@@ -53,21 +94,19 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec, NativeVideoPlayerSou
       }
 
       do {
-        let videoInformation = try await self.sourceLoader.load(priority: .utility) {
-          if self.url.isFileURL {
-            try VideoFileHelper.validateReadPermission(for: self.url)
-          }
-
-          try await self.initializeAsset()
-
-          guard let asset = self.asset else {
-            throw PlayerError.assetNotInitialized.error()
-          }
-
-          return try await asset.getAssetInformation()
+        let loadedInformation = try await self.sourceLoader.load(
+          reservation: request.reservation,
+          isCurrent: { self.ownsAssetLoad(request.reservation) },
+          priority: .utility
+        ) {
+          try await self.loadAssetInformation(for: request)
         }
+        try self.ensureInformationOwnership(
+          request.reservation,
+          asset: loadedInformation.asset
+        )
 
-        promise.resolve(withResult: videoInformation)
+        promise.resolve(withResult: loadedInformation.information)
       } catch {
         if error is CancellationError {
           promise.reject(withError: SourceError.cancelled.error())
@@ -80,11 +119,109 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec, NativeVideoPlayerSou
     return promise
   }
 
-  func initializeAsset() async throws {
-    guard asset == nil else {
-      return
+  private func loadAssetInformation(
+    for request: InformationRequest
+  ) async throws -> LoadedAssetInformation {
+    try ensureCurrentAssetLoad(request.reservation, isCurrent: { true })
+
+    if url.isFileURL {
+      try VideoFileHelper.validateReadPermission(for: url)
     }
 
+    let asset: AVURLAsset
+    if let existingAsset = request.asset {
+      guard currentAsset() === existingAsset else {
+        throw CancellationError()
+      }
+      asset = existingAsset
+    } else {
+      asset = try await loadAsset(
+        for: request.reservation,
+        isCurrent: { true }
+      )
+    }
+
+    try ensureCurrentAssetLoad(request.reservation, isCurrent: { true })
+    let videoInformation = try await asset.getAssetInformation()
+    return LoadedAssetInformation(information: videoInformation, asset: asset)
+  }
+
+  func initializeAsset() async throws {
+    _ = try await getAsset()
+  }
+
+  func getAsset() async throws -> AVURLAsset {
+    try await getAsset(isCurrent: { true })
+  }
+
+  func getAsset(isCurrent: @escaping () -> Bool) async throws -> AVURLAsset {
+    guard isCurrent() else {
+      throw CancellationError()
+    }
+
+    return try await getAsset(for: beginAssetRequest(), isCurrent: isCurrent)
+  }
+
+  private func getAsset(
+    for request: AssetRequest,
+    isCurrent: @escaping () -> Bool
+  ) async throws -> AVURLAsset {
+    guard isCurrent() else {
+      throw CancellationError()
+    }
+
+    switch request {
+    case .existing(let asset):
+      return asset
+    case .load(let reservation):
+      return try await initializeAsset(
+        for: reservation,
+        isCurrent: isCurrent
+      )
+    }
+  }
+
+  private func initializeAsset(
+    for reservation: SourceLoader.LoadReservation,
+    isCurrent: @escaping () -> Bool
+  ) async throws -> AVURLAsset {
+    do {
+      let asset = try await sourceLoader.load(
+        reservation: reservation,
+        isCurrent: {
+          isCurrent() && self.ownsAssetLoad(reservation)
+        }
+      ) {
+        try await self.loadAsset(
+          for: reservation,
+          isCurrent: isCurrent
+        )
+      }
+
+      guard isCurrent(), ownsAssetLoad(reservation),
+        currentAsset() === asset
+      else {
+        clearAsset(for: reservation)
+        throw CancellationError()
+      }
+
+      return asset
+    } catch {
+      clearAsset(for: reservation)
+      if error is CancellationError {
+        throw SourceError.cancelled.error()
+      }
+      throw error
+    }
+  }
+
+  private func loadAsset(
+    for reservation: SourceLoader.LoadReservation,
+    isCurrent: @escaping () -> Bool
+  ) async throws -> AVURLAsset {
+    try ensureCurrentAssetLoad(reservation, isCurrent: isCurrent)
+
+    let asset: AVURLAsset
     if let headers = config.headers {
       let options = [
         "AVURLAssetHTTPHeaderFieldsKey": headers
@@ -94,32 +231,32 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec, NativeVideoPlayerSou
       asset = AVURLAsset(url: url)
     }
 
-    guard let asset else {
-      throw SourceError.failedToInitializeAsset.error()
-    }
-
     do {
+      let drmManager: DRMManagerSpec?
       if let drmParams = config.drm {
-        drmManager = try PluginsRegistry.shared.getDrmManager(source: self)
+        let manager = try PluginsRegistry.shared.getDrmManager(source: self)
 
-        guard let drmManager else {
+        guard let manager else {
           throw LibraryError.DRMPluginNotFound.error()
         }
 
         do {
-          try drmManager.createContentKeyRequest(for: asset, drmParams: drmParams)
+          try manager.createContentKeyRequest(for: asset, drmParams: drmParams)
         } catch {
           print("[ReactNativeVideo] Failed to create content key request for DRM: \(drmParams)")
         }
+        drmManager = manager
+      } else {
+        drmManager = nil
       }
 
-      // Code browned from expo-video https://github.com/expo/expo/blob/ea17c9b1ce5111e1454b089ba381f3feb93f33cc/packages/expo-video/ios/VideoPlayerItem.swift#L40C30-L40C73
-      // If we don't load those properties, they will be loaded on main thread causing lags
       _ = try? await asset.load(.duration, .preferredTransform, .isPlayable) as Any
 
       try Task.checkCancellation()
+      try ensureCurrentAssetLoad(reservation, isCurrent: isCurrent)
+      return try installAsset(asset, drmManager: drmManager, for: reservation)
     } catch {
-      self.asset = nil
+      clearAsset(for: reservation)
       if error is CancellationError {
         throw SourceError.cancelled.error()
       }
@@ -127,40 +264,106 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec, NativeVideoPlayerSou
     }
   }
 
-  func getAsset() async throws -> AVURLAsset {
-    if let asset {
-      return asset
+  private func beginAssetRequest() -> AssetRequest {
+    assetLoadLock.lock()
+    defer { assetLoadLock.unlock() }
+    if let asset = _asset {
+      return .existing(asset)
     }
+    // All source loads take the asset lock before reserving their SourceLoader
+    // token, so the token and ownership marker cannot be published out of order.
+    let reservation = sourceLoader.reserveLoad()
+    currentAssetLoadReservation = reservation
+    return .load(reservation)
+  }
 
-    do {
-      try await sourceLoader.load {
-        try await self.initializeAsset()
-      }
+  private func beginInformationRequest() -> InformationRequest {
+    assetLoadLock.lock()
+    defer { assetLoadLock.unlock() }
+    let reservation = sourceLoader.reserveLoad()
+    currentAssetLoadReservation = reservation
+    return InformationRequest(reservation: reservation, asset: _asset)
+  }
 
-      guard let asset else {
-        throw SourceError.failedToInitializeAsset.error()
-      }
+  private func ownsAssetLoad(_ reservation: SourceLoader.LoadReservation) -> Bool {
+    assetLoadLock.lock()
+    defer { assetLoadLock.unlock() }
+    return currentAssetLoadReservation === reservation
+  }
 
-      return asset
-    } catch {
-      if error is CancellationError {
-        self.asset = nil
-        throw SourceError.cancelled.error()
-      }
-      throw error
+  private func ensureCurrentAssetLoad(
+    _ reservation: SourceLoader.LoadReservation,
+    isCurrent: () -> Bool
+  ) throws {
+    guard isCurrent(), ownsAssetLoad(reservation) else {
+      throw CancellationError()
     }
+  }
+
+  private func ensureInformationOwnership(
+    _ reservation: SourceLoader.LoadReservation,
+    asset: AVURLAsset
+  ) throws {
+    assetLoadLock.lock()
+    defer { assetLoadLock.unlock() }
+    guard currentAssetLoadReservation === reservation, _asset === asset else {
+      throw CancellationError()
+    }
+  }
+
+  private func installAsset(
+    _ asset: AVURLAsset,
+    drmManager: DRMManagerSpec?,
+    for reservation: SourceLoader.LoadReservation
+  ) throws -> AVURLAsset {
+    assetLoadLock.lock()
+    defer { assetLoadLock.unlock() }
+    guard currentAssetLoadReservation === reservation else {
+      throw CancellationError()
+    }
+    _asset = asset
+    _drmManager = drmManager
+    return asset
+  }
+
+  private func clearAsset(for reservation: SourceLoader.LoadReservation) {
+    assetLoadLock.lock()
+    defer { assetLoadLock.unlock() }
+    guard currentAssetLoadReservation === reservation else {
+      return
+    }
+    currentAssetLoadReservation = nil
+    _asset = nil
+    _drmManager = nil
+  }
+
+  private func currentAsset() -> AVURLAsset? {
+    assetLoadLock.lock()
+    defer { assetLoadLock.unlock() }
+    return _asset
   }
 
   func releaseAsset() {
-    sourceLoader.cancelSync()
-    asset = nil
+    assetLoadLock.lock()
+    defer { assetLoadLock.unlock() }
+    sourceLoader.requestCancellation()
+    currentAssetLoadReservation = nil
+    _asset = nil
+    _drmManager = nil
+  }
+
+  private func setAssetFromPlugin(_ asset: AVURLAsset?) {
+    assetLoadLock.lock()
+    defer { assetLoadLock.unlock() }
+    sourceLoader.requestCancellation()
+    currentAssetLoadReservation = nil
+    _asset = asset
+    _drmManager = nil
   }
 
   var memorySize: Int {
-    var size = 0
-
-    size += asset?.estimatedMemoryUsage ?? 0
-
-    return size
+    assetLoadLock.lock()
+    defer { assetLoadLock.unlock() }
+    return _asset?.estimatedMemoryUsage ?? 0
   }
 }
