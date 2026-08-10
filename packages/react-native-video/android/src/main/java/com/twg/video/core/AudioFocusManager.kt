@@ -5,6 +5,7 @@ import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.AudioFocusRequest
 import android.os.Build
+import androidx.annotation.MainThread
 import androidx.annotation.OptIn
 import androidx.annotation.RequiresApi
 import androidx.media3.common.util.UnstableApi
@@ -58,36 +59,53 @@ class AudioFocusManager() {
     }
   }
 
-  fun registerPlayer(player: HybridVideoPlayer) {
+  fun registerPlayer(player: HybridVideoPlayer) = Threading.runOnMainThread {
+    registerPlayerOnMain(player)
+  }
+
+  @MainThread
+  private fun registerPlayerOnMain(player: HybridVideoPlayer) {
+    if (player.isReleasedForService) {
+      return
+    }
     if (!players.contains(player)) {
       players.add(player)
     }
   }
 
-  fun unregisterPlayer(player: HybridVideoPlayer) {
+  fun unregisterPlayer(player: HybridVideoPlayer) = Threading.runOnMainThread {
+    unregisterPlayerOnMain(player)
+  }
+
+  @MainThread
+  private fun unregisterPlayerOnMain(player: HybridVideoPlayer) {
     players.remove(player)
     if (players.isEmpty()) {
       abandonAudioFocus()
     } else {
-      requestAudioFocusUpdate()
+      requestAudioFocusUpdateOnMain()
     }
   }
 
-  fun requestAudioFocusUpdate() {
-    Threading.runOnMainThread {
-      val requiredMixMode = determineRequiredMixMode()
+  fun requestAudioFocusUpdate() = Threading.runOnMainThread {
+    requestAudioFocusUpdateOnMain()
+  }
 
-      if (requiredMixMode == null) {
-        abandonAudioFocus()
-        return@runOnMainThread
-      }
+  @MainThread
+  private fun requestAudioFocusUpdateOnMain() {
+    val requiredMixMode = determineRequiredMixMode()
 
-      if (currentMixAudioMode != requiredMixMode) {
-        requestAudioFocus(requiredMixMode)
-      }
+    if (requiredMixMode == null) {
+      abandonAudioFocus()
+      return
+    }
+
+    if (currentMixAudioMode != requiredMixMode) {
+      requestAudioFocus(requiredMixMode)
     }
   }
 
+  @MainThread
   private fun determineRequiredMixMode(): MixAudioMode? {
     val activePlayers = players.filter { player ->
       player.player.isPlaying && player.player.volume != 0f
@@ -121,7 +139,8 @@ class AudioFocusManager() {
     }
   }
 
-    private fun requestAudioFocus(mixMode: MixAudioMode) {
+  @MainThread
+  private fun requestAudioFocus(mixMode: MixAudioMode) {
     val focusType = when (mixMode) {
       MixAudioMode.DONOTMIX -> AudioManager.AUDIOFOCUS_GAIN
       MixAudioMode.DUCKOTHERS -> AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
@@ -144,6 +163,7 @@ class AudioFocusManager() {
     }
   }
 
+  @MainThread
   @RequiresApi(Build.VERSION_CODES.O)
   private fun requestAudioFocusNew(focusType: Int): Int {
 
@@ -161,6 +181,7 @@ class AudioFocusManager() {
     return audioManager.requestAudioFocus(audioFocusRequest!!)
   }
 
+  @MainThread
   @Suppress("DEPRECATION")
   private fun requestAudioFocusLegacy(focusType: Int): Int {
     return audioManager.requestAudioFocus(
@@ -170,6 +191,7 @@ class AudioFocusManager() {
     )
   }
 
+  @MainThread
   private fun abandonAudioFocus() {
     if (currentMixAudioMode != null) {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -182,6 +204,7 @@ class AudioFocusManager() {
     }
   }
 
+  @MainThread
   @RequiresApi(Build.VERSION_CODES.O)
   private fun abandonAudioFocusNew() {
     audioFocusRequest?.let { request ->
@@ -189,47 +212,44 @@ class AudioFocusManager() {
     }
   }
 
+  @MainThread
   @Suppress("DEPRECATION")
   private fun abandonAudioFocusLegacy() {
     audioManager.abandonAudioFocus(audioFocusChangeListener)
   }
 
+  @MainThread
   private fun pauseActivePlayers() {
-    Threading.runOnMainThread {
-      players.forEach { player ->
-        player.player.let { mediaPlayer ->
-          if (mediaPlayer.volume != 0f && mediaPlayer.isPlaying) {
-            mediaPlayer.pause()
-          }
+    players.forEach { player ->
+      player.player.let { mediaPlayer ->
+        if (mediaPlayer.volume != 0f && mediaPlayer.isPlaying) {
+          mediaPlayer.pause()
         }
       }
     }
   }
 
+  @MainThread
   private fun duckActivePlayers() {
-    Threading.runOnMainThread {
-      players.forEach { player ->
-        player.player.let { mediaPlayer ->
-          // We need to duck the volume to 50%. After the audio focus is regained,
-          // we will restore the volume to the user's volume.
-          mediaPlayer.volume = mediaPlayer.volume * 0.5f
-        }
+    players.forEach { player ->
+      player.player.let { mediaPlayer ->
+        // We need to duck the volume to 50%. After the audio focus is regained,
+        // we will restore the volume to the user's volume.
+        mediaPlayer.volume = mediaPlayer.volume * 0.5f
       }
     }
   }
 
+  @MainThread
   private fun unDuckActivePlayers() {
-    Threading.runOnMainThread {
-      // Resume players that were paused due to audio focus loss
-      players.forEach { player ->
-        player.player.let { mediaPlayer ->
-          // Restore full volume if it was ducked
-          if (mediaPlayer.volume != 0f && mediaPlayer.volume.toDouble() != player.userVolume) {
-            mediaPlayer.volume = player.userVolume.toFloat()
-          }
+    // Resume players that were paused due to audio focus loss
+    players.forEach { player ->
+      player.player.let { mediaPlayer ->
+        // Restore full volume if it was ducked
+        if (mediaPlayer.volume != 0f && mediaPlayer.volume.toDouble() != player.userVolume) {
+          mediaPlayer.volume = player.userVolume.toFloat()
         }
       }
     }
   }
 }
-
