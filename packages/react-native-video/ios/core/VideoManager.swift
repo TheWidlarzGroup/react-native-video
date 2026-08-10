@@ -34,6 +34,16 @@ class VideoManager {
   }
 
   func setAudioSessionManagementDisabled(_ disabled: Bool) {
+    if Thread.isMainThread {
+      setAudioSessionManagementDisabledOnMain(disabled)
+    } else {
+      DispatchQueue.main.async { [weak self] in
+        self?.setAudioSessionManagementDisabledOnMain(disabled)
+      }
+    }
+  }
+
+  private func setAudioSessionManagementDisabledOnMain(_ disabled: Bool) {
     isAudioSessionManagementForcedDisabled = disabled
 
     if disabled {
@@ -117,6 +127,16 @@ class VideoManager {
   }
   
   func requestAudioSessionUpdate() {
+    if Thread.isMainThread {
+      requestAudioSessionUpdateOnMain()
+    } else {
+      DispatchQueue.main.async { [weak self] in
+        self?.requestAudioSessionUpdateOnMain()
+      }
+    }
+  }
+
+  private func requestAudioSessionUpdateOnMain() {
     updateAudioSessionConfiguration()
   }
 
@@ -130,12 +150,22 @@ class VideoManager {
 
   // MARK: - Remote Control Events
   func setRemoteControlEventsActive(_ active: Bool) {
+    if Thread.isMainThread {
+      setRemoteControlEventsActiveOnMain(active)
+    } else {
+      DispatchQueue.main.async { [weak self] in
+        self?.setRemoteControlEventsActiveOnMain(active)
+      }
+    }
+  }
+
+  private func setRemoteControlEventsActiveOnMain(_ active: Bool) {
     if isAudioSessionManagementDisabled || remoteControlEventsActive == active {
       return
     }
     
     remoteControlEventsActive = active
-    requestAudioSessionUpdate()
+    updateAudioSessionConfiguration()
   }
   
   // MARK: - Audio Session Management
@@ -369,6 +399,24 @@ class VideoManager {
     else {
       return
     }
+
+    let options = (userInfo[AVAudioSessionInterruptionOptionKey] as? UInt).map {
+      AVAudioSession.InterruptionOptions(rawValue: $0)
+    }
+
+    if Thread.isMainThread {
+      handleAudioSessionInterruptionOnMain(type: type, options: options)
+    } else {
+      DispatchQueue.main.async { [weak self] in
+        self?.handleAudioSessionInterruptionOnMain(type: type, options: options)
+      }
+    }
+  }
+
+  private func handleAudioSessionInterruptionOnMain(
+    type: AVAudioSession.InterruptionType,
+    options: AVAudioSession.InterruptionOptions?
+  ) {
     
     switch type {
     case .began:
@@ -382,11 +430,8 @@ class VideoManager {
       
     case .ended:
       // Interruption ended, check if we should resume audio session
-      if let optionsValue = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt {
-        let options = AVAudioSession.InterruptionOptions(rawValue: optionsValue)
-        if options.contains(.shouldResume) {
-          updateAudioSessionConfiguration()
-        }
+      if options?.contains(.shouldResume) == true {
+        updateAudioSessionConfiguration()
       }
       
     @unknown default:
@@ -402,6 +447,17 @@ class VideoManager {
     else {
       return
     }
+
+    if Thread.isMainThread {
+      handleAudioRouteChangeOnMain(reason: reason)
+    } else {
+      DispatchQueue.main.async { [weak self] in
+        self?.handleAudioRouteChangeOnMain(reason: reason)
+      }
+    }
+  }
+
+  private func handleAudioRouteChangeOnMain(reason: AVAudioSession.RouteChangeReason) {
     
     switch reason {
     case .oldDeviceUnavailable:

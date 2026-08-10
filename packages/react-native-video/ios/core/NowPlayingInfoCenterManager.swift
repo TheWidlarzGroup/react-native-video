@@ -9,7 +9,6 @@ class NowPlayingInfoCenterManager {
   private weak var currentPlayer: AVPlayer?
   private let players = SynchronizedHashTable<AVPlayer>(weakObjects: true)
 
-  private let observersLock = NSLock()
   private var observers: [Int: NSKeyValueObservation] = [:]
   private var playbackObserver: Any?
 
@@ -20,23 +19,19 @@ class NowPlayingInfoCenterManager {
   private var playbackPositionTarget: Any?
   private var togglePlayPauseTarget: Any?
 
-  private let remoteCommandCenter = MPRemoteCommandCenter.shared()
+  private lazy var remoteCommandCenter = MPRemoteCommandCenter.shared()
 
-  var receivingRemoteControlEvents = false {
+  private var receivingRemoteControlEvents = false {
     didSet {
       if receivingRemoteControlEvents {
-        DispatchQueue.main.async { [weak self] in
-          VideoManager.shared.setRemoteControlEventsActive(true)
-          UIApplication.shared.beginReceivingRemoteControlEvents()
-          if self?.currentPlayer?.currentItem != nil {
-            self?.updateNowPlayingInfo()
-          }
+        UIApplication.shared.beginReceivingRemoteControlEvents()
+        VideoManager.shared.setRemoteControlEventsActive(true)
+        if currentPlayer?.currentItem != nil {
+          updateNowPlayingInfoOnMain()
         }
       } else {
-        DispatchQueue.main.async {
-          UIApplication.shared.endReceivingRemoteControlEvents()
-          VideoManager.shared.setRemoteControlEventsActive(false)
-        }
+        UIApplication.shared.endReceivingRemoteControlEvents()
+        VideoManager.shared.setRemoteControlEventsActive(false)
       }
     }
   }
@@ -46,6 +41,16 @@ class NowPlayingInfoCenterManager {
   }
 
   func registerPlayer(player: AVPlayer) {
+    if Thread.isMainThread {
+      registerPlayerOnMain(player: player)
+    } else {
+      DispatchQueue.main.async { [weak self, player] in
+        self?.registerPlayerOnMain(player: player)
+      }
+    }
+  }
+
+  private func registerPlayerOnMain(player: AVPlayer) {
     if players.contains(player) {
       return
     }
@@ -55,10 +60,8 @@ class NowPlayingInfoCenterManager {
     }
 
     let newObserver = observePlayers(player: player)
-    observersLock.lock()
     let oldObserver = observers[player.hashValue]
     observers[player.hashValue] = newObserver
-    observersLock.unlock()
     oldObserver?.invalidate()
 
     players.add(player)
@@ -70,22 +73,28 @@ class NowPlayingInfoCenterManager {
   }
 
   func removePlayer(player: AVPlayer) {
-    // Take the removal and the emptiness answer in one acquisition; split across two, a
-    // player removed from the JS thread and one removed from a `deinit` on another thread
-    // could both see an empty table and both run cleanup(), unbalancing remote-control begin/end.
+    if Thread.isMainThread {
+      removePlayerOnMain(player: player)
+    } else {
+      DispatchQueue.main.async { [weak self, player] in
+        self?.removePlayerOnMain(player: player)
+      }
+    }
+  }
+
+  private func removePlayerOnMain(player: AVPlayer) {
+    // Keep registration removal and empty-state detection coupled in the registry.
     let (wasRegistered, noPlayersLeft) = players.removeReportingEmpty(player)
     if !wasRegistered {
       return
     }
 
     if noPlayersLeft {
-      cleanup()
+      cleanupOnMain()
       return
     }
 
-    observersLock.lock()
     let observer = observers.removeValue(forKey: player.hashValue)
-    observersLock.unlock()
     observer?.invalidate()
 
     if currentPlayer == player {
@@ -96,16 +105,24 @@ class NowPlayingInfoCenterManager {
       currentPlayer = nil
       findNewCurrentPlayer()
       if currentPlayer == nil {
-        updatePlaybackState()
+        updatePlaybackStateOnMain()
       }
     }
   }
 
   public func cleanup() {
-    observersLock.lock()
+    if Thread.isMainThread {
+      cleanupOnMain()
+    } else {
+      DispatchQueue.main.async { [weak self] in
+        self?.cleanupOnMain()
+      }
+    }
+  }
+
+  private func cleanupOnMain() {
     let staleObservers = observers
     observers.removeAll()
-    observersLock.unlock()
     staleObservers.values.forEach { $0.invalidate() }
     players.removeAllObjects()
 
@@ -134,12 +151,12 @@ class NowPlayingInfoCenterManager {
     currentPlayer = player
     registerCommandTargets()
 
-    updateNowPlayingInfo()
+    updateNowPlayingInfoOnMain()
     playbackObserver = player.addPeriodicTimeObserver(
       forInterval: CMTime(value: 1, timescale: 4),
       queue: .main,
       using: { [weak self] _ in
-        self?.updatePlaybackState()
+        self?.updatePlaybackStateOnMain()
       }
     )
   }
@@ -148,11 +165,9 @@ class NowPlayingInfoCenterManager {
     invalidateCommandTargets()
 
     playTarget = remoteCommandCenter.playCommand.addTarget { [weak self] _ in
-      guard let self, let player = self.currentPlayer else {
-        return .commandFailed
-      }
+      DispatchQueue.main.async { [weak self] in
+        guard let player = self?.currentPlayer, player.rate == 0 else { return }
 
-      if player.rate == 0 {
         player.play()
       }
 
@@ -160,11 +175,9 @@ class NowPlayingInfoCenterManager {
     }
 
     pauseTarget = remoteCommandCenter.pauseCommand.addTarget { [weak self] _ in
-      guard let self, let player = self.currentPlayer else {
-        return .commandFailed
-      }
+      DispatchQueue.main.async { [weak self] in
+        guard let player = self?.currentPlayer, player.rate != 0 else { return }
 
-      if player.rate != 0 {
         player.pause()
         VideoManager.shared.clearBackgroundResumeIntent(for: player)
       }
@@ -174,55 +187,56 @@ class NowPlayingInfoCenterManager {
 
     skipBackwardTarget = remoteCommandCenter.skipBackwardCommand.addTarget {
       [weak self] _ in
-      guard let self, let player = self.currentPlayer else {
-        return .commandFailed
+      DispatchQueue.main.async { [weak self] in
+        guard let self, let player = self.currentPlayer else { return }
+        let newTime =
+          player.currentTime()
+          - CMTime(seconds: self.SEEK_INTERVAL_SECONDS, preferredTimescale: .max)
+        player.seek(to: newTime)
       }
-      let newTime =
-        player.currentTime()
-        - CMTime(seconds: self.SEEK_INTERVAL_SECONDS, preferredTimescale: .max)
-      player.seek(to: newTime)
       return .success
     }
 
     skipForwardTarget = remoteCommandCenter.skipForwardCommand.addTarget {
       [weak self] _ in
-      guard let self, let player = self.currentPlayer else {
-        return .commandFailed
+      DispatchQueue.main.async { [weak self] in
+        guard let self, let player = self.currentPlayer else { return }
+        let newTime =
+          player.currentTime()
+          + CMTime(seconds: self.SEEK_INTERVAL_SECONDS, preferredTimescale: .max)
+        player.seek(to: newTime)
       }
-
-      let newTime =
-        player.currentTime()
-        + CMTime(seconds: self.SEEK_INTERVAL_SECONDS, preferredTimescale: .max)
-      player.seek(to: newTime)
       return .success
     }
 
     playbackPositionTarget = remoteCommandCenter.changePlaybackPositionCommand
       .addTarget { [weak self] event in
-        guard let self, let player = self.currentPlayer else {
+        if let event = event as? MPChangePlaybackPositionCommandEvent {
+          let positionTime = event.positionTime
+          DispatchQueue.main.async { [weak self] in
+            guard let player = self?.currentPlayer else { return }
+            player.seek(
+              to: CMTime(seconds: positionTime, preferredTimescale: .max)
+            )
+          }
+          return .success
+        } else {
           return .commandFailed
         }
-        if let event = event as? MPChangePlaybackPositionCommandEvent {
-          player.seek(
-            to: CMTime(seconds: event.positionTime, preferredTimescale: .max)
-          )
-          return .success
-        }
-        return .commandFailed
       }
 
     // Handler for togglePlayPauseCommand, sent by Apple's Earpods wired headphones
     togglePlayPauseTarget = remoteCommandCenter.togglePlayPauseCommand.addTarget
     { [weak self] _ in
-      guard let self, let player = self.currentPlayer else {
-        return .commandFailed
-      }
+      DispatchQueue.main.async { [weak self] in
+        guard let player = self?.currentPlayer else { return }
 
-      if player.rate == 0 {
-        player.play()
-      } else {
-        player.pause()
-        VideoManager.shared.clearBackgroundResumeIntent(for: player)
+        if player.rate == 0 {
+          player.play()
+        } else {
+          player.pause()
+          VideoManager.shared.clearBackgroundResumeIntent(for: player)
+        }
       }
 
       return .success
@@ -242,17 +256,27 @@ class NowPlayingInfoCenterManager {
     )
   }
 
-  public func updateNowPlayingInfo() {
-    updateStaticInfo()
-    updatePlaybackState()
-  }
-
   func updateStaticInfo(ifCurrentItem playerItem: AVPlayerItem) {
-    guard currentPlayer?.currentItem === playerItem else { return }
-    updateStaticInfo()
+    if Thread.isMainThread {
+      updateStaticInfoOnMain(ifCurrentItem: playerItem)
+    } else {
+      DispatchQueue.main.async { [weak self, playerItem] in
+        self?.updateStaticInfoOnMain(ifCurrentItem: playerItem)
+      }
+    }
   }
 
-  func updateStaticInfo() {
+  private func updateStaticInfoOnMain(ifCurrentItem playerItem: AVPlayerItem) {
+    guard currentPlayer?.currentItem === playerItem else { return }
+    updateStaticInfoOnMain()
+  }
+
+  private func updateNowPlayingInfoOnMain() {
+    updateStaticInfoOnMain()
+    updatePlaybackStateOnMain()
+  }
+
+  private func updateStaticInfoOnMain() {
     guard let player = currentPlayer, let currentItem = player.currentItem else {
       return
     }
@@ -306,6 +330,16 @@ class NowPlayingInfoCenterManager {
   }
 
   func updatePlaybackState() {
+    if Thread.isMainThread {
+      updatePlaybackStateOnMain()
+    } else {
+      DispatchQueue.main.async { [weak self] in
+        self?.updatePlaybackStateOnMain()
+      }
+    }
+  }
+
+  private func updatePlaybackStateOnMain() {
     guard let player = currentPlayer else {
       invalidateCommandTargets()
       MPNowPlayingInfoCenter.default().nowPlayingInfo = [:]
@@ -332,21 +366,23 @@ class NowPlayingInfoCenterManager {
   // We will observe players rate to find last active player that info will be displayed
   private func observePlayers(player: AVPlayer) -> NSKeyValueObservation {
     return player.observe(\.rate) { [weak self] player, _ in
-      guard let self else { return }
+      DispatchQueue.main.async { [weak self, weak player] in
+        guard let self, let player, self.players.contains(player) else { return }
 
-      let rate = player.rate
+        let rate = player.rate
 
-      // case where there is new player that is not paused
-      // In this case event is triggered by non currentPlayer
-      if rate != 0 && self.currentPlayer != player {
-        self.setCurrentPlayer(player: player)
-        return
-      }
+        // case where there is new player that is not paused
+        // In this case event is triggered by non currentPlayer
+        if rate != 0 && self.currentPlayer != player {
+          self.setCurrentPlayer(player: player)
+          return
+        }
 
-      // case where currentPlayer was paused
-      // In this case event is triggered by currentPlayer
-      if rate == 0 && self.currentPlayer == player {
-        self.findNewCurrentPlayer()
+        // case where currentPlayer was paused
+        // In this case event is triggered by currentPlayer
+        if rate == 0 && self.currentPlayer == player {
+          self.findNewCurrentPlayer()
+        }
       }
     }
   }
