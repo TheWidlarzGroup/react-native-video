@@ -193,9 +193,6 @@ class VideoView @JvmOverloads constructor(
       MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY)
     )
     layout(left, top, right, bottom)
-
-    // Additional layout fixes for small video players
-    applySmallPlayerLayoutFixes()
   }
 
   override fun requestLayout() {
@@ -553,13 +550,16 @@ class VideoView @JvmOverloads constructor(
   private fun PlayerView.configureForSmallPlayer() {
     SmallVideoPlayerOptimizer.applyOptimizations(this, context, isFullscreen = false)
 
-    // Also apply after any layout changes
-    viewTreeObserver.addOnGlobalLayoutListener {
-      SmallVideoPlayerOptimizer.applyOptimizations(this, context, isFullscreen = false)
+    // Re-apply when this view's own bounds change. Scoped to the PlayerView rather than the
+    // window-wide ViewTreeObserver: a global layout listener registered before attach is merged
+    // into the window's observer and never removed on detach, which retains every PlayerView for
+    // the lifetime of the Activity. A layout-change listener lives on the view itself.
+    addOnLayoutChangeListener { _, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+      val sizeChanged =
+        (right - left) != (oldRight - oldLeft) || (bottom - top) != (oldBottom - oldTop)
+      if (sizeChanged) {
+        SmallVideoPlayerOptimizer.applyOptimizations(this, context, isFullscreen = false)
+      }
     }
-  }
-
-  private fun applySmallPlayerLayoutFixes() {
-    SmallVideoPlayerOptimizer.applyOptimizations(playerView, context, isFullscreen = false)
   }
 }

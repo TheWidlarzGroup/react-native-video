@@ -47,14 +47,16 @@ object SmallVideoPlayerOptimizer {
     context: Context,
     isFullscreen: Boolean = false
   ) {
+    // For fullscreen mode, use system defaults - no custom optimizations.
+    // Let ExoPlayer use its default controller timeout and styling.
+    // Checked before posting: View.post() on a detached view queues into HandlerActionQueue,
+    // which is only drained on attach, so a Runnable that would only return still accumulates.
+    if (isFullscreen) {
+      return
+    }
+
     playerView.post {
       try {
-        if (isFullscreen) {
-          // For fullscreen mode, use system defaults - no custom optimizations
-          // Let ExoPlayer use its default controller timeout and styling
-          return@post
-        }
-
         // Only apply optimizations if the video player itself is small
         if (!isSmallVideoPlayer(playerView)) {
           return@post
@@ -104,10 +106,14 @@ object SmallVideoPlayerOptimizer {
             else -> secondarySize
           }
 
+          // Writing layoutParams unconditionally calls requestLayout() even when nothing
+          // changed, which re-enters this pass. Only write when the size actually differs.
           val params = child.layoutParams
-          params.width = buttonSize
-          params.height = buttonSize
-          child.layoutParams = params
+          if (params.width != buttonSize || params.height != buttonSize) {
+            params.width = buttonSize
+            params.height = buttonSize
+            child.layoutParams = params
+          }
 
           // Hide less essential buttons on small video players
           when (child.id) {
@@ -133,8 +139,11 @@ object SmallVideoPlayerOptimizer {
     progressContainer?.let { progress ->
       val params = progress.layoutParams as? ViewGroup.MarginLayoutParams
       params?.let {
-        it.height = (4 * context.resources.displayMetrics.density).toInt()
-        progress.layoutParams = it
+        val targetHeight = (4 * context.resources.displayMetrics.density).toInt()
+        if (it.height != targetHeight) {
+          it.height = targetHeight
+          progress.layoutParams = it
+        }
       }
     }
   }
