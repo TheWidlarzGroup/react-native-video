@@ -22,40 +22,39 @@ private final class CurrentOperation: @unchecked Sendable {
 final class SourceLoader {
   final class Token: @unchecked Sendable {}
 
+  private struct Request {
+    let token: Token
+    let operation: CurrentOperation?
+  }
+
   private enum State {
-    case open(token: Token?, operation: CurrentOperation?)
+    case open(Request?)
     case closed
   }
 
   private let lock = NSLock()
-  private var state: State = .open(token: nil, operation: nil)
+  private var state: State = .open(nil)
 
   func begin(
     if shouldBegin: () -> Bool = { true },
     onBegin: () -> Void = {}
   ) throws -> Token? {
-    let token: Token
-    let previousOperation: CurrentOperation?
-
-    lock.lock()
-    switch state {
-    case .closed:
-      lock.unlock()
-      throw CancellationError()
-    case .open(_, let operation):
+    let request: (token: Token, previousOperation: CurrentOperation?)? = try withState {
+      guard case .open(let currentRequest) = state else {
+        throw CancellationError()
+      }
       guard shouldBegin() else {
-        lock.unlock()
         return nil
       }
-      token = Token()
-      previousOperation = operation
-      state = .open(token: token, operation: nil)
+
+      let token = Token()
+      state = .open(Request(token: token, operation: nil))
       onBegin()
-      lock.unlock()
+      return (token, currentRequest?.operation)
     }
 
-    previousOperation?.cancel()
-    return token
+    request?.previousOperation?.cancel()
+    return request?.token
   }
 
   func withState<T>(_ operation: () throws -> T) rethrows -> T {
@@ -66,8 +65,8 @@ final class SourceLoader {
 
   func isCurrent(_ token: Token) -> Bool {
     withState {
-      guard case .open(let current, _) = state else { return false }
-      return current === token
+      guard case .open(let request) = state else { return false }
+      return request?.token === token
     }
   }
 
@@ -80,7 +79,7 @@ final class SourceLoader {
 
   func commit<T>(_ token: Token, update: () throws -> T) throws -> T {
     try withState {
-      guard case .open(let current, _) = state, current === token else {
+      guard case .open(let request) = state, request?.token === token else {
         throw CancellationError()
       }
       return try update()
@@ -92,41 +91,31 @@ final class SourceLoader {
     _ token: Token? = nil,
     update: () -> T
   ) -> T? {
-    let operation: CurrentOperation?
-    let result: T
+    let cancellation: (result: T, operation: CurrentOperation?)? = withState {
+      guard case .open(let request) = state,
+            token == nil || request?.token === token else {
+        return nil
+      }
 
-    lock.lock()
-    guard case .open(let current, let currentOperation) = state,
-          token == nil || current === token else {
-      lock.unlock()
-      return nil
+      state = .open(nil)
+      return (update(), request?.operation)
     }
-    operation = currentOperation
-    state = .open(token: nil, operation: nil)
-    result = update()
-    lock.unlock()
 
-    operation?.cancel()
-    return result
+    cancellation?.operation?.cancel()
+    return cancellation?.result
   }
 
   @discardableResult
   func close<T>(update: () -> T) -> T? {
-    let operation: CurrentOperation?
-    let result: T
+    let cancellation: (result: T, operation: CurrentOperation?)? = withState {
+      guard case .open(let request) = state else { return nil }
 
-    lock.lock()
-    guard case .open(_, let currentOperation) = state else {
-      lock.unlock()
-      return nil
+      state = .closed
+      return (update(), request?.operation)
     }
-    operation = currentOperation
-    state = .closed
-    result = update()
-    lock.unlock()
 
-    operation?.cancel()
-    return result
+    cancellation?.operation?.cancel()
+    return cancellation?.result
   }
 
   func load<T>(
@@ -145,15 +134,19 @@ final class SourceLoader {
     }
 
     let previousOperation: CurrentOperation?
-    lock.lock()
-    guard case .open(let current, let previous) = state, current === token else {
-      lock.unlock()
+    do {
+      previousOperation = try withState {
+        guard case .open(let request) = state, request?.token === token else {
+          throw CancellationError()
+        }
+
+        state = .open(Request(token: token, operation: currentOperation))
+        return request?.operation
+      }
+    } catch {
       task.cancel()
-      throw CancellationError()
+      throw error
     }
-    previousOperation = previous
-    state = .open(token: token, operation: currentOperation)
-    lock.unlock()
     previousOperation?.cancel()
 
     return try await withTaskCancellationHandler {
@@ -161,7 +154,7 @@ final class SourceLoader {
         let result = try await task.value
         try Task.checkCancellation()
         guard isCurrent() else { throw CancellationError() }
-        try finish(currentOperation)
+        guard clear(currentOperation) else { throw CancellationError() }
         return result
       } catch {
         clear(currentOperation)
@@ -172,33 +165,31 @@ final class SourceLoader {
     }
   }
 
-  private func finish(_ operation: CurrentOperation) throws {
-    lock.lock()
-    defer { lock.unlock() }
-    guard case .open(let token, let current) = state,
-          current === operation else {
-      throw CancellationError()
-    }
-    state = .open(token: token, operation: nil)
-  }
+  @discardableResult
+  private func clear(_ operation: CurrentOperation) -> Bool {
+    withState {
+      guard case .open(let request) = state,
+            let request,
+            request.operation === operation else {
+        return false
+      }
 
-  private func clear(_ operation: CurrentOperation) {
-    lock.lock()
-    defer { lock.unlock() }
-    guard case .open(let token, let current) = state,
-          current === operation else { return }
-    state = .open(token: token, operation: nil)
+      state = .open(Request(token: request.token, operation: nil))
+      return true
+    }
   }
 
   private func cancel(_ operation: CurrentOperation) {
-    lock.lock()
-    guard case .open(_, let current) = state,
-          current === operation else {
-      lock.unlock()
-      return
+    let operationToCancel: CurrentOperation? = withState {
+      guard case .open(let request) = state,
+            request?.operation === operation else {
+        return nil
+      }
+
+      state = .open(nil)
+      return operation
     }
-    state = .open(token: nil, operation: nil)
-    lock.unlock()
-    operation.cancel()
+
+    operationToCancel?.cancel()
   }
 }
