@@ -48,14 +48,14 @@ class VideoPlaybackService : MediaSessionService() {
     val ticketId = intent?.takeIf { candidate ->
       candidate.hasExtra(START_TICKET_ID_EXTRA)
     }?.getLongExtra(START_TICKET_ID_EXTRA, NO_START_TICKET_ID)
-    val acceptance = acceptStartCommandOnMain(ticketId)
+    val acceptance = acceptStartCommand(ticketId)
     if (!acceptance.accepted) {
       stopSelf(startId)
       return START_NOT_STICKY
     }
 
-    activateServiceOnMain()
-    acceptance.preparedPlayers?.let { players -> reconcilePreparedPlayersOnMain(players) }
+    activateService()
+    acceptance.preparedPlayers?.let { players -> reconcilePreparedPlayers(players) }
     if (!isServiceActive) {
       stopSelf(startId)
       return START_NOT_STICKY
@@ -77,15 +77,15 @@ class VideoPlaybackService : MediaSessionService() {
 
   // Player Registry
   fun unregisterPlayer(player: HybridVideoPlayer) =
-    Threading.runOnMainThread { reconcilePlayerOnMain(player) }
+    Threading.runOnMainThread { reconcilePlayer(player) }
 
   fun updatePlayerPreferences(player: HybridVideoPlayer) =
-    Threading.runOnMainThread { reconcilePlayerOnMain(player) }
+    Threading.runOnMainThread { reconcilePlayer(player) }
 
   fun detachPlayer(player: HybridVideoPlayer) = Threading.runOnMainThread {
     mediaSessionsList.remove(player)?.release()
-    removePlayerFromPreparedStartTicketOnMain(player)
-    stopIfNoPlayersOnMain()
+    removePlayerFromPreparedStartTicket(player)
+    stopIfNoPlayers()
   }
 
   // Callbacks
@@ -98,11 +98,11 @@ class VideoPlaybackService : MediaSessionService() {
   }
 
   override fun onTaskRemoved(rootIntent: Intent?) {
-    stopAndInvalidateOnMain()
+    stopAndInvalidate()
   }
 
   override fun onDestroy() {
-    stopAndInvalidateOnMain(destroyed = true)
+    stopAndInvalidate(destroyed = true)
     super.onDestroy()
   }
 
@@ -116,7 +116,7 @@ class VideoPlaybackService : MediaSessionService() {
   }
 
   @MainThread
-  private fun cleanupOnMain() {
+  private fun cleanupService() {
     if (isCleanedUp) {
       return
     }
@@ -133,24 +133,21 @@ class VideoPlaybackService : MediaSessionService() {
   }
 
   // Stop the service if there are no active media sessions (no players need it)
-  fun stopIfNoPlayers() = Threading.runOnMainThread { stopIfNoPlayersOnMain() }
-
-  @MainThread
-  private fun stopIfNoPlayersOnMain() {
+  fun stopIfNoPlayers() = Threading.runOnMainThread {
     if (!isServiceActive || mediaSessionsList.isNotEmpty() || hasPreparedStartTicket()) {
-      return
+      return@runOnMainThread
     }
 
     isServiceActive = false
-    invalidateStartTicketsOnMain()
-    cleanupOnMain()
+    invalidateStartTickets()
+    cleanupService()
   }
 
   @MainThread
-  private fun stopAndInvalidateOnMain(destroyed: Boolean = false) {
-    invalidateStartTicketsOnMain(destroyed)
+  private fun stopAndInvalidate(destroyed: Boolean = false) {
+    invalidateStartTickets(destroyed)
     isServiceActive = false
-    cleanupOnMain()
+    cleanupService()
   }
 
   /**
@@ -177,43 +174,40 @@ class VideoPlaybackService : MediaSessionService() {
    * calls this before returning, so its following binder command is ordered after promotion.
    */
   internal fun completePreparedStart(ticketId: Long, startRequested: Boolean) {
-    Threading.runOnMainThread { completePreparedStartOnMain(ticketId, startRequested) }
-  }
+    Threading.runOnMainThread {
+      var preparedPlayers: List<HybridVideoPlayer>? = null
+      var discarded = false
+      synchronized(startTicketLock) {
+        val ticket = preparedStartTicket
+        when {
+          ticket?.id == ticketId -> {
+            if (ticket.requestCount > 0) {
+              ticket.requestCount -= 1
+            }
 
-  @MainThread
-  private fun completePreparedStartOnMain(ticketId: Long, startRequested: Boolean) {
-    var preparedPlayers: List<HybridVideoPlayer>? = null
-    var discarded = false
-    synchronized(startTicketLock) {
-      val ticket = preparedStartTicket
-      when {
-        ticket?.id == ticketId -> {
-          if (ticket.requestCount > 0) {
-            ticket.requestCount -= 1
+            if (startRequested) {
+              preparedPlayers = consumePreparedStartTicketLocked(ticket)
+            } else if (ticket.requestCount == 0) {
+              preparedStartTicket = null
+              discarded = true
+            }
           }
-
-          if (startRequested) {
-            preparedPlayers = consumePreparedStartTicketLocked(ticket)
-          } else if (ticket.requestCount == 0) {
-            preparedStartTicket = null
-            discarded = true
-          }
+          acceptedStartTicketId == ticketId -> return@runOnMainThread
+          else -> return@runOnMainThread
         }
-        acceptedStartTicketId == ticketId -> return
-        else -> return
+      }
+
+      if (preparedPlayers != null) {
+        activateService()
+        reconcilePreparedPlayers(preparedPlayers)
+      } else if (discarded) {
+        stopIfNoPlayers()
       }
     }
-
-    if (preparedPlayers != null) {
-      activateServiceOnMain()
-      reconcilePreparedPlayersOnMain(preparedPlayers)
-    } else if (discarded) {
-      stopIfNoPlayersOnMain()
-    }
   }
 
   @MainThread
-  private fun acceptStartCommandOnMain(ticketId: Long?): StartCommandAcceptance {
+  private fun acceptStartCommand(ticketId: Long?): StartCommandAcceptance {
     return synchronized(startTicketLock) {
       if (isDestroyed) {
         return@synchronized StartCommandAcceptance.REJECTED
@@ -233,7 +227,7 @@ class VideoPlaybackService : MediaSessionService() {
   }
 
   @MainThread
-  private fun activateServiceOnMain() {
+  private fun activateService() {
     if (!isServiceActive) {
       isServiceActive = true
       isCleanedUp = false
@@ -242,43 +236,43 @@ class VideoPlaybackService : MediaSessionService() {
   }
 
   @MainThread
-  private fun reconcilePlayerOnMain(player: HybridVideoPlayer) {
-    reconcilePlayerOnMain(player, checkIdleAfterwards = true)
+  private fun reconcilePlayer(player: HybridVideoPlayer) {
+    reconcilePlayer(player, checkIdleAfterwards = true)
   }
 
   @MainThread
-  private fun reconcilePreparedPlayersOnMain(players: List<HybridVideoPlayer>) {
+  private fun reconcilePreparedPlayers(players: List<HybridVideoPlayer>) {
     players.forEach { player ->
-      reconcilePlayerOnMain(player, checkIdleAfterwards = false)
+      reconcilePlayer(player, checkIdleAfterwards = false)
     }
-    stopIfNoPlayersOnMain()
+    stopIfNoPlayers()
   }
 
   @MainThread
-  private fun reconcilePlayerOnMain(
+  private fun reconcilePlayer(
     player: HybridVideoPlayer,
     checkIdleAfterwards: Boolean
   ) {
     if (
       player.isReleasedForService ||
-      isDestroyedOnMain() ||
+      isServiceDestroyed() ||
       !isServiceActive
     ) {
       return
     }
 
     if (player.playInBackground || player.showNotificationControls) {
-      ensurePlayerSessionOnMain(player)
+      ensurePlayerSession(player)
     } else {
       mediaSessionsList.remove(player)?.release()
       if (checkIdleAfterwards) {
-        stopIfNoPlayersOnMain()
+        stopIfNoPlayers()
       }
     }
   }
 
   @MainThread
-  private fun ensurePlayerSessionOnMain(player: HybridVideoPlayer) {
+  private fun ensurePlayerSession(player: HybridVideoPlayer) {
     if (mediaSessionsList.containsKey(player)) {
       return
     }
@@ -319,7 +313,7 @@ class VideoPlaybackService : MediaSessionService() {
   }
 
   @MainThread
-  private fun removePlayerFromPreparedStartTicketOnMain(player: HybridVideoPlayer) {
+  private fun removePlayerFromPreparedStartTicket(player: HybridVideoPlayer) {
     synchronized(startTicketLock) {
       preparedStartTicket?.players?.removeAll { reference ->
         val preparedPlayer = reference.get()
@@ -329,7 +323,7 @@ class VideoPlaybackService : MediaSessionService() {
   }
 
   @MainThread
-  private fun invalidateStartTicketsOnMain(destroyed: Boolean = false) {
+  private fun invalidateStartTickets(destroyed: Boolean = false) {
     synchronized(startTicketLock) {
       if (destroyed) {
         isDestroyed = true
@@ -340,7 +334,7 @@ class VideoPlaybackService : MediaSessionService() {
   }
 
   @MainThread
-  private fun isDestroyedOnMain(): Boolean = synchronized(startTicketLock) {
+  private fun isServiceDestroyed(): Boolean = synchronized(startTicketLock) {
     isDestroyed
   }
 
