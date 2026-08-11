@@ -73,25 +73,7 @@ class VideoPlaybackServiceConnection(
     unbind()
   }
 
-  fun start() = Threading.runOnMainThread {
-    val player = player.get()
-    if (player == null || !wantsService(player)) {
-      disconnect()
-      return@runOnMainThread
-    }
-
-    when (val state = state) {
-      ConnectionState.Disconnected -> bind()
-      ConnectionState.Binding -> Unit
-      is ConnectionState.Connected -> startConnected(state.binder.service, player)
-    }
-  }
-
-  fun stop() = Threading.runOnMainThread {
-    disconnect()
-  }
-
-  fun updatePreferences() = Threading.runOnMainThread {
+  fun update() = Threading.runOnMainThread {
     val player = player.get()
     if (player == null || !wantsService(player)) {
       disconnect()

@@ -6,17 +6,9 @@ import android.os.Build
 import com.twg.video.core.services.playback.VideoPlaybackService
 import com.twg.video.core.services.playback.VideoPlaybackServiceConnection
 
-fun VideoPlaybackService.Companion.startService(
+fun VideoPlaybackService.Companion.updateService(
   connection: VideoPlaybackServiceConnection
-) = connection.start()
-
-fun VideoPlaybackService.Companion.stopService(
-  connection: VideoPlaybackServiceConnection
-) = connection.stop()
-
-fun VideoPlaybackService.Companion.updateServicePreferences(
-  connection: VideoPlaybackServiceConnection
-) = connection.updatePreferences()
+) = connection.update()
 
 internal fun VideoPlaybackService.Companion.requestSystemStart(context: Context): Boolean {
   val intent = Intent(context, VideoPlaybackService::class.java).apply {
