@@ -2,6 +2,7 @@ package com.twg.video.core
 
 import android.os.Build
 import android.util.Log
+import androidx.annotation.MainThread
 import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
 import com.facebook.react.bridge.LifecycleEventListener
@@ -32,9 +33,11 @@ object VideoManager : LifecycleEventListener {
 
   private var lastPlayedNitroId: Int? = null
 
+  @MainThread
   private fun playersSnapshot(): List<HybridVideoPlayer> =
     players.keys.toList()
 
+  @MainThread
   private fun viewsSnapshot(): List<WeakReference<VideoView>> =
     views.values.toList()
 

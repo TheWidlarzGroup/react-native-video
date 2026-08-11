@@ -95,7 +95,7 @@ class VideoPlaybackService : MediaSessionService() {
   }
 
   @MainThread
-  fun stopIfNoPlayers() {
+  private fun stopIfNoPlayers() {
     if (mediaSessionsList.isNotEmpty()) return
     stopForegroundSafely()
     isForeground = false
