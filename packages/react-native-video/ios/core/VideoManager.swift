@@ -102,17 +102,34 @@ class VideoManager {
   // MARK: - public
   
   func register(player: HybridVideoPlayer) {
-    runOnMainThread { [weak player] in
-      guard let player, !player.isReleased else { return }
+    runOnMainThread { [player] in
+      guard !player.isReleased else { return }
       self.players.add(player)
       PluginsRegistry.shared.notifyPlayerCreated(player: player)
     }
   }
   
   func unregister(player: HybridVideoPlayer) {
+    guard !Thread.isMainThread else {
+      // Weak table membership is already cleared during deinit, after release is claimed.
+      guard players.contains(player) || player.isReleased else { return }
+      unregisterOnMainThread(player: player)
+      return
+    }
+
+    deferUnregisterToMainThread(player: player)
+  }
+
+  private func deferUnregisterToMainThread(player: HybridVideoPlayer) {
     runOnMainThread { [weak player] in
       guard let player, self.players.contains(player) else { return }
-      self.players.remove(player)
+      self.unregisterOnMainThread(player: player)
+    }
+  }
+
+  private func unregisterOnMainThread(player: HybridVideoPlayer) {
+    players.remove(player)
+    withExtendedLifetime(player) {
       PluginsRegistry.shared.notifyPlayerDestroyed(player: player)
     }
   }
