@@ -77,26 +77,12 @@ class VideoPlaybackService : MediaSessionService() {
 
   // Player Registry
   fun unregisterPlayer(player: HybridVideoPlayer) =
-    Threading.runOnMainThread { unregisterPlayerOnMain(player) }
-
-  @MainThread
-  private fun unregisterPlayerOnMain(player: HybridVideoPlayer) {
-    reconcilePlayerOnMain(player)
-  }
+    Threading.runOnMainThread { reconcilePlayerOnMain(player) }
 
   fun updatePlayerPreferences(player: HybridVideoPlayer) =
-    Threading.runOnMainThread { updatePlayerPreferencesOnMain(player) }
+    Threading.runOnMainThread { reconcilePlayerOnMain(player) }
 
-  @MainThread
-  private fun updatePlayerPreferencesOnMain(player: HybridVideoPlayer) {
-    reconcilePlayerOnMain(player)
-  }
-
-  fun detachPlayer(player: HybridVideoPlayer) =
-    Threading.runOnMainThread { detachPlayerOnMain(player) }
-
-  @MainThread
-  private fun detachPlayerOnMain(player: HybridVideoPlayer) {
+  fun detachPlayer(player: HybridVideoPlayer) = Threading.runOnMainThread {
     mediaSessionsList.remove(player)?.release()
     removePlayerFromPreparedStartTicketOnMain(player)
     stopIfNoPlayersOnMain()

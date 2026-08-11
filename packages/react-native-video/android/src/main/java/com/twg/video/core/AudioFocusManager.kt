@@ -60,13 +60,8 @@ class AudioFocusManager() {
   }
 
   fun registerPlayer(player: HybridVideoPlayer) = Threading.runOnMainThread {
-    registerPlayerOnMain(player)
-  }
-
-  @MainThread
-  private fun registerPlayerOnMain(player: HybridVideoPlayer) {
     if (player.isReleasedForService) {
-      return
+      return@runOnMainThread
     }
     if (!players.contains(player)) {
       players.add(player)
@@ -74,30 +69,20 @@ class AudioFocusManager() {
   }
 
   fun unregisterPlayer(player: HybridVideoPlayer) = Threading.runOnMainThread {
-    unregisterPlayerOnMain(player)
-  }
-
-  @MainThread
-  private fun unregisterPlayerOnMain(player: HybridVideoPlayer) {
     players.remove(player)
     if (players.isEmpty()) {
       abandonAudioFocus()
     } else {
-      requestAudioFocusUpdateOnMain()
+      requestAudioFocusUpdate()
     }
   }
 
   fun requestAudioFocusUpdate() = Threading.runOnMainThread {
-    requestAudioFocusUpdateOnMain()
-  }
-
-  @MainThread
-  private fun requestAudioFocusUpdateOnMain() {
     val requiredMixMode = determineRequiredMixMode()
 
     if (requiredMixMode == null) {
       abandonAudioFocus()
-      return
+      return@runOnMainThread
     }
 
     if (currentMixAudioMode != requiredMixMode) {
