@@ -76,7 +76,7 @@ class VideoPlaybackServiceConnection(
   fun start() = Threading.runOnMainThread {
     val player = player.get()
     if (player == null || !wantsService(player)) {
-      stopOnMain()
+      disconnect()
       return@runOnMainThread
     }
 
@@ -88,13 +88,13 @@ class VideoPlaybackServiceConnection(
   }
 
   fun stop() = Threading.runOnMainThread {
-    stopOnMain()
+    disconnect()
   }
 
   fun updatePreferences() = Threading.runOnMainThread {
     val player = player.get()
     if (player == null || !wantsService(player)) {
-      stopOnMain()
+      disconnect()
       return@runOnMainThread
     }
 
@@ -107,11 +107,11 @@ class VideoPlaybackServiceConnection(
 
   @MainThread
   private fun wantsService(player: HybridVideoPlayer): Boolean =
-    !player.isReleasedForService &&
+    !player.isReleaseStarted &&
       (player.playInBackground || player.showNotificationControls)
 
   @MainThread
-  private fun stopOnMain() {
+  private fun disconnect() {
     val connected = state as? ConnectionState.Connected
     player.get()?.let { connected?.binder?.service?.unregisterPlayer(it) }
     unbind()

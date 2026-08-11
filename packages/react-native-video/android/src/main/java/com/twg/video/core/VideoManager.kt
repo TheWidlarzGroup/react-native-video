@@ -151,7 +151,7 @@ object VideoManager : LifecycleEventListener {
 
   fun addViewToPlayer(view: VideoView, player: HybridVideoPlayer) {
     runOnMainThreadSync {
-      if (player.isReleasedForService) {
+      if (player.isReleaseStarted) {
         return@runOnMainThreadSync
       }
 
@@ -174,7 +174,7 @@ object VideoManager : LifecycleEventListener {
 
   fun registerPlayer(player: HybridVideoPlayer) {
     runOnMainThreadSync {
-      if (player.isReleasedForService || players.containsKey(player)) {
+      if (player.isReleaseStarted || players.containsKey(player)) {
         return@runOnMainThreadSync
       }
       players[player] = mutableListOf()

@@ -55,8 +55,7 @@ class VideoPlaybackService : MediaSessionService() {
 
   @MainThread
   fun registerPlayer(player: HybridVideoPlayer): Boolean {
-    if (player.isReleasedForService ||
-      (!player.playInBackground && !player.showNotificationControls)) {
+    if (player.isReleaseStarted || (!player.playInBackground && !player.showNotificationControls)) {
       return false
     }
 
@@ -72,8 +71,7 @@ class VideoPlaybackService : MediaSessionService() {
 
   @MainThread
   fun updatePlayerPreferences(player: HybridVideoPlayer) {
-    if (player.isReleasedForService ||
-      (!player.playInBackground && !player.showNotificationControls)) {
+    if (player.isReleaseStarted || (!player.playInBackground && !player.showNotificationControls)) {
       unregisterPlayer(player)
     } else {
       ensurePlayerSession(player)

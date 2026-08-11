@@ -3,6 +3,7 @@ package com.margelo.nitro.video
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import androidx.annotation.MainThread
 import androidx.media3.common.C
 import androidx.media3.common.Metadata
 import androidx.media3.common.PlaybackException
@@ -69,7 +70,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
 
   var loadedWithSource = false
   private val releaseStarted = AtomicBoolean(false)
-  internal val isReleasedForService: Boolean
+  internal val isReleaseStarted: Boolean
     get() = releaseStarted.get()
   private var currentPlayerView: WeakReference<PlayerView>? = null
 
@@ -393,29 +394,28 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
     progressHandler.post { completeRelease() }
   }
 
+  @MainThread
   private fun completeRelease() {
     VideoPlaybackService.stopService(videoPlaybackServiceConnection)
 
-    runOnMainThread {
-      try {
-        VideoManager.unregisterPlayer(this)
-      } finally {
-        stopProgressUpdates()
-        loadedWithSource = false
+    try {
+      VideoManager.unregisterPlayer(this)
+    } finally {
+      stopProgressUpdates()
+      loadedWithSource = false
 
-        eventEmitter.clearAllListeners()
+      eventEmitter.clearAllListeners()
 
-        player.removeListener(playerListener)
-        player.removeAnalyticsListener(analyticsListener)
-        player.release() // Release player
+      player.removeListener(playerListener)
+      player.removeAnalyticsListener(analyticsListener)
+      player.release() // Release player
 
-        // Clean Listeners
-        audioFocusChangedListener.removeEventEmitter()
-        audioBecomingNoisyReceiver.removeEventEmitter()
+      // Clean Listeners
+      audioFocusChangedListener.removeEventEmitter()
+      audioBecomingNoisyReceiver.removeEventEmitter()
 
-        // Update status
-        status = VideoPlayerStatus.IDLE
-      }
+      // Update status
+      status = VideoPlayerStatus.IDLE
     }
   }
 

@@ -60,7 +60,7 @@ class AudioFocusManager() {
   }
 
   fun registerPlayer(player: HybridVideoPlayer) = Threading.runOnMainThread {
-    if (player.isReleasedForService) {
+    if (player.isReleaseStarted) {
       return@runOnMainThread
     }
     if (!players.contains(player)) {
