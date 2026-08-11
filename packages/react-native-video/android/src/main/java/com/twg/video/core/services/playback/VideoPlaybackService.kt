@@ -19,23 +19,23 @@ import android.os.Build
 import androidx.annotation.MainThread
 import androidx.core.app.NotificationCompat
 import com.margelo.nitro.video.HybridVideoPlayer
-import com.twg.video.core.utils.Threading
-import java.lang.ref.WeakReference
 
 class VideoPlaybackServiceBinder(val service: VideoPlaybackService): Binder()
 
 @OptIn(UnstableApi::class)
 class VideoPlaybackService : MediaSessionService() {
+  private enum class LifecycleState {
+    INACTIVE,
+    ACTIVE,
+    DESTROYED
+  }
+
   // All map access is confined to the main looper.
   private val mediaSessionsList = mutableMapOf<HybridVideoPlayer, MediaSession>()
-  private val startTicketLock = Any()
   private var nextStartTicketId = 0L
-  private var preparedStartTicket: StartTicket? = null
-  private var acceptedStartTicketId: Long? = null
-  private var isDestroyed = false
-  private var isServiceActive = false
-  private var isCleanedUp = false
-  private var binder = VideoPlaybackServiceBinder(this)
+  private val startTicketIds = mutableSetOf<Long>()
+  private var lifecycleState = LifecycleState.INACTIVE
+  private val binder = VideoPlaybackServiceBinder(this)
   private var isForeground = false
   private var cachedLaunchIntent: Intent? = null
 
@@ -48,15 +48,13 @@ class VideoPlaybackService : MediaSessionService() {
     val ticketId = intent?.takeIf { candidate ->
       candidate.hasExtra(START_TICKET_ID_EXTRA)
     }?.getLongExtra(START_TICKET_ID_EXTRA, NO_START_TICKET_ID)
-    val acceptance = acceptStartCommand(ticketId)
-    if (!acceptance.accepted) {
+    if (!acceptStartCommand(ticketId)) {
       stopSelf(startId)
       return START_NOT_STICKY
     }
 
     activateService()
-    acceptance.preparedPlayers?.let { players -> reconcilePreparedPlayers(players) }
-    if (!isServiceActive) {
+    if (lifecycleState != LifecycleState.ACTIVE) {
       stopSelf(startId)
       return START_NOT_STICKY
     }
@@ -76,15 +74,15 @@ class VideoPlaybackService : MediaSessionService() {
   }
 
   // Player Registry
-  fun unregisterPlayer(player: HybridVideoPlayer) =
-    Threading.runOnMainThread { reconcilePlayer(player) }
+  @MainThread
+  fun unregisterPlayer(player: HybridVideoPlayer) = reconcilePlayer(player)
 
-  fun updatePlayerPreferences(player: HybridVideoPlayer) =
-    Threading.runOnMainThread { reconcilePlayer(player) }
+  @MainThread
+  fun updatePlayerPreferences(player: HybridVideoPlayer) = reconcilePlayer(player)
 
-  fun detachPlayer(player: HybridVideoPlayer) = Threading.runOnMainThread {
+  @MainThread
+  fun detachPlayer(player: HybridVideoPlayer) {
     mediaSessionsList.remove(player)?.release()
-    removePlayerFromPreparedStartTicket(player)
     stopIfNoPlayers()
   }
 
@@ -117,11 +115,6 @@ class VideoPlaybackService : MediaSessionService() {
 
   @MainThread
   private fun cleanupService() {
-    if (isCleanedUp) {
-      return
-    }
-    isCleanedUp = true
-
     stopForegroundSafely()
     isForeground = false
     stopSelf()
@@ -133,104 +126,70 @@ class VideoPlaybackService : MediaSessionService() {
   }
 
   // Stop the service if there are no active media sessions (no players need it)
-  fun stopIfNoPlayers() = Threading.runOnMainThread {
-    if (!isServiceActive || mediaSessionsList.isNotEmpty() || hasPreparedStartTicket()) {
-      return@runOnMainThread
+  @MainThread
+  fun stopIfNoPlayers() {
+    if (lifecycleState != LifecycleState.ACTIVE || mediaSessionsList.isNotEmpty()) {
+      return
     }
 
-    isServiceActive = false
+    lifecycleState = LifecycleState.INACTIVE
     invalidateStartTickets()
     cleanupService()
   }
 
   @MainThread
   private fun stopAndInvalidate(destroyed: Boolean = false) {
-    invalidateStartTickets(destroyed)
-    isServiceActive = false
+    lifecycleState = if (destroyed) LifecycleState.DESTROYED else LifecycleState.INACTIVE
+    invalidateStartTickets()
     cleanupService()
   }
 
   /**
-   * Adds a player to the bounded weak-reference batch for the next explicit system start.
+   * Reserves a player-bound ticket for the next explicit system start.
    */
-  internal fun prepareForStart(player: HybridVideoPlayer): Long? = synchronized(startTicketLock) {
-    if (isDestroyed || player.isReleasedForService) {
-      return@synchronized null
+  @MainThread
+  internal fun prepareForStart(player: HybridVideoPlayer): Long? {
+    if (lifecycleState == LifecycleState.DESTROYED || player.isReleasedForService) {
+      return null
     }
 
-    val ticket = preparedStartTicket ?: StartTicket(++nextStartTicketId).also {
-      preparedStartTicket = it
-    }
-    ticket.requestCount += 1
-    ticket.players.removeAll { it.get() == null }
-    if (ticket.players.none { it.get() === player }) {
-      ticket.players.add(WeakReference(player))
-    }
-    ticket.id
+    val ticketId = ++nextStartTicketId
+    startTicketIds.add(ticketId)
+    return ticketId
   }
 
   /**
-   * Completes one request paired with [prepareForStart] on the main looper. The start helper
-   * calls this before returning, so its following binder command is ordered after promotion.
+   * Completes the system start paired with [prepareForStart].
    */
-  internal fun completePreparedStart(ticketId: Long, startRequested: Boolean) {
-    Threading.runOnMainThread {
-      var preparedPlayers: List<HybridVideoPlayer>? = null
-      var discarded = false
-      synchronized(startTicketLock) {
-        val ticket = preparedStartTicket
-        when {
-          ticket?.id == ticketId -> {
-            if (ticket.requestCount > 0) {
-              ticket.requestCount -= 1
-            }
+  @MainThread
+  internal fun completePreparedStart(
+    ticketId: Long,
+    player: HybridVideoPlayer,
+    startRequested: Boolean
+  ) {
+    if (ticketId !in startTicketIds) {
+      return
+    }
 
-            if (startRequested) {
-              preparedPlayers = consumePreparedStartTicketLocked(ticket)
-            } else if (ticket.requestCount == 0) {
-              preparedStartTicket = null
-              discarded = true
-            }
-          }
-          acceptedStartTicketId == ticketId -> return@runOnMainThread
-          else -> return@runOnMainThread
-        }
-      }
-
-      if (preparedPlayers != null) {
-        activateService()
-        reconcilePreparedPlayers(preparedPlayers)
-      } else if (discarded) {
-        stopIfNoPlayers()
-      }
+    if (startRequested) {
+      activateService()
+      reconcilePlayer(player)
+    } else {
+      startTicketIds.remove(ticketId)
+      stopIfNoPlayers()
     }
   }
 
   @MainThread
-  private fun acceptStartCommand(ticketId: Long?): StartCommandAcceptance {
-    return synchronized(startTicketLock) {
-      if (isDestroyed) {
-        return@synchronized StartCommandAcceptance.REJECTED
-      }
-
-      val ticket = preparedStartTicket
-      when {
-        ticketId == null -> StartCommandAcceptance.REJECTED
-        ticket?.id == ticketId -> StartCommandAcceptance(
-          accepted = true,
-          preparedPlayers = consumePreparedStartTicketLocked(ticket)
-        )
-        acceptedStartTicketId == ticketId -> StartCommandAcceptance(accepted = true)
-        else -> StartCommandAcceptance.REJECTED
-      }
-    }
+  private fun acceptStartCommand(ticketId: Long?): Boolean {
+    return lifecycleState != LifecycleState.DESTROYED &&
+      ticketId != null && startTicketIds.remove(ticketId)
   }
 
   @MainThread
   private fun activateService() {
-    if (!isServiceActive) {
-      isServiceActive = true
-      isCleanedUp = false
+    if (lifecycleState == LifecycleState.INACTIVE) {
+      lifecycleState = LifecycleState.ACTIVE
       isForeground = false
     }
   }
@@ -241,23 +200,19 @@ class VideoPlaybackService : MediaSessionService() {
   }
 
   @MainThread
-  private fun reconcilePreparedPlayers(players: List<HybridVideoPlayer>) {
-    players.forEach { player ->
-      reconcilePlayer(player, checkIdleAfterwards = false)
-    }
-    stopIfNoPlayers()
-  }
-
-  @MainThread
   private fun reconcilePlayer(
     player: HybridVideoPlayer,
     checkIdleAfterwards: Boolean
   ) {
-    if (
-      player.isReleasedForService ||
-      isServiceDestroyed() ||
-      !isServiceActive
-    ) {
+    if (player.isReleasedForService) {
+      mediaSessionsList.remove(player)?.release()
+      if (checkIdleAfterwards) {
+        stopIfNoPlayers()
+      }
+      return
+    }
+
+    if (lifecycleState != LifecycleState.ACTIVE) {
       return
     }
 
@@ -308,40 +263,9 @@ class VideoPlaybackService : MediaSessionService() {
     addSession(mediaSession)
   }
 
-  private fun hasPreparedStartTicket(): Boolean = synchronized(startTicketLock) {
-    preparedStartTicket != null
-  }
-
   @MainThread
-  private fun removePlayerFromPreparedStartTicket(player: HybridVideoPlayer) {
-    synchronized(startTicketLock) {
-      preparedStartTicket?.players?.removeAll { reference ->
-        val preparedPlayer = reference.get()
-        preparedPlayer == null || preparedPlayer === player
-      }
-    }
-  }
-
-  @MainThread
-  private fun invalidateStartTickets(destroyed: Boolean = false) {
-    synchronized(startTicketLock) {
-      if (destroyed) {
-        isDestroyed = true
-      }
-      preparedStartTicket = null
-      acceptedStartTicketId = null
-    }
-  }
-
-  @MainThread
-  private fun isServiceDestroyed(): Boolean = synchronized(startTicketLock) {
-    isDestroyed
-  }
-
-  private fun consumePreparedStartTicketLocked(ticket: StartTicket): List<HybridVideoPlayer> {
-    preparedStartTicket = null
-    acceptedStartTicketId = ticket.id
-    return ticket.players.mapNotNull { reference -> reference.get() }
+  private fun invalidateStartTickets() {
+    startTicketIds.clear()
   }
 
   companion object {
@@ -351,20 +275,6 @@ class VideoPlaybackService : MediaSessionService() {
     private const val PLACEHOLDER_NOTIFICATION_ID = 1729
     private const val NOTIFICATION_CHANNEL_ID = "twg_video_playback"
     private const val NO_START_TICKET_ID = -1L
-  }
-
-  private data class StartCommandAcceptance(
-    val accepted: Boolean,
-    val preparedPlayers: List<HybridVideoPlayer>? = null
-  ) {
-    companion object {
-      val REJECTED = StartCommandAcceptance(accepted = false)
-    }
-  }
-
-  private class StartTicket(val id: Long) {
-    var requestCount = 0
-    val players = mutableListOf<WeakReference<HybridVideoPlayer>>()
   }
 
   private fun createPlaceholderNotification(): Notification {

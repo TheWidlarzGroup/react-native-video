@@ -26,12 +26,8 @@ import com.margelo.nitro.core.Promise
 import com.twg.video.core.LibraryError
 import com.twg.video.core.PlayerError
 import com.twg.video.core.VideoManager
-import com.twg.video.core.extensions.detachPlayer
-import com.twg.video.core.extensions.startService
-import com.twg.video.core.extensions.stopService
 import com.twg.video.core.player.OnAudioFocusChangedListener
 import com.twg.video.core.recivers.AudioBecomingNoisyReceiver
-import com.twg.video.core.services.playback.VideoPlaybackService
 import com.twg.video.core.services.playback.VideoPlaybackServiceConnection
 import com.twg.video.core.utils.TextTrackUtils
 import com.twg.video.core.utils.Threading.mainThreadProperty
@@ -98,7 +94,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
 
   // Service Connection
   private val servicePreferencesLock = Any()
-  private val videoPlaybackServiceConnection = VideoPlaybackServiceConnection(WeakReference(this))
+  private val videoPlaybackServiceConnection = VideoPlaybackServiceConnection(WeakReference(this), context)
 
   // Text track selection state
   private var selectedExternalTrackIndex: Int? = null
@@ -129,16 +125,14 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
 
         field = value
         if (shouldRun && !wasRunning) {
-          if (videoPlaybackServiceConnection.requestStart()) {
-            VideoPlaybackService.startService(this, context, videoPlaybackServiceConnection)
-          }
+          videoPlaybackServiceConnection.start()
         }
         if (!shouldRun && wasRunning) {
-          VideoPlaybackService.stopService(this, videoPlaybackServiceConnection)
+          videoPlaybackServiceConnection.stop()
         }
 
         // Inform service to refresh notification/session layout
-        try { videoPlaybackServiceConnection.serviceBinder?.service?.updatePlayerPreferences(this) } catch (_: Exception) {}
+        videoPlaybackServiceConnection.updatePreferences()
       }
     }
 
@@ -221,15 +215,13 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
 
         field = value
         if (shouldRun && !wasRunning) {
-          if (videoPlaybackServiceConnection.requestStart()) {
-            VideoPlaybackService.startService(this, context, videoPlaybackServiceConnection)
-          }
+          videoPlaybackServiceConnection.start()
         }
         if (!shouldRun && wasRunning) {
-          VideoPlaybackService.stopService(this, videoPlaybackServiceConnection)
+          videoPlaybackServiceConnection.stop()
         }
         // Update preferences to refresh notifications/registration
-        try { videoPlaybackServiceConnection.serviceBinder?.service?.updatePlayerPreferences(this) } catch (_: Exception) {}
+        videoPlaybackServiceConnection.updatePreferences()
       }
     }
 
@@ -476,7 +468,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   }
 
   private fun completeRelease(unregisterPlayer: Boolean) {
-    VideoPlaybackService.detachPlayer(this, videoPlaybackServiceConnection)
+    videoPlaybackServiceConnection.detach()
 
     runOnMainThread {
       try {
