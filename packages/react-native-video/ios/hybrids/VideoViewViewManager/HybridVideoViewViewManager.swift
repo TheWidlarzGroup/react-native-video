@@ -9,7 +9,7 @@ import Foundation
 import AVKit
 import NitroModules
 
-struct ViewListenerPair {
+private struct ViewListenerPair {
   let id: UUID
   let eventName: String
   let callback: Any

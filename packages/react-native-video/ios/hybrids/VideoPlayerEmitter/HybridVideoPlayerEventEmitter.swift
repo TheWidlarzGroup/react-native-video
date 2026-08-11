@@ -8,7 +8,7 @@
 import Foundation
 import NitroModules
 
-struct ListenerPair {
+private struct ListenerPair {
   let id: UUID
   let eventName: String
   let callback: Any
