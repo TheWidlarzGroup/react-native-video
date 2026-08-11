@@ -135,23 +135,27 @@ class NowPlayingInfoCenterManager {
 
     playTarget = remoteCommandCenter.playCommand.addTarget { [weak self] _ in
       return runOnMainThreadSync {
-        guard let player = self?.currentPlayer, player.rate == 0 else {
+        guard let player = self?.currentPlayer else {
           return .commandFailed
         }
 
-        player.play()
+        if player.rate == 0 {
+          player.play()
+        }
         return .success
       }
     }
 
     pauseTarget = remoteCommandCenter.pauseCommand.addTarget { [weak self] _ in
       return runOnMainThreadSync {
-        guard let player = self?.currentPlayer, player.rate != 0 else {
+        guard let player = self?.currentPlayer else {
           return .commandFailed
         }
 
-        player.pause()
-        VideoManager.shared.clearBackgroundResumeIntent(for: player)
+        if player.rate != 0 {
+          player.pause()
+          VideoManager.shared.clearBackgroundResumeIntent(for: player)
+        }
         return .success
       }
     }

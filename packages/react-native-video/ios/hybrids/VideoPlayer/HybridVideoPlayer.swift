@@ -771,10 +771,6 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   }
 
   var memorySize: Int {
-    var size = 0
-
-    size += playerItem?.asset.estimatedMemoryUsage ?? 0
-
-    return size
+    isReleased ? 0 : playerItem?.asset.estimatedMemoryUsage ?? 0
   }
 }

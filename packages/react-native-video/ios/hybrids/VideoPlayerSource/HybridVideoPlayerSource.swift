@@ -36,13 +36,12 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec, NativeVideoPlayerSou
   var asset: AVURLAsset? {
     get { sourceLoader.withState { storedAsset } }
     set {
-      let releasedOwnership = sourceLoader.cancel {
-        let releasedOwnership = (asset: storedAsset, drmManager: storedDrmManager)
+      let releasedAsset = sourceLoader.cancel {
+        let releasedAsset = storedAsset
         storedAsset = newValue
-        storedDrmManager = nil
-        return releasedOwnership
+        return releasedAsset
       }
-      withExtendedLifetime(releasedOwnership) {}
+      withExtendedLifetime(releasedAsset) {}
     }
   }
 
@@ -184,13 +183,12 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec, NativeVideoPlayerSou
         return prepared.asset
       }
     } catch {
-      let releasedOwnership = sourceLoader.cancel(token) {
-        let releasedOwnership = (asset: storedAsset, drmManager: storedDrmManager)
+      let releasedAsset = sourceLoader.cancel(token) {
+        let releasedAsset = storedAsset
         storedAsset = nil
-        storedDrmManager = nil
-        return releasedOwnership
+        return releasedAsset
       }
-      withExtendedLifetime(releasedOwnership) {}
+      withExtendedLifetime(releasedAsset) {}
       if error is CancellationError {
         throw SourceError.cancelled.error()
       }
@@ -251,13 +249,12 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec, NativeVideoPlayerSou
   }
 
   func releaseAsset() {
-    let releasedOwnership = sourceLoader.cancel {
-      let releasedOwnership = (asset: storedAsset, drmManager: storedDrmManager)
+    let releasedAsset = sourceLoader.cancel {
+      let releasedAsset = storedAsset
       storedAsset = nil
-      storedDrmManager = nil
-      return releasedOwnership
+      return releasedAsset
     }
-    withExtendedLifetime(releasedOwnership) {}
+    withExtendedLifetime(releasedAsset) {}
   }
 
   var memorySize: Int {
