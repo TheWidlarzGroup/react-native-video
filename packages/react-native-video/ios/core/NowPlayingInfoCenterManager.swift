@@ -7,7 +7,7 @@ class NowPlayingInfoCenterManager {
   private let SEEK_INTERVAL_SECONDS: Double = 10
 
   private weak var currentPlayer: AVPlayer?
-  private let players = SynchronizedHashTable<AVPlayer>(weakObjects: true)
+  private let players = NSHashTable<AVPlayer>.weakObjects()
 
   private var observers: [Int: NSKeyValueObservation] = [:]
   private var playbackObserver: Any?
@@ -62,9 +62,10 @@ class NowPlayingInfoCenterManager {
     runOnMainThread { [weak self, player] in
       guard let self else { return }
 
-      // Keep registration removal and empty-state detection coupled in the registry.
-      let (wasRegistered, noPlayersLeft) = self.players.removeReportingEmpty(player)
-      guard wasRegistered else { return }
+      guard self.players.contains(player) else { return }
+
+      self.players.remove(player)
+      let noPlayersLeft = self.players.allObjects.isEmpty
 
       if noPlayersLeft {
         self.cleanup()
@@ -225,8 +226,11 @@ class NowPlayingInfoCenterManager {
   }
 
   func updateStaticInfo(ifCurrentItem playerItem: AVPlayerItem) {
-    guard currentPlayer?.currentItem === playerItem else { return }
-    updateStaticInfo()
+    runOnMainThread { [weak self, weak playerItem] in
+      guard let self, let playerItem,
+            self.currentPlayer?.currentItem === playerItem else { return }
+      self.updateStaticInfo()
+    }
   }
 
   private func updateNowPlayingInfo() {
@@ -288,19 +292,22 @@ class NowPlayingInfoCenterManager {
   }
 
   func updatePlaybackState() {
-    guard let player = currentPlayer else {
-      invalidateCommandTargets()
-      MPNowPlayingInfoCenter.default().nowPlayingInfo = [:]
-      return
+    runOnMainThread { [weak self] in
+      guard let self else { return }
+      guard let player = self.currentPlayer else {
+        self.invalidateCommandTargets()
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = [:]
+        return
+      }
+
+      guard let currentItem = player.currentItem else { return }
+
+      var info = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [:]
+      info[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentItem.currentTime().seconds
+      info[MPNowPlayingInfoPropertyPlaybackRate] = player.rate
+      info[MPMediaItemPropertyPlaybackDuration] = currentItem.duration.seconds
+      MPNowPlayingInfoCenter.default().nowPlayingInfo = info
     }
-
-    guard let currentItem = player.currentItem else { return }
-
-    var info = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [:]
-    info[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentItem.currentTime().seconds
-    info[MPNowPlayingInfoPropertyPlaybackRate] = player.rate
-    info[MPMediaItemPropertyPlaybackDuration] = currentItem.duration.seconds
-    MPNowPlayingInfoCenter.default().nowPlayingInfo = info
   }
 
   private func findNewCurrentPlayer() {

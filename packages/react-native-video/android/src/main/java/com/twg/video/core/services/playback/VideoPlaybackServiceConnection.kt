@@ -13,6 +13,7 @@ import androidx.annotation.MainThread
 import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
 import com.margelo.nitro.video.HybridVideoPlayer
+import com.twg.video.core.extensions.requestSystemStart
 import com.twg.video.core.utils.Threading
 import java.lang.ref.WeakReference
 
@@ -21,113 +22,106 @@ class VideoPlaybackServiceConnection(
   private val player: WeakReference<HybridVideoPlayer>,
   context: Context
 ) : ServiceConnection {
+  private sealed interface ConnectionState {
+    data object Disconnected : ConnectionState
+    data object Binding : ConnectionState
+    data class Connected(val binder: VideoPlaybackServiceBinder) : ConnectionState
+  }
+
   // Android keys service dispatchers by the exact Context instance used to bind.
   private val context = context.applicationContext ?: context
-  private var isBound = false
-  private var serviceBinder: VideoPlaybackServiceBinder? = null
-  private var isStartDesired = false
+  private var state: ConnectionState = ConnectionState.Disconnected
 
   @MainThread
   override fun onServiceConnected(componentName: ComponentName?, binder: IBinder?) {
     val connectedBinder = binder as? VideoPlaybackServiceBinder
-    val player = player.get()
-
-    if (!isBound || connectedBinder == null || player == null || player.isReleasedForService) {
-      connectedBinder?.service?.stopIfNoPlayers()
-      if (isBound) {
-        unbind()
-      }
-      return
-    }
-
-    serviceBinder = connectedBinder
-    if (!isStartDesired) {
-      connectedBinder.service.stopIfNoPlayers()
+    if (state != ConnectionState.Binding || connectedBinder == null) {
       unbind()
       return
     }
 
-    requestServiceStart(connectedBinder.service, player)
+    state = ConnectionState.Connected(connectedBinder)
+    val player = player.get()
+    if (player == null || !wantsService(player)) {
+      player?.let { connectedBinder.service.unregisterPlayer(it) }
+      unbind()
+      return
+    }
+
+    startConnected(connectedBinder.service, player)
   }
 
   @MainThread
   override fun onServiceDisconnected(componentName: ComponentName?) {
-    serviceBinder = null
-    if (!isStartDesired) {
-      unbind()
+    if (state is ConnectionState.Connected) {
+      state = ConnectionState.Binding
     }
   }
 
   @MainThread
   override fun onBindingDied(componentName: ComponentName?) {
-    serviceBinder = null
     unbind()
-    if (isStartDesired) {
-      bind()
-    }
+    player.get()?.takeIf(::wantsService)?.let { bind() }
   }
 
   @MainThread
   override fun onNullBinding(componentName: ComponentName?) {
     Log.e(
       TAG,
-      "Could not bind to playback service - there can be issues with background playback" +
-        "and notification controls"
+      "Could not bind to playback service - background playback and notification controls are unavailable"
     )
     unbind()
   }
 
   fun start() = Threading.runOnMainThread {
     val player = player.get()
-    if (player == null || player.isReleasedForService) {
-      isStartDesired = false
-      unbind()
+    if (player == null || !wantsService(player)) {
+      stopOnMain()
       return@runOnMainThread
     }
 
-    isStartDesired = true
-    val service = serviceBinder?.service
-    if (service == null) {
-      bind()
-    } else {
-      requestServiceStart(service, player)
+    when (val state = state) {
+      ConnectionState.Disconnected -> bind()
+      ConnectionState.Binding -> Unit
+      is ConnectionState.Connected -> startConnected(state.binder.service, player)
     }
   }
 
   fun stop() = Threading.runOnMainThread {
-    isStartDesired = false
-    player.get()?.let { player ->
-      try {
-        serviceBinder?.service?.unregisterPlayer(player)
-      } catch (_: Exception) {}
-    }
-    unbind()
+    stopOnMain()
   }
 
   fun updatePreferences() = Threading.runOnMainThread {
-    player.get()?.let { player ->
-      try {
-        serviceBinder?.service?.updatePlayerPreferences(player)
-      } catch (_: Exception) {}
+    val player = player.get()
+    if (player == null || !wantsService(player)) {
+      stopOnMain()
+      return@runOnMainThread
+    }
+
+    when (val state = state) {
+      ConnectionState.Disconnected -> bind()
+      ConnectionState.Binding -> Unit
+      is ConnectionState.Connected -> state.binder.service.updatePlayerPreferences(player)
     }
   }
 
-  fun detach() = Threading.runOnMainThread {
-    isStartDesired = false
-    player.get()?.let { player ->
-      try {
-        serviceBinder?.service?.detachPlayer(player)
-      } catch (_: Exception) {}
-    }
+  @MainThread
+  private fun wantsService(player: HybridVideoPlayer): Boolean =
+    !player.isReleasedForService &&
+      (player.playInBackground || player.showNotificationControls)
+
+  @MainThread
+  private fun stopOnMain() {
+    val connected = state as? ConnectionState.Connected
+    player.get()?.let { connected?.binder?.service?.unregisterPlayer(it) }
     unbind()
   }
 
   @MainThread
   private fun bind() {
-    val player = player.get()
-    if (!isStartDesired || isBound || player == null || player.isReleasedForService) {
-      return
-    }
+    if (state != ConnectionState.Disconnected) return
+    val player = player.get() ?: return
+    if (!wantsService(player)) return
 
     val intent = Intent(context, VideoPlaybackService::class.java).apply {
       action = VideoPlaybackService.VIDEO_PLAYBACK_SERVICE_INTERFACE
@@ -138,77 +132,40 @@ class VideoPlaybackServiceConnection(
       BIND_AUTO_CREATE
     }
 
-    // Mark the dispatcher before binding so even an immediate callback sees consistent state.
-    isBound = true
+    state = ConnectionState.Binding
     val bound = try {
       context.bindService(intent, this, flags)
     } catch (_: Exception) {
       false
     }
     if (!bound) {
-      unbind()
+      state = ConnectionState.Disconnected
     }
   }
 
   @MainThread
   private fun unbind() {
-    serviceBinder = null
-    if (!isBound) {
-      return
-    }
-
-    isBound = false
+    if (state == ConnectionState.Disconnected) return
+    state = ConnectionState.Disconnected
     try {
       context.unbindService(this)
     } catch (_: Exception) {}
   }
 
   @MainThread
-  private fun requestServiceStart(
+  private fun startConnected(
     service: VideoPlaybackService,
     player: HybridVideoPlayer
   ) {
-    val ticketId = service.prepareForStart(player) ?: run {
-      unbind()
-      if (isStartDesired && !player.isReleasedForService) {
-        bind()
-      }
-      return
-    }
-
-    if (player.isReleasedForService) {
-      isStartDesired = false
-      service.completePreparedStart(ticketId, player, false)
+    if (!wantsService(player) || !service.registerPlayer(player)) {
+      service.unregisterPlayer(player)
       unbind()
       return
     }
 
-    val intent = Intent(context, VideoPlaybackService::class.java).apply {
-      action = VideoPlaybackService.VIDEO_PLAYBACK_SERVICE_INTERFACE
-      putExtra(VideoPlaybackService.START_TICKET_ID_EXTRA, ticketId)
-    }
-    service.completePreparedStart(ticketId, player, requestSystemStart(intent))
-  }
-
-  @MainThread
-  private fun requestSystemStart(intent: Intent): Boolean {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-      return try {
-        context.startService(intent) != null
-      } catch (_: Exception) {
-        false
-      }
-    }
-
-    return try {
-      context.startForegroundService(intent) != null
-    } catch (_: Exception) {
-      // Preserve the existing best-effort fallback for devices that reject foreground start.
-      try {
-        context.startService(intent) != null
-      } catch (_: Exception) {
-        false
-      }
+    if (!VideoPlaybackService.requestSystemStart(context)) {
+      service.unregisterPlayer(player)
+      unbind()
     }
   }
 

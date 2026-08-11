@@ -12,8 +12,8 @@ class VideoManager {
   // MARK: - Singleton
   static let shared = VideoManager()
   
-  private let players = SynchronizedHashTable<HybridVideoPlayer>(weakObjects: true)
-  private let videoView = SynchronizedHashTable<VideoComponentView>(weakObjects: true)
+  private let players = NSHashTable<HybridVideoPlayer>.weakObjects()
+  private let videoView = NSHashTable<VideoComponentView>.weakObjects()
   
   private var isAudioSessionActive = false
   private var remoteControlEventsActive = false
@@ -102,21 +102,33 @@ class VideoManager {
   // MARK: - public
   
   func register(player: HybridVideoPlayer) {
-    players.add(player)
-    PluginsRegistry.shared.notifyPlayerCreated(player: player)
+    runOnMainThread { [weak player] in
+      guard let player, !player.isReleased else { return }
+      self.players.add(player)
+      PluginsRegistry.shared.notifyPlayerCreated(player: player)
+    }
   }
   
   func unregister(player: HybridVideoPlayer) {
-    players.remove(player)
-    PluginsRegistry.shared.notifyPlayerDestroyed(player: player)
+    runOnMainThread { [weak player] in
+      guard let player, self.players.contains(player) else { return }
+      self.players.remove(player)
+      PluginsRegistry.shared.notifyPlayerDestroyed(player: player)
+    }
   }
   
   func register(view: VideoComponentView) {
-    videoView.add(view)
+    runOnMainThread { [weak view] in
+      guard let view else { return }
+      self.videoView.add(view)
+    }
   }
   
   func unregister(view: VideoComponentView) {
-    videoView.remove(view)
+    runOnMainThread { [weak view] in
+      guard let view else { return }
+      self.videoView.remove(view)
+    }
   }
   
   func requestAudioSessionUpdate() {
@@ -128,19 +140,24 @@ class VideoManager {
   /// Clears the resume intent for the player backing `avPlayer` — for remote
   /// (lock screen / Control Center / headset) pauses, which bypass `pause()`.
   func clearBackgroundResumeIntent(for avPlayer: AVPlayer) {
-    for player in players.allObjects where player.player === avPlayer {
-      player.wasPlayingInBackground = false
+    runOnMainThread { [weak self, weak avPlayer] in
+      guard let self, let avPlayer else { return }
+      for player in self.players.allObjects where player.player === avPlayer {
+        player.wasPlayingInBackground = false
+      }
     }
   }
 
   // MARK: - Remote Control Events
   func setRemoteControlEventsActive(_ active: Bool) {
-    if isAudioSessionManagementDisabled || remoteControlEventsActive == active {
-      return
+    runOnMainThread { [weak self] in
+      guard let self,
+            !self.isAudioSessionManagementDisabled,
+            self.remoteControlEventsActive != active else { return }
+
+      self.remoteControlEventsActive = active
+      self.updateAudioSessionConfiguration()
     }
-    
-    remoteControlEventsActive = active
-    updateAudioSessionConfiguration()
   }
   
   // MARK: - Audio Session Management
@@ -379,24 +396,27 @@ class VideoManager {
       AVAudioSession.InterruptionOptions(rawValue: $0)
     }
 
-    switch type {
-    case .began:
-      // The interruption deactivated our session — keep the cache honest.
-      isAudioSessionActive = false
-      // Not a system background pause; don't auto-resume after an interruption.
-      for player in players.allObjects {
-        player.wasPlayingInBackground = false
+    runOnMainThread { [weak self] in
+      guard let self else { return }
+
+      switch type {
+      case .began:
+        // The interruption deactivated our session — keep the cache honest.
+        self.isAudioSessionActive = false
+        // Not a system background pause; don't auto-resume after an interruption.
+        for player in self.players.allObjects {
+          player.wasPlayingInBackground = false
+        }
+
+      case .ended:
+        // Interruption ended, check if we should resume audio session
+        if options?.contains(.shouldResume) == true {
+          self.updateAudioSessionConfiguration()
+        }
+
+      @unknown default:
+        break
       }
-      break
-      
-    case .ended:
-      // Interruption ended, check if we should resume audio session
-      if options?.contains(.shouldResume) == true {
-        updateAudioSessionConfiguration()
-      }
-      
-    @unknown default:
-      break
     }
   }
   
@@ -429,55 +449,67 @@ class VideoManager {
   }
   
   @objc func applicationWillResignActive(notification: Notification) {
-    // Pause all players when the app is about to become inactive
-    for player in players.allObjects {
-      if player.playInBackground || player.playWhenInactive || !player.isPlaying || player.player.isExternalPlaybackActive == true {
-        continue
+    runOnMainThread { [weak self] in
+      guard let self else { return }
+      // Pause all players when the app is about to become inactive
+      for player in self.players.allObjects {
+        if player.playInBackground || player.playWhenInactive || !player.isPlaying || player.player.isExternalPlaybackActive == true {
+          continue
+        }
+
+        try? player.pause()
+        player.wasAutoPaused = true
       }
-      
-      try? player.pause()
-      player.wasAutoPaused = true
     }
   }
   
   @objc func applicationDidBecomeActive(notification: Notification) {
-    // Resume all players when the app becomes active
-    for player in players.allObjects {
-      if player.wasAutoPaused {
-        try? player.play()
-        player.wasAutoPaused = false
+    runOnMainThread { [weak self] in
+      guard let self else { return }
+      // Resume all players when the app becomes active
+      for player in self.players.allObjects {
+        if player.wasAutoPaused {
+          try? player.play()
+          player.wasAutoPaused = false
+        }
       }
     }
   }
   
   @objc func applicationDidEnterBackground(notification: Notification) {
-    // Pause all players when the app enters background
-    for player in players.allObjects {
-      if player.playInBackground || player.player.isExternalPlaybackActive == true || !player.isPlaying {
-        player.wasPlayingInBackground = player.playInBackground && player.isPlaying
-        continue
-      }
+    runOnMainThread { [weak self] in
+      guard let self else { return }
+      // Pause all players when the app enters background
+      for player in self.players.allObjects {
+        if player.playInBackground || player.player.isExternalPlaybackActive == true || !player.isPlaying {
+          player.wasPlayingInBackground = player.playInBackground && player.isPlaying
+          continue
+        }
 
-      try? player.pause()
-      player.wasAutoPaused = true
+        try? player.pause()
+        player.wasAutoPaused = true
+      }
     }
   }
 
   @objc func applicationWillEnterForeground(notification: Notification) {
-    // Resume all players when the app enters foreground
-    for player in players.allObjects {
-      if player.wasAutoPaused {
-        try? player.play()
-        player.wasAutoPaused = false
-      } else if player.wasPlayingInBackground && !player.isPlaying {
-        // Was playing when backgrounded but the system paused it — resume.
-        try? player.play()
+    runOnMainThread { [weak self] in
+      guard let self else { return }
+      // Resume all players when the app enters foreground
+      for player in self.players.allObjects {
+        if player.wasAutoPaused {
+          try? player.play()
+          player.wasAutoPaused = false
+        } else if player.wasPlayingInBackground && !player.isPlaying {
+          // Was playing when backgrounded but the system paused it — resume.
+          try? player.play()
+        }
+
+        player.wasPlayingInBackground = false
       }
 
-      player.wasPlayingInBackground = false
+      // Re-assert the session — it may have been deactivated by the system while backgrounded.
+      self.updateAudioSessionConfiguration()
     }
-
-    // Re-assert the session — it may have been deactivated by the system while backgrounded.
-    updateAudioSessionConfiguration()
   }
 }

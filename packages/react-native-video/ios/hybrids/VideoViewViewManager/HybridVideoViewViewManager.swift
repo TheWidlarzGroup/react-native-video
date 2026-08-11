@@ -17,7 +17,7 @@ struct ViewListenerPair {
 
 class HybridVideoViewViewManager: HybridVideoViewViewManagerSpec {
   weak var view: VideoComponentView?
-  var listeners: [ViewListenerPair] = []
+  private let listeners = ListenerStore<ViewListenerPair>()
   
   let DEALOCATED_WARNING = "ReactNativeVideo: VideoComponentView is no longer available. It is likely that the view was deallocated."
   
@@ -42,7 +42,7 @@ class HybridVideoViewViewManager: HybridVideoViewViewManagerSpec {
   }
   
   private func emitEvent<T>(eventName: String, invoke: (T) throws -> Void) {
-    for pair in listeners where pair.eventName == eventName {
+    for pair in listeners.snapshot() where pair.eventName == eventName {
       if let callback = pair.callback as? T {
         do {
           try invoke(callback)

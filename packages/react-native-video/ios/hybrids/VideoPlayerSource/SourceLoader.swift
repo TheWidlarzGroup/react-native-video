@@ -7,189 +7,198 @@
 
 import Foundation
 
-private class AnyCancellable {
-  private let _cancel: () -> Void
+private final class CurrentOperation: @unchecked Sendable {
+  private let cancelOperation: () -> Void
 
-  init(_ cancel: @escaping () -> Void) {
-    self._cancel = cancel
+  init(cancel: @escaping () -> Void) {
+    cancelOperation = cancel
   }
 
   func cancel() {
-    _cancel()
+    cancelOperation()
   }
 }
 
-actor SourceLoaderActor {
-  private var currentCancellable: AnyCancellable?
-  private var currentReservation: SourceLoader.LoadReservation?
+final class SourceLoader {
+  final class Token: @unchecked Sendable {}
 
-  func load<T>(
-    reservation: SourceLoader.LoadReservation,
-    isCurrentLoad: @escaping () -> Bool,
-    priority: TaskPriority,
-    operation: @escaping () async throws -> T
-  ) async throws -> T {
-    guard isCurrentLoad() else {
+  private enum State {
+    case open(token: Token?, operation: CurrentOperation?)
+    case closed
+  }
+
+  private let lock = NSLock()
+  private var state: State = .open(token: nil, operation: nil)
+
+  func begin(
+    if shouldBegin: () -> Bool = { true },
+    onBegin: () -> Void = {}
+  ) throws -> Token? {
+    let token: Token
+    let previousOperation: CurrentOperation?
+
+    lock.lock()
+    switch state {
+    case .closed:
+      lock.unlock()
       throw CancellationError()
+    case .open(_, let operation):
+      guard shouldBegin() else {
+        lock.unlock()
+        return nil
+      }
+      token = Token()
+      previousOperation = operation
+      state = .open(token: token, operation: nil)
+      onBegin()
+      lock.unlock()
     }
-    cancelCurrentTask()
 
-    let cancellableTask = Task(priority: priority) {
-      try await operation()
+    previousOperation?.cancel()
+    return token
+  }
+
+  func withState<T>(_ operation: () throws -> T) rethrows -> T {
+    lock.lock()
+    defer { lock.unlock() }
+    return try operation()
+  }
+
+  func isCurrent(_ token: Token) -> Bool {
+    withState {
+      guard case .open(let current, _) = state else { return false }
+      return current === token
     }
+  }
 
-    let cancellable = AnyCancellable {
-      cancellableTask.cancel()
+  var isClosed: Bool {
+    withState {
+      if case .closed = state { return true }
+      return false
     }
-    currentCancellable = cancellable
-    currentReservation = reservation
+  }
 
-    do {
-      let result = try await cancellableTask.value
-      guard isCurrentLoad(),
-        currentReservation === reservation,
-        currentCancellable === cancellable
-      else {
+  func commit<T>(_ token: Token, update: () throws -> T) throws -> T {
+    try withState {
+      guard case .open(let current, _) = state, current === token else {
         throw CancellationError()
       }
-      currentCancellable = nil
-      return result
-    } catch {
-      if currentCancellable === cancellable {
-        currentCancellable = nil
-      }
-      throw error
+      return try update()
     }
   }
 
-  func cancel(
-    reservation: SourceLoader.LoadReservation,
-    isCancelled: @escaping () -> Bool
-  ) {
-    guard isCancelled(), currentReservation === reservation else {
-      return
+  @discardableResult
+  func cancel<T>(
+    _ token: Token? = nil,
+    update: () -> T
+  ) -> T? {
+    let operation: CurrentOperation?
+    let result: T
+
+    lock.lock()
+    guard case .open(let current, let currentOperation) = state,
+          token == nil || current === token else {
+      lock.unlock()
+      return nil
     }
-    cancelCurrentTask()
+    operation = currentOperation
+    state = .open(token: nil, operation: nil)
+    result = update()
+    lock.unlock()
+
+    operation?.cancel()
+    return result
   }
 
-  func cancelCurrent(isCurrentCancellation: @escaping () -> Bool) {
-    guard isCurrentCancellation() else {
-      return
+  @discardableResult
+  func close<T>(update: () -> T) -> T? {
+    let operation: CurrentOperation?
+    let result: T
+
+    lock.lock()
+    guard case .open(_, let currentOperation) = state else {
+      lock.unlock()
+      return nil
     }
-    cancelCurrentTask()
-  }
+    operation = currentOperation
+    state = .closed
+    result = update()
+    lock.unlock()
 
-  private func cancelCurrentTask() {
-    currentCancellable?.cancel()
-    currentCancellable = nil
-    currentReservation = nil
-  }
-}
-
-class SourceLoader {
-  final class LoadReservation {
-    private var cancelled = false
-
-    fileprivate init() {}
-
-    fileprivate func cancel() {
-      cancelled = true
-    }
-
-    fileprivate var isCancelled: Bool {
-      cancelled
-    }
-  }
-
-  private let actor = SourceLoaderActor()
-  private let requestLock = NSLock()
-  private var currentReservation: LoadReservation?
-
-  func reserveLoad() -> LoadReservation {
-    requestLock.lock()
-    defer { requestLock.unlock() }
-    let reservation = LoadReservation()
-    currentReservation = reservation
-    return reservation
+    operation?.cancel()
+    return result
   }
 
   func load<T>(
-    reservation: LoadReservation,
+    token: Token,
     isCurrent: @escaping () -> Bool = { true },
     priority: TaskPriority = .userInitiated,
     operation: @escaping () async throws -> T
   ) async throws -> T {
-    if Task.isCancelled {
-      requestCancellation(for: reservation)
+    guard isCurrent() else { throw CancellationError() }
+
+    let task = Task(priority: priority) {
+      try await operation()
+    }
+    let currentOperation = CurrentOperation {
+      task.cancel()
+    }
+
+    let previousOperation: CurrentOperation?
+    lock.lock()
+    guard case .open(let current, let previous) = state, current === token else {
+      lock.unlock()
+      task.cancel()
       throw CancellationError()
     }
-
-    let isCurrentLoad = { [self] in
-      self.isActive(reservation)
-        && isCurrent()
-    }
+    previousOperation = previous
+    state = .open(token: token, operation: currentOperation)
+    lock.unlock()
+    previousOperation?.cancel()
 
     return try await withTaskCancellationHandler {
-      try Task.checkCancellation()
-      let result = try await actor.load(
-        reservation: reservation,
-        isCurrentLoad: isCurrentLoad,
-        priority: priority,
-        operation: operation
-      )
-      try Task.checkCancellation()
-      return result
+      do {
+        let result = try await task.value
+        try Task.checkCancellation()
+        guard isCurrent() else { throw CancellationError() }
+        try finish(currentOperation)
+        return result
+      } catch {
+        clear(currentOperation)
+        throw error
+      }
     } onCancel: {
-      requestCancellation(for: reservation)
+      self.cancel(currentOperation)
     }
   }
 
-  func requestCancellation() {
-    let cancellation = reserveCancellation()
-    Task {
-      await actor.cancelCurrent(
-        isCurrentCancellation: { self.isCurrentCancellation(cancellation) }
-      )
+  private func finish(_ operation: CurrentOperation) throws {
+    lock.lock()
+    defer { lock.unlock() }
+    guard case .open(let token, let current) = state,
+          current === operation else {
+      throw CancellationError()
     }
+    state = .open(token: token, operation: nil)
   }
 
-  private func reserveCancellation() -> LoadReservation {
-    requestLock.lock()
-    defer { requestLock.unlock() }
-    let cancellation = LoadReservation()
-    cancellation.cancel()
-    currentReservation = cancellation
-    return cancellation
+  private func clear(_ operation: CurrentOperation) {
+    lock.lock()
+    defer { lock.unlock() }
+    guard case .open(let token, let current) = state,
+          current === operation else { return }
+    state = .open(token: token, operation: nil)
   }
 
-  private func isActive(_ reservation: LoadReservation) -> Bool {
-    requestLock.lock()
-    defer { requestLock.unlock() }
-    return currentReservation === reservation && reservation.isCancelled == false
-  }
-
-  private func isCurrentCancellation(_ reservation: LoadReservation) -> Bool {
-    requestLock.lock()
-    defer { requestLock.unlock() }
-    return currentReservation === reservation && reservation.isCancelled
-  }
-
-  private func requestCancellation(for reservation: LoadReservation) {
-    requestLock.lock()
-    reservation.cancel()
-    requestLock.unlock()
-
-    Task {
-      await actor.cancel(
-        reservation: reservation,
-        isCancelled: { self.isCancelled(reservation) }
-      )
+  private func cancel(_ operation: CurrentOperation) {
+    lock.lock()
+    guard case .open(_, let current) = state,
+          current === operation else {
+      lock.unlock()
+      return
     }
-  }
-
-  private func isCancelled(_ reservation: LoadReservation) -> Bool {
-    requestLock.lock()
-    defer { requestLock.unlock() }
-    return reservation.isCancelled
+    state = .open(token: nil, operation: nil)
+    lock.unlock()
+    operation.cancel()
   }
 }

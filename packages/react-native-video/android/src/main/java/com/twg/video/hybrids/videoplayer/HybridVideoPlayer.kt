@@ -26,8 +26,12 @@ import com.margelo.nitro.core.Promise
 import com.twg.video.core.LibraryError
 import com.twg.video.core.PlayerError
 import com.twg.video.core.VideoManager
+import com.twg.video.core.extensions.startService
+import com.twg.video.core.extensions.stopService
+import com.twg.video.core.extensions.updateServicePreferences
 import com.twg.video.core.player.OnAudioFocusChangedListener
 import com.twg.video.core.recivers.AudioBecomingNoisyReceiver
+import com.twg.video.core.services.playback.VideoPlaybackService
 import com.twg.video.core.services.playback.VideoPlaybackServiceConnection
 import com.twg.video.core.utils.TextTrackUtils
 import com.twg.video.core.utils.Threading.mainThreadProperty
@@ -63,17 +67,8 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
     return@runOnMainThreadSync ExoPlayer.Builder(context).build()
   }
 
-  private enum class RegistrationState {
-    UNREGISTERED,
-    REGISTERING,
-    REGISTERED,
-    RELEASE_PENDING
-  }
-
   var loadedWithSource = false
-  private val lifecycleLock = Any()
   private val releaseStarted = AtomicBoolean(false)
-  private var registrationState = RegistrationState.UNREGISTERED
   internal val isReleasedForService: Boolean
     get() = releaseStarted.get()
   private var currentPlayerView: WeakReference<PlayerView>? = null
@@ -93,7 +88,6 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   private val audioBecomingNoisyReceiver = AudioBecomingNoisyReceiver()
 
   // Service Connection
-  private val servicePreferencesLock = Any()
   private val videoPlaybackServiceConnection = VideoPlaybackServiceConnection(WeakReference(this), context)
 
   // Text track selection state
@@ -118,21 +112,22 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
     }
 
   override var showNotificationControls: Boolean = false
+    get() = runOnMainThreadSync { field }
     set(value) {
-      synchronized(servicePreferencesLock) {
+      runOnMainThreadSync {
         val wasRunning = (field || playInBackground)
         val shouldRun = (value || playInBackground)
 
         field = value
         if (shouldRun && !wasRunning) {
-          videoPlaybackServiceConnection.start()
+          VideoPlaybackService.startService(videoPlaybackServiceConnection)
         }
         if (!shouldRun && wasRunning) {
-          videoPlaybackServiceConnection.stop()
+          VideoPlaybackService.stopService(videoPlaybackServiceConnection)
         }
 
         // Inform service to refresh notification/session layout
-        videoPlaybackServiceConnection.updatePreferences()
+        VideoPlaybackService.updateServicePreferences(videoPlaybackServiceConnection)
       }
     }
 
@@ -208,20 +203,21 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   override var disableAudioSessionManagement: Boolean = false
 
   override var playInBackground: Boolean = false
+    get() = runOnMainThreadSync { field }
     set(value) {
-      synchronized(servicePreferencesLock) {
+      runOnMainThreadSync {
         val shouldRun = (value || showNotificationControls)
         val wasRunning = (field || showNotificationControls)
 
         field = value
         if (shouldRun && !wasRunning) {
-          videoPlaybackServiceConnection.start()
+          VideoPlaybackService.startService(videoPlaybackServiceConnection)
         }
         if (!shouldRun && wasRunning) {
-          videoPlaybackServiceConnection.stop()
+          VideoPlaybackService.stopService(videoPlaybackServiceConnection)
         }
         // Update preferences to refresh notifications/registration
-        videoPlaybackServiceConnection.updatePreferences()
+        VideoPlaybackService.updateServicePreferences(videoPlaybackServiceConnection)
       }
     }
 
@@ -292,18 +288,14 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
     }
   }
 
-  private inline fun <T> withActivePlayer(action: () -> T): T = synchronized(lifecycleLock) {
-    ensureNotReleased()
-    action().also { ensureNotReleased() }
-  }
-
   override fun initialize(): Promise<Unit> {
     return Promise.async {
       return@async runOnMainThreadSync {
-        withActivePlayer {
-          initializePlayer()
-          player.prepare()
-        }
+        ensureNotReleased()
+        initializePlayer()
+        ensureNotReleased()
+        player.prepare()
+        ensureNotReleased()
       }
     }
   }
@@ -311,57 +303,18 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   constructor(source: HybridVideoPlayerSource) : this() {
     this.source = source
 
-    runOnMainThread {
+    runOnMainThreadSync {
       try {
-        withActivePlayer {
-          if (source.config.initializeOnCreation == true) {
-            initializePlayer()
-            player.prepare()
-            ensureNotReleased()
-          }
+        ensureNotReleased()
+        if (source.config.initializeOnCreation == true) {
+          initializePlayer()
+          ensureNotReleased()
+          player.prepare()
         }
+        ensureNotReleased()
+        VideoManager.registerPlayer(this)
       } catch (_: PlayerError.Cancelled) {
         // Release won before asynchronous initialization.
-      }
-    }
-
-    val shouldRegister = synchronized(lifecycleLock) {
-      if (releaseStarted.get()) {
-        false
-      } else {
-        registrationState = RegistrationState.REGISTERING
-        true
-      }
-    }
-    if (shouldRegister) {
-      var registrationCompleted = false
-      try {
-        VideoManager.registerPlayer(this)
-        registrationCompleted = true
-      } finally {
-        if (!registrationCompleted) {
-          releaseStarted.compareAndSet(false, true)
-        }
-        val shouldTeardown = synchronized(lifecycleLock) {
-          when (registrationState) {
-            RegistrationState.REGISTERING -> {
-              registrationState = if (registrationCompleted) {
-                RegistrationState.REGISTERED
-              } else {
-                RegistrationState.UNREGISTERED
-              }
-              !registrationCompleted
-            }
-            RegistrationState.RELEASE_PENDING -> {
-              registrationState = RegistrationState.UNREGISTERED
-              true
-            }
-            else -> error("Unexpected registration state: $registrationState")
-          }
-        }
-        if (shouldTeardown) {
-          completeRelease(unregisterPlayer = true)
-        }
       }
     }
   }
@@ -399,18 +352,16 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
       val hybridSource = source as? HybridVideoPlayerSource ?: throw PlayerError.InvalidSource
 
       runOnMainThreadSync {
-        withActivePlayer {
-          val oldSource = this.source as? HybridVideoPlayerSource
-          oldSource?.sourceLoader?.cancel()
+        ensureNotReleased()
+        val oldSource = this.source as? HybridVideoPlayerSource
+        oldSource?.sourceLoader?.cancel()
 
-          // Update source
-          this.source = source
-          player.setMediaSource(hybridSource.mediaSource)
-          ensureNotReleased()
+        this.source = source
+        player.setMediaSource(hybridSource.mediaSource)
+        ensureNotReleased()
 
-          // Prepare player
-          player.prepare()
-        }
+        player.prepare()
+        ensureNotReleased()
       }
     }
   }
@@ -418,63 +369,36 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   override fun preload(): Promise<Unit> {
     return Promise.async {
       runOnMainThreadSync {
-        withActivePlayer {
-          if (!loadedWithSource) {
-            initializePlayer()
-          }
-
-          if (player.playbackState != Player.STATE_IDLE) {
-            return@withActivePlayer
-          }
-
-          player.prepare()
+        ensureNotReleased()
+        if (!loadedWithSource) {
+          initializePlayer()
         }
+
+        if (player.playbackState != Player.STATE_IDLE) {
+          return@runOnMainThreadSync
+        }
+
+        player.prepare()
+        ensureNotReleased()
       }
     }
   }
 
   override fun release() {
-    val releaseReenteredLifecycle = Thread.holdsLock(lifecycleLock)
     if (!releaseStarted.compareAndSet(false, true)) {
       return
     }
 
-    var shouldTeardown = true
-    val shouldUnregister = synchronized(lifecycleLock) {
-      when (registrationState) {
-        RegistrationState.UNREGISTERED -> false
-        RegistrationState.REGISTERING -> {
-          registrationState = RegistrationState.RELEASE_PENDING
-          shouldTeardown = false
-          false
-        }
-        RegistrationState.REGISTERED -> {
-          registrationState = RegistrationState.UNREGISTERED
-          true
-        }
-        RegistrationState.RELEASE_PENDING -> {
-          shouldTeardown = false
-          false
-        }
-      }
-    }
-    if (shouldTeardown) {
-      if (releaseReenteredLifecycle) {
-        progressHandler.post { completeRelease(shouldUnregister) }
-      } else {
-        completeRelease(shouldUnregister)
-      }
-    }
+    // Defer teardown until the current main-thread callback chain has finished.
+    progressHandler.post { completeRelease() }
   }
 
-  private fun completeRelease(unregisterPlayer: Boolean) {
-    videoPlaybackServiceConnection.detach()
+  private fun completeRelease() {
+    VideoPlaybackService.stopService(videoPlaybackServiceConnection)
 
     runOnMainThread {
       try {
-        if (unregisterPlayer) {
-          VideoManager.unregisterPlayer(this)
-        }
+        VideoManager.unregisterPlayer(this)
       } finally {
         stopProgressUpdates()
         loadedWithSource = false
