@@ -138,6 +138,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
 
   deinit {
     guard let releasedSource = close() else { return }
+    try? _eventEmitter?.clearAllListeners()
     releaseAsset(for: releasedSource)
 
     runOnMainThreadSync {
