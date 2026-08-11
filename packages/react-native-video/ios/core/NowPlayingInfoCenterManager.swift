@@ -134,71 +134,77 @@ class NowPlayingInfoCenterManager {
     invalidateCommandTargets()
 
     playTarget = remoteCommandCenter.playCommand.addTarget { [weak self] _ in
-      DispatchQueue.main.async { [weak self] in
-        guard let player = self?.currentPlayer, player.rate == 0 else { return }
+      return runOnMainThreadSync {
+        guard let player = self?.currentPlayer, player.rate == 0 else {
+          return .commandFailed
+        }
 
         player.play()
+        return .success
       }
-
-      return .success
     }
 
     pauseTarget = remoteCommandCenter.pauseCommand.addTarget { [weak self] _ in
-      DispatchQueue.main.async { [weak self] in
-        guard let player = self?.currentPlayer, player.rate != 0 else { return }
+      return runOnMainThreadSync {
+        guard let player = self?.currentPlayer, player.rate != 0 else {
+          return .commandFailed
+        }
 
         player.pause()
         VideoManager.shared.clearBackgroundResumeIntent(for: player)
+        return .success
       }
-
-      return .success
     }
 
     skipBackwardTarget = remoteCommandCenter.skipBackwardCommand.addTarget {
       [weak self] _ in
-      DispatchQueue.main.async { [weak self] in
-        guard let self, let player = self.currentPlayer else { return }
+      return runOnMainThreadSync {
+        guard let self, let player = self.currentPlayer else {
+          return .commandFailed
+        }
         let newTime =
           player.currentTime()
           - CMTime(seconds: self.SEEK_INTERVAL_SECONDS, preferredTimescale: .max)
         player.seek(to: newTime)
+        return .success
       }
-      return .success
     }
 
     skipForwardTarget = remoteCommandCenter.skipForwardCommand.addTarget {
       [weak self] _ in
-      DispatchQueue.main.async { [weak self] in
-        guard let self, let player = self.currentPlayer else { return }
+      return runOnMainThreadSync {
+        guard let self, let player = self.currentPlayer else {
+          return .commandFailed
+        }
         let newTime =
           player.currentTime()
           + CMTime(seconds: self.SEEK_INTERVAL_SECONDS, preferredTimescale: .max)
         player.seek(to: newTime)
+        return .success
       }
-      return .success
     }
 
     playbackPositionTarget = remoteCommandCenter.changePlaybackPositionCommand
       .addTarget { [weak self] event in
-        if let event = event as? MPChangePlaybackPositionCommandEvent {
-          let positionTime = event.positionTime
-          DispatchQueue.main.async { [weak self] in
-            guard let player = self?.currentPlayer else { return }
-            player.seek(
-              to: CMTime(seconds: positionTime, preferredTimescale: .max)
-            )
+        return runOnMainThreadSync {
+          guard let player = self?.currentPlayer,
+                let event = event as? MPChangePlaybackPositionCommandEvent else {
+            return .commandFailed
           }
+          player.seek(
+            to: CMTime(seconds: event.positionTime, preferredTimescale: .max)
+          )
           return .success
-        } else {
-          return .commandFailed
         }
       }
 
     // Handler for togglePlayPauseCommand, sent by Apple's Earpods wired headphones
     togglePlayPauseTarget = remoteCommandCenter.togglePlayPauseCommand.addTarget
     { [weak self] _ in
-      DispatchQueue.main.async { [weak self] in
-        guard let player = self?.currentPlayer else { return }
+      return runOnMainThreadSync {
+        guard let player = self?.currentPlayer else {
+          return .commandFailed
+        }
 
         if player.rate == 0 {
           player.play()
@@ -206,9 +212,8 @@ class NowPlayingInfoCenterManager {
           player.pause()
           VideoManager.shared.clearBackgroundResumeIntent(for: player)
         }
+        return .success
       }
-
-      return .success
     }
   }
 

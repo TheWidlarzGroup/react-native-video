@@ -15,3 +15,11 @@ func runOnMainThread(_ action: @escaping () -> Void) {
 
   DispatchQueue.main.async(execute: action)
 }
+
+func runOnMainThreadSync<T>(_ action: () throws -> T) rethrows -> T {
+  if Thread.isMainThread {
+    return try action()
+  }
+
+  return try DispatchQueue.main.sync(execute: action)
+}

@@ -34,7 +34,7 @@ class VideoManager {
   }
 
   func setAudioSessionManagementDisabled(_ disabled: Bool) {
-    runOnMainThread { [weak self] in
+    runOnMainThreadSync { [weak self] in
       guard let self else { return }
       self.isAudioSessionManagementForcedDisabled = disabled
 
