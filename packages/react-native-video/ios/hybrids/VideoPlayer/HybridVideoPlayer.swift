@@ -40,54 +40,56 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   }
 
   private func beginLoad() throws -> LoadContext {
-    var source: (any HybridVideoPlayerSourceSpec)?
-    guard let token = try sourceLoader.begin(onBegin: {
-      source = storedSource
-    }), let source else { throw CancellationError() }
-    return LoadContext(source: source, token: token)
+    try runOnMainThreadSync {
+      var source: (any HybridVideoPlayerSourceSpec)?
+      guard let token = try sourceLoader.begin(onBegin: {
+        source = storedSource
+      }), let source else { throw CancellationError() }
+      return LoadContext(source: source, token: token)
+    }
   }
 
   private func beginLoadIfPlayerItemMissing() throws -> LoadContext? {
-    var source: (any HybridVideoPlayerSourceSpec)?
-    guard let token = try sourceLoader.begin(
-      if: { storedPlayerItem == nil },
-      onBegin: { source = storedSource }
-    ) else { return nil }
-    guard let source else { throw CancellationError() }
-    return LoadContext(source: source, token: token)
+    try runOnMainThreadSync {
+      var source: (any HybridVideoPlayerSourceSpec)?
+      guard let token = try sourceLoader.begin(
+        if: { storedPlayerItem == nil },
+        onBegin: { source = storedSource }
+      ) else { return nil }
+      guard let source else { throw CancellationError() }
+      return LoadContext(source: source, token: token)
+    }
   }
 
   private func beginPreloadIfNeeded() throws -> LoadContext? {
-    var source: (any HybridVideoPlayerSourceSpec)?
-    guard let token = try sourceLoader.begin(
-      if: { storedStatus == .idle },
-      onBegin: { source = storedSource }
-    ) else { return nil }
-    guard let source else { throw CancellationError() }
-    return LoadContext(source: source, token: token)
+    try runOnMainThreadSync {
+      var source: (any HybridVideoPlayerSourceSpec)?
+      guard let token = try sourceLoader.begin(
+        if: { storedStatus == .idle },
+        onBegin: { source = storedSource }
+      ) else { return nil }
+      guard let source else { throw CancellationError() }
+      return LoadContext(source: source, token: token)
+    }
   }
 
   private func replaceSourceAndBeginLoad(
     with newSource: any HybridVideoPlayerSourceSpec
-  ) throws -> (previousSource: any HybridVideoPlayerSourceSpec, context: LoadContext) {
-    var previousSource: (any HybridVideoPlayerSourceSpec)?
-    guard let token = try sourceLoader.begin(onBegin: {
-      previousSource = storedSource
-      storedSource = newSource
-    }), let previousSource else { throw CancellationError() }
-    return (
-      previousSource,
-      LoadContext(source: newSource, token: token)
-    )
+  ) throws -> LoadContext {
+    try runOnMainThreadSync {
+      var previousSource: (any HybridVideoPlayerSourceSpec)?
+      guard let token = try sourceLoader.begin(onBegin: {
+        previousSource = storedSource
+        storedSource = newSource
+      }), let previousSource else { throw CancellationError() }
+      let context = LoadContext(source: newSource, token: token)
+      releaseAssetIfNotUsedByCurrentLoad(for: previousSource)
+      return context
+    }
   }
 
   private func ensureCurrentLoad(_ context: LoadContext) throws {
     guard sourceLoader.isCurrent(context.token) else { throw CancellationError() }
-  }
-
-  private func releaseCurrentReplacementAssetIfOwned(_ context: LoadContext) {
-    guard sourceLoader.isCurrent(context.token) else { return }
-    releaseAsset(for: context.source)
   }
 
   private func releaseAssetIfNotUsedByCurrentLoad(
@@ -100,6 +102,12 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
 
   private func releaseAsset(for source: any HybridVideoPlayerSourceSpec) {
     (source as? HybridVideoPlayerSource)?.releaseAsset()
+  }
+
+  private func close() -> (any HybridVideoPlayerSourceSpec)? {
+    runOnMainThreadSync {
+      sourceLoader.close(update: { storedSource })
+    }
   }
 
   init(source: (any HybridVideoPlayerSourceSpec)) throws {
@@ -129,16 +137,11 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   }
 
   deinit {
-    guard let releasedSource = sourceLoader.close(update: { storedSource }) else { return }
+    guard let releasedSource = close() else { return }
     releaseAsset(for: releasedSource)
 
-    let capturedPlayer = player
-    let capturedObserver = playerObserver
-    DispatchQueue.main.async {
-      capturedObserver?.invalidatePlayerItemObservers()
-      capturedObserver?.invalidatePlayerObservers()
-      NowPlayingInfoCenterManager.shared.removePlayer(player: capturedPlayer)
-      capturedPlayer.replaceCurrentItem(with: nil)
+    runOnMainThreadSync {
+      releaseOnMainThread()
     }
   }
 
@@ -146,7 +149,16 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
 
   var source: any HybridVideoPlayerSourceSpec {
     get { sourceLoader.withState { storedSource } }
-    set { sourceLoader.cancel { storedSource = newValue } }
+    set {
+      let releasedSource = runOnMainThreadSync {
+        sourceLoader.cancel {
+          let releasedSource = storedSource
+          storedSource = newValue
+          return releasedSource
+        }
+      }
+      withExtendedLifetime(releasedSource) {}
+    }
   }
 
   var playerItem: AVPlayerItem? {
@@ -322,7 +334,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   }
 
   func release() {
-    guard let releasedSource = sourceLoader.close(update: { storedSource }) else { return }
+    guard let releasedSource = close() else { return }
 
     try? _eventEmitter?.clearAllListeners()
     releaseAsset(for: releasedSource)
@@ -357,16 +369,6 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
         loadedPlayerItem.item.setBufferConfig(config: bufferConfig)
       }
       self.player.replaceCurrentItem(with: loadedPlayerItem.item)
-
-      guard self.sourceLoader.isCurrent(loadedPlayerItem.context.token) else {
-        self.sourceLoader.withState {
-          if self.storedPlayerItem === loadedPlayerItem.item {
-            self.storedPlayerItem = nil
-          }
-        }
-        self.player.replaceCurrentItem(with: nil)
-        throw CancellationError()
-      }
     }
   }
 
@@ -481,14 +483,13 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       promise.resolve(withResult: ())
       return promise
     case .second(let newSource):
-      let replacement: (previousSource: any HybridVideoPlayerSourceSpec, context: LoadContext)
+      let replacementContext: LoadContext
       do {
-        replacement = try replaceSourceAndBeginLoad(with: newSource)
+        replacementContext = try replaceSourceAndBeginLoad(with: newSource)
       } catch {
         promise.reject(withError: PlayerError.cancelled.error())
         return promise
       }
-      releaseAssetIfNotUsedByCurrentLoad(for: replacement.previousSource)
 
       Task.detached(priority: .userInitiated) { [weak self] in
         guard let self else {
@@ -500,11 +501,10 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
         }
 
         do {
-          let loadedPlayerItem = try await self.loadPlayerItem(for: replacement.context)
+          let loadedPlayerItem = try await self.loadPlayerItem(for: replacementContext)
           try await self.commitPlayerItem(loadedPlayerItem)
           promise.resolve(withResult: ())
         } catch {
-          self.releaseCurrentReplacementAssetIfOwned(replacement.context)
           if error is CancellationError {
             promise.reject(withError: PlayerError.cancelled.error())
           } else {

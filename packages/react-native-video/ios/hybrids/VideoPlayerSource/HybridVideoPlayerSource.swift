@@ -28,13 +28,21 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec, NativeVideoPlayerSou
     let asset: AVURLAsset?
   }
 
+  private struct AssetInformationResult {
+    let preparedAsset: PreparedAsset
+    let information: VideoInformation
+  }
+
   var asset: AVURLAsset? {
     get { sourceLoader.withState { storedAsset } }
     set {
-      sourceLoader.cancel {
+      let releasedOwnership = sourceLoader.cancel {
+        let releasedOwnership = (asset: storedAsset, drmManager: storedDrmManager)
         storedAsset = newValue
         storedDrmManager = nil
+        return releasedOwnership
       }
+      withExtendedLifetime(releasedOwnership) {}
     }
   }
 
@@ -104,7 +112,10 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec, NativeVideoPlayerSou
             isCurrent: { true }
           )
           let information = try await prepared.asset.getAssetInformation()
-          return (prepared, information)
+          return AssetInformationResult(
+            preparedAsset: prepared,
+            information: information
+          )
         }
 
         try self.sourceLoader.commit(request.token) {
@@ -113,11 +124,11 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec, NativeVideoPlayerSou
               throw CancellationError()
             }
           } else {
-            self.storedAsset = result.0.asset
-            self.storedDrmManager = result.0.drmManager
+            self.storedAsset = result.preparedAsset.asset
+            self.storedDrmManager = result.preparedAsset.drmManager
           }
         }
-        promise.resolve(withResult: result.1)
+        promise.resolve(withResult: result.information)
       } catch {
         self.sourceLoader.cancel(request.token) {}
         if error is CancellationError {
@@ -170,10 +181,13 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec, NativeVideoPlayerSou
           return prepared.asset
         }
       } catch {
-        sourceLoader.cancel(token) {
+        let releasedOwnership = sourceLoader.cancel(token) {
+          let releasedOwnership = (asset: storedAsset, drmManager: storedDrmManager)
           storedAsset = nil
           storedDrmManager = nil
+          return releasedOwnership
         }
+        withExtendedLifetime(releasedOwnership) {}
         if error is CancellationError {
           throw SourceError.cancelled.error()
         }
@@ -235,13 +249,17 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec, NativeVideoPlayerSou
   }
 
   func releaseAsset() {
-    sourceLoader.cancel {
+    let releasedOwnership = sourceLoader.cancel {
+      let releasedOwnership = (asset: storedAsset, drmManager: storedDrmManager)
       storedAsset = nil
       storedDrmManager = nil
+      return releasedOwnership
     }
+    withExtendedLifetime(releasedOwnership) {}
   }
 
   var memorySize: Int {
-    sourceLoader.withState { storedAsset?.estimatedMemoryUsage ?? 0 }
+    let asset = sourceLoader.withState { storedAsset }
+    return asset?.estimatedMemoryUsage ?? 0
   }
 }
