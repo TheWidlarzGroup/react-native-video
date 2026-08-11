@@ -103,7 +103,6 @@ class VideoManager {
   
   func register(player: HybridVideoPlayer) {
     runOnMainThread { [player] in
-      guard !player.isReleased else { return }
       self.players.add(player)
       PluginsRegistry.shared.notifyPlayerCreated(player: player)
     }
