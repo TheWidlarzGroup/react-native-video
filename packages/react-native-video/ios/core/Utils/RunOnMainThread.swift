@@ -7,19 +7,25 @@
 
 import Foundation
 
-func runOnMainThread(_ action: @escaping () -> Void) {
+private func performOnMainThread<T>(
+  _ action: () throws -> T,
+  dispatch: () throws -> T
+) rethrows -> T {
   guard !Thread.isMainThread else {
-    action()
-    return
-  }
-
-  DispatchQueue.main.async(execute: action)
-}
-
-func runOnMainThreadSync<T>(_ action: () throws -> T) rethrows -> T {
-  if Thread.isMainThread {
     return try action()
   }
 
-  return try DispatchQueue.main.sync(execute: action)
+  return try dispatch()
+}
+
+func runOnMainThread(_ action: @escaping () -> Void) {
+  performOnMainThread(action) {
+    DispatchQueue.main.async(execute: action)
+  }
+}
+
+func runOnMainThreadSync<T>(_ action: () throws -> T) rethrows -> T {
+  try performOnMainThread(action) {
+    try DispatchQueue.main.sync(execute: action)
+  }
 }

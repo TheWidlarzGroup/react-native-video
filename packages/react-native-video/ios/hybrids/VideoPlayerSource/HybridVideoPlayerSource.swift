@@ -153,46 +153,48 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec, NativeVideoPlayerSou
   func getAsset(isCurrent: @escaping () -> Bool) async throws -> AVURLAsset {
     guard isCurrent() else { throw CancellationError() }
 
-    while true {
-      if let asset = sourceLoader.withState({ storedAsset }) {
-        guard isCurrent() else { throw CancellationError() }
-        return asset
-      }
+    var existingAsset: AVURLAsset?
+    let token = try sourceLoader.begin(if: {
+      existingAsset = storedAsset
+      return existingAsset == nil
+    })
 
-      guard let token = try sourceLoader.begin(if: { storedAsset == nil }) else {
-        continue
-      }
+    if let existingAsset {
+      guard isCurrent() else { throw CancellationError() }
+      return existingAsset
+    }
 
-      do {
-        let prepared = try await sourceLoader.load(
+    guard let token else { throw CancellationError() }
+
+    do {
+      let prepared = try await sourceLoader.load(
+        token: token,
+        isCurrent: isCurrent
+      ) {
+        try await self.prepareAsset(
+          existing: nil,
           token: token,
           isCurrent: isCurrent
-        ) {
-          try await self.prepareAsset(
-            existing: nil,
-            token: token,
-            isCurrent: isCurrent
-          )
-        }
-
-        return try sourceLoader.commit(token) {
-          storedAsset = prepared.asset
-          storedDrmManager = prepared.drmManager
-          return prepared.asset
-        }
-      } catch {
-        let releasedOwnership = sourceLoader.cancel(token) {
-          let releasedOwnership = (asset: storedAsset, drmManager: storedDrmManager)
-          storedAsset = nil
-          storedDrmManager = nil
-          return releasedOwnership
-        }
-        withExtendedLifetime(releasedOwnership) {}
-        if error is CancellationError {
-          throw SourceError.cancelled.error()
-        }
-        throw error
+        )
       }
+
+      return try sourceLoader.commit(token) {
+        storedAsset = prepared.asset
+        storedDrmManager = prepared.drmManager
+        return prepared.asset
+      }
+    } catch {
+      let releasedOwnership = sourceLoader.cancel(token) {
+        let releasedOwnership = (asset: storedAsset, drmManager: storedDrmManager)
+        storedAsset = nil
+        storedDrmManager = nil
+        return releasedOwnership
+      }
+      withExtendedLifetime(releasedOwnership) {}
+      if error is CancellationError {
+        throw SourceError.cancelled.error()
+      }
+      throw error
     }
   }
 
