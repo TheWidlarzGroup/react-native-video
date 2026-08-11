@@ -378,12 +378,8 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
 
     releaseAsset(for: currentSource())
 
-    if Thread.isMainThread {
+    runOnMainThread { [self] in
       releaseOnMainThread()
-    } else {
-      DispatchQueue.main.async { [self] in
-        releaseOnMainThread()
-      }
     }
   }
 

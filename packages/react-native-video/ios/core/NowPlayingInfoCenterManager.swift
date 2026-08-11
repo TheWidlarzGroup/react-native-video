@@ -37,71 +37,53 @@ class NowPlayingInfoCenterManager {
   }
 
   func registerPlayer(player: AVPlayer) {
-    if Thread.isMainThread {
-      registerPlayerOnMain(player: player)
-    } else {
-      DispatchQueue.main.async { [weak self, player] in
-        self?.registerPlayerOnMain(player: player)
+    runOnMainThread { [weak self, player] in
+      guard let self, !self.players.contains(player) else { return }
+
+      if !self.receivingRemoteControlEvents {
+        self.receivingRemoteControlEvents = true
       }
-    }
-  }
 
-  private func registerPlayerOnMain(player: AVPlayer) {
-    if players.contains(player) {
-      return
-    }
+      let newObserver = self.observePlayers(player: player)
+      let oldObserver = self.observers[player.hashValue]
+      self.observers[player.hashValue] = newObserver
+      oldObserver?.invalidate()
 
-    if !receivingRemoteControlEvents {
-      receivingRemoteControlEvents = true
-    }
+      self.players.add(player)
 
-    let newObserver = observePlayers(player: player)
-    let oldObserver = observers[player.hashValue]
-    observers[player.hashValue] = newObserver
-    oldObserver?.invalidate()
-
-    players.add(player)
-
-    // Also take over if the new player is already playing — KVO won't fire since rate hasn't changed
-    if currentPlayer == nil || player.rate != 0 {
-      setCurrentPlayer(player: player)
+      // Also take over if the new player is already playing — KVO won't fire since rate hasn't changed
+      if self.currentPlayer == nil || player.rate != 0 {
+        self.setCurrentPlayer(player: player)
+      }
     }
   }
 
   func removePlayer(player: AVPlayer) {
-    if Thread.isMainThread {
-      removePlayerOnMain(player: player)
-    } else {
-      DispatchQueue.main.async { [weak self, player] in
-        self?.removePlayerOnMain(player: player)
+    runOnMainThread { [weak self, player] in
+      guard let self else { return }
+
+      // Keep registration removal and empty-state detection coupled in the registry.
+      let (wasRegistered, noPlayersLeft) = self.players.removeReportingEmpty(player)
+      guard wasRegistered else { return }
+
+      if noPlayersLeft {
+        self.cleanup()
+        return
       }
-    }
-  }
 
-  private func removePlayerOnMain(player: AVPlayer) {
-    // Keep registration removal and empty-state detection coupled in the registry.
-    let (wasRegistered, noPlayersLeft) = players.removeReportingEmpty(player)
-    if !wasRegistered {
-      return
-    }
+      let observer = self.observers.removeValue(forKey: player.hashValue)
+      observer?.invalidate()
 
-    if noPlayersLeft {
-      cleanup()
-      return
-    }
-
-    let observer = observers.removeValue(forKey: player.hashValue)
-    observer?.invalidate()
-
-    if currentPlayer == player {
-      if let playbackObserver {
-        player.removeTimeObserver(playbackObserver)
-        self.playbackObserver = nil
-      }
-      currentPlayer = nil
-      findNewCurrentPlayer()
-      if currentPlayer == nil {
-        updatePlaybackState()
+      if self.currentPlayer == player {
+        if let playbackObserver = self.playbackObserver {
+          player.removeTimeObserver(playbackObserver)
+          self.playbackObserver = nil
+        }
+        self.currentPlayer = nil
+        self.findNewCurrentPlayer()
+        if self.currentPlayer == nil {
+          self.updatePlaybackState()
+        }
       }
     }
   }

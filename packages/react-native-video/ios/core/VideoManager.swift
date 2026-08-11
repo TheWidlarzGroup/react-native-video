@@ -34,25 +34,18 @@ class VideoManager {
   }
 
   func setAudioSessionManagementDisabled(_ disabled: Bool) {
-    if Thread.isMainThread {
-      setAudioSessionManagementDisabledOnMain(disabled)
-    } else {
-      DispatchQueue.main.async { [weak self] in
-        self?.setAudioSessionManagementDisabledOnMain(disabled)
+    runOnMainThread { [weak self] in
+      guard let self else { return }
+      self.isAudioSessionManagementForcedDisabled = disabled
+
+      if disabled {
+        // Deactivate audio session when disabling management
+        // so other libraries can take control
+        self.deactivateAudioSession()
+      } else {
+        // Re-enable audio session management
+        self.updateAudioSessionConfiguration()
       }
-    }
-  }
-
-  private func setAudioSessionManagementDisabledOnMain(_ disabled: Bool) {
-    isAudioSessionManagementForcedDisabled = disabled
-
-    if disabled {
-      // Deactivate audio session when disabling management
-      // so other libraries can take control
-      deactivateAudioSession()
-    } else {
-      // Re-enable audio session management
-      updateAudioSessionConfiguration()
     }
   }
   
@@ -127,17 +120,9 @@ class VideoManager {
   }
   
   func requestAudioSessionUpdate() {
-    if Thread.isMainThread {
-      requestAudioSessionUpdateOnMain()
-    } else {
-      DispatchQueue.main.async { [weak self] in
-        self?.requestAudioSessionUpdateOnMain()
-      }
+    runOnMainThread { [weak self] in
+      self?.updateAudioSessionConfiguration()
     }
-  }
-
-  private func requestAudioSessionUpdateOnMain() {
-    updateAudioSessionConfiguration()
   }
 
   /// Clears the resume intent for the player backing `avPlayer` — for remote
@@ -424,29 +409,22 @@ class VideoManager {
       return
     }
 
-    if Thread.isMainThread {
-      handleAudioRouteChangeOnMain(reason: reason)
-    } else {
-      DispatchQueue.main.async { [weak self] in
-        self?.handleAudioRouteChangeOnMain(reason: reason)
-      }
-    }
-  }
+    runOnMainThread { [weak self] in
+      guard let self else { return }
 
-  private func handleAudioRouteChangeOnMain(reason: AVAudioSession.RouteChangeReason) {
-    
-    switch reason {
-    case .oldDeviceUnavailable:
-      // Output device removed (e.g. headphones) — iOS pauses; don't resume onto the speaker.
-      for player in players.allObjects {
-        player.wasPlayingInBackground = false
+      switch reason {
+      case .oldDeviceUnavailable:
+        // Output device removed (e.g. headphones) — iOS pauses; don't resume onto the speaker.
+        for player in self.players.allObjects {
+          player.wasPlayingInBackground = false
+        }
+        self.updateAudioSessionConfiguration()
+      case .categoryChange, .override, .wakeFromSleep, .newDeviceAvailable:
+        // Reconfigure audio session when route changes
+        self.updateAudioSessionConfiguration()
+      default:
+        break
       }
-      updateAudioSessionConfiguration()
-    case .categoryChange, .override, .wakeFromSleep, .newDeviceAvailable:
-      // Reconfigure audio session when route changes
-      updateAudioSessionConfiguration()
-    default:
-      break
     }
   }
   
