@@ -271,7 +271,6 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
       return@async runOnMainThreadSync {
         ensureNotReleased()
         initializePlayer()
-        ensureNotReleased()
         player.prepare()
         ensureNotReleased()
       }
@@ -283,13 +282,10 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
 
     runOnMainThreadSync {
       try {
-        ensureNotReleased()
         if (source.config.initializeOnCreation == true) {
           initializePlayer()
-          ensureNotReleased()
           player.prepare()
         }
-        ensureNotReleased()
         VideoManager.registerPlayer(this)
       } catch (_: PlayerError.Cancelled) {
         // Initialization was cancelled by release.
@@ -326,11 +322,9 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
         return@async
       }
 
-      ensureNotReleased()
-      val hybridSource = source as? HybridVideoPlayerSource ?: throw PlayerError.InvalidSource
-
       runOnMainThreadSync {
         ensureNotReleased()
+        val hybridSource = source as? HybridVideoPlayerSource ?: throw PlayerError.InvalidSource
         val oldSource = this.source as? HybridVideoPlayerSource
         oldSource?.sourceLoader?.cancel()
 
