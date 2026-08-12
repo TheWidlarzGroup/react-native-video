@@ -141,9 +141,8 @@ class VideoManager {
   }
   
   func unregister(view: VideoComponentView) {
-    runOnMainThread { [weak view] in
-      guard let view else { return }
-      self.videoView.remove(view)
+    runOnMainThreadSync {
+      videoView.remove(view)
     }
   }
   
