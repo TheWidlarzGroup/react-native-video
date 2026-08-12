@@ -8,14 +8,14 @@
 import Foundation
 import NitroModules
 
-struct ListenerPair {
+private struct ListenerPair {
   let id: UUID
   let eventName: String
   let callback: Any
 }
 
 class HybridVideoPlayerEventEmitter: HybridVideoPlayerEventEmitterSpec {
-  var listeners: [ListenerPair] = []
+  private let listeners = ListenerStore<ListenerPair>()
 
   // MARK: - Private helpers
 
@@ -28,7 +28,7 @@ class HybridVideoPlayerEventEmitter: HybridVideoPlayerEventEmitterSpec {
   }
 
   private func emitEvent<T>(eventName: String, invoke: (T) throws -> Void) {
-    for pair in listeners where pair.eventName == eventName {
+    for pair in listeners.snapshot() where pair.eventName == eventName {
       if let callback = pair.callback as? T {
         do {
           try invoke(callback)

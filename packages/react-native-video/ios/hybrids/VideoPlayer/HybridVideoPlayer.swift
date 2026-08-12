@@ -23,18 +23,95 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     }
   }
 
-  var playerItem: AVPlayerItem? {
-    didSet {
-      if let bufferConfig = source.config.bufferConfig {
-        playerItem?.setBufferConfig(config: bufferConfig)
-      }
-    }
-  }
   var playerObserver: VideoPlayerObserver?
   private let sourceLoader = SourceLoader()
+  private var storedSource: any HybridVideoPlayerSourceSpec
+  private var storedPlayerItem: AVPlayerItem?
+  private var storedStatus: VideoPlayerStatus = .idle
+
+  private struct LoadContext {
+    let source: any HybridVideoPlayerSourceSpec
+    let token: SourceLoader.Token
+  }
+
+  private struct LoadedPlayerItem {
+    let item: AVPlayerItem
+    let context: LoadContext
+  }
+
+  private func beginLoad() throws -> LoadContext {
+    try runOnMainThreadSync {
+      var source: (any HybridVideoPlayerSourceSpec)?
+      guard let token = try sourceLoader.begin(onBegin: {
+        source = storedSource
+      }), let source else { throw CancellationError() }
+      return LoadContext(source: source, token: token)
+    }
+  }
+
+  private func beginLoadIfPlayerItemMissing() throws -> LoadContext? {
+    try runOnMainThreadSync {
+      var source: (any HybridVideoPlayerSourceSpec)?
+      guard let token = try sourceLoader.begin(
+        if: { storedPlayerItem == nil },
+        onBegin: { source = storedSource }
+      ) else { return nil }
+      guard let source else { throw CancellationError() }
+      return LoadContext(source: source, token: token)
+    }
+  }
+
+  private func beginPreloadIfNeeded() throws -> LoadContext? {
+    try runOnMainThreadSync {
+      var source: (any HybridVideoPlayerSourceSpec)?
+      guard let token = try sourceLoader.begin(
+        if: { storedStatus == .idle },
+        onBegin: { source = storedSource }
+      ) else { return nil }
+      guard let source else { throw CancellationError() }
+      return LoadContext(source: source, token: token)
+    }
+  }
+
+  private func replaceSourceAndBeginLoad(
+    with newSource: any HybridVideoPlayerSourceSpec
+  ) throws -> LoadContext {
+    try runOnMainThreadSync {
+      var previousSource: (any HybridVideoPlayerSourceSpec)?
+      guard let token = try sourceLoader.begin(onBegin: {
+        previousSource = storedSource
+        storedSource = newSource
+      }), let previousSource else { throw CancellationError() }
+      let context = LoadContext(source: newSource, token: token)
+      releaseAssetIfNotUsedByCurrentLoad(for: previousSource)
+      return context
+    }
+  }
+
+  private func ensureCurrentLoad(_ context: LoadContext) throws {
+    guard sourceLoader.isCurrent(context.token) else { throw CancellationError() }
+  }
+
+  private func releaseAssetIfNotUsedByCurrentLoad(
+    for source: any HybridVideoPlayerSourceSpec
+  ) {
+    let currentSource = sourceLoader.withState { storedSource }
+    guard ObjectIdentifier(currentSource as AnyObject) != ObjectIdentifier(source as AnyObject) else { return }
+    releaseAsset(for: source)
+  }
+
+  private func releaseAsset(for source: any HybridVideoPlayerSourceSpec) {
+    (source as? HybridVideoPlayerSource)?.releaseAsset()
+  }
+
+  private func close() -> (any HybridVideoPlayerSourceSpec)? {
+    runOnMainThreadSync {
+      sourceLoader.close(update: { storedSource })
+    }
+  }
 
   init(source: (any HybridVideoPlayerSourceSpec)) throws {
-    self.source = source
+    storedSource = source
     self.eventEmitter = HybridVideoPlayerEventEmitter()
 
     // Initialize AVPlayer with empty item
@@ -44,13 +121,12 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     self.playerObserver = VideoPlayerObserver(delegate: self)
     self.playerObserver?.initializePlayerObservers()
 
-    Task {
-      if source.config.initializeOnCreation == true {
+    if source.config.initializeOnCreation == true {
+      let initialLoadContext = try beginLoad()
+      Task {
         do {
-          self.playerItem = try await self.sourceLoader.load {
-            try await self.initializePlayerItem()
-          }
-          self.player.replaceCurrentItem(with: self.playerItem)
+          let loadedPlayerItem = try await self.loadPlayerItem(for: initialLoadContext)
+          try await self.commitPlayerItem(loadedPlayerItem)
         } catch {
           // Ignore cancellation errors during initialization
         }
@@ -61,20 +137,56 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   }
 
   deinit {
-    release()
+    guard let releasedSource = close() else { return }
+    try? _eventEmitter?.clearAllListeners()
+    releaseAsset(for: releasedSource)
+
+    runOnMainThreadSync {
+      releaseOnMainThread()
+    }
   }
 
   // MARK: - Hybrid Impl
 
-  var source: any HybridVideoPlayerSourceSpec
+  var source: any HybridVideoPlayerSourceSpec {
+    get { sourceLoader.withState { storedSource } }
+    set {
+      let releasedSource = runOnMainThreadSync {
+        sourceLoader.cancel {
+          let releasedSource = storedSource
+          storedSource = newValue
+          return releasedSource
+        }
+      }
+      withExtendedLifetime(releasedSource) {}
+    }
+  }
 
-  var status: VideoPlayerStatus = .idle {
-    didSet {
-      if status != oldValue {
-        _eventEmitter?.onStatusChange(status)
+  var playerItem: AVPlayerItem? {
+    get { sourceLoader.withState { storedPlayerItem } }
+    set {
+      sourceLoader.withState { storedPlayerItem = newValue }
+      if let bufferConfig = source.config.bufferConfig {
+        newValue?.setBufferConfig(config: bufferConfig)
       }
     }
   }
+
+  var status: VideoPlayerStatus {
+    get { sourceLoader.withState { storedStatus } }
+    set {
+      let previous = sourceLoader.withState { () -> VideoPlayerStatus in
+        let previous = storedStatus
+        storedStatus = newValue
+        return previous
+      }
+      if newValue != previous {
+        _eventEmitter?.onStatusChange(newValue)
+      }
+    }
+  }
+
+  var isReleased: Bool { sourceLoader.isClosed }
 
   var eventEmitter: HybridVideoPlayerEventEmitterSpec
   var _eventEmitter: HybridVideoPlayerEventEmitter? {
@@ -190,20 +302,29 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   }
 
   func initialize() throws -> Promise<Void> {
+    let context: LoadContext?
+    do {
+      context = try beginLoadIfPlayerItemMissing()
+    } catch {
+      let promise = Promise<Void>()
+      promise.reject(withError: PlayerError.cancelled.error())
+      return promise
+    }
+
+    guard let context else {
+      let promise = Promise<Void>()
+      promise.resolve(withResult: ())
+      return promise
+    }
+
     return Promise.async { [weak self] in
       guard let self else {
         throw LibraryError.deallocated(objectName: "HybridVideoPlayer").error()
       }
 
-      if self.playerItem != nil {
-        return
-      }
-
       do {
-        self.playerItem = try await self.sourceLoader.load {
-          try await self.initializePlayerItem()
-        }
-        self.player.replaceCurrentItem(with: self.playerItem)
+        let loadedPlayerItem = try await self.loadPlayerItem(for: context)
+        try await self.commitPlayerItem(loadedPlayerItem)
       } catch {
         if error is CancellationError {
           throw PlayerError.cancelled.error()
@@ -214,32 +335,68 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   }
 
   func release() {
-    sourceLoader.cancelSync()
-    NowPlayingInfoCenterManager.shared.removePlayer(player: player)
+    guard let releasedSource = close() else { return }
 
     try? _eventEmitter?.clearAllListeners()
+    releaseAsset(for: releasedSource)
 
-    self.playerItem = nil
-
-    if let source = self.source as? HybridVideoPlayerSource {
-      source.releaseAsset()
+    // Always defer teardown by one main-loop turn. AVPlayer and plugin callbacks can
+    // synchronously re-enter release while their own lifecycle transition is in progress.
+    DispatchQueue.main.async { [self] in
+      releaseOnMainThread()
     }
+  }
 
-    // Clear player observer
+  private func releaseOnMainThread() {
     playerObserver?.invalidatePlayerItemObservers()
     playerObserver?.invalidatePlayerObservers()
-    self.playerObserver = nil
+    playerObserver = nil
 
-    self.player.replaceCurrentItem(with: nil)
+    NowPlayingInfoCenterManager.shared.removePlayer(player: player)
+    playerItem = nil
+    player.replaceCurrentItem(with: nil)
     status = .idle
 
     VideoManager.shared.unregister(player: self)
   }
 
+  private func commitPlayerItem(_ loadedPlayerItem: LoadedPlayerItem) async throws {
+    try await MainActor.run {
+      try self.sourceLoader.commit(loadedPlayerItem.context.token) {
+        self.storedPlayerItem = loadedPlayerItem.item
+      }
+
+      if let bufferConfig = loadedPlayerItem.context.source.config.bufferConfig {
+        loadedPlayerItem.item.setBufferConfig(config: bufferConfig)
+      }
+      self.player.replaceCurrentItem(with: loadedPlayerItem.item)
+    }
+  }
+
+  private func loadPlayerItem(for context: LoadContext) async throws -> LoadedPlayerItem {
+    try ensureCurrentLoad(context)
+    let playerItem = try await sourceLoader.load(
+      token: context.token
+    ) {
+      try self.ensureCurrentLoad(context)
+      return try await self.initializePlayerItem(source: context.source, context: context)
+    }
+    try ensureCurrentLoad(context)
+    return LoadedPlayerItem(item: playerItem, context: context)
+  }
+
   func preload() throws -> NitroModules.Promise<Void> {
     let promise = Promise<Void>()
 
-    if status != .idle {
+    let context: LoadContext?
+    do {
+      context = try beginPreloadIfNeeded()
+    } catch {
+      promise.reject(withError: PlayerError.cancelled.error())
+      return promise
+    }
+
+    guard let context else {
       promise.resolve(withResult: ())
       return promise
     }
@@ -254,12 +411,8 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       }
 
       do {
-        let playerItem = try await self.sourceLoader.load {
-          try await self.initializePlayerItem()
-        }
-        self.playerItem = playerItem
-
-        self.player.replaceCurrentItem(with: playerItem)
+        let loadedPlayerItem = try await self.loadPlayerItem(for: context)
+        try await self.commitPlayerItem(loadedPlayerItem)
         promise.resolve(withResult: ())
       } catch {
         if error is CancellationError {
@@ -331,6 +484,14 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       promise.resolve(withResult: ())
       return promise
     case .second(let newSource):
+      let replacementContext: LoadContext
+      do {
+        replacementContext = try replaceSourceAndBeginLoad(with: newSource)
+      } catch {
+        promise.reject(withError: PlayerError.cancelled.error())
+        return promise
+      }
+
       Task.detached(priority: .userInitiated) { [weak self] in
         guard let self else {
           promise.reject(
@@ -340,19 +501,9 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
           return
         }
 
-        await self.sourceLoader.cancel()
-
-        if let oldSource = self.source as? HybridVideoPlayerSource {
-          oldSource.releaseAsset()
-        }
-
-        self.source = newSource
-
         do {
-          self.playerItem = try await self.sourceLoader.load {
-            try await self.initializePlayerItem()
-          }
-          self.player.replaceCurrentItem(with: self.playerItem)
+          let loadedPlayerItem = try await self.loadPlayerItem(for: replacementContext)
+          try await self.commitPlayerItem(loadedPlayerItem)
           promise.resolve(withResult: ())
         } catch {
           if error is CancellationError {
@@ -370,23 +521,41 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   // MARK: - Methods
 
   func initializePlayerItem() async throws -> AVPlayerItem {
+    let context = try beginLoad()
+    return try await loadPlayerItem(for: context).item
+  }
+
+  private func initializePlayerItem(
+    source: any HybridVideoPlayerSourceSpec,
+    context: LoadContext
+  ) async throws -> AVPlayerItem {
     // Ensure the source is a valid HybridVideoPlayerSource
-    guard let _hybridSource = source as? HybridVideoPlayerSource else {
+    guard let hybridSource = source as? HybridVideoPlayerSource else {
       status = .error
       throw PlayerError.invalidSource.error()
     }
 
     // (maybe) Override source with plugins
     let _source = await PluginsRegistry.shared.overrideSource(
-      source: _hybridSource
+      source: hybridSource
     )
+    try ensureCurrentLoad(context)
 
     let isNetworkSource = _source.url.isFileURL == false
     _eventEmitter?.onLoadStart(
       .init(sourceType: isNetworkSource ? .network : .local, source: _source)
     )
 
-    let asset = try await _source.getAsset()
+    let asset: AVURLAsset
+    if let source = _source as? HybridVideoPlayerSource {
+      asset = try await source.getAsset(
+        isCurrent: { self.sourceLoader.isCurrent(context.token) }
+      )
+    } else {
+      try ensureCurrentLoad(context)
+      asset = try await _source.getAsset()
+    }
+    try ensureCurrentLoad(context)
 
     let playerItem: AVPlayerItem
 
@@ -400,6 +569,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     } else {
       playerItem = AVPlayerItem(asset: asset)
     }
+    try ensureCurrentLoad(context)
 
     if let metadata = source.config.metadata {
       let title = metadata.title
@@ -601,10 +771,6 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   }
 
   var memorySize: Int {
-    var size = 0
-
-    size += playerItem?.asset.estimatedMemoryUsage ?? 0
-
-    return size
+    isReleased ? 0 : playerItem?.asset.estimatedMemoryUsage ?? 0
   }
 }

@@ -10,17 +10,48 @@ import Foundation
 import NitroModules
 
 class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec, NativeVideoPlayerSourceSpec {
-  var asset: AVURLAsset?
   var uri: String
   var config: NativeVideoConfig
 
-  var drmManager: DRMManagerSpec?
-
   let url: URL
   private let sourceLoader = SourceLoader()
+  private var storedAsset: AVURLAsset?
+  private var storedDrmManager: DRMManagerSpec?
+
+  private struct PreparedAsset {
+    let asset: AVURLAsset
+    let drmManager: DRMManagerSpec?
+  }
+
+  private struct InformationRequest {
+    let token: SourceLoader.Token
+    let asset: AVURLAsset?
+  }
+
+  private struct AssetInformationResult {
+    let preparedAsset: PreparedAsset
+    let information: VideoInformation
+  }
+
+  var asset: AVURLAsset? {
+    get { sourceLoader.withState { storedAsset } }
+    set {
+      let releasedAsset = sourceLoader.cancel {
+        let releasedAsset = storedAsset
+        storedAsset = newValue
+        return releasedAsset
+      }
+      withExtendedLifetime(releasedAsset) {}
+    }
+  }
+
+  var drmManager: DRMManagerSpec? {
+    get { sourceLoader.withState { storedDrmManager } }
+    set { sourceLoader.withState { storedDrmManager = newValue } }
+  }
 
   init(config: NativeVideoConfig) throws {
-    self.uri = config.uri
+    uri = config.uri
     self.config = config
 
     guard let url = URL(string: uri) else {
@@ -32,8 +63,7 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec, NativeVideoPlayerSou
     super.init()
 
     if config.drm != nil {
-      // Try to get the DRM manager
-      // If no DRM manager is found, it will throw an error
+      // Try to get the DRM manager. If none is registered, the plugin registry throws.
       _ = try PluginsRegistry.shared.getDrmManager(source: self)
     }
   }
@@ -44,6 +74,20 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec, NativeVideoPlayerSou
 
   func getAssetInformationAsync() -> Promise<VideoInformation> {
     let promise = Promise<VideoInformation>()
+    let request: InformationRequest
+
+    do {
+      var existingAsset: AVURLAsset?
+      guard let token = try sourceLoader.begin(onBegin: {
+        existingAsset = storedAsset
+      }) else {
+        throw CancellationError()
+      }
+      request = InformationRequest(token: token, asset: existingAsset)
+    } catch {
+      promise.reject(withError: SourceError.cancelled.error())
+      return promise
+    }
 
     Task.detached(priority: .utility) { [weak self] in
       guard let self else {
@@ -53,22 +97,39 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec, NativeVideoPlayerSou
       }
 
       do {
-        let videoInformation = try await self.sourceLoader.load(priority: .utility) {
+        let result = try await self.sourceLoader.load(
+          token: request.token,
+          priority: .utility
+        ) {
           if self.url.isFileURL {
             try VideoFileHelper.validateReadPermission(for: self.url)
           }
 
-          try await self.initializeAsset()
-
-          guard let asset = self.asset else {
-            throw PlayerError.assetNotInitialized.error()
-          }
-
-          return try await asset.getAssetInformation()
+          let prepared = try await self.prepareAsset(
+            existing: request.asset,
+            token: request.token,
+            isCurrent: { true }
+          )
+          let information = try await prepared.asset.getAssetInformation()
+          return AssetInformationResult(
+            preparedAsset: prepared,
+            information: information
+          )
         }
 
-        promise.resolve(withResult: videoInformation)
+        try self.sourceLoader.commit(request.token) {
+          if let existingAsset = request.asset {
+            guard self.storedAsset === existingAsset else {
+              throw CancellationError()
+            }
+          } else {
+            self.storedAsset = result.preparedAsset.asset
+            self.storedDrmManager = result.preparedAsset.drmManager
+          }
+        }
+        promise.resolve(withResult: result.information)
       } catch {
+        self.sourceLoader.cancel(request.token) {}
         if error is CancellationError {
           promise.reject(withError: SourceError.cancelled.error())
         } else {
@@ -81,86 +142,123 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec, NativeVideoPlayerSou
   }
 
   func initializeAsset() async throws {
-    guard asset == nil else {
-      return
+    _ = try await getAsset()
+  }
+
+  func getAsset() async throws -> AVURLAsset {
+    try await getAsset(isCurrent: { true })
+  }
+
+  func getAsset(isCurrent: @escaping () -> Bool) async throws -> AVURLAsset {
+    guard isCurrent() else { throw CancellationError() }
+
+    var existingAsset: AVURLAsset?
+    let token = try sourceLoader.begin(if: {
+      existingAsset = storedAsset
+      return existingAsset == nil
+    })
+
+    if let existingAsset {
+      guard isCurrent() else { throw CancellationError() }
+      return existingAsset
     }
 
+    guard let token else { throw CancellationError() }
+
+    do {
+      let prepared = try await sourceLoader.load(
+        token: token,
+        isCurrent: isCurrent
+      ) {
+        try await self.prepareAsset(
+          existing: nil,
+          token: token,
+          isCurrent: isCurrent
+        )
+      }
+
+      return try sourceLoader.commit(token) {
+        storedAsset = prepared.asset
+        storedDrmManager = prepared.drmManager
+        return prepared.asset
+      }
+    } catch {
+      let releasedAsset = sourceLoader.cancel(token) {
+        let releasedAsset = storedAsset
+        storedAsset = nil
+        return releasedAsset
+      }
+      withExtendedLifetime(releasedAsset) {}
+      if error is CancellationError {
+        throw SourceError.cancelled.error()
+      }
+      throw error
+    }
+  }
+
+  private func prepareAsset(
+    existing: AVURLAsset?,
+    token: SourceLoader.Token,
+    isCurrent: () -> Bool
+  ) async throws -> PreparedAsset {
+    guard sourceLoader.isCurrent(token), isCurrent() else {
+      throw CancellationError()
+    }
+
+    if let existing {
+      return PreparedAsset(
+        asset: existing,
+        drmManager: sourceLoader.withState { storedDrmManager }
+      )
+    }
+
+    let asset: AVURLAsset
     if let headers = config.headers {
-      let options = [
-        "AVURLAssetHTTPHeaderFieldsKey": headers
-      ]
-      asset = AVURLAsset(url: url, options: options)
+      asset = AVURLAsset(
+        url: url,
+        options: ["AVURLAssetHTTPHeaderFieldsKey": headers]
+      )
     } else {
       asset = AVURLAsset(url: url)
     }
 
-    guard let asset else {
-      throw SourceError.failedToInitializeAsset.error()
+    let drmManager: DRMManagerSpec?
+    if let drmParams = config.drm {
+      let manager = try PluginsRegistry.shared.getDrmManager(source: self)
+      guard let manager else {
+        throw LibraryError.DRMPluginNotFound.error()
+      }
+
+      do {
+        try manager.createContentKeyRequest(for: asset, drmParams: drmParams)
+      } catch {
+        print("[ReactNativeVideo] Failed to create content key request for DRM: \(drmParams)")
+      }
+      drmManager = manager
+    } else {
+      drmManager = nil
     }
 
-    do {
-      if let drmParams = config.drm {
-        drmManager = try PluginsRegistry.shared.getDrmManager(source: self)
-
-        guard let drmManager else {
-          throw LibraryError.DRMPluginNotFound.error()
-        }
-
-        do {
-          try drmManager.createContentKeyRequest(for: asset, drmParams: drmParams)
-        } catch {
-          print("[ReactNativeVideo] Failed to create content key request for DRM: \(drmParams)")
-        }
-      }
-
-      // Code browned from expo-video https://github.com/expo/expo/blob/ea17c9b1ce5111e1454b089ba381f3feb93f33cc/packages/expo-video/ios/VideoPlayerItem.swift#L40C30-L40C73
-      // If we don't load those properties, they will be loaded on main thread causing lags
-      _ = try? await asset.load(.duration, .preferredTransform, .isPlayable) as Any
-
-      try Task.checkCancellation()
-    } catch {
-      self.asset = nil
-      if error is CancellationError {
-        throw SourceError.cancelled.error()
-      }
-      throw error
-    }
-  }
-
-  func getAsset() async throws -> AVURLAsset {
-    if let asset {
-      return asset
+    _ = try? await asset.load(.duration, .preferredTransform, .isPlayable) as Any
+    try Task.checkCancellation()
+    guard sourceLoader.isCurrent(token), isCurrent() else {
+      throw CancellationError()
     }
 
-    do {
-      try await sourceLoader.load {
-        try await self.initializeAsset()
-      }
-
-      guard let asset else {
-        throw SourceError.failedToInitializeAsset.error()
-      }
-
-      return asset
-    } catch {
-      if error is CancellationError {
-        self.asset = nil
-        throw SourceError.cancelled.error()
-      }
-      throw error
-    }
+    return PreparedAsset(asset: asset, drmManager: drmManager)
   }
 
   func releaseAsset() {
-    sourceLoader.cancelSync()
-    asset = nil
+    let releasedAsset = sourceLoader.cancel {
+      let releasedAsset = storedAsset
+      storedAsset = nil
+      return releasedAsset
+    }
+    withExtendedLifetime(releasedAsset) {}
   }
 
   var memorySize: Int {
-    var size = 0
-
-    size += asset?.estimatedMemoryUsage ?? 0
-
-    return size
+    let asset = sourceLoader.withState { storedAsset }
+    return asset?.estimatedMemoryUsage ?? 0
   }
 }
