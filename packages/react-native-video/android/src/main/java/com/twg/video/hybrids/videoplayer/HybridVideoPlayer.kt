@@ -292,7 +292,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
         ensureNotReleased()
         VideoManager.registerPlayer(this)
       } catch (_: PlayerError.Cancelled) {
-        // Release won before asynchronous initialization.
+        // Initialization was cancelled by release.
       }
     }
   }

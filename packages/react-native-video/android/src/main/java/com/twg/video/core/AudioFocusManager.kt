@@ -12,8 +12,8 @@ import androidx.media3.common.util.UnstableApi
 import com.margelo.nitro.NitroModules
 import com.margelo.nitro.video.HybridVideoPlayer
 import com.margelo.nitro.video.MixAudioMode
-import kotlin.getValue
 import com.twg.video.core.utils.Threading
+import kotlin.getValue
 
 @OptIn(UnstableApi::class)
 class AudioFocusManager() {
