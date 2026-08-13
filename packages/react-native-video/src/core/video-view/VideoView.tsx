@@ -77,25 +77,23 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
   ) => {
     const nitroId = React.useMemo(() => nitroIdCounter++, []);
     const nitroViewManager = React.useRef<VideoViewViewManager | null>(null);
-    const [isManagerReady, setIsManagerReady] = React.useState(false);
+    const [managerGeneration, setManagerGeneration] = React.useState(0);
 
     const setupViewManager = React.useCallback(
       (id: number) => {
         try {
-          if (nitroViewManager.current === null) {
-            nitroViewManager.current =
-              VideoViewViewManagerFactory.createViewManager(id);
+          nitroViewManager.current =
+            VideoViewViewManagerFactory.createViewManager(id);
 
-            // Should never happen
-            if (!nitroViewManager.current) {
-              throw new VideoError(
-                'view/not-found',
-                'Failed to create View Manager'
-              );
-            }
+          // Should never happen
+          if (!nitroViewManager.current) {
+            throw new VideoError(
+              'view/not-found',
+              'Failed to create View Manager'
+            );
           }
 
-          setIsManagerReady(true);
+          setManagerGeneration((generation) => generation + 1);
         } catch (error) {
           const parsedError = tryParseNativeVideoError(error);
 
@@ -214,7 +212,7 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
       return () => {
         if (nitroViewManager.current) {
           nitroViewManager.current.clearAllListeners();
-          setIsManagerReady(false);
+          setManagerGeneration(0);
         }
       };
     }, []);
@@ -280,7 +278,7 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
       willExitFullscreen,
       willEnterPictureInPicture,
       willExitPictureInPicture,
-      isManagerReady,
+      managerGeneration,
     ]);
 
     // Update non-event props
@@ -305,7 +303,7 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
       autoEnterPictureInPicture,
       resizeMode,
       props,
-      isManagerReady,
+      managerGeneration,
     ]);
 
     return (
