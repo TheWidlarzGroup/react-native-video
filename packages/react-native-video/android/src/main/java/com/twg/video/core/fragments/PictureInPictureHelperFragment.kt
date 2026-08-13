@@ -14,11 +14,34 @@ import com.twg.video.view.VideoView
 import java.util.UUID
 
 @OptIn(UnstableApi::class)
-class PictureInPictureHelperFragment(private val videoView: VideoView) : Fragment() {
+class PictureInPictureHelperFragment() : Fragment() {
+  private var videoView: VideoView? = null
   val id: String = UUID.randomUUID().toString()
+
+  constructor(videoView: VideoView) : this() {
+    this.videoView = videoView
+  }
+
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+
+    if (videoView == null) {
+      // The original view is gone after restoration. React Native will add a new helper
+      // when it remounts the VideoView, so remove this orphaned fragment.
+      Handler(Looper.getMainLooper()).post {
+        if (isAdded) {
+          parentFragmentManager.beginTransaction()
+            .remove(this)
+            .commitAllowingStateLoss()
+        }
+      }
+    }
+  }
 
   override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean) {
     super.onPictureInPictureModeChanged(isInPictureInPictureMode)
+
+    val videoView = videoView ?: return
 
     if (isInPictureInPictureMode) {
       var currentPipVideo = VideoManager.getCurrentPictureInPictureVideo()
