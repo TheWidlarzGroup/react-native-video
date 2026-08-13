@@ -42,6 +42,15 @@ import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.max
 
+internal fun Player.setPlaybackRate(rate: Double) {
+  if (rate <= 0.0) {
+    pause()
+    return
+  }
+
+  playbackParameters = playbackParameters.withSpeed(rate.toFloat())
+}
+
 @UnstableApi
 @DoNotStrip
 class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
@@ -174,7 +183,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   override var rate: Double by mainThreadProperty(
     get = { player.playbackParameters.speed.toDouble() },
     set = { value ->
-      player.playbackParameters = player.playbackParameters.withSpeed(value.toFloat())
+      player.setPlaybackRate(value)
     }
   )
 
