@@ -10,6 +10,7 @@ export type PlayerError =
 
 export type SourceError =
   | 'source/invalid-uri'
+  | 'source/photo-library-asset-not-found'
   | 'source/missing-read-file-permission'
   | 'source/file-does-not-exist'
   | 'source/failed-to-initialize-asset'

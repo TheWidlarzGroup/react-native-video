@@ -15,17 +15,18 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec, NativeVideoPlayerSou
 
   let url: URL
   private let sourceLoader = SourceLoader()
-  private var storedAsset: AVURLAsset?
+  private let photoLibraryAssetLoader: any PhotoLibraryAssetLoading
+  private var storedAsset: AVAsset?
   private var storedDrmManager: DRMManagerSpec?
 
   private struct PreparedAsset {
-    let asset: AVURLAsset
+    let asset: AVAsset
     let drmManager: DRMManagerSpec?
   }
 
   private struct InformationRequest {
     let token: SourceLoader.Token
-    let asset: AVURLAsset?
+    let asset: AVAsset?
   }
 
   private struct AssetInformationResult {
@@ -33,7 +34,7 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec, NativeVideoPlayerSou
     let information: VideoInformation
   }
 
-  var asset: AVURLAsset? {
+  var asset: AVAsset? {
     get { sourceLoader.withState { storedAsset } }
     set {
       let releasedAsset = sourceLoader.cancel {
@@ -50,9 +51,13 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec, NativeVideoPlayerSou
     set { sourceLoader.withState { storedDrmManager = newValue } }
   }
 
-  init(config: NativeVideoConfig) throws {
+  init(
+    config: NativeVideoConfig,
+    photoLibraryAssetLoader: any PhotoLibraryAssetLoading = PhotoLibraryAssetLoader()
+  ) throws {
     uri = config.uri
     self.config = config
+    self.photoLibraryAssetLoader = photoLibraryAssetLoader
 
     guard let url = URL(string: uri) else {
       throw SourceError.invalidUri(uri: uri).error()
@@ -77,7 +82,7 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec, NativeVideoPlayerSou
     let request: InformationRequest
 
     do {
-      var existingAsset: AVURLAsset?
+      var existingAsset: AVAsset?
       guard let token = try sourceLoader.begin(onBegin: {
         existingAsset = storedAsset
       }) else {
@@ -145,14 +150,14 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec, NativeVideoPlayerSou
     _ = try await getAsset()
   }
 
-  func getAsset() async throws -> AVURLAsset {
+  func getAsset() async throws -> AVAsset {
     try await getAsset(isCurrent: { true })
   }
 
-  func getAsset(isCurrent: @escaping () -> Bool) async throws -> AVURLAsset {
+  func getAsset(isCurrent: @escaping () -> Bool) async throws -> AVAsset {
     guard isCurrent() else { throw CancellationError() }
 
-    var existingAsset: AVURLAsset?
+    var existingAsset: AVAsset?
     let token = try sourceLoader.begin(if: {
       existingAsset = storedAsset
       return existingAsset == nil
@@ -160,6 +165,9 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec, NativeVideoPlayerSou
 
     if let existingAsset {
       guard isCurrent() else { throw CancellationError() }
+      if config.drm != nil, !(existingAsset is AVURLAsset) {
+        throw SourceError.unsupportedContentType(uri: uri).error()
+      }
       return existingAsset
     }
 
@@ -197,7 +205,7 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec, NativeVideoPlayerSou
   }
 
   private func prepareAsset(
-    existing: AVURLAsset?,
+    existing: AVAsset?,
     token: SourceLoader.Token,
     isCurrent: () -> Bool
   ) async throws -> PreparedAsset {
@@ -206,14 +214,20 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec, NativeVideoPlayerSou
     }
 
     if let existing {
+      if config.drm != nil, !(existing is AVURLAsset) {
+        throw SourceError.unsupportedContentType(uri: uri).error()
+      }
+
       return PreparedAsset(
         asset: existing,
         drmManager: sourceLoader.withState { storedDrmManager }
       )
     }
 
-    let asset: AVURLAsset
-    if let headers = config.headers {
+    let asset: AVAsset
+    if url.scheme?.lowercased() == "ph" {
+      asset = try await photoLibraryAssetLoader.loadAsset(for: uri)
+    } else if let headers = config.headers {
       asset = AVURLAsset(
         url: url,
         options: ["AVURLAssetHTTPHeaderFieldsKey": headers]
@@ -224,13 +238,17 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec, NativeVideoPlayerSou
 
     let drmManager: DRMManagerSpec?
     if let drmParams = config.drm {
+      guard let urlAsset = asset as? AVURLAsset else {
+        throw SourceError.unsupportedContentType(uri: uri).error()
+      }
+
       let manager = try PluginsRegistry.shared.getDrmManager(source: self)
       guard let manager else {
         throw LibraryError.DRMPluginNotFound.error()
       }
 
       do {
-        try manager.createContentKeyRequest(for: asset, drmParams: drmParams)
+        try manager.createContentKeyRequest(for: urlAsset, drmParams: drmParams)
       } catch {
         print("[ReactNativeVideo] Failed to create content key request for DRM: \(drmParams)")
       }

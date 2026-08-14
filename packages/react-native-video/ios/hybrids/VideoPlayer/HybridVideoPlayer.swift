@@ -541,12 +541,12 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     )
     try ensureCurrentLoad(context)
 
-    let isNetworkSource = _source.url.isFileURL == false
+    let isLocalSource = _source.url.isFileURL || _source.url.scheme?.lowercased() == "ph"
     _eventEmitter?.onLoadStart(
-      .init(sourceType: isNetworkSource ? .network : .local, source: _source)
+      .init(sourceType: isLocalSource ? .local : .network, source: _source)
     )
 
-    let asset: AVURLAsset
+    let asset: AVAsset
     if let source = _source as? HybridVideoPlayerSource {
       asset = try await source.getAsset(
         isCurrent: { self.sourceLoader.isCurrent(context.token) }

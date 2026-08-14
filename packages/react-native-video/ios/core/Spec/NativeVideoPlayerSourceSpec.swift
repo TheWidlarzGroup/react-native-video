@@ -14,8 +14,8 @@ public typealias NativeVideoPlayerSource = NativeVideoPlayerSourceSpec & HybridV
 public protocol NativeVideoPlayerSourceSpec {
   // MARK: - Properties
   
-  /// The underlying AVURLAsset instance
-  var asset: AVURLAsset? { get set }
+  /// The underlying AVAsset instance
+  var asset: AVAsset? { get set }
   
   /// The URL of the video source
   var url: URL { get }
@@ -28,8 +28,8 @@ public protocol NativeVideoPlayerSourceSpec {
   /// Initialize the asset asynchronously
   func initializeAsset() async throws
   
-  /// Get non-null AVURLAsset instance (self.asset)
-  func getAsset() async throws -> AVURLAsset
+  /// Get non-null AVAsset instance (self.asset)
+  func getAsset() async throws -> AVAsset
   
   /// Release the asset resources
   func releaseAsset()
