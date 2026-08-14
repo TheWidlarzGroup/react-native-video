@@ -74,6 +74,7 @@ enum PlayerError: VideoError {
 // MARK: - SourceError
 enum SourceError: VideoError {
   case invalidUri(uri: String)
+  case photoLibraryAssetNotFound(uri: String)
   case missingReadFilePermission(uri: String)
   case fileDoesNotExist(uri: String)
   case failedToInitializeAsset
@@ -84,6 +85,8 @@ enum SourceError: VideoError {
     switch self {
     case .invalidUri:
       return "source/invalid-uri"
+    case .photoLibraryAssetNotFound:
+      return "source/photo-library-asset-not-found"
     case .missingReadFilePermission:
       return "source/missing-read-file-permission"
     case .fileDoesNotExist:
@@ -101,6 +104,8 @@ enum SourceError: VideoError {
     switch self {
     case let .invalidUri(uri: uri):
       return "Invalid source file uri: \(uri)"
+    case let .photoLibraryAssetNotFound(uri: uri):
+      return "Photo library video was not found at URI: \(uri)"
     case let .missingReadFilePermission(uri: uri):
       return "Missing read file permission for source file at \(uri)"
     case let .fileDoesNotExist(uri: uri):
@@ -165,5 +170,3 @@ extension VideoError {
     return RuntimeError.error(withMessage: getMessage())
   }
 }
-
-
