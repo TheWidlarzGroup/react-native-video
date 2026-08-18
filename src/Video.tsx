@@ -164,6 +164,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     ref,
   ) => {
     const nativeRef = useRef<ElementRef<typeof NativeVideoComponent>>(null);
+    const sourceProperties = typeof source === 'number' ? undefined : source;
 
     const isPosterDeprecated = typeof poster === 'string';
 
@@ -216,7 +217,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         if (uri && uri.match(/^\//)) {
           uri = `file://${uri}`;
         }
-        if (!uri && _source.ad?.type !== 'ssai') {
+        if (!uri && resolvedSource.ad?.type !== 'ssai') {
           console.log('Trying to load empty source');
         }
         const isNetwork = !!(uri && uri.match(/^(rtp|rtsp|http|https):/));
@@ -227,8 +228,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           )
         );
 
-        const selectedDrm = _source.drm || drm;
-        const _textTracks = _source.textTracks || textTracks;
+        const selectedDrm = resolvedSource.drm || drm;
+        const _textTracks = resolvedSource.textTracks || textTracks;
         const _drm = !selectedDrm
           ? undefined
           : {
@@ -246,8 +247,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
             };
 
         let _cmcd: NativeCmcdConfiguration | undefined;
-        if (Platform.OS === 'android' && source?.cmcd) {
-          const cmcd = source.cmcd;
+        if (Platform.OS === 'android' && resolvedSource.cmcd) {
+          const cmcd = resolvedSource.cmcd;
 
           if (typeof cmcd === 'boolean') {
             _cmcd = cmcd ? {mode: CmcdMode.MODE_QUERY_PARAMETER} : undefined;
@@ -270,14 +271,14 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         }
 
         const selectedContentStartTime =
-          _source.contentStartTime || contentStartTime;
+          resolvedSource.contentStartTime || contentStartTime;
 
-        const _ad = normalizeAdConfig(_source.ad, adTagUrl, adLanguage);
+        const _ad = normalizeAdConfig(resolvedSource.ad, adTagUrl, adLanguage);
 
         const _minLoadRetryCount =
-          _source.minLoadRetryCount || minLoadRetryCount;
+          resolvedSource.minLoadRetryCount || minLoadRetryCount;
 
-        const _bufferConfig = _source.bufferConfig || bufferConfig;
+        const _bufferConfig = resolvedSource.bufferConfig || bufferConfig;
         return {
           uri,
           isNetwork,
@@ -310,7 +311,6 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         drm,
         localSourceEncryptionKeyScheme,
         minLoadRetryCount,
-        source?.cmcd,
         textTracks,
         bufferConfig,
       ],
@@ -681,7 +681,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       [onControlsVisibilityChange],
     );
 
-    const selectedDrm = source?.drm || drm;
+    const selectedDrm = sourceProperties?.drm || drm;
     const usingExternalGetLicense = selectedDrm?.getLicense instanceof Function;
 
     const onGetLicense = useCallback(

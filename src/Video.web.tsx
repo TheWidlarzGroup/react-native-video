@@ -3,6 +3,7 @@ import React, {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useMemo,
   useRef,
   useState,
   type RefObject,
@@ -11,6 +12,7 @@ import React, {
 import {StyleProp, ViewStyle} from 'react-native';
 import {unstable_createElement} from 'react-native-web';
 import type {ReactVideoProps, VideoMetadata, VideoRef} from './types';
+import {resolveAssetSourceForVideo} from './utils';
 
 // Define a style prop that is accepted and transformed by React Native Web
 // for the native `video` element.
@@ -93,6 +95,10 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     );
 
     const [src, setSource] = useState(source);
+    const resolvedSrc = useMemo(
+      () => (src === undefined ? undefined : resolveAssetSourceForVideo(src)),
+      [src],
+    );
     const currentSourceProp = useRef(source);
     useEffect(() => {
       if (isDeepEqual(source, currentSourceProp.current)) {
@@ -322,12 +328,12 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       };
     }, [onPictureInPictureStatusChanged]);
 
-    useMediaSession(src?.metadata, nativeRef, showNotificationControls);
+    useMediaSession(resolvedSrc?.metadata, nativeRef, showNotificationControls);
 
     return (
       <WebVideo
         ref={nativeRef}
-        src={src?.uri as string | undefined}
+        src={resolvedSrc?.uri}
         muted={muted}
         autoPlay={!paused}
         controls={controls}
@@ -394,8 +400,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           });
         }}
         onLoadedMetadata={() => {
-          if (src?.startPosition) {
-            seek(src.startPosition / 1000);
+          if (resolvedSrc?.startPosition) {
+            seek(resolvedSrc.startPosition / 1000);
           }
         }}
         onPlay={() =>
