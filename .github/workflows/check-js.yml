@@ -6,6 +6,7 @@ on:
       - master
     paths:
       - '.github/workflows/check-js.yml'
+      - '.type-tests/**'
       - 'src/**'
       - '*.json'
       - '*.js'
@@ -16,6 +17,7 @@ on:
   pull_request:
     paths:
       - '.github/workflows/check-js.yml'
+      - '.type-tests/**'
       - 'src/**'
       - '*.json'
       - '*.js'
@@ -42,6 +44,8 @@ jobs:
           yarn tsc | reviewdog -name="tsc" -efm="%f(%l,%c): error TS%n: %m" -reporter="github-pr-review" -filter-mode="nofilter" -fail-on-error -tee
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check public types
+        run: yarn test:types
 
   JS-Lint:
     name: Lint JS (eslint, prettier)
