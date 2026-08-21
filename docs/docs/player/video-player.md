@@ -127,7 +127,7 @@ Properties below are Apple platforms‑only
 |----------|------|-------------|
 | `preferredForwardBufferDurationMs` | `number` | Preferred duration the player attempts to retain ahead of the playhead (ms). |
 | `preferredPeakBitRate` | `number` | Desired limit of network bandwidth for loading the current item (bits per second). |
-| `preferredMaximumResolution` | `{ width: number; height: number }` | Preferred maximum video resolution. |
+| `preferredMaximumResolution` | `{ width: number; height: number }` | Preferred maximum video resolution. Android: applied as `maxVideoSize`. |
 | `preferredPeakBitRateForExpensiveNetworks` | `number` | Bandwidth limit for expensive networks (e.g., cellular), in bits per second. |
 | `preferredMaximumResolutionForExpensiveNetworks` | `{ width: number; height: number }` | Preferred maximum resolution on expensive networks. |
 | `livePlayback.targetOffsetMs` | `number` | Target live offset (ms) the player will try to maintain. |
