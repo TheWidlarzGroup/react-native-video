@@ -10,8 +10,12 @@ export const writeToPodfile = (
 ) => {
   const podfilePath = path.join(projectRoot, 'ios', 'Podfile');
   const podfileContent = fs.readFileSync(podfilePath, 'utf8');
+  const generatedTag = `rn-video-set-${key.toLowerCase()}`;
 
-  if (podfileContent.includes(`$${key} =`)) {
+  if (
+    podfileContent.includes(`$${key} =`) &&
+    !podfileContent.includes(`@generated begin ${generatedTag} `)
+  ) {
     console.warn(
       `RNV - Podfile already contains a definition for "$${key}". Skipping...`,
     );
