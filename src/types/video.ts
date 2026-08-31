@@ -333,7 +333,8 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   /** @deprecated Use source.contentStartTime */
   contentStartTime?: number; // Android
   controls?: boolean;
-  currentPlaybackTime?: number; // Android
+  /** @deprecated Read currentPlaybackTime from the onProgress event instead. */
+  currentPlaybackTime?: number;
   disableFocus?: boolean;
   disableDisconnectError?: boolean; // Android
   filter?: EnumValues<FilterType>; // iOS
