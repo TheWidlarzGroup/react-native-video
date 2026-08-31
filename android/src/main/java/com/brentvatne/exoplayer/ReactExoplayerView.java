@@ -2503,6 +2503,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 addView(exoPlayerView, 0, layoutParams);
                 reLayoutControls();
             }
+            rootViewChildrenOriginalVisibility.clear();
         }
     }
 
@@ -2511,7 +2512,8 @@ public class ReactExoplayerView extends FrameLayout implements
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             ArrayList<RemoteAction> actions = PictureInPictureUtil.getPictureInPictureActions(themedReactContext, isPaused, pictureInPictureReceiver);
             pictureInPictureParamsBuilder.setActions(actions);
-            if (player.getPlaybackState() == Player.STATE_READY) {
+            if (player != null && player.getPlaybackState() == Player.STATE_READY
+                    && player.getVideoSize().width > 0 && player.getVideoSize().height > 0) {
                 pictureInPictureParamsBuilder.setAspectRatio(PictureInPictureUtil.calcPictureInPictureAspectRatio(player));
             }
             _pipParams = pictureInPictureParamsBuilder.build();
@@ -2527,7 +2529,7 @@ public class ReactExoplayerView extends FrameLayout implements
         ViewGroup rootView = decorView.findViewById(android.R.id.content);
 
         if (!rootViewChildrenOriginalVisibility.isEmpty()) {
-            if (exoPlayerView.getParent().equals(rootView)) rootView.removeView(exoPlayerView);
+            if (rootView.equals(exoPlayerView.getParent())) rootView.removeView(exoPlayerView);
             for (int i = 0; i < rootView.getChildCount(); i++) {
                 rootView.getChildAt(i).setVisibility(rootViewChildrenOriginalVisibility.get(i));
             }
