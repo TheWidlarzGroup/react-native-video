@@ -63,18 +63,32 @@ void ReactVideoViewManager::UpdateProperties(
     for (auto const &pair : propertyMap) {
       auto const &propertyName = pair.first;
       auto const &propertyValue = pair.second;
+      if (propertyName == "src") {
+        try {
+          if (propertyValue.IsNull()) {
+            reactVideoView.Clear_Source();
+          } else {
+            auto const &srcMap = propertyValue.AsObject();
+            auto uri = srcMap.find("uri");
+            if (uri == srcMap.end() || uri->second.IsNull()) {
+              reactVideoView.Clear_Source();
+            } else {
+              reactVideoView.Set_UriString(to_hstring(uri->second.AsString()));
+            }
+          }
+        } catch (...) {
+          reactVideoView.Clear_Source();
+        }
+        continue;
+      }
       if (!propertyValue.IsNull()) {
-        if (propertyName == "src") {
-          auto const &srcMap = propertyValue.AsObject();
-          auto const &uri = srcMap.at("uri");
-          reactVideoView.Set_UriString(to_hstring(uri.AsString()));
-        } else if (propertyName == "resizeMode") {
+        if (propertyName == "resizeMode") {
           auto resizeModeString = propertyValue.AsString();
           Stretch resizeMode = Stretch::None;
           if (resizeModeString == "contain") {
-              resizeMode = Stretch::Uniform;
+            resizeMode = Stretch::Uniform;
           } else if (resizeModeString == "stretch") {
-              resizeMode = Stretch::Fill;
+            resizeMode = Stretch::Fill;
           } else if (resizeModeString == "cover") {
             resizeMode = Stretch::UniformToFill;
           }
@@ -82,8 +96,7 @@ void ReactVideoViewManager::UpdateProperties(
         } else if (propertyName == "repeat") {
           reactVideoView.Set_IsLoopingEnabled(propertyValue.AsBoolean());
         } else if (propertyName == "paused") {
-          m_paused = propertyValue.AsBoolean();
-          reactVideoView.Set_Paused(m_paused);
+          reactVideoView.Set_Paused(propertyValue.AsBoolean());
         } else if (propertyName == "muted") {
           reactVideoView.Set_Muted(propertyValue.AsBoolean());
         } else if (propertyName == "volume") {
@@ -101,7 +114,7 @@ void ReactVideoViewManager::UpdateProperties(
         }
       }
     }
-    reactVideoView.Set_AutoPlay(!m_paused); // auto play on pause false or not set.
+    reactVideoView.Set_AutoPlay(!reactVideoView.IsPaused());
   }
 }
 
