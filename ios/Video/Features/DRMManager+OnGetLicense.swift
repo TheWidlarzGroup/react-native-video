@@ -23,7 +23,7 @@ extension DRMManager {
 
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
-            self.pendingLicenses[loadedLicenseUrl] = keyRequest
+            self.pendingLicenses[loadedLicenseUrl, default: []].append(keyRequest)
             onGetLicense([
                 "licenseUrl": licenseServerUrl,
                 "loadedLicenseUrl": loadedLicenseUrl,
@@ -35,7 +35,7 @@ extension DRMManager {
     }
 
     func setJSLicenseResult(license: String, licenseUrl: String) {
-        guard let keyContentRequest = pendingLicenses[licenseUrl] else {
+        guard let keyContentRequest = pendingLicenses[licenseUrl]?.first else {
             setJSLicenseError(error: "Loading request for licenseUrl \(licenseUrl) not found", licenseUrl: licenseUrl)
             return
         }
@@ -45,7 +45,7 @@ extension DRMManager {
             return
         }
 
-        pendingLicenses.removeValue(forKey: licenseUrl)
+        takePendingLicense(for: licenseUrl)
         do {
             try finishProcessingContentKeyRequest(keyRequest: keyContentRequest, license: responseData)
         } catch {
@@ -56,7 +56,7 @@ extension DRMManager {
     func setJSLicenseError(error: String, licenseUrl: String) {
         let rctError = RCTVideoError.fromJSPart(error)
 
-        guard let keyContentRequest = pendingLicenses.removeValue(forKey: licenseUrl) else {
+        guard let keyContentRequest = takePendingLicense(for: licenseUrl) else {
             onVideoError?([
                 "error": RCTVideoErrorHandler.createError(from: rctError),
                 "target": reactTag as Any,
@@ -65,5 +65,18 @@ extension DRMManager {
         }
 
         handleError(rctError, for: keyContentRequest)
+    }
+
+    @discardableResult
+    private func takePendingLicense(for licenseUrl: String) -> AVContentKeyRequest? {
+        guard var requests = pendingLicenses[licenseUrl], !requests.isEmpty else { return nil }
+
+        let request = requests.removeFirst()
+        if requests.isEmpty {
+            pendingLicenses.removeValue(forKey: licenseUrl)
+        } else {
+            pendingLicenses[licenseUrl] = requests
+        }
+        return request
     }
 }
