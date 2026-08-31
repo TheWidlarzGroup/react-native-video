@@ -11,23 +11,25 @@ class RCTVideoCachingHandler: NSObject, DVAssetLoaderDelegatesDelegate {
     }
 
     func shouldCache(source: VideoSource) -> Bool {
-        if source.isNetwork && source.shouldCache && source.textTracks.isEmpty {
+        guard source.isNetwork, source.shouldCache else { return false }
+        guard source.textTracks.isEmpty else {
             /* The DVURLAsset created by cache doesn't have a tracksWithMediaType property, so trying
              * to bring in the text track code will crash. I suspect this is because the asset hasn't fully loaded.
              * Until this is fixed, we need to bypass caching when text tracks are specified.
              */
             DebugLog("""
-              Caching is not supported for uri '\(source.uri ?? "NO URI")' because text tracks are not compatible with the cache.
-              Checkout https://github.com/react-native-community/react-native-video/blob/master/docs/caching.md
+            Caching is not supported for uri '\(source.uri ?? "NO URI")' because text tracks are not compatible with the cache.
+            Checkout https://github.com/react-native-community/react-native-video/blob/master/docs/caching.md
             """)
-            return true
+            return false
         }
-        return false
+        return true
     }
 
     func playerItemForSourceUsingCache(source: VideoSource, assetOptions options: NSDictionary) async throws -> AVPlayerItem {
-        let uri = source.uri!
-        let url = URL(string: uri)
+        guard let uri = source.uri, let url = URL(string: uri) else {
+            throw NSError(domain: "RCTVideoCachingHandler", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid cache URL"])
+        }
         let (videoCacheStatus, cachedAsset) = await getItemForUri(uri)
 
         guard let playerItemPrepareText else {
@@ -42,7 +44,7 @@ class RCTVideoCachingHandler: NSObject, DVAssetLoaderDelegatesDelegate {
               The video file will not be cached.
               Checkout https://github.com/react-native-community/react-native-video/blob/master/docs/caching.md
             """)
-            let asset: AVURLAsset! = AVURLAsset(url: url!, options: options as? [String: Any])
+            let asset = AVURLAsset(url: url, options: options as? [String: Any])
             return await playerItemPrepareText(source, asset, options, "")
 
         case .unsupportedFileExtension:
@@ -52,7 +54,7 @@ class RCTVideoCachingHandler: NSObject, DVAssetLoaderDelegatesDelegate {
               The video file will not be cached.
               Checkout https://github.com/react-native-community/react-native-video/blob/master/docs/caching.md
             """)
-            let asset: AVURLAsset! = AVURLAsset(url: url!, options: options as? [String: Any])
+            let asset = AVURLAsset(url: url, options: options as? [String: Any])
             return await playerItemPrepareText(source, asset, options, "")
 
         default:
@@ -63,7 +65,9 @@ class RCTVideoCachingHandler: NSObject, DVAssetLoaderDelegatesDelegate {
             }
         }
 
-        let asset: DVURLAsset! = DVURLAsset(url: url, options: options as? [String: Any], networkTimeout: 10000)
+        guard let asset = DVURLAsset(url: url, options: options as? [String: Any], networkTimeout: 10000) else {
+            throw NSError(domain: "RCTVideoCachingHandler", code: 2, userInfo: [NSLocalizedDescriptionKey: "Unable to create cache asset"])
+        }
         asset.loaderDelegate = self
 
         /* More granular code to have control over the DVURLAsset
