@@ -765,7 +765,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
 
     const _viewType = useMemo(() => {
       const hasValidDrmProp =
-        drm !== undefined && Object.keys(drm).length !== 0;
+        selectedDrm !== undefined && Object.keys(selectedDrm).length !== 0;
 
       const shallForceViewType =
         hasValidDrmProp && (viewType === ViewType.TEXTURE || useTextureView);
@@ -796,7 +796,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       }
 
       return ViewType.SURFACE;
-    }, [drm, useSecureView, useTextureView, viewType]);
+    }, [selectedDrm, useSecureView, useTextureView, viewType]);
 
     const _renderPoster = useCallback(() => {
       if (!hasPoster || !showPoster) {
