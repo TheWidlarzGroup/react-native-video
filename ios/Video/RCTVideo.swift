@@ -458,6 +458,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     var isSetSourceOngoing = false
     var nextSource: NSDictionary?
+    private var sourceRequestId: UInt = 0
 
     func applyNextSource() {
         if self.nextSource != nil {
@@ -467,6 +468,17 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             self.nextSource = nil
             self.setSrc(nextSrc)
         }
+    }
+
+    private func shouldProcessSourceRequest(_ requestId: UInt) -> Bool {
+        guard requestId == sourceRequestId else {
+            if nextSource != nil {
+                isSetSourceOngoing = false
+                applyNextSource()
+            }
+            return false
+        }
+        return true
     }
 
     // MARK: - Player and source
@@ -633,6 +645,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func setSrc(_ source: NSDictionary!) {
+        sourceRequestId &+= 1
+        let requestId = sourceRequestId
+
         if self.isSetSourceOngoing || self.nextSource != nil {
             DebugLog("setSrc buffer request")
             self._player?.replaceCurrentItem(with: nil)
@@ -642,6 +657,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         self.isSetSourceOngoing = true
 
         let initializeSource = {
+            guard self.shouldProcessSourceRequest(requestId) else { return }
             self._source = VideoSource(source)
 
             #if USE_GOOGLE_IMA
@@ -675,13 +691,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             RCTVideoUtils.delay { [weak self] in
                 do {
                     guard let self else { throw NSError(domain: "", code: 0, userInfo: nil) }
+                    guard self.shouldProcessSourceRequest(requestId) else { return }
 
                     let playerItem = try await self.preparePlayerItem()
+                    guard self.shouldProcessSourceRequest(requestId) else { return }
                     try await self.setupPlayer(playerItem: playerItem)
                 } catch {
-                    DebugLog("An error occurred: \(error.localizedDescription)")
-
-                    if let self {
+                    if let self, self.shouldProcessSourceRequest(requestId) {
+                        DebugLog("An error occurred: \(error.localizedDescription)")
                         self.onVideoError?(["error": error.localizedDescription])
                         self.isSetSourceOngoing = false
                         self.applyNextSource()
