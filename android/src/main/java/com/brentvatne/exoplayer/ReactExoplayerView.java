@@ -604,7 +604,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 double minBufferMemoryReservePercent = source.getBufferConfig().getMinBufferMemoryReservePercent() != BufferConfig.Companion.getBufferConfigPropUnsetDouble()
                         ? source.getBufferConfig().getMinBufferMemoryReservePercent()
                         : ReactExoplayerView.DEFAULT_MIN_BUFFER_MEMORY_RESERVE;
-                long reserveMemory = (long) minBufferMemoryReservePercent * runtime.maxMemory();
+                long reserveMemory = (long) (minBufferMemoryReservePercent * runtime.maxMemory());
                 long bufferedMs = bufferedDurationUs / (long) 1000;
                 if (reserveMemory > freeMemory && bufferedMs > 2000) {
                     // We don't have enough memory in reserve so we stop buffering to allow other components to use it instead
