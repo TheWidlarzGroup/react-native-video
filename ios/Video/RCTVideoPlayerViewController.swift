@@ -3,16 +3,12 @@ import AVKit
 class RCTVideoPlayerViewController: AVPlayerViewController {
     weak var rctDelegate: RCTVideoPlayerViewControllerDelegate?
 
-    // Optional paramters
+    // Optional parameters
     var preferredOrientation: String?
-    var autorotate: Bool?
+    var autorotate = true
 
     func shouldAutorotate() -> Bool {
-        if autorotate! || preferredOrientation == nil || (preferredOrientation!.lowercased() == "all") {
-            return true
-        }
-
-        return false
+        return autorotate || preferredOrientation?.lowercased() == "all" || preferredOrientation == nil
     }
 
     override func viewDidDisappear(_ animated: Bool) {
