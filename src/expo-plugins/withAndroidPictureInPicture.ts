@@ -9,22 +9,24 @@ export const withAndroidPictureInPicture: ConfigPlugin<boolean> = (
   enableAndroidPictureInPicture,
 ) => {
   return withAndroidManifest(config, (_config) => {
-    if (!enableAndroidPictureInPicture) {
-      return _config;
-    }
-
     const mainActivity = AndroidConfig.Manifest.getMainActivity(
       _config.modResults,
     );
 
     if (!mainActivity) {
-      console.warn(
-        'AndroidManifest.xml is missing an <activity android:name=".MainActivity" /> element - skipping adding Picture-In-Picture related config.',
-      );
+      if (enableAndroidPictureInPicture) {
+        console.warn(
+          'AndroidManifest.xml is missing an <activity android:name=".MainActivity" /> element - skipping adding Picture-In-Picture related config.',
+        );
+      }
       return _config;
     }
 
-    mainActivity.$['android:supportsPictureInPicture'] = 'true';
+    if (enableAndroidPictureInPicture) {
+      mainActivity.$['android:supportsPictureInPicture'] = 'true';
+    } else {
+      delete mainActivity.$['android:supportsPictureInPicture'];
+    }
 
     return _config;
   });
