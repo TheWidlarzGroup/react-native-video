@@ -17,6 +17,8 @@ class SideLoadedTextTrackList {
         return tracks == other.tracks
     }
 
+    override fun hashCode(): Int = tracks.hashCode()
+
     companion object {
         fun parse(src: ReadableArray?): SideLoadedTextTrackList? {
             if (src == null) {

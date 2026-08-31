@@ -3,6 +3,7 @@ package com.brentvatne.common.api
 import android.net.Uri
 import com.brentvatne.common.toolbox.ReactBridgeUtils
 import com.facebook.react.bridge.ReadableMap
+import java.util.Objects
 
 /**
  * Class representing a sideLoaded text track from application
@@ -13,6 +14,12 @@ class SideLoadedTextTrack {
     var title: String? = null
     var uri: Uri = Uri.EMPTY
     var type: String? = null
+
+    override fun equals(other: Any?): Boolean =
+        other is SideLoadedTextTrack && language == other.language && title == other.title && uri == other.uri && type == other.type
+
+    override fun hashCode(): Int = Objects.hash(language, title, uri, type)
+
     companion object {
         val SIDELOAD_TEXT_TRACK_LANGUAGE = "language"
         val SIDELOAD_TEXT_TRACK_TITLE = "title"
