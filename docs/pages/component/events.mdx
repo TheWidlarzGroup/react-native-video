@@ -378,13 +378,15 @@ Triggered every `progressUpdateInterval` milliseconds, providing information abo
 | currentTime      | number | Current playback position (seconds)                                   |
 | playableDuration | number | Duration that can be played using only the buffer (seconds)          |
 | seekableDuration | number | Duration that can be seeked to (usually the total length of the media) |
+| currentPlaybackTime | number? | Android/iOS epoch time in milliseconds for HLS live streams with `EXT-X-PROGRAM-DATE-TIME` |
 
 **Example:**
 ```javascript
 {
   currentTime: 5.2,
   playableDuration: 34.6,
-  seekableDuration: 888
+  seekableDuration: 888,
+  currentPlaybackTime: 1788181205200
 }
 ```
 
