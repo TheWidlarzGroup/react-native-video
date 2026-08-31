@@ -21,15 +21,15 @@ extension DRMManager {
             throw RCTVideoError.invalidContentId
         }
 
-        pendingLicenses[loadedLicenseUrl] = keyRequest
-
         DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            self.pendingLicenses[loadedLicenseUrl] = keyRequest
             onGetLicense([
                 "licenseUrl": licenseServerUrl,
                 "loadedLicenseUrl": loadedLicenseUrl,
                 "contentId": assetId,
                 "spcBase64": spcData.base64EncodedString(),
-                "target": self?.reactTag as Any,
+                "target": self.reactTag as Any,
             ])
         }
     }
@@ -45,9 +45,9 @@ extension DRMManager {
             return
         }
 
+        pendingLicenses.removeValue(forKey: licenseUrl)
         do {
             try finishProcessingContentKeyRequest(keyRequest: keyContentRequest, license: responseData)
-            pendingLicenses.removeValue(forKey: licenseUrl)
         } catch {
             handleError(error, for: keyContentRequest)
         }
@@ -56,13 +56,14 @@ extension DRMManager {
     func setJSLicenseError(error: String, licenseUrl: String) {
         let rctError = RCTVideoError.fromJSPart(error)
 
-        DispatchQueue.main.async { [weak self] in
-            self?.onVideoError?([
+        guard let keyContentRequest = pendingLicenses.removeValue(forKey: licenseUrl) else {
+            onVideoError?([
                 "error": RCTVideoErrorHandler.createError(from: rctError),
-                "target": self?.reactTag as Any,
+                "target": reactTag as Any,
             ])
+            return
         }
 
-        pendingLicenses.removeValue(forKey: licenseUrl)
+        handleError(rctError, for: keyContentRequest)
     }
 }
