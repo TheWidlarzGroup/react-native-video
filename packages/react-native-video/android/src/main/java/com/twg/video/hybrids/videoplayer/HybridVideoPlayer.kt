@@ -255,6 +255,8 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
 
     loadedWithSource = true
 
+    applyVideoQualityConstraints()
+
     player.addListener(playerListener)
     player.addAnalyticsListener(analyticsListener)
     player.setMediaSource(hybridSource.mediaSource)
@@ -267,6 +269,37 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
     status = VideoPlayerStatus.LOADING
     ensureNotReleased()
     startProgressUpdates()
+  }
+
+  /**
+   * Applies `bufferConfig.preferredMaximumResolution` and
+   * `preferredPeakBitRate` to the player's track selection.
+   *
+   * Both options were previously iOS-only in practice: they are applied to the
+   * `AVPlayerItem` in `AVPlayerItem+setBufferConfig.swift`, while Android read
+   * only the buffering fields off the same config and silently ignored these
+   * two. ExoPlayer expresses the same constraints through
+   * `TrackSelectionParameters`, which this file's sibling `TextTrackUtils`
+   * already uses for text-track selection.
+   *
+   * Called from `initializePlayer`, which every caller runs inside
+   * `runOnMainThreadSync` — `trackSelectionParameters` must be set on the
+   * player's application thread.
+   */
+  private fun applyVideoQualityConstraints() {
+    val config = bufferConfig ?: return
+    val maxResolution = config.preferredMaximumResolution
+    val maxBitRate = config.preferredPeakBitRate
+
+    if (maxResolution == null && maxBitRate == null) return
+
+    player.trackSelectionParameters = player.trackSelectionParameters
+      .buildUpon()
+      .apply {
+        maxResolution?.let { setMaxVideoSize(it.width.toInt(), it.height.toInt()) }
+        maxBitRate?.let { setMaxVideoBitrate(it.toInt()) }
+      }
+      .build()
   }
 
   private fun ensureNotReleased() {
