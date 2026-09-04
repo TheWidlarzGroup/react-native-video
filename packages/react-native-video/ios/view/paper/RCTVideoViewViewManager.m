@@ -1,5 +1,4 @@
 #import <React/RCTViewManager.h>
-#import "RCTEventDispatcher.h"
 #import "RCTVideoViewComponentView.h"
 
 @interface RCTVideoViewViewManager : RCTViewManager
