@@ -182,6 +182,8 @@ class VideoView @JvmOverloads constructor(
       setShowSubtitleButton(true)
       useController = false
 
+      resizeMode = this@VideoView.resizeMode.toAspectRatioFrameLayout()
+
       // Apply optimizations based on video player size if needed
       configureForSmallPlayer()
     }
