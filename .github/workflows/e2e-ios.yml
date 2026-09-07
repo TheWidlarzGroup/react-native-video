@@ -1,0 +1,78 @@
+# iOS E2E gate — free standard macOS (arm64) runner + iOS Simulator.
+# Free plan allows max 5 concurrent macOS jobs — keep this to ONE job per PR.
+name: e2e-ios
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: e2e-ios-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  APP_ID: com.rnvtest.host
+  SIM_DEVICE: iPhone 16
+
+jobs:
+  e2e-ios:
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup-bun
+
+      - name: Install pods
+        run: |
+          cd test-app
+          bundle install
+          bundle exec pod install --project-directory=ios
+          bundle exec ruby ios/fix-fmt-cxx17.rb
+
+      - name: Cache Pods
+        uses: actions/cache@v4
+        with:
+          path: test-app/ios/Pods
+          key: pods-${{ runner.os }}-${{ hashFiles('test-app/ios/Podfile.lock') }}
+
+      - name: Build for simulator
+        run: |
+          xcodebuild -workspace test-app/ios/RNVideoE2E.xcworkspace \
+            -scheme RNVideoE2E -configuration Debug -sdk iphonesimulator \
+            -derivedDataPath build \
+            -destination "platform=iOS Simulator,name=${SIM_DEVICE}" \
+            build | xcbeautify --quiet || true
+
+      - name: Boot simulator & install app
+        run: |
+          xcrun simctl boot "${SIM_DEVICE}" || true
+          xcrun simctl bootstatus "${SIM_DEVICE}" -b
+          APP_PATH=$(find build/Build/Products -name "*.app" -maxdepth 3 | head -1)
+          xcrun simctl install booted "$APP_PATH"
+
+      - name: Install Maestro
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      - name: Serve media fixtures
+        run: |
+          npx --yes serve e2e/fixtures/media -l 8090 &
+          sleep 2 && curl -sf http://localhost:8090/short.mp4 -o /dev/null
+
+      - name: Run flows
+        run: |
+          maestro test -e APP_ID=${{ env.APP_ID }} \
+            --format junit --output e2e-report-ios.xml \
+            e2e/flows/
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-ios-artifacts
+          path: |
+            e2e-report-ios.xml
+            ~/.maestro/tests/**
+          if-no-files-found: ignore
