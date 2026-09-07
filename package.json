@@ -9,6 +9,7 @@
     "packages/react-native-video",
     "packages/drm-plugin",
     "example",
+    "test-app",
     "docs"
   ],
   "scripts": {
@@ -20,8 +21,9 @@
     "react-native-video": "bun run --cwd packages/react-native-video",
     "drm-plugin": "bun run --cwd packages/drm-plugin",
     "example": "bun run --cwd example",
+    "test-app": "bun run --cwd test-app",
     "docs": "bun run --cwd docs",
-    "postinstall": "patch-package --patch-dir example/patches",
+    "postinstall": "patch-package --patch-dir example/patches && patch-package --patch-dir test-app/patches",
     "release:github": "release-it --preRelease beta",
     "release": "./scripts/release.sh"
   },

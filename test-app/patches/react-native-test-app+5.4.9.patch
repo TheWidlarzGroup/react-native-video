@@ -1,0 +1,15 @@
+--- a/node_modules/react-native-test-app/android/app/src/main/java/com/microsoft/reacttestapp/MainActivity.kt
++++ b/node_modules/react-native-test-app/android/app/src/main/java/com/microsoft/reacttestapp/MainActivity.kt
+@@ -113,6 +113,12 @@
+                     ?: throw IllegalArgumentException("No component with slug: $slug")
+                 val intent = ComponentActivity.newIntent(this, newComponentViewModel(component))
+                 intent.flags = Intent.FLAG_ACTIVITY_TASK_ON_HOME or Intent.FLAG_ACTIVITY_NEW_TASK
++                // Preserve the launch Intent's action/data (e.g. a rnvtest:// deep link):
++                // without this, ComponentActivity.getIntent().data is always null, so
++                // Linking.getInitialURL() on Android silently returns null too.
++                // Rationale and how this was found: test-app/patches/README.md
++                intent.action = getIntent().action
++                intent.data = getIntent().data
+                 startActivity(intent)
+                 finish()
+             }
