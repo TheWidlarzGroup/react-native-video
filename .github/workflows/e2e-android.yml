@@ -1,0 +1,72 @@
+# Android E2E gate — free standard ubuntu runner + KVM-accelerated emulator.
+name: e2e-android
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: e2e-android-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  APP_ID: com.rnvtest.host
+  API_LEVEL: 34
+
+jobs:
+  e2e-android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Enable KVM for hardware-accelerated emulator
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - uses: ./.github/actions/setup-bun
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4 # gradle cache
+
+      - name: Build test app APK
+        run: cd test-app/android && ./gradlew assembleDebug --no-daemon
+
+      - name: Install Maestro
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      - name: Serve media fixtures
+        run: |
+          npx --yes serve e2e/fixtures/media -l 8090 &
+          sleep 2 && curl -sf http://localhost:8090/short.mp4 -o /dev/null
+
+      - name: Run flows on emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ env.API_LEVEL }}
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          script: |
+            adb install test-app/android/app/build/outputs/apk/debug/app-debug.apk
+            maestro test -e APP_ID=${{ env.APP_ID }} \
+              --format junit --output e2e-report-android.xml \
+              e2e/flows/
+
+      - name: Upload artifacts (report + Maestro recordings)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-android-artifacts
+          path: |
+            e2e-report-android.xml
+            ~/.maestro/tests/**
+          if-no-files-found: ignore
