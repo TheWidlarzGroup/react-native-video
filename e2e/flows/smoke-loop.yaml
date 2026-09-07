@@ -1,0 +1,53 @@
+# Loop: toggling `loop` on the player must restart playback on onEnd instead of stopping.
+#
+# Verified on-device: a tap issued while the video is actively decoding is only actually
+# delivered once the player goes idle (see smoke-rate.yaml) — so the loop-toggle tap below
+# always lands too late to affect the clip's first natural end, and the player sits stopped
+# at its end position afterwards (play() alone, from position == duration, does not restart
+# it — confirmed on-device, no further events fire). So: let end #1 happen, then manually
+# seek back and press play once to reach end #2 (by which point the deferred loop-toggle
+# tap has already landed, so `loop` is set for that entire 2nd playthrough) — and make NO
+# further taps. evt-loop-verified only marks on a 3rd onEnd (ScenarioScreen.tsx's endCount)
+# with no tap between end #2 and end #3: that transition can only come from an unassisted
+# `loop` restart, which is the one thing this flow doesn't itself do.
+appId: ${APP_ID}
+tags: [smoke]
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: "e2e-host-ready"
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 1500
+- openLink: rnvtest://scenario/mp4
+- extendedWaitUntil:
+    visible: "Open"
+    timeout: 3000
+    optional: true
+- tapOn:
+    text: "Open"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "scenario-mp4"
+    timeout: 8000
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 20000
+- tapOn:
+    id: "btn-loop-toggle"
+- extendedWaitUntil:
+    visible:
+      id: "evt-onEnded"
+    timeout: 15000            # tap above only actually lands once this natural end #1 happens
+- tapOn:
+    id: "btn-seek-1"
+- tapOn:
+    id: "btn-play-pause"
+- extendedWaitUntil:
+    visible:
+      id: "evt-loop-verified"
+    timeout: 25000            # end #2 (~7s from position 1s) then an unassisted end #3

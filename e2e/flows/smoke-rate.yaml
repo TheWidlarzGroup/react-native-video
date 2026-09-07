@@ -1,0 +1,45 @@
+# Playback rate cycling (1x -> 2x -> 0.5x), surfaced via onPlaybackRateChange
+# (see ScenarioScreen.tsx). Verified on-device: a tap issued while the video is actively
+# decoding is queued by the test driver and only delivered once the player goes idle
+# (paused/ended) — not a code bug, reproduced even with a listener that does nothing but
+# log. So the first tap's effect only lands around the clip's natural end (~8s); the
+# second tap lands promptly since the player is idle by then. Timeouts reflect that.
+appId: ${APP_ID}
+tags: [smoke]
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: "e2e-host-ready"
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 1500
+- openLink: rnvtest://scenario/mp4
+- extendedWaitUntil:
+    visible: "Open"
+    timeout: 3000
+    optional: true
+- tapOn:
+    text: "Open"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "scenario-mp4"
+    timeout: 8000
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 20000
+- tapOn:
+    id: "btn-rate-cycle"
+- extendedWaitUntil:
+    visible:
+      id: "evt-rate-2x"
+    timeout: 15000            # tap is only actually delivered once the clip reaches its natural end
+- tapOn:
+    id: "btn-rate-cycle"
+- extendedWaitUntil:
+    visible:
+      id: "evt-rate-0-5x"
+    timeout: 5000
