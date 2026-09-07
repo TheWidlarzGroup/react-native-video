@@ -1,0 +1,47 @@
+# Error path: a syntactically-broken HLS manifest must produce onError (and NOT onLoad).
+# See smoke-error-404.yaml for why this warms up with the mp4 scenario first: a scenario
+# that fails before ever attempting real playback never fires a single player event on a
+# truly cold launch.
+appId: ${APP_ID}
+tags: [smoke]
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: "e2e-host-ready"
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 1500
+- openLink: rnvtest://scenario/mp4
+- extendedWaitUntil:
+    visible: "Open"
+    timeout: 3000
+    optional: true
+- tapOn:
+    text: "Open"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 20000
+- openLink: rnvtest://scenario/broken-manifest
+- extendedWaitUntil:
+    visible: "Open"
+    timeout: 3000
+    optional: true
+- tapOn:
+    text: "Open"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "scenario-broken-manifest"
+    timeout: 8000
+- extendedWaitUntil:
+    visible:
+      id: "evt-onError"
+    timeout: 20000
+- assertVisible:
+    id: "evt-error-code"      # exact code differs per platform — wave 2 pins it per-platform
+- assertNotVisible:
+    id: "evt-onLoad"

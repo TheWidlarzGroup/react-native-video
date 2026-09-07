@@ -1,0 +1,57 @@
+# Error path: 404 source must produce onError (and NOT onLoad)
+appId: ${APP_ID}
+tags: [smoke]
+---
+- launchApp:
+    clearState: true
+# See smoke-mp4-happy-path.yaml: openLink before JS has mounted+subscribed silently
+# drops the deep link (RCTLinkingManager's 'url' event is fire-and-forget).
+- extendedWaitUntil:
+    visible:
+      id: "e2e-host-ready"
+    timeout: 15000
+# On a truly cold launch, a scenario that fails before ever attempting real playback
+# (this one) never fires a single player event — confirmed hanging even after 30s wait,
+# not just slow. A scenario with real playback (mp4/hls) fires fine cold. Root cause not
+# fully pinned down (looks like some native/Nitro registration path that only completes
+# once triggered by an actual playback attempt) — see e2e/SPIKE_RNTA.md. Mitigation:
+# warm up with a real-playback scenario first; this is the same process the other two
+# MVP flows already exercise successfully from cold, so it's proven to complete init.
+- waitForAnimationToEnd:
+    timeout: 1500
+- openLink: rnvtest://scenario/mp4
+- extendedWaitUntil:
+    visible: "Open"
+    timeout: 3000
+    optional: true
+- tapOn:
+    text: "Open"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 20000
+- openLink: rnvtest://scenario/error-404
+# iOS shows a one-time "Open in <app>?" system confirmation for openLink on some sessions
+# (simulator-specific, not app-specific) — harmless no-op when it doesn't appear.
+- extendedWaitUntil:
+    visible: "Open"
+    timeout: 3000
+    optional: true
+- tapOn:
+    text: "Open"
+    optional: true
+# See smoke-mp4-happy-path.yaml: Android's Activity-redirect (MainActivity -> ComponentActivity
+# in singleApp mode) + fresh JS mount takes a moment longer than an instant assertVisible allows.
+- extendedWaitUntil:
+    visible:
+      id: "scenario-error-404"
+    timeout: 8000
+- extendedWaitUntil:
+    visible:
+      id: "evt-onError"
+    timeout: 20000
+- assertVisible:
+    id: "evt-error-code"      # exact code differs per platform — wave 2 pins it per-platform
+- assertNotVisible:
+    id: "evt-onLoad"

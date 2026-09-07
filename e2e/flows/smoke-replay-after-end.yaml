@@ -1,0 +1,43 @@
+# Reuse-after-natural-end: once the player has run to completion, it must still be
+# seekable and resumable — not stuck in a terminal state. evt-paused is expected to fire
+# implicitly once playback stops at the natural end (see ScenarioScreen.tsx's
+# onPlaybackStateChange derivation); evt-resumed then proves play() still works afterwards.
+appId: ${APP_ID}
+tags: [smoke]
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: "e2e-host-ready"
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 1500
+- openLink: rnvtest://scenario/mp4
+- extendedWaitUntil:
+    visible: "Open"
+    timeout: 3000
+    optional: true
+- tapOn:
+    text: "Open"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "scenario-mp4"
+    timeout: 8000
+- extendedWaitUntil:
+    visible:
+      id: "evt-onEnded"
+    timeout: 20000
+- extendedWaitUntil:
+    visible:
+      id: "evt-paused"
+    timeout: 5000
+- tapOn:
+    id: "btn-seek-1"
+- tapOn:
+    id: "btn-play-pause"
+- extendedWaitUntil:
+    visible:
+      id: "evt-resumed"
+    timeout: 5000

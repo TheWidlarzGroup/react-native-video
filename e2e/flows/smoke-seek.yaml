@@ -1,0 +1,46 @@
+# Seek forward then backward. evt-seek-fwd-landed/evt-seek-back-landed are derived from
+# onProgress currentTime (>4s / <2s after a forward seek already landed), not onSeek alone —
+# proves the player actually moved, not just that seekTo() was called (see ScenarioScreen.tsx).
+appId: ${APP_ID}
+tags: [smoke]
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: "e2e-host-ready"
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 1500
+- openLink: rnvtest://scenario/mp4
+- extendedWaitUntil:
+    visible: "Open"
+    timeout: 3000
+    optional: true
+- tapOn:
+    text: "Open"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "scenario-mp4"
+    timeout: 8000
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 20000
+- tapOn:
+    id: "btn-seek-5"
+- extendedWaitUntil:
+    visible:
+      id: "evt-onSeek"
+    timeout: 5000
+- extendedWaitUntil:
+    visible:
+      id: "evt-seek-fwd-landed"
+    timeout: 5000
+- tapOn:
+    id: "btn-seek-1"
+- extendedWaitUntil:
+    visible:
+      id: "evt-seek-back-landed"
+    timeout: 5000

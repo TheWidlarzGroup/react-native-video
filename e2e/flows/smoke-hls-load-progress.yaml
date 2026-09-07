@@ -1,0 +1,41 @@
+# HLS VOD: manifest parses, playback starts, progress advances past 2 s
+appId: ${APP_ID}
+tags: [smoke]
+---
+- launchApp:
+    clearState: true
+# See smoke-mp4-happy-path.yaml: openLink before JS has mounted+subscribed silently
+# drops the deep link (RCTLinkingManager's 'url' event is fire-and-forget).
+- extendedWaitUntil:
+    visible:
+      id: "e2e-host-ready"
+    timeout: 15000
+# See smoke-mp4-happy-path.yaml: small settle buffer for RNTA's native bootstrapping.
+- waitForAnimationToEnd:
+    timeout: 1500
+- openLink: rnvtest://scenario/hls
+# iOS shows a one-time "Open in <app>?" system confirmation for openLink on some sessions
+# (simulator-specific, not app-specific) — harmless no-op when it doesn't appear.
+- extendedWaitUntil:
+    visible: "Open"
+    timeout: 3000
+    optional: true
+- tapOn:
+    text: "Open"
+    optional: true
+# See smoke-mp4-happy-path.yaml: Android's Activity-redirect (MainActivity -> ComponentActivity
+# in singleApp mode) + fresh JS mount takes a moment longer than an instant assertVisible allows.
+- extendedWaitUntil:
+    visible:
+      id: "scenario-hls"
+    timeout: 8000
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 25000            # HLS: manifest + first segments over local HTTP
+- extendedWaitUntil:
+    visible:
+      id: "evt-progress-gt-2s"
+    timeout: 15000
+- assertNotVisible:
+    id: "evt-onError"
