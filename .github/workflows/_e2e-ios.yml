@@ -152,6 +152,17 @@ jobs:
           test -n "$APP_PATH"
           xcrun simctl install "$SIM_UDID" "$APP_PATH"
 
+          # Warm-up, outside Maestro: the first launch after install and the first
+          # `simctl openurl` on a hosted runner are far slower than the rest (the
+          # openurl timed out after 17 s in one run, and the first flow saw a system
+          # "Open in app?" confirmation that later flows did not). Doing both once here
+          # puts the first flow on the same footing as the others.
+          xcrun simctl launch "$SIM_UDID" ${{ env.APP_ID }} || true
+          sleep 8
+          xcrun simctl openurl "$SIM_UDID" 'rnvtest://scenario/mp4' || echo "warm-up openurl failed (non-fatal)"
+          sleep 8
+          xcrun simctl terminate "$SIM_UDID" ${{ env.APP_ID }} || true
+
       - name: Run flows
         env:
           # Passed through the environment so a tags value cannot break out of the
