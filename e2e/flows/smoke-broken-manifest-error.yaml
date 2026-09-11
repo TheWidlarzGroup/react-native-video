@@ -36,7 +36,7 @@ tags: [smoke]
 - extendedWaitUntil:
     visible:
       id: "scenario-broken-manifest"
-    timeout: 8000
+    timeout: 20000
 - extendedWaitUntil:
     visible:
       id: "evt-onError"

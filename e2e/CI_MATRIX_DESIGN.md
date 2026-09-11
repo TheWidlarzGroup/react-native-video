@@ -171,10 +171,14 @@ Quarantine rides on Maestro's own tags: the gate runs `maestro test --exclude-ta
 nightly adds `--include-tags=flaky` legs when the tag is in use. Marking a flow unstable is
 a one-line change in its YAML — visible in review, greppable.
 
-Caching: Pods keyed on the runner image, the RN version and `Podfile.lock`, Gradle via
-`gradle/actions/setup-gradle`, and `node_modules` in a namespace separate from the docs
-workflows' cache (with the patch files in the key, since patch-package cannot re-apply a
-changed patch to an already-patched tree). The Android emulator deliberately boots cold:
+Caching: Pods keyed on the runner image, the RN version and `Podfile.lock`; xcodebuild's
+DerivedData keyed on everything that feeds the iOS build (a cold Pods build is ~12 minutes
+on a hosted runner, an incremental one a fraction of that); Gradle's dependency and build
+caches via `gradle/actions/setup-gradle` with `--build-cache`, written from PR runs too;
+and `node_modules` in a namespace separate from the docs workflows' cache (with the patch
+files in the key, since patch-package cannot re-apply a changed patch to an
+already-patched tree). The iOS simulator boots in the background from the moment it is
+resolved, overlapping pod install and the build. The Android emulator deliberately boots cold:
 resuming a saved snapshot produced system-process ANR dialogs ("System UI isn't
 responding") that covered the app and made every flow fail on its first assertion.
 

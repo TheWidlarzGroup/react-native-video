@@ -39,7 +39,7 @@ jobs:
       expected-labels: ${{ steps.plan.outputs.expected-labels }}
       quarantine-labels: ${{ steps.plan.outputs.quarantine-labels }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Everything about the matrix (rows, artifact names, the shape guard, flaky
       # detection) lives in scripts/e2e/matrix-plan.mjs, which has unit tests.
@@ -107,9 +107,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           path: reports
 

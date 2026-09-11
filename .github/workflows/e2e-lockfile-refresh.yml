@@ -27,7 +27,7 @@ jobs:
     env:
       REFRESH_BRANCH: ci/e2e-lockfile-refresh
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Captured before any work so the --force-with-lease at the end covers the whole
       # job, not just the seconds before the push. Empty when the branch does not exist.

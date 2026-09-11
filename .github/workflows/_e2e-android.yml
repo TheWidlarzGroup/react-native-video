@@ -43,7 +43,7 @@ jobs:
     # still need their own `if: always()`.
     continue-on-error: ${{ !inputs.blocking }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # upload-artifact@v4 hard-errors on a duplicate name within a run, so the name has
       # to differ per (rn-version, api-level, tag selection).
@@ -74,11 +74,17 @@ jobs:
           rn-version: ${{ inputs.rn-version }}
           platform: android
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: 17
-      - uses: gradle/actions/setup-gradle@v4
+      # cache-read-only defaults to true off the default branch, which would mean no
+      # Gradle cache is ever written by PR runs (the only runs this workflow has until
+      # the nightly exists); --build-cache below then reuses compiled Kotlin/dex/jar
+      # outputs between runs.
+      - uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-read-only: false
 
       # x86_64 only: that is the emulator ABI; the other three would be built and thrown
       # away.
@@ -105,7 +111,7 @@ jobs:
           echo "OK: plugins applied, generated manifest reset"
 
       - name: Build test app APK
-        run: cd test-app/android && ./gradlew assembleDebug --no-daemon -PreactNativeArchitectures=x86_64
+        run: cd test-app/android && ./gradlew assembleDebug --build-cache --no-daemon -PreactNativeArchitectures=x86_64
 
       # react-native-test-app applies the Expo config plugins (test-app/rnv-e2e-plugin.mjs)
       # while evaluating Gradle settings and writes the result into its own manifest in
@@ -183,7 +189,7 @@ jobs:
 
       - name: Upload artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.suffix.outputs.name }}
           path: |
