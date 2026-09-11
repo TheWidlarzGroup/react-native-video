@@ -123,17 +123,16 @@ jobs:
           force-avd-creation: false
           disable-animations: true
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
-          # The action runs this with /usr/bin/sh (dash), which has no `pipefail`.
+          # The action runs EVERY LINE of this script as its own `/usr/bin/sh -c`, and
+          # stops at the first line that exits non-zero. So: one command per line, no
+          # backslash continuations (the continuation would become a separate command
+          # and `\` the flow path), and no `set -e`, which would only apply to its own
+          # line.
           script: |
-            set -eu
-            # -r: a restored snapshot may already carry the app; every flow clears state.
             adb install -r test-app/android/app/build/outputs/apk/debug/app-debug.apk
             adb logcat -c
             adb logcat > logcat.txt &
-            maestro test -e APP_ID=${{ env.APP_ID }} $TAGS \
-              --format junit --output e2e-report.xml \
-              --debug-output maestro-debug \
-              e2e/flows/
+            maestro test -e APP_ID=${{ env.APP_ID }} $TAGS --format junit --output e2e-report.xml --debug-output maestro-debug e2e/flows/
 
       - name: Job summary
         if: always()
