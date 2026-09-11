@@ -2,6 +2,7 @@
 // an orphan `e2e-results` branch; this script only reads and writes it.
 import { readFileSync, appendFileSync, existsSync } from 'node:fs';
 import { parseJUnit, isCompleteReport } from './junit-summary.mjs';
+import { isMain } from './is-main.mjs';
 
 export function greenStreak(records, label) {
   let streak = 0;
@@ -59,14 +60,9 @@ function readHistory(path, stderr) {
     });
 }
 
-// The CLI body, factored out of `import.meta.main` and taking its I/O as arguments rather
-// than reading `process.*` directly. This is what lets the tests below call it in-process:
-// `bun test` on this machine (Bun 1.4.0) returns EBADF for every subprocess spawn — both
-// `node:child_process.spawnSync` and `Bun.spawnSync`, regardless of command — so a test
-// that shells out to run this script as a real CLI cannot pass under `bun test`, which is
-// exactly what lefthook and CI invoke. Driving `main` directly sidesteps spawning
-// altogether while still exercising the real argv-parsing, missing-report, and
-// malformed-history-line behaviour.
+// The CLI body takes its I/O as arguments rather than reading `process.*` directly, so
+// the unit tests can drive it in-process and still exercise the real argv parsing,
+// missing-report and malformed-history-line behaviour.
 export function main({ argv, env, stdout, stderr }) {
   const [, , reportPath, label, historyFile, rowKind] = argv;
   // `rowKind` is an explicit, separate CLI argument — never inferred from `label` — so
@@ -104,15 +100,12 @@ export function main({ argv, env, stdout, stderr }) {
   //   - 'no-cases': the report is complete and well-formed but matched zero test cases
   //     (e.g. a tag-filter misconfiguration matched no flows for this label). A report
   //     with no flows in it is not evidence anything passed, so for a COVERAGE row it
-  //     can't count as green — a coverage leg matching zero flows means its tag filter is
-  //     broken. A QUARANTINE row is the one deliberate exception: quarantine legs select
-  //     flows tagged `flaky`, and today nothing is tagged `flaky`, so zero matched cases
-  //     means zero flows are quarantined — the healthy state, not a failure. That
-  //     exemption is scored below as `reason: 'no-quarantined-flows'` with `failures: 0`,
-  //     and it is reachable ONLY through the `isQuarantine` flag above, never through any
-  //     property of `complete` itself — the same `complete.total === 0` condition, and
-  //     the same fail-closed `failures: 1` result, still apply unconditionally to every
-  //     coverage row.
+  //     can't count as green. A QUARANTINE row is the one exception: it selects flows
+  //     tagged `flaky`, so zero matched cases means zero flows are quarantined, which is
+  //     the healthy state. (The nightly workflow only schedules quarantine legs when at
+  //     least one flow carries the tag, because Maestro refuses to run a tag filter that
+  //     matches nothing, so in practice this branch is defence in depth.) The exemption
+  //     is reachable only through the `isQuarantine` flag above.
   // In every one of these cases we don't know which flows would have run, so `cases` is
   // left empty: the run intentionally does not count against (or for) any individual
   // flow's per-flow pass rate in `flowPassRate` — only against the overall streak.
@@ -156,7 +149,7 @@ export function main({ argv, env, stdout, stderr }) {
   return 0;
 }
 
-if (import.meta.main) {
+if (isMain(import.meta.url)) {
   process.exit(
     main({ argv: process.argv, env: process.env, stdout: process.stdout, stderr: process.stderr })
   );

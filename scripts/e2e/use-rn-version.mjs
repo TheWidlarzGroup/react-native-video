@@ -5,6 +5,7 @@
 import { readFileSync, writeFileSync, copyFileSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
+import { isMain } from './is-main.mjs';
 
 export const FLOOR = '0.77';
 const PKG = 'test-app/package.json';
@@ -105,9 +106,15 @@ function main() {
     process.exit(1);
   }
 
+  if (refresh) {
+    console.log(`[rn-matrix] refreshed ${lockPath}`);
+    return;
+  }
+  console.log(`[rn-matrix] switched test-app to RN ${version}`);
   console.log(
-    refresh ? `[rn-matrix] refreshed ${lockPath}` : `[rn-matrix] switched test-app to RN ${version}`
+    `[rn-matrix] ${PKG} and ${ROOT_LOCK} are now the ${version} variant — do not commit them.\n` +
+      `[rn-matrix] back to the floor: git checkout -- ${ROOT_LOCK} ${PKG}`
   );
 }
 
-if (import.meta.main) main();
+if (isMain(import.meta.url)) main();
