@@ -1,0 +1,240 @@
+# Weekly refresh of the per-RN-version lockfiles under e2e/rn-matrix/*/bun.lock.
+#
+# Every other E2E install in this repo uses `bun install --frozen-lockfile` (see
+# .github/actions/e2e-setup and .github/actions/setup-bun's `frozen` input) so that a
+# red matrix leg always means "the code broke," never "npm/bun resolved differently
+# today." That guarantee only holds if the committed lockfiles are kept current —
+# otherwise they drift silently until an unrelated contributor's PR fails on a
+# resolution change they had nothing to do with. This workflow is the deliberate
+# exception to "always frozen": its entire job is to re-resolve freshly and hand the
+# result to a human as a normal, reviewable PR, so the drift is caught here instead of
+# there. Do not "fix" this by adding --frozen-lockfile to the install below.
+name: e2e-lockfile-refresh
+
+on:
+  schedule:
+    - cron: '0 3 * * 1' # Monday 03:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  # Not cancel-in-progress: a run that's already mid-push shouldn't be killed by a
+  # manual workflow_dispatch landing on top of the Monday schedule — the second run
+  # just waits and finds nothing left to do (or picks up whatever the first missed).
+  group: e2e-lockfile-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    # Scheduled workflows do run on forks (unlike on GitHub.com's UI, Actions does not
+    # suppress `schedule` there), but a fork has no reason to push branches or open PRs
+    # against itself on someone else's cron. Matches the guard already used by the
+    # other cron/event workflows in this repo (stale.yml, triage-discussion.yml,
+    # validate-issue.yml).
+    if: ${{ github.repository == 'TheWidlarzGroup/react-native-video' }}
+    runs-on: ubuntu-latest
+    env:
+      REFRESH_BRANCH: ci/e2e-lockfile-refresh
+    steps:
+      - uses: actions/checkout@v4
+
+      # Captured here — before the refresh loop below does any work — rather than
+      # immediately before the push at the end of the job, so the lease used later
+      # protects the whole window this job takes to run (several `bun install`s,
+      # then a commit and push), not just the last few seconds before the push.
+      # That covers a competing writer pushing to ci/e2e-lockfile-refresh WHILE this
+      # job is mid-run (a second copy of this workflow racing it is already ruled
+      # out by the `concurrency` group above, so this isn't protecting against
+      # that). It does NOT cover a maintainer's review fixup landing on the open PR
+      # branch in the days between weekly runs — this SHA is captured after that
+      # edit, so it can only ever describe the edit as "the expected state," not
+      # detect it. The "Open a PR" step below has a separate check (the
+      # $BOT_EMAIL identity check on the branch tip) specifically for that
+      # between-runs case: it refuses the push outright if the tip is not both
+      # authored and committed by the bot. If the branch doesn't exist yet, SHA is
+      # left empty on purpose — the push step below turns that into a "must not
+      # exist" lease instead of comparing against nothing.
+      - name: Capture the refresh branch's current remote state
+        id: branch-sha
+        run: |
+          set -euo pipefail
+          git fetch origin "$REFRESH_BRANCH" 2>/dev/null || true
+          SHA="$(git rev-parse "origin/$REFRESH_BRANCH" 2>/dev/null || true)"
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+
+      # Only installs bun itself and the root workspace deps at the floor (0.77)
+      # variant — deliberately not `frozen: true` (that's the matrix jobs' setup, via
+      # e2e-setup) and deliberately not e2e-setup itself, which also selects an RN
+      # version, installs Maestro, and boots the fixture server: none of that is
+      # relevant to resolving lockfiles, and e2e-setup's version-select step would
+      # reject a version whose bun.lock doesn't exist yet, which for a freshly added
+      # matrix row is exactly the case this workflow needs to handle.
+      - uses: ./.github/actions/setup-bun
+
+      # `use-rn-version.mjs <version> --refresh` overlays test-app/package.json with
+      # that version's overlay.json, runs a plain `bun install`, copies the resulting
+      # root bun.lock into e2e/rn-matrix/<version>/bun.lock, and — per its own `finally`
+      # block — unconditionally restores test-app/package.json and the root bun.lock to
+      # their pre-overlay (floor) contents before returning, success or failure. So the
+      # only working-tree effect that should survive this whole loop is inside
+      # e2e/rn-matrix/*/; the guard step below verifies that instead of assuming it.
+      - name: Refresh every matrix lockfile
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          # The floor (0.77) has no e2e/rn-matrix/<version> directory by design — see
+          # e2e/rn-matrix/README.md: the repo's own test-app/package.json and root
+          # bun.lock ARE its variant. Globbing only existing directories already
+          # excludes it, so there is no floor case to special-case or skip here; leaving
+          # it out is intentional, not an oversight.
+          for dir in e2e/rn-matrix/*/; do
+            node scripts/e2e/use-rn-version.mjs "$(basename "$dir")" --refresh
+          done
+
+      - name: Guard against staging anything outside the matrix lockfiles
+        run: |
+          set -euo pipefail
+          # This is the actual failure mode worth guarding against: if the script's
+          # floor-restore ever regressed (or something else touched the tree), a
+          # `git add e2e/rn-matrix` below would still miss the stray file and the PR
+          # would look clean — but a stray, uncommitted test-app/package.json or root
+          # bun.lock left on the runner isn't the danger; a stray change that DID make it
+          # into the diff below would be. Fail loudly here instead of trusting that.
+          STRAY="$(git status --porcelain -- . ':!e2e/rn-matrix')"
+          if [ -n "$STRAY" ]; then
+            echo "::error::refresh left changes outside e2e/rn-matrix — refusing to open a PR that could silently retarget the repo's default RN version. Changed:"
+            echo "$STRAY"
+            exit 1
+          fi
+
+      - name: Check for lockfile drift
+        id: diff
+        run: |
+          set -euo pipefail
+          # `git diff` only reports changes to already-tracked paths. A brand-new
+          # matrix version (overlay.json committed, bun.lock not generated yet) is
+          # exactly the case this workflow exists to handle, and it produces an
+          # UNTRACKED bun.lock here — `git diff --quiet` would see no drift and the
+          # freshly resolved lockfile would be silently discarded with no PR and no
+          # error. `git status --porcelain` sees untracked files too, so use that
+          # instead to tell "no drift" and "drift found" apart correctly.
+          if [ -z "$(git status --porcelain -- e2e/rn-matrix)" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open a PR with the refreshed lockfiles
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LEASE_SHA: ${{ steps.branch-sha.outputs.sha }}
+        run: |
+          set -euo pipefail
+          BOT_EMAIL="github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "$BOT_EMAIL"
+
+          # The lease pushed below only protects THIS job's own runtime — a third
+          # party pushing to $REFRESH_BRANCH sometime between the "Capture" step's
+          # fetch and this push a few minutes later. It cannot protect against an
+          # edit that landed on the branch before that fetch ran, because LEASE_SHA
+          # already includes it by the time we captured it — there is nothing for a
+          # lease to compare against there. That earlier case — a maintainer pushing
+          # a review fixup to the open refresh PR sometime in the days it sits open
+          # between Monday runs — is actually the common one, and it's what this
+          # check protects: refuse to touch the branch at all if its current tip
+          # (LEASE_SHA) isn't a commit this workflow made. This workflow always
+          # commits as $BOT_EMAIL (set just above) and always produces exactly one
+          # commit per push (see the -B reset below), so any tip not both authored AND
+          # committed by $BOT_EMAIL can only mean a human touched the branch since our
+          # last run.
+          #
+          # Both fields are required, not just the author: git preserves the author
+          # identity through `git commit --amend` and through a rebase, rewriting only
+          # the committer. So a maintainer running `git commit --amend --no-edit` on the
+          # open refresh PR — an ordinary, non-adversarial fixup — leaves the author as
+          # $BOT_EMAIL while the content and the committer are theirs, and an
+          # author-only check would wave it through and discard exactly the work this
+          # mechanism exists to protect. The bot's own commits always set both, because
+          # it only ever creates a fresh commit and never amends or rebases one.
+          if [ -n "$LEASE_SHA" ]; then
+            TIP_IDENT="$(git log -1 --format='%ae %ce' "$LEASE_SHA")"
+            if [ "$TIP_IDENT" != "$BOT_EMAIL $BOT_EMAIL" ]; then
+              echo "::error::refusing to force-push $REFRESH_BRANCH — its current tip $LEASE_SHA has author/committer '$TIP_IDENT', not this workflow ($BOT_EMAIL). A maintainer likely pushed or amended a commit on the open refresh PR; force-pushing over it would silently discard that work. Merge or close the open PR, or delete the branch, and next week's scheduled run will recreate it from scratch."
+              exit 1
+            fi
+          fi
+
+          # -B resets the branch to point at the CURRENT commit — the checkout this job
+          # started from, plus the uncommitted refresh sitting in the working tree — so
+          # this always produces a single clean commit of this run's diff, never a merge
+          # with whatever a stale origin/$REFRESH_BRANCH happens to contain. This is safe
+          # to do unconditionally here only because the authorship check above already
+          # confirmed the branch has nothing on it but our own prior commit.
+          git checkout -B "$REFRESH_BRANCH"
+          git add e2e/rn-matrix
+          git commit -m "chore(e2e): refresh RN matrix lockfiles"
+
+          # This lease is the job's-own-runtime guard described above: it compares
+          # against the SHA captured right after checkout (the "Capture the refresh
+          # branch's current remote state" step, before the refresh loop ran), not a
+          # fetch done seconds before this push, so a competing writer anywhere in the
+          # job's own run causes a real rejection rather than silently being absorbed.
+          # When the branch didn't exist at capture time, LEASE_SHA is empty, so the
+          # lease requires the branch to still not exist — the closest equivalent for
+          # "must not exist" that --force-with-lease supports.
+          if [ -n "$LEASE_SHA" ]; then
+            git push --force-with-lease="refs/heads/$REFRESH_BRANCH:$LEASE_SHA" -u origin "$REFRESH_BRANCH"
+          else
+            git push --force-with-lease="refs/heads/$REFRESH_BRANCH:" -u origin "$REFRESH_BRANCH"
+          fi
+
+          # `gh pr view "$REFRESH_BRANCH"` would return success for ANY PR ever opened
+          # from this branch, including one already merged or closed — this repo does
+          # not delete head branches on merge (delete_branch_on_merge is false), so the
+          # branch survives past its first merge. Checking that instead of an OPEN PR
+          # would permanently stop this workflow from ever opening a new PR again after
+          # the first one merges or gets closed. Count only OPEN PRs for this head
+          # branch; a closed/merged one is not a reason to stay silent.
+          OPEN_PR_COUNT="$(gh pr list --head "$REFRESH_BRANCH" --state open --json number --jq 'length')"
+          # `set -e` does not apply to a command used as an `if` condition, so a `gh`/
+          # `jq` output that isn't a clean integer (an auth banner on stdout, a future
+          # incompatibility, a rate-limit message) would otherwise make `[ -eq ]` throw
+          # and fall through to a silent, successful-looking exit — after real drift
+          # was already committed and force-pushed. Validate the shape first and fail
+          # loudly if it's not a plain integer, instead of trusting the comparison.
+          if ! [[ "$OPEN_PR_COUNT" =~ ^[0-9]+$ ]]; then
+            echo "::error::gh pr list returned unexpected output while checking for an open PR on $REFRESH_BRANCH: '$OPEN_PR_COUNT'"
+            exit 1
+          fi
+          if [ "$OPEN_PR_COUNT" -eq 0 ]; then
+            # The e2e gate (.github/workflows/e2e.yml) triggers on `pull_request` only,
+            # and GitHub does not run other workflows off events authored by the
+            # default GITHUB_TOKEN — so this PR's checks will show clean/empty rather
+            # than "e2e failed," which looks safer than it is. Say so plainly in the
+            # body, since that's the one place a human merging this is guaranteed to
+            # look.
+            BODY="$(printf '%s\n\n%s' \
+              "Weekly refresh of the per-RN-version lockfiles under \`e2e/rn-matrix\`. Review the dependency drift here rather than discovering it in an unrelated PR." \
+              "⚠️ This PR was opened by automation using the default \`GITHUB_TOKEN\`, which does not trigger other workflows — the \`e2e\` gate did **not** run against it. Re-trigger CI (close and reopen this PR, or push an empty commit) and confirm it is green before merging.")"
+            # This call needs more than the `pull-requests: write` declared above:
+            # GitHub also gates PR creation by the default GITHUB_TOKEN behind a
+            # separate repository/organization setting — "Allow GitHub Actions to
+            # create and approve pull requests" (Settings → Actions → General) — which
+            # is off by default on many repos/orgs and is NOT implied by this
+            # workflow's `permissions:` block. If it's off, this step fails outright
+            # with a permissions error and the weekly drift never becomes a PR. This
+            # is a one-time manual repo setting; see the "Manual setup" section of
+            # e2e/CI_MATRIX_DESIGN.md for the full list of prerequisites a human must
+            # enable before this pipeline works end to end.
+            gh pr create \
+              --title "chore(e2e): refresh RN matrix lockfiles" \
+              --body "$BODY" \
+              --base master
+          else
+            echo "an open PR already exists for $REFRESH_BRANCH — not opening another one"
+          fi
