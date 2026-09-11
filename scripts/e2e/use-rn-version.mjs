@@ -2,7 +2,7 @@
 // Switches test-app/ to one of the React Native versions in the CI matrix.
 // The floor version needs no directory: the repo's own test-app/package.json and root
 // bun.lock ARE the floor variant, so the default state of the repo always works.
-import { readFileSync, writeFileSync, copyFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, copyFileSync, existsSync, rmSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
 import { isMain } from './is-main.mjs';
@@ -10,6 +10,15 @@ import { isMain } from './is-main.mjs';
 export const FLOOR = '0.77';
 const PKG = 'test-app/package.json';
 const ROOT_LOCK = 'bun.lock';
+const NESTED_NODE_MODULES = 'test-app/node_modules';
+
+// bun nests a variant's react-native under test-app/node_modules, and a later
+// `bun install --frozen-lockfile` for another variant (or the floor) leaves that nested
+// copy in place, so test-app keeps resolving the OLD version. Drop it on every switch so
+// the next install starts clean.
+function clearNestedNodeModules() {
+  rmSync(NESTED_NODE_MODULES, { recursive: true, force: true });
+}
 
 export function applyOverlay(basePkg, overlay) {
   const overlayDeps = overlay.dependencies ?? {};
@@ -90,8 +99,10 @@ function main() {
     process.exit(1);
   }
 
+  clearNestedNodeModules();
+
   if (version === FLOOR) {
-    console.log(`[rn-matrix] ${FLOOR} is the floor — repo state used as-is`);
+    console.log(`[rn-matrix] ${FLOOR} is the floor — repo state used as-is; run bun install --frozen-lockfile`);
     return;
   }
 
@@ -107,10 +118,12 @@ function main() {
   }
 
   if (refresh) {
-    console.log(`[rn-matrix] refreshed ${lockPath}`);
+    // The refresh install left the variant's tree behind; the repo is back on the floor.
+    clearNestedNodeModules();
+    console.log(`[rn-matrix] refreshed ${lockPath}; run bun install --frozen-lockfile to reinstall the floor`);
     return;
   }
-  console.log(`[rn-matrix] switched test-app to RN ${version}`);
+  console.log(`[rn-matrix] switched test-app to RN ${version}; run bun install --frozen-lockfile`);
   console.log(
     `[rn-matrix] ${PKG} and ${ROOT_LOCK} are now the ${version} variant — do not commit them.\n` +
       `[rn-matrix] back to the floor: git checkout -- ${ROOT_LOCK} ${PKG}`
