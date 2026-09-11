@@ -128,11 +128,22 @@ jobs:
           # backslash continuations (the continuation would become a separate command
           # and `\` the flow path), and no `set -e`, which would only apply to its own
           # line.
+          # The emulator dies with this step, so the post-mortem (a screenshot and the
+          # accessibility hierarchy of the app's default screen, i.e. what Maestro
+          # matches `id:` against) has to happen here, after Maestro, before the final
+          # line turns a Maestro failure back into a step failure.
           script: |
             adb install -r test-app/android/app/build/outputs/apk/debug/app-debug.apk
             adb logcat -c
             adb logcat > logcat.txt &
-            maestro test -e APP_ID=${{ env.APP_ID }} $TAGS --format junit --output e2e-report.xml --debug-output maestro-debug e2e/flows/
+            maestro test -e APP_ID=${{ env.APP_ID }} $TAGS --format junit --output e2e-report.xml --debug-output "$PWD/maestro-debug" --flatten-debug-output e2e/flows/ || touch maestro-failed
+            mkdir -p post-mortem
+            adb shell am start -W -n ${{ env.APP_ID }}/com.microsoft.reacttestapp.MainActivity > post-mortem/am-start.txt 2>&1 || true
+            sleep 6
+            adb exec-out screencap -p > post-mortem/default-screen.png || true
+            adb shell uiautomator dump /sdcard/hierarchy.xml > /dev/null 2>&1 && adb pull /sdcard/hierarchy.xml post-mortem/hierarchy.xml || true
+            adb shell dumpsys activity activities > post-mortem/activities.txt 2>&1 || true
+            test ! -f maestro-failed
 
       - name: Job summary
         if: always()
@@ -148,5 +159,7 @@ jobs:
           path: |
             e2e-report.xml
             maestro-debug/**
+            post-mortem/**
             logcat.txt
+            ~/.maestro/tests/**
           if-no-files-found: ignore
