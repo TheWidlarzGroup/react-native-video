@@ -37,6 +37,9 @@ on:
 env:
   APP_ID: com.rnvtest.host
 
+permissions:
+  contents: read
+
 jobs:
   run:
     # The status context GitHub shows is "<caller job name> / <this job name>", so this
@@ -156,6 +159,7 @@ jobs:
           TAGS: ${{ inputs.tags }}
         run: |
           set -euo pipefail
+          # shellcheck disable=SC2086 # $TAGS is a list of flags and must word-split
           maestro test -e APP_ID=${{ env.APP_ID }} $TAGS \
             --format junit --output e2e-report.xml \
             --debug-output maestro-debug \
@@ -168,6 +172,12 @@ jobs:
         if: always()
         run: |
           set -euo pipefail
+          # A leg that died before the simulator booted has no log to collect; that is
+          # not a second failure worth reporting.
+          if ! xcrun simctl list devices booted | grep -q Booted; then
+            echo "no booted simulator — skipping device log"
+            exit 0
+          fi
           xcrun simctl spawn booted log show --last 60m \
             --predicate 'process == "ReactTestApp"' > device.log
 

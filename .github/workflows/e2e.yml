@@ -15,6 +15,9 @@ concurrency:
   group: e2e-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 # Branch protection pins these EXACT status-context strings:
 #   android (0.77) / maestro
 #   android (0.82) / maestro
