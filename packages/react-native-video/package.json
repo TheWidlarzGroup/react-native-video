@@ -48,6 +48,7 @@
   "scripts": {
     "postinstall": "bun run build || exit 0;",
     "typecheck": "tsc",
+    "test": "bun test __tests__",
     "typecheck:web": "tsc -p tsconfig.web.json",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
