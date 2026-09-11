@@ -1,5 +1,5 @@
-# Reusable iOS E2E leg — called once per (rn-version, ios-runtime) matrix cell by the
-# PR-gate and nightly orchestrators. Never triggered directly.
+# Reusable iOS E2E leg — one (rn-version, ios-runtime) matrix cell. Called by the
+# PR-gate (e2e.yml) and nightly (e2e-nightly.yml) orchestrators, never triggered directly.
 name: _e2e-ios
 
 on:
@@ -14,11 +14,11 @@ on:
         type: string
         default: 'macos-26'
       ios-runtime:
-        description: 'iOS simulator runtime major version, used in the job summary and artifact name'
+        description: 'iOS simulator runtime major version, e.g. 26'
         type: string
         default: '26'
       sim-device:
-        description: 'Simulator device name passed to xcrun simctl'
+        description: 'Simulator device name'
         type: string
         default: 'iPhone 17'
       blocking:
@@ -30,7 +30,7 @@ on:
         type: string
         default: '--exclude-tags=flaky'
       artifact-name:
-        description: 'Full artifact name to upload results under. When set, used verbatim instead of deriving one from rn-version/ios-runtime/tags. The nightly orchestrator sets this from its own matrix-plan job so its expected-row list and this leg''s actual upload are the same string by construction; left empty by callers with no such list to keep in sync (e.g. the PR-gate).'
+        description: 'Artifact name to upload under. The nightly orchestrator passes the name it expects to download; when empty, one is derived from rn-version/ios-runtime/tags.'
         type: string
         default: ''
 
@@ -39,34 +39,18 @@ env:
 
 jobs:
   run:
-    # Explicit name: a reusable-workflow call's status context is composed as
-    # "<caller job's displayed name> / <this job's displayed name>" — the top-level
-    # `name:` of this file plays no part in it. Left unset, this job's displayed name
-    # would default to its id, `run`, giving contexts like `ios / run` that say
-    # nothing about what ran. `maestro` names the actual test runner and is shared
-    # with `_e2e-android.yml` so both platforms' contexts read the same way. Any
-    # future rename here changes every caller's context strings (both `e2e.yml` and
-    # `e2e-nightly.yml`) — see the comments there before renaming.
+    # The status context GitHub shows is "<caller job name> / <this job name>", so this
+    # name is part of every branch-protection rule. See e2e.yml before renaming.
     name: maestro
     runs-on: ${{ inputs.runner }}
     timeout-minutes: 60
-    # continue-on-error only changes the conclusion reported to the caller — steps below
-    # still stop after a failure unless they carry their own `if: always()`, so the
-    # summary and artifact-upload steps are marked always() independently of this.
     continue-on-error: ${{ !inputs.blocking }}
     steps:
       - uses: actions/checkout@v4
 
-      # This step has two independent jobs, and does both unconditionally rather than
-      # skipping the first when the caller supplies `artifact-name`. First: derive a
-      # tag-selection slug — kept even though nothing downstream in this file keys a
-      # cache on it (unlike the Android leg's AVD cache), because the slug is still the
-      # legacy-default artifact-naming ingredient used below when no caller-supplied name
-      # is given. Second: resolve the artifact name itself, preferring a caller-supplied
-      # `artifact-name` over deriving one from rn-version/ios-runtime/slug.
-      # upload-artifact@v4 hard-errors on a duplicate artifact name within a run, so
-      # getting this resolution right isn't cosmetic.
-      - name: Compute artifact suffix from tag selection
+      # upload-artifact@v4 hard-errors on a duplicate name within a run, so the name has
+      # to differ per (rn-version, ios-runtime, tag selection).
+      - name: Resolve artifact name
         id: suffix
         env:
           TAGS: ${{ inputs.tags }}
@@ -74,65 +58,22 @@ jobs:
         run: |
           set -euo pipefail
           SLUG=$(echo "$TAGS" | sed -E 's/[^A-Za-z0-9]+/-/g; s/^-+|-+$//g')
-          # An empty slug is exactly the failure this step exists to make impossible: two
-          # legs at the same rn-version/ios-runtime whose `tags` both happen to sanitize
-          # to nothing would collapse onto the same artifact name below, and
-          # upload-artifact@v4 would hard-error on the second upload with a message that
-          # points at the symptom (a duplicate name) rather than this step, which is the
-          # actual cause. Failing loudly here, before that name is ever used, trades a
-          # confusing downstream error for a clear one at the source.
           if [ -z "$SLUG" ]; then
-            echo "::error::tags '${TAGS}' produced an empty artifact-name slug — refusing to continue" >&2
+            echo "::error::tags '${TAGS}' produced an empty slug" >&2
             exit 1
           fi
-          echo "slug=${SLUG}" >> "$GITHUB_OUTPUT"
+          echo "name=${GIVEN_NAME:-e2e-ios-rn${{ inputs.rn-version }}-ios${{ inputs.ios-runtime }}-${SLUG}}" >> "$GITHUB_OUTPUT"
 
-          # Preferring a caller-supplied name over re-deriving one here is what makes the
-          # nightly orchestrator's expected-row list (matrix-plan, in e2e-nightly.yml) and
-          # this leg's real upload the SAME STRING BY CONSTRUCTION when it supplies one,
-          # instead of two independently hand-maintained templates that merely agree
-          # today — which is exactly the bug a prior version of this pipeline had: the
-          # caller computed its own copy of this exact rn-version/ios-runtime/slug format
-          # to build its expected-row list, and editing one copy without the other
-          # silently turned a 17-row expected night into a 26-row actual one. A caller
-          # that does not supply `artifact-name` (the PR-gate `e2e.yml`, whose small
-          # matrix keeps names distinct by inspection and which has no expected-row list
-          # to keep in sync with in the first place) still gets this derived default.
-          if [ -n "$GIVEN_NAME" ]; then
-            NAME="$GIVEN_NAME"
-          else
-            NAME="e2e-ios-rn${{ inputs.rn-version }}-ios${{ inputs.ios-runtime }}-${SLUG}"
-          fi
-          echo "name=${NAME}" >> "$GITHUB_OUTPUT"
-
+      # Also builds dist/main.ios.jsbundle, which pod install below embeds as a resource.
       - uses: ./.github/actions/e2e-setup
         with:
           rn-version: ${{ inputs.rn-version }}
+          platform: ios
 
-      # Must restore BEFORE pod install — actions/cache restores at its own step position,
-      # so the old workflow's cache-after-install never took effect. The RN version
-      # belongs in the key (and the restore-keys prefix) or the three RN legs evict each
-      # other.
-      #
-      # Keyed on inputs.runner, NOT runner.os: `runner.os` is the literal string "macOS"
-      # on both macos-26 and macos-15, but those images ship different Xcode majors, and
-      # a Pods tree built under one is not portable to the other — test-app/ios/
-      # fix-fmt-cxx17.rb exists precisely because Xcode 26's clang rejects something
-      # Xcode 15's accepted, and that script only patches the one case it knows about.
-      # Podfile.lock is a checked-in file, identical for a given rn-version regardless of
-      # runner image, so without this the macos-26/iOS-26 leg and the macos-15/iOS-18 leg
-      # of the SAME rn-version — which run concurrently in the nightly matrix — would
-      # compute the exact same key and silently share (or fight over) one Pods tree.
-      # `pod install` will not catch this after the fact: it treats an unchanged
-      # Podfile.lock as up to date and won't regenerate anything.
-      #
-      # Not keyed on the tag-selection slug: unlike the Android AVD cache (which restores
-      # live emulator/userdata state that genuinely differs per leg), this cache only
-      # holds the output of `pod install`, which is fully determined by Podfile.lock plus
-      # the RN version plus the runner image. The quarantine leg and a regular nightly
-      # cell at the same rn-version/runner produce byte-identical Pods, so sharing this
-      # key across them is correct, not a race: a concurrent miss just means both legs
-      # build independently and the loser's save is a harmless no-op.
+      # Restored before pod install (actions/cache restores at its own step position).
+      # Keyed on the runner image, not runner.os: macos-26 and macos-15 ship different
+      # Xcode majors and a Pods tree built under one does not compile under the other.
+      # The RN version is in the key so the three variants do not evict each other.
       - name: Cache Pods
         uses: actions/cache@v4
         with:
@@ -146,24 +87,10 @@ jobs:
           cd test-app
           bundle install
           bundle exec pod install --project-directory=ios
-          bundle exec ruby ios/fix-fmt-cxx17.rb
 
-      # `ios-runtime` used to be consumed only by the artifact-name and job-summary
-      # strings below it — the actual simulator selection went by `sim-device` (a bare
-      # device name) alone, with no runtime qualifier anywhere. That's fine on a runner
-      # image carrying a single Xcode/runtime, but the `runner` input's own description
-      # above says `macos-15` carries BOTH iOS 18 and iOS 26 — so on that image, a bare
-      # `simctl boot "iPhone 16"` has no guarantee of landing on the runtime the nightly
-      # matrix actually intends for that row; it depends on whatever `xcode-select`
-      # happens to default to, which nothing here ever inspects or sets. A leg that
-      # silently ran the wrong runtime would still pass or fail for real reasons, but its
-      # result gets written into history.jsonl, the nightly issue, and the green-streak
-      # counter under the WRONG OS-version label, permanently and with no visible error —
-      # a real iOS-18-only regression would show green under the "ios18" label because
-      # iOS 18 was never actually exercised. Resolving the simulator by device name AND
-      # runtime here — and failing loudly when no such simulator exists, rather than
-      # falling back to whatever runtime happens to be available — is what makes
-      # `ios-runtime` an enforced input instead of a decorative one.
+      # macos-15 carries both iOS 18 and iOS 26 runtimes, so a bare device name is
+      # ambiguous there. Resolve device + runtime to a UDID and fail if the requested
+      # runtime is absent rather than silently testing (and recording) a different one.
       - name: Resolve simulator by device and runtime
         id: sim
         env:
@@ -172,10 +99,6 @@ jobs:
         run: |
           set -euo pipefail
           xcrun simctl list devices available --json > devices.json
-
-          # Runtime keys look like "com.apple.CoreSimulator.SimRuntime.iOS-18-2" — match
-          # on the major-version segment only, since `ios-runtime` is a major version
-          # (e.g. "18"), not a full point release the runner image happens to ship.
           MATCH=$(jq -r --arg name "$SIM_DEVICE" --arg runtime "$IOS_RUNTIME" '
             .devices
             | to_entries[]
@@ -184,39 +107,18 @@ jobs:
             | select(.name == $name)
             | .udid
           ' devices.json | head -1)
-
           if [ -z "$MATCH" ]; then
-            echo "::error::No available simulator named '${SIM_DEVICE}' was found for iOS runtime ${IOS_RUNTIME} on this runner — refusing to fall back to a different runtime, since that would silently record coverage for an OS version that was never tested." >&2
-            echo "Runtimes and devices actually available on this runner:" >&2
+            echo "::error::no available simulator named '${SIM_DEVICE}' for iOS ${IOS_RUNTIME} on this runner" >&2
             jq -r '.devices | to_entries[] | .key as $rt | .value[] | "\($rt): \(.name)"' devices.json >&2
             exit 1
           fi
-
-          # Log the exact runtime that was picked, not just the major that was asked for.
-          # A runner can carry several point releases of the same major (26.0 and 26.5,
-          # say), `head -1` above picks one of them, and which one is not stable between
-          # runs. That is within spec — the matrix pins majors deliberately — but without
-          # this line a failure specific to one point release is unattributable from the
-          # artifacts afterwards.
           RESOLVED_RUNTIME=$(jq -r --arg udid "$MATCH" '
             .devices | to_entries[] | select(.value[]?.udid == $udid) | .key
           ' devices.json)
-          echo "Resolved '${SIM_DEVICE}' for requested iOS ${IOS_RUNTIME} -> ${MATCH} on ${RESOLVED_RUNTIME}"
-
+          echo "resolved '${SIM_DEVICE}' for iOS ${IOS_RUNTIME} -> ${MATCH} on ${RESOLVED_RUNTIME}"
           echo "udid=${MATCH}" >> "$GITHUB_OUTPUT"
 
-      # `set -o pipefail` (folded into set -euo pipefail below) replaces the old
-      # workflow's `... | xcbeautify --quiet || true`. Without pipefail, a pipeline's
-      # exit status is whatever the LAST command returns — xcbeautify itself nearly
-      # always exits 0 — so a genuine xcodebuild failure was masked by xcbeautify's
-      # success, and the trailing `|| true` masked it a second time over. With
-      # pipefail, the pipeline fails if either side does.
-      #
-      # Destination is addressed by `id=` (the UDID resolved above), not `name=`: a bare
-      # device name is ambiguous exactly on the runner images this leg cares about most
-      # (macos-15, which carries multiple runtimes for the same device name), and the
-      # whole point of the resolution step above is to pin down which one of those this
-      # build actually targets.
+      # pipefail: without it xcbeautify's exit code would mask a failed xcodebuild.
       - name: Build for simulator
         env:
           SIM_UDID: ${{ steps.sim.outputs.udid }}
@@ -236,33 +138,21 @@ jobs:
           set -euo pipefail
           xcrun simctl boot "$SIM_UDID" || true
           xcrun simctl bootstatus "$SIM_UDID" -b
-
-          # Booting by UDID already ties this to the runtime resolved above, but that
-          # resolution and this boot are two separate simctl calls — asserting the
-          # booted device's actual runtime here is what turns "we asked for the right
-          # one" into "we confirmed we got the right one". The whole finding this fixes
-          # is that `ios-runtime` was trusted rather than enforced; stopping at the
-          # selection expression without checking what actually came up would repeat
-          # that same mistake one level down, just with a fancier selector.
           BOOTED_RUNTIME=$(xcrun simctl list devices available --json | jq -r --arg udid "$SIM_UDID" '
             .devices | to_entries[] | select(.value[]?.udid == $udid) | .key
           ')
           if ! printf '%s' "$BOOTED_RUNTIME" | grep -q "com.apple.CoreSimulator.SimRuntime.iOS-${IOS_RUNTIME}-"; then
-            echo "::error::Booted simulator ${SIM_UDID} reports runtime '${BOOTED_RUNTIME}', which does not match the requested ios-runtime=${IOS_RUNTIME} — failing rather than recording this run as ${IOS_RUNTIME} coverage it didn't actually perform." >&2
+            echo "::error::booted simulator runtime '${BOOTED_RUNTIME}' does not match requested iOS ${IOS_RUNTIME}" >&2
             exit 1
           fi
-
           APP_PATH=$(find build/Build/Products -name "*.app" -maxdepth 3 | head -1)
           test -n "$APP_PATH"
           xcrun simctl install "$SIM_UDID" "$APP_PATH"
 
       - name: Run flows
         env:
-          # Routed through env rather than interpolated straight into the script below:
-          # `${{ }}` is a textual substitution that happens before the shell parses the
-          # line, so a `tags` value containing a quote/backtick/`$()` could break out of
-          # the `maestro test` argument list it's substituted into. $TAGS as a normal
-          # shell variable is safe from that regardless of its contents.
+          # Passed through the environment so a tags value cannot break out of the
+          # command line via `${{ }}` text substitution.
           TAGS: ${{ inputs.tags }}
         run: |
           set -euo pipefail
@@ -271,23 +161,9 @@ jobs:
             --debug-output maestro-debug \
             e2e/flows/
 
-      # Deliberately not a `log stream ... &` piped to a file: that stream is fully
-      # buffered once redirected, and nothing kills it in a way that's guaranteed to
-      # flush that buffer before the runner tears the step down — SIGTERM's default
-      # disposition, absent a handler `log stream` is known to install, is abrupt
-      # termination, no better than SIGKILL for a buffered writer. `log show` instead
-      # reads back the system log AFTER the run, from persisted storage, and writes a
-      # complete file before exiting on its own — flush-agnostic by construction, not
-      # merely likely to work. `if: always()` so a failed run still gets a log.
-      #
-      # --last 60m matches the job's own `timeout-minutes: 60` above, not a guess at how
-      # long pod install/xcodebuild/boot/Maestro usually take. Pinning it to the job
-      # timeout means the window can never be shorter than the job that produced the
-      # log, so a slow leg can't roll the earliest ReactTestApp entries off the edge and
-      # upload a device.log that looks complete but silently starts mid-run. There's no
-      # cost to the extra width: the predicate already filters to this app's process,
-      # and a fresh runner has no older history to pull in anyway. Do not shrink this
-      # without also shrinking timeout-minutes.
+      # `log show` reads the persisted log after the run, so nothing has to be flushed
+      # or killed cleanly. --last matches timeout-minutes so the window can never be
+      # shorter than the job.
       - name: Collect device log
         if: always()
         run: |

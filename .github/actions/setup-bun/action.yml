@@ -7,7 +7,7 @@ inputs:
     default: ./
     required: false
   frozen:
-    description: 'Install with --frozen-lockfile (required for matrix jobs)'
+    description: 'Install with --frozen-lockfile. Used by the E2E matrix legs, which swap the root lockfile per React Native version.'
     default: 'false'
     required: false
 
@@ -19,39 +19,35 @@ runs:
       with:
         bun-version: 1.3.1
 
+    # Frozen (E2E matrix) and non-frozen (docs) callers get separate cache namespaces.
+    # A matrix leg installs a node_modules tree that nests a different react-native
+    # under test-app/ per RN version; a docs job restoring such a tree through a broad
+    # restore-key and re-saving it under the floor lockfile's hash would poison the
+    # floor leg. Frozen callers therefore only ever restore an entry saved for the exact
+    # same lockfile set, and non-frozen callers never see frozen entries at all.
     - name: Cache dependencies
       id: bun-cache
       uses: actions/cache@v4
       with:
         path: |
           **/node_modules
-        key: ${{ runner.os }}-v7-bun-${{ hashFiles('**/bun.lock') }}-${{ hashFiles('**/package.json') }}
-        # The bare `${{ runner.os }}-v7-bun-` prefix is only safe as a restore-key
-        # fallback when every caller resolves the same dependency tree (today: the docs
-        # workflows). A frozen/matrix caller (e2e-setup) selects a React Native version by
-        # swapping test-app/package.json and the root bun.lock BEFORE this step runs, so
-        # hashFiles('**/bun.lock') already is version-specific — but the bare prefix would
-        # still happily restore a node_modules tree cached for a DIFFERENT RN version on a
-        # miss, and a --frozen-lockfile install does not reliably correct a stale nested
-        # test-app/node_modules/react-native left behind by that mismatch. So when
-        # `frozen` is true, drop the broad fallback entirely: restore-keys collapses to the
-        # same version-specific prefix twice (a harmless no-op duplicate), meaning a miss
-        # falls through to a clean install instead of a foreign tree.
-        #
-        # Deliberately NOT written as `frozen == 'true' && SAFE || UNSAFE`: that idiom
-        # returns UNSAFE whenever SAFE is falsy, regardless of the condition — and an
-        # empty hashFiles() result (e.g. the glob matches nothing) is falsy in GHA
-        # expressions. Guarding the SAFE branch would silently fall through to the
-        # unsafe bare prefix even with frozen == 'true'. Instead the UNSAFE value is
-        # gated behind its own condition on the right of `||`, so it is only ever
-        # produced when `frozen != 'true'` evaluates true — there is no path to it
-        # while frozen == 'true', independent of whether the left branch is truthy.
+        key: ${{ runner.os }}-v7-bun-${{ inputs.frozen == 'true' && 'frozen' || 'shared' }}-${{ hashFiles('**/bun.lock') }}-${{ hashFiles('**/package.json') }}
         restore-keys: |
-          ${{ runner.os }}-v7-bun-${{ hashFiles('**/bun.lock') }}
-          ${{ inputs.frozen == 'true' && format('{0}-v7-bun-{1}', runner.os, hashFiles('**/bun.lock')) || (inputs.frozen != 'true' && format('{0}-v7-bun-', runner.os)) }}
+          ${{ runner.os }}-v7-bun-${{ inputs.frozen == 'true' && 'frozen' || 'shared' }}-${{ hashFiles('**/bun.lock') }}-
+          ${{ inputs.frozen != 'true' && format('{0}-v7-bun-shared-', runner.os) || '' }}
 
     - name: Install dependencies
       working-directory: ${{ inputs.working-directory }}
-      run: bun install ${{ inputs.frozen == 'true' && '--frozen-lockfile' || '' }}
       shell: bash
-
+      env:
+        FROZEN: ${{ inputs.frozen }}
+      run: |
+        set -euo pipefail
+        if [ "$FROZEN" != "true" ]; then
+          bun install
+          exit 0
+        fi
+        if ! bun install --frozen-lockfile; then
+          echo "::error::bun install --frozen-lockfile failed. The E2E matrix installs every RN variant from a committed lockfile (e2e/rn-matrix/<version>/bun.lock, which snapshots the whole workspace). If this PR changed any package.json, regenerate the variants: for v in 0.82 0.87; do node scripts/e2e/use-rn-version.mjs \$v --refresh; done — and commit e2e/rn-matrix/. See e2e/rn-matrix/README.md." >&2
+          exit 1
+        fi
