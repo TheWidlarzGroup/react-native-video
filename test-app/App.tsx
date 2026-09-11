@@ -11,13 +11,8 @@ import {
   Text,
 } from 'react-native';
 import { ScenarioScreen } from './src/e2e/ScenarioScreen';
+import { parseScenario } from './src/e2e/deepLink';
 import { type ScenarioName } from './src/e2e/fixtures';
-
-function parseScenario(url: string | null): ScenarioName | null {
-  if (!url) return null;
-  const match = url.match(/^rnvtest:\/\/scenario\/([^/?#]+)/);
-  return (match?.[1] as ScenarioName) ?? null;
-}
 
 /**
  * Resolves the scenario from the launch URL and from later `url` events.

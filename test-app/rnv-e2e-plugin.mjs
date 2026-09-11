@@ -16,25 +16,25 @@ import { withAndroidManifest, withInfoPlist } from "@expo/config-plugins";
 
 const URL_SCHEME = "rnvtest";
 
-function withDeepLinkAndBackgroundAudio(config) {
-  return withInfoPlist(config, (config) => {
-    const urlTypes = (config.modResults.CFBundleURLTypes ??= []);
-    if (!urlTypes.some((t) => t.CFBundleURLSchemes?.includes(URL_SCHEME))) {
-      urlTypes.push({ CFBundleURLSchemes: [URL_SCHEME] });
-    }
+// Pure, idempotent transforms — exported so rnv-e2e-plugin.test.mjs can apply them
+// twice and assert nothing accumulates. The with* wrappers below only plumb them in.
 
-    const backgroundModes = (config.modResults.UIBackgroundModes ??= []);
-    if (!backgroundModes.includes("audio")) {
-      backgroundModes.push("audio");
-    }
+export function applyInfoPlist(plist) {
+  const urlTypes = (plist.CFBundleURLTypes ??= []);
+  if (!urlTypes.some((t) => t.CFBundleURLSchemes?.includes(URL_SCHEME))) {
+    urlTypes.push({ CFBundleURLSchemes: [URL_SCHEME] });
+  }
 
-    return config;
-  });
+  const backgroundModes = (plist.UIBackgroundModes ??= []);
+  if (!backgroundModes.includes("audio")) {
+    backgroundModes.push("audio");
+  }
+
+  return plist;
 }
 
-function withAndroidDeepLinkAndCleartext(config) {
-  return withAndroidManifest(config, (config) => {
-    const manifest = config.modResults;
+export function applyAndroidManifest(manifest) {
+  {
     const app = manifest.manifest.application[0];
     app.$["android:usesCleartextTraffic"] = "true";
     app.$["android:supportsPictureInPicture"] = "true";
@@ -76,6 +76,20 @@ function withAndroidDeepLinkAndCleartext(config) {
       componentActivity.$["android:supportsPictureInPicture"] = "true";
     }
 
+    return manifest;
+  }
+}
+
+function withDeepLinkAndBackgroundAudio(config) {
+  return withInfoPlist(config, (config) => {
+    applyInfoPlist(config.modResults);
+    return config;
+  });
+}
+
+function withAndroidDeepLinkAndCleartext(config) {
+  return withAndroidManifest(config, (config) => {
+    applyAndroidManifest(config.modResults);
     return config;
   });
 }

@@ -1,4 +1,4 @@
 {
   "extends": "@react-native/typescript-config/tsconfig.json",
-  "exclude": ["rnv-e2e-plugin.mjs"]
+  "exclude": ["rnv-e2e-plugin.mjs", "rnv-e2e-plugin.test.mjs", "**/*.test.ts"]
 }

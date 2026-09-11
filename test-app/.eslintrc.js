@@ -5,5 +5,6 @@ module.exports = {
     tsconfigRootDir: __dirname,
     project: true,
   },
-  ignorePatterns: ['rnv-e2e-plugin.mjs'],
+  // Tests run under `bun test` and import bun:test, which the RN tsconfig does not know.
+  ignorePatterns: ['rnv-e2e-plugin.mjs', '*.test.mjs', '*.test.ts'],
 };
