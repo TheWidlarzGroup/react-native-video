@@ -1,16 +1,8 @@
-# Nightly orchestrator. Runs the full RN-version x device matrix every night plus two
-# always-non-blocking quarantine legs for flows tagged `flaky`, then reports every row's
-# result: one line appended to the `e2e-results` history branch and one deduplicated
-# GitHub issue per failing row. Nothing here blocks anything except the report job
-# itself — every coverage and quarantine leg is called with `blocking: false`, so a red
-# flow never fails this workflow; the only way this run itself goes red is the report
-# job failing to do its own job (see the comment on that job below).
-#
-# 7 macOS jobs (6 ios coverage + 1 quarantine-ios) against the free plan's 5-concurrent
-# cap means two waves. `timeout-minutes` on the reusable iOS workflow is measured from
-# when a job actually STARTS on a runner, not from when it enters the queue, so a job
-# throttled into the second wave is not racing a clock that started ticking while it was
-# still waiting — it gets its full 60 minutes once it begins. That is fine overnight.
+# Nightly orchestrator: the full RN-version x device matrix, plus one quarantine leg per
+# platform for flows tagged `flaky` (only scheduled when such flows exist — Maestro
+# refuses a tag filter that matches nothing). Every leg is non-blocking; the report job
+# then records one history line per row on the `e2e-results` branch and opens/updates/
+# closes one GitHub issue per failing row. Design: e2e/CI_MATRIX_DESIGN.md.
 name: e2e-nightly
 
 on:
@@ -18,46 +10,21 @@ on:
     - cron: '0 2 * * *'
   workflow_dispatch:
 
-# A manual dispatch overlapping the scheduled run (or two manual dispatches back to back)
-# would otherwise race in the report job: two concurrent `git push` attempts to the
-# `e2e-results` branch, or two concurrent `gh issue` mutations for the same row. Queuing
-# the second run instead of cancelling the first avoids both without needing any retry
-# logic (this plan runs with zero retries) — cancel-in-progress stays false because
-# killing a run partway through a 17-job matrix would waste the runner-minutes already
-# spent on whichever jobs had completed.
+# Queue rather than cancel: two overlapping runs would race on the history-branch push
+# and on issue mutations, and cancelling would waste the runner minutes already spent.
 concurrency:
   group: e2e-nightly
   cancel-in-progress: false
 
-# contents: write — the report job pushes one commit per run to the orphan `e2e-results`
-# branch. issues: write — nightly-issue.mjs creates/comments/closes issues labeled
-# `e2e-nightly`. Both reusable workflows below inherit these; neither needs more than the
-# `contents: read` that write implies.
+# contents: write — push to the orphan `e2e-results` branch. issues: write — nightly issues.
 permissions:
   contents: write
   issues: write
 
 jobs:
-  # Single source of truth for every row this nightly runs, INCLUDING the artifact name
-  # each row uploads under — not just the coordinates (rn/api-level/device) that produce
-  # it. Earlier versions of this job derived matrix coordinates here and separately
-  # re-typed the artifact-name FORMAT STRING a second time to build `expected-labels`,
-  # which was still two independently hand-maintained templates that merely agreed as
-  # long as nobody edited one without the other. A review proved that failure mode by
-  # doing exactly that (reordering one reusable workflow's name format) and watching a
-  # 17-row night turn into 26: 9 real passes silently restarting their green streak under
-  # new labels, and 9 stale labels becoming permanent ghost issues nothing would ever
-  # close.
-  #
-  # This version closes that gap structurally: every row's artifact name is computed HERE
-  # ONCE, threaded into the leg via the new `artifact-name` input on `_e2e-android.yml`/
-  # `_e2e-ios.yml`, and used verbatim by `steps.suffix` in those files instead of being
-  # re-derived there. `expected-labels` is then extracted from the exact same per-row
-  # objects that produced the matrices and the quarantine `with:` blocks — not a fourth
-  # copy of the naming template, a projection of the first. Widening ANDROID_API to four
-  # entries below changes the matrix shape, the artifact names the legs are told to use,
-  # AND the report job's expected-row list, all in the same edit, because they are all
-  # reads of the same `*_rows` value.
+  # Single source of truth for every row and for the artifact name each row uploads
+  # under. The legs receive that name via `artifact-name`, and the report job derives
+  # its expected-row list from the same objects, so the two cannot drift apart.
   matrix-plan:
     name: matrix plan
     runs-on: ubuntu-latest
@@ -65,132 +32,83 @@ jobs:
     outputs:
       android-matrix: ${{ steps.plan.outputs.android-matrix }}
       ios-matrix: ${{ steps.plan.outputs.ios-matrix }}
+      has-quarantine: ${{ steps.plan.outputs.has-quarantine }}
       quarantine-android: ${{ steps.plan.outputs.quarantine-android }}
       quarantine-ios: ${{ steps.plan.outputs.quarantine-ios }}
       expected-labels: ${{ steps.plan.outputs.expected-labels }}
       quarantine-labels: ${{ steps.plan.outputs.quarantine-labels }}
     steps:
-      - name: Define the matrix and derive each row's artifact name from it
+      - uses: actions/checkout@v4
+
+      - name: Define the matrix and derive each row's artifact name
         id: plan
         run: |
           set -euo pipefail
 
-          # RN versions: floor/middle/latest, per the plan's global constraints.
           ANDROID_RN='["0.77","0.82","0.87"]'
           ANDROID_API='["36","35","34"]'
           IOS_RN='["0.77","0.82","0.87"]'
           IOS_DEVICES='[{"runner":"macos-26","runtime":"26","sim":"iPhone 17"},{"runner":"macos-15","runtime":"18","sim":"iPhone 16"}]'
-
-          # The quarantine legs are single rows, not generated by a matrix loop, so they
-          # are plain scalars rather than list entries above — but they still flow
-          # through this same job's outputs (see quarantine-android/quarantine-ios
-          # below) rather than being duplicated as literals in the quarantine jobs'
-          # `with:` blocks, so a coordinate changed here cannot drift out of step with
-          # the artifact name this job computes for it.
           QUARANTINE_ANDROID_RN='0.77'
           QUARANTINE_ANDROID_API='36'
           QUARANTINE_IOS_RN='0.77'
           QUARANTINE_IOS_RUNNER='macos-26'
           QUARANTINE_IOS_RUNTIME='26'
 
-          # This sed expression must still match `_e2e-android.yml`/`_e2e-ios.yml`'s own
-          # "Compute artifact suffix" step's slug derivation, because that slug is what
-          # those files fall back to naming an upload after for callers (the PR-gate
-          # `e2e.yml`) that do NOT supply `artifact-name` — this job always supplies one
-          # (see below), so its own artifact names never actually depend on this slug
-          # matching anything downstream. It is kept here only to build the same-shaped
-          # names those legacy defaults would have used, purely for human-readable
-          # continuity with history recorded before this change; if it ever drifted from
-          # the callees' derivation, the only consequence is a cosmetic naming
-          # difference for nightly rows, not a correctness gap — see the header comment
-          # above for why: this job's names are now what the legs are TOLD to use, not a
-          # separate guess at what they will pick themselves.
+          # Same derivation as the "Resolve artifact name" step in the reusable legs.
           slug() { echo "$1" | sed -E 's/[^A-Za-z0-9]+/-/g; s/^-+|-+$//g'; }
           COVERAGE_SLUG=$(slug '--exclude-tags=flaky')
           QUARANTINE_SLUG=$(slug '--include-tags=flaky')
-          if [ -z "$COVERAGE_SLUG" ] || [ -z "$QUARANTINE_SLUG" ]; then
-            echo "::error::a tag-selection slug computed empty — refusing to derive artifact names from it" >&2
-            exit 1
+
+          # Quarantine legs only make sense when at least one flow is tagged flaky.
+          if grep -lqE '^\s*tags:.*\bflaky\b|^\s*-\s*flaky\s*$' e2e/flows/*.yaml; then
+            has_quarantine=true
+          else
+            has_quarantine=false
           fi
 
-          # Each `*_rows` value below is the one place a row's coordinates and its
-          # artifact name are bound together. `android_matrix`/`ios_matrix` and
-          # `expected_labels` are both projections OF these values, not independent
-          # re-typings of the naming format — see the header comment.
           android_rows=$(jq -nc --argjson rn "$ANDROID_RN" --argjson api "$ANDROID_API" --arg slug "$COVERAGE_SLUG" '
             [ $rn[] as $r | $api[] as $a | {rn: $r, "api-level": $a, "artifact-name": "e2e-android-rn\($r)-api\($a)-\($slug)"} ]
-          ') || { echo "::error::jq failed building android_rows" >&2; exit 1; }
-
+          ')
           ios_rows=$(jq -nc --argjson rn "$IOS_RN" --argjson devices "$IOS_DEVICES" --arg slug "$COVERAGE_SLUG" '
             [ $rn[] as $r | $devices[] as $d | {rn: $r, runner: $d.runner, "ios-runtime": $d.runtime, "sim-device": $d.sim, "artifact-name": "e2e-ios-rn\($r)-ios\($d.runtime)-\($slug)"} ]
-          ') || { echo "::error::jq failed building ios_rows" >&2; exit 1; }
-
+          ')
           quarantine_android=$(jq -nc --arg rn "$QUARANTINE_ANDROID_RN" --arg api "$QUARANTINE_ANDROID_API" --arg slug "$QUARANTINE_SLUG" '
             {"rn-version": $rn, "api-level": $api, "artifact-name": "e2e-android-rn\($rn)-api\($api)-\($slug)"}
-          ') || { echo "::error::jq failed building quarantine-android" >&2; exit 1; }
-
+          ')
           quarantine_ios=$(jq -nc --arg rn "$QUARANTINE_IOS_RN" --arg runner "$QUARANTINE_IOS_RUNNER" --arg rt "$QUARANTINE_IOS_RUNTIME" --arg slug "$QUARANTINE_SLUG" '
             {"rn-version": $rn, runner: $runner, "ios-runtime": $rt, "artifact-name": "e2e-ios-rn\($rn)-ios\($rt)-\($slug)"}
-          ') || { echo "::error::jq failed building quarantine-ios" >&2; exit 1; }
+          ')
 
-          # `strategy.matrix: { include: [...] }` with no other top-level matrix key means
-          # this list of fully-specified row objects IS the matrix, one job per entry —
-          # unlike mixing `include:` alongside separate `rn:`/`device:` axes (which
-          # cross-products the axes and then APPENDS include entries as extra jobs, the
-          # trap the previous version of this file warned about), a bare `include:` list
-          # has nothing to cross-product against and just enumerates the jobs directly.
-          # This is what lets each row carry its own `artifact-name` bound to its own
-          # rn/api-level (or rn/runner/ios-runtime/sim-device) instead of those being
-          # independent axes that happen to combine into a name after the fact.
-          android_matrix=$(jq -nc --argjson rows "$android_rows" '{include: $rows}') \
-            || { echo "::error::jq failed building android-matrix" >&2; exit 1; }
-          ios_matrix=$(jq -nc --argjson rows "$ios_rows" '{include: $rows}') \
-            || { echo "::error::jq failed building ios-matrix" >&2; exit 1; }
+          # A bare `include:` list enumerates exactly these jobs, one per row object.
+          android_matrix=$(jq -nc --argjson rows "$android_rows" '{include: $rows}')
+          ios_matrix=$(jq -nc --argjson rows "$ios_rows" '{include: $rows}')
 
-          expected_labels=$(jq -nc \
-            --argjson arows "$android_rows" --argjson qa "$quarantine_android" \
-            --argjson irows "$ios_rows" --argjson qi "$quarantine_ios" '
-            ( [$arows[]."artifact-name"] + [$qa."artifact-name"] + [$irows[]."artifact-name"] + [$qi."artifact-name"] )
-          ') || { echo "::error::jq failed building expected-labels" >&2; exit 1; }
+          quarantine_labels=$(jq -nc --argjson qa "$quarantine_android" --argjson qi "$quarantine_ios" --argjson on "$has_quarantine" '
+            if $on then [ $qa."artifact-name", $qi."artifact-name" ] else [] end
+          ')
+          expected_labels=$(jq -nc --argjson arows "$android_rows" --argjson irows "$ios_rows" --argjson q "$quarantine_labels" '
+            [$arows[]."artifact-name"] + [$irows[]."artifact-name"] + $q
+          ')
 
-          # The two labels that identify a quarantine row, and ONLY a quarantine row, for
-          # the report job below. This is a projection of the exact same `$qa`/`$qi`
-          # values used to build `expected-labels` above — not a second, independently
-          # maintained guess at which labels "look like" quarantine (e.g. by pattern-
-          # matching the artifact-name string) — so there is exactly one place a row's
-          # quarantine-ness is decided, and it is bound to the same objects the
-          # quarantine-android/quarantine-ios jobs' own `with:` blocks read from.
-          quarantine_labels=$(jq -nc --argjson qa "$quarantine_android" --argjson qi "$quarantine_ios" '
-            [ $qa."artifact-name", $qi."artifact-name" ]
-          ') || { echo "::error::jq failed building quarantine-labels" >&2; exit 1; }
-
-          # Per-family counts, not just the total. An aggregate `-ne 17` passes whenever
-          # two families drift in opposite directions — 9 Android coverage rows becoming 8
-          # while 6 iOS rows become 7 sums to the same 17 — and the whole point of this
-          # job is that "the numbers agree today" is not evidence. Assert each family
-          # separately so a partially wired-in change fails here rather than producing a
-          # night whose shape nobody notices.
-          android_count=$(echo "$android_matrix" | jq 'length')
-          ios_count=$(echo "$ios_matrix" | jq 'length')
-          quarantine_count=$(echo "$quarantine_android" | jq 'length')
-          quarantine_count=$((quarantine_count + $(echo "$quarantine_ios" | jq 'length')))
-          count=$(echo "$expected_labels" | jq 'length')
-          if [ "$android_count" -ne 9 ] || [ "$ios_count" -ne 6 ] || [ "$quarantine_count" -ne 2 ]; then
-            echo "::error::matrix shape wrong — android ${android_count} (want 9), ios ${ios_count} (want 6), quarantine ${quarantine_count} (want 2). A leg family was changed without updating this guard." >&2
+          # Shape guard: a family changed without updating this file fails here, not as
+          # a night whose row count nobody notices.
+          android_count=$(echo "$android_rows" | jq 'length')
+          ios_count=$(echo "$ios_rows" | jq 'length')
+          quarantine_count=$(echo "$quarantine_labels" | jq 'length')
+          expected_count=$(echo "$expected_labels" | jq 'length')
+          want_quarantine=0; [ "$has_quarantine" = true ] && want_quarantine=2
+          if [ "$android_count" -ne 9 ] || [ "$ios_count" -ne 6 ] || [ "$quarantine_count" -ne "$want_quarantine" ]; then
+            echo "::error::matrix shape wrong — android ${android_count} (want 9), ios ${ios_count} (want 6), quarantine ${quarantine_count} (want ${want_quarantine})" >&2
             exit 1
           fi
-          if [ "$count" -ne 17 ]; then
-            echo "::error::expected 17 rows, computed ${count} — matrix-plan's own arithmetic is wrong" >&2
+          if [ "$expected_count" -ne $((15 + want_quarantine)) ]; then
+            echo "::error::expected $((15 + want_quarantine)) rows, computed ${expected_count}" >&2
             exit 1
           fi
-
-          # Every row must actually carry the artifact-name the rest of the pipeline keys
-          # off; a row object missing that field would reach `with:` as an empty string,
-          # and an empty artifact-name silently falls back to the callee's legacy
-          # derivation, which is exactly the label drift this job exists to prevent.
-          for fam in "$android_matrix" "$ios_matrix" "$quarantine_android" "$quarantine_ios"; do
-            if ! echo "$fam" | jq -e 'all(.[]; has("artifact-name") and (."artifact-name" | length > 0))' >/dev/null; then
-              echo "::error::a matrix row is missing a non-empty artifact-name: ${fam}" >&2
+          for rows in "$android_rows" "$ios_rows" "[$quarantine_android, $quarantine_ios]"; do
+            if ! echo "$rows" | jq -e 'all(.[]; (."artifact-name" // "") | length > 0)' >/dev/null; then
+              echo "::error::a matrix row is missing artifact-name: ${rows}" >&2
               exit 1
             fi
           done
@@ -198,6 +116,7 @@ jobs:
           {
             echo "android-matrix=${android_matrix}"
             echo "ios-matrix=${ios_matrix}"
+            echo "has-quarantine=${has_quarantine}"
             echo "quarantine-android=${quarantine_android}"
             echo "quarantine-ios=${quarantine_ios}"
             echo "expected-labels=${expected_labels}"
@@ -233,6 +152,7 @@ jobs:
 
   quarantine-android:
     needs: matrix-plan
+    if: needs.matrix-plan.outputs.has-quarantine == 'true'
     name: quarantine android (flaky)
     uses: ./.github/workflows/_e2e-android.yml
     with:
@@ -244,6 +164,7 @@ jobs:
 
   quarantine-ios:
     needs: matrix-plan
+    if: needs.matrix-plan.outputs.has-quarantine == 'true'
     name: quarantine ios (flaky)
     uses: ./.github/workflows/_e2e-ios.yml
     with:
@@ -251,23 +172,11 @@ jobs:
       runner: ${{ fromJSON(needs.matrix-plan.outputs.quarantine-ios).runner }}
       ios-runtime: ${{ fromJSON(needs.matrix-plan.outputs.quarantine-ios).ios-runtime }}
       artifact-name: ${{ fromJSON(needs.matrix-plan.outputs.quarantine-ios).artifact-name }}
-      # sim-device intentionally omitted: the reusable workflow's default ('iPhone 17')
-      # is exactly the device the coverage matrix pairs with macos-26/iOS 26 above, so
-      # there is nothing to override.
       blocking: false
       tags: '--include-tags=flaky'
 
-  # Reports on every row regardless of how it finished. `_e2e-android.yml`/`_e2e-ios.yml`
-  # run with `blocking: false`, which makes their own conclusion read as success to
-  # `needs` below no matter what the underlying flows did — so `if: always()` here is
-  # belt-and-braces (it also covers a cancelled run), not the thing actually keeping this
-  # job alive across red matrix cells.
-  #
-  # `needs` lists all four leg jobs, including both quarantine legs — `needs` is what
-  # guarantees the artifact-producing jobs have finished (and therefore uploaded) before
-  # `download-artifact` below runs; it is not implied by artifacts merely existing in the
-  # same run. Missing either quarantine job here would let `report` start while that leg
-  # is still mid-flight and silently download a run with 15 or 16 rows instead of 17.
+  # `needs` on every leg guarantees all artifacts are uploaded before the download;
+  # `if: always()` keeps this running after skipped quarantine legs or a cancelled run.
   report:
     needs: [matrix-plan, android, ios, quarantine-android, quarantine-ios]
     if: always()
@@ -277,35 +186,13 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: actions/download-artifact@v4
-        if: always()
         with:
           path: reports
 
-      # A leg that dies before Maestro ever runs — a Gradle/APK build failure, a KVM
-      # step failure, an emulator boot failure, or the "Compute artifact suffix" step
-      # itself failing — uploads nothing at all: `upload-artifact` with
-      # `if-no-files-found: ignore` produces no artifact, not an empty one, so
-      # download-artifact never creates a `reports/<label>/` directory for that row. A
-      # loop over `reports/*/` alone would never see it: no history line, no issue, ever,
-      # indistinguishable from "the leg was never scheduled." Pre-creating every expected
-      # label's directory here — from `matrix-plan`'s output, the same source the
-      # coverage/quarantine jobs above were generated from — guarantees the two steps
-      # below always visit all 17 rows. A label whose artifact WAS uploaded is untouched
-      # by `mkdir -p` (the directory already exists with real content in it); a label
-      # with no artifact gets an empty directory, which record-result.mjs's own existing
-      # `missing-report` handling then correctly scores as a failing row — the identical
-      # fail-closed rule it already applies to a directory that exists but merely lacks a
-      # report file inside it.
-      #
-      # This also structurally eliminates the degenerate case where `reports/` ends up
-      # empty (e.g. a first run against fresh scaffolding where every single leg fails
-      # before Maestro): an unmatched `reports/*/` glob would otherwise pass through
-      # LITERALLY as the four-character string `reports/*/`, `basename` would turn that
-      # into a bogus `"*"` label, and the loops below would record one fabricated row
-      # instead of 17 real ones. After this step `reports/` always contains at least the
-      # 17 expected directories, so that glob can never fail to match.
+      # A leg that died before Maestro ran uploads nothing, so download-artifact creates
+      # no directory for it. Pre-creating every expected row's directory makes the loop
+      # below visit all rows; record-result.mjs scores the empty ones as `missing-report`.
       - name: Ensure every expected row has a reports/ directory
-        if: always()
         env:
           EXPECTED_LABELS_JSON: ${{ needs.matrix-plan.outputs.expected-labels }}
         run: |
@@ -315,34 +202,13 @@ jobs:
             mkdir -p "reports/${label}"
           done
 
-      # `shopt -s nullglob` is defense-in-depth, not the primary fix: the step above
-      # already guarantees `reports/*/` matches at least 17 directories. It costs
-      # nothing to also make the glob itself incapable of producing a literal
-      # unexpanded `*` if that guarantee were ever bypassed (e.g. the step above being
-      # skipped by some future edit that adds a conflicting `if:`).
-      #
-      # record-result.mjs is the one place in this pipeline that decides what "green"
-      # means for a row (its fail-closed handling of a missing report file, a report
-      # truncated mid-write, and a report with zero cases). This step runs it once per
-      # row and has the "Open or close issues" step below read ITS verdict back via
-      # `row-status.tsv`, rather than that step re-deriving the same decision a second
-      # time by hand-written grep — which is what let the two disagree on
-      # malformed-but-non-empty XML before this fix. There is now exactly one
-      # implementation of "green" in this workflow.
-      #
-      # Classification and history-persistence are deliberately independent of each
-      # other: a missing `e2e-results` branch (the current, expected state until the
-      # repository owner creates it — see the warning below) must not prevent rows from
-      # being classified for issue reporting, so `history/` is created locally either
-      # way and only pushed when the clone actually succeeded.
-      #
-      # Neither `set -e` nor a bare loop is used for the per-row `node` calls, for the
-      # same reason as before this review: one row's crash must not abort the loop
-      # before the remaining rows get their turn, and must not skip the commit+push of
-      # whatever WAS successfully recorded. The step's own exit code still reflects
-      # whether every row succeeded.
+      # record-result.mjs is the one place that decides what "green" means for a row.
+      # Its verdict is read back from the history line it just appended into
+      # row-status.tsv, which the issue step below consumes. History persistence and
+      # classification are independent: a missing `e2e-results` branch (until the
+      # one-time setup in e2e/CI_MATRIX_DESIGN.md, "Manual setup") still classifies
+      # rows for issue reporting. No `set -e`: one row's crash must not skip the rest.
       - name: Classify rows and append results to the history branch
-        if: always()
         env:
           GH_TOKEN: ${{ github.token }}
           EXPECTED_LABELS_JSON: ${{ needs.matrix-plan.outputs.expected-labels }}
@@ -356,8 +222,8 @@ jobs:
             "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" \
             history 2>clone-error.log; then
             {
-              echo "::warning::the orphan 'e2e-results' branch does not exist (or is unreachable) — this run's rows will still be classified for issue reporting below, but nothing will be persisted to history."
-              echo "The repository owner must create it once: an empty orphan branch, pushed to origin (CI_MATRIX_PLAN Task 9, Step 5)."
+              echo "::warning::the orphan 'e2e-results' branch does not exist (or is unreachable) — rows are still classified for issue reporting, but nothing is persisted to history."
+              echo "Create it once (empty orphan branch pushed to origin); see e2e/CI_MATRIX_DESIGN.md, \"Manual setup\"."
             } | tee -a "$GITHUB_STEP_SUMMARY" >&2
             cat clone-error.log >&2
             mkdir -p history
@@ -368,26 +234,13 @@ jobs:
           : > row-status.tsv
           for dir in reports/*/; do
             label=$(basename "$dir")
-            # Whether this row is one of the two quarantine legs is decided by exact
-            # membership in `quarantine-labels` — the same labels matrix-plan bound to
-            # the quarantine-android/quarantine-ios jobs' own `with:` blocks — never by
-            # pattern-matching `label`'s text (e.g. looking for "quarantine" or
-            # "include-tags" in the string). That keeps the quarantine exemption
-            # record-result.mjs applies below reachable ONLY for these two exact rows: a
-            # coverage row can never accidentally satisfy this check no matter what its
-            # artifact name looks like.
+            # Quarantine-ness is exact membership in matrix-plan's list, never a pattern
+            # match on the label text.
             row_args=("${dir}e2e-report.xml" "$label" history/history.jsonl)
             if echo "$QUARANTINE_LABELS_JSON" | jq -e --arg l "$label" 'any(.[]; . == $l)' >/dev/null; then
               row_args+=(quarantine)
             fi
             if node scripts/e2e/record-result.mjs "${row_args[@]}"; then
-              # The line record-result.mjs just appended is the last line of
-              # history.jsonl at this point in the loop — these invocations are
-              # sequential, one per row, never concurrent — so reading it back (instead
-              # of re-parsing the JUnit XML a second time) is what keeps this in
-              # lockstep with record-result.mjs's own classification rather than merely
-              # resembling it. Matching on both label and failures guards against ever
-              # reading back the wrong row's line.
               status=$(tail -n 1 history/history.jsonl \
                 | jq -r --arg l "$label" 'if .label == $l and .failures == 0 then "pass" else "fail" end')
             else
@@ -398,28 +251,13 @@ jobs:
             printf '%s\t%s\n' "$label" "$status" >> row-status.tsv
           done
 
-          # A label in row-status.tsv that matrix-plan does NOT expect means this leg's
-          # actual artifact name and matrix-plan's own idea of that name have diverged —
-          # exactly the drift a prior review demonstrated by editing a reusable
-          # workflow's name format on one side only. Nightly-driven legs can no longer
-          # hit this (they upload under the exact string matrix-plan handed them via the
-          # `artifact-name` input — see that job and the reusable workflows' "Compute
-          # artifact suffix" step), so a hit here now means either that mechanism itself
-          # regressed or something outside this workflow's own matrix deposited an
-          # artifact into this run. Either way it must be loud, not a row that quietly
-          # gets an issue while nobody notices the label doesn't correspond to a real
-          # matrix cell.
-          # LC_ALL=C on both the sorts and the comm: `comm` assumes its two inputs are
-          # ordered by the SAME collation and silently produces wrong output — not an
-          # error — when they are not. The label alphabet is locale-invariant today, so
-          # this changes nothing now; pinning it means a label that later contains a
-          # character whose ordering is locale-dependent cannot turn this check into a
-          # quiet source of false results.
+          # A label matrix-plan does not expect means an artifact name diverged from the
+          # plan, or something outside this matrix uploaded into the run.
           extra=$(LC_ALL=C comm -13 \
             <(echo "$EXPECTED_LABELS_JSON" | jq -r '.[]' | LC_ALL=C sort -u) \
             <(cut -f1 row-status.tsv | LC_ALL=C sort -u))
           if [ -n "$extra" ]; then
-            echo "::error::row-status.tsv contains labels matrix-plan does not expect (artifact-name drift):"
+            echo "::error::row-status.tsv contains labels matrix-plan does not expect:"
             echo "$extra" | sed 's/^/  - /' >&2
             overall=1
           fi
@@ -429,11 +267,6 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
             git add history.jsonl
-            # commit/push are checked explicitly (rather than relying on `set -e`,
-            # which this script deliberately runs without) because a failure here is
-            # exactly the "silently recorded nothing" outcome the missing-branch
-            # handling above exists to avoid — e.g. a push rejected as non-fast-forward
-            # because something else wrote to e2e-results between the clone and here.
             if git diff --cached --quiet; then
               echo "no history changes to commit"
             elif ! git commit -m "chore(ci): nightly results ${{ github.run_id }}"; then
@@ -448,23 +281,10 @@ jobs:
 
           exit "$overall"
 
-      # nightly-issue.mjs now requires the `e2e-nightly` label to exist in the repo (a
-      # one-time `gh label create e2e-nightly`, deferred to the owner alongside the
-      # `e2e-results` branch) and exits non-zero when a mutating `gh` call fails — it
-      # used to swallow every failure and exit 0. That change is deliberate on the
-      # script's part: nobody watches this job, so a create/comment/close that silently
-      # failed would mean a failing row never gets an issue, forever, while the log
-      # insists it did. This step honors that by letting a mutation failure fail THIS
-      # step (and therefore this job) loudly, while still — like the step above —
-      # running every row to completion first rather than aborting the loop on the
-      # first failure. `if: always()` so a failure in the step above (including a real
-      # one, not just the expected missing-branch case) never suppresses issue
-      # reporting; the two are independent concerns, and one failing must not silence
-      # the other.
-      #
-      # Status comes from `row-status.tsv`, written by the step above from
-      # record-result.mjs's own classification — see that step's comment for why this
-      # is no longer a second hand-written notion of "green".
+      # nightly-issue.mjs exits non-zero when a mutating gh call fails; that fails this
+      # step loudly (nobody watches this job) but every row is still processed first.
+      # Runs even if the step above failed: classification and issue reporting are
+      # independent concerns.
       - name: Open or close issues per matrix row
         if: always()
         env:
@@ -473,35 +293,20 @@ jobs:
         run: |
           set -uo pipefail
           if [ ! -s row-status.tsv ]; then
-            echo "::error::row-status.tsv is missing or empty — the classification step must have failed before recording any rows; refusing to silently report zero issues for a night that should have produced 17."
+            echo "::error::row-status.tsv is missing or empty — the classification step failed before recording any rows"
             exit 1
           fi
 
-          # `[ -s ... ]` above only proves the file is non-empty, not that every expected
-          # row made it in — a classify-step interruption partway through its 17
-          # sequential iterations (this job's own timeout-minutes firing mid-loop, a
-          # wedged `node` subprocess on one row, a runner reclaim) leaves a non-empty,
-          # well-formed file that quietly covers only a subset, and a hand-built
-          # 10-of-17-line file was shown to pass the emptiness check and get processed as
-          # if it were complete. Comparing the LABEL SET against matrix-plan's
-          # expected-labels — not just a line count, which a coincidental partial match
-          # could satisfy — is what actually detects that, and naming the missing labels
-          # (rather than only saying "something's missing") is what makes the gap in the
-          # job log actionable instead of merely visible. Rows that ARE present are still
-          # processed below despite the failure: a partial night's real signal
-          # (whichever rows a truly dying step managed to record) should not be thrown
-          # away just because the run itself must be flagged red.
-          # LC_ALL=C throughout: `comm` silently produces wrong output, rather than an
-          # error, when its two inputs are ordered by different collations. See the same
-          # note on the extra-label check in the classify step above.
+          # Compare the label set, not a count: a classify step interrupted mid-loop
+          # leaves a well-formed file that covers only a subset of rows.
           expected_sorted=$(echo "$EXPECTED_LABELS_JSON" | jq -r '.[]' | LC_ALL=C sort -u)
           actual_sorted=$(cut -f1 row-status.tsv | LC_ALL=C sort -u)
           missing=$(LC_ALL=C comm -23 <(echo "$expected_sorted") <(echo "$actual_sorted"))
           overall=0
           if [ -n "$missing" ]; then
-            missing_count=$(echo "$missing" | grep -c .)
             expected_count=$(echo "$expected_sorted" | grep -c .)
-            echo "::error::row-status.tsv has $((expected_count - missing_count)) of ${expected_count} expected rows — the classify step likely did not run to completion. Missing:"
+            missing_count=$(echo "$missing" | grep -c .)
+            echo "::error::row-status.tsv has $((expected_count - missing_count)) of ${expected_count} expected rows. Missing:"
             echo "$missing" | sed 's/^/  - /' >&2
             overall=1
           fi

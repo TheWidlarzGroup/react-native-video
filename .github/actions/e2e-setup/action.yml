@@ -1,9 +1,12 @@
 name: e2e setup
-description: Swap RN version, install frozen, install Maestro, start the fixture server
+description: Swap RN version, install frozen, bundle the test app's JS, install Maestro, start the fixture server
 
 inputs:
   rn-version:
     description: 'React Native version id, matching e2e/rn-matrix (0.77 is the floor)'
+    required: true
+  platform:
+    description: 'android or ios — selects which JS bundle to build'
     required: true
   fixture-port:
     description: 'Port for the local media fixture server'
@@ -13,57 +16,58 @@ inputs:
 runs:
   using: composite
   steps:
-    # Must precede any install: pod install and gradlew read node_modules.
+    # Must precede the install: it rewrites test-app/package.json and the root bun.lock.
     - name: Select React Native version
       run: node scripts/e2e/use-rn-version.mjs ${{ inputs.rn-version }}
       shell: bash
 
-    # frozen: 'true' both runs `bun install --frozen-lockfile` and narrows setup-bun's
-    # own dependency cache to a version-specific restore-key (see the comment in
-    # .github/actions/setup-bun/action.yml) so a matrix leg can never silently install
-    # a node_modules tree left behind by another leg's React Native version.
     - uses: ./.github/actions/setup-bun
       with:
         frozen: 'true'
 
-    # Belt-and-braces check on the invariant the cache-key narrowing above is meant to
-    # guarantee: fail loudly, before Maestro/pod/gradle ever run, if the React Native
-    # version actually resolved from test-app/ isn't the one this job asked for.
+    # Fail before any native build if the install did not yield the requested version.
     - name: Verify resolved React Native version
       working-directory: test-app
+      shell: bash
+      env:
+        EXPECTED: ${{ inputs.rn-version }}
       run: |
-        EXPECTED="${{ inputs.rn-version }}"
-
-        # Resolve exactly the way Metro/pod install/gradlew do: Node module resolution
-        # from inside test-app/, which walks up to the hoisted root node_modules when
-        # there is no nested override. A hardcoded `test-app/node_modules/react-native`
-        # path would be wrong here — bun hoists react-native to the repo root in the
-        # common case, so this must not assume a nested copy exists.
-        RESOLVED=$(node -p "require('react-native/package.json').version" 2>/dev/null) || {
+        set -euo pipefail
+        # Resolve from inside test-app/, the way Metro, pod install and gradle do.
+        RESOLVED=$(node -p "require('react-native/package.json').version") || {
           echo "::error::could not resolve react-native from test-app/ — install did not complete" >&2
           exit 1
         }
-        echo "requested rn-version: ${EXPECTED}"
-        echo "resolved react-native version: ${RESOLVED}"
-
+        echo "requested ${EXPECTED}, resolved ${RESOLVED}"
         case "$RESOLVED" in
-          "$EXPECTED" | "$EXPECTED".*)
-            echo "OK: resolved react-native ${RESOLVED} matches requested ${EXPECTED}"
-            ;;
+          "$EXPECTED" | "$EXPECTED".*) ;;
           *)
-            echo "::error::resolved react-native version '${RESOLVED}' does not match requested rn-version '${EXPECTED}' — a stale/foreign node_modules tree was installed (cache poisoning across the RN version matrix)" >&2
+            echo "::error::resolved react-native ${RESOLVED} does not match requested ${EXPECTED} — a stale node_modules tree was installed" >&2
             exit 1
             ;;
         esac
+
+    # react-native-test-app does not bundle JS in Gradle or Xcode. It embeds the files
+    # listed under `resources` in test-app/app.json (dist/) at build time and falls back
+    # to a Metro dev server when they are missing — and no Metro runs in CI. On iOS the
+    # bundle must exist before `pod install`, which is when RNTA resolves those resources.
+    - name: Bundle the test app's JS
+      working-directory: test-app
       shell: bash
+      run: |
+        set -euo pipefail
+        bun run build:${{ inputs.platform }}
+        test -s dist/main.${{ inputs.platform }}.jsbundle
 
     - name: Install Maestro
+      shell: bash
       run: |
+        set -euo pipefail
         curl -Ls "https://get.maestro.mobile.dev" | bash
         echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
-      shell: bash
 
     - name: Start fixture server
+      shell: bash
       run: |
         node e2e/fixtures/serve.mjs e2e/fixtures/media ${{ inputs.fixture-port }} &
         for i in $(seq 1 30); do
@@ -72,4 +76,3 @@ runs:
         done
         echo "fixture server did not come up" >&2
         exit 1
-      shell: bash
