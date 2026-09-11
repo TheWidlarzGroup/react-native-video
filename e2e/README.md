@@ -8,14 +8,33 @@ Deterministic Maestro flows against the test app. Full rationale: [`CONTEXT.md`]
 # 1. Fixtures (one-time, or after changing generate.sh; requires ffmpeg)
 ./e2e/fixtures/generate.sh
 
-# 2. Serve fixtures
-npx serve e2e/fixtures/media -l 8090
+# 2. Serve fixtures (dependency-free — this is the same server CI starts via
+#    .github/actions/e2e-setup/action.yml; run it from the repo root and leave it running)
+node e2e/fixtures/serve.mjs e2e/fixtures/media 8090
 
-# 3. Build & install the test app on an emulator/simulator (see example app README)
+# 3. Pick the React Native version, install, then build & install the test app.
+#    (0.77 is the floor and needs no switch; see e2e/rn-matrix/README.md for the others.)
+node scripts/e2e/use-rn-version.mjs 0.77
+bun install --frozen-lockfile   # also applies test-app/patches/ via the root postinstall
 
-# 4. Run
-maestro test -e APP_ID=<app id> e2e/flows/            # all
-maestro test -e APP_ID=<app id> e2e/flows/smoke-mp4-happy-path.yaml  # one
+# Android: build a debug APK and install it on a running emulator
+cd test-app/android && ./gradlew assembleDebug && cd ../..
+adb install -r test-app/android/app/build/outputs/apk/debug/app-debug.apk
+
+# iOS: install pods, apply the Xcode 26 fmt fix, build, then install on a booted simulator
+# (see .github/workflows/_e2e-ios.yml for the exact CI commands this mirrors)
+cd test-app && bundle install && bundle exec pod install --project-directory=ios \
+  && bundle exec ruby ios/fix-fmt-cxx17.rb && cd ..
+xcodebuild -workspace test-app/ios/RNVideoE2E.xcworkspace \
+  -scheme RNVideoE2E -configuration Debug -sdk iphonesimulator \
+  -derivedDataPath build \
+  -destination "platform=iOS Simulator,name=<simulator name>" build
+xcrun simctl boot "<simulator name>" || true   # already-booted is fine, hence `|| true`
+xcrun simctl install booted "$(find build/Build/Products -name '*.app' -maxdepth 3 | head -1)"
+
+# 4. Run (APP_ID is com.rnvtest.host, from _e2e-android.yml's/_e2e-ios.yml's env)
+maestro test -e APP_ID=com.rnvtest.host e2e/flows/            # all
+maestro test -e APP_ID=com.rnvtest.host e2e/flows/smoke-mp4-happy-path.yaml  # one
 ```
 
 Android emulator reaches fixtures via `10.0.2.2:8090` (cleartext HTTP must be allowed in

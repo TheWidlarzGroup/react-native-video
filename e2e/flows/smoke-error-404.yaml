@@ -14,9 +14,9 @@ tags: [smoke]
 # (this one) never fires a single player event — confirmed hanging even after 30s wait,
 # not just slow. A scenario with real playback (mp4/hls) fires fine cold. Root cause not
 # fully pinned down (looks like some native/Nitro registration path that only completes
-# once triggered by an actual playback attempt) — see e2e/SPIKE_RNTA.md. Mitigation:
-# warm up with a real-playback scenario first; this is the same process the other two
-# MVP flows already exercise successfully from cold, so it's proven to complete init.
+# once triggered by an actual playback attempt). Mitigation: warm up with a real-playback
+# scenario first; this is the same process the other two MVP flows already exercise
+# successfully from cold, so it's proven to complete init.
 - waitForAnimationToEnd:
     timeout: 1500
 - openLink: rnvtest://scenario/mp4
