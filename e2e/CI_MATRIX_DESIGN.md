@@ -82,8 +82,11 @@ check its author cannot fix.
   carries iOS 26 only; `macos-15` carries both iOS 18.x and 26.x.
 - Quarantine: when at least one flow is tagged `flaky`, one extra job per platform runs
   `--include-tags=flaky` at the floor RN version (Android API 36, iOS 26). Maestro refuses
-  a tag filter that matches nothing, so `matrix-plan` only schedules these legs when the
-  tag is actually in use.
+  a tag filter that matches nothing, so the plan only schedules these legs when the tag
+  is actually in use.
+
+The whole plan (rows, artifact names, shape guard, flaky detection) is computed by
+`scripts/e2e/matrix-plan.mjs`, which has unit tests; the workflow only calls it.
 
 ### Why this is not a bottleneck
 

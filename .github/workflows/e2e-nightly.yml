@@ -25,6 +25,7 @@ jobs:
   # Single source of truth for every row and for the artifact name each row uploads
   # under. The legs receive that name via `artifact-name`, and the report job derives
   # its expected-row list from the same objects, so the two cannot drift apart.
+  # Quarantine legs are only planned when a flow is tagged `flaky`.
   matrix-plan:
     name: matrix plan
     runs-on: ubuntu-latest
@@ -40,88 +41,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Define the matrix and derive each row's artifact name
+      # Everything about the matrix (rows, artifact names, the shape guard, flaky
+      # detection) lives in scripts/e2e/matrix-plan.mjs, which has unit tests.
+      - name: Build the matrix plan
         id: plan
-        run: |
-          set -euo pipefail
-
-          ANDROID_RN='["0.77","0.82","0.87"]'
-          ANDROID_API='["36","35","34"]'
-          IOS_RN='["0.77","0.82","0.87"]'
-          IOS_DEVICES='[{"runner":"macos-26","runtime":"26","sim":"iPhone 17"},{"runner":"macos-15","runtime":"18","sim":"iPhone 16"}]'
-          QUARANTINE_ANDROID_RN='0.77'
-          QUARANTINE_ANDROID_API='36'
-          QUARANTINE_IOS_RN='0.77'
-          QUARANTINE_IOS_RUNNER='macos-26'
-          QUARANTINE_IOS_RUNTIME='26'
-
-          # Same derivation as the "Resolve artifact name" step in the reusable legs.
-          slug() { echo "$1" | sed -E 's/[^A-Za-z0-9]+/-/g; s/^-+|-+$//g'; }
-          COVERAGE_SLUG=$(slug '--exclude-tags=flaky')
-          QUARANTINE_SLUG=$(slug '--include-tags=flaky')
-
-          # Quarantine legs only make sense when at least one flow is tagged flaky.
-          if grep -lqE '^\s*tags:.*\bflaky\b|^\s*-\s*flaky\s*$' e2e/flows/*.yaml; then
-            has_quarantine=true
-          else
-            has_quarantine=false
-          fi
-
-          android_rows=$(jq -nc --argjson rn "$ANDROID_RN" --argjson api "$ANDROID_API" --arg slug "$COVERAGE_SLUG" '
-            [ $rn[] as $r | $api[] as $a | {rn: $r, "api-level": $a, "artifact-name": "e2e-android-rn\($r)-api\($a)-\($slug)"} ]
-          ')
-          ios_rows=$(jq -nc --argjson rn "$IOS_RN" --argjson devices "$IOS_DEVICES" --arg slug "$COVERAGE_SLUG" '
-            [ $rn[] as $r | $devices[] as $d | {rn: $r, runner: $d.runner, "ios-runtime": $d.runtime, "sim-device": $d.sim, "artifact-name": "e2e-ios-rn\($r)-ios\($d.runtime)-\($slug)"} ]
-          ')
-          quarantine_android=$(jq -nc --arg rn "$QUARANTINE_ANDROID_RN" --arg api "$QUARANTINE_ANDROID_API" --arg slug "$QUARANTINE_SLUG" '
-            {"rn-version": $rn, "api-level": $api, "artifact-name": "e2e-android-rn\($rn)-api\($api)-\($slug)"}
-          ')
-          quarantine_ios=$(jq -nc --arg rn "$QUARANTINE_IOS_RN" --arg runner "$QUARANTINE_IOS_RUNNER" --arg rt "$QUARANTINE_IOS_RUNTIME" --arg slug "$QUARANTINE_SLUG" '
-            {"rn-version": $rn, runner: $runner, "ios-runtime": $rt, "artifact-name": "e2e-ios-rn\($rn)-ios\($rt)-\($slug)"}
-          ')
-
-          # A bare `include:` list enumerates exactly these jobs, one per row object.
-          android_matrix=$(jq -nc --argjson rows "$android_rows" '{include: $rows}')
-          ios_matrix=$(jq -nc --argjson rows "$ios_rows" '{include: $rows}')
-
-          quarantine_labels=$(jq -nc --argjson qa "$quarantine_android" --argjson qi "$quarantine_ios" --argjson on "$has_quarantine" '
-            if $on then [ $qa."artifact-name", $qi."artifact-name" ] else [] end
-          ')
-          expected_labels=$(jq -nc --argjson arows "$android_rows" --argjson irows "$ios_rows" --argjson q "$quarantine_labels" '
-            [$arows[]."artifact-name"] + [$irows[]."artifact-name"] + $q
-          ')
-
-          # Shape guard: a family changed without updating this file fails here, not as
-          # a night whose row count nobody notices.
-          android_count=$(echo "$android_rows" | jq 'length')
-          ios_count=$(echo "$ios_rows" | jq 'length')
-          quarantine_count=$(echo "$quarantine_labels" | jq 'length')
-          expected_count=$(echo "$expected_labels" | jq 'length')
-          want_quarantine=0; [ "$has_quarantine" = true ] && want_quarantine=2
-          if [ "$android_count" -ne 9 ] || [ "$ios_count" -ne 6 ] || [ "$quarantine_count" -ne "$want_quarantine" ]; then
-            echo "::error::matrix shape wrong — android ${android_count} (want 9), ios ${ios_count} (want 6), quarantine ${quarantine_count} (want ${want_quarantine})" >&2
-            exit 1
-          fi
-          if [ "$expected_count" -ne $((15 + want_quarantine)) ]; then
-            echo "::error::expected $((15 + want_quarantine)) rows, computed ${expected_count}" >&2
-            exit 1
-          fi
-          for rows in "$android_rows" "$ios_rows" "[$quarantine_android, $quarantine_ios]"; do
-            if ! echo "$rows" | jq -e 'all(.[]; (."artifact-name" // "") | length > 0)' >/dev/null; then
-              echo "::error::a matrix row is missing artifact-name: ${rows}" >&2
-              exit 1
-            fi
-          done
-
-          {
-            echo "android-matrix=${android_matrix}"
-            echo "ios-matrix=${ios_matrix}"
-            echo "has-quarantine=${has_quarantine}"
-            echo "quarantine-android=${quarantine_android}"
-            echo "quarantine-ios=${quarantine_ios}"
-            echo "expected-labels=${expected_labels}"
-            echo "quarantine-labels=${quarantine_labels}"
-          } >> "$GITHUB_OUTPUT"
+        run: node scripts/e2e/matrix-plan.mjs e2e/flows
 
   android:
     needs: matrix-plan
