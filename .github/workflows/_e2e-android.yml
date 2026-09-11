@@ -46,9 +46,7 @@ jobs:
       - uses: actions/checkout@v4
 
       # upload-artifact@v4 hard-errors on a duplicate name within a run, so the name has
-      # to differ per (rn-version, api-level, tag selection). The slug also keys the AVD
-      # cache: a quarantine leg and its coverage sibling share coordinates but must not
-      # share emulator state.
+      # to differ per (rn-version, api-level, tag selection).
       - name: Resolve artifact name
         id: suffix
         env:
@@ -128,29 +126,12 @@ jobs:
           fi
           echo "OK: rnvtest intent filter present in ${MERGED}"
 
-      - name: Cache AVD snapshot
-        uses: actions/cache@v4
-        id: avd-cache
-        with:
-          path: |
-            ~/.android/avd/*
-            ~/.android/adb*
-          key: avd-${{ inputs.api-level }}-rn${{ inputs.rn-version }}-${{ steps.suffix.outputs.slug }}
-
-      # Boots once and lets the emulator save its snapshot on exit; the cache step above
-      # stores that snapshot at the end of the job.
-      - name: Create AVD and cache a cold snapshot
-        if: steps.avd-cache.outputs.cache-hit != 'true'
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: ${{ inputs.api-level }}
-          arch: x86_64
-          profile: pixel_6
-          force-avd-creation: false
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
-          disable-animations: false
-          script: echo "AVD created"
-
+      # Cold boot, no snapshots, no AVD cache. Earlier versions saved a snapshot right
+      # after the first boot and resumed it for the flows; every failing Android run
+      # since then showed a system process ("Quickstep" / "System UI isn't responding")
+      # ANR dialog covering the app after the resume, and Maestro treats everything
+      # under a system dialog as invisible. A cold boot costs about two minutes and has
+      # not produced one.
       - name: Run flows on emulator
         uses: reactivecircus/android-emulator-runner@v2
         env:
@@ -163,23 +144,25 @@ jobs:
           profile: pixel_6
           force-avd-creation: false
           disable-animations: true
-          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           # The action runs EVERY LINE of this script as its own `/usr/bin/sh -c`, and
           # stops at the first line that exits non-zero. So: one command per line, no
           # backslash continuations (the continuation would become a separate command
           # and `\` the flow path), and no `set -e`, which would only apply to its own
           # line.
           #
-          # hide_error_dialogs: on a slow hosted emulator the system launcher (Quickstep)
-          # can ANR during launchApp's clear-state relaunches; its "isn't responding"
-          # dialog then sits on top of the app and Maestro treats everything under it as
-          # invisible. Test harnesses suppress those dialogs with this setting.
+          # hide_error_dialogs suppresses app crash/ANR dialogs (system-process ANR
+          # dialogs are handled by not resuming snapshots, above). The boot-animation
+          # wait plus a short settle gives the launcher time to finish initialising
+          # before the first clear-state launch.
           # The emulator dies with this step, so the post-mortem (a screenshot and the
           # accessibility hierarchy of the app's default screen, i.e. what Maestro
           # matches `id:` against) has to happen here, after Maestro, before the final
           # line turns a Maestro failure back into a step failure.
           script: |
             adb shell settings put global hide_error_dialogs 1
+            adb shell 'while [ "$(getprop init.svc.bootanim)" != "stopped" ]; do sleep 1; done'
+            sleep 10
             adb install -r test-app/android/app/build/outputs/apk/debug/app-debug.apk
             adb logcat -c
             adb logcat > logcat.txt &
