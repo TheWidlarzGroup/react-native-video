@@ -1,6 +1,12 @@
-# Seek forward then backward. evt-seek-fwd-landed/evt-seek-back-landed are derived from
-# onProgress currentTime (>4s / <2s after a forward seek already landed), not onSeek alone —
-# proves the player actually moved, not just that seekTo() was called (see ScenarioScreen.tsx).
+# Seek forward then backward. evt-seek-fwd-landed / evt-seek-back-landed are derived
+# from the FIRST onProgress after an onSeek (> 4 s / < 2 s, see eventLog.ts), so natural
+# playback can never satisfy them: they prove the player actually moved where it was told.
+#
+# Taps only on an idle player: the iOS driver defers a tap issued during playback until
+# the app settles (the clip's end), and a tap landing in that end transition was lost in
+# CI. So: let the clip end, then seek + play (play is a no-op on Android, where the seek
+# alone resumes). The seek-back tap is deferred to the next end on iOS and lands on an
+# ended player, hence the play right after it, which lands at once on an idle player.
 appId: ${APP_ID}
 tags: [smoke]
 ---
@@ -28,19 +34,27 @@ tags: [smoke]
     visible:
       id: "evt-onLoad"
     timeout: 20000
+- extendedWaitUntil:
+    visible:
+      id: "evt-onEnded"
+    timeout: 20000
 - tapOn:
     id: "btn-seek-5"
+- tapOn:
+    id: "btn-play"
 - extendedWaitUntil:
     visible:
       id: "evt-onSeek"
-    timeout: 15000            # tap is only actually delivered once the clip reaches its natural end (~8s, see smoke-rate.yaml and CONTEXT.md) — do not shrink this back down
+    timeout: 5000
 - extendedWaitUntil:
     visible:
       id: "evt-seek-fwd-landed"
     timeout: 5000
 - tapOn:
     id: "btn-seek-1"
+- tapOn:
+    id: "btn-play"
 - extendedWaitUntil:
     visible:
       id: "evt-seek-back-landed"
-    timeout: 5000
+    timeout: 15000            # iOS: the seek-1 tap is deferred until the clip ends (~3 s from 5 s)
