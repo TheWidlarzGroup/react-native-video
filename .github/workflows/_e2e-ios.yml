@@ -166,10 +166,12 @@ jobs:
           # Passed through the environment so a tags value cannot break out of the
           # command line via `${{ }}` text substitution.
           TAGS: ${{ inputs.tags }}
-          # Maestro installs and launches its XCTest runner on first use; on a hosted
-          # macOS runner that takes longer than the 15 s default and fails with
-          # "iOS driver not ready in time".
-          MAESTRO_DRIVER_STARTUP_TIMEOUT: '120000'
+          # Maestro builds, installs and launches its XCTest runner on first use; on a
+          # hosted macOS runner that has taken anywhere from ~60 s to just over 120 s
+          # (the driver's HTTP server came up 121 s after xcodebuild started in one run,
+          # and Maestro gave up at 120 s with "iOS driver not ready in time"). Five
+          # minutes leaves headroom without hiding a genuinely broken driver for long.
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: '300000'
         run: |
           set -euo pipefail
           # shellcheck disable=SC2086 # $TAGS is a list of flags and must word-split
