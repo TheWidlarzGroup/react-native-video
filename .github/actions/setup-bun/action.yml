@@ -32,12 +32,13 @@ runs:
         path: |
           **/node_modules
         # patch-package edits files inside node_modules at postinstall and cannot apply a
-        # changed patch on top of an already-patched tree, so the patches are part of the
-        # key: a patch change must miss the cache.
-        key: ${{ runner.os }}-v7-bun-${{ inputs.frozen == 'true' && 'frozen' || 'shared' }}-${{ hashFiles('**/bun.lock') }}-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/patches/*.patch') }}
+        # changed patch on top of an already-patched tree. The patches hash therefore
+        # comes FIRST, so every restore-key prefix below carries it and a patch change
+        # misses every cached tree, including the broad shared fallback.
+        key: ${{ runner.os }}-v8-bun-${{ inputs.frozen == 'true' && 'frozen' || 'shared' }}-${{ hashFiles('**/patches/*.patch') }}-${{ hashFiles('**/bun.lock') }}-${{ hashFiles('**/package.json') }}
         restore-keys: |
-          ${{ runner.os }}-v7-bun-${{ inputs.frozen == 'true' && 'frozen' || 'shared' }}-${{ hashFiles('**/bun.lock') }}-${{ hashFiles('**/package.json') }}-
-          ${{ inputs.frozen != 'true' && format('{0}-v7-bun-shared-', runner.os) || '' }}
+          ${{ runner.os }}-v8-bun-${{ inputs.frozen == 'true' && 'frozen' || 'shared' }}-${{ hashFiles('**/patches/*.patch') }}-${{ hashFiles('**/bun.lock') }}-
+          ${{ inputs.frozen != 'true' && format('{0}-v8-bun-shared-{1}-', runner.os, hashFiles('**/patches/*.patch')) || '' }}
 
     - name: Install dependencies
       working-directory: ${{ inputs.working-directory }}
