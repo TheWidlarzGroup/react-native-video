@@ -46,7 +46,7 @@ tags: [smoke]
 - extendedWaitUntil:
     visible:
       id: "scenario-error-404"
-    timeout: 8000
+    timeout: 20000
 - extendedWaitUntil:
     visible:
       id: "evt-onError"

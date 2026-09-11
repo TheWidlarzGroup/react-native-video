@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup-bun
         with:
           frozen: 'true'
@@ -50,7 +50,7 @@ jobs:
       REACT_TEST_RENDERER_VERSION: '19.2.8'
       TYPES_REACT_VERSION: '19.2.18'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # Not the setup-bun composite on purpose: its node_modules cache would save this
       # job's React 19 tree under the frozen key the E2E legs and the checks job restore.
       - uses: oven-sh/setup-bun@v2

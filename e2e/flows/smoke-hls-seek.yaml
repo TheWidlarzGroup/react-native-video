@@ -22,11 +22,11 @@ tags: [smoke]
 - extendedWaitUntil:
     visible:
       id: "scenario-hls"
-    timeout: 8000
+    timeout: 20000
 - extendedWaitUntil:
     visible:
       id: "evt-onLoad"
-    timeout: 25000            # HLS: manifest + first segments over local HTTP
+    timeout: 40000            # HLS: manifest + first segments over local HTTP; slow hosted simulators
 # Same shape as smoke-seek.yaml: interact only once the player is idle (see there).
 - extendedWaitUntil:
     visible:

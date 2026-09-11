@@ -49,7 +49,7 @@ jobs:
     timeout-minutes: 60
     continue-on-error: ${{ !inputs.blocking }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # upload-artifact@v4 hard-errors on a duplicate name within a run, so the name has
       # to differ per (rn-version, ios-runtime, tag selection).
@@ -72,24 +72,6 @@ jobs:
         with:
           rn-version: ${{ inputs.rn-version }}
           platform: ios
-
-      # Restored before pod install (actions/cache restores at its own step position).
-      # Keyed on the runner image, not runner.os: macos-26 and macos-15 ship different
-      # Xcode majors and a Pods tree built under one does not compile under the other.
-      # The RN version is in the key so the three variants do not evict each other.
-      - name: Cache Pods
-        uses: actions/cache@v4
-        with:
-          path: test-app/ios/Pods
-          key: pods-${{ inputs.runner }}-rn${{ inputs.rn-version }}-${{ hashFiles('test-app/ios/Podfile.lock') }}
-          restore-keys: pods-${{ inputs.runner }}-rn${{ inputs.rn-version }}-
-
-      - name: Install pods
-        run: |
-          set -euo pipefail
-          cd test-app
-          bundle install
-          bundle exec pod install --project-directory=ios
 
       # macos-15 carries both iOS 18 and iOS 26 runtimes, so a bare device name is
       # ambiguous there. Resolve device + runtime to a UDID and fail if the requested
@@ -120,6 +102,40 @@ jobs:
           ' devices.json)
           echo "resolved '${SIM_DEVICE}' for iOS ${IOS_RUNTIME} -> ${MATCH} on ${RESOLVED_RUNTIME}"
           echo "udid=${MATCH}" >> "$GITHUB_OUTPUT"
+          # Start booting now so the (several-minute) boot overlaps pod install and the
+          # build; the install step below waits for it to finish.
+          xcrun simctl boot "$MATCH" || true
+
+      # Restored before pod install (actions/cache restores at its own step position).
+      # Keyed on the runner image, not runner.os: macos-26 and macos-15 ship different
+      # Xcode majors and a Pods tree built under one does not compile under the other.
+      # The RN version is in the key so the three variants do not evict each other.
+      - name: Cache Pods
+        uses: actions/cache@v6
+        with:
+          path: test-app/ios/Pods
+          key: pods-${{ inputs.runner }}-rn${{ inputs.rn-version }}-${{ hashFiles('test-app/ios/Podfile.lock') }}
+          restore-keys: pods-${{ inputs.runner }}-rn${{ inputs.rn-version }}-
+
+      - name: Install pods
+        run: |
+          set -euo pipefail
+          cd test-app
+          bundle install
+          bundle exec pod install --project-directory=ios
+
+      # DerivedData from the previous run of this (runner, rn-version) cell. xcodebuild
+      # rebuilds only what changed on top of it; a cold build of the Pods alone takes
+      # about 12 minutes on a hosted runner. Keyed on everything that feeds the build:
+      # Podfile.lock, the library's iOS sources and generated Nitro code, and the
+      # test app's own iOS inputs. The restore-keys fallback hands an older tree to an
+      # incremental build, which is still far cheaper than starting from nothing.
+      - name: Cache DerivedData
+        uses: actions/cache@v6
+        with:
+          path: build
+          key: deriveddata-${{ inputs.runner }}-rn${{ inputs.rn-version }}-${{ hashFiles('test-app/ios/Podfile.lock', 'test-app/ios/Podfile', 'test-app/app.json', 'test-app/rnv-e2e-plugin.mjs', 'packages/react-native-video/ios/**', 'packages/react-native-video/nitrogen/generated/ios/**', 'packages/react-native-video/nitrogen/generated/shared/**', 'packages/react-native-video/cpp/**') }}
+          restore-keys: deriveddata-${{ inputs.runner }}-rn${{ inputs.rn-version }}-
 
       # pipefail: without it xcbeautify's exit code would mask a failed xcodebuild.
       - name: Build for simulator
@@ -139,6 +155,7 @@ jobs:
           IOS_RUNTIME: ${{ inputs.ios-runtime }}
         run: |
           set -euo pipefail
+          # Boot was started right after the simulator was resolved; wait for it here.
           xcrun simctl boot "$SIM_UDID" || true
           xcrun simctl bootstatus "$SIM_UDID" -b
           BOOTED_RUNTIME=$(xcrun simctl list devices available --json | jq -r --arg udid "$SIM_UDID" '
@@ -207,7 +224,7 @@ jobs:
 
       - name: Upload artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.suffix.outputs.name }}
           path: |
