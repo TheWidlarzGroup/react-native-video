@@ -2,6 +2,7 @@
 // and closes it when the row goes green. Uses the gh CLI with the workflow's GITHUB_TOKEN
 // so no external service is involved.
 import { execFileSync } from 'node:child_process';
+import { isMain } from './is-main.mjs';
 
 const PREFIX = '[e2e nightly]';
 
@@ -140,7 +141,7 @@ export function runNightlyIssue(run, label, status, runUrl) {
   return failed ? 1 : 0;
 }
 
-if (import.meta.main) {
+if (isMain(import.meta.url)) {
   const [, , label, status, runUrl] = process.argv;
   if (!label || !status) {
     console.error('usage: nightly-issue.mjs <label> <pass|fail> <runUrl>');

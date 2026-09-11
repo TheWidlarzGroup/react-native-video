@@ -6,7 +6,6 @@ pre-commit:
       exclude: "docs/**/*"
       run: bun lint
     lint-docs:
-      # using @widlarzgroup/eslint-plugin-docusaurus for CSS variable validation
       root: "docs/"
       glob: "**/*.{js,ts,jsx,tsx,css}"
       run: bun run lint
@@ -18,6 +17,11 @@ pre-commit:
     test-scripts:
       glob: "{e2e,scripts}/**/*.mjs"
       run: bun test e2e scripts
+    # Refuse to commit the root lockfile / test-app manifest while switched to a
+    # non-floor RN version via scripts/e2e/use-rn-version.mjs.
+    floor-lockfile:
+      glob: "{bun.lock,test-app/package.json}"
+      run: scripts/e2e/check-floor-lockfile.sh
 commit-msg:
   parallel: true
   commands:

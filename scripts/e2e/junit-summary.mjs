@@ -2,6 +2,7 @@
 // stable <testcase>/<failure> shape, so a regex reader is enough and keeps this
 // dependency-free.
 import { readFileSync, appendFileSync } from 'node:fs';
+import { isMain } from './is-main.mjs';
 
 const CASE_RE = /<testcase\b([^>]*?)(\/>|>([\s\S]*?)<\/testcase>)/g;
 
@@ -76,7 +77,7 @@ export function renderSummary(parsed, label, hasFile, isComplete = true) {
   return `${head}${incompleteWarning}| | Flow | Failure |\n|---|---|---|\n${rows}\n`;
 }
 
-if (import.meta.main) {
+if (isMain(import.meta.url)) {
   const [, , reportPath, label = 'e2e'] = process.argv;
   let xml = '';
   let fileExists = false;
