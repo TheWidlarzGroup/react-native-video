@@ -110,6 +110,9 @@ jobs:
       # Keyed on the runner image, not runner.os: macos-26 and macos-15 ship different
       # Xcode majors and a Pods tree built under one does not compile under the other.
       # The RN version is in the key so the three variants do not evict each other.
+      # Kept even though restore + pod install is not faster than a cold pod install:
+      # a restored tree keeps the Pods sources' timestamps, which is what lets the
+      # DerivedData cache below turn a 12-minute build into a ~2-minute incremental one.
       - name: Cache Pods
         uses: actions/cache@v6
         with:
@@ -177,6 +180,15 @@ jobs:
           xcrun simctl launch "$SIM_UDID" ${{ env.APP_ID }} || true
           sleep 8
           xcrun simctl terminate "$SIM_UDID" ${{ env.APP_ID }} || true
+
+      # See e2e/warmup/ios-approve-open-link.yaml: takes the one-time "Open in app?"
+      # confirmation (after which the link is lost) out of the real flows' way and
+      # warms the first launch and the Maestro driver. Never fails the leg.
+      - name: Warm up (approve the deep-link confirmation once)
+        env:
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: '300000'
+        run: |
+          maestro test -e APP_ID=${{ env.APP_ID }} e2e/warmup/ios-approve-open-link.yaml || echo "warm-up flow did not pass (non-fatal)"
 
       - name: Run flows
         env:
