@@ -18,10 +18,21 @@ export const writeToPodfile = (
     return;
   }
 
-  if (testApp) {
-    mergeTestAppPodfile(podfileContent, podfilePath, key, value);
-  } else {
-    mergeExpoPodfile(podfileContent, podfilePath, key, value);
+  // mergeContents throws when its anchor is missing rather than reporting
+  // `didMerge: false`; a Podfile this plugin does not understand should warn, not
+  // abort prebuild.
+  try {
+    if (testApp) {
+      mergeTestAppPodfile(podfileContent, podfilePath, key, value);
+    } else {
+      mergeExpoPodfile(podfileContent, podfilePath, key, value);
+    }
+  } catch (error) {
+    console.warn(
+      `RNV - Failed to write "$${key} = ${value}" to Podfile: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
   }
 };
 
