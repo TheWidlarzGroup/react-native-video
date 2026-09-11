@@ -2,7 +2,7 @@ import { Platform } from 'react-native';
 import type { VideoConfig } from 'react-native-video';
 
 /**
- * Fixture server runs on the CI host (or dev machine): `npx serve e2e/fixtures/media -l 8090`
+ * Fixture server runs on the CI host (or dev machine): `node e2e/fixtures/serve.mjs e2e/fixtures/media 8090`
  * - Android emulator reaches the host at 10.0.2.2
  * - iOS simulator reaches the host at localhost
  * Android requires cleartext HTTP for this host (debug manifest / network security config).
