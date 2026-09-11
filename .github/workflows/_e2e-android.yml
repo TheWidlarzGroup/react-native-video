@@ -84,8 +84,46 @@ jobs:
 
       # x86_64 only: that is the emulator ABI; the other three would be built and thrown
       # away.
+      # react-native-test-app runs this same script while evaluating Gradle settings
+      # (test-app.gradle -> config-plugins.gradle), silently skipping it when it cannot
+      # locate @expo/config-plugins. Run it here first, with its output visible, and
+      # check the manifest it edits in place, so a skipped or failing plugin step is
+      # an explicit error before Gradle.
+      - name: Apply the config plugins explicitly
+        working-directory: test-app/android
+        run: |
+          set -euo pipefail
+          echo "node: $(node --version)"
+          node ../../node_modules/react-native-test-app/scripts/apply-config-plugins.mjs --android
+          MANIFEST=../../node_modules/react-native-test-app/android/app/src/main/AndroidManifest.xml
+          if ! grep -q 'android:scheme="rnvtest"' "$MANIFEST"; then
+            echo "::error::apply-config-plugins.mjs ran but the rnvtest intent filter is not in ${MANIFEST}" >&2
+            cat "$MANIFEST"
+            exit 1
+          fi
+          echo "OK: rnvtest intent filter present in the react-native-test-app manifest"
+
       - name: Build test app APK
         run: cd test-app/android && ./gradlew assembleDebug --no-daemon -PreactNativeArchitectures=x86_64
+
+      # react-native-test-app applies the Expo config plugins (test-app/rnv-e2e-plugin.mjs)
+      # while evaluating Gradle settings and writes the result into its own manifest in
+      # node_modules. If that step silently does nothing, every flow fails at openLink
+      # with "unable to resolve Intent" ten times over; fail here instead, with the
+      # manifest in the log.
+      - name: Verify the deep-link intent filter made it into the APK manifest
+        run: |
+          set -euo pipefail
+          MERGED=$(find test-app/android/app/build/intermediates -path '*merged_manifest*/debug/*' -name AndroidManifest.xml | head -1)
+          test -n "$MERGED" || { echo "::error::merged debug manifest not found under build/intermediates" >&2; exit 1; }
+          if ! grep -q 'android:scheme="rnvtest"' "$MERGED"; then
+            echo "::error::the rnvtest:// intent filter is missing from the merged manifest — the config-plugin step did not apply" >&2
+            echo "--- ${MERGED}"; cat "$MERGED"
+            echo "--- node_modules/react-native-test-app/android/app/src/main/AndroidManifest.xml"
+            cat node_modules/react-native-test-app/android/app/src/main/AndroidManifest.xml
+            exit 1
+          fi
+          echo "OK: rnvtest intent filter present in ${MERGED}"
 
       - name: Cache AVD snapshot
         uses: actions/cache@v4
@@ -161,5 +199,5 @@ jobs:
             maestro-debug/**
             post-mortem/**
             logcat.txt
-            ~/.maestro/tests/**
+            test-app/android/app/build/generated/rnta/src/main/AndroidManifest.xml
           if-no-files-found: ignore
