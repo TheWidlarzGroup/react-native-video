@@ -5,19 +5,16 @@ tags: [smoke]
 ---
 - launchApp:
     clearState: true
-# RCTLinkingManager.getInitialURL() only reads UIApplicationLaunchOptionsURLKey (a true
-# OS-level cold-launch-via-URL). openLink instead posts the 'url' NSNotification, which is
-# fire-and-forget: if it arrives before JS has mounted and subscribed, it's silently
-# dropped. Wait for a marker that only exists once JS has actually rendered.
+# openLink delivers the URL through the 'url' event, which is fire-and-forget: a link
+# sent before JS has subscribed is silently dropped. The test app renders this marker
+# only after its Linking listener is attached (App.tsx), so waiting for it is what
+# makes openLink safe.
 - extendedWaitUntil:
     visible:
       id: "e2e-host-ready"
     timeout: 15000
-# RNTA's own native bootstrapping (TestApp/ReactInstance setup) can still be settling for
-# a moment after first paint, even once e2e-host-ready is visible — a scenario that fails
-# almost instantly (error-404: ~30ms from mount to onStatusChange('error')) can race past
-# that before Linking's bridge is ready to receive the very first deep link. A slower
-# scenario (real playback) doesn't expose this. Small fixed buffer, not a flake retry.
+# Small settle buffer for RNTA's native bootstrapping after first paint; observed to
+# matter for scenarios that fail almost instantly (error-404). Not a flake retry.
 - waitForAnimationToEnd:
     timeout: 1500
 - openLink: rnvtest://scenario/mp4
