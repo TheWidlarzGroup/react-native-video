@@ -1,0 +1,76 @@
+# PR gate. Android is cheap and unlimited on ubuntu runners, so it covers all three RN
+# versions; iOS is capped at 5 concurrent macOS jobs across the whole account, so the gate
+# spends exactly one — five simultaneous PRs still fit.
+name: e2e
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+# One group for the whole gate: a new push cancels all four jobs at once and frees the
+# macOS slot immediately instead of holding it for a stale commit.
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+# Branch protection must be pinned to these four EXACT status-context strings:
+#   android (0.77) / maestro
+#   android (0.82) / maestro
+#   android (0.87) / maestro
+#   ios / maestro
+# Each is composed by GitHub as "<this file's caller job displayed name> / <the
+# callee job's displayed name>" — never the top-level `name: e2e` above, which is
+# not part of the context at all. The first half comes from this file (the `name:`
+# on the `android` job below, or the bare job id `ios` since that job has no
+# override); the second half, `maestro`, comes from the `name: maestro` on the
+# `run:` job inside `_e2e-android.yml`/`_e2e-ios.yml`. A later rename on EITHER side
+# — this file's job names or the callees' job name — silently changes these strings
+# and detaches them from whatever branch-protection rule was pinned to the old ones,
+# which is how a required check becomes permanently unsatisfiable with no obvious
+# cause. Re-verify this comment (and update branch protection to match) before
+# renaming either side.
+jobs:
+  android:
+    # Explicit name: the matrix below carries two keys (rn, blocking), and GitHub's default
+    # matrix job-name suffix lists every key's value in order — without this override the
+    # check would render as "android (0.77, true)" instead of the "android (0.77)" the PR
+    # gate is documented to produce.
+    name: android (${{ matrix.rn }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - rn: '0.77'
+            blocking: true
+          - rn: '0.82'
+            blocking: true
+          # RN 0.87 needs three library-side fixes before it can gate — see
+          # e2e/CI_MATRIX_DESIGN.md, "Rollout while RN 0.87 is still broken". Until they
+          # land, `android (0.87) / maestro` is EXPECTED TO RENDER RED ON EVERY PR:
+          # `blocking: false` below only sets the callee job's
+          # `continue-on-error`, which keeps this *workflow run's* conclusion green — it
+          # does not, and cannot, flip the individual check's own conclusion back to
+          # success. That red is the honest signal this matrix cell exists to produce and
+          # must stay visible, not be hidden. Do NOT add `android (0.87) / maestro` to
+          # required status checks until it is actually passing — a required check that
+          # renders red on every PR by design makes the gate permanently unsatisfiable.
+          - rn: '0.87'
+            blocking: false
+    uses: ./.github/workflows/_e2e-android.yml
+    with:
+      rn-version: ${{ matrix.rn }}
+      api-level: '36'
+      blocking: ${{ matrix.blocking }}
+
+  ios:
+    uses: ./.github/workflows/_e2e-ios.yml
+    with:
+      rn-version: '0.87'
+      runner: 'macos-26'
+      ios-runtime: '26'
+      # Same non-blocking caveat as android (0.87) above: `ios / maestro` is EXPECTED TO
+      # RENDER RED ON EVERY PR until the RN 0.87 library fixes land, because
+      # `continue-on-error` (driven by `blocking: false`) only keeps this run's overall
+      # conclusion green — the check itself still reports its real result. Do NOT add
+      # `ios / maestro` to required status checks until it is actually passing.
+      blocking: false
