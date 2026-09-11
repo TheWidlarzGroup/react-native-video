@@ -169,11 +169,17 @@ jobs:
           # backslash continuations (the continuation would become a separate command
           # and `\` the flow path), and no `set -e`, which would only apply to its own
           # line.
+          #
+          # hide_error_dialogs: on a slow hosted emulator the system launcher (Quickstep)
+          # can ANR during launchApp's clear-state relaunches; its "isn't responding"
+          # dialog then sits on top of the app and Maestro treats everything under it as
+          # invisible. Test harnesses suppress those dialogs with this setting.
           # The emulator dies with this step, so the post-mortem (a screenshot and the
           # accessibility hierarchy of the app's default screen, i.e. what Maestro
           # matches `id:` against) has to happen here, after Maestro, before the final
           # line turns a Maestro failure back into a step failure.
           script: |
+            adb shell settings put global hide_error_dialogs 1
             adb install -r test-app/android/app/build/outputs/apk/debug/app-debug.apk
             adb logcat -c
             adb logcat > logcat.txt &
