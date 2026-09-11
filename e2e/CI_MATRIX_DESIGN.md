@@ -171,9 +171,12 @@ Quarantine rides on Maestro's own tags: the gate runs `maestro test --exclude-ta
 nightly adds `--include-tags=flaky` legs when the tag is in use. Marking a flow unstable is
 a one-line change in its YAML — visible in review, greppable.
 
-Caching: AVD snapshot (the single largest saving on Android), Pods keyed on the runner
-image, the RN version and `Podfile.lock`, Gradle via `gradle/actions/setup-gradle`, and
-`node_modules` in a namespace separate from the docs workflows' cache.
+Caching: Pods keyed on the runner image, the RN version and `Podfile.lock`, Gradle via
+`gradle/actions/setup-gradle`, and `node_modules` in a namespace separate from the docs
+workflows' cache (with the patch files in the key, since patch-package cannot re-apply a
+changed patch to an already-patched tree). The Android emulator deliberately boots cold:
+resuming a saved snapshot produced system-process ANR dialogs ("System UI isn't
+responding") that covered the app and made every flow fail on its first assertion.
 
 ## Reporting and trust
 
