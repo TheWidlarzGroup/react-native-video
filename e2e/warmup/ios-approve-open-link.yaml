@@ -1,0 +1,32 @@
+# iOS warm-up, run by _e2e-ios.yml once before the real suite (it lives outside
+# e2e/flows/ so `maestro test e2e/flows/` never picks it up).
+#
+# The first `rnvtest://` link opened on a fresh simulator can raise the system
+# "Open in “RNVideoE2E”?" confirmation, and after tapping Open the link does not reach
+# JS (seen repeatedly in CI: the app stays on its default screen). Opening one link here
+# takes that confirmation out of the way, so every real flow's openLink behaves like the
+# second and later ones. It also warms the first launch and Maestro's driver. Nothing in
+# here asserts anything that could fail the leg.
+appId: ${APP_ID}
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: "e2e-host-ready"
+    timeout: 30000
+    optional: true
+- openLink: rnvtest://scenario/mp4
+- extendedWaitUntil:
+    visible: "Open"
+    timeout: 5000
+    optional: true
+- tapOn:
+    text: "Open"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "scenario-mp4"
+    timeout: 20000
+    optional: true
+- stopApp
