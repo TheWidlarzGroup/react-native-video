@@ -31,6 +31,11 @@ jobs:
           frozen: 'true'
       - name: Lint
         run: bun lint
+      # example/ and test-app/ typecheck against the library's built lib/ types (its
+      # `types` entry). lib/ is produced by the library's postinstall, which bun skips on
+      # a node_modules cache hit, and it is not part of that cache.
+      - name: Build packages
+        run: bun run build
       - name: Typecheck
         run: bun typecheck
       - name: Unit tests
