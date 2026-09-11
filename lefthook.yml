@@ -16,8 +16,8 @@ pre-commit:
     # reach them. Their unit tests are the only gate they have. test-app's pure logic
     # (deep-link parsing, config plugin, event log) is tested the same way.
     test-scripts:
-      glob: "{e2e,scripts,test-app}/**/*.{mjs,ts,tsx}"
-      run: bun test e2e scripts test-app
+      glob: "{e2e,scripts,test-app,packages/react-native-video}/**/*.{mjs,ts,tsx}"
+      run: bun test e2e scripts test-app packages/react-native-video/__tests__
     # Workflow lint runs in CI (lint-workflows.yml); run it locally too when installed.
     workflows:
       glob: ".github/**/*.yml"
