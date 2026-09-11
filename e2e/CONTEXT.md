@@ -52,6 +52,15 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
   listed under `resources` in `app.json` (`test-app/dist/`) and falls back to Metro when
   they are missing. CI runs `bun run build:<platform>` first; on iOS that must happen
   before `pod install`, which is when the resources are resolved.
+- **RNTA's Android manifest can go stale.** `react-native bundle` (through
+  `react-native.config.js`) runs RNTA's manifest generator, which copies RNTA's
+  `AndroidManifest.xml` into `android/app/build/generated/rnta/` and afterwards skips
+  regeneration unless `app.json` is newer than that file. The config plugins (deep-link
+  intent filter, cleartext HTTP) are applied to RNTA's source manifest later, at Gradle
+  settings time, so a bundle-then-build sequence ships an APK without the intent filter
+  and every `openLink` fails with "unable to resolve Intent". CI applies the plugins
+  explicitly and deletes the generated manifest before Gradle; locally, delete it or
+  touch `app.json` after the bundle step.
 - **iOS deep links need `RCTLinkingManager`, not just `CFBundleURLTypes`.** RNTA's
   `SceneDelegate` already forwards to it; a hand-rolled AppDelegate would have to.
 - **`openLink` right after `launchApp` drops the link.** `RCTLinkingManager.getInitialURL()`

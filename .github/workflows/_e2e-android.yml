@@ -84,16 +84,18 @@ jobs:
 
       # x86_64 only: that is the emulator ABI; the other three would be built and thrown
       # away.
-      # react-native-test-app runs this same script while evaluating Gradle settings
-      # (test-app.gradle -> config-plugins.gradle), silently skipping it when it cannot
-      # locate @expo/config-plugins. Run it here first, with its output visible, and
-      # check the manifest it edits in place, so a skipped or failing plugin step is
-      # an explicit error before Gradle.
-      - name: Apply the config plugins explicitly
+      # react-native-test-app applies the Expo config plugins while evaluating Gradle
+      # settings, editing its own AndroidManifest.xml in node_modules in place. But its
+      # manifest generator (android/android-manifest.js) ALSO runs during `react-native
+      # bundle` (via react-native.config.js), i.e. in the JS bundle step above, before
+      # the plugins have been applied, and it skips regeneration whenever the generated
+      # file is newer than app.json. Gradle then keeps that pristine manifest and the
+      # APK has no rnvtest intent filter. Apply the plugins explicitly here, verify the
+      # source manifest, and delete the stale generated one so Gradle regenerates it.
+      - name: Apply the config plugins and reset the generated manifest
         working-directory: test-app/android
         run: |
           set -euo pipefail
-          echo "node: $(node --version)"
           node ../../node_modules/react-native-test-app/scripts/apply-config-plugins.mjs --android
           MANIFEST=../../node_modules/react-native-test-app/android/app/src/main/AndroidManifest.xml
           if ! grep -q 'android:scheme="rnvtest"' "$MANIFEST"; then
@@ -101,7 +103,8 @@ jobs:
             cat "$MANIFEST"
             exit 1
           fi
-          echo "OK: rnvtest intent filter present in the react-native-test-app manifest"
+          rm -rf app/build/generated/rnta
+          echo "OK: plugins applied, generated manifest reset"
 
       - name: Build test app APK
         run: cd test-app/android && ./gradlew assembleDebug --no-daemon -PreactNativeArchitectures=x86_64
