@@ -23,8 +23,8 @@ export type MarkerId =
   | 'evt-paused' // isPlaying seen false after having been true (real pause, not initial state)
   | 'evt-resumed' // isPlaying seen true again after evt-paused
   | 'evt-onSeek'
-  | 'evt-seek-fwd-landed' // onProgress currentTime > 4s (proves a forward seek landed, not natural playback)
-  | 'evt-seek-back-landed' // onProgress currentTime < 2s after evt-seek-fwd-landed (proves a backward seek landed)
+  | 'evt-seek-fwd-landed' // first onProgress after an onSeek reports currentTime > 4s
+  | 'evt-seek-back-landed' // first onProgress after an onSeek reports currentTime < 2s
   | 'evt-muted'
   | 'evt-unmuted' // muted:false after evt-muted (real unmute, not the initial default)
   | 'evt-volume-low' // onVolumeChange volume <= 0.35 while not muted
@@ -68,7 +68,6 @@ const state = {
   errorCode: '' as string,
   // Derived-marker bookkeeping; cleared by reset() with everything else.
   endCount: 0,
-  seekedForwardPastFour: false,
   loopEnabled: false,
   seekPending: false,
   lastProgress: null as number | null,
@@ -121,27 +120,22 @@ function handle(event: PlayerEvent) {
       const t = event.currentTime;
       // derived markers: assert text, not numbers
       if (t > PROGRESS_MARKER_SECONDS) mark('evt-progress-gt-2s');
-      if (t > SEEK_FORWARD_LANDED_SECONDS) {
-        mark('evt-seek-fwd-landed');
-        state.seekedForwardPastFour = true;
-      }
-      // Only meaningful once a forward seek has actually landed.
-      if (t < SEEK_BACK_LANDED_SECONDS && state.seekedForwardPastFour) {
-        mark('evt-seek-back-landed');
-      }
-      // Loop on Android (ExoPlayer repeat mode) restarts without onEnd or onSeek: the
-      // only trace is progress jumping from the end back to the start.
-      if (
+      // The seek markers are derived from the FIRST progress after an onSeek, so
+      // natural playback can never satisfy them: a forward seek must report > 4 s, a
+      // backward one < 2 s.
+      if (state.seekPending) {
+        state.seekPending = false;
+        if (t > SEEK_FORWARD_LANDED_SECONDS) mark('evt-seek-fwd-landed');
+        if (t < SEEK_BACK_LANDED_SECONDS) mark('evt-seek-back-landed');
+      } else if (
+        // Loop on Android (ExoPlayer repeat mode) restarts without onEnd or onSeek: the
+        // only trace is progress jumping from the end back to the start.
         state.loopEnabled &&
         state.lastProgress !== null &&
         state.lastProgress > LOOP_WRAP_FROM_SECONDS &&
         t < LOOP_WRAP_TO_SECONDS
       ) {
-        if (state.seekPending) {
-          state.seekPending = false;
-        } else {
-          mark('evt-loop-verified');
-        }
+        mark('evt-loop-verified');
       }
       state.lastProgress = t;
       return;
@@ -188,7 +182,7 @@ function handle(event: PlayerEvent) {
 
     case 'onSeek':
       mark('evt-onSeek');
-      // The next backward jump in progress is this seek landing, not a loop wrap.
+      // The next progress event is where this seek landed (and not a loop wrap).
       state.seekPending = true;
       log(`onSeek ${event.seekTime}`);
       return;
@@ -227,7 +221,6 @@ export const eventLog = {
     state.entries = [];
     state.errorCode = '';
     state.endCount = 0;
-    state.seekedForwardPastFour = false;
     state.loopEnabled = false;
     state.seekPending = false;
     state.lastProgress = null;

@@ -27,12 +27,19 @@ tags: [smoke]
     visible:
       id: "evt-onLoad"
     timeout: 25000            # HLS: manifest + first segments over local HTTP
+# Same shape as smoke-seek.yaml: interact only once the player is idle (see there).
+- extendedWaitUntil:
+    visible:
+      id: "evt-onEnded"
+    timeout: 25000
 - tapOn:
     id: "btn-seek-5"
+- tapOn:
+    id: "btn-play"
 - extendedWaitUntil:
     visible:
       id: "evt-onSeek"
-    timeout: 15000            # tap is only actually delivered once the clip reaches its natural end (~8s, see smoke-rate.yaml and CONTEXT.md) — do not shrink this back down
+    timeout: 5000
 - extendedWaitUntil:
     visible:
       id: "evt-seek-fwd-landed"

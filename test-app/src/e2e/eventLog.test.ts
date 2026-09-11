@@ -68,15 +68,26 @@ test('progress markers are thresholds on currentTime', () => {
   expect(markers()).toEqual(['evt-onProgress']);
   feed({ type: 'onProgress', currentTime: 2.1 });
   expect(markers()).toContain('evt-progress-gt-2s');
-  expect(markers()).not.toContain('evt-seek-fwd-landed');
-  feed({ type: 'onProgress', currentTime: 4.5 });
-  expect(markers()).toContain('evt-seek-fwd-landed');
 });
 
-test('a backward seek only counts after a forward seek landed', () => {
-  feed({ type: 'onProgress', currentTime: 0.5 }); // natural start, not a seek back
+test('natural playback never produces the seek markers', () => {
+  feed(
+    { type: 'onProgress', currentTime: 0.5 },
+    { type: 'onProgress', currentTime: 5 },
+    { type: 'onProgress', currentTime: 7.9 },
+    { type: 'onProgress', currentTime: 1 }
+  );
+  expect(markers()).not.toContain('evt-seek-fwd-landed');
   expect(markers()).not.toContain('evt-seek-back-landed');
-  feed({ type: 'onProgress', currentTime: 5 }, { type: 'onProgress', currentTime: 1 });
+});
+
+test('seek markers come from the first progress after onSeek', () => {
+  feed({ type: 'onSeek', seekTime: 5 }, { type: 'onProgress', currentTime: 5.1 });
+  expect(markers()).toContain('evt-seek-fwd-landed');
+  expect(markers()).not.toContain('evt-seek-back-landed');
+  feed({ type: 'onProgress', currentTime: 1 }); // no seek pending: ignored
+  expect(markers()).not.toContain('evt-seek-back-landed');
+  feed({ type: 'onSeek', seekTime: 1 }, { type: 'onProgress', currentTime: 1.2 });
   expect(markers()).toContain('evt-seek-back-landed');
 });
 
@@ -161,6 +172,7 @@ test('a manual seek back to the start is not mistaken for a loop wrap', () => {
     { type: 'onProgress', currentTime: 0 }
   );
   expect(markers()).not.toContain('evt-loop-verified');
+  expect(markers()).toContain('evt-seek-back-landed');
   // The seek has been consumed; the next wrap is a real loop restart.
   feed({ type: 'onProgress', currentTime: 7.9 }, { type: 'onProgress', currentTime: 0.3 });
   expect(markers()).toContain('evt-loop-verified');
