@@ -10,6 +10,10 @@ inputs:
     description: 'Install with --frozen-lockfile. Used by the E2E matrix legs, which swap the root lockfile per React Native version.'
     default: 'false'
     required: false
+  cache:
+    description: 'Cache node_modules between runs. Off on macOS runners, where saving the tree took ~5 minutes against a ~1.5 minute install.'
+    default: 'true'
+    required: false
 
 runs:
   using: composite
@@ -27,6 +31,7 @@ runs:
     # same lockfile set, and non-frozen callers never see frozen entries at all.
     - name: Cache dependencies
       id: bun-cache
+      if: inputs.cache == 'true'
       uses: actions/cache@v6
       with:
         path: |
