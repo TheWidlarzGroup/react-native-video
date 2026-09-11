@@ -8,16 +8,6 @@ const project = (() => {
       ios: {
         sourceDir: "ios",
       },
-      macos: {
-        sourceDir: "macos",
-      },
-      visionos: {
-        sourceDir: "visionos",
-      },
-      windows: {
-        sourceDir: "windows",
-        solutionFile: "windows/RNVideoE2E.sln",
-      },
     });
   } catch (_) {
     return undefined;
