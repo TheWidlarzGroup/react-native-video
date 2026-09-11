@@ -10,6 +10,14 @@ on:
     paths-ignore:
       - 'docs/**'
       - '**/*.md'
+  # Also on the default branch: a cache entry is only restorable by other branches
+  # when it was written on the default branch, so this is what keeps every new pull
+  # request warm (and doubles as a post-merge check).
+  push:
+    branches: [master]
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
   workflow_dispatch:
 
 permissions:

@@ -203,6 +203,14 @@ orphan `e2e-results` branch; `scripts/e2e/record-result.mjs` computes per-flow p
 and the consecutive-green counter that gates marking a check required. A missing,
 truncated or empty report is recorded as a failure, never as green.
 
+### Cache budget
+
+The repository's Actions cache is 10 GB with LRU eviction beyond that. Two rules keep it
+in shape: entries are only restorable across branches when written on the default
+branch, so `e2e.yml` and `unit.yml` also run on pushes to `master` (that is what keeps a
+fresh pull request warm); and `cache-cleanup.yml` deletes a pull request's entries when
+it closes and, daily, keeps only the newest entry of each cache family per ref.
+
 ## Manual setup (one-time)
 
 None of these is enforced by any workflow's `permissions:` block, so a missing one fails

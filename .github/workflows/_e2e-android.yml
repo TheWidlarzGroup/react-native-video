@@ -85,6 +85,9 @@ jobs:
       - uses: gradle/actions/setup-gradle@v6
         with:
           cache-read-only: false
+          # Drop files the build did not touch before saving, so a cache entry only
+          # carries what this build actually needs.
+          cache-cleanup: on-success
 
       # x86_64 only: that is the emulator ABI; the other three would be built and thrown
       # away.
