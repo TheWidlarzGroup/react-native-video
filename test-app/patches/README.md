@@ -2,7 +2,12 @@
 
 Applied by `patch-package` from the repo root `postinstall`.
 
-## `react-native-test-app+5.4.9.patch` — preserve deep-link Intent data
+## `react-native-test-app+5.4.9.patch` — deliver deep links to one activity
+
+Two changes to the redirect `MainActivity` performs in `singleApp` mode, both on the Intent it
+builds for `ComponentActivity`.
+
+### 1. Preserve the launch Intent's action/data
 
 **What breaks without it:** on Android, `Linking.getInitialURL()` always resolves to `null`
 after a `rnvtest://scenario/<name>` deep link, so every Maestro flow lands on the test app's
@@ -23,10 +28,28 @@ instead does not work either — its `onCreate()` throws unless the Intent carri
 `intent-filter` itself is injected correctly through `app.json` (`withAndroidManifest`); only
 this in-process hand-off loses the data.
 
-**Scope:** two lines, against a file `react-native-test-app` compiles directly from
+### 2. `FLAG_ACTIVITY_CLEAR_TOP | FLAG_ACTIVITY_SINGLE_TOP`
+
+**What breaks without it:** a second deep link in the same session (scenario A, then
+scenario B — what the error flows do) starts a *second* `ComponentActivity` with a *second*
+React root, while the first one keeps running in the background with its player. Both roots
+mount `App`; React Native broadcasts Linking's `url` event to every root in the runtime, so
+both mount scenario B, two players play at once and every event in the log appears twice.
+Meanwhile `getInitialURL()` in the new root can still read the *previous* activity's Intent
+(`getCurrentActivity()` lags), i.e. scenario A.
+
+**With the flags:** the existing `ComponentActivity` (a `ReactActivity`) receives the link via
+`onNewIntent`, React Native emits the `url` event to the single root, and `App.tsx` remounts
+`ScenarioScreen` (keyed on the scenario), which destroys the previous player. One activity,
+one root, one player.
+
+**Scope:** a handful of lines, against a file `react-native-test-app` compiles directly from
 `node_modules` — not a fork of the template and not an edit to a generated project. Re-check
 it when bumping `react-native-test-app`; 5.4.9 supports React Native 0.76–0.87, so the pin
-covers the whole version matrix.
+covers the whole version matrix. `patch-package`'s *make* mode does not understand
+`bun.lock`; regenerate the file by hand (`diff -u` of the pristine and edited
+`MainActivity.kt`, with `a/node_modules/...` / `b/node_modules/...` headers) and verify with
+`bunx patch-package --patch-dir test-app/patches` on a pristine copy.
 
 iOS needs no equivalent: RNTA's `SceneDelegate.swift` forwards to `RCTLinkingManager`
 unconditionally, and `RCTLinkingManager` reads `UIApplicationLaunchOptionsURLKey` directly.

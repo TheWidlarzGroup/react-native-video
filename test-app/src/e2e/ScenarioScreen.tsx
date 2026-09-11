@@ -32,14 +32,20 @@ import { SCENARIO_SOURCES, type ScenarioName } from './fixtures';
  *    not from a rejected promise) never triggers it — that failure surfaces only via
  *    onStatusChange('error'), so both are needed to catch every error path.
  */
-export function ScenarioScreen({ scenario }: { scenario: ScenarioName }) {
+export function ScenarioScreen({
+  scenario,
+  rootId,
+}: {
+  scenario: ScenarioName;
+  rootId?: number;
+}) {
   // See RATE_STEPS in eventLog.ts for why the next rate is tracked here, not read
   // from the player at press time.
   const rateStepRef = useRef(0);
 
   const player = useVideoPlayer(SCENARIO_SOURCES[scenario], (p) => {
     eventLog.reset();
-    eventLog.log(`scenario:${scenario}`);
+    eventLog.log(`scenario:${scenario} root#${rootId ?? '?'}`);
 
     // Marker derivation lives in eventLog.handle(); this only maps payloads.
     p.addEventListener('onLoad', (e) =>
@@ -91,36 +97,67 @@ export function ScenarioScreen({ scenario }: { scenario: ScenarioName }) {
           testID="btn-rate-cycle"
           title="rate"
           onPress={() => {
-            player.rate = RATE_STEPS[rateStepRef.current];
+            const next = RATE_STEPS[rateStepRef.current];
+            eventLog.log(`press:rate -> ${next}`);
+            player.rate = next;
             rateStepRef.current = (rateStepRef.current + 1) % RATE_STEPS.length;
+          }}
+        />
+        <Button
+          testID="btn-play"
+          title="play"
+          onPress={() => {
+            eventLog.log('press:play');
+            player.play();
+          }}
+        />
+        <Button
+          testID="btn-pause"
+          title="pause"
+          onPress={() => {
+            eventLog.log('press:pause');
+            player.pause();
           }}
         />
         <Button
           testID="btn-play-pause"
           title="play/pause"
-          onPress={() => (player.isPlaying ? player.pause() : player.play())}
+          onPress={() => {
+            eventLog.log(`press:play-pause (isPlaying=${player.isPlaying})`);
+            if (player.isPlaying) player.pause();
+            else player.play();
+          }}
         />
         <Button
           testID="btn-seek-5"
           title="seek 5s"
-          onPress={() => player.seekTo(5)}
+          onPress={() => {
+            eventLog.log('press:seek -> 5');
+            player.seekTo(5);
+          }}
         />
         <Button
           testID="btn-seek-1"
           title="seek 1s"
-          onPress={() => player.seekTo(1)}
+          onPress={() => {
+            eventLog.log('press:seek -> 1');
+            player.seekTo(1);
+          }}
         />
         <Button
           testID="btn-mute-toggle"
           title="mute"
           onPress={() => {
-            player.muted = !player.muted;
+            const next = !player.muted;
+            eventLog.log(`press:mute -> ${next}`);
+            player.muted = next;
           }}
         />
         <Button
           testID="btn-volume-low"
           title="vol .3"
           onPress={() => {
+            eventLog.log('press:volume -> 0.3 (unmuted)');
             player.muted = false;
             player.volume = 0.3;
           }}
@@ -129,7 +166,10 @@ export function ScenarioScreen({ scenario }: { scenario: ScenarioName }) {
           testID="btn-loop-toggle"
           title="loop"
           onPress={() => {
-            player.loop = !player.loop;
+            const next = !player.loop;
+            eventLog.log(`press:loop -> ${next}`);
+            eventLog.setLoopEnabled(next);
+            player.loop = next;
           }}
         />
       </View>
