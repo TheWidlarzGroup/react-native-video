@@ -110,6 +110,22 @@ jobs:
           rm -rf app/build/generated/rnta
           echo "OK: plugins applied, generated manifest reset"
 
+      # The wrapper downloads the Gradle distribution on first use; that download from
+      # services.gradle.org is the one piece of this leg that reaches the network at
+      # build time, and it has been cut off mid-transfer ("Connection reset"). Fetch it
+      # up to three times before the build proper; once setup-gradle has saved the
+      # distribution to its cache this is a no-op.
+      - name: Fetch the Gradle distribution
+        working-directory: test-app/android
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            ./gradlew --version && exit 0
+            echo "gradle wrapper download failed (attempt ${attempt}/3), retrying in 15 s" >&2
+            sleep 15
+          done
+          exit 1
+
       - name: Build test app APK
         run: cd test-app/android && ./gradlew assembleDebug --build-cache --no-daemon -PreactNativeArchitectures=x86_64
 
