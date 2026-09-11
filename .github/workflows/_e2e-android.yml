@@ -152,16 +152,16 @@ jobs:
           # line.
           #
           # hide_error_dialogs suppresses app crash/ANR dialogs (system-process ANR
-          # dialogs are handled by not resuming snapshots, above). The boot-animation
-          # wait plus a short settle gives the launcher time to finish initialising
-          # before the first clear-state launch.
+          # dialogs are handled by not resuming snapshots, above). The action already
+          # waited for sys.boot_completed; the short settle gives the launcher time to
+          # finish initialising before the first clear-state launch. (Do not wait for
+          # init.svc.bootanim == stopped: with -no-boot-anim that service never runs.)
           # The emulator dies with this step, so the post-mortem (a screenshot and the
           # accessibility hierarchy of the app's default screen, i.e. what Maestro
           # matches `id:` against) has to happen here, after Maestro, before the final
           # line turns a Maestro failure back into a step failure.
           script: |
             adb shell settings put global hide_error_dialogs 1
-            adb shell 'while [ "$(getprop init.svc.bootanim)" != "stopped" ]; do sleep 1; done'
             sleep 10
             adb install -r test-app/android/app/build/outputs/apk/debug/app-debug.apk
             adb logcat -c
