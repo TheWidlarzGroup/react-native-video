@@ -31,9 +31,12 @@ runs:
       with:
         path: |
           **/node_modules
-        key: ${{ runner.os }}-v7-bun-${{ inputs.frozen == 'true' && 'frozen' || 'shared' }}-${{ hashFiles('**/bun.lock') }}-${{ hashFiles('**/package.json') }}
+        # patch-package edits files inside node_modules at postinstall and cannot apply a
+        # changed patch on top of an already-patched tree, so the patches are part of the
+        # key: a patch change must miss the cache.
+        key: ${{ runner.os }}-v7-bun-${{ inputs.frozen == 'true' && 'frozen' || 'shared' }}-${{ hashFiles('**/bun.lock') }}-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/patches/*.patch') }}
         restore-keys: |
-          ${{ runner.os }}-v7-bun-${{ inputs.frozen == 'true' && 'frozen' || 'shared' }}-${{ hashFiles('**/bun.lock') }}-
+          ${{ runner.os }}-v7-bun-${{ inputs.frozen == 'true' && 'frozen' || 'shared' }}-${{ hashFiles('**/bun.lock') }}-${{ hashFiles('**/package.json') }}-
           ${{ inputs.frozen != 'true' && format('{0}-v7-bun-shared-', runner.os) || '' }}
 
     - name: Install dependencies
