@@ -86,10 +86,25 @@ How to run the suite and how to add a flow: [`README.md`](README.md).
   React Native architecture gap, not app- or scenario-specific, and it reproduced 100% of
   the time on a fresh `launchApp: clearState: true` in real Maestro runs (not just manual
   `simctl` testing). **Fix, already applied in every `e2e/flows/*.yaml`:** insert an
-  `extendedWaitUntil: { visible: "Display Settings" }` (a static string already on the
-  test app's default screen) between `launchApp` and `openLink`, so the link is only sent
-  once JS has actually mounted and subscribed. Verified stable over 3 consecutive full
-  `maestro test e2e/flows/` runs (3/3 passed each time, ~29s).
+  `extendedWaitUntil: { visible: { id: "e2e-host-ready" } }` (a `testID` on the
+  `<Text>` the test app's default screen renders — `App.tsx`'s
+  `<Text testID="e2e-host-ready">RNVideoE2E ready</Text>` — matched by testID rather
+  than by its literal text, which is more robust against the copy changing) between
+  `launchApp` and `openLink`, so the link is only sent once JS has actually mounted and
+  subscribed. Verified stable over 3 consecutive full `maestro test e2e/flows/` runs
+  (3/3 passed each time, ~29s).
+
+- **A cold-launched scenario that fails before any real playback fires NO player event at
+  all — and this is an unexplained workaround, not a fix.** On a genuinely cold launch, the
+  error-404 scenario (which errors before attempting playback) never emitted a single
+  event; confirmed hanging past 30 s, not merely slow. A scenario with real playback
+  (mp4/hls) initialises fine cold. The root cause was never pinned down — it looks like a
+  native/Nitro registration path that only completes once an actual playback attempt
+  triggers it. `smoke-error-404.yaml` works around it by first navigating through the mp4
+  scenario, verified stable over 3 repeats. **This is worth root-causing properly**: the
+  warm-up makes a green flow out of behaviour nobody has explained, and if the underlying
+  cause is a real library bug in cold-start initialisation, this flow is now shaped so it
+  can never catch it.
 
 ## Gotchas found while building the wave-1 expansion (seek, mute/volume, rate, loop)
 

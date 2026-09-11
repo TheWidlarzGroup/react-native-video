@@ -1,8 +1,9 @@
 // @ts-check
 // Config plugin for the RNTA-hosted E2E test app: deep links (rnvtest://scenario/<name>),
 // background audio, PiP, and Android cleartext HTTP to the local fixture server. Applied
-// via app.json's "plugins" — no generated-project edits. See e2e/SPIKE_RNTA.md for the
-// investigation this came out of, and test-app/patches/ for the one Android-side patch
+// via app.json's "plugins" — no generated-project edits. See e2e/CONTEXT.md ("Gotchas
+// found while building the MVP scaffold") for the investigation this came out of, and
+// test-app/patches/ for the one Android-side patch
 // this setup still needs (deep links dropped in singleApp mode — not fixable via a plugin
 // alone, see that patch's own comment).
 //
