@@ -173,19 +173,21 @@ jobs:
           # and `\` the flow path), and no `set -e`, which would only apply to its own
           # line.
           #
-          # hide_error_dialogs suppresses app crash/ANR dialogs (system-process ANR
-          # dialogs are handled by not resuming snapshots, above). The action already
-          # waited for sys.boot_completed; the short settle gives the launcher time to
-          # finish initialising before the first clear-state launch. (Do not wait for
-          # init.svc.bootanim == stopped: with -no-boot-anim that service never runs.)
+          # hide_error_dialogs suppresses app crash/ANR dialogs. System-process ANRs
+          # (the launcher, "Quickstep isn't responding") are not covered by it and have
+          # shown up right after a cold boot on a busy runner, with the dialog then
+          # covering every flow; scripts/e2e/android-settle.sh waits for the guest load
+          # to drop and dismisses any such dialog before Maestro starts. (Do not wait
+          # for init.svc.bootanim == stopped: with -no-boot-anim that service never
+          # runs.)
           # The emulator dies with this step, so the post-mortem (a screenshot and the
           # accessibility hierarchy of the app's default screen, i.e. what Maestro
           # matches `id:` against) has to happen here, after Maestro, before the final
           # line turns a Maestro failure back into a step failure.
           script: |
             adb shell settings put global hide_error_dialogs 1
-            sleep 10
             adb install -r test-app/android/app/build/outputs/apk/debug/app-debug.apk
+            bash scripts/e2e/android-settle.sh 120
             adb logcat -c
             adb logcat > logcat.txt &
             maestro test -e APP_ID=${{ env.APP_ID }} $TAGS --format junit --output e2e-report.xml --debug-output "$PWD/maestro-debug" --flatten-debug-output e2e/flows/ || touch maestro-failed
