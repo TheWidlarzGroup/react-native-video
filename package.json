@@ -96,23 +96,23 @@
           "types": [
             {
               "type": "feat",
-              "section": "Features \u2728"
+              "section": "Features ✨"
             },
             {
               "type": "fix",
-              "section": "Bug Fixes \ud83d\udc1b"
+              "section": "Bug Fixes 🐛"
             },
             {
               "type": "refactor",
-              "section": "Code Refactoring \ud83d\udee0"
+              "section": "Code Refactoring 🛠"
             },
             {
               "type": "chore(deps)",
-              "section": "Dependency Upgrades \ud83d\udce6"
+              "section": "Dependency Upgrades 📦"
             },
             {
               "type": "docs",
-              "section": "Documentation \ud83d\udcda"
+              "section": "Documentation 📚"
             }
           ]
         },
