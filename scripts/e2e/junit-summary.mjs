@@ -51,10 +51,15 @@ export function isCompleteReport(xml) {
   return xml.includes('</testsuites>');
 }
 
-// Maestro failure messages are free text and routinely contain newlines and pipes, both of
-// which silently destroy a markdown table. Flatten and escape before embedding.
+// Maestro failure messages are free text and routinely contain newlines, pipes and
+// backslashes, all of which silently destroy a markdown table. Flatten and escape
+// before embedding; backslashes first, so the escapes added for pipes stay intact.
 function cell(text) {
-  return text.replace(/\s+/g, ' ').replace(/\|/g, '\\|').trim();
+  return text
+    .replace(/\s+/g, ' ')
+    .replace(/\\/g, '\\\\')
+    .replace(/\|/g, '\\|')
+    .trim();
 }
 
 export function renderSummary(parsed, label, hasFile, isComplete = true) {

@@ -11,6 +11,13 @@ const XML = `<?xml version="1.0"?>
   </testsuite>
 </testsuites>`;
 
+test('table cells escape backslashes as well as pipes', () => {
+  const xml = `<testsuites><testsuite><testcase name="a\\b"><failure message="path C:\\x | y"/></testcase></testsuite></testsuites>`;
+  const md = renderSummary(parseJUnit(xml), 'l', true, true);
+  expect(md).toContain('`a\\\\b`');
+  expect(md).toContain('path C:\\\\x \\| y');
+});
+
 test('counts cases and failures', () => {
   const parsed = parseJUnit(XML);
   expect(parsed.total).toBe(2);
@@ -71,7 +78,9 @@ test('handles messages with backslash-pipe sequences', () => {
   const row = renderSummary(parseJUnit(xml), 'x', true, true).trimEnd().split('\n').at(-1);
   // Backslash and pipe are treated as separate characters; the pipe gets escaped
   expect(row.split(/(?<!\\)\|/).length).toBe(5);
-  expect(row).toContain('already has \\\\| in it');
+  // The message contains a literal backslash before the pipe; in a markdown table the
+  // backslash must be escaped too (\\), followed by the escaped pipe (\|).
+  expect(row).toContain('already has \\\\\\| in it');
 });
 
 test('decodes XML entities in failure messages', () => {
