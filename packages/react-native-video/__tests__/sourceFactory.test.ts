@@ -1,56 +1,19 @@
-import { test, expect, mock, beforeEach } from 'bun:test';
+import { test, expect, beforeEach } from 'bun:test';
 import { VideoRuntimeError } from '../src/core/types/VideoError';
-
-// sourceFactory creates the native factory hybrid object at import time and reads
-// Platform / Image from react-native, so both modules are mocked before it is imported.
-const platform = { OS: 'ios' as string };
-const calls: { fromUri: string[]; fromVideoConfig: Record<string, unknown>[] } = {
-  fromUri: [],
-  fromVideoConfig: [],
-};
-let nativeThrows: unknown = null;
-let resolvedAsset: { uri?: unknown } | null = { uri: 'file:///asset.mp4' };
-
-mock.module('react-native', () => ({
-  Platform: {
-    get OS() {
-      return platform.OS;
-    },
-    select: (spec: Record<string, unknown>) =>
-      platform.OS in spec ? spec[platform.OS] : spec.default,
-  },
-  Image: { resolveAssetSource: () => resolvedAsset },
-}));
-
-mock.module('react-native-nitro-modules', () => ({
-  NitroModules: {
-    createHybridObject: () => ({
-      fromUri: (uri: string) => {
-        if (nativeThrows) throw nativeThrows;
-        calls.fromUri.push(uri);
-        return { name: 'VideoPlayerSource', uri };
-      },
-      fromVideoConfig: (config: Record<string, unknown>) => {
-        if (nativeThrows) throw nativeThrows;
-        calls.fromVideoConfig.push(config);
-        return { name: 'VideoPlayerSource', uri: config.uri };
-      },
-    }),
-  },
-}));
+import {
+  assets,
+  platform,
+  resetNativeMocks,
+  sourceFactory as native,
+} from './helpers/nativeMocks';
 
 const { createSource, createSourceFromUri, createSourceFromVideoConfig } = await import(
   '../src/core/utils/sourceFactory'
 );
 
-beforeEach(() => {
-  platform.OS = 'ios';
-  calls.fromUri = [];
-  calls.fromVideoConfig = [];
-  nativeThrows = null;
-  resolvedAsset = { uri: 'file:///asset.mp4' };
-});
+beforeEach(resetNativeMocks);
 
+const calls = native.calls;
 const lastConfig = () => calls.fromVideoConfig.at(-1)!;
 
 test('a string source goes straight to fromUri', () => {
@@ -72,7 +35,7 @@ test('a numeric asset is resolved through Image.resolveAssetSource', () => {
 });
 
 test('an asset that does not resolve is a source/invalid-uri error', () => {
-  resolvedAsset = null;
+  assets.resolved = null;
   expect(() => createSource(42)).toThrow(VideoRuntimeError);
   try {
     createSource(42);
@@ -172,7 +135,7 @@ test('invalid config uris and non-source values are typed errors', () => {
 });
 
 test('native factory errors are parsed into VideoRuntimeError', () => {
-  nativeThrows = new Error('{%@source/unsupported-content-type::nope@%}');
+  native.throws = new Error('{%@source/unsupported-content-type::nope@%}');
   try {
     createSource('https://x/a.bin');
     throw new Error('expected throw');
@@ -180,6 +143,6 @@ test('native factory errors are parsed into VideoRuntimeError', () => {
     expect(e).toBeInstanceOf(VideoRuntimeError);
     expect((e as VideoRuntimeError).code).toBe('source/unsupported-content-type');
   }
-  nativeThrows = new Error('plain native failure');
+  native.throws = new Error('plain native failure');
   expect(() => createSource({ uri: 'https://x/a.mp4' })).toThrow('plain native failure');
 });
