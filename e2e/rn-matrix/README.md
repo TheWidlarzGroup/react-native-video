@@ -11,9 +11,11 @@ The floor version (0.77) has no directory: the repo's own `test-app/package.json
 ## Switching locally
 
 `node scripts/e2e/use-rn-version.mjs <version>` rewrites `test-app/package.json` and the
-root `bun.lock`; then run `bun install --frozen-lockfile`. Restore the floor before
-committing: `git checkout -- bun.lock test-app/package.json`. A pre-commit hook refuses to
-commit either file while switched.
+root `bun.lock` and clears `test-app/node_modules` (a nested `react-native` from the
+previous variant would otherwise survive the next install); then run
+`bun install --frozen-lockfile`. To go back: `node scripts/e2e/use-rn-version.mjs 0.77`,
+`git checkout -- bun.lock test-app/package.json`, install again. A pre-commit hook refuses
+to commit either file while switched.
 
 ## When a lockfile must be regenerated
 
