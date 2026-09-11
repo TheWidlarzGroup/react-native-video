@@ -40,7 +40,14 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
 - Keep clips 5–15 s — `onEnded` tests must not wait minutes.
 - **Zero retries.** A flow is never re-run to turn it green — a retry hides exactly the
   race conditions this suite exists to catch. A flow that proves unstable gets quarantined
-  (`tags: [flaky]`) with an issue, and drops out of the gate until it is fixed.
+  (`tags: [flaky]`) with an issue, and drops out of the gate until it is fixed. The single
+  exception is transport, not behaviour: `e2e/shared/open-scenario.yaml` retries the
+  `openLink` command itself, because `simctl openurl` on hosted macOS runners has timed
+  out before the app received anything. What the app then shows is never retried.
+- **iOS: the first deep link on a fresh simulator can raise "Open in app?", and the link
+  after that confirmation never reaches JS.** The iOS leg runs
+  `e2e/warmup/ios-approve-open-link.yaml` once before the suite to take that confirmation
+  out of the real flows' way; the shared subflow still handles it defensively.
 - v7 API only in the test app: `useVideoPlayer` + `VideoView` + `useEvent`,
   `player.seekTo()`. No `<Video>` component, no v6 `drm` prop.
 - No check becomes *required* in branch protection before 10–15 consecutive clean runs

@@ -13,30 +13,18 @@ tags: [smoke]
     timeout: 15000
 - waitForAnimationToEnd:
     timeout: 1500
-- openLink: rnvtest://scenario/mp4
-- extendedWaitUntil:
-    visible: "Open"
-    timeout: 3000
-    optional: true
-- tapOn:
-    text: "Open"
-    optional: true
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4
 - extendedWaitUntil:
     visible:
       id: "evt-onLoad"
     timeout: 20000
-- openLink: rnvtest://scenario/broken-manifest
-- extendedWaitUntil:
-    visible: "Open"
-    timeout: 3000
-    optional: true
-- tapOn:
-    text: "Open"
-    optional: true
-- extendedWaitUntil:
-    visible:
-      id: "scenario-broken-manifest"
-    timeout: 20000
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: broken-manifest
 - extendedWaitUntil:
     visible:
       id: "evt-onError"
