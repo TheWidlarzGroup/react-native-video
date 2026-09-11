@@ -21,9 +21,12 @@ runs:
       run: node scripts/e2e/use-rn-version.mjs ${{ inputs.rn-version }}
       shell: bash
 
+    # No node_modules cache on macOS: measured 287 s to save the tree against an 82 s
+    # install, and the restore is not free either.
     - uses: ./.github/actions/setup-bun
       with:
         frozen: 'true'
+        cache: ${{ runner.os == 'macOS' && 'false' || 'true' }}
 
     # Fail before any native build if the install did not yield the requested version.
     - name: Verify resolved React Native version
