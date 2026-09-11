@@ -13,10 +13,11 @@ pre-commit:
       glob: "*.{js,ts,jsx,tsx,mjs,cjs}"
       run: bun typecheck
     # e2e/ and scripts/ are not workspace packages, so `bun lint` / `bun typecheck` never
-    # reach them. Their unit tests are the only gate they have.
+    # reach them. Their unit tests are the only gate they have. test-app's pure logic
+    # (deep-link parsing, config plugin, event log) is tested the same way.
     test-scripts:
-      glob: "{e2e,scripts}/**/*.mjs"
-      run: bun test e2e scripts
+      glob: "{e2e,scripts,test-app}/**/*.{mjs,ts,tsx}"
+      run: bun test e2e scripts test-app
     # Refuse to commit the root lockfile / test-app manifest while switched to a
     # non-floor RN version via scripts/e2e/use-rn-version.mjs.
     floor-lockfile:
