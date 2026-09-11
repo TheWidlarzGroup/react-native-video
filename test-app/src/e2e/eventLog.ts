@@ -30,8 +30,9 @@ export type MarkerId =
   | 'evt-volume-low' // onVolumeChange volume <= 0.35 while not muted
   | 'evt-rate-2x'
   | 'evt-rate-0-5x'
-  | 'evt-loop-verified'; // onEnd fired a 3rd time with no tap between the 2nd and 3rd —
-// only an unassisted `loop` restart could produce that (see smoke-loop.yaml)
+  | 'evt-loop-verified'; // an unassisted loop restart: see LOOP_VERIFIED_END_COUNT and
+// the wrap-around rule in handle('onProgress') — AVPlayer reports each loop as onEnd,
+// ExoPlayer wraps silently, so both are covered (see smoke-loop.yaml)
 
 export type PlayerEvent =
   | { type: 'onLoad'; duration?: number }
@@ -53,6 +54,11 @@ export const SEEK_FORWARD_LANDED_SECONDS = 4;
 export const SEEK_BACK_LANDED_SECONDS = 2;
 export const VOLUME_LOW_THRESHOLD = 0.35;
 export const LOOP_VERIFIED_END_COUNT = 3;
+// A loop wrap-around: progress was near the end of the 8 s clip and is now near its
+// start, with loop enabled and no seek pending. A manual seek to 1 s (btn-seek-1) never
+// lands below LOOP_WRAP_TO_SECONDS, so it cannot be mistaken for a wrap.
+export const LOOP_WRAP_FROM_SECONDS = 6;
+export const LOOP_WRAP_TO_SECONDS = 0.75;
 
 type Listener = () => void;
 
@@ -63,6 +69,9 @@ const state = {
   // Derived-marker bookkeeping; cleared by reset() with everything else.
   endCount: 0,
   seekedForwardPastFour: false,
+  loopEnabled: false,
+  seekPending: false,
+  lastProgress: null as number | null,
 };
 
 const listeners = new Set<Listener>();
@@ -120,6 +129,21 @@ function handle(event: PlayerEvent) {
       if (t < SEEK_BACK_LANDED_SECONDS && state.seekedForwardPastFour) {
         mark('evt-seek-back-landed');
       }
+      // Loop on Android (ExoPlayer repeat mode) restarts without onEnd or onSeek: the
+      // only trace is progress jumping from the end back to the start.
+      if (
+        state.loopEnabled &&
+        state.lastProgress !== null &&
+        state.lastProgress > LOOP_WRAP_FROM_SECONDS &&
+        t < LOOP_WRAP_TO_SECONDS
+      ) {
+        if (state.seekPending) {
+          state.seekPending = false;
+        } else {
+          mark('evt-loop-verified');
+        }
+      }
+      state.lastProgress = t;
       return;
     }
 
@@ -164,6 +188,8 @@ function handle(event: PlayerEvent) {
 
     case 'onSeek':
       mark('evt-onSeek');
+      // The next backward jump in progress is this seek landing, not a loop wrap.
+      state.seekPending = true;
       log(`onSeek ${event.seekTime}`);
       return;
 
@@ -192,12 +218,19 @@ export const eventLog = {
   log,
   setErrorCode,
   handle,
+  // Called by btn-loop-toggle: the wrap-around rule above only applies while loop is on.
+  setLoopEnabled(enabled: boolean) {
+    state.loopEnabled = enabled;
+  },
   reset() {
     state.markers = new Set();
     state.entries = [];
     state.errorCode = '';
     state.endCount = 0;
     state.seekedForwardPastFour = false;
+    state.loopEnabled = false;
+    state.seekPending = false;
+    state.lastProgress = null;
     emit();
   },
   getMarkers: () => state.markers,

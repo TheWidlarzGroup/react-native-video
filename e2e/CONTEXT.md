@@ -60,12 +60,33 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
   notification fire-and-forget. If it arrives before JS has subscribed it is lost, with no
   error. The test app therefore renders `e2e-host-ready` only after its `Linking` listener
   is attached (`App.tsx`), and every flow waits for that marker before `openLink`.
-- **Android: `Linking.getInitialURL()` can read the previous activity's intent.** RNTA's
-  singleApp mode forwards a deep link into a brand-new `ComponentActivity` (see
-  `test-app/patches/`). RN's `IntentModule.getInitialURL()` reads
-  `getCurrentActivity().intent`, and `getCurrentActivity()` can still point at the old
-  activity for a brief window, returning `null`. `App.tsx` retries once after 300 ms on
-  Android only.
+- **Android: one activity, one React root.** RNTA's singleApp mode forwards a deep link
+  from `MainActivity` into `ComponentActivity` (see `test-app/patches/`). Without
+  `CLEAR_TOP | SINGLE_TOP` on that redirect, a second link in the same session opened a
+  second `ComponentActivity` with a second React root; RN broadcasts the `url` event to
+  every root, so two scenarios mounted and two players played at once. The patch makes the
+  existing activity receive the link via `onNewIntent`, which reaches JS as the `url`
+  event on the single root.
+- **Android: `Linking.getInitialURL()` can read the previous activity's intent.** RN's
+  `IntentModule.getInitialURL()` reads `getCurrentActivity().intent`, and
+  `getCurrentActivity()` can lag behind the redirect for a brief window, returning `null`
+  for the first link. `App.tsx` re-reads it at 300 ms and 1 s on Android only, and stops
+  re-reading once a `url` event has arrived (after which the original intent is stale).
+- **Android 15+ draws edge-to-edge and `SafeAreaView` is iOS-only.** Without a top
+  padding equal to `StatusBar.currentHeight`, the first marker renders under the status
+  bar and Maestro drops it from the hierarchy as invisible ("Skipping invisible child").
+  Local runs on API 34 never showed this; API 35/36 do.
+- **Taps are immediate on Android, deferred on iOS.** The iOS driver only delivers a tap
+  once the player goes idle (below); the Android driver delivers it at once. Flows that
+  must work on both use absolute actions (`btn-play`, `btn-seek-1`, `btn-loop-toggle` with
+  the value tracked in JS), never state-dependent toggles.
+- **`loop` is reported differently per platform.** AVPlayer fires `onEnd` on every loop
+  pass; ExoPlayer's repeat mode wraps silently (no `onEnd`, no `onSeek`) and only progress
+  jumping from the end of the clip back to its start betrays it. `evt-loop-verified`
+  covers both (see `eventLog.ts`).
+- **Every control press is logged** (`press:<control> -> <value>`) so a failing flow's
+  hierarchy dump shows what actually landed and when; each `App` instance logs its root id
+  with the scenario, which is how the two-root problem above was found.
 - **`useSyncExternalStore` bails out on same-reference snapshots.** Every mutation in
   `eventLog.ts` produces a new `Set`/array; mutating in place never re-renders.
 - **`onError` only fires from a rejected JS promise or a caught synchronous throw.** A
@@ -103,7 +124,7 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
   - A **"pause mid-playback" flow is not achievable** under this constraint and was
     dropped rather than shipped passing vacuously. Revisit if Maestro's idle detection
     changes.
-  - **`loop` needs a third, unassisted `onEnd` to prove anything**: the loop-toggle tap
-    lands too late for the first natural end, and a manual replay produces a second end
+  - **`loop` needs an unassisted restart to prove anything**: the loop-toggle tap lands
+    too late for the first natural end (iOS) and a manual replay produces a second end
     regardless. `smoke-loop.yaml` seeks + plays once, then makes no further taps; only
-    `loop` itself can produce end #3.
+    `loop` itself can produce end #3 (iOS) or a silent wrap-around (Android).

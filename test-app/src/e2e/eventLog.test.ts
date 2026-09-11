@@ -142,3 +142,40 @@ test('onSeek marks and logs', () => {
   expect(markers()).toEqual(['evt-onSeek']);
   expect(eventLog.getEntries()[0]).toMatch(/onSeek 5$/);
 });
+
+test('loop is verified by a silent wrap-around only while loop is enabled', () => {
+  // ExoPlayer repeat mode restarts without onEnd: progress goes from the end straight
+  // back to the start.
+  feed({ type: 'onProgress', currentTime: 7.5 }, { type: 'onProgress', currentTime: 0.2 });
+  expect(markers()).not.toContain('evt-loop-verified');
+  eventLog.setLoopEnabled(true);
+  feed({ type: 'onProgress', currentTime: 7.6 }, { type: 'onProgress', currentTime: 0.1 });
+  expect(markers()).toContain('evt-loop-verified');
+});
+
+test('a manual seek back to the start is not mistaken for a loop wrap', () => {
+  eventLog.setLoopEnabled(true);
+  feed(
+    { type: 'onProgress', currentTime: 8 },
+    { type: 'onSeek', seekTime: 0 },
+    { type: 'onProgress', currentTime: 0 }
+  );
+  expect(markers()).not.toContain('evt-loop-verified');
+  // The seek has been consumed; the next wrap is a real loop restart.
+  feed({ type: 'onProgress', currentTime: 7.9 }, { type: 'onProgress', currentTime: 0.3 });
+  expect(markers()).toContain('evt-loop-verified');
+});
+
+test('a seek to 1 s lands above the wrap threshold and never counts as a wrap', () => {
+  eventLog.setLoopEnabled(true);
+  feed({ type: 'onProgress', currentTime: 8 }, { type: 'onProgress', currentTime: 1 });
+  expect(markers()).not.toContain('evt-loop-verified');
+});
+
+test('reset clears the loop bookkeeping', () => {
+  eventLog.setLoopEnabled(true);
+  feed({ type: 'onProgress', currentTime: 7.5 });
+  eventLog.reset();
+  feed({ type: 'onProgress', currentTime: 0.1 });
+  expect(markers()).not.toContain('evt-loop-verified');
+});
