@@ -1,0 +1,75 @@
+name: e2e setup
+description: Swap RN version, install frozen, install Maestro, start the fixture server
+
+inputs:
+  rn-version:
+    description: 'React Native version id, matching e2e/rn-matrix (0.77 is the floor)'
+    required: true
+  fixture-port:
+    description: 'Port for the local media fixture server'
+    default: '8090'
+    required: false
+
+runs:
+  using: composite
+  steps:
+    # Must precede any install: pod install and gradlew read node_modules.
+    - name: Select React Native version
+      run: node scripts/e2e/use-rn-version.mjs ${{ inputs.rn-version }}
+      shell: bash
+
+    # frozen: 'true' both runs `bun install --frozen-lockfile` and narrows setup-bun's
+    # own dependency cache to a version-specific restore-key (see the comment in
+    # .github/actions/setup-bun/action.yml) so a matrix leg can never silently install
+    # a node_modules tree left behind by another leg's React Native version.
+    - uses: ./.github/actions/setup-bun
+      with:
+        frozen: 'true'
+
+    # Belt-and-braces check on the invariant the cache-key narrowing above is meant to
+    # guarantee: fail loudly, before Maestro/pod/gradle ever run, if the React Native
+    # version actually resolved from test-app/ isn't the one this job asked for.
+    - name: Verify resolved React Native version
+      working-directory: test-app
+      run: |
+        EXPECTED="${{ inputs.rn-version }}"
+
+        # Resolve exactly the way Metro/pod install/gradlew do: Node module resolution
+        # from inside test-app/, which walks up to the hoisted root node_modules when
+        # there is no nested override. A hardcoded `test-app/node_modules/react-native`
+        # path would be wrong here — bun hoists react-native to the repo root in the
+        # common case, so this must not assume a nested copy exists.
+        RESOLVED=$(node -p "require('react-native/package.json').version" 2>/dev/null) || {
+          echo "::error::could not resolve react-native from test-app/ — install did not complete" >&2
+          exit 1
+        }
+        echo "requested rn-version: ${EXPECTED}"
+        echo "resolved react-native version: ${RESOLVED}"
+
+        case "$RESOLVED" in
+          "$EXPECTED" | "$EXPECTED".*)
+            echo "OK: resolved react-native ${RESOLVED} matches requested ${EXPECTED}"
+            ;;
+          *)
+            echo "::error::resolved react-native version '${RESOLVED}' does not match requested rn-version '${EXPECTED}' — a stale/foreign node_modules tree was installed (cache poisoning across the RN version matrix)" >&2
+            exit 1
+            ;;
+        esac
+      shell: bash
+
+    - name: Install Maestro
+      run: |
+        curl -Ls "https://get.maestro.mobile.dev" | bash
+        echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+      shell: bash
+
+    - name: Start fixture server
+      run: |
+        node e2e/fixtures/serve.mjs e2e/fixtures/media ${{ inputs.fixture-port }} &
+        for i in $(seq 1 30); do
+          curl -sf "http://localhost:${{ inputs.fixture-port }}/short.mp4" -o /dev/null && exit 0
+          sleep 1
+        done
+        echo "fixture server did not come up" >&2
+        exit 1
+      shell: bash

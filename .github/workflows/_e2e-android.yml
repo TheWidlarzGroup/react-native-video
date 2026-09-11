@@ -1,0 +1,206 @@
+# Reusable Android E2E leg — called once per (rn-version, api-level) matrix cell by the
+# PR-gate and nightly orchestrators. Never triggered directly.
+name: _e2e-android
+
+on:
+  workflow_call:
+    inputs:
+      rn-version:
+        description: 'React Native version id, matching e2e/rn-matrix (0.77 is the floor)'
+        type: string
+        required: true
+      api-level:
+        description: 'Android emulator API level'
+        type: string
+        required: true
+      blocking:
+        description: 'false => the job reports but does not fail the calling run'
+        type: boolean
+        default: true
+      tags:
+        description: 'Maestro tag selection, e.g. --exclude-tags=flaky'
+        type: string
+        default: '--exclude-tags=flaky'
+      artifact-name:
+        description: 'Full artifact name to upload results under. When set, used verbatim instead of deriving one from rn-version/api-level/tags. The nightly orchestrator sets this from its own matrix-plan job so its expected-row list and this leg''s actual upload are the same string by construction; left empty by callers with no such list to keep in sync (e.g. the PR-gate).'
+        type: string
+        default: ''
+
+env:
+  APP_ID: com.rnvtest.host
+
+jobs:
+  run:
+    # Explicit name: a reusable-workflow call's status context is composed as
+    # "<caller job's displayed name> / <this job's displayed name>" — the top-level
+    # `name:` of this file plays no part in it. Left unset, this job's displayed name
+    # would default to its id, `run`, giving contexts like `android (0.77) / run`
+    # that say nothing about what ran. `maestro` names the actual test runner and is
+    # shared with `_e2e-ios.yml` so both platforms' contexts read the same way. Any
+    # future rename here changes every caller's context strings (both `e2e.yml` and
+    # `e2e-nightly.yml`) — see the comments there before renaming.
+    name: maestro
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    # continue-on-error only changes the conclusion reported to the caller — steps below
+    # still stop after a failure unless they carry their own `if: always()`, so the
+    # summary and artifact-upload steps are marked always() independently of this.
+    continue-on-error: ${{ !inputs.blocking }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # This step has two independent jobs, and does both unconditionally rather than
+      # skipping the first when the caller supplies `artifact-name`. First: derive a
+      # tag-selection slug. The AVD cache key further down keys on this slug ALONE,
+      # regardless of what the uploaded artifact ends up being named, to keep a
+      # quarantine leg and its same-rn/same-api-level coverage sibling from racing on one
+      # cache entry — that need doesn't go away just because artifact-naming
+      # responsibility has moved to the caller. Second: resolve the artifact name itself,
+      # preferring a caller-supplied `artifact-name` over deriving one from rn-version/
+      # api-level/slug.
+      - name: Compute artifact suffix from tag selection
+        id: suffix
+        env:
+          TAGS: ${{ inputs.tags }}
+          GIVEN_NAME: ${{ inputs.artifact-name }}
+        run: |
+          set -euo pipefail
+          SLUG=$(echo "$TAGS" | sed -E 's/[^A-Za-z0-9]+/-/g; s/^-+|-+$//g')
+          # An empty slug is exactly the failure this step exists to make impossible: two
+          # legs at the same rn-version/api-level whose `tags` both happen to sanitize to
+          # nothing would collapse onto the same artifact name below, and
+          # upload-artifact@v4 would hard-error on the second upload with a message that
+          # points at the symptom (a duplicate name) rather than this step, which is the
+          # actual cause. Failing loudly here, before that name is ever used, trades a
+          # confusing downstream error for a clear one at the source.
+          if [ -z "$SLUG" ]; then
+            echo "::error::tags '${TAGS}' produced an empty artifact-name slug — refusing to continue" >&2
+            exit 1
+          fi
+          echo "slug=${SLUG}" >> "$GITHUB_OUTPUT"
+
+          # Preferring a caller-supplied name over re-deriving one here is what makes the
+          # nightly orchestrator's expected-row list (matrix-plan, in e2e-nightly.yml) and
+          # this leg's real upload the SAME STRING BY CONSTRUCTION when it supplies one,
+          # instead of two independently hand-maintained templates that merely agree
+          # today — which is exactly the bug a prior version of this pipeline had: the
+          # caller computed its own copy of this exact rn-version/api-level/slug format to
+          # build its expected-row list, and editing one copy without the other silently
+          # turned a 17-row expected night into a 26-row actual one. A caller that does
+          # not supply `artifact-name` (the PR-gate `e2e.yml`, whose small matrix keeps
+          # names distinct by inspection and which has no expected-row list to keep in
+          # sync with in the first place) still gets this derived default.
+          if [ -n "$GIVEN_NAME" ]; then
+            NAME="$GIVEN_NAME"
+          else
+            NAME="e2e-android-rn${{ inputs.rn-version }}-api${{ inputs.api-level }}-${SLUG}"
+          fi
+          echo "name=${NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Enable KVM for hardware-accelerated emulator
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - uses: ./.github/actions/e2e-setup
+        with:
+          rn-version: ${{ inputs.rn-version }}
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Build test app APK
+        run: cd test-app/android && ./gradlew assembleDebug --no-daemon
+
+      - name: Cache AVD snapshot
+        uses: actions/cache@v4
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          # Keyed on rn-version AND the tag-selection slug: nightly runs several RN legs
+          # at the same API level concurrently (rn-version covers that), and also runs a
+          # flaky-quarantine leg alongside the regular cell at identical rn-version/
+          # api-level coordinates (the slug covers that). Any key narrower than this lets
+          # two concurrent legs race on one cache entry (both miss, both rebuild cold,
+          # one wins the save) and risks a leg restoring a snapshot populated by a
+          # DIFFERENT leg's run. The slug is computed by the "Compute artifact suffix"
+          # step above, which must run before this step for that reason.
+          key: avd-${{ inputs.api-level }}-rn${{ inputs.rn-version }}-${{ steps.suffix.outputs.slug }}
+
+      - name: Create AVD and cache a cold snapshot
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ inputs.api-level }}
+          arch: x86_64
+          profile: pixel_6
+          force-avd-creation: false
+          # No -no-snapshot here: the emulator must auto-save a snapshot on exit for the
+          # cache populated by this step to actually speed up later runs. Passing
+          # -no-snapshot (as an earlier draft did) would disable snapshot save entirely,
+          # silently defeating the cache this step exists to create.
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          disable-animations: false
+          script: |
+            set -euo pipefail
+            echo "AVD created"
+
+      - name: Run flows on emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        env:
+          # Routed through env rather than interpolated straight into the script below:
+          # `${{ }}` is a textual substitution that happens before the shell parses the
+          # line, so a `tags` value containing a quote/backtick/`$()` could break out of
+          # the `maestro test` argument list it's substituted into. $TAGS as a normal
+          # shell variable is safe from that regardless of its contents.
+          TAGS: ${{ inputs.tags }}
+        with:
+          api-level: ${{ inputs.api-level }}
+          arch: x86_64
+          profile: pixel_6
+          force-avd-creation: false
+          disable-animations: true
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          script: |
+            # set -e: without it, only the LAST command's exit status decided this step —
+            # a failing `adb install` earlier in the block would be silently swallowed and
+            # Maestro would go on to test whatever APK was already on the device. Nothing
+            # below legitimately returns non-zero on the happy path (the `-r` on install
+            # below is exactly what makes that true — see its comment), so this is safe.
+            set -euo pipefail
+            # -r (reinstall, keep data) unconditionally replaces whatever APK the cached
+            # AVD's userdata partition already has installed — a cache hit restores a
+            # device that may already have com.rnvtest.host on it, and a plain `adb
+            # install` fails with INSTALL_FAILED_ALREADY_EXISTS in that case. Kept data
+            # doesn't matter: every flow already does `launchApp: clearState: true`.
+            adb install -r test-app/android/app/build/outputs/apk/debug/app-debug.apk
+            adb logcat -c
+            adb logcat > logcat.txt &
+            maestro test -e APP_ID=${{ env.APP_ID }} $TAGS \
+              --format junit --output e2e-report.xml \
+              --debug-output maestro-debug \
+              e2e/flows/
+
+      - name: Job summary
+        if: always()
+        run: |
+          node scripts/e2e/junit-summary.mjs e2e-report.xml \
+            "android · RN ${{ inputs.rn-version }} · API ${{ inputs.api-level }}"
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.suffix.outputs.name }}
+          path: |
+            e2e-report.xml
+            maestro-debug/**
+            logcat.txt
+          if-no-files-found: ignore
