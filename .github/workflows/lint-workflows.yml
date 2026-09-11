@@ -1,0 +1,29 @@
+# Static check of every workflow and composite action: expression typos, unknown
+# inputs/outputs on workflow_call and matrix keys, plus shellcheck on run: blocks.
+# The E2E pipeline is seven YAML files that only ever execute in CI; this is the
+# cheapest way to catch a broken `${{ }}` before a 40-minute matrix does.
+name: lint-workflows
+
+on:
+  pull_request:
+    paths:
+      - '.github/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  actionlint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install actionlint
+        run: |
+          set -euo pipefail
+          bash <(curl -sSL https://raw.githubusercontent.com/rhysd/actionlint/v1.7.7/scripts/download-actionlint.bash) 1.7.7
+
+      - name: Lint workflows
+        run: ./actionlint -color

@@ -18,6 +18,10 @@ pre-commit:
     test-scripts:
       glob: "{e2e,scripts,test-app}/**/*.{mjs,ts,tsx}"
       run: bun test e2e scripts test-app
+    # Workflow lint runs in CI (lint-workflows.yml); run it locally too when installed.
+    workflows:
+      glob: ".github/**/*.yml"
+      run: if command -v actionlint >/dev/null; then actionlint; else echo "actionlint not installed (brew install actionlint); CI will run it"; fi
     # Refuse to commit the root lockfile / test-app manifest while switched to a
     # non-floor RN version via scripts/e2e/use-rn-version.mjs.
     floor-lockfile:
