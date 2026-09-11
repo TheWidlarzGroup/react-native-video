@@ -157,18 +157,23 @@ jobs:
           # Passed through the environment so a tags value cannot break out of the
           # command line via `${{ }}` text substitution.
           TAGS: ${{ inputs.tags }}
+          # Maestro installs and launches its XCTest runner on first use; on a hosted
+          # macOS runner that takes longer than the 15 s default and fails with
+          # "iOS driver not ready in time".
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: '120000'
         run: |
           set -euo pipefail
           # shellcheck disable=SC2086 # $TAGS is a list of flags and must word-split
           maestro test -e APP_ID=${{ env.APP_ID }} $TAGS \
             --format junit --output e2e-report.xml \
-            --debug-output maestro-debug \
+            --debug-output "$PWD/maestro-debug" --flatten-debug-output \
             e2e/flows/
 
       # `log show` reads the persisted log after the run, so nothing has to be flushed
       # or killed cleanly. --last matches timeout-minutes so the window can never be
-      # shorter than the job.
-      - name: Collect device log
+      # shorter than the job. The screenshot shows whatever the simulator was left on,
+      # which is the failing screen when Maestro stopped on an assertion.
+      - name: Collect device log and screenshot
         if: always()
         run: |
           set -euo pipefail
@@ -178,8 +183,10 @@ jobs:
             echo "no booted simulator — skipping device log"
             exit 0
           fi
+          mkdir -p post-mortem
+          xcrun simctl io booted screenshot post-mortem/last-screen.png || true
           xcrun simctl spawn booted log show --last 60m \
-            --predicate 'process == "ReactTestApp"' > device.log
+            --predicate 'process CONTAINS "RNVideoE2E" OR process == "ReactTestApp"' > device.log
 
       - name: Job summary
         if: always()
@@ -195,5 +202,7 @@ jobs:
           path: |
             e2e-report.xml
             maestro-debug/**
+            post-mortem/**
             device.log
+            ~/.maestro/tests/**
           if-no-files-found: ignore
