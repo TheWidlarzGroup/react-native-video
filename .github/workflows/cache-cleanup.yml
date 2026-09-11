@@ -1,0 +1,77 @@
+# Keeps the Actions cache (10 GB per repository, LRU eviction beyond that) from filling
+# up with stale entries:
+#   - when a pull request closes, every cache entry scoped to it is deleted;
+#   - once a day, on every ref, only the newest entry of each cache family is kept
+#     (bun, pods, deriveddata, gradle-*), because every change to a lockfile, patch or
+#     source hash creates a new key and the previous entries linger until evicted.
+# Caches written on the default branch are the ones every pull request can restore,
+# so those are pruned to one-per-family too, never removed entirely.
+name: cache-cleanup
+
+on:
+  pull_request:
+    types: [closed]
+  schedule:
+    - cron: '30 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  closed-pr:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      REF: refs/pull/${{ github.event.pull_request.number }}/merge
+    steps:
+      - name: Delete every cache entry scoped to this pull request
+        run: |
+          set -euo pipefail
+          gh cache list --ref "$REF" --limit 200 --json id,key,sizeInBytes \
+            --jq '.[] | "\(.id)\t\(.sizeInBytes)\t\(.key)"' > entries.tsv || true
+          if [ ! -s entries.tsv ]; then echo "no cache entries for ${REF}"; exit 0; fi
+          total=0
+          while IFS=$'\t' read -r id size key; do
+            gh cache delete "$id" && echo "deleted ${key} ($((size / 1048576)) MB)"
+            total=$((total + size))
+          done < entries.tsv
+          echo "freed $((total / 1048576)) MB"
+
+  prune:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      # A "family" is the key with its trailing hash segments removed: everything the
+      # workflows generate is <name>-<fixed coordinates>-<hash>[-<hash>], so stripping
+      # 32+ character hex runs groups the variants of one cache together.
+      - name: Keep only the newest entry per cache family and ref
+        run: |
+          set -euo pipefail
+          gh cache list --limit 500 --sort last_accessed_at --order desc \
+            --json id,key,ref,sizeInBytes,lastAccessedAt \
+            --jq '.[] | "\(.id)\t\(.ref)\t\(.sizeInBytes)\t\(.key)"' > entries.tsv || true
+          if [ ! -s entries.tsv ]; then echo "no cache entries"; exit 0; fi
+          declare -A seen
+          freed=0; kept=0
+          while IFS=$'\t' read -r id ref size key; do
+            family=$(echo "$key" | sed -E 's/-?[0-9a-f]{32,}//g; s/-+$//')
+            slot="${ref}|${family}"
+            if [ -n "${seen[$slot]:-}" ]; then
+              gh cache delete "$id" && echo "deleted ${key} on ${ref} ($((size / 1048576)) MB), newer entry kept"
+              freed=$((freed + size))
+            else
+              seen[$slot]=1
+              kept=$((kept + 1))
+            fi
+          done < entries.tsv
+          echo "kept ${kept} entries, freed $((freed / 1048576)) MB"
+          gh api "repos/${GH_REPO}/actions/cache/usage" --jq '"now: \(.active_caches_count) caches, \((.active_caches_size_in_bytes/1073741824*100|round)/100) GB"'
