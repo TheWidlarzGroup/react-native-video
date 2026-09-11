@@ -182,7 +182,7 @@ jobs:
             <(cut -f1 row-status.tsv | LC_ALL=C sort -u))
           if [ -n "$extra" ]; then
             echo "::error::row-status.tsv contains labels matrix-plan does not expect:"
-            echo "$extra" | sed 's/^/  - /' >&2
+            while IFS= read -r label; do echo "  - ${label}" >&2; done <<< "$extra"
             overall=1
           fi
 
@@ -231,7 +231,7 @@ jobs:
             expected_count=$(echo "$expected_sorted" | grep -c .)
             missing_count=$(echo "$missing" | grep -c .)
             echo "::error::row-status.tsv has $((expected_count - missing_count)) of ${expected_count} expected rows. Missing:"
-            echo "$missing" | sed 's/^/  - /' >&2
+            while IFS= read -r label; do echo "  - ${label}" >&2; done <<< "$missing"
             overall=1
           fi
 

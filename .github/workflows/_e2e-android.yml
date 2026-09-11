@@ -29,6 +29,9 @@ on:
 env:
   APP_ID: com.rnvtest.host
 
+permissions:
+  contents: read
+
 jobs:
   run:
     # The status context GitHub shows is "<caller job name> / <this job name>", so this
@@ -120,8 +123,9 @@ jobs:
           force-avd-creation: false
           disable-animations: true
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          # The action runs this with /usr/bin/sh (dash), which has no `pipefail`.
           script: |
-            set -euo pipefail
+            set -eu
             # -r: a restored snapshot may already carry the app; every flow clears state.
             adb install -r test-app/android/app/build/outputs/apk/debug/app-debug.apk
             adb logcat -c
