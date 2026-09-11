@@ -3,10 +3,28 @@
 Each directory is one React Native version in the CI matrix. `overlay.json` holds only the
 dependency differences from `test-app/package.json`; `bun.lock` is the full root lockfile
 resolved with that overlay applied, so every CI job installs with `--frozen-lockfile` and a
-red job can never mean "npm resolved differently today".
+red job can never mean "bun resolved differently today".
 
 The floor version (0.77) has no directory: the repo's own `test-app/package.json` and root
 `bun.lock` are its variant.
+
+## Switching locally
+
+`node scripts/e2e/use-rn-version.mjs <version>` rewrites `test-app/package.json` and the
+root `bun.lock`; then run `bun install --frozen-lockfile`. Restore the floor before
+committing: `git checkout -- bun.lock test-app/package.json`. A pre-commit hook refuses to
+commit either file while switched.
+
+## When a lockfile must be regenerated
+
+The variant lockfiles snapshot the whole workspace, not just `test-app/`. Any change to a
+`package.json` anywhere in the monorepo (library, example, docs) makes the frozen install
+fail on the 0.82/0.87 legs. Regenerate and commit the variants in the same PR:
+
+```bash
+for v in 0.82 0.87; do node scripts/e2e/use-rn-version.mjs "$v" --refresh; done
+git add e2e/rn-matrix
+```
 
 ## Adding a version
 
