@@ -25,7 +25,12 @@ bun install --frozen-lockfile   # also applies test-app/patches/ via the root po
 #    CI does) or keep `bun run --cwd test-app start` running instead.
 bun run --cwd test-app build:android   # or build:ios — before pod install on iOS
 
-# Android: build a debug APK and install it on a running emulator
+# Android: build a debug APK and install it on a running emulator. The bundle step above
+# already generated test-app/android/app/build/generated/rnta/.../AndroidManifest.xml,
+# BEFORE react-native-test-app applied the config plugins (deep-link intent filter,
+# cleartext HTTP), and the generator only regenerates when app.json is newer than that
+# file. Delete it so Gradle regenerates it with the plugins applied.
+rm -rf test-app/android/app/build/generated/rnta
 cd test-app/android && ./gradlew assembleDebug -PreactNativeArchitectures=x86_64 && cd ../..
 adb install -r test-app/android/app/build/outputs/apk/debug/app-debug.apk
 
