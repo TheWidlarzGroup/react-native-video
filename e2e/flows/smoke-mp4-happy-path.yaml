@@ -17,23 +17,10 @@ tags: [smoke]
 # matter for scenarios that fail almost instantly (error-404). Not a flake retry.
 - waitForAnimationToEnd:
     timeout: 1500
-- openLink: rnvtest://scenario/mp4
-# iOS shows a one-time "Open in <app>?" system confirmation for openLink on some sessions
-# (simulator-specific, not app-specific) — harmless no-op when it doesn't appear.
-- extendedWaitUntil:
-    visible: "Open"
-    timeout: 3000
-    optional: true
-- tapOn:
-    text: "Open"
-    optional: true
-# Android's singleApp mode routes rnvtest:// through MainActivity, which redirects to a
-# second Activity (ComponentActivity) that actually hosts the JS — that Activity-transition
-# + fresh JS mount takes a moment longer than an instant assertVisible allows for.
-- extendedWaitUntil:
-    visible:
-      id: "scenario-mp4"
-    timeout: 20000
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4
 - extendedWaitUntil:
     visible:
       id: "evt-onLoad"

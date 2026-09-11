@@ -64,6 +64,9 @@ deep links (`rnvtest://scenario/<name>`), never via UI navigation.
 1. If the scenario needs new app behavior: add a `ScenarioName` + source in `fixtures.ts`,
    and (if needed) a derived marker in `eventLog.ts` — markers over number-parsing, always.
 2. Copy the closest existing flow in `e2e/flows/`, rename, adjust deep link + assertions.
+   Open scenarios through the shared subflow (`runFlow: ../shared/open-scenario.yaml` with
+   `SCENARIO`), never with a bare `openLink`: the subflow owns the deep-link transport
+   retry, the iOS "Open in app?" confirmation and the wait for the scenario screen.
 3. Timeouts: generous on first event after load (emulator decoders are slow to start),
    tight after playback is running. Clip lengths are 8 s — nothing should wait > 30 s.
 4. Run locally on BOTH platforms before opening a PR.
@@ -77,6 +80,10 @@ plain reviewable YAML.
 ## Rules
 
 - No external network in PR flows — local fixtures only. Public streams live in nightly.
-- Zero retries. A flaky flow gets quarantined (`tags: [flaky]`) with an issue, never
-  retried into a false green — a retry hides the race the flow just caught.
+- Zero retries on anything the flows assert. A flaky flow gets quarantined
+  (`tags: [flaky]`) with an issue, never retried into a false green — a retry hides the
+  race the flow just caught. The one retry in the suite wraps the `openLink` transport in
+  `e2e/shared/open-scenario.yaml` (hosted simulators have timed out inside `simctl openurl`
+  before the app saw anything); a scenario screen or marker that does not appear still
+  fails the flow.
 - Bugfix in an E2E-coverable area ⇒ the PR includes a reproducing flow.

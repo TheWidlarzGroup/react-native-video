@@ -13,22 +13,10 @@ tags: [smoke]
 # See smoke-mp4-happy-path.yaml: small settle buffer for RNTA's native bootstrapping.
 - waitForAnimationToEnd:
     timeout: 1500
-- openLink: rnvtest://scenario/hls
-# iOS shows a one-time "Open in <app>?" system confirmation for openLink on some sessions
-# (simulator-specific, not app-specific) — harmless no-op when it doesn't appear.
-- extendedWaitUntil:
-    visible: "Open"
-    timeout: 3000
-    optional: true
-- tapOn:
-    text: "Open"
-    optional: true
-# See smoke-mp4-happy-path.yaml: Android's Activity-redirect (MainActivity -> ComponentActivity
-# in singleApp mode) + fresh JS mount takes a moment longer than an instant assertVisible allows.
-- extendedWaitUntil:
-    visible:
-      id: "scenario-hls"
-    timeout: 20000
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: hls
 - extendedWaitUntil:
     visible:
       id: "evt-onLoad"
