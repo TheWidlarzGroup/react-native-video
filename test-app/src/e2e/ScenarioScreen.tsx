@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import { Button, StyleSheet, Text, View } from 'react-native';
 // v7 API only — never <Video>, never v6 props (see e2e/CONTEXT.md)
 import { useVideoPlayer, VideoView } from 'react-native-video';
@@ -7,8 +7,12 @@ import { EventLogPanel } from './EventLogPanel';
 import { SCENARIO_SOURCES, type ScenarioName } from './fixtures';
 
 /**
- * One screen per scenario, opened via deep link: rnvtest://scenario/<name>
- * eventLog.reset() runs on mount so each flow starts from a clean marker state.
+ * One screen per scenario, opened via deep link: rnvtest://scenario/<name>. App.tsx keys
+ * this component on the scenario, so every scenario gets a fresh mount and a fresh
+ * player. The event log is reset inside the player setup callback, before any listener
+ * is attached: useVideoPlayer runs that callback synchronously during the first render
+ * when initializeOnCreation is false, so a reset in an effect would run AFTER the first
+ * events (a 404 fails ~30 ms after mount) and wipe them.
  *
  * Sources set initializeOnCreation: false (see fixtures.ts) and this screen calls
  * player.initialize() itself, after attaching listeners, instead of relying on
@@ -29,11 +33,6 @@ import { SCENARIO_SOURCES, type ScenarioName } from './fixtures';
  *    onStatusChange('error'), so both are needed to catch every error path.
  */
 export function ScenarioScreen({ scenario }: { scenario: ScenarioName }) {
-  useEffect(() => {
-    eventLog.reset();
-    eventLog.log(`scenario:${scenario}`);
-  }, [scenario]);
-
   // btn-rate-cycle target index: NOT derived from reading player.rate at press time.
   // A tap issued while the video is actively playing is only actually delivered once the
   // player goes idle (see e2e/flows/smoke-rate.yaml) — by then the native `rate` reads 0
@@ -42,6 +41,9 @@ export function ScenarioScreen({ scenario }: { scenario: ScenarioName }) {
   const RATE_STEPS = [2, 0.5, 1] as const;
 
   const player = useVideoPlayer(SCENARIO_SOURCES[scenario], (p) => {
+    eventLog.reset();
+    eventLog.log(`scenario:${scenario}`);
+
     // Counts onEnd firings for this player instance — a marker is a one-shot boolean,
     // so proving `loop` actually restarted playback needs a real counter, not a marker.
     let endCount = 0;

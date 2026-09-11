@@ -20,24 +20,35 @@ function parseScenario(url: string | null): ScenarioName | null {
 }
 
 /**
- * RNTA's singleApp mode opens a deep link by forwarding it into a brand new
- * ComponentActivity instance (MainActivity forwards + finishes — see the patch in
- * test-app/patches/). That new activity's fresh JS root calls getInitialURL() essentially
- * immediately, but IntentModule.getInitialURL() (react-native's Android implementation)
- * reads getCurrentActivity().intent — and getCurrentActivity() is updated by RN's own
- * activity-lifecycle tracking, which can still be pointing at the *previous* activity for
- * a brief window after the new one is created (confirmed via `adb shell dumpsys activity
- * activities`: the new activity is topResumedActivity with the correct action/data at the
- * exact moment getInitialURL() reads stale state and returns null). One retry after a
- * short delay is enough in practice. iOS doesn't need this — RCTLinkingManager reads
- * UIApplicationLaunchOptionsURLKey directly, no cross-activity race involved.
+ * Resolves the scenario from the launch URL and from later `url` events.
+ *
+ * `ready` flips to true only after the `url` listener is attached. The default screen
+ * renders the `e2e-host-ready` marker from that flag, so a flow that waits for the
+ * marker before `openLink` is guaranteed the link will be received: RCTLinkingManager's
+ * `url` notification is fire-and-forget and is lost if nothing is subscribed yet.
+ *
+ * Android retry: RNTA's singleApp mode opens a deep link by forwarding it into a fresh
+ * ComponentActivity (see test-app/patches/). RN's `IntentModule.getInitialURL()` reads
+ * `getCurrentActivity().intent`, and `getCurrentActivity()` can still point at the
+ * previous activity for a brief window after the new one is created, returning null.
+ * One retry after a short delay is enough. iOS reads the launch URL from
+ * `UIApplicationLaunchOptionsURLKey` directly and has no such race.
  */
-function useScenarioDeepLink(): ScenarioName | null {
+function useScenarioDeepLink(): {
+  scenario: ScenarioName | null;
+  ready: boolean;
+} {
   const [scenario, setScenario] = React.useState<ScenarioName | null>(null);
+  const [ready, setReady] = React.useState(false);
 
   React.useEffect(() => {
     let cancelled = false;
     let retryTimer: ReturnType<typeof setTimeout> | undefined;
+
+    const sub = Linking.addEventListener('url', ({ url }) =>
+      setScenario(parseScenario(url))
+    );
+    setReady(true);
 
     const resolveInitialURL = (isRetry: boolean) => {
       Linking.getInitialURL().then((url) => {
@@ -52,9 +63,6 @@ function useScenarioDeepLink(): ScenarioName | null {
     };
     resolveInitialURL(false);
 
-    const sub = Linking.addEventListener('url', ({ url }) =>
-      setScenario(parseScenario(url))
-    );
     return () => {
       cancelled = true;
       if (retryTimer) clearTimeout(retryTimer);
@@ -62,19 +70,21 @@ function useScenarioDeepLink(): ScenarioName | null {
     };
   }, []);
 
-  return scenario;
+  return { scenario, ready };
 }
 
 export default function App(): React.JSX.Element {
-  const scenario = useScenarioDeepLink();
+  const { scenario, ready } = useScenarioDeepLink();
 
   return (
     <SafeAreaView style={styles.app}>
       {scenario ? (
-        <ScenarioScreen scenario={scenario} />
-      ) : (
+        // Keyed on the scenario so switching scenarios remounts the screen: a fresh
+        // player, a fresh setup callback and a fresh event log every time.
+        <ScenarioScreen key={scenario} scenario={scenario} />
+      ) : ready ? (
         <Text testID="e2e-host-ready">RNVideoE2E ready</Text>
-      )}
+      ) : null}
     </SafeAreaView>
   );
 }

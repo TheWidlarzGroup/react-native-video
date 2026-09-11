@@ -42,6 +42,6 @@ tags: [smoke]
       id: "evt-onError"
     timeout: 20000
 - assertVisible:
-    id: "evt-error-code"      # exact code differs per platform — wave 2 pins it per-platform
+    id: "evt-error-code"      # exact code differs per platform; not pinned yet
 - assertNotVisible:
     id: "evt-onLoad"
