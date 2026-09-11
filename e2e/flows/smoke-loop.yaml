@@ -5,9 +5,9 @@
 #     the 2nd playthrough proves it;
 #   - Android: ExoPlayer's repeat mode wraps silently (no onEnd, no onSeek), so progress
 #     jumping from the end of the clip back to its start while loop is on proves it.
-# Flow shape: let end #1 happen, enable loop, seek back to 1 s and press play once (on
-# Android the seek alone resumes playback; play is a no-op there), then make NO further
-# taps. The next restart can only come from `loop` itself.
+# Flow shape: let end #1 happen, THEN enable loop, seek back to 1 s and press play once
+# (on Android the seek alone resumes playback; play is a no-op there), then make NO
+# further taps. The next restart can only come from `loop` itself.
 appId: ${APP_ID}
 tags: [smoke]
 ---
@@ -35,12 +35,16 @@ tags: [smoke]
     visible:
       id: "evt-onLoad"
     timeout: 20000
-- tapOn:
-    id: "btn-loop-toggle"
+# Enable loop only AFTER the first natural end. A loop tap that lands exactly at the end
+# (seen in CI: 8.0 s after onLoad) makes ExoPlayer restart the source at once, with no
+# onEnd, so a flow waiting for end #1 after the tap never sees it. Ended player = idle
+# player, so this tap is immediate on both platforms.
 - extendedWaitUntil:
     visible:
       id: "evt-onEnded"
-    timeout: 15000            # tap above only actually lands once this natural end #1 happens
+    timeout: 20000
+- tapOn:
+    id: "btn-loop-toggle"
 - tapOn:
     id: "btn-seek-1"
 # btn-play, not btn-play-pause: on Android a seek from the ended state resumes

@@ -10,6 +10,7 @@ import {
   StatusBar,
   StyleSheet,
   Text,
+  View,
 } from 'react-native';
 import { ScenarioScreen } from './src/e2e/ScenarioScreen';
 import { parseScenario } from './src/e2e/deepLink';
@@ -96,7 +97,13 @@ export default function App(): React.JSX.Element {
         // player, a fresh setup callback and a fresh event log every time.
         <ScenarioScreen key={scenario} scenario={scenario} rootId={rootId} />
       ) : ready ? (
-        <Text testID="e2e-host-ready">RNVideoE2E ready</Text>
+        // Centred on purpose: React Native's dev banner ("Connect to Metro to develop
+        // JavaScript") covers the top of the screen for a few seconds after a debug
+        // launch, longer on a slow simulator, and Maestro treats anything under it as
+        // invisible. LogBox notifications sit at the bottom. The middle is safe.
+        <View style={styles.centered}>
+          <Text testID="e2e-host-ready">RNVideoE2E ready</Text>
+        </View>
       ) : null}
     </SafeAreaView>
   );
@@ -113,4 +120,5 @@ const styles = StyleSheet.create({
       default: 0,
     }),
   },
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 });
