@@ -28,52 +28,52 @@ measured by regressions caught before merge, not by matrix size.
   manifest. See "Version-swap mechanism" for the cost this carries today.
 - **D13 — The iOS gate tracks the newest RN version that is green.** Android covers every
   version per PR, so the single iOS job buys platform coverage; pairing it with the newest
-  working version puts it where version-specific breakage occurs. Today that is the floor,
-  because RN 0.87 needs library fixes first (below). Move it to 0.87 once nightly is green
-  there.
+  version puts it where version-specific breakage occurs. Today that is 0.87; the floor's
+  iOS build is covered by nightly.
 
-## RN 0.87 readiness
+## RN 0.87 support
 
-The version swap itself works: bun nests `test-app/node_modules/{react-native,react,
+The version swap works: bun nests `test-app/node_modules/{react-native,react,
 react-native-nitro-modules}` while the root stays on 0.77 / nitro 0.35 for the library,
 and CocoaPods follows the nested copy. RNTA 5.4.9 declares `react-native: 0.76 - 0.87`, so
 the pinned version (with the deep-link patch in `test-app/patches/`) covers the whole
 matrix.
 
-RN 0.87 needs three library-side changes before its rows can be green:
+RN 0.87 needed three changes, all in place:
 
-1. `ReactNativeVideo.podspec` must not publish `ios/Video-Bridging-Header.h` as a public
-   header (issue #5084, PR #5085); `jsi/jsi.h` is owned by module `React` under the
-   prebuilt core.
-2. Three quoted imports of React headers must become framework-style — under the prebuilt
-   core `RCTBridge.h` is not in the Pods header tree at all:
-   - `ios/view/fabric/RCTVideoViewViewManager.mm` — `#import "RCTBridge.h"`
-   - `ios/view/paper/RCTVideoViewViewManager.m` — `#import "RCTEventDispatcher.h"`
-   - `ios/view/fabric/RCTVideoViewComponentView.mm` — `#import "RCTFabricComponentsPlugins.h"`
-3. `react-native-nitro-modules` must be `0.37.1` for RN 0.87. With 0.35.0 the app builds
-   and launches, then red-screens with `Failed to install Nitro:
+1. `ReactNativeVideo.podspec` no longer publishes `ios/Video-Bridging-Header.h` as a public
+   header (issue #5084; the same change as PR #5085). `add_nitrogen_files` appends the
+   Nitrogen headers after it, so it led the umbrella header and loaded module `React`
+   first; under the prebuilt core `jsi/jsi.h` belongs to module `React`, and NitroModules'
+   textual `#include "jsi/jsi.h"` then failed to compile.
+2. Three quoted imports of React headers are framework-style — under the prebuilt core
+   `RCTBridge.h` is not in the Pods header tree at all. The `<React/…>` form resolves on
+   the floor as well:
+   - `ios/view/fabric/RCTVideoViewViewManager.mm` — `<React/RCTBridge.h>`
+   - `ios/view/paper/RCTVideoViewViewManager.m` — `<React/RCTEventDispatcher.h>`
+   - `ios/view/fabric/RCTVideoViewComponentView.mm` — `<React/RCTFabricComponentsPlugins.h>`
+3. `react-native-nitro-modules` is `0.37.1` in the 0.82 and 0.87 overlays. With 0.35.0 the
+   app builds and launches, then red-screens with `Failed to install Nitro:
    installJSIBindingsWithRuntime: was not called`.
 
-With all three applied, the full Maestro suite passed locally on RN 0.87.1 (Xcode 26, iOS
-26 simulator). The library's committed nitrogen-0.35 output runs against the Nitro 0.37.1
+Verified locally (Xcode 26.6): the full Maestro suite passes on RN 0.87.1 on an iOS 26.5
+simulator and an Android API 36 emulator, and on RN 0.77 on iOS with changes 1 and 2
+applied. The library's committed nitrogen-0.35 output runs against the Nitro 0.37.1
 runtime, so no regeneration is needed today; if that changes, the overlay would have to
 reach the root workspace and D12 must be revisited.
 
-RN 0.82 is unverified. Assumed easier than 0.87 (closer to the floor), but untested.
+RN 0.82 passes on Android in the PR gate; its iOS rows run in nightly only.
 
 ## Matrix
 
-### PR gate — 3 parallel jobs
+### PR gate — 4 parallel jobs
 
 | Job | Runner | RN | Device |
 |---|---|---|---|
 | `android (0.77) / maestro` | `ubuntu-latest` | 0.77 | API 36 |
 | `android (0.82) / maestro` | `ubuntu-latest` | 0.82 | API 36 |
-| `ios / maestro` | `macos-26` | 0.77 | iOS 26 |
-
-RN 0.87 joins the gate (and takes over the iOS job, D13) once the three library fixes
-land and nightly is green on it. Until then it runs in nightly only, so no PR shows a red
-check its author cannot fix.
+| `android (0.87) / maestro` | `ubuntu-latest` | 0.87 | API 36 |
+| `ios / maestro` | `macos-26` | 0.87 | iOS 26 |
 
 ### Nightly — 15 coverage jobs, none blocking
 
@@ -233,9 +233,10 @@ plugin conformance flows, tvOS, and screenshot comparison. All of these read fro
 
 ## Open risks
 
-- **The pipeline has not yet completed a real CI run.** Expect the first runs to surface
-  runner-image details (simulator names, emulator boot times) that local runs cannot.
-- **RN 0.82 is unverified.** It may need its own fixes, discovered when the row first runs.
+- **RN 0.87 on iOS is verified locally, not yet on a hosted runner.** The first gate run
+  after the switch builds its Pods and DerivedData from scratch (new cache keys).
+- **RN 0.82 on iOS is unverified.** It may need its own fixes, discovered when the nightly
+  row first runs.
 - **Nitro 0.35-generated code against a 0.37 runtime is observed to work, not guaranteed.**
 - **API 36 emulator images on GitHub runners are assumed available and KVM-accelerated.**
   If boot times prove unstable, the PR Android device drops to API 35.

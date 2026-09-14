@@ -29,15 +29,14 @@ permissions:
 # Branch protection pins these EXACT status-context strings:
 #   android (0.77) / maestro
 #   android (0.82) / maestro
+#   android (0.87) / maestro
 #   ios / maestro
 # GitHub composes them as "<caller job name here> / <callee job name>", where the
 # callee job is `maestro` in _e2e-android.yml / _e2e-ios.yml. Renaming either side
 # silently detaches the required check. Update branch protection with any rename.
 #
-# RN 0.87 is not in the gate yet: it needs three library-side fixes first (see
-# e2e/CI_MATRIX_DESIGN.md, "RN 0.87 readiness"). Until they land it runs in nightly
-# only, so no PR shows a red check its author cannot fix. Once 0.87 is green there,
-# add `android (0.87)` here and move `ios` to 0.87 (D13).
+# The single iOS job runs the newest RN version (D13); the floor's iOS build is covered
+# by nightly.
 jobs:
   android:
     # Explicit name so the check renders as "android (0.77)" rather than listing every
@@ -51,6 +50,8 @@ jobs:
             blocking: true
           - rn: '0.82'
             blocking: true
+          - rn: '0.87'
+            blocking: true
     uses: ./.github/workflows/_e2e-android.yml
     with:
       rn-version: ${{ matrix.rn }}
@@ -60,7 +61,7 @@ jobs:
   ios:
     uses: ./.github/workflows/_e2e-ios.yml
     with:
-      rn-version: '0.77'
+      rn-version: '0.87'
       runner: 'macos-26'
       ios-runtime: '26'
       blocking: true
