@@ -86,6 +86,19 @@ test('onError is JS-only: never forwarded to the emitter, delivered to every lis
   expect(seen).toEqual(['a:player/not-initialized', 'b:player/not-initialized']);
 });
 
+test('trigger reports whether anyone was listening', () => {
+  const events = new Events(fakeEmitter().emitter);
+  const err = new VideoRuntimeError('unknown/unknown', 'x');
+  expect(events.trigger(err)).toBe(false);
+  const sub = events.addEventListener('onError', () => {});
+  expect(events.trigger(err)).toBe(true);
+  sub.remove();
+  // The Set still exists but is empty: nothing is delivered, and the caller must not
+  // treat this as "handled" — VideoPlayer.throwError relies on the return value to
+  // decide whether to throw.
+  expect(events.trigger(err)).toBe(false);
+});
+
 test('the same onError callback is not registered twice', () => {
   const events = new Events(fakeEmitter().emitter);
   let calls = 0;

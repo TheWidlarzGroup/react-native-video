@@ -110,14 +110,18 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   }
 
   /**
-   * Wraps a promise to try parsing native errors to VideoRuntimeError
+   * Wraps a promise to parse native errors to VideoRuntimeError. The rejection is
+   * delivered to `onError` listeners (like `throwError`) and the promise always rejects
+   * with the parsed error, so `await` never hangs and never rejects with `undefined`.
    * @internal
    */
-  private wrapPromise<T>(promise: Promise<T>) {
-    return new Promise<T>((resolve, reject) => {
-      promise.then(resolve).catch((error) => {
-        reject(this.throwError(error));
-      });
+  private wrapPromise<T>(promise: Promise<T>): Promise<T> {
+    return promise.catch((error: unknown) => {
+      const parsedError = tryParseNativeVideoError(error);
+      if (parsedError instanceof VideoRuntimeError) {
+        this.triggerJSEvent('onError', parsedError);
+      }
+      throw parsedError;
     });
   }
 

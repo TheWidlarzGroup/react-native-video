@@ -29,6 +29,14 @@ test('a sync method delivers to onError instead of throwing when a listener exis
   expect(seen).toEqual(['player/not-initialized']);
 });
 
+test('after the last onError listener is removed, errors throw again', () => {
+  const player = new VideoPlayer('https://x/a.mp4');
+  const sub = player.addEventListener('onError', () => {});
+  sub.remove();
+  native.playThrows = new Error(encoded('player/released', 'gone'));
+  expect(() => player.play()).toThrow(VideoRuntimeError);
+});
+
 test('an unparsable native error is rethrown as-is, even with an onError listener', () => {
   const player = new VideoPlayer('https://x/a.mp4');
   let calls = 0;
@@ -36,6 +44,24 @@ test('an unparsable native error is rethrown as-is, even with an onError listene
   native.playThrows = new Error('plain');
   expect(() => player.play()).toThrow('plain');
   expect(calls).toBe(0);
+});
+
+test('a rejected native promise rejects with the parsed error when nobody listens', async () => {
+  const player = new VideoPlayer('https://x/a.mp4');
+  native.initializeRejects = new Error(encoded('source/file-does-not-exist', 'missing'));
+  const err = await player.initialize().catch((e: unknown) => e);
+  expect(err).toBeInstanceOf(VideoRuntimeError);
+  expect((err as VideoRuntimeError).code).toBe('source/file-does-not-exist');
+});
+
+test('a rejected native promise notifies onError and still rejects with the error', async () => {
+  const player = new VideoPlayer('https://x/a.mp4');
+  const seen: string[] = [];
+  player.addEventListener('onError', (e) => seen.push(e.code));
+  native.initializeRejects = new Error(encoded('source/file-does-not-exist', 'missing'));
+  const err = await player.initialize().catch((e: unknown) => e);
+  expect(seen).toEqual(['source/file-does-not-exist']);
+  expect(err).toBeInstanceOf(VideoRuntimeError);
 });
 
 test('a resolved native promise resolves', async () => {
