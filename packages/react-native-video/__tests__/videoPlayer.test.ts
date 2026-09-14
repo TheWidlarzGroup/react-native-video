@@ -43,3 +43,9 @@ test('a resolved native promise resolves', async () => {
   await expect(player.initialize()).resolves.toBeUndefined();
 });
 
+test('release tears down the native player once and blocks further access', () => {
+  const player = new VideoPlayer('https://x/a.mp4');
+  player.release();
+  player.release();
+  expect(native.released).toBe(1);
+});

@@ -19,6 +19,7 @@ import { VideoPlayerEvents } from './events/VideoPlayerEvents';
 
 class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   private _player: VideoPlayerImpl | undefined;
+  private _released = false;
   private _releaseTimeout: ReturnType<typeof setTimeout> | undefined;
 
   protected get player(): VideoPlayerImpl {
@@ -46,7 +47,10 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
    * @internal
    */
   __destroy() {
-    if (this._player === undefined) return;
+    // `_player` stays set for a grace period after release (see below), so a second
+    // release inside that window must not tear the native player down again.
+    if (this._player === undefined || this._released) return;
+    this._released = true;
 
     this.clearAllEvents();
 
