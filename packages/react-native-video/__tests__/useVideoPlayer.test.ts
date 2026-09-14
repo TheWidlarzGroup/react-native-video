@@ -48,6 +48,26 @@ test('creates one native player and keeps it across re-renders with the same sou
   expect(h.current()).toBe(first);
 });
 
+test('an inline config object with the same content does not recreate the player', () => {
+  const h = mount({ source: { uri: 'https://x/a.mp4' } });
+  h.update({ source: { uri: 'https://x/a.mp4' } });
+  h.update({ source: { uri: 'https://x/a.mp4', headers: {} } }); // different content
+  expect(native.created).toHaveLength(2);
+  expect(native.created[0]!.released).toBe(1);
+  expect(native.created[1]!.released).toBe(0);
+});
+
+test('a config object the caller keeps around is not recreated on re-render', () => {
+  // Regression for createSource writing defaults back into the caller's object,
+  // which changed useVideoPlayer's JSON key between renders.
+  const stable: VideoConfig = { uri: 'https://x/a.mpd', drm: { licenseServer: 'https://l' } };
+  const h = mount({ source: stable });
+  h.update({ source: stable });
+  h.update({ source: stable });
+  expect(native.created).toHaveLength(1);
+  expect(native.created[0]!.released).toBe(0);
+});
+
 test('changing the source releases the old player and creates a new one', () => {
   const h = mount({ source: 'https://x/a.mp4' });
   const first = h.current();

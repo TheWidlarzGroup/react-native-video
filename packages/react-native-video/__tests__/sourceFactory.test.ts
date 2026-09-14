@@ -96,6 +96,21 @@ test('external subtitles get default type and language', () => {
   ]);
 });
 
+test('does not mutate the caller config', () => {
+  // useVideoPlayer keys the player on JSON.stringify(source): if the factory wrote
+  // defaults back into a config the caller keeps around (a module constant, a
+  // useMemo/useState value), the next render would see a different key and destroy
+  // and recreate the player.
+  const config = {
+    uri: 'https://x/a.mpd',
+    drm: { licenseServer: 'https://l' },
+    externalSubtitles: [{ uri: 'https://x/en.vtt' as const, label: 'English' }],
+  };
+  const before = JSON.stringify(config);
+  createSource(config);
+  expect(JSON.stringify(config)).toBe(before);
+});
+
 test('invalid config uris and non-source values are typed errors', () => {
   const code = (fn: () => unknown) => {
     try {
