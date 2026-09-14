@@ -49,11 +49,11 @@ export const withAndroidNotificationControls: ConfigPlugin = (oldConfig) => {
       });
     }
 
-    config.android ??= {};
-    const permissions = (config.android.permissions ??= []);
-    for (const permission of PERMISSIONS) {
-      if (!permissions.includes(permission)) permissions.push(permission);
-    }
+    // Write the permissions into the manifest itself. Adding them to
+    // `config.android.permissions` from inside this mod is too late: `expo prebuild`
+    // registers its own permissions mod after the app's plugins, so it runs first and
+    // has already written the manifest by the time this mod changes the config.
+    AndroidConfig.Permissions.ensurePermissions(config.modResults, PERMISSIONS);
     return config;
   });
 };
