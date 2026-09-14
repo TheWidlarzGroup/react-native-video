@@ -6,10 +6,13 @@ We want this community to be friendly and respectful to each other. Please follo
 
 ## Development workflow
 
-This project is a monorepo managed using [Bun workspaces](https://bun.sh/docs/install/workspaces). It contains the following packages:
+This project is a monorepo managed using [Bun workspaces](https://bun.sh/docs/install/workspaces). It contains:
 
-- An Library package in the `packages/react-native-video` directory.
-- An example app in the `example/` directory.
+- The library in `packages/react-native-video`.
+- The DRM plugin in `packages/drm-plugin`.
+- An example app in `example/`, for trying the library by hand.
+- The E2E test app in `test-app/` and its Maestro flows and media fixtures in `e2e/`.
+- The documentation site in `docs/`.
 
 To get started with the project, run `bun install` in the root directory to install the required dependencies for each package:
 
@@ -19,7 +22,7 @@ bun install
 
 > Since the project relies on Bun workspaces, you cannot use [`npm`](https://github.com/npm/cli) or [`yarn`](https://yarnpkg.com/) for development.
 
-The [example app](/example/) demonstrates usage of the library. You need to run it to test any changes you make.
+The [example app](/example/) demonstrates usage of the library and is the quickest way to try a change by hand.
 
 It is configured to use the local version of the library, so any changes you make to the library's source code will be reflected in the example app. Changes to the library's JavaScript code will be reflected in the example app without a rebuild, but native code changes will require a rebuild of the example app.
 
@@ -47,11 +50,12 @@ To run the example app on iOS:
 bun example ios
 ```
 
-Make sure your code passes TypeScript and ESLint. Run the following to verify:
+Make sure your code passes TypeScript, ESLint and the unit tests. Run the following to verify:
 
 ```sh
 bun typecheck
 bun lint
+bun run test
 ```
 
 To fix formatting errors, run the following:
@@ -60,6 +64,34 @@ To fix formatting errors, run the following:
 bun lint --fix
 ```
 
+## Testing your change
+
+Every pull request that changes behavior should come with a test that would fail without the change. Pick the level that matches what you changed:
+
+- **Unit tests** (`packages/react-native-video/__tests__/`, run with `bun run test`) for the library's JavaScript layer: source normalization, error parsing, event routing, `VideoPlayer`, hooks and the Expo config plugins. They use Bun's built-in test runner (`bun:test`) and mock the native side, so they run in about a second.
+- **Maestro E2E flows** (`e2e/flows/`) for behavior on a real emulator or simulator: loading, progress, seeking, volume, rate, loop, end of playback and errors. Flows drive the test app through deep links and assert on text markers it renders for player events. [`e2e/README.md`](e2e/README.md) explains how to run the suite locally and how to add a flow; [`e2e/CONTEXT.md`](e2e/CONTEXT.md) explains why it is built the way it is.
+
+Rules of thumb:
+
+- **A bug fix in an area the E2E suite can exercise includes a flow that reproduces the bug.** Check that the flow fails without your fix and passes with it.
+- New features come with tests for the new behavior; if the test app needs a new scenario or marker, add it in `test-app/src/e2e/` (see "Adding a flow" in `e2e/README.md`).
+- Refactors and documentation changes need no new tests, but the existing ones must keep passing.
+- When no automated test fits (native UI, DRM, picture-in-picture, a platform CI does not run), explain how you verified the change under "Test plan" in the pull request.
+- E2E flows are never retried to make them pass. A flow that turns out to be unstable is tagged `flaky` with an issue and leaves the PR gate until it is fixed.
+
+## Continuous integration
+
+Every pull request runs:
+
+- **`unit`**: lint, typecheck and unit tests on React 18, plus the library's tests and typecheck on React 19.
+- **`e2e`**: the Maestro suite on Android (React Native 0.77, 0.82 and 0.87, API 36) and on iOS (React Native 0.87, iOS 26). A leg takes about 15 minutes on Android and 25–35 minutes on iOS.
+
+Pull requests that only change `docs/` or Markdown files skip both. Workflows on a first pull request from a fork start after a maintainer approves them.
+
+A red E2E leg is a real signal, not something to re-run. Its artifacts contain the JUnit report, a screenshot and view hierarchy at the failing step, and the device log.
+
+> **Changing a `package.json`?** The E2E matrix installs React Native 0.82 and 0.87 from committed lockfiles that snapshot the whole workspace, so any `package.json` change needs them regenerated in the same pull request: `for v in 0.82 0.87; do node scripts/e2e/use-rn-version.mjs "$v" --refresh; done`, then commit `e2e/rn-matrix/`. See [`e2e/rn-matrix/README.md`](e2e/rn-matrix/README.md).
+
 ### Commit message convention
 
 We follow the [conventional commits specification](https://www.conventionalcommits.org/en) for our commit messages:
@@ -67,19 +99,21 @@ We follow the [conventional commits specification](https://www.conventionalcommi
 - `fix`: bug fixes, e.g. fix crash due to deprecated method.
 - `feat`: new features, e.g. add new method to the module.
 - `refactor`: code refactor, e.g. migrate from class components to hooks.
-- `docs`: changes into documentation, e.g. add usage example for the module..
-- `test`: adding or updating tests, e.g. add integration tests using detox.
-- `chore`: tooling changes, e.g. change CI config.
+- `perf`: performance improvements.
+- `docs`: changes into documentation, e.g. add usage example for the module.
+- `test`: adding or updating tests, e.g. add a Maestro flow for seeking in HLS.
+- `ci`: changes to the CI workflows.
+- `build`: changes to the build system or dependencies.
+- `chore`: other tooling changes.
 
-Our pre-commit hooks verify that your commit message matches this format when committing.
+### Pre-commit hooks
 
-### Linting and tests
+[Lefthook](https://github.com/evilmartians/lefthook) runs on commit:
 
-[ESLint](https://eslint.org/), [Prettier](https://prettier.io/), [TypeScript](https://www.typescriptlang.org/)
-
-We use [TypeScript](https://www.typescriptlang.org/) for type checking, [ESLint](https://eslint.org/) with [Prettier](https://prettier.io/) for linting and formatting the code, and [Jest](https://jestjs.io/) for testing.
-
-Our pre-commit hooks verify that the linter and tests pass when committing.
+- ESLint and TypeScript on staged source files.
+- The unit tests when test-covered files are staged.
+- [commitlint](https://commitlint.js.org/) on the commit message.
+- A guard that refuses to commit the root `bun.lock` or `test-app/package.json` while the test app is switched to a non-default React Native version.
 
 ### Publishing to npm
 
@@ -96,11 +130,14 @@ bun release
 The `package.json` file contains various scripts for common tasks:
 
 - `bun install`: setup project by installing dependencies.
+- `bun run build`: build the packages.
 - `bun typecheck`: type-check files with TypeScript.
 - `bun lint`: lint files with ESLint.
+- `bun run test`: run the unit tests.
 - `bun example start`: start the Metro server for the example app.
 - `bun example android`: run the example app on Android.
 - `bun example ios`: run the example app on iOS.
+- `bun test-app start`: start the Metro server for the E2E test app.
 
 ### Sending a pull request
 
@@ -109,7 +146,7 @@ The `package.json` file contains various scripts for common tasks:
 When you're sending a pull request:
 
 - Prefer small pull requests focused on one change.
-- Verify that linters and tests are passing.
+- Add or update tests for your change (see [Testing your change](#testing-your-change)) and verify that linters and tests are passing.
 - Review the documentation to make sure it looks good.
 - If your change affects how the library is **used** (API, props, events, or behavior), update the AI agent skill in `skills/react-native-video/` to match — keep it in sync just like the docs.
 - Follow the pull request template when opening a pull request.
