@@ -74,7 +74,7 @@ bun lint --fix
 
 Every pull request that changes behavior should come with a test that would fail without the change. Pick the level that matches what you changed:
 
-- **Unit tests** (`packages/react-native-video/__tests__/`, run with `bun run test`) for the library's JavaScript layer: native error parsing and `useManagedInstance`. They use Bun's built-in test runner (`bun:test`) and mock the native side, so they run in about a second.
+- **Unit tests** (`packages/react-native-video/__tests__/`, run with `bun run test`) for the library's JavaScript layer: source normalization, error parsing, event routing, `VideoPlayer` and hooks. They use Bun's built-in test runner (`bun:test`) and mock the native side, so they run in about a second.
 - **Maestro E2E flows** (`e2e/flows/`) for behavior on a real emulator or simulator: loading, progress, seeking, volume, rate, loop, end of playback and errors. Flows drive the test app through deep links and assert on text markers it renders for player events. [`e2e/README.md`](e2e/README.md) explains how to run the suite locally and how to add a flow; [`e2e/CONTEXT.md`](e2e/CONTEXT.md) explains why it is built the way it is.
 
 Rules of thumb:
