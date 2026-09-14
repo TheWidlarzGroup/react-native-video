@@ -110,6 +110,20 @@ test('withAndroidNotificationControls adds the playback service and permissions'
   ]);
 });
 
+test('withAndroidNotificationControls adds the service to a manifest with no <service> yet', async () => {
+  // The default Expo template manifest has no <service> element, so xml2js produces
+  // no `service` array at all.
+  const m = await runMod(withAndroidNotificationControls(baseConfig()), 'android', 'manifest', manifest({ service: false }));
+  expect(services(m)).toHaveLength(1);
+});
+
+test('withAndroidNotificationControls does not duplicate an existing service', async () => {
+  const config = withAndroidNotificationControls(baseConfig());
+  const once = await runMod(config, 'android', 'manifest', manifest());
+  const twice = await runMod(config, 'android', 'manifest', once);
+  expect(services(twice)).toHaveLength(1);
+});
+
 test('withReactNativeVideo registers only the mods its props ask for', () => {
   const none = withReactNativeVideo(baseConfig(), {}) as any;
   expect(none.mods.ios?.infoPlist).toBeUndefined();
