@@ -96,7 +96,14 @@ const SERVICE = 'com.twg.video.core.services.playback.VideoPlaybackService';
 const services = (m: any) =>
   (m.manifest.application[0].service ?? []).filter((s: any) => s.$['android:name'] === SERVICE);
 
-test('withAndroidNotificationControls adds the playback service and permissions', async () => {
+const FOREGROUND_PERMISSIONS = [
+  'android.permission.FOREGROUND_SERVICE',
+  'android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK',
+];
+const permissions = (m: any): string[] =>
+  (m.manifest['uses-permission'] ?? []).map((p: any) => p.$['android:name']);
+
+test('withAndroidNotificationControls adds the playback service and its permissions to the manifest', async () => {
   const config = withAndroidNotificationControls(baseConfig());
   const m = await runMod(config, 'android', 'manifest', manifest());
   expect(services(m)).toHaveLength(1);
@@ -104,10 +111,9 @@ test('withAndroidNotificationControls adds the playback service and permissions'
   expect(services(m)[0]['intent-filter'][0].action[0].$['android:name']).toBe(
     'androidx.media3.session.MediaSessionService'
   );
-  expect(config.android?.permissions).toEqual([
-    'android.permission.FOREGROUND_SERVICE',
-    'android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK',
-  ]);
+  // In the manifest, not only in config.android.permissions: expo prebuild runs its own
+  // permissions mod before this one, so a permission added to the config here is lost.
+  expect(permissions(m)).toEqual(FOREGROUND_PERMISSIONS);
 });
 
 test('withAndroidNotificationControls adds the service to a manifest with no <service> yet', async () => {
@@ -115,13 +121,15 @@ test('withAndroidNotificationControls adds the service to a manifest with no <se
   // no `service` array at all.
   const m = await runMod(withAndroidNotificationControls(baseConfig()), 'android', 'manifest', manifest({ service: false }));
   expect(services(m)).toHaveLength(1);
+  expect(permissions(m)).toEqual(FOREGROUND_PERMISSIONS);
 });
 
-test('withAndroidNotificationControls does not duplicate an existing service', async () => {
+test('withAndroidNotificationControls does not duplicate the service or its permissions', async () => {
   const config = withAndroidNotificationControls(baseConfig());
   const once = await runMod(config, 'android', 'manifest', manifest());
   const twice = await runMod(config, 'android', 'manifest', once);
   expect(services(twice)).toHaveLength(1);
+  expect(permissions(twice)).toEqual(FOREGROUND_PERMISSIONS);
 });
 
 test('withReactNativeVideo registers only the mods its props ask for', () => {
