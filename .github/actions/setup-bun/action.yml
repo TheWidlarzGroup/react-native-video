@@ -6,6 +6,10 @@ inputs:
     description: 'working directory for bun install'
     default: ./
     required: false
+  frozen:
+    description: 'Install with --frozen-lockfile, so a stale bun.lock fails the job instead of resolving new versions.'
+    default: 'false'
+    required: false
 
 runs:
   using: composite
@@ -15,19 +19,35 @@ runs:
       with:
         bun-version: 1.3.1
 
+    # Frozen and non-frozen callers get separate cache namespaces, so a tree resolved by a
+    # plain install (docs) is never restored by a job that must install exactly bun.lock.
     - name: Cache dependencies
       id: bun-cache
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: |
           **/node_modules
-        key: ${{ runner.os }}-v7-bun-${{ hashFiles('**/bun.lock') }}-${{ hashFiles('**/package.json') }}
+        # patch-package edits files inside node_modules at postinstall and cannot apply a
+        # changed patch on top of an already-patched tree. The patches hash therefore
+        # comes FIRST, so every restore-key prefix below carries it and a patch change
+        # misses every cached tree, including the broad shared fallback.
+        key: ${{ runner.os }}-v8-bun-${{ inputs.frozen == 'true' && 'frozen' || 'shared' }}-${{ hashFiles('**/patches/*.patch') }}-${{ hashFiles('**/bun.lock') }}-${{ hashFiles('**/package.json') }}
         restore-keys: |
-          ${{ runner.os }}-v7-bun-${{ hashFiles('**/bun.lock') }}
-          ${{ runner.os }}-v7-bun-
+          ${{ runner.os }}-v8-bun-${{ inputs.frozen == 'true' && 'frozen' || 'shared' }}-${{ hashFiles('**/patches/*.patch') }}-${{ hashFiles('**/bun.lock') }}-
+          ${{ inputs.frozen != 'true' && format('{0}-v8-bun-shared-{1}-', runner.os, hashFiles('**/patches/*.patch')) || '' }}
 
     - name: Install dependencies
       working-directory: ${{ inputs.working-directory }}
-      run: bun install
       shell: bash
-
+      env:
+        FROZEN: ${{ inputs.frozen }}
+      run: |
+        set -euo pipefail
+        if [ "$FROZEN" != "true" ]; then
+          bun install
+          exit 0
+        fi
+        if ! bun install --frozen-lockfile; then
+          echo "::error::bun install --frozen-lockfile failed: bun.lock does not match the package.json files. Run bun install and commit bun.lock." >&2
+          exit 1
+        fi

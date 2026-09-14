@@ -13,6 +13,10 @@ pre-commit:
     types:
       glob: "*.{js,ts,jsx,tsx}"
       run: bun typecheck
+    # The library's unit tests are not part of `bun lint` / `bun typecheck`.
+    test:
+      glob: "packages/react-native-video/**/*.{ts,tsx}"
+      run: bun run test
 commit-msg:
   parallel: true
   commands:
