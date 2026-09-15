@@ -1,19 +1,12 @@
-const project = (() => {
-  try {
-    const { configureProjects } = require("react-native-test-app");
-    return configureProjects({
-      android: {
-        sourceDir: "android",
-      },
-      ios: {
-        sourceDir: "ios",
-      },
-    });
-  } catch (_) {
-    return undefined;
-  }
-})();
+const { configureProjects } = require("react-native-test-app");
 
 module.exports = {
-  ...(project ? { project } : undefined),
+  project: configureProjects({
+    android: {
+      sourceDir: "android",
+    },
+    ios: {
+      sourceDir: "ios",
+    },
+  }),
 };

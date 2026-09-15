@@ -1,9 +1,8 @@
-// react-native-test-app applies the Android config-plugin step to node_modules'
-// AndroidManifest.xml IN PLACE and re-runs it on every Gradle build, so every mod must
-// be idempotent or the manifest accumulates duplicate intent-filters build after build.
 import { test, expect } from 'bun:test';
 import { applyAndroidManifest, applyInfoPlist } from './rnv-e2e-plugin.mjs';
 
+// The shape of react-native-test-app's AndroidManifest.xml as xml2js parses it. It is not
+// read from node_modules because the plugin rewrites that file in place.
 function freshManifest() {
   return {
     manifest: {
@@ -30,84 +29,67 @@ function freshManifest() {
   };
 }
 
-function launcher(manifest) {
-  return manifest.manifest.application[0].activity[0];
-}
-
-function rnvFilters(manifest) {
-  return launcher(manifest)['intent-filter'].filter((f) =>
+function rnvFilters(activity) {
+  return (activity['intent-filter'] ?? []).filter((f) =>
     (f.data ?? []).some((d) => d.$['android:scheme'] === 'rnvtest')
   );
 }
 
-test('android: adds the deep-link filter, cleartext and PiP once', () => {
+test('android: adds the deep-link filter and cleartext', () => {
+  const original = freshManifest();
   const m = applyAndroidManifest(freshManifest());
-  const app = m.manifest.application[0];
-  expect(app.$['android:usesCleartextTraffic']).toBe('true');
-  expect(app.$['android:supportsPictureInPicture']).toBe('true');
-  expect(launcher(m).$['android:supportsPictureInPicture']).toBe('true');
-  expect(app.activity[1].$['android:supportsPictureInPicture']).toBe('true');
+  const [launcher, componentActivity] = m.manifest.application[0].activity;
+  expect(m.manifest.application[0].$['android:usesCleartextTraffic']).toBe('true');
 
-  const filters = rnvFilters(m);
-  expect(filters).toHaveLength(1);
-  expect(filters[0].action[0].$['android:name']).toBe('android.intent.action.VIEW');
-  expect(filters[0].category.map((c) => c.$['android:name'])).toEqual([
-    'android.intent.category.DEFAULT',
-    'android.intent.category.BROWSABLE',
+  expect(rnvFilters(launcher)).toEqual([
+    {
+      action: [{ $: { 'android:name': 'android.intent.action.VIEW' } }],
+      category: [
+        { $: { 'android:name': 'android.intent.category.DEFAULT' } },
+        { $: { 'android:name': 'android.intent.category.BROWSABLE' } },
+      ],
+      data: [{ $: { 'android:scheme': 'rnvtest' } }],
+    },
   ]);
-  // The LAUNCHER filter is untouched.
-  expect(launcher(m)['intent-filter']).toHaveLength(2);
+  const [originalLauncher, originalComponentActivity] = original.manifest.application[0].activity;
+  expect(launcher['intent-filter'][0]).toEqual(originalLauncher['intent-filter'][0]);
+  expect(componentActivity).toEqual(originalComponentActivity);
 });
 
-test('android: applying the transform repeatedly changes nothing', () => {
+test('android: applying the transform again changes nothing', () => {
   const once = applyAndroidManifest(freshManifest());
-  const snapshot = JSON.stringify(once);
-  for (let i = 0; i < 5; i++) applyAndroidManifest(once);
-  expect(JSON.stringify(once)).toBe(snapshot);
-  expect(rnvFilters(once)).toHaveLength(1);
+  const snapshot = structuredClone(once);
+  expect(applyAndroidManifest(once)).toEqual(snapshot);
 });
 
-test('android: the deep link lands on the LAUNCHER activity, not the first activity', () => {
+test('android: finds the LAUNCHER activity by category, not by position', () => {
   const m = freshManifest();
-  // Put a non-launcher activity first to make sure the lookup is by category.
-  m.manifest.application[0].activity.unshift({
+  const other = {
     $: { 'android:name': '.SomethingElse' },
     'intent-filter': [{ action: [{ $: { 'android:name': 'android.intent.action.VIEW' } }] }],
-  });
-  applyAndroidManifest(m);
-  const activities = m.manifest.application[0].activity;
-  expect(rnvFilters({ manifest: { application: [{ activity: [activities[1]] }] } })).toHaveLength(1);
-  expect((activities[0]['intent-filter'] ?? []).some((f) => f.data)).toBe(false);
+  };
+  m.manifest.application[0].activity.unshift(other);
+  const [first, launcher] = applyAndroidManifest(m).manifest.application[0].activity;
+  expect(rnvFilters(first)).toHaveLength(0);
+  expect(rnvFilters(launcher)).toHaveLength(1);
 });
 
-test('android: tolerates a manifest without ComponentActivity', () => {
+test('android: fails with a clear error when there is no LAUNCHER activity', () => {
   const m = freshManifest();
-  m.manifest.application[0].activity.pop();
-  expect(() => applyAndroidManifest(m)).not.toThrow();
-  expect(rnvFilters(m)).toHaveLength(1);
+  m.manifest.application[0].activity.shift();
+  expect(() => applyAndroidManifest(m)).toThrow('no LAUNCHER activity');
 });
 
-test('ios: adds the URL scheme and background audio once', () => {
+test('ios: adds the URL scheme, and applying again changes nothing', () => {
   const p = applyInfoPlist({});
   expect(p.CFBundleURLTypes).toEqual([{ CFBundleURLSchemes: ['rnvtest'] }]);
-  expect(p.UIBackgroundModes).toEqual(['audio']);
+  expect(applyInfoPlist(structuredClone(p))).toEqual(p);
 });
 
-test('ios: applying the transform repeatedly changes nothing', () => {
-  const p = applyInfoPlist({});
-  const snapshot = JSON.stringify(p);
-  for (let i = 0; i < 5; i++) applyInfoPlist(p);
-  expect(JSON.stringify(p)).toBe(snapshot);
-});
-
-test('ios: keeps existing URL types and background modes', () => {
-  const p = applyInfoPlist({
-    CFBundleURLTypes: [{ CFBundleURLSchemes: ['other'] }],
-    UIBackgroundModes: ['fetch'],
-  });
+test('ios: keeps existing URL types', () => {
+  const p = applyInfoPlist({ CFBundleURLTypes: [{ CFBundleURLSchemes: ['other'] }] });
   expect(p.CFBundleURLTypes).toEqual([
     { CFBundleURLSchemes: ['other'] },
     { CFBundleURLSchemes: ['rnvtest'] },
   ]);
-  expect(p.UIBackgroundModes).toEqual(['fetch', 'audio']);
 });
