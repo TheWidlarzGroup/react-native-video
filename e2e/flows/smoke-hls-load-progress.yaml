@@ -2,17 +2,7 @@
 appId: ${APP_ID}
 tags: [smoke]
 ---
-- launchApp:
-    clearState: true
-# See smoke-mp4-happy-path.yaml: openLink before JS has mounted+subscribed silently
-# drops the deep link (RCTLinkingManager's 'url' event is fire-and-forget).
-- extendedWaitUntil:
-    visible:
-      id: "e2e-host-ready"
-    timeout: 15000
-# See smoke-mp4-happy-path.yaml: small settle buffer for RNTA's native bootstrapping.
-- waitForAnimationToEnd:
-    timeout: 1500
+- runFlow: ../shared/launch-app.yaml
 - runFlow:
     file: ../shared/open-scenario.yaml
     env:

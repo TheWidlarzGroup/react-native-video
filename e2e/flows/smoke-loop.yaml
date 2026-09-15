@@ -1,6 +1,5 @@
-# Loop: toggling `loop` on the player must restart playback at the end instead of
-# stopping. evt-loop-verified (ScenarioScreen.tsx / eventLog.ts) marks an UNASSISTED
-# restart on either platform:
+# Loop: enabling `loop` on the player must restart playback at the end instead of
+# stopping. evt-loop-verified (eventLog.ts) marks an UNASSISTED restart on either platform:
 #   - iOS: AVPlayer reports every loop pass as onEnd, so a 3rd onEnd with no tap after
 #     the 2nd playthrough proves it;
 #   - Android: ExoPlayer's repeat mode wraps silently (no onEnd, no onSeek), so progress
@@ -11,14 +10,7 @@
 appId: ${APP_ID}
 tags: [smoke]
 ---
-- launchApp:
-    clearState: true
-- extendedWaitUntil:
-    visible:
-      id: "e2e-host-ready"
-    timeout: 15000
-- waitForAnimationToEnd:
-    timeout: 1500
+- runFlow: ../shared/launch-app.yaml
 - runFlow:
     file: ../shared/open-scenario.yaml
     env:
@@ -47,3 +39,5 @@ tags: [smoke]
     visible:
       id: "evt-loop-verified"
     timeout: 25000            # end #2 (~7s from position 1s) then an unassisted end #3
+- assertNotVisible:
+    id: "evt-onError"

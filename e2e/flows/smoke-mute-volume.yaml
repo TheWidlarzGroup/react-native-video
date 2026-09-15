@@ -1,17 +1,10 @@
-# Mute, unmute, and a numeric volume change — all surfaced via onVolumeChange
-# (see ScenarioScreen.tsx). evt-unmuted only fires after evt-muted, so it proves a real
+# Mute, unmute, and a numeric volume change — all reported through onVolumeChange (markers
+# derived in eventLog.ts). evt-unmuted only fires after evt-muted, so it proves a real
 # transition rather than the player's initial (unmuted) default.
 appId: ${APP_ID}
 tags: [smoke]
 ---
-- launchApp:
-    clearState: true
-- extendedWaitUntil:
-    visible:
-      id: "e2e-host-ready"
-    timeout: 15000
-- waitForAnimationToEnd:
-    timeout: 1500
+- runFlow: ../shared/launch-app.yaml
 - runFlow:
     file: ../shared/open-scenario.yaml
     env:
@@ -47,3 +40,5 @@ tags: [smoke]
     visible:
       id: "evt-volume-low"
     timeout: 5000
+- assertNotVisible:
+    id: "evt-onError"

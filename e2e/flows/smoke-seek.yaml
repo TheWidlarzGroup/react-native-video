@@ -10,14 +10,7 @@
 appId: ${APP_ID}
 tags: [smoke]
 ---
-- launchApp:
-    clearState: true
-- extendedWaitUntil:
-    visible:
-      id: "e2e-host-ready"
-    timeout: 15000
-- waitForAnimationToEnd:
-    timeout: 1500
+- runFlow: ../shared/launch-app.yaml
 - runFlow:
     file: ../shared/open-scenario.yaml
     env:
@@ -50,3 +43,5 @@ tags: [smoke]
     visible:
       id: "evt-seek-back-landed"
     timeout: 15000            # iOS: the seek-1 tap is deferred until the clip ends (~3 s from 5 s)
+- assertNotVisible:
+    id: "evt-onError"

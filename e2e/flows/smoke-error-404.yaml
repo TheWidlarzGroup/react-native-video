@@ -1,24 +1,10 @@
-# Error path: 404 source must produce onError (and NOT onLoad)
+# Error path: a 404 source must produce onError (and NOT onLoad).
+# Opens the mp4 scenario first: on a truly cold launch a scenario that fails before any
+# playback attempt fires no player event at all (e2e/CONTEXT.md, "Flow-design gotchas").
 appId: ${APP_ID}
 tags: [smoke]
 ---
-- launchApp:
-    clearState: true
-# See smoke-mp4-happy-path.yaml: openLink before JS has mounted+subscribed silently
-# drops the deep link (RCTLinkingManager's 'url' event is fire-and-forget).
-- extendedWaitUntil:
-    visible:
-      id: "e2e-host-ready"
-    timeout: 15000
-# On a truly cold launch, a scenario that fails before ever attempting real playback
-# (this one) never fires a single player event — confirmed hanging even after 30s wait,
-# not just slow. A scenario with real playback (mp4/hls) fires fine cold. Root cause not
-# fully pinned down (looks like some native/Nitro registration path that only completes
-# once triggered by an actual playback attempt). Mitigation: warm up with a real-playback
-# scenario first; this is the same process the other two MVP flows already exercise
-# successfully from cold, so it's proven to complete init.
-- waitForAnimationToEnd:
-    timeout: 1500
+- runFlow: ../shared/launch-app.yaml
 - runFlow:
     file: ../shared/open-scenario.yaml
     env:

@@ -1,18 +1,9 @@
-# Error path: a syntactically-broken HLS manifest must produce onError (and NOT onLoad).
-# See smoke-error-404.yaml for why this warms up with the mp4 scenario first: a scenario
-# that fails before ever attempting real playback never fires a single player event on a
-# truly cold launch.
+# Error path: a syntactically broken HLS manifest must produce onError (and NOT onLoad).
+# Opens the mp4 scenario first, like smoke-error-404.yaml.
 appId: ${APP_ID}
 tags: [smoke]
 ---
-- launchApp:
-    clearState: true
-- extendedWaitUntil:
-    visible:
-      id: "e2e-host-ready"
-    timeout: 15000
-- waitForAnimationToEnd:
-    timeout: 1500
+- runFlow: ../shared/launch-app.yaml
 - runFlow:
     file: ../shared/open-scenario.yaml
     env:

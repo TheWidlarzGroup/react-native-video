@@ -3,20 +3,7 @@
 appId: ${APP_ID}
 tags: [smoke]
 ---
-- launchApp:
-    clearState: true
-# openLink delivers the URL through the 'url' event, which is fire-and-forget: a link
-# sent before JS has subscribed is silently dropped. The test app renders this marker
-# only after its Linking listener is attached (App.tsx), so waiting for it is what
-# makes openLink safe.
-- extendedWaitUntil:
-    visible:
-      id: "e2e-host-ready"
-    timeout: 15000
-# Small settle buffer for RNTA's native bootstrapping after first paint; observed to
-# matter for scenarios that fail almost instantly (error-404). Not a flake retry.
-- waitForAnimationToEnd:
-    timeout: 1500
+- runFlow: ../shared/launch-app.yaml
 - runFlow:
     file: ../shared/open-scenario.yaml
     env:

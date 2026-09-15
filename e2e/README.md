@@ -65,14 +65,18 @@ deep links (`rnvtest://scenario/<name>`), never via UI navigation.
    `deepLink.ts`, its source in `fixtures.ts` (the compiler requires one per name), and
    (if needed) a derived marker in `eventLog.ts` — markers over number-parsing, always.
 2. Copy the closest existing flow in `e2e/flows/`, rename, adjust deep link + assertions.
-   Open scenarios through the shared subflow (`runFlow: ../shared/open-scenario.yaml` with
-   `SCENARIO`), never with a bare `openLink`: the subflow owns the deep-link transport
-   retry, the iOS "Open in app?" confirmation and the wait for the scenario screen.
+   Start with `runFlow: ../shared/launch-app.yaml` (a clean launch that waits until the
+   app can receive a deep link), then open scenarios through
+   `runFlow: ../shared/open-scenario.yaml` with `SCENARIO`, never with a bare `openLink`:
+   that subflow owns the deep-link transport retry, the iOS "Open in app?" confirmation
+   and the wait for the scenario screen.
 3. Timeouts: generous on first event after load (emulator decoders are slow to start),
-   tight after playback is running. Clip lengths are 8 s — nothing should wait > 30 s.
-4. Run locally on BOTH platforms before opening a PR.
-5. One flow = one scenario = one file. Keep flows independent (each starts with
-   `launchApp: clearState: true`).
+   tight after playback is running. Clips are 8 s; only HLS's first load waits up to 40 s.
+4. End every flow that expects playback with `assertNotVisible: evt-onError`, so an error
+   after the asserted marker still fails it.
+5. Run locally on BOTH platforms before opening a PR.
+6. One flow = one scenario = one file. Keep flows independent: each starts from a clean
+   launch.
 
 Optionally, record a draft with [agent-device](https://github.com/callstack/agent-device)
 and export to Maestro YAML, then clean it up by hand — the committed artifact is always

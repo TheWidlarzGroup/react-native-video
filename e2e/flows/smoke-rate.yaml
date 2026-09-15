@@ -1,5 +1,5 @@
-# Playback rate changes (1x -> 2x -> 0.5x), surfaced via onPlaybackRateChange
-# (see ScenarioScreen.tsx). Verified on-device: a tap issued while the video is actively
+# Playback rate changes (1x -> 2x -> 0.5x), reported through onPlaybackRateChange (markers
+# derived in eventLog.ts). Verified on-device: a tap issued while the video is actively
 # decoding is queued by the test driver and only delivered once the player goes idle
 # (paused/ended) — not a code bug, reproduced even with a listener that does nothing but
 # log. So the first tap's effect only lands around the clip's natural end (~8s); the
@@ -7,14 +7,7 @@
 appId: ${APP_ID}
 tags: [smoke]
 ---
-- launchApp:
-    clearState: true
-- extendedWaitUntil:
-    visible:
-      id: "e2e-host-ready"
-    timeout: 15000
-- waitForAnimationToEnd:
-    timeout: 1500
+- runFlow: ../shared/launch-app.yaml
 - runFlow:
     file: ../shared/open-scenario.yaml
     env:
@@ -35,3 +28,5 @@ tags: [smoke]
     visible:
       id: "evt-rate-0-5x"
     timeout: 5000
+- assertNotVisible:
+    id: "evt-onError"
