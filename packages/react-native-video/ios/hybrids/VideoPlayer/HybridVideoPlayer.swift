@@ -427,7 +427,18 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   }
 
   func play() throws {
-    player.play()
+    // `AVPlayer.play()` defers actual playback until the
+    // `isPlaybackLikelyToKeepUp` heuristic clears, which parks cold HLS starts
+    // at rate 0 for over a second (play() issued, currentTime frozen at 0.00).
+    // `playImmediately(atRate:)` starts with whatever is already buffered
+    // while keeping `automaticallyWaitsToMinimizeStalling` enabled, so
+    // AVFoundation still waits-and-resumes by itself on mid-playback
+    // buffer underruns.
+    if #available(iOS 16.0, tvOS 16.0, *) {
+      player.playImmediately(atRate: player.defaultRate)
+    } else {
+      player.playImmediately(atRate: 1.0)
+    }
   }
 
   func pause() throws {
