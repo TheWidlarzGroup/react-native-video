@@ -2,17 +2,31 @@ pre-commit:
   parallel: true
   commands:
     lint:
-      glob: "*.{js,ts,jsx,tsx}"
+      glob: "*.{js,ts,jsx,tsx,mjs,cjs}"
       exclude: "docs/**/*"
       run: bun lint
     lint-docs:
-      # using @widlarzgroup/eslint-plugin-docusaurus for CSS variable validation
       root: "docs/"
       glob: "**/*.{js,ts,jsx,tsx,css}"
       run: bun run lint
     types:
-      glob: "*.{js,ts,jsx,tsx}"
+      glob: "*.{js,ts,jsx,tsx,mjs,cjs}"
       run: bun typecheck
+    # e2e/ and scripts/ are not workspace packages, so `bun lint` / `bun typecheck` never
+    # reach them. Their unit tests are the only gate they have. test-app's pure logic
+    # (deep-link parsing, config plugin, event log) is tested the same way.
+    test-scripts:
+      glob: "{e2e,scripts,test-app,packages/react-native-video}/**/*.{mjs,ts,tsx}"
+      run: bun test e2e scripts test-app packages/react-native-video/__tests__
+    # Workflow lint runs in CI (lint-workflows.yml); run it locally too when installed.
+    workflows:
+      glob: ".github/**/*.yml"
+      run: if command -v actionlint >/dev/null; then actionlint; else echo "actionlint not installed (brew install actionlint); CI will run it"; fi
+    # Refuse to commit the root lockfile / test-app manifest while switched to a
+    # non-floor RN version via scripts/e2e/use-rn-version.mjs.
+    floor-lockfile:
+      glob: "{bun.lock,test-app/package.json}"
+      run: scripts/e2e/check-floor-lockfile.sh
 commit-msg:
   parallel: true
   commands:

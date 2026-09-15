@@ -1,0 +1,218 @@
+# Reusable Android E2E leg — one (rn-version, api-level) matrix cell. Called by the
+# PR-gate (e2e.yml) and nightly (e2e-nightly.yml) orchestrators, never triggered directly.
+name: _e2e-android
+
+on:
+  workflow_call:
+    inputs:
+      rn-version:
+        description: 'React Native version id, matching e2e/rn-matrix (0.77 is the floor)'
+        type: string
+        required: true
+      api-level:
+        description: 'Android emulator API level'
+        type: string
+        required: true
+      blocking:
+        description: 'false => the job reports but does not fail the calling run'
+        type: boolean
+        default: true
+      tags:
+        description: 'Maestro tag selection, e.g. --exclude-tags=flaky'
+        type: string
+        default: '--exclude-tags=flaky'
+      artifact-name:
+        description: 'Artifact name to upload under. The nightly orchestrator passes the name it expects to download; when empty, one is derived from rn-version/api-level/tags.'
+        type: string
+        default: ''
+
+env:
+  APP_ID: com.rnvtest.host
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    # The status context GitHub shows is "<caller job name> / <this job name>", so this
+    # name is part of every branch-protection rule. See e2e.yml before renaming.
+    name: maestro
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    # Only changes the conclusion reported to the caller; the summary/upload steps below
+    # still need their own `if: always()`.
+    continue-on-error: ${{ !inputs.blocking }}
+    steps:
+      - uses: actions/checkout@v7
+
+      # upload-artifact hard-errors on a duplicate name within a run, so the name has
+      # to differ per (rn-version, api-level, tag selection).
+      - name: Resolve artifact name
+        id: suffix
+        env:
+          TAGS: ${{ inputs.tags }}
+          GIVEN_NAME: ${{ inputs.artifact-name }}
+        run: |
+          set -euo pipefail
+          SLUG=$(echo "$TAGS" | sed -E 's/[^A-Za-z0-9]+/-/g; s/^-+|-+$//g')
+          if [ -z "$SLUG" ]; then
+            echo "::error::tags '${TAGS}' produced an empty slug" >&2
+            exit 1
+          fi
+          echo "slug=${SLUG}" >> "$GITHUB_OUTPUT"
+          echo "name=${GIVEN_NAME:-e2e-android-rn${{ inputs.rn-version }}-api${{ inputs.api-level }}-${SLUG}}" >> "$GITHUB_OUTPUT"
+
+      - name: Enable KVM for hardware-accelerated emulator
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - uses: ./.github/actions/e2e-setup
+        with:
+          rn-version: ${{ inputs.rn-version }}
+          platform: android
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 17
+      # cache-read-only defaults to true off the default branch, which would mean no
+      # Gradle cache is ever written by PR runs (the only runs this workflow has until
+      # the nightly exists); --build-cache below then reuses compiled Kotlin/dex/jar
+      # outputs between runs.
+      - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+        with:
+          cache-read-only: false
+          # Drop files the build did not touch before saving, so a cache entry only
+          # carries what this build actually needs.
+          cache-cleanup: on-success
+
+      # react-native-test-app applies the Expo config plugins while evaluating Gradle
+      # settings, editing its own AndroidManifest.xml in node_modules in place. But its
+      # manifest generator (android/android-manifest.js) ALSO runs during `react-native
+      # bundle` (via react-native.config.js), i.e. in the JS bundle step above, before
+      # the plugins have been applied, and it skips regeneration whenever the generated
+      # file is newer than app.json. Gradle then keeps that pristine manifest and the
+      # APK has no rnvtest intent filter. Apply the plugins explicitly here, verify the
+      # source manifest, and delete the stale generated one so Gradle regenerates it.
+      - name: Apply the config plugins and reset the generated manifest
+        working-directory: test-app/android
+        run: |
+          set -euo pipefail
+          node ../../node_modules/react-native-test-app/scripts/apply-config-plugins.mjs --android
+          MANIFEST=../../node_modules/react-native-test-app/android/app/src/main/AndroidManifest.xml
+          if ! grep -q 'android:scheme="rnvtest"' "$MANIFEST"; then
+            echo "::error::apply-config-plugins.mjs ran but the rnvtest intent filter is not in ${MANIFEST}" >&2
+            cat "$MANIFEST"
+            exit 1
+          fi
+          rm -rf app/build/generated/rnta
+          echo "OK: plugins applied, generated manifest reset"
+
+      # The wrapper downloads the Gradle distribution on first use; that download from
+      # services.gradle.org is the one piece of this leg that reaches the network at
+      # build time, and it has been cut off mid-transfer ("Connection reset"). Fetch it
+      # up to three times before the build proper; once setup-gradle has saved the
+      # distribution to its cache this is a no-op.
+      - name: Fetch the Gradle distribution
+        working-directory: test-app/android
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            ./gradlew --version && exit 0
+            echo "gradle wrapper download failed (attempt ${attempt}/3), retrying in 15 s" >&2
+            sleep 15
+          done
+          exit 1
+
+      # x86_64 only: that is the emulator ABI; the other three would be built and thrown away.
+      - name: Build test app APK
+        run: cd test-app/android && ./gradlew assembleDebug --build-cache --no-daemon -PreactNativeArchitectures=x86_64
+
+      # Without the intent filter every flow fails at openLink with "unable to resolve
+      # Intent"; fail here instead, with both manifests in the log.
+      - name: Verify the deep-link intent filter made it into the APK manifest
+        run: |
+          set -euo pipefail
+          MERGED=$(find test-app/android/app/build/intermediates -path '*merged_manifest*/debug/*' -name AndroidManifest.xml | head -1)
+          test -n "$MERGED" || { echo "::error::merged debug manifest not found under build/intermediates" >&2; exit 1; }
+          if ! grep -q 'android:scheme="rnvtest"' "$MERGED"; then
+            echo "::error::the rnvtest:// intent filter is missing from the merged manifest — the config-plugin step did not apply" >&2
+            echo "--- ${MERGED}"; cat "$MERGED"
+            echo "--- node_modules/react-native-test-app/android/app/src/main/AndroidManifest.xml"
+            cat node_modules/react-native-test-app/android/app/src/main/AndroidManifest.xml
+            exit 1
+          fi
+          echo "OK: rnvtest intent filter present in ${MERGED}"
+
+      # Cold boot, no snapshots, no AVD cache. Earlier versions saved a snapshot right
+      # after the first boot and resumed it for the flows; every failing Android run
+      # since then showed a system process ("Quickstep" / "System UI isn't responding")
+      # ANR dialog covering the app after the resume, and Maestro treats everything
+      # under a system dialog as invisible. A cold boot costs about two minutes and has
+      # not produced one.
+      - name: Run flows on emulator
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
+        env:
+          # Passed through the environment so a tags value cannot break out of the
+          # command line via `${{ }}` text substitution.
+          TAGS: ${{ inputs.tags }}
+        with:
+          api-level: ${{ inputs.api-level }}
+          arch: x86_64
+          profile: pixel_6
+          force-avd-creation: false
+          disable-animations: true
+          emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          # The action runs EVERY LINE of this script as its own `/usr/bin/sh -c`, and
+          # stops at the first line that exits non-zero. So: one command per line, no
+          # backslash continuations (the continuation would become a separate command
+          # and `\` the flow path), and no `set -e`, which would only apply to its own
+          # line.
+          #
+          # hide_error_dialogs suppresses app crash/ANR dialogs. System-process ANRs
+          # (the launcher, "Quickstep isn't responding") are not covered by it and have
+          # shown up right after a cold boot on a busy runner, with the dialog then
+          # covering every flow; scripts/e2e/android-settle.sh waits for the guest load
+          # to drop and dismisses any such dialog before Maestro starts. (Do not wait
+          # for init.svc.bootanim == stopped: with -no-boot-anim that service never
+          # runs.)
+          # The emulator dies with this step, so the post-mortem (a screenshot and the
+          # accessibility hierarchy of the app's default screen, i.e. what Maestro
+          # matches `id:` against) has to happen here, after Maestro, before the final
+          # line turns a Maestro failure back into a step failure.
+          script: |
+            adb shell settings put global hide_error_dialogs 1
+            adb install -r test-app/android/app/build/outputs/apk/debug/app-debug.apk
+            bash scripts/e2e/android-settle.sh 120
+            adb logcat -c
+            adb logcat > logcat.txt &
+            maestro test -e APP_ID=${{ env.APP_ID }} $TAGS --format junit --output e2e-report.xml --debug-output "$PWD/maestro-debug" --flatten-debug-output e2e/flows/ || touch maestro-failed
+            mkdir -p post-mortem
+            adb shell am start -W -n ${{ env.APP_ID }}/com.microsoft.reacttestapp.MainActivity > post-mortem/am-start.txt 2>&1 || true
+            sleep 6
+            adb exec-out screencap -p > post-mortem/default-screen.png || true
+            adb shell uiautomator dump /sdcard/hierarchy.xml > /dev/null 2>&1 && adb pull /sdcard/hierarchy.xml post-mortem/hierarchy.xml || true
+            adb shell dumpsys activity activities > post-mortem/activities.txt 2>&1 || true
+            test ! -f maestro-failed
+
+      - name: Job summary
+        if: always()
+        run: |
+          node scripts/e2e/junit-summary.mjs e2e-report.xml \
+            "android · RN ${{ inputs.rn-version }} · API ${{ inputs.api-level }}"
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ steps.suffix.outputs.name }}
+          path: |
+            e2e-report.xml
+            maestro-debug/**
+            post-mortem/**
+            logcat.txt
+            test-app/android/app/build/generated/rnta/src/main/AndroidManifest.xml
+          if-no-files-found: ignore

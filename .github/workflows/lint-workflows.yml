@@ -1,0 +1,39 @@
+# Static check of every workflow and composite action: expression typos, unknown
+# inputs/outputs on workflow_call and matrix keys, plus shellcheck on run: blocks.
+# The E2E pipeline is seven YAML files that only ever execute in CI; this is the
+# cheapest way to catch a broken `${{ }}` before a 40-minute matrix does.
+name: lint-workflows
+
+on:
+  pull_request:
+    paths:
+      - '.github/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  actionlint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      # The release archive, verified by checksum, rather than piping a download script
+      # into bash. Bump both values together (actionlint_<version>_checksums.txt).
+      - name: Install actionlint
+        env:
+          ACTIONLINT_VERSION: 1.7.7
+          ACTIONLINT_SHA256: 023070a287cd8cccd71515fedc843f1985bf96c436b7effaecce67290e7e0757
+        run: |
+          set -euo pipefail
+          TARBALL="actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
+          curl -fsSL -o "$RUNNER_TEMP/$TARBALL" "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/${TARBALL}"
+          echo "${ACTIONLINT_SHA256}  $RUNNER_TEMP/$TARBALL" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/$TARBALL" -C . actionlint
+
+      - name: Lint workflows
+        run: ./actionlint -color

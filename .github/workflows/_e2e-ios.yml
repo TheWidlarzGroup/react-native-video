@@ -1,0 +1,240 @@
+# Reusable iOS E2E leg — one (rn-version, ios-runtime) matrix cell. Called by the
+# PR-gate (e2e.yml) and nightly (e2e-nightly.yml) orchestrators, never triggered directly.
+name: _e2e-ios
+
+on:
+  workflow_call:
+    inputs:
+      rn-version:
+        description: 'React Native version id, matching e2e/rn-matrix (0.77 is the floor)'
+        type: string
+        required: true
+      runner:
+        description: 'macos-26 carries iOS 26 only; macos-15 carries iOS 18 and 26'
+        type: string
+        default: 'macos-26'
+      ios-runtime:
+        description: 'iOS simulator runtime major version, e.g. 26'
+        type: string
+        default: '26'
+      sim-device:
+        description: 'Simulator device name'
+        type: string
+        default: 'iPhone 17'
+      blocking:
+        description: 'false => the job reports but does not fail the calling run'
+        type: boolean
+        default: true
+      tags:
+        description: 'Maestro tag selection, e.g. --exclude-tags=flaky'
+        type: string
+        default: '--exclude-tags=flaky'
+      artifact-name:
+        description: 'Artifact name to upload under. The nightly orchestrator passes the name it expects to download; when empty, one is derived from rn-version/ios-runtime/tags.'
+        type: string
+        default: ''
+
+env:
+  APP_ID: com.rnvtest.host
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    # The status context GitHub shows is "<caller job name> / <this job name>", so this
+    # name is part of every branch-protection rule. See e2e.yml before renaming.
+    name: maestro
+    runs-on: ${{ inputs.runner }}
+    timeout-minutes: 60
+    continue-on-error: ${{ !inputs.blocking }}
+    steps:
+      - uses: actions/checkout@v7
+
+      # upload-artifact hard-errors on a duplicate name within a run, so the name has
+      # to differ per (rn-version, ios-runtime, tag selection).
+      - name: Resolve artifact name
+        id: suffix
+        env:
+          TAGS: ${{ inputs.tags }}
+          GIVEN_NAME: ${{ inputs.artifact-name }}
+        run: |
+          set -euo pipefail
+          SLUG=$(echo "$TAGS" | sed -E 's/[^A-Za-z0-9]+/-/g; s/^-+|-+$//g')
+          if [ -z "$SLUG" ]; then
+            echo "::error::tags '${TAGS}' produced an empty slug" >&2
+            exit 1
+          fi
+          echo "name=${GIVEN_NAME:-e2e-ios-rn${{ inputs.rn-version }}-ios${{ inputs.ios-runtime }}-${SLUG}}" >> "$GITHUB_OUTPUT"
+
+      # Also builds dist/main.ios.jsbundle, which pod install below embeds as a resource.
+      - uses: ./.github/actions/e2e-setup
+        with:
+          rn-version: ${{ inputs.rn-version }}
+          platform: ios
+
+      # macos-15 carries both iOS 18 and iOS 26 runtimes, so a bare device name is
+      # ambiguous there. Resolve device + runtime to a UDID and fail if the requested
+      # runtime is absent rather than silently testing (and recording) a different one.
+      - name: Resolve simulator by device and runtime
+        id: sim
+        env:
+          SIM_DEVICE: ${{ inputs.sim-device }}
+          IOS_RUNTIME: ${{ inputs.ios-runtime }}
+        run: |
+          set -euo pipefail
+          xcrun simctl list devices available --json > devices.json
+          MATCH=$(jq -r --arg name "$SIM_DEVICE" --arg runtime "$IOS_RUNTIME" '
+            .devices
+            | to_entries[]
+            | select(.key | test("com\\.apple\\.CoreSimulator\\.SimRuntime\\.iOS-" + $runtime + "-"))
+            | .value[]
+            | select(.name == $name)
+            | .udid
+          ' devices.json | head -1)
+          if [ -z "$MATCH" ]; then
+            echo "::error::no available simulator named '${SIM_DEVICE}' for iOS ${IOS_RUNTIME} on this runner" >&2
+            jq -r '.devices | to_entries[] | .key as $rt | .value[] | "\($rt): \(.name)"' devices.json >&2
+            exit 1
+          fi
+          RESOLVED_RUNTIME=$(jq -r --arg udid "$MATCH" '
+            .devices | to_entries[] | select(.value[]?.udid == $udid) | .key
+          ' devices.json)
+          echo "resolved '${SIM_DEVICE}' for iOS ${IOS_RUNTIME} -> ${MATCH} on ${RESOLVED_RUNTIME}"
+          echo "udid=${MATCH}" >> "$GITHUB_OUTPUT"
+          # Start booting now so the (several-minute) boot overlaps pod install and the
+          # build; the install step below waits for it to finish.
+          xcrun simctl boot "$MATCH" || true
+
+      # Restored before pod install (actions/cache restores at its own step position).
+      # Keyed on the runner image, not runner.os: macos-26 and macos-15 ship different
+      # Xcode majors and a Pods tree built under one does not compile under the other.
+      # The RN version is in the key so the three variants do not evict each other.
+      # Kept even though restore + pod install is not faster than a cold pod install:
+      # a restored tree keeps the Pods sources' timestamps, which is what lets the
+      # DerivedData cache below turn a 12-minute build into a ~2-minute incremental one.
+      - name: Cache Pods
+        uses: actions/cache@v6
+        with:
+          path: test-app/ios/Pods
+          key: pods-${{ inputs.runner }}-rn${{ inputs.rn-version }}-${{ hashFiles('test-app/ios/Podfile.lock') }}
+          restore-keys: pods-${{ inputs.runner }}-rn${{ inputs.rn-version }}-
+
+      - name: Install pods
+        run: |
+          set -euo pipefail
+          cd test-app
+          bundle install
+          bundle exec pod install --project-directory=ios
+
+      # DerivedData from the previous run of this (runner, rn-version) cell. xcodebuild
+      # rebuilds only what changed on top of it; a cold build of the Pods alone takes
+      # about 12 minutes on a hosted runner. Keyed on everything that feeds the build:
+      # Podfile.lock, the library's iOS sources and generated Nitro code, and the
+      # test app's own iOS inputs. The restore-keys fallback hands an older tree to an
+      # incremental build, which is still far cheaper than starting from nothing.
+      - name: Cache DerivedData
+        uses: actions/cache@v6
+        with:
+          path: build
+          key: deriveddata-${{ inputs.runner }}-rn${{ inputs.rn-version }}-${{ hashFiles('test-app/ios/Podfile.lock', 'test-app/ios/Podfile', 'test-app/app.json', 'test-app/rnv-e2e-plugin.mjs', 'packages/react-native-video/ios/**', 'packages/react-native-video/nitrogen/generated/ios/**', 'packages/react-native-video/nitrogen/generated/shared/**', 'packages/react-native-video/cpp/**') }}
+          restore-keys: deriveddata-${{ inputs.runner }}-rn${{ inputs.rn-version }}-
+
+      # pipefail: without it xcbeautify's exit code would mask a failed xcodebuild.
+      - name: Build for simulator
+        env:
+          SIM_UDID: ${{ steps.sim.outputs.udid }}
+        run: |
+          set -euo pipefail
+          xcodebuild -workspace test-app/ios/RNVideoE2E.xcworkspace \
+            -scheme RNVideoE2E -configuration Debug -sdk iphonesimulator \
+            -derivedDataPath build \
+            -destination "platform=iOS Simulator,id=${SIM_UDID}" \
+            build | xcbeautify --quiet
+
+      - name: Boot simulator and install app
+        env:
+          SIM_UDID: ${{ steps.sim.outputs.udid }}
+          IOS_RUNTIME: ${{ inputs.ios-runtime }}
+        run: |
+          set -euo pipefail
+          # Boot was started right after the simulator was resolved; wait for it here.
+          xcrun simctl boot "$SIM_UDID" || true
+          xcrun simctl bootstatus "$SIM_UDID" -b
+          BOOTED_RUNTIME=$(xcrun simctl list devices available --json | jq -r --arg udid "$SIM_UDID" '
+            .devices | to_entries[] | select(.value[]?.udid == $udid) | .key
+          ')
+          if ! printf '%s' "$BOOTED_RUNTIME" | grep -q "com.apple.CoreSimulator.SimRuntime.iOS-${IOS_RUNTIME}-"; then
+            echo "::error::booted simulator runtime '${BOOTED_RUNTIME}' does not match requested iOS ${IOS_RUNTIME}" >&2
+            exit 1
+          fi
+          APP_PATH=$(find build/Build/Products -name "*.app" -maxdepth 3 | head -1)
+          test -n "$APP_PATH"
+          xcrun simctl install "$SIM_UDID" "$APP_PATH"
+
+      # See e2e/warmup/ios-approve-open-link.yaml: warms the first launch after install
+      # (far slower than the rest on a hosted runner) and the Maestro driver, and takes the
+      # one-time "Open in app?" confirmation, after which the link is lost, out of the real
+      # flows' way. Never fails the leg.
+      - name: Warm up (approve the deep-link confirmation once)
+        env:
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: '300000'
+        run: |
+          maestro test -e APP_ID=${{ env.APP_ID }} e2e/warmup/ios-approve-open-link.yaml || echo "warm-up flow did not pass (non-fatal)"
+
+      - name: Run flows
+        env:
+          # Passed through the environment so a tags value cannot break out of the
+          # command line via `${{ }}` text substitution.
+          TAGS: ${{ inputs.tags }}
+          # Maestro builds, installs and launches its XCTest runner on first use; on a
+          # hosted macOS runner that has taken anywhere from ~60 s to just over 120 s
+          # (the driver's HTTP server came up 121 s after xcodebuild started in one run,
+          # and Maestro gave up at 120 s with "iOS driver not ready in time"). Five
+          # minutes leaves headroom without hiding a genuinely broken driver for long.
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: '300000'
+        run: |
+          set -euo pipefail
+          # shellcheck disable=SC2086 # $TAGS is a list of flags and must word-split
+          maestro test -e APP_ID=${{ env.APP_ID }} $TAGS \
+            --format junit --output e2e-report.xml \
+            --debug-output "$PWD/maestro-debug" --flatten-debug-output \
+            e2e/flows/
+
+      # `log show` reads the persisted log after the run, so nothing has to be flushed
+      # or killed cleanly. --last matches timeout-minutes so the window can never be
+      # shorter than the job. The screenshot shows whatever the simulator was left on,
+      # which is the failing screen when Maestro stopped on an assertion.
+      - name: Collect device log and screenshot
+        if: always()
+        run: |
+          set -euo pipefail
+          # A leg that died before the simulator booted has no log to collect; that is
+          # not a second failure worth reporting.
+          if ! xcrun simctl list devices booted | grep -q Booted; then
+            echo "no booted simulator — skipping device log"
+            exit 0
+          fi
+          mkdir -p post-mortem
+          xcrun simctl io booted screenshot post-mortem/last-screen.png || true
+          xcrun simctl spawn booted log show --last 60m \
+            --predicate 'process CONTAINS "RNVideoE2E" OR process == "ReactTestApp"' > device.log
+
+      - name: Job summary
+        if: always()
+        run: |
+          node scripts/e2e/junit-summary.mjs e2e-report.xml \
+            "ios · RN ${{ inputs.rn-version }} · iOS ${{ inputs.ios-runtime }}"
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ steps.suffix.outputs.name }}
+          path: |
+            e2e-report.xml
+            maestro-debug/**
+            post-mortem/**
+            device.log
+            ~/.maestro/tests/**
+          if-no-files-found: ignore

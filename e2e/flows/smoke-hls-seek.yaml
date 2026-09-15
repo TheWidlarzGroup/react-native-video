@@ -1,0 +1,30 @@
+# Seeking within an HLS stream — cross-format coverage for smoke-seek.yaml's assertions
+# (adaptive/segmented sources exercise a different native seek path than a plain mp4).
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: hls
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 40000            # HLS: manifest + first segments over local HTTP; slow hosted simulators
+# Same shape as smoke-seek.yaml: interact only once the player is idle (see there).
+- runFlow: ../shared/wait-for-end.yaml
+- tapOn:
+    id: "btn-seek-5"
+- tapOn:
+    id: "btn-play"
+- extendedWaitUntil:
+    visible:
+      id: "evt-onSeek"
+    timeout: 5000
+- extendedWaitUntil:
+    visible:
+      id: "evt-seek-fwd-landed"
+    timeout: 10000
+- assertNotVisible:
+    id: "evt-onError"

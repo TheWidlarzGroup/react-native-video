@@ -1,0 +1,27 @@
+# Error path: a 404 source must produce onError (and NOT onLoad).
+# Opens the mp4 scenario first: on a truly cold launch a scenario that fails before any
+# playback attempt fires no player event at all (e2e/CONTEXT.md, "Flow-design gotchas").
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 20000
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: error-404
+- extendedWaitUntil:
+    visible:
+      id: "evt-onError"
+    timeout: 20000
+- assertVisible:
+    id: "evt-error-code"      # exact code differs per platform; not pinned yet
+- assertNotVisible:
+    id: "evt-onLoad"

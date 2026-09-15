@@ -1,0 +1,16 @@
+# Shared by flows that interact with the player after its natural end (via runFlow):
+# waits for evt-onEnded, then for the screen to stop changing before the next tap.
+#
+# Taps are only issued on an idle player (e2e/CONTEXT.md, "Flow-design gotchas"), but
+# "idle" is not the instant the marker renders: in CI a tap sent 264 ms after onEnded, while
+# AVPlayer was still wrapping up, reached no button (Maestro reported it done; the app never
+# logged the press). The settle wait below is a wait for the UI, not a retry: a marker the
+# player never produces still fails the flow.
+appId: ${APP_ID}
+---
+- extendedWaitUntil:
+    visible:
+      id: "evt-onEnded"
+    timeout: 25000
+- waitForAnimationToEnd:
+    timeout: 5000

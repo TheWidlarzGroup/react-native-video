@@ -1,0 +1,61 @@
+# PR gate. Android is cheap and unlimited on ubuntu runners; macOS is capped at 5
+# concurrent jobs per account, so the gate spends exactly one macOS job per PR and five
+# simultaneous PRs still fit. Rationale and the full matrix: e2e/CI_MATRIX_DESIGN.md.
+name: e2e
+
+on:
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+  # Also on the default branch: a cache entry is only restorable by other branches
+  # when it was written on the default branch, so this is what keeps every new pull
+  # request warm (and doubles as a post-merge check).
+  push:
+    branches: [master]
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+  workflow_dispatch:
+
+# A new push to a pull request cancels the whole gate at once and frees the macOS slot
+# immediately. Runs on master queue instead: each one writes the caches pull requests
+# restore and checks a merge.
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+# Branch protection pins these EXACT status-context strings:
+#   android (0.77) / maestro
+#   android (0.82) / maestro
+#   android (0.87) / maestro
+#   ios / maestro
+# GitHub composes them as "<caller job name here> / <callee job name>", where the
+# callee job is `maestro` in _e2e-android.yml / _e2e-ios.yml. Renaming either side
+# silently detaches the required check. Update branch protection with any rename.
+#
+# The single iOS job runs the newest RN version (D13); the floor's iOS build is covered
+# by nightly.
+jobs:
+  android:
+    # Explicit name so the check renders as "android (0.77)" rather than listing every
+    # matrix key.
+    name: android (${{ matrix.rn }})
+    strategy:
+      fail-fast: false
+      matrix:
+        rn: ['0.77', '0.82', '0.87']
+    uses: ./.github/workflows/_e2e-android.yml
+    with:
+      rn-version: ${{ matrix.rn }}
+      api-level: '36'
+
+  ios:
+    uses: ./.github/workflows/_e2e-ios.yml
+    with:
+      rn-version: '0.87'
+      runner: 'macos-26'
+      ios-runtime: '26'

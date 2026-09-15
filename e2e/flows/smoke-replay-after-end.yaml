@@ -1,0 +1,29 @@
+# Reuse-after-natural-end: once the player has run to completion, it must still be
+# seekable and resumable — not stuck in a terminal state. evt-paused is expected to fire
+# implicitly once playback stops at the natural end (derived from onPlaybackStateChange in
+# eventLog.ts); evt-resumed then proves play() still works afterwards.
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4
+- runFlow: ../shared/wait-for-end.yaml
+- extendedWaitUntil:
+    visible:
+      id: "evt-paused"
+    timeout: 5000
+- tapOn:
+    id: "btn-seek-1"
+# btn-play, not a play/pause toggle: on Android a seek from the ended state resumes
+# playback by itself and taps land immediately, so a toggle would pause it again.
+- tapOn:
+    id: "btn-play"
+- extendedWaitUntil:
+    visible:
+      id: "evt-resumed"
+    timeout: 5000
+- assertNotVisible:
+    id: "evt-onError"

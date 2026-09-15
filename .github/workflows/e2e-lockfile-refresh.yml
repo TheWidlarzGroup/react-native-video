@@ -1,0 +1,185 @@
+# Weekly refresh of the per-RN-version lockfiles under e2e/rn-matrix/*/bun.lock.
+#
+# Every other E2E install uses `bun install --frozen-lockfile`, so a red matrix leg means
+# "the code broke", never "bun resolved differently today". That only holds if the
+# committed lockfiles stay current; this workflow re-resolves them and hands the drift
+# to a human as a reviewable PR. It is the deliberate exception to "always frozen".
+#
+# Two jobs, so the token that can push and open pull requests never shares a runner with
+# freshly resolved dependencies or a third-party action: `resolve` installs and has
+# read-only access; `open-pr` only commits the lockfiles it receives.
+name: e2e-lockfile-refresh
+
+on:
+  schedule:
+    - cron: '0 3 * * 1' # Monday 03:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-lockfile-refresh
+  cancel-in-progress: false
+
+env:
+  REFRESH_BRANCH: ci/e2e-lockfile-refresh
+
+jobs:
+  resolve:
+    # Scheduled workflows also run on forks; same guard as stale.yml et al.
+    if: ${{ github.repository == 'TheWidlarzGroup/react-native-video' }}
+    runs-on: ubuntu-latest
+    # A few installs; anything near this means a hung install, not a slow one.
+    timeout-minutes: 30
+    outputs:
+      changed: ${{ steps.diff.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      # Not the setup-bun composite: it would install the floor (running lifecycle
+      # scripts) and restore a node_modules cache other workflows write, neither of which
+      # a lockfile refresh needs.
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: .bun-version
+
+      # `--refresh` overlays test-app/package.json, runs `bun install --ignore-scripts`
+      # (resolving a lockfile needs no lifecycle scripts), copies the resulting root
+      # bun.lock into the variant directory and restores the floor files. The floor (0.77)
+      # has no directory by design (e2e/rn-matrix/README.md).
+      - name: Refresh every matrix lockfile
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          for dir in e2e/rn-matrix/*/; do
+            node scripts/e2e/use-rn-version.mjs "$(basename "$dir")" --refresh
+          done
+
+      - name: Guard against changes outside the matrix lockfiles
+        run: |
+          set -euo pipefail
+          STRAY="$(git status --porcelain --untracked-files=all -- . ':!e2e/rn-matrix/*/bun.lock')"
+          if [ -n "$STRAY" ]; then
+            echo "::error::refresh left changes outside e2e/rn-matrix/*/bun.lock — refusing to open a PR that could retarget the repo's default RN version:"
+            echo "$STRAY"
+            exit 1
+          fi
+
+      # `git status`, not `git diff`: a freshly added version produces an UNTRACKED
+      # bun.lock, which `git diff` would not report.
+      - name: Check for lockfile drift
+        id: diff
+        run: |
+          set -euo pipefail
+          if [ -z "$(git status --porcelain -- e2e/rn-matrix)" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload the refreshed lockfiles
+        if: steps.diff.outputs.changed == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: rn-matrix-lockfiles
+          path: e2e/rn-matrix/*/bun.lock
+          if-no-files-found: error
+          retention-days: 1
+
+  open-pr:
+    needs: resolve
+    if: needs.resolve.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: rn-matrix-lockfiles
+          path: e2e/rn-matrix
+
+      # The artifact is untrusted input as far as this job is concerned: only lockfiles
+      # of versions that already have an overlay may land in the commit.
+      - name: Guard the downloaded files
+        run: |
+          set -euo pipefail
+          STRAY="$(git status --porcelain --untracked-files=all | grep -vE '^( M|\?\?) e2e/rn-matrix/[0-9]+\.[0-9]+/bun\.lock$' || true)"
+          if [ -n "$STRAY" ]; then
+            echo "::error::the downloaded artifact contains more than matrix lockfiles:"
+            echo "$STRAY"
+            exit 1
+          fi
+          for lock in e2e/rn-matrix/*/bun.lock; do
+            test -f "$(dirname "$lock")/overlay.json" || { echo "::error::${lock} has no overlay.json next to it" >&2; exit 1; }
+          done
+
+      # Taken before the push so --force-with-lease protects against a push to the branch
+      # in the meantime. Empty when the branch does not exist.
+      - name: Capture the refresh branch's current remote state
+        id: branch-sha
+        run: |
+          set -euo pipefail
+          git fetch origin "$REFRESH_BRANCH" 2>/dev/null || true
+          SHA="$(git rev-parse "origin/$REFRESH_BRANCH" 2>/dev/null || true)"
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Open a PR with the refreshed lockfiles
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LEASE_SHA: ${{ steps.branch-sha.outputs.sha }}
+        run: |
+          set -euo pipefail
+          BOT_EMAIL="github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "$BOT_EMAIL"
+
+          # Refuse to force-push over a branch tip this workflow did not create: a
+          # maintainer may have pushed or amended a fixup on the open refresh PR. Both
+          # author and committer are checked because --amend / rebase keep the author.
+          if [ -n "$LEASE_SHA" ]; then
+            TIP_IDENT="$(git log -1 --format='%ae %ce' "$LEASE_SHA")"
+            if [ "$TIP_IDENT" != "$BOT_EMAIL $BOT_EMAIL" ]; then
+              echo "::error::refusing to force-push $REFRESH_BRANCH — its tip $LEASE_SHA has author/committer '$TIP_IDENT', not this workflow. Merge or close the open PR (or delete the branch) and the next run will recreate it."
+              exit 1
+            fi
+          fi
+
+          # Always exactly one fresh commit on top of the current default branch.
+          git checkout -B "$REFRESH_BRANCH"
+          git add e2e/rn-matrix
+          git commit -m "chore(e2e): refresh RN matrix lockfiles"
+
+          if [ -n "$LEASE_SHA" ]; then
+            git push --force-with-lease="refs/heads/$REFRESH_BRANCH:$LEASE_SHA" -u origin "$REFRESH_BRANCH"
+          else
+            git push --force-with-lease="refs/heads/$REFRESH_BRANCH:" -u origin "$REFRESH_BRANCH"
+          fi
+
+          # Only OPEN PRs count: the head branch survives a merge, so a merged/closed PR
+          # must not stop the next refresh from opening a new one.
+          OPEN_PR_COUNT="$(gh pr list --head "$REFRESH_BRANCH" --state open --json number --jq 'length')"
+          if ! [[ "$OPEN_PR_COUNT" =~ ^[0-9]+$ ]]; then
+            echo "::error::gh pr list returned unexpected output: '$OPEN_PR_COUNT'"
+            exit 1
+          fi
+          if [ "$OPEN_PR_COUNT" -eq 0 ]; then
+            BODY="$(printf '%s\n\n%s' \
+              "Weekly refresh of the per-RN-version lockfiles under \`e2e/rn-matrix\`. Review the dependency drift here rather than discovering it in an unrelated PR." \
+              "⚠️ Opened by automation with the default \`GITHUB_TOKEN\`, which does not trigger other workflows — the \`e2e\` gate did **not** run against it. Re-trigger CI (close and reopen, or push an empty commit) and confirm it is green before merging.")"
+            # Needs "Allow GitHub Actions to create and approve pull requests" enabled in
+            # repo/org settings, in addition to the permissions block above. See
+            # e2e/CI_MATRIX_DESIGN.md, "Manual setup".
+            gh pr create \
+              --title "chore(e2e): refresh RN matrix lockfiles" \
+              --body "$BODY" \
+              --base master
+          else
+            echo "an open PR already exists for $REFRESH_BRANCH — not opening another one"
+          fi

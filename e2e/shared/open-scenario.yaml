@@ -1,0 +1,32 @@
+# Shared by every flow (via runFlow): opens the scenario deep link and waits for its
+# screen. Lives outside e2e/flows/ so `maestro test e2e/flows/` never runs it on its own.
+#
+# The retry wraps ONLY the openLink transport: on a hosted macOS runner `simctl openurl`
+# itself has timed out (NSPOSIXErrorDomain 60, "Simulator device failed to open") before
+# the app saw anything. Nothing the flows assert on is retried — a marker that does not
+# appear still fails the flow, so the zero-retries rule for the library's behaviour holds.
+appId: ${APP_ID}
+---
+- retry:
+    maxRetries: 2
+    commands:
+      - openLink: rnvtest://scenario/${SCENARIO}
+# iOS can ask "Open in app?" for the first link; the iOS leg pre-approves it in a warm-up
+# flow, so this normally gives up after 1.5 s. Android never asks.
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - extendedWaitUntil:
+          visible: "Open"
+          timeout: 1500
+          optional: true
+      - tapOn:
+          text: "Open"
+          optional: true
+# Android's singleApp redirect (MainActivity -> ComponentActivity) plus a fresh JS mount
+# takes a moment longer than an instant assertVisible allows; hosted simulators more.
+- extendedWaitUntil:
+    visible:
+      id: "scenario-${SCENARIO}"
+    timeout: 20000

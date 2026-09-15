@@ -1,0 +1,43 @@
+{
+  "name": "RNVideoE2E",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "android": "react-native run-android",
+    "build:android": "react-native bundle --entry-file index.js --platform android --dev true --bundle-output dist/main.android.jsbundle --assets-dest dist/res",
+    "build:ios": "react-native bundle --entry-file index.js --platform ios --dev true --bundle-output dist/main.ios.jsbundle --assets-dest dist",
+    "ios": "react-native run-ios",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "start": "react-native start",
+    "bundle-install": "bundle install",
+    "pods": "cd ios && bundle exec pod install && cd .."
+  },
+  "dependencies": {
+    "react": "18.3.1",
+    "react-native": "0.77.3",
+    "react-native-nitro-modules": "0.35.0",
+    "react-native-video": "*"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@babel/preset-env": "^7.25.3",
+    "@babel/runtime": "^7.25.0",
+    "@expo/config-plugins": "^57.0.0",
+    "@react-native-community/cli": "15.0.1",
+    "@react-native-community/cli-platform-android": "15.0.1",
+    "@react-native-community/cli-platform-ios": "15.0.1",
+    "@react-native/babel-preset": "0.77.3",
+    "@react-native/eslint-config": "0.77.3",
+    "@react-native/metro-config": "0.77.3",
+    "@react-native/typescript-config": "0.77.3",
+    "@rnx-kit/metro-config": "^2.2.4",
+    "@types/react": "^18.2.6",
+    "eslint": "^8.19.0",
+    "react-native-test-app": "^5.4.9",
+    "typescript": "5.0.4"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

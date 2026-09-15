@@ -29,9 +29,6 @@ Pod::Spec.new do |s|
     s.exclude_files = ["ios/view/fabric/**/*.{h,m,mm,swift}"]
   end
 
-  # Cxx to Swift bridging helpers
-  s.public_header_files = ["ios/Video-Bridging-Header.h"]
-
   s.pod_target_xcconfig = {
     "GCC_PREPROCESSOR_DEFINITIONS" => "$(inherited) FOLLY_NO_CONFIG FOLLY_CFG_NO_COROUTINES FOLLY_MOBILE"
   }

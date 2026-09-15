@@ -1,0 +1,103 @@
+# Lint, typecheck and unit tests. Until this file existed those only ran from the local
+# pre-commit hook. The react-19 job re-runs the library's tests and typecheck with React
+# 19 (the version RN 0.82+ requires) without touching the committed lockfile: the
+# workspace is pinned to React 18 for the library, example and test-app, so nothing else
+# in the repo exercises React 19 outside the nightly E2E matrix.
+name: unit
+
+on:
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+  # Also on the default branch: a cache entry is only restorable by other branches
+  # when it was written on the default branch, so this is what keeps every new pull
+  # request warm (and doubles as a post-merge check).
+  push:
+    branches: [master]
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Superseded pull request runs are cancelled; master runs are not (see e2e.yml).
+concurrency:
+  group: unit-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  checks:
+    name: lint, typecheck, test (react 18)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup-bun
+        with:
+          frozen: 'true'
+      - name: Lint
+        run: bun lint
+      # example/ and test-app/ typecheck against the library's built lib/ types (its
+      # `types` entry). lib/ is produced by the library's postinstall, which bun skips on
+      # a node_modules cache hit, and it is not part of that cache.
+      - name: Build packages
+        run: bun run build
+      - name: Typecheck
+        run: bun typecheck
+      - name: Unit tests
+        run: bun run test
+
+  react-19:
+    name: library tests and typecheck (react 19)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      REACT_VERSION: '19.2.8'
+      REACT_TEST_RENDERER_VERSION: '19.2.8'
+      TYPES_REACT_VERSION: '19.2.18'
+    steps:
+      - uses: actions/checkout@v7
+      # Not the setup-bun composite on purpose: its node_modules cache would save this
+      # job's React 19 tree under the frozen key the E2E legs and the checks job restore.
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: .bun-version
+
+      # Root `overrides` force every workspace onto React 19 for this job only; the
+      # install is deliberately not frozen and nothing here is committed. Pin exact
+      # versions so a red run means the library broke, not that npm moved.
+      - name: Override React to 19
+        run: |
+          set -euo pipefail
+          node -e '
+            const fs = require("node:fs");
+            const pkg = require("./package.json");
+            pkg.overrides = {
+              ...(pkg.overrides ?? {}),
+              react: process.env.REACT_VERSION,
+              "react-test-renderer": process.env.REACT_TEST_RENDERER_VERSION,
+              "@types/react": process.env.TYPES_REACT_VERSION,
+            };
+            fs.writeFileSync("package.json", JSON.stringify(pkg, null, 2) + "\n");
+          '
+          bun install
+
+      - name: Verify the library resolves React 19
+        working-directory: packages/react-native-video
+        run: |
+          set -euo pipefail
+          for pkg in react react-test-renderer @types/react; do
+            v=$(node -p "require('${pkg}/package.json').version")
+            echo "${pkg}: ${v}"
+            case "$v" in 19.*) ;; *) echo "::error::${pkg} resolved to ${v}, expected 19.x" >&2; exit 1 ;; esac
+          done
+
+      - name: Library unit tests
+        run: bun test packages/react-native-video/__tests__
+
+      - name: Library typecheck
+        working-directory: packages/react-native-video
+        run: bun run typecheck
