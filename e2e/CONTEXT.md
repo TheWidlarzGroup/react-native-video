@@ -15,19 +15,19 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
   (e.g. `evt-progress-gt-2s`) instead of parsing numbers in YAML. Scenarios are opened via
   deep links (`rnvtest://scenario/<name>`), never via UI navigation.
 - **D3 — Deterministic media.** Local fixtures served from a job-local HTTP server
-  (short mp4, tiny HLS VOD, intentionally broken manifest). Public streams (Apple/Mux)
-  only in nightly, non-blocking. DRM in CI: ClearKey / Widevine L3 on Android emulator only.
-  FairPlay is out of CI scope (manual / OSS device-cloud programs).
-- **D4 — CI: free standard GitHub-hosted runners only.** Unlimited for public repos incl.
-  macOS (max 5 concurrent macOS jobs). No larger runners, no paid services.
-- **D5 — Agents never ARE the test.** The gate is deterministic Maestro. agent-device
-  (Callstack, MIT) is an optional authoring accelerator: record a run → export strict
-  Maestro YAML → human review → plain YAML lands in repo.
-- **D6 — Community writes cases, maintainers own infrastructure.** Scenario catalog as
-  `good-first-test` issues, one exemplary flow per assertion type, rule: "bugfix in an
-  E2E-coverable area ⇒ PR includes a reproducing flow".
-- **D7 — v7 differentiator: tested cross-platform event contract.** Plugins run the same
-  shared conformance flows as core.
+  (short mp4, tiny HLS VOD, intentionally broken manifest). No flow depends on an external
+  stream, so a red run is never the network.
+- **D4 — CI: standard GitHub-hosted runners.** `ubuntu-latest` for Android, `macos-26` /
+  `macos-15` for iOS. Hosted macOS runners are limited to 5 concurrent jobs, which shapes
+  the matrix (`CI_MATRIX_DESIGN.md`).
+- **D5 — Agents never ARE the test.** The gate is deterministic Maestro. A flow may be
+  drafted with any tool, but what lands in the repo is plain YAML a human has reviewed.
+- **D6 — A bug fix brings a reproducing flow.** A fix in an area the suite can exercise
+  includes a flow that fails without it (`CONTRIBUTING.md`, "Testing your change"). The
+  harness itself (test app, CI workflows, scripts) is maintained alongside the library.
+- **D7 — One flow for both platforms.** Every flow runs unchanged on Android and iOS.
+  Platform differences in how the player reports an event (e.g. `loop`, below) are absorbed
+  by the test app's markers, never by per-platform flows.
 
 ## Practical rules
 

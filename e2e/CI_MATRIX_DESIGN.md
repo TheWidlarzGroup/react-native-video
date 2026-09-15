@@ -7,7 +7,7 @@ versions and platforms, and continues the decision numbering at D8.
 ## Goal
 
 Run every PR through the Maestro E2E suite across multiple React Native versions and both
-platforms, in parallel, on free GitHub-hosted runners. The system must not become a
+platforms, in parallel, on standard GitHub-hosted runners. The system must not become a
 bottleneck (a PR waiting on a queue) and must not produce false positives (red for reasons
 unrelated to the change) or false negatives (green that hides a real break). Success is
 measured by regressions caught before merge, not by matrix size.
@@ -15,7 +15,7 @@ measured by regressions caught before merge, not by matrix size.
 ## Decisions (D8–D13)
 
 - **D8 — Three RN versions:** floor (0.77), middle (0.82), latest (0.87). Wide enough to
-  catch mid-range breaks, narrow enough to fit the free macOS concurrency limit.
+  catch mid-range breaks, narrow enough to fit the macOS concurrency limit.
 - **D9 — Asymmetric gate.** Per PR: Android × every RN version, iOS × one RN version.
   Nightly: the full grid plus older OS versions. Rationale in "Why this is not a
   bottleneck" below.
@@ -85,20 +85,20 @@ RN 0.82 passes on Android in the PR gate; its iOS rows run in nightly only.
   a tag filter that matches nothing, so the plan only schedules these legs when the tag
   is actually in use.
 
-The whole plan (rows, artifact names, shape guard, flaky detection) is computed by
+The whole plan (rows, tag selections, artifact names, flaky detection) is computed by
 `scripts/e2e/matrix-plan.mjs`, which has unit tests; the workflow only calls it.
 
 ### Why this is not a bottleneck
 
-The free plan for a public repository allows 20 concurrent jobs but only **5 concurrent
-macOS jobs**. The gate consumes 1 macOS job per PR, so five simultaneous PRs still fit; a
-sixth queues only its iOS job, not the whole gate. A symmetric 3×2 gate would consume 3
-macOS jobs per PR and queue from the second PR onward. Orchestrator-level `concurrency`
-with `cancel-in-progress` frees the macOS slot immediately on a new push.
+Hosted macOS runners are limited to **5 concurrent jobs**. The gate consumes 1 macOS job
+per PR, so five simultaneous PRs still fit; a sixth queues only its iOS job, not the whole
+gate. A symmetric 3×2 gate would consume 3 macOS jobs per PR and queue from the second PR
+onward. Orchestrator-level `concurrency` with `cancel-in-progress` frees the macOS slot
+immediately on a new push to a pull request.
 
 Nightly exceeds the macOS limit (6–7 macOS jobs, 5 at a time) and runs in two waves.
 `timeout-minutes` is measured from when a job starts on a runner, so the second wave gets
-its own full budget; worst case is about two hours, which costs nothing overnight.
+its own full budget; worst case is about two hours, which is acceptable overnight.
 `cancel-in-progress: false` queues a run that spills into the next trigger rather than
 overlapping it.
 
@@ -127,9 +127,11 @@ runs `bun install --frozen-lockfile`. It **must** run before `pod install` and `
 which read `node_modules`. A pre-commit hook refuses to commit the root lockfile or the
 test-app manifest while switched.
 
-`--refresh` merges the overlay, runs `bun install` *without* `--frozen-lockfile`, copies the
-resulting root `bun.lock` back into the variant directory and restores the floor files —
-even if the install fails. Used by the weekly bot job and by anyone adding a version.
+`--refresh` merges the overlay, runs `bun install --ignore-scripts` *without*
+`--frozen-lockfile`, copies the resulting root `bun.lock` back into the variant directory
+and restores `test-app/package.json` and the root `bun.lock` byte for byte — even if the
+install fails. Used by the weekly bot job (which resolves in a read-only job and pushes
+from a separate one) and by anyone adding a version or changing a `package.json`.
 
 `--frozen-lockfile` is what makes a red job trustworthy: a job cannot silently pick up a new
 transitive version. Dependency drift becomes its own weekly bot PR instead of noise in
@@ -226,16 +228,12 @@ quietly:
    Actions → General). `e2e-lockfile-refresh.yml`'s `gh pr create` needs it in addition to
    `pull-requests: write`; it is off by default on many repos and orgs.
 
-## Out of scope
+## Not covered
 
-Public dashboard and GitHub Pages publication (D7), execution-time trend analysis, DRM,
-plugin conformance flows, tvOS, and screenshot comparison. All of these read from the same
-`e2e-results` branch when their time comes.
+DRM, tvOS and screenshot comparison are not part of the suite.
 
 ## Open risks
 
-- **RN 0.87 on iOS is verified locally, not yet on a hosted runner.** The first gate run
-  after the switch builds its Pods and DerivedData from scratch (new cache keys).
 - **RN 0.82 on iOS is unverified.** It may need its own fixes, discovered when the nightly
   row first runs.
 - **Nitro 0.35-generated code against a 0.37 runtime is observed to work, not guaranteed.**

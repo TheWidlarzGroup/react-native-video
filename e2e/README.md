@@ -79,13 +79,11 @@ deep links (`rnvtest://scenario/<name>`), never via UI navigation.
 6. One flow = one scenario = one file. Keep flows independent: each starts from a clean
    launch.
 
-Optionally, record a draft with [agent-device](https://github.com/callstack/agent-device)
-and export to Maestro YAML, then clean it up by hand — the committed artifact is always
-plain reviewable YAML.
+However a flow was drafted, the committed artifact is plain YAML, reviewed by hand.
 
 ## Rules
 
-- No external network in PR flows — local fixtures only. Public streams live in nightly.
+- No external network in flows — local fixtures only.
 - Zero retries on anything the flows assert. A flaky flow gets quarantined
   (`tags: [flaky]`) with an issue, never retried into a false green — a retry hides the
   race the flow just caught. The one retry in the suite wraps the `openLink` transport in
