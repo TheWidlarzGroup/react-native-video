@@ -97,7 +97,11 @@ export function main({ argv, stdout, stderr, root = process.cwd(), runInstall })
       root,
       version,
       refresh,
-      runInstall: runInstall ?? (() => execFileSync('bun', ['install'], { cwd: root, stdio: 'inherit' })),
+      // Resolving a lockfile runs no lifecycle scripts: they would execute freshly
+      // resolved dependency code for nothing (and next to a write token in CI).
+      runInstall:
+        runInstall ??
+        (() => execFileSync('bun', ['install', '--ignore-scripts'], { cwd: root, stdio: 'inherit' })),
     });
   } catch (err) {
     stderr.write(`[rn-matrix] ${err.message}\n`);

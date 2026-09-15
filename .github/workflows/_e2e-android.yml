@@ -82,7 +82,7 @@ jobs:
       # Gradle cache is ever written by PR runs (the only runs this workflow has until
       # the nightly exists); --build-cache below then reuses compiled Kotlin/dex/jar
       # outputs between runs.
-      - uses: gradle/actions/setup-gradle@v6
+      - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
         with:
           cache-read-only: false
           # Drop files the build did not touch before saving, so a cache entry only
@@ -154,7 +154,7 @@ jobs:
       # under a system dialog as invisible. A cold boot costs about two minutes and has
       # not produced one.
       - name: Run flows on emulator
-        uses: reactivecircus/android-emulator-runner@v2
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
         env:
           # Passed through the environment so a tags value cannot break out of the
           # command line via `${{ }}` text substitution.

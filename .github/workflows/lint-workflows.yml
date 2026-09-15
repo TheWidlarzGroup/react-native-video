@@ -19,11 +19,21 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
+      # The release archive, verified by checksum, rather than piping a download script
+      # into bash. Bump both values together (actionlint_<version>_checksums.txt).
       - name: Install actionlint
+        env:
+          ACTIONLINT_VERSION: 1.7.7
+          ACTIONLINT_SHA256: 023070a287cd8cccd71515fedc843f1985bf96c436b7effaecce67290e7e0757
         run: |
           set -euo pipefail
-          bash <(curl -sSL https://raw.githubusercontent.com/rhysd/actionlint/v1.7.7/scripts/download-actionlint.bash) 1.7.7
+          TARBALL="actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
+          curl -fsSL -o "$RUNNER_TEMP/$TARBALL" "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/${TARBALL}"
+          echo "${ACTIONLINT_SHA256}  $RUNNER_TEMP/$TARBALL" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/$TARBALL" -C . actionlint
 
       - name: Lint workflows
         run: ./actionlint -color

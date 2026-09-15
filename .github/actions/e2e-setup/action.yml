@@ -62,16 +62,27 @@ runs:
         bun run build:${{ inputs.platform }}
         test -s dist/main.${{ inputs.platform }}.jsbundle
 
-    # Pinned, so a Maestro release cannot turn the gate red without a change in this repo.
-    # Bump deliberately, after running the suite locally with the new version.
+    # A pinned release, verified by checksum, instead of piping the get.maestro.mobile.dev
+    # installer into bash: a Maestro release cannot turn the gate red without a change in
+    # this repo, and neither a changed installer nor a swapped archive runs here. Bump both
+    # values together, after running the suite locally with the new version
+    # (`shasum -a 256 maestro.zip`).
     - name: Install Maestro
       shell: bash
       env:
         MAESTRO_VERSION: 2.10.0
+        MAESTRO_SHA256: 29b675e10cc12080e445e9bfb2e2b4e4dfb9c0f2e30d5884120d258b5e1cd991
       run: |
         set -euo pipefail
-        curl -Ls "https://get.maestro.mobile.dev" | bash
+        ZIP="$RUNNER_TEMP/maestro.zip"
+        curl -fsSL -o "$ZIP" "https://github.com/mobile-dev-inc/maestro/releases/download/cli-${MAESTRO_VERSION}/maestro.zip"
+        if command -v sha256sum >/dev/null; then CHECK=(sha256sum -c -); else CHECK=(shasum -a 256 -c -); fi
+        echo "${MAESTRO_SHA256}  ${ZIP}" | "${CHECK[@]}"
+        unzip -q "$ZIP" -d "$RUNNER_TEMP"
+        mkdir -p "$HOME/.maestro"
+        cp -R "$RUNNER_TEMP/maestro/." "$HOME/.maestro/"
         echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+        "$HOME/.maestro/bin/maestro" --version
 
     - name: Start fixture server
       shell: bash

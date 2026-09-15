@@ -114,7 +114,21 @@ jobs:
       issues: write
     timeout-minutes: 15
     steps:
+      # Only the history checkout below keeps credentials, for its push.
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      # The orphan `e2e-results` branch does not exist until the one-time setup in
+      # e2e/CI_MATRIX_DESIGN.md ("Manual setup"). Rows are still classified and reported
+      # without it; only the history is not persisted.
+      - name: Check out the results history
+        id: history
+        continue-on-error: true
+        uses: actions/checkout@v7
+        with:
+          ref: e2e-results
+          path: history
 
       - uses: actions/download-artifact@v8
         with:
@@ -141,7 +155,7 @@ jobs:
       # rows for issue reporting. No `set -e`: one row's crash must not skip the rest.
       - name: Classify rows and append results to the history branch
         env:
-          GH_TOKEN: ${{ github.token }}
+          HISTORY_OUTCOME: ${{ steps.history.outcome }}
           EXPECTED_LABELS_JSON: ${{ needs.matrix-plan.outputs.expected-labels }}
           QUARANTINE_LABELS_JSON: ${{ needs.matrix-plan.outputs.quarantine-labels }}
         run: |
@@ -149,14 +163,12 @@ jobs:
           shopt -s nullglob
 
           persist_history=1
-          if ! git clone --branch e2e-results --depth 1 \
-            "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" \
-            history 2>clone-error.log; then
+          if [ "$HISTORY_OUTCOME" != "success" ]; then
             {
               echo "::warning::the orphan 'e2e-results' branch does not exist (or is unreachable) — rows are still classified for issue reporting, but nothing is persisted to history."
               echo "Create it once (empty orphan branch pushed to origin); see e2e/CI_MATRIX_DESIGN.md, \"Manual setup\"."
             } | tee -a "$GITHUB_STEP_SUMMARY" >&2
-            cat clone-error.log >&2
+            rm -rf history
             mkdir -p history
             persist_history=0
           fi

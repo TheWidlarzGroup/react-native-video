@@ -62,7 +62,7 @@ jobs:
       - uses: actions/checkout@v7
       # Not the setup-bun composite on purpose: its node_modules cache would save this
       # job's React 19 tree under the frozen key the E2E legs and the checks job restore.
-      - uses: oven-sh/setup-bun@v2
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version-file: .bun-version
 
