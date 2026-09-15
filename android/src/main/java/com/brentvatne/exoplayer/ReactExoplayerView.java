@@ -144,6 +144,7 @@ import com.google.ads.interactivemedia.v3.api.ImaSdkFactory;
 import com.google.ads.interactivemedia.v3.api.ImaSdkSettings;
 import com.google.common.collect.ImmutableList;
 
+import java.lang.reflect.Method;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
@@ -592,6 +593,7 @@ public class ReactExoplayerView extends FrameLayout implements
         private final DefaultLoadControl defaultLoadControl;
         private final Runtime runtime = Runtime.getRuntime();
         private final int availableHeapInBytes;
+        @Nullable private final Method defaultGetAllocatorForPlayer = findGetAllocatorForPlayer();
 
         RNVLoadControl(BufferConfig config) {
             defaultLoadControl = buildLoadControl(config, allocator);
@@ -639,8 +641,32 @@ public class ReactExoplayerView extends FrameLayout implements
             return allocator;
         }
 
+        // On 1.9+ DefaultLoadControl counts buffered bytes per player only through the allocator it
+        // hands out here, so returning the raw allocator would silently disable its byte limit. The
+        // method does not exist in the Media3 this library compiles against, hence the reflection.
         public Allocator getAllocator(PlayerId playerId) {
+            if (defaultGetAllocatorForPlayer != null) {
+                try {
+                    return (Allocator) defaultGetAllocatorForPlayer.invoke(defaultLoadControl, playerId);
+                } catch (ReflectiveOperationException e) {
+                    DebugLog.w(TAG, "Falling back to the raw allocator: " + e);
+                }
+            }
             return allocator;
+        }
+
+        // Matched by signature rather than name, so it survives R8 renaming it in minified apps.
+        @Nullable
+        private Method findGetAllocatorForPlayer() {
+            for (Method method : DefaultLoadControl.class.getMethods()) {
+                Class<?>[] parameterTypes = method.getParameterTypes();
+                if (method.getReturnType() == Allocator.class
+                        && parameterTypes.length == 1
+                        && parameterTypes[0] == PlayerId.class) {
+                    return method;
+                }
+            }
+            return null;
         }
 
         @Override
