@@ -19,10 +19,7 @@ tags: [smoke]
     visible:
       id: "evt-onLoad"
     timeout: 20000
-- extendedWaitUntil:
-    visible:
-      id: "evt-onEnded"
-    timeout: 20000
+- runFlow: ../shared/wait-for-end.yaml
 - tapOn:
     id: "btn-seek-5"
 - tapOn:

@@ -10,10 +10,7 @@ tags: [smoke]
     file: ../shared/open-scenario.yaml
     env:
       SCENARIO: mp4
-- extendedWaitUntil:
-    visible:
-      id: "evt-onEnded"
-    timeout: 20000
+- runFlow: ../shared/wait-for-end.yaml
 - extendedWaitUntil:
     visible:
       id: "evt-paused"

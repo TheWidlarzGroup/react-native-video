@@ -18,10 +18,7 @@ tags: [smoke]
 # the middle of that end transition was lost in CI (right coordinates, no press). Waiting
 # for the end first makes the tap land on an idle player on both platforms. The mute
 # markers still require the press, so nothing here passes vacuously.
-- extendedWaitUntil:
-    visible:
-      id: "evt-onEnded"
-    timeout: 20000
+- runFlow: ../shared/wait-for-end.yaml
 - tapOn:
     id: "btn-mute"
 - extendedWaitUntil:

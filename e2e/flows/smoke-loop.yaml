@@ -23,10 +23,7 @@ tags: [smoke]
 # (seen in CI: 8.0 s after onLoad) makes ExoPlayer restart the source at once, with no
 # onEnd, so a flow waiting for end #1 after the tap never sees it. Ended player = idle
 # player, so this tap is immediate on both platforms.
-- extendedWaitUntil:
-    visible:
-      id: "evt-onEnded"
-    timeout: 20000
+- runFlow: ../shared/wait-for-end.yaml
 - tapOn:
     id: "btn-loop-on"
 - tapOn:

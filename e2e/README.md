@@ -69,7 +69,8 @@ deep links (`rnvtest://scenario/<name>`), never via UI navigation.
    app can receive a deep link), then open scenarios through
    `runFlow: ../shared/open-scenario.yaml` with `SCENARIO`, never with a bare `openLink`:
    that subflow owns the deep-link transport retry, the iOS "Open in app?" confirmation
-   and the wait for the scenario screen.
+   and the wait for the scenario screen. To interact after the clip's natural end, wait
+   with `runFlow: ../shared/wait-for-end.yaml`, not on `evt-onEnded` directly.
 3. Timeouts: generous on first event after load (emulator decoders are slow to start),
    tight after playback is running. Clips are 8 s; only HLS's first load waits up to 40 s.
 4. End every flow that expects playback with `assertNotVisible: evt-onError`, so an error
