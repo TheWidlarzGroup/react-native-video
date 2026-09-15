@@ -80,7 +80,7 @@ jobs:
           -scheme BareExample \
           -sdk iphonesimulator \
           -configuration Debug \
-          -destination 'platform=iOS Simulator,name=iPhone 16' \
+          -destination 'generic/platform=iOS Simulator' \
           build \
           CODE_SIGNING_ALLOWED=NO | xcpretty"
 
@@ -144,7 +144,7 @@ jobs:
           -scheme BareExample \
           -sdk iphonesimulator \
           -configuration Debug \
-          -destination 'platform=iOS Simulator,name=iPhone 16' \
+          -destination 'generic/platform=iOS Simulator' \
           build \
           CODE_SIGNING_ALLOWED=NO | xcpretty"
 
@@ -211,6 +211,6 @@ jobs:
           -scheme BareExample \
           -sdk iphonesimulator \
           -configuration Debug \
-          -destination 'platform=iOS Simulator,name=iPhone 16' \
+          -destination 'generic/platform=iOS Simulator' \
           build \
           CODE_SIGNING_ALLOWED=NO | xcpretty"
