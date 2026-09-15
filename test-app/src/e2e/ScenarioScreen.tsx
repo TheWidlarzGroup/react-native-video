@@ -1,177 +1,138 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { Button, StyleSheet, Text, View } from 'react-native';
 // v7 API only — never <Video>, never v6 props (see e2e/CONTEXT.md)
-import { useVideoPlayer, VideoView } from 'react-native-video';
-import { eventLog, RATE_STEPS } from './eventLog';
+import {
+  useVideoPlayer,
+  VideoView,
+  type VideoPlayer,
+} from 'react-native-video';
+import { eventLog } from './eventLog';
 import { EventLogPanel } from './EventLogPanel';
-import { SCENARIO_SOURCES, type ScenarioName } from './fixtures';
+import type { ScenarioName } from './deepLink';
+import { SCENARIO_SOURCES } from './fixtures';
+
+type Control = {
+  id: string;
+  title: string;
+  press: (player: VideoPlayer) => void;
+};
+
+// Every control sets an absolute value: a Maestro tap can be delivered long after it was
+// issued (see e2e/CONTEXT.md), so none may depend on the player's state at press time.
+const CONTROLS: Control[] = [
+  { id: 'btn-play', title: 'play', press: (p) => p.play() },
+  { id: 'btn-seek-1', title: 'seek 1s', press: (p) => p.seekTo(1) },
+  { id: 'btn-seek-5', title: 'seek 5s', press: (p) => p.seekTo(5) },
+  {
+    id: 'btn-rate-2',
+    title: 'rate 2x',
+    press: (p) => {
+      p.rate = 2;
+    },
+  },
+  {
+    id: 'btn-rate-0-5',
+    title: 'rate 0.5x',
+    press: (p) => {
+      p.rate = 0.5;
+    },
+  },
+  {
+    id: 'btn-mute',
+    title: 'mute',
+    press: (p) => {
+      p.muted = true;
+    },
+  },
+  {
+    id: 'btn-unmute',
+    title: 'unmute',
+    press: (p) => {
+      p.muted = false;
+    },
+  },
+  {
+    id: 'btn-volume-low',
+    title: 'vol .3',
+    press: (p) => {
+      p.muted = false;
+      p.volume = 0.3;
+    },
+  },
+  {
+    id: 'btn-loop-on',
+    title: 'loop',
+    press: (p) => {
+      eventLog.setLoopEnabled(true);
+      p.loop = true;
+    },
+  },
+];
+
+// Marker derivation lives in eventLog.handle(); this only maps payloads.
+function logPlayerEvents(player: VideoPlayer) {
+  player.addEventListener('onLoad', ({ duration }) =>
+    eventLog.handle({ type: 'onLoad', duration })
+  );
+  player.addEventListener('onProgress', ({ currentTime }) =>
+    eventLog.handle({ type: 'onProgress', currentTime })
+  );
+  player.addEventListener('onEnd', () => eventLog.handle({ type: 'onEnd' }));
+  player.addEventListener('onError', (error) =>
+    eventLog.handle({ type: 'onError', code: error.code })
+  );
+  player.addEventListener('onStatusChange', (status) =>
+    eventLog.handle({ type: 'onStatusChange', status })
+  );
+  player.addEventListener('onPlaybackStateChange', ({ isPlaying }) =>
+    eventLog.handle({ type: 'onPlaybackStateChange', isPlaying })
+  );
+  player.addEventListener('onSeek', (seekTime) =>
+    eventLog.handle({ type: 'onSeek', seekTime })
+  );
+  player.addEventListener('onVolumeChange', ({ muted, volume }) =>
+    eventLog.handle({ type: 'onVolumeChange', muted, volume })
+  );
+  player.addEventListener('onPlaybackRateChange', (rate) =>
+    eventLog.handle({ type: 'onPlaybackRateChange', rate })
+  );
+}
 
 /**
- * One screen per scenario, opened via deep link: rnvtest://scenario/<name>. App.tsx keys
- * this component on the scenario, so every scenario gets a fresh mount and a fresh
- * player. The event log is reset inside the player setup callback, before any listener
- * is attached: useVideoPlayer runs that callback synchronously during the first render
- * when initializeOnCreation is false, so a reset in an effect would run AFTER the first
- * events (a 404 fails ~30 ms after mount) and wipe them.
- *
- * Sources set initializeOnCreation: false (see fixtures.ts) and this screen calls
- * player.initialize() itself, after attaching listeners, instead of relying on
- * useVideoPlayer's default auto-load:
- *  - With the default (true), useVideoPlayer defers its setup callback until the native
- *    side's own auto-triggered load reaches onLoadStart/onStatusChange. A source that
- *    fails immediately (error-404, broken-manifest) never reaches that point, so setup()
- *    — and every listener we'd register inside it — never runs at all.
- *  - onError specifically is also JS-only and un-buffered (VideoPlayerEvents.native.ts),
- *    so it must be attached with player.addEventListener before the load that can reject
- *    it is kicked off — matching the pattern in docs/docs/player/events.md — rather than
- *    via useEvent, whose post-render effect can lose a fast local failure.
- *  - onError itself only fires from a JS-side promise rejection (initialize/preload/
- *    replaceSourceAsync, or a synchronous method throw). A source that resolves initialize()
- *    optimistically and only fails later, once AVPlayerItem's async status observation
- *    notices (e.g. a 404: HydridVideoPlayer.swift sets `status = .error` from an observer,
- *    not from a rejected promise) never triggers it — that failure surfaces only via
- *    onStatusChange('error'), so both are needed to catch every error path.
+ * One screen per scenario; App.tsx keys it on the scenario, so each one gets a fresh
+ * player. Sources set `initializeOnCreation: false`, which makes useVideoPlayer run the
+ * setup callback synchronously during the first render: the log is reset and every
+ * listener attached there, before this screen starts the load itself. See e2e/CONTEXT.md
+ * ("Test app gotchas") for why neither may happen later.
  */
-export function ScenarioScreen({
-  scenario,
-  rootId,
-}: {
-  scenario: ScenarioName;
-  rootId?: number;
-}) {
-  // See RATE_STEPS in eventLog.ts for why the next rate is tracked here, not read
-  // from the player at press time.
-  const rateStepRef = useRef(0);
-
+export function ScenarioScreen({ scenario }: { scenario: ScenarioName }) {
   const player = useVideoPlayer(SCENARIO_SOURCES[scenario], (p) => {
     eventLog.reset();
-    eventLog.log(`scenario:${scenario} root#${rootId ?? '?'}`);
-
-    // Marker derivation lives in eventLog.handle(); this only maps payloads.
-    p.addEventListener('onLoad', (e) =>
-      eventLog.handle({ type: 'onLoad', duration: e?.duration })
-    );
-    p.addEventListener('onProgress', (e) =>
-      eventLog.handle({ type: 'onProgress', currentTime: e?.currentTime ?? 0 })
-    );
-    p.addEventListener('onEnd', () => eventLog.handle({ type: 'onEnd' }));
-    p.addEventListener('onError', (error) =>
-      eventLog.handle({ type: 'onError', code: error.code })
-    );
-    p.addEventListener('onStatusChange', (status) =>
-      eventLog.handle({ type: 'onStatusChange', status })
-    );
-    p.addEventListener('onPlaybackStateChange', (e) =>
-      eventLog.handle({
-        type: 'onPlaybackStateChange',
-        isPlaying: Boolean(e?.isPlaying),
-      })
-    );
-    p.addEventListener('onSeek', (seekTime) =>
-      eventLog.handle({ type: 'onSeek', seekTime })
-    );
-    p.addEventListener('onVolumeChange', (e) =>
-      eventLog.handle({
-        type: 'onVolumeChange',
-        muted: Boolean(e?.muted),
-        volume: e?.volume ?? 1,
-      })
-    );
-    p.addEventListener('onPlaybackRateChange', (rate) =>
-      eventLog.handle({ type: 'onPlaybackRateChange', rate })
-    );
-
+    eventLog.log(`scenario:${scenario}`);
+    logPlayerEvents(p);
     p.initialize()
       .then(() => p.play())
       .catch(() => {
-        // Rejection is already surfaced via the onError listener above.
+        // Surfaced by the onError listener.
       });
   });
 
   return (
     <View style={styles.screen} testID={`scenario-${scenario}`}>
-      <Text testID="scenario-title">scenario:{scenario}</Text>
+      <Text>scenario:{scenario}</Text>
       <VideoView player={player} style={styles.video} resizeMode="contain" />
       <View style={styles.controls}>
-        <Button
-          testID="btn-rate-cycle"
-          title="rate"
-          onPress={() => {
-            const next = RATE_STEPS[rateStepRef.current];
-            eventLog.log(`press:rate -> ${next}`);
-            player.rate = next;
-            rateStepRef.current = (rateStepRef.current + 1) % RATE_STEPS.length;
-          }}
-        />
-        <Button
-          testID="btn-play"
-          title="play"
-          onPress={() => {
-            eventLog.log('press:play');
-            player.play();
-          }}
-        />
-        <Button
-          testID="btn-pause"
-          title="pause"
-          onPress={() => {
-            eventLog.log('press:pause');
-            player.pause();
-          }}
-        />
-        <Button
-          testID="btn-play-pause"
-          title="play/pause"
-          onPress={() => {
-            eventLog.log(`press:play-pause (isPlaying=${player.isPlaying})`);
-            if (player.isPlaying) player.pause();
-            else player.play();
-          }}
-        />
-        <Button
-          testID="btn-seek-5"
-          title="seek 5s"
-          onPress={() => {
-            eventLog.log('press:seek -> 5');
-            player.seekTo(5);
-          }}
-        />
-        <Button
-          testID="btn-seek-1"
-          title="seek 1s"
-          onPress={() => {
-            eventLog.log('press:seek -> 1');
-            player.seekTo(1);
-          }}
-        />
-        <Button
-          testID="btn-mute-toggle"
-          title="mute"
-          onPress={() => {
-            const next = !player.muted;
-            eventLog.log(`press:mute -> ${next}`);
-            player.muted = next;
-          }}
-        />
-        <Button
-          testID="btn-volume-low"
-          title="vol .3"
-          onPress={() => {
-            eventLog.log('press:volume -> 0.3 (unmuted)');
-            player.muted = false;
-            player.volume = 0.3;
-          }}
-        />
-        <Button
-          testID="btn-loop-toggle"
-          title="loop"
-          onPress={() => {
-            const next = !player.loop;
-            eventLog.log(`press:loop -> ${next}`);
-            eventLog.setLoopEnabled(next);
-            player.loop = next;
-          }}
-        />
+        {CONTROLS.map(({ id, title, press }) => (
+          <Button
+            key={id}
+            testID={id}
+            title={title}
+            onPress={() => {
+              eventLog.log(`press:${title}`);
+              press(player);
+            }}
+          />
+        ))}
       </View>
       {/* Text-surface of player state — everything Maestro asserts on lives here */}
       <EventLogPanel />

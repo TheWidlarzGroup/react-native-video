@@ -10,45 +10,48 @@
  * it is unit-tested without React Native (eventLog.test.ts). ScenarioScreen only maps the
  * player's listener payloads onto `PlayerEvent`s.
  */
+import type { VideoPlayerStatus } from 'react-native-video';
 
-export type MarkerId =
-  | 'evt-onLoad'
-  | 'evt-onProgress'
-  | 'evt-progress-gt-2s'
-  | 'evt-onEnded'
-  | 'evt-onError'
-  | 'evt-onPlaybackStateChanged'
-  | 'evt-source-replaced' // reserved for replaceSourceAsync coverage
-  | 'evt-playing' // isPlaying seen true at least once
-  | 'evt-paused' // isPlaying seen false after having been true (real pause, not initial state)
-  | 'evt-resumed' // isPlaying seen true again after evt-paused
-  | 'evt-onSeek'
-  | 'evt-seek-fwd-landed' // first onProgress after an onSeek reports currentTime > 4s
-  | 'evt-seek-back-landed' // first onProgress after an onSeek reports currentTime < 2s
-  | 'evt-muted'
-  | 'evt-unmuted' // muted:false after evt-muted (real unmute, not the initial default)
-  | 'evt-volume-low' // onVolumeChange volume <= 0.35 while not muted
-  | 'evt-rate-2x'
-  | 'evt-rate-0-5x'
-  | 'evt-loop-verified'; // an unassisted loop restart: see LOOP_VERIFIED_END_COUNT and
-// the wrap-around rule in handle('onProgress') — AVPlayer reports each loop as onEnd,
-// ExoPlayer wraps silently, so both are covered (see smoke-loop.yaml)
+// Every marker, in the order EventLogPanel renders them.
+export const MARKER_IDS = [
+  'evt-onLoad',
+  'evt-onProgress',
+  'evt-progress-gt-2s',
+  'evt-onEnded',
+  'evt-onError',
+  'evt-onPlaybackStateChanged',
+  'evt-playing', // isPlaying seen true at least once
+  'evt-paused', // isPlaying seen false after having been true (real pause, not initial state)
+  'evt-resumed', // isPlaying seen true again after evt-paused
+  'evt-onSeek',
+  'evt-seek-fwd-landed', // first onProgress after an onSeek reports currentTime > 4s
+  'evt-seek-back-landed', // first onProgress after an onSeek reports currentTime < 2s
+  'evt-muted',
+  'evt-unmuted', // muted:false after evt-muted (real unmute, not the initial default)
+  'evt-volume-low', // onVolumeChange volume <= 0.35 while not muted
+  'evt-rate-2x',
+  'evt-rate-0-5x',
+  // An unassisted loop restart: see LOOP_VERIFIED_END_COUNT and the wrap-around rule in
+  // handle('onProgress') — AVPlayer reports each loop as onEnd, ExoPlayer wraps silently,
+  // so both are covered (see smoke-loop.yaml).
+  'evt-loop-verified',
+] as const;
+
+export type MarkerId = (typeof MARKER_IDS)[number];
+
+export type LogEntry = { readonly id: number; readonly text: string };
 
 export type PlayerEvent =
-  | { type: 'onLoad'; duration?: number }
+  | { type: 'onLoad'; duration: number }
   | { type: 'onProgress'; currentTime: number }
   | { type: 'onEnd' }
   | { type: 'onError'; code: string }
-  | { type: 'onStatusChange'; status: string }
+  | { type: 'onStatusChange'; status: VideoPlayerStatus }
   | { type: 'onPlaybackStateChange'; isPlaying: boolean }
   | { type: 'onSeek'; seekTime: number }
   | { type: 'onVolumeChange'; muted: boolean; volume: number }
   | { type: 'onPlaybackRateChange'; rate: number };
 
-// btn-rate-cycle steps through these. The next value is tracked in JS, never derived
-// from player.rate at press time: a tap issued mid-playback is only delivered once the
-// player goes idle, when the native rate reads 0 (see CONTEXT.md).
-export const RATE_STEPS = [2, 0.5, 1] as const;
 export const PROGRESS_MARKER_SECONDS = 2;
 export const SEEK_FORWARD_LANDED_SECONDS = 4;
 export const SEEK_BACK_LANDED_SECONDS = 2;
@@ -59,60 +62,62 @@ export const LOOP_VERIFIED_END_COUNT = 3;
 // lands below LOOP_WRAP_TO_SECONDS, so it cannot be mistaken for a wrap.
 export const LOOP_WRAP_FROM_SECONDS = 6;
 export const LOOP_WRAP_TO_SECONDS = 0.75;
+// Set when the player reports an error status without a code (see handle).
+export const STATUS_ERROR_CODE = 'status/error';
 
-type Listener = () => void;
+const MAX_ENTRIES = 50;
 
-const state = {
-  markers: new Set<MarkerId>(),
-  entries: [] as string[],
-  errorCode: '' as string,
-  // Derived-marker bookkeeping; cleared by reset() with everything else.
+type State = {
+  // useSyncExternalStore compares snapshots by reference, so markers and entries are
+  // replaced on every change and never mutated in place.
+  markers: ReadonlySet<MarkerId>;
+  entries: readonly LogEntry[];
+  errorCode: string;
+  // Derived-marker bookkeeping.
+  endCount: number;
+  loopEnabled: boolean;
+  seekPending: boolean;
+  lastProgress: number | null;
+};
+
+const initialState = (): State => ({
+  markers: new Set(),
+  entries: [],
+  errorCode: '',
   endCount: 0,
   loopEnabled: false,
   seekPending: false,
-  lastProgress: null as number | null,
-};
+  lastProgress: null,
+});
 
-const listeners = new Set<Listener>();
-const MAX_ENTRIES = 50;
+let state = initialState();
+// Never reset, so a key stays unique even across scenarios and after old entries drop off.
+let nextEntryId = 0;
+const listeners = new Set<() => void>();
 
 function emit() {
-  listeners.forEach((l) => l());
+  listeners.forEach((listener) => listener());
 }
 
 function mark(id: MarkerId) {
   if (!state.markers.has(id)) {
-    // useSyncExternalStore bails out on an unchanged snapshot reference,
-    // so mutations must produce a new Set/array, never mutate in place.
     state.markers = new Set(state.markers).add(id);
-    emit();
   }
 }
 
-function has(id: MarkerId) {
-  return state.markers.has(id);
+function append(line: string) {
+  const entry = {
+    id: nextEntryId++,
+    text: `${new Date().toISOString().slice(11, 23)} ${line}`,
+  };
+  state.entries = [...state.entries, entry].slice(-MAX_ENTRIES);
 }
 
-function log(line: string) {
-  const next = [
-    ...state.entries,
-    `${new Date().toISOString().slice(11, 23)} ${line}`,
-  ];
-  state.entries =
-    next.length > MAX_ENTRIES ? next.slice(next.length - MAX_ENTRIES) : next;
-  emit();
-}
-
-function setErrorCode(code: string) {
-  state.errorCode = code;
-  emit();
-}
-
-function handle(event: PlayerEvent) {
+function apply(event: PlayerEvent) {
   switch (event.type) {
     case 'onLoad':
       mark('evt-onLoad');
-      log(`onLoad duration=${event.duration ?? '?'}`);
+      append(`onLoad duration=${event.duration}`);
       return;
 
     case 'onProgress': {
@@ -148,23 +153,24 @@ function handle(event: PlayerEvent) {
       // real counter: smoke-loop.yaml taps play once to get from end #1 to end #2, then
       // makes no further taps — only `loop` itself can produce a #3.
       if (state.endCount >= LOOP_VERIFIED_END_COUNT) mark('evt-loop-verified');
-      log(`onEnded (#${state.endCount})`);
+      append(`onEnded (#${state.endCount})`);
       return;
 
     case 'onError':
       mark('evt-onError');
-      setErrorCode(event.code);
-      log(`onError code=${event.code}`);
+      state.errorCode = event.code;
+      append(`onError code=${event.code}`);
       return;
 
     case 'onStatusChange':
-      log(`status:${event.status}`);
       // A source that resolves initialize() optimistically and fails later only reports
-      // through the status observer, never through onError (see CONTEXT.md).
+      // through the status observer, never through onError (see CONTEXT.md). That path
+      // has no code, so it must not replace one onError already reported.
       if (event.status === 'error') {
         mark('evt-onError');
-        setErrorCode('status/error');
+        if (state.errorCode === '') state.errorCode = STATUS_ERROR_CODE;
       }
+      append(`status:${event.status}`);
       return;
 
     case 'onPlaybackStateChange':
@@ -173,64 +179,68 @@ function handle(event: PlayerEvent) {
       // something once we've actually seen it playing — same for "resumed" vs. evt-paused.
       if (event.isPlaying) {
         mark('evt-playing');
-        if (has('evt-paused')) mark('evt-resumed');
-      } else if (has('evt-playing')) {
+        if (state.markers.has('evt-paused')) mark('evt-resumed');
+      } else if (state.markers.has('evt-playing')) {
         mark('evt-paused');
       }
-      log(`playbackState isPlaying=${event.isPlaying}`);
+      append(`playbackState isPlaying=${event.isPlaying}`);
       return;
 
     case 'onSeek':
       mark('evt-onSeek');
       // The next progress event is where this seek landed (and not a loop wrap).
       state.seekPending = true;
-      log(`onSeek ${event.seekTime}`);
+      append(`onSeek ${event.seekTime}`);
       return;
 
     case 'onVolumeChange':
       if (event.muted) {
         mark('evt-muted');
-      } else if (has('evt-muted')) {
+      } else if (state.markers.has('evt-muted')) {
         mark('evt-unmuted');
       }
       if (!event.muted && event.volume <= VOLUME_LOW_THRESHOLD) {
         mark('evt-volume-low');
       }
-      log(`onVolumeChange muted=${event.muted} volume=${event.volume}`);
+      append(`onVolumeChange muted=${event.muted} volume=${event.volume}`);
       return;
 
     case 'onPlaybackRateChange':
       if (event.rate === 2) mark('evt-rate-2x');
       if (event.rate === 0.5) mark('evt-rate-0-5x');
-      log(`onPlaybackRateChange ${event.rate}`);
+      append(`onPlaybackRateChange ${event.rate}`);
       return;
+
+    default:
+      // A new PlayerEvent type fails to compile here until it is handled.
+      event satisfies never;
   }
 }
 
 export const eventLog = {
-  mark,
-  log,
-  setErrorCode,
-  handle,
-  // Called by btn-loop-toggle: the wrap-around rule above only applies while loop is on.
+  handle(event: PlayerEvent) {
+    apply(event);
+    emit();
+  },
+  log(line: string) {
+    append(line);
+    emit();
+  },
+  // Called by btn-loop-on: the wrap-around rule in handle only applies while loop is on.
   setLoopEnabled(enabled: boolean) {
     state.loopEnabled = enabled;
   },
   reset() {
-    state.markers = new Set();
-    state.entries = [];
-    state.errorCode = '';
-    state.endCount = 0;
-    state.loopEnabled = false;
-    state.seekPending = false;
-    state.lastProgress = null;
+    state = initialState();
     emit();
   },
-  getMarkers: () => state.markers,
-  getEntries: () => state.entries,
-  getErrorCode: () => state.errorCode,
-  subscribe(l: Listener) {
-    listeners.add(l);
-    return () => listeners.delete(l);
+  getMarkers: (): ReadonlySet<MarkerId> => state.markers,
+  getEntries: (): readonly LogEntry[] => state.entries,
+  getErrorCode: (): string => state.errorCode,
+  subscribe(listener: () => void) {
+    listeners.add(listener);
+    return () => {
+      listeners.delete(listener);
+    };
   },
 };

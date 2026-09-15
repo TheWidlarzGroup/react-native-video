@@ -9,18 +9,18 @@ builds for `ComponentActivity`.
 
 ### 1. Preserve the launch Intent's action/data
 
-**What breaks without it:** on Android, `Linking.getInitialURL()` always resolves to `null`
-after a `rnvtest://scenario/<name>` deep link, so every Maestro flow lands on the test app's
-default screen instead of its scenario. No error, no crash — the flows just fail their first
-assertion.
+**What breaks without it:** on Android, a `rnvtest://scenario/<name>` deep link never reaches
+JS: no `url` event and a `null` `Linking.getInitialURL()`, so every Maestro flow stays on the
+test app's default screen instead of its scenario. No error, no crash — the flows just fail
+their first assertion.
 
 **Cause:** in `singleApp` mode, `react-native-test-app`'s own `MainActivity.kt` does not host
 the app itself. It looks up the component, builds a fresh Intent for a separate
 `ComponentActivity`, starts it, and calls `finish()`. That redirect Intent is constructed from
 scratch and never carries over the launching Intent's `action` or `data`, so the deep-link URI
-is dropped before the JS side ever exists. React Native's `IntentModule.getInitialURL()`
-requires **both** `Intent.ACTION_VIEW` and a non-null `data` — copying only `data` still
-returns `null`, which is why the patch sets both.
+is dropped before the JS side ever exists. React Native's `IntentModule.getInitialURL()` and
+the `onNewIntent` path that emits the `url` event both require `Intent.ACTION_VIEW` **and** a
+non-null `data`, which is why the patch copies both.
 
 **Why a patch and not configuration:** putting the `intent-filter` on `ComponentActivity`
 instead does not work either — its `onCreate()` throws unless the Intent carries a

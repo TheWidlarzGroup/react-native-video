@@ -30,13 +30,13 @@ tags: [smoke]
       id: "evt-onEnded"
     timeout: 20000
 - tapOn:
-    id: "btn-mute-toggle"
+    id: "btn-mute"
 - extendedWaitUntil:
     visible:
       id: "evt-muted"
     timeout: 5000
 - tapOn:
-    id: "btn-mute-toggle"
+    id: "btn-unmute"
 - extendedWaitUntil:
     visible:
       id: "evt-unmuted"

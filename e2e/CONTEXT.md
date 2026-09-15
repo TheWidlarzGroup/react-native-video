@@ -82,27 +82,24 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
   second `ComponentActivity` with a second React root; RN broadcasts the `url` event to
   every root, so two scenarios mounted and two players played at once. The patch makes the
   existing activity receive the link via `onNewIntent`, which reaches JS as the `url`
-  event on the single root.
-- **Android: `Linking.getInitialURL()` can read the previous activity's intent.** RN's
-  `IntentModule.getInitialURL()` reads `getCurrentActivity().intent`, and
-  `getCurrentActivity()` can lag behind the redirect for a brief window, returning `null`
-  for the first link. `App.tsx` re-reads it at 300 ms and 1 s on Android only, and stops
-  re-reading once a `url` event has arrived (after which the original intent is stale).
+  event on the single root. Since every flow opens its links into the running app, they
+  all arrive as `url` events; `Linking.getInitialURL()` only matters for a cold launch
+  from a link, which no flow does.
 - **Android 15+ draws edge-to-edge and `SafeAreaView` is iOS-only.** Without a top
   padding equal to `StatusBar.currentHeight`, the first marker renders under the status
   bar and Maestro drops it from the hierarchy as invisible ("Skipping invisible child").
   Local runs on API 34 never showed this; API 35/36 do.
 - **Taps are immediate on Android, deferred on iOS.** The iOS driver only delivers a tap
   once the player goes idle (below); the Android driver delivers it at once. Flows that
-  must work on both use absolute actions (`btn-play`, `btn-seek-1`, `btn-loop-toggle` with
-  the value tracked in JS), never state-dependent toggles.
+  must work on both use absolute actions (`btn-play`, `btn-seek-1`, `btn-loop-on`), never
+  state-dependent toggles.
 - **`loop` is reported differently per platform.** AVPlayer fires `onEnd` on every loop
   pass; ExoPlayer's repeat mode wraps silently (no `onEnd`, no `onSeek`) and only progress
   jumping from the end of the clip back to its start betrays it. `evt-loop-verified`
   covers both (see `eventLog.ts`).
-- **Every control press is logged** (`press:<control> -> <value>`) so a failing flow's
-  hierarchy dump shows what actually landed and when; each `App` instance logs its root id
-  with the scenario, which is how the two-root problem above was found.
+- **Every control press is logged** (`press:<control>`, e.g. `press:rate 2x`) so a failing flow's
+  hierarchy dump shows what actually landed and when. Duplicated entries in that log are
+  how the two-root problem above was found.
 - **`useSyncExternalStore` bails out on same-reference snapshots.** Every mutation in
   `eventLog.ts` produces a new `Set`/array; mutating in place never re-renders.
 - **`onError` only fires from a rejected JS promise or a caught synchronous throw.** A
@@ -134,13 +131,14 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
   - An **absolute value-set** (`seekTo(5)`, `player.muted = true`) is fine whenever the
     deferred tap lands: `smoke-seek`, `smoke-mute-volume`, `smoke-hls-seek`.
   - A **relative** action (`rate = f(current rate)`, a play/pause toggle keyed on
-    `isPlaying`) reads stale state when it finally lands. Track the next value in JS
-    (`ScenarioScreen.tsx`'s `rateStepRef`) and/or interact only once the player is idle
-    (`smoke-loop`, `smoke-replay-after-end`).
+    `isPlaying`) reads stale state when it finally lands. The test app therefore has no
+    toggles: every control in `ScenarioScreen.tsx` sets an absolute value (`btn-rate-2`,
+    `btn-mute` / `btn-unmute`), and flows that depend on playback state interact only
+    once the player is idle (`smoke-loop`, `smoke-replay-after-end`).
   - A **"pause mid-playback" flow is not achievable** under this constraint and was
     dropped rather than shipped passing vacuously. Revisit if Maestro's idle detection
     changes.
-  - **`loop` needs an unassisted restart to prove anything**: the loop-toggle tap lands
+  - **`loop` needs an unassisted restart to prove anything**: the `btn-loop-on` tap lands
     too late for the first natural end (iOS) and a manual replay produces a second end
     regardless. `smoke-loop.yaml` seeks + plays once, then makes no further taps; only
     `loop` itself can produce end #3 (iOS) or a silent wrap-around (Android).

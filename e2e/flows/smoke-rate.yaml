@@ -1,4 +1,4 @@
-# Playback rate cycling (1x -> 2x -> 0.5x), surfaced via onPlaybackRateChange
+# Playback rate changes (1x -> 2x -> 0.5x), surfaced via onPlaybackRateChange
 # (see ScenarioScreen.tsx). Verified on-device: a tap issued while the video is actively
 # decoding is queued by the test driver and only delivered once the player goes idle
 # (paused/ended) — not a code bug, reproduced even with a listener that does nothing but
@@ -24,13 +24,13 @@ tags: [smoke]
       id: "evt-onLoad"
     timeout: 20000
 - tapOn:
-    id: "btn-rate-cycle"
+    id: "btn-rate-2"
 - extendedWaitUntil:
     visible:
       id: "evt-rate-2x"
     timeout: 15000            # tap is only actually delivered once the clip reaches its natural end
 - tapOn:
-    id: "btn-rate-cycle"
+    id: "btn-rate-0-5"
 - extendedWaitUntil:
     visible:
       id: "evt-rate-0-5x"

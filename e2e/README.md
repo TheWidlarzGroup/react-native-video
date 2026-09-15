@@ -61,8 +61,9 @@ deep links (`rnvtest://scenario/<name>`), never via UI navigation.
 
 ## Adding a flow
 
-1. If the scenario needs new app behavior: add a `ScenarioName` + source in `fixtures.ts`,
-   and (if needed) a derived marker in `eventLog.ts` — markers over number-parsing, always.
+1. If the scenario needs new app behavior: add its name to `SCENARIO_NAMES` in
+   `deepLink.ts`, its source in `fixtures.ts` (the compiler requires one per name), and
+   (if needed) a derived marker in `eventLog.ts` — markers over number-parsing, always.
 2. Copy the closest existing flow in `e2e/flows/`, rename, adjust deep link + assertions.
    Open scenarios through the shared subflow (`runFlow: ../shared/open-scenario.yaml` with
    `SCENARIO`), never with a bare `openLink`: the subflow owns the deep-link transport

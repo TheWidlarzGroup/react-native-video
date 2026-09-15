@@ -36,10 +36,10 @@ tags: [smoke]
       id: "evt-onEnded"
     timeout: 20000
 - tapOn:
-    id: "btn-loop-toggle"
+    id: "btn-loop-on"
 - tapOn:
     id: "btn-seek-1"
-# btn-play, not btn-play-pause: on Android a seek from the ended state resumes
+# btn-play, not a play/pause toggle: on Android a seek from the ended state resumes
 # playback by itself and taps land immediately, so a toggle would pause it again.
 - tapOn:
     id: "btn-play"

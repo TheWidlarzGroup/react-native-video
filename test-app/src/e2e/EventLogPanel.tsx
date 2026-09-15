@@ -1,28 +1,6 @@
 import React, { useSyncExternalStore } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { eventLog, type MarkerId } from './eventLog';
-
-const ALL_MARKERS: MarkerId[] = [
-  'evt-onLoad',
-  'evt-onProgress',
-  'evt-progress-gt-2s',
-  'evt-onEnded',
-  'evt-onError',
-  'evt-onPlaybackStateChanged',
-  'evt-source-replaced',
-  'evt-playing',
-  'evt-paused',
-  'evt-resumed',
-  'evt-onSeek',
-  'evt-seek-fwd-landed',
-  'evt-seek-back-landed',
-  'evt-muted',
-  'evt-unmuted',
-  'evt-volume-low',
-  'evt-rate-2x',
-  'evt-rate-0-5x',
-  'evt-loop-verified',
-];
+import { eventLog, MARKER_IDS } from './eventLog';
 
 /**
  * Renders:
@@ -42,9 +20,9 @@ export function EventLogPanel() {
   );
 
   return (
-    <View style={styles.panel} testID="event-log-panel">
+    <View style={styles.panel}>
       <View style={styles.markerRow}>
-        {ALL_MARKERS.filter((m) => markers.has(m)).map((m) => (
+        {MARKER_IDS.filter((m) => markers.has(m)).map((m) => (
           <Text key={m} testID={m} style={styles.marker}>
             {m}
           </Text>
@@ -56,9 +34,9 @@ export function EventLogPanel() {
         </Text>
       )}
       <ScrollView style={styles.log}>
-        {entries.map((line, i) => (
-          <Text key={i} style={styles.logLine}>
-            {line}
+        {entries.map(({ id, text }) => (
+          <Text key={id} style={styles.logLine}>
+            {text}
           </Text>
         ))}
       </ScrollView>
