@@ -24,6 +24,7 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
 
     private var localStyle = SubtitleStyle()
     private var pendingResizeMode: Int? = null
+    private var hideLiveBadge = false
     private val liveBadge: TextView = TextView(context).apply {
         text = "LIVE"
         setTextColor(Color.WHITE)
@@ -195,6 +196,12 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
         playerView.setShowSubtitleButton(show)
     }
 
+    fun setHideLiveBadge(hide: Boolean) {
+        if (hideLiveBadge == hide) return
+        hideLiveBadge = hide
+        updateLiveUi()
+    }
+
     fun isControllerVisible(): Boolean = playerView.isControllerFullyVisible
 
     fun setControllerVisibilityListener(listener: PlayerView.ControllerVisibilityListener?) {
@@ -215,7 +222,7 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
         val seekable = player.isCurrentMediaItemSeekable
 
         // Show/hide badge
-        liveBadge.visibility = if (isLive) View.VISIBLE else View.GONE
+        liveBadge.visibility = if (isLive && !hideLiveBadge) View.VISIBLE else View.GONE
 
         // Disable/enable scrubbing based on seekable
         val timeBar = playerView.findViewById<DefaultTimeBar?>(androidx.media3.ui.R.id.exo_progress)
