@@ -45,7 +45,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # upload-artifact@v4 hard-errors on a duplicate name within a run, so the name has
+      # upload-artifact hard-errors on a duplicate name within a run, so the name has
       # to differ per (rn-version, api-level, tag selection).
       - name: Resolve artifact name
         id: suffix
@@ -89,8 +89,6 @@ jobs:
           # carries what this build actually needs.
           cache-cleanup: on-success
 
-      # x86_64 only: that is the emulator ABI; the other three would be built and thrown
-      # away.
       # react-native-test-app applies the Expo config plugins while evaluating Gradle
       # settings, editing its own AndroidManifest.xml in node_modules in place. But its
       # manifest generator (android/android-manifest.js) ALSO runs during `react-native
@@ -129,14 +127,12 @@ jobs:
           done
           exit 1
 
+      # x86_64 only: that is the emulator ABI; the other three would be built and thrown away.
       - name: Build test app APK
         run: cd test-app/android && ./gradlew assembleDebug --build-cache --no-daemon -PreactNativeArchitectures=x86_64
 
-      # react-native-test-app applies the Expo config plugins (test-app/rnv-e2e-plugin.mjs)
-      # while evaluating Gradle settings and writes the result into its own manifest in
-      # node_modules. If that step silently does nothing, every flow fails at openLink
-      # with "unable to resolve Intent" ten times over; fail here instead, with the
-      # manifest in the log.
+      # Without the intent filter every flow fails at openLink with "unable to resolve
+      # Intent"; fail here instead, with both manifests in the log.
       - name: Verify the deep-link intent filter made it into the APK manifest
         run: |
           set -euo pipefail

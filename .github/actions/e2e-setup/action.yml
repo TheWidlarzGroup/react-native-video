@@ -62,8 +62,12 @@ runs:
         bun run build:${{ inputs.platform }}
         test -s dist/main.${{ inputs.platform }}.jsbundle
 
+    # Pinned, so a Maestro release cannot turn the gate red without a change in this repo.
+    # Bump deliberately, after running the suite locally with the new version.
     - name: Install Maestro
       shell: bash
+      env:
+        MAESTRO_VERSION: 2.10.0
       run: |
         set -euo pipefail
         curl -Ls "https://get.maestro.mobile.dev" | bash

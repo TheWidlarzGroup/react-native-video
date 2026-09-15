@@ -1,11 +1,13 @@
 # Keeps the Actions cache (10 GB per repository, LRU eviction beyond that) from filling
 # up with stale entries:
 #   - when a pull request closes, every cache entry scoped to it is deleted;
-#   - once a day, on every ref, only the newest entry of each cache family is kept
-#     (bun, pods, deriveddata, gradle-*), because every change to a lockfile, patch or
-#     source hash creates a new key and the previous entries linger until evicted.
+#   - once a day, on every ref, only the newest entry of each cache family is kept,
+#     because every change to a source hash creates a new key and the previous entries
+#     linger until evicted.
 # Caches written on the default branch are the ones every pull request can restore,
-# so those are pruned to one-per-family too, never removed entirely.
+# so those are pruned to one-per-family too, never removed entirely. Gradle entries are
+# left alone: gradle/actions/setup-gradle manages its own, and several with the same
+# prefix are live at once (one per React Native version).
 name: cache-cleanup
 
 on:
@@ -50,9 +52,11 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
     steps:
-      # A "family" is the key with its trailing hash segments removed: everything the
-      # workflows generate is <name>-<fixed coordinates>-<hash>[-<hash>], so stripping
-      # 32+ character hex runs groups the variants of one cache together.
+      # A "family" is the key without its LAST hash segment. Only the last one: the
+      # earlier segments tell live variants apart. The bun key is
+      # <os>-v8-bun-frozen-<patches>-<bun.lock>-<package.json>, and each React Native
+      # version swaps in its own bun.lock, so stripping every hash would keep one RN
+      # version's node_modules and delete the others every night.
       - name: Keep only the newest entry per cache family and ref
         run: |
           set -euo pipefail
@@ -63,7 +67,8 @@ jobs:
           declare -A seen
           freed=0; kept=0
           while IFS=$'\t' read -r id ref size key; do
-            family=$(echo "$key" | sed -E 's/-?[0-9a-f]{32,}//g; s/-+$//')
+            case "$key" in *gradle*) kept=$((kept + 1)); continue ;; esac
+            family=$(echo "$key" | sed -E 's/-[0-9a-f]{32,}$//')
             slot="${ref}|${family}"
             if [ -n "${seen[$slot]:-}" ]; then
               gh cache delete "$id" && echo "deleted ${key} on ${ref} ($((size / 1048576)) MB), newer entry kept"

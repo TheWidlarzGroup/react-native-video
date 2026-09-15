@@ -23,9 +23,10 @@ on:
 permissions:
   contents: read
 
+# Superseded pull request runs are cancelled; master runs are not (see e2e.yml).
 concurrency:
   group: unit-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   checks:
@@ -63,7 +64,7 @@ jobs:
       # job's React 19 tree under the frozen key the E2E legs and the checks job restore.
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: 1.3.1
+          bun-version-file: .bun-version
 
       # Root `overrides` force every workspace onto React 19 for this job only; the
       # install is deliberately not frozen and nothing here is committed. Pin exact

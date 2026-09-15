@@ -51,7 +51,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # upload-artifact@v4 hard-errors on a duplicate name within a run, so the name has
+      # upload-artifact hard-errors on a duplicate name within a run, so the name has
       # to differ per (rn-version, ios-runtime, tag selection).
       - name: Resolve artifact name
         id: suffix
@@ -172,18 +172,10 @@ jobs:
           test -n "$APP_PATH"
           xcrun simctl install "$SIM_UDID" "$APP_PATH"
 
-          # Warm-up, outside Maestro: the first launch after install on a hosted runner
-          # is far slower than the rest, so do it once here. Deliberately NO
-          # `simctl openurl` here: it raises the system "Open in app?" confirmation,
-          # which nothing outside Maestro can dismiss and which then covers every flow.
-          # The flows handle that confirmation themselves (optional tap on "Open").
-          xcrun simctl launch "$SIM_UDID" ${{ env.APP_ID }} || true
-          sleep 8
-          xcrun simctl terminate "$SIM_UDID" ${{ env.APP_ID }} || true
-
-      # See e2e/warmup/ios-approve-open-link.yaml: takes the one-time "Open in app?"
-      # confirmation (after which the link is lost) out of the real flows' way and
-      # warms the first launch and the Maestro driver. Never fails the leg.
+      # See e2e/warmup/ios-approve-open-link.yaml: warms the first launch after install
+      # (far slower than the rest on a hosted runner) and the Maestro driver, and takes the
+      # one-time "Open in app?" confirmation, after which the link is lost, out of the real
+      # flows' way. Never fails the leg.
       - name: Warm up (approve the deep-link confirmation once)
         env:
           MAESTRO_DRIVER_STARTUP_TIMEOUT: '300000'

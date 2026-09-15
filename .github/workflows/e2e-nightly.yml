@@ -16,15 +16,14 @@ concurrency:
   group: e2e-nightly
   cancel-in-progress: false
 
-# contents: write — push to the orphan `e2e-results` branch. issues: write — nightly issues.
+# Read-only by default; only the report job below writes.
 permissions:
-  contents: write
-  issues: write
+  contents: read
 
 jobs:
-  # Single source of truth for every row and for the artifact name each row uploads
-  # under. The legs receive that name via `artifact-name`, and the report job derives
-  # its expected-row list from the same objects, so the two cannot drift apart.
+  # Single source of truth for every row: the legs receive its `tags` and
+  # `artifact-name`, and the report job derives its expected-row list from the same
+  # objects, so they cannot drift apart.
   # Quarantine legs are only planned when a flow is tagged `flaky`.
   matrix-plan:
     name: matrix plan
@@ -49,6 +48,7 @@ jobs:
 
   android:
     needs: matrix-plan
+    name: android (${{ matrix.rn }}, API ${{ matrix.api-level }})
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.matrix-plan.outputs.android-matrix) }}
@@ -56,6 +56,7 @@ jobs:
     with:
       rn-version: ${{ matrix.rn }}
       api-level: ${{ matrix.api-level }}
+      tags: ${{ matrix.tags }}
       artifact-name: ${{ matrix.artifact-name }}
       blocking: false
 
@@ -71,6 +72,7 @@ jobs:
       runner: ${{ matrix.runner }}
       ios-runtime: ${{ matrix.ios-runtime }}
       sim-device: ${{ matrix.sim-device }}
+      tags: ${{ matrix.tags }}
       artifact-name: ${{ matrix.artifact-name }}
       blocking: false
 
@@ -84,7 +86,7 @@ jobs:
       api-level: ${{ fromJSON(needs.matrix-plan.outputs.quarantine-android).api-level }}
       artifact-name: ${{ fromJSON(needs.matrix-plan.outputs.quarantine-android).artifact-name }}
       blocking: false
-      tags: '--include-tags=flaky'
+      tags: ${{ fromJSON(needs.matrix-plan.outputs.quarantine-android).tags }}
 
   quarantine-ios:
     needs: matrix-plan
@@ -97,7 +99,7 @@ jobs:
       ios-runtime: ${{ fromJSON(needs.matrix-plan.outputs.quarantine-ios).ios-runtime }}
       artifact-name: ${{ fromJSON(needs.matrix-plan.outputs.quarantine-ios).artifact-name }}
       blocking: false
-      tags: '--include-tags=flaky'
+      tags: ${{ fromJSON(needs.matrix-plan.outputs.quarantine-ios).tags }}
 
   # `needs` on every leg guarantees all artifacts are uploaded before the download;
   # `if: always()` keeps this running after skipped quarantine legs or a cancelled run.
@@ -105,6 +107,11 @@ jobs:
     needs: [matrix-plan, android, ios, quarantine-android, quarantine-ios]
     if: always()
     runs-on: ubuntu-latest
+    # contents: write pushes to the orphan `e2e-results` branch; issues: write opens and
+    # closes the nightly issues.
+    permissions:
+      contents: write
+      issues: write
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7

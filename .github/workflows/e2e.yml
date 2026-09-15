@@ -18,10 +18,12 @@ on:
       - '**/*.md'
   workflow_dispatch:
 
-# A new push cancels the whole gate at once and frees the macOS slot immediately.
+# A new push to a pull request cancels the whole gate at once and frees the macOS slot
+# immediately. Runs on master queue instead: each one writes the caches pull requests
+# restore and checks a merge.
 concurrency:
   group: e2e-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -45,18 +47,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - rn: '0.77'
-            blocking: true
-          - rn: '0.82'
-            blocking: true
-          - rn: '0.87'
-            blocking: true
+        rn: ['0.77', '0.82', '0.87']
     uses: ./.github/workflows/_e2e-android.yml
     with:
       rn-version: ${{ matrix.rn }}
       api-level: '36'
-      blocking: ${{ matrix.blocking }}
 
   ios:
     uses: ./.github/workflows/_e2e-ios.yml
@@ -64,4 +59,3 @@ jobs:
       rn-version: '0.87'
       runner: 'macos-26'
       ios-runtime: '26'
-      blocking: true

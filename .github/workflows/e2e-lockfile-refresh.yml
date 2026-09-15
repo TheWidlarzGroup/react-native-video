@@ -24,6 +24,8 @@ jobs:
     # Scheduled workflows also run on forks; same guard as stale.yml et al.
     if: ${{ github.repository == 'TheWidlarzGroup/react-native-video' }}
     runs-on: ubuntu-latest
+    # A few installs; anything near this means a hung install, not a slow one.
+    timeout-minutes: 30
     env:
       REFRESH_BRANCH: ci/e2e-lockfile-refresh
     steps:
