@@ -1,245 +1,150 @@
-import { test, expect } from 'bun:test';
-import { issueTitle, decide, reconcile, runNightlyIssue } from './nightly-issue.mjs';
+import { describe, expect, test } from 'bun:test';
+import { decide, issueTitle, main, reconcile } from './nightly-issue.mjs';
+import { fakeIo } from './test-helpers.mjs';
 
-test('title is stable and identifies the matrix row', () => {
-  expect(issueTitle('android · RN 0.87 · API 36')).toBe(
-    '[e2e nightly] android · RN 0.87 · API 36'
-  );
+const ROW = 'e2e-android-rn0.87-api36-exclude-tags-flaky';
+const TITLE = issueTitle(ROW);
+const OURS = [{ id: 'L1', name: 'e2e-nightly', description: '', color: 'ededed' }];
+const issue = (number, title = TITLE, labels = OURS) => ({ number, title, labels });
+
+test('the title is the prefix plus the unmodified label', () => {
+  expect(TITLE).toBe(`[e2e nightly] ${ROW}`);
 });
 
-test('title does not prettify a machine-derived label', () => {
-  // The label is the artifact directory name from the nightly workflow. It must pass
-  // through untouched — reformatting it would break title-based deduplication the
-  // next time the same row reports.
-  const label = 'e2e-android-rn0.87-api36-exclude-tags-flaky';
-  expect(issueTitle(label)).toBe(`[e2e nightly] ${label}`);
+test.each([
+  ['fail', null, 'create'],
+  ['fail', { number: 1 }, 'comment'],
+  ['pass', { number: 1 }, 'close'],
+  ['pass', null, 'noop'],
+])('decide: %s with existing %o -> %s', (status, existing, action) => {
+  expect(decide({ status, existing })).toBe(action);
 });
 
-test('a failure with no open issue creates one', () => {
-  expect(decide({ status: 'fail', existing: null })).toBe('create');
+describe('reconcile', () => {
+  test('matches only the exact title, ignoring token-similar rows from the search', () => {
+    const issues = [issue(1, issueTitle('e2e-android-rn0.87-api35-exclude-tags-flaky')), issue(2, `${TITLE}0`), issue(3)];
+    expect(reconcile(issues, TITLE)).toEqual({ existing: issue(3), duplicates: [] });
+  });
+
+  test('finds nothing in an empty result or among near-matches', () => {
+    expect(reconcile([], TITLE)).toEqual({ existing: null, duplicates: [] });
+    expect(reconcile([issue(1, `${TITLE} `)], TITLE)).toEqual({ existing: null, duplicates: [] });
+  });
+
+  test('ignores a same-titled issue without the e2e-nightly label', () => {
+    expect(reconcile([issue(7, TITLE, [])], TITLE)).toEqual({ existing: null, duplicates: [] });
+    expect(reconcile([{ number: 7, title: TITLE }, issue(9)], TITLE)).toEqual({ existing: issue(9), duplicates: [] });
+  });
+
+  test('keeps the oldest of several matches and returns the rest as duplicates', () => {
+    expect(reconcile([issue(42), issue(17), issue(99)], TITLE)).toEqual({
+      existing: issue(17),
+      duplicates: [issue(42), issue(99)],
+    });
+  });
 });
 
-test('a repeat failure comments instead of duplicating', () => {
-  expect(decide({ status: 'fail', existing: { number: 12 } })).toBe('comment');
-});
-
-test('a pass with an open issue closes it', () => {
-  expect(decide({ status: 'pass', existing: { number: 12 } })).toBe('close');
-});
-
-test('a pass with no open issue does nothing', () => {
-  expect(decide({ status: 'pass', existing: null })).toBe('noop');
-});
-
-test('decide covers all four status/existing combinations distinctly', () => {
-  // A belt-and-braces check on top of the four tests above: assert the full truth
-  // table in one place so swapping any two branches is immediately visible as a
-  // duplicate entry in this set, not just a single failing assertion.
-  const outcomes = new Set([
-    decide({ status: 'fail', existing: null }),
-    decide({ status: 'fail', existing: { number: 1 } }),
-    decide({ status: 'pass', existing: { number: 1 } }),
-    decide({ status: 'pass', existing: null }),
-  ]);
-  expect(outcomes).toEqual(new Set(['create', 'comment', 'close', 'noop']));
-});
-
-const TITLE = '[e2e nightly] android · RN 0.87 · API 36';
-
-const LABEL = 'e2e-nightly';
-const LABELS = [{ id: 'L1', name: LABEL, description: '', color: 'ededed' }];
-
-test('reconcile ignores near-matches from a fuzzy search', () => {
-  // GitHub's issue search is token-based, not exact. A search for this title can
-  // return neighbouring rows that share most tokens but are not the same row.
-  const issues = [
-    { number: 1, title: '[e2e nightly] android · RN 0.87 · API 35', labels: LABELS },
-    { number: 2, title: '[e2e nightly] android · RN 0.86 · API 36', labels: LABELS },
-    { number: 3, title: TITLE, labels: LABELS },
-  ];
-  const { existing, duplicates } = reconcile(issues, TITLE);
-  expect(existing).toEqual({ number: 3, title: TITLE, labels: LABELS });
-  expect(duplicates).toEqual([]);
-});
-
-test('reconcile finds nothing when only near-matches exist', () => {
-  const issues = [
-    { number: 1, title: '[e2e nightly] android · RN 0.87 · API 35' },
-    { number: 2, title: '[e2e nightly] ios · RN 0.87 · API 36' },
-  ];
-  const { existing, duplicates } = reconcile(issues, TITLE);
-  expect(existing).toBeNull();
-  expect(duplicates).toEqual([]);
-});
-
-test('reconcile treats an empty search result as no existing issue', () => {
-  const { existing, duplicates } = reconcile([], TITLE);
-  expect(existing).toBeNull();
-  expect(duplicates).toEqual([]);
-});
-
-test('reconcile keeps the oldest issue and flags the rest as duplicates from a race', () => {
-  // Two runs for the same row can both search before either has created its issue,
-  // then both create — leaving two open issues with the identical title.
-  const issues = [
-    { number: 42, title: TITLE, labels: LABELS },
-    { number: 17, title: TITLE, labels: LABELS },
-    { number: 99, title: TITLE, labels: LABELS },
-  ];
-  const { existing, duplicates } = reconcile(issues, TITLE);
-  expect(existing).toEqual({ number: 17, title: TITLE, labels: LABELS });
-  expect(duplicates).toEqual([
-    { number: 42, title: TITLE, labels: LABELS },
-    { number: 99, title: TITLE, labels: LABELS },
-  ]);
-});
-
-test('reconcile treats a single exact match as canonical with no duplicates', () => {
-  const issues = [{ number: 5, title: TITLE, labels: LABELS }];
-  const { existing, duplicates } = reconcile(issues, TITLE);
-  expect(existing).toEqual({ number: 5, title: TITLE, labels: LABELS });
-  expect(duplicates).toEqual([]);
-});
-
-test('reconcile leaves an exact-title issue untouched when it lacks the e2e-nightly label', () => {
-  // A maintainer can open (or rename) an issue with this exact title by hand. Without the
-  // label check, this script would comment on it as a "repeat failure" or auto-close it as
-  // a duplicate — neither of which is this script's issue to manage.
-  const issues = [{ number: 7, title: TITLE, labels: [] }];
-  const { existing, duplicates } = reconcile(issues, TITLE);
-  expect(existing).toBeNull();
-  expect(duplicates).toEqual([]);
-});
-
-test('reconcile picks the labelled issue over an untagged same-title issue', () => {
-  const issues = [
-    { number: 7, title: TITLE, labels: [] },
-    { number: 3, title: TITLE, labels: LABELS },
-  ];
-  const { existing, duplicates } = reconcile(issues, TITLE);
-  expect(existing).toEqual({ number: 3, title: TITLE, labels: LABELS });
-  expect(duplicates).toEqual([]);
-});
-
-// runNightlyIssue takes gh's `run(args) => stdout` as a plain function argument, so these
-// tests drive the real create/comment/close/duplicate-close logic with a fake `run` instead
-// of spawning a subprocess (bun test's subprocess spawns return EBADF under Bun 1.4.0).
-function silenceConsole(fn) {
-  const log = console.log;
-  const error = console.error;
-  const logs = [];
-  const errors = [];
-  console.log = (...args) => logs.push(args.join(' '));
-  console.error = (...args) => errors.push(args.join(' '));
-  try {
-    const exitCode = fn();
-    return { exitCode, logs, errors };
-  } finally {
-    console.log = log;
-    console.error = error;
+describe('main', () => {
+  // A fake `gh`: records every call, answers `issue list` with `open` (or the raw
+  // `listOutput`), and throws for any call whose arguments start with one of `failing`.
+  function fakeGh({ open = [], listOutput = JSON.stringify(open), failing = [] } = {}) {
+    const calls = [];
+    const run = (args) => {
+      calls.push(args);
+      if (failing.some((prefix) => prefix.every((arg, i) => args[i] === arg))) {
+        throw new Error(`HTTP 403: ${args.slice(0, 3).join(' ')}`);
+      }
+      return args[1] === 'list' ? listOutput : '';
+    };
+    return { run, calls, mutations: () => calls.filter((args) => args[1] !== 'list') };
   }
-}
-
-test('runNightlyIssue reports success only when the mutation actually ran', () => {
-  const calls = [];
-  const run = (args) => {
-    calls.push(args);
-    if (args[0] === 'issue' && args[1] === 'list') return '[]';
-    return '';
+  const call = (gh, status = 'fail', args = [ROW, status, 'https://example.com/run/1']) => {
+    const fake = fakeIo();
+    const code = main({ argv: ['node', 'nightly-issue.mjs', ...args], ...fake.io, run: gh.run });
+    return { code, stdout: fake.stdout(), stderr: fake.stderr() };
   };
-  const { exitCode, logs, errors } = silenceConsole(() =>
-    runNightlyIssue(run, 'android · RN 0.87 · API 36', 'fail', 'https://example.com/run/1')
-  );
-  expect(exitCode).toBe(0);
-  expect(logs).toEqual(['[nightly-issue] android · RN 0.87 · API 36: create']);
-  expect(errors).toEqual([]);
-  expect(calls.some((args) => args[0] === 'issue' && args[1] === 'create')).toBe(true);
-});
 
-test('a failed mutation is reported loudly and never logged as a success', () => {
-  // This is the critical case: if `gh issue create` fails (missing label, no issues:write
-  // permission, ...), the script must not print the success line, and must fail the run —
-  // reporting must not fail the run it reports on, but the reporter silently failing to
-  // report is a different failure that must not be invisible.
-  const run = (args) => {
-    if (args[0] === 'issue' && args[1] === 'list') return '[]';
-    if (args[0] === 'issue' && args[1] === 'create') {
-      throw new Error("HTTP 404: 'e2e-nightly' not found");
-    }
-    return '';
-  };
-  const { exitCode, logs, errors } = silenceConsole(() =>
-    runNightlyIssue(run, 'android · RN 0.87 · API 36', 'fail', 'https://example.com/run/1')
-  );
-  expect(exitCode).toBe(1);
-  expect(logs).toEqual([]);
-  expect(errors).toEqual([
-    "[nightly-issue] android · RN 0.87 · API 36: failed to create issue: HTTP 404: 'e2e-nightly' not found",
-  ]);
-});
+  test('searches open issues by title, scoped to the e2e-nightly label', () => {
+    const gh = fakeGh();
+    call(gh, 'pass');
+    const [list] = gh.calls;
+    expect(list.slice(0, 4)).toEqual(['issue', 'list', '--state', 'open']);
+    expect(list[list.indexOf('--search') + 1]).toBe(`"${TITLE}" in:title`);
+    expect(list[list.indexOf('--label') + 1]).toBe('e2e-nightly');
+    expect(list[list.indexOf('--json') + 1].split(',')).toContain('labels');
+  });
 
-test('a failed duplicate close is reported loudly but does not block the primary action', () => {
-  const issues = [
-    { number: 17, title: issueTitle('android · RN 0.87 · API 36'), labels: LABELS },
-    { number: 42, title: issueTitle('android · RN 0.87 · API 36'), labels: LABELS },
-  ];
-  const run = (args) => {
-    if (args[0] === 'issue' && args[1] === 'list') return JSON.stringify(issues);
-    if (args[0] === 'issue' && args[1] === 'close' && args[2] === '42') {
-      throw new Error('HTTP 403: rate limited');
-    }
-    return '';
-  };
-  const { exitCode, logs, errors } = silenceConsole(() =>
-    runNightlyIssue(run, 'android · RN 0.87 · API 36', 'fail', 'https://example.com/run/1')
-  );
-  expect(exitCode).toBe(1);
-  expect(errors).toEqual([
-    '[nightly-issue] android · RN 0.87 · API 36: failed to close duplicate #42: HTTP 403: rate limited',
-  ]);
-  // The primary action (commenting on the canonical issue #17) still ran and still reports,
-  // because a duplicate-cleanup failure is unrelated to whether the main report succeeded.
-  expect(logs).toEqual(['[nightly-issue] android · RN 0.87 · API 36: comment']);
-});
+  test('a failing row without an issue creates one, labelled, linking the run', () => {
+    const gh = fakeGh();
+    const { code, stdout, stderr } = call(gh, 'fail');
+    expect(code).toBe(0);
+    expect(stdout).toBe(`[nightly-issue] ${ROW}: create\n`);
+    expect(stderr).toBe('');
+    const [create] = gh.mutations();
+    expect(create.slice(0, 6)).toEqual(['issue', 'create', '--title', TITLE, '--label', 'e2e-nightly']);
+    expect(create.at(-1)).toContain('Run: https://example.com/run/1');
+  });
 
-test('findExisting scopes the gh issue list search to the e2e-nightly label', () => {
-  // reconcile's label check only protects a decision made from whatever `gh issue list`
-  // already returned. The `--label` filter and the `labels` field in `--json` are what
-  // actually scope that real API call — drop either one and an untagged same-title issue
-  // that ranks outside the (unfiltered, --limit 50) search window would simply never come
-  // back for reconcile to filter. Capture the literal args passed to `run` for `issue list`
-  // so a future edit that drops either piece fails this test instead of silently reopening
-  // the gap.
-  let listArgs = null;
-  const run = (args) => {
-    if (args[0] === 'issue' && args[1] === 'list') {
-      listArgs = args;
-      return '[]';
-    }
-    return '';
-  };
-  silenceConsole(() =>
-    runNightlyIssue(run, 'android · RN 0.87 · API 36', 'pass', 'https://example.com/run/1')
-  );
-  expect(listArgs).not.toBeNull();
-  const labelIndex = listArgs.indexOf('--label');
-  expect(labelIndex).toBeGreaterThan(-1);
-  expect(listArgs[labelIndex + 1]).toBe('e2e-nightly');
-  const jsonIndex = listArgs.indexOf('--json');
-  expect(jsonIndex).toBeGreaterThan(-1);
-  expect(listArgs[jsonIndex + 1].split(',')).toContain('labels');
-});
+  test('a failing row with an issue comments on it', () => {
+    const gh = fakeGh({ open: [issue(12)] });
+    expect(call(gh, 'fail').stdout).toBe(`[nightly-issue] ${ROW}: comment\n`);
+    expect(gh.mutations()).toEqual([['issue', 'comment', '12', '--body', 'Still failing. Run: https://example.com/run/1']]);
+  });
 
-test('a failed read degrades to "no existing issue" instead of throwing', () => {
-  const run = (args) => {
-    if (args[0] === 'issue' && args[1] === 'list') {
-      throw new Error('HTTP 500: something went wrong');
-    }
-    return '';
-  };
-  const { exitCode, logs } = silenceConsole(() =>
-    runNightlyIssue(run, 'android · RN 0.87 · API 36', 'fail', 'https://example.com/run/1')
-  );
-  expect(exitCode).toBe(0);
-  expect(logs).toEqual(['[nightly-issue] android · RN 0.87 · API 36: create']);
+  test('a green row closes its issue, and does nothing without one', () => {
+    const withIssue = fakeGh({ open: [issue(12)] });
+    expect(call(withIssue, 'pass').stdout).toBe(`[nightly-issue] ${ROW}: close\n`);
+    expect(withIssue.mutations()).toEqual([['issue', 'close', '12', '--comment', 'Green again. Run: https://example.com/run/1']]);
+
+    const withoutIssue = fakeGh();
+    expect(call(withoutIssue, 'pass').stdout).toBe(`[nightly-issue] ${ROW}: noop\n`);
+    expect(withoutIssue.mutations()).toEqual([]);
+  });
+
+  test('closes duplicates against the oldest issue before acting on it', () => {
+    const gh = fakeGh({ open: [issue(42), issue(17)] });
+    expect(call(gh, 'fail').code).toBe(0);
+    expect(gh.mutations().map((args) => args.slice(0, 3))).toEqual([
+      ['issue', 'close', '42'],
+      ['issue', 'comment', '17'],
+    ]);
+    expect(gh.mutations()[0].at(-1)).toBe('Duplicate of #17 for the same matrix row; closing.');
+  });
+
+  test('a failed mutation fails the run and is never reported as done', () => {
+    const { code, stdout, stderr } = call(fakeGh({ failing: [['issue', 'create']] }), 'fail');
+    expect(code).toBe(1);
+    expect(stdout).toBe('');
+    expect(stderr).toBe(`[nightly-issue] ${ROW}: failed to create issue: HTTP 403: issue create --title\n`);
+  });
+
+  test('a failed duplicate close fails the run but still performs the main action', () => {
+    const gh = fakeGh({ open: [issue(17), issue(42)], failing: [['issue', 'close', '42']] });
+    const { code, stdout, stderr } = call(gh, 'fail');
+    expect(code).toBe(1);
+    expect(stderr).toContain('failed to close duplicate #42');
+    expect(stdout).toBe(`[nightly-issue] ${ROW}: comment\n`);
+  });
+
+  test.each([
+    ['a failing lookup', { failing: [['issue', 'list']] }],
+    ['an unparseable lookup', { listOutput: 'not json' }],
+  ])('%s degrades to "no issue yet"', (_, options) => {
+    const { code, stdout, stderr } = call(fakeGh(options), 'fail');
+    expect(code).toBe(0);
+    expect(stdout).toBe(`[nightly-issue] ${ROW}: create\n`);
+    expect(stderr).toContain('gh issue list failed');
+  });
+
+  test.each([
+    ['no arguments', []],
+    ['an unknown status', [ROW, 'failed', 'https://example.com/run/1']],
+    ['no run URL', [ROW, 'fail']],
+  ])('fails with usage and calls no gh given %s', (_, args) => {
+    const gh = fakeGh({ open: [issue(12)] });
+    const { code, stderr } = call(gh, undefined, args);
+    expect(code).toBe(1);
+    expect(stderr).toBe('usage: nightly-issue.mjs <label> <pass|fail> <run-url>\n');
+    expect(gh.calls).toEqual([]);
+  });
 });

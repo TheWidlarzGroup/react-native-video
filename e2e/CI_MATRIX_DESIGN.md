@@ -199,9 +199,10 @@ updated rather than duplicated on subsequent nights, and closed automatically wh
 goes green (`scripts/e2e/nightly-issue.mjs`, via `gh` and `GITHUB_TOKEN`).
 
 **Quarantine decisions are data-driven.** Nightly appends one JSON line per row to an
-orphan `e2e-results` branch; `scripts/e2e/record-result.mjs` computes per-flow pass rates
-and the consecutive-green counter that gates marking a check required. A missing,
-truncated or empty report is recorded as a failure, never as green.
+orphan `e2e-results` branch, with each flow's result, so per-flow pass rates can be read
+from the history; `scripts/e2e/record-result.mjs` also reports the consecutive-green
+counter that gates marking a check required. A missing, truncated or empty report is
+recorded as a failure, never as green.
 
 ### Cache budget
 

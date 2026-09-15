@@ -14,14 +14,21 @@ max=${1:-120}
 deadline=$((SECONDS + max))
 
 echo "[settle] waiting for the guest 1-minute load to drop below 2.0 (max ${max}s)"
+settled=0
+load=unknown
 while [ "$SECONDS" -lt "$deadline" ]; do
   load=$(adb shell cat /proc/loadavg | tr -d '\r' | cut -d' ' -f1)
   if awk -v l="$load" 'BEGIN { exit !(l + 0 < 2.0) }'; then
     echo "[settle] load ${load}"
+    settled=1
     break
   fi
   sleep 5
 done
+if [ "$settled" -eq 0 ]; then
+  # Not fatal: the dialog check below still runs, and flows may pass on a busy guest.
+  echo "[settle] load still ${load} after ${max}s; continuing anyway" >&2
+fi
 
 # Prints the centre of the first node whose text matches $1, from a uiautomator dump on
 # stdin, or nothing.

@@ -1,171 +1,165 @@
-import { test, expect } from 'bun:test';
-import { parseJUnit, renderSummary, isCompleteReport } from './junit-summary.mjs';
+import { describe, expect, test } from 'bun:test';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { isCompleteReport, main, parseJUnit, renderSummary } from './junit-summary.mjs';
+import { fakeIo, useTmpDirs } from './test-helpers.mjs';
 
-const XML = `<?xml version="1.0"?>
+const tmpDir = useTmpDirs();
+
+// The attribute layout Maestro 2.x writes.
+const REPORT = `<?xml version='1.0' encoding='UTF-8'?>
 <testsuites>
-  <testsuite name="e2e">
-    <testcase name="smoke-mp4-happy-path" time="14.2"/>
-    <testcase name="smoke-seek" time="16.0">
-      <failure message="Assertion is false: id: evt-seeked is visible"/>
+  <testsuite name="Test Suite" device="API35Test" tests="2" failures="1" time="30.2">
+    <testcase id="smoke-mp4-happy-path" name="smoke-mp4-happy-path" classname="smoke-mp4-happy-path" time="14.2" status="SUCCESS"/>
+    <testcase id="smoke-seek" name="smoke-seek" classname="smoke-seek" time="16.0" status="ERROR">
+      <failure message="Assertion is false: id: evt-seek-fwd-landed is visible"/>
     </testcase>
   </testsuite>
 </testsuites>`;
 
-test('table cells escape backslashes as well as pipes', () => {
-  const xml = `<testsuites><testsuite><testcase name="a\\b"><failure message="path C:\\x | y"/></testcase></testsuite></testsuites>`;
-  const md = renderSummary(parseJUnit(xml), 'l', true, true);
-  expect(md).toContain('`a\\\\b`');
-  expect(md).toContain('path C:\\\\x \\| y');
+const oneCase = (inner, attrs = 'name="f"') =>
+  `<testsuites><testsuite><testcase ${attrs}>${inner}</testcase></testsuite></testsuites>`;
+const message = (text) => parseJUnit(oneCase(`<failure message="${text}"/>`)).cases[0].message;
+const lastRow = (md) => md.trimEnd().split('\n').at(-1);
+// Columns of a markdown table row, splitting on unescaped pipes only.
+const columns = (row) => row.split(/(?<!\\)\|/).length - 2;
+
+describe('parseJUnit', () => {
+  test('counts cases and failures, with each failure message', () => {
+    expect(parseJUnit(REPORT)).toEqual({
+      total: 2,
+      failures: 1,
+      cases: [
+        { name: 'smoke-mp4-happy-path', failed: false, message: '' },
+        { name: 'smoke-seek', failed: true, message: 'Assertion is false: id: evt-seek-fwd-landed is visible' },
+      ],
+    });
+  });
+
+  test('reads `name`, never the end of `classname`', () => {
+    const xml = oneCase('', 'classname="Suite" name="smoke-seek"');
+    expect(parseJUnit(xml).cases[0].name).toBe('smoke-seek');
+  });
+
+  test('an <error> element counts as a failure', () => {
+    expect(parseJUnit(oneCase('<error message="crashed"/>')).cases[0]).toEqual({
+      name: 'f',
+      failed: true,
+      message: 'crashed',
+    });
+  });
+
+  test('an empty document has no cases', () => {
+    expect(parseJUnit('')).toEqual({ total: 0, failures: 0, cases: [] });
+  });
+
+  describe('XML entities', () => {
+    test('named entities are decoded', () => {
+      expect(message('text &quot;Play&quot; &amp; &apos;Pause&apos; &lt;b&gt;')).toBe(
+        `text "Play" & 'Pause' <b>`
+      );
+    });
+
+    test('decimal and hex references are decoded, including astral code points', () => {
+      expect(message('&#65;&#x42;&#x1F600;')).toBe('AB😀');
+    });
+
+    test('decoded text is never decoded a second time', () => {
+      expect(message('&#38;quot;')).toBe('&quot;');
+      expect(message('&amp;#60;')).toBe('&#60;');
+      expect(message('&amp;amp;')).toBe('&amp;');
+    });
+
+    test('a reference outside Unicode is left as written', () => {
+      expect(message('&#x110000;')).toBe('&#x110000;');
+    });
+  });
 });
 
-test('counts cases and failures', () => {
-  const parsed = parseJUnit(XML);
-  expect(parsed.total).toBe(2);
-  expect(parsed.failures).toBe(1);
+test('isCompleteReport requires the closing root element', () => {
+  expect(isCompleteReport(REPORT)).toBe(true);
+  expect(isCompleteReport('<testsuites><testsuite>')).toBe(false);
+  expect(isCompleteReport('')).toBe(false);
 });
 
-test('captures the failure message', () => {
-  const failed = parseJUnit(XML).cases.find((c) => c.failed);
-  expect(failed.name).toBe('smoke-seek');
-  expect(failed.message).toContain('evt-seeked');
+describe('renderSummary', () => {
+  const render = (xml, overrides = {}) =>
+    renderSummary({
+      parsed: parseJUnit(xml),
+      label: 'android · RN 0.87 · API 36',
+      reportExists: true,
+      reportComplete: isCompleteReport(xml),
+      ...overrides,
+    });
+
+  test('renders a heading and one table row per flow', () => {
+    const md = render(REPORT);
+    expect(md.startsWith('### android · RN 0.87 · API 36 — 1 failed / 2 flows\n\n')).toBe(true);
+    expect(md).toContain('| | Flow | Failure |\n|---|---|---|\n');
+    expect(md).toContain('| ✅ | `smoke-mp4-happy-path` |  |');
+    expect(md).toContain('| ❌ | `smoke-seek` | Assertion is false: id: evt-seek-fwd-landed is visible |');
+  });
+
+  test('newlines, pipes and backslashes in a message cannot break the table', () => {
+    const row = lastRow(render(oneCase('<failure message="a | b\nc C:\\x \\| y"/>', 'name="a\\b"')));
+    expect(columns(row)).toBe(3);
+    expect(row).toBe('| ❌ | `a\\\\b` | a \\| b c C:\\\\x \\\\\\| y |');
+  });
+
+  test('a missing report says the job failed before Maestro ran', () => {
+    const md = render('', { reportExists: false });
+    expect(md).toContain('_No JUnit report produced — the job failed before Maestro ran._');
+    expect(md).not.toContain('incomplete');
+  });
+
+  test('a complete report with no cases says no flows ran', () => {
+    const md = render('<testsuites><testsuite/></testsuites>');
+    expect(md).toContain('0 failed / 0 flows');
+    expect(md).toContain('_No flows ran._');
+    expect(md).not.toContain('| Flow |');
+  });
+
+  test('an incomplete report without cases shows only the warning', () => {
+    const md = render('<testsuites><testsuite>');
+    expect(md).toContain('_JUnit report is incomplete');
+    expect(md).not.toContain('_No flows ran._');
+    expect(md).not.toContain('| Flow |');
+  });
+
+  test('an incomplete report still lists the cases that closed, below the warning', () => {
+    const md = render('<testsuites><testsuite><testcase name="f1"/><testcase name="f2"><failure message="timeout"/></testcase>');
+    expect(md).toContain('1 failed / 2 flows');
+    expect(md.indexOf('_JUnit report is incomplete')).toBeLessThan(md.indexOf('| | Flow | Failure |'));
+    expect(md).toContain('`f1`');
+    expect(md).toContain('`f2`');
+  });
 });
 
-test('marks passing cases as not failed', () => {
-  const passed = parseJUnit(XML).cases.find((c) => c.name === 'smoke-mp4-happy-path');
-  expect(passed.failed).toBe(false);
-});
+describe('main', () => {
+  test('appends the summary to GITHUB_STEP_SUMMARY', () => {
+    const dir = tmpDir();
+    const report = join(dir, 'report.xml');
+    const summary = join(dir, 'summary.md');
+    writeFileSync(report, REPORT);
+    writeFileSync(summary, 'before\n');
+    const { io, stdout } = fakeIo({ GITHUB_STEP_SUMMARY: summary });
 
-test('renders a table naming the label and the failing flow', () => {
-  const md = renderSummary(parseJUnit(XML), 'android · RN 0.87 · API 36', true, true);
-  expect(md).toContain('android · RN 0.87 · API 36');
-  expect(md).toContain('smoke-seek');
-  expect(md).toContain('1 failed');
-  // Assert markdown table structure is present
-  expect(md).toContain('| | Flow | Failure |');
-  expect(md).toContain('|---|---|---|');
-  // Assert the failing case has its own row
-  const lines = md.split('\n');
-  const failingRow = lines.find((l) => l.includes('smoke-seek'));
-  expect(failingRow).toBeDefined();
-  expect(failingRow.split(/(?<!\\)\|/).length).toBe(5); // table with 4 separators
-});
+    expect(main({ argv: ['node', 'junit-summary.mjs', report, 'my label'], ...io })).toBe(0);
+    expect(readFileSync(summary, 'utf8')).toStartWith('before\n### my label — 1 failed / 2 flows');
+    expect(stdout()).toBe('');
+  });
 
-test('handles a report with no failures', () => {
-  const md = renderSummary(parseJUnit('<testsuites><testsuite/></testsuites>'), 'x', true, true);
-  expect(md).toContain('0 failed');
-  // Assert this is a genuine zero-flow run, not a missing file
-  expect(md).toContain('_No flows ran._');
-  // Should not render a table
-  expect(md).not.toContain('| | Flow | Failure |');
-});
+  test('writes to stdout without GITHUB_STEP_SUMMARY, and reports a missing file', () => {
+    const { io, stdout } = fakeIo();
+    const code = main({ argv: ['node', 'junit-summary.mjs', join(tmpDir(), 'missing.xml')], ...io });
+    expect(code).toBe(0);
+    expect(stdout()).toContain('### e2e — 0 failed / 0 flows');
+    expect(stdout()).toContain('_No JUnit report produced');
+  });
 
-test('a failure message with pipes and newlines cannot break the table', () => {
-  const xml =
-    '<testsuites><testsuite><testcase name="f">' +
-    '<failure message="a | b\nc"/></testcase></testsuite></testsuites>';
-  const row = renderSummary(parseJUnit(xml), 'x', true, true).trimEnd().split('\n').at(-1);
-  expect(row.startsWith('|')).toBe(true);
-  // Split on unescaped pipes only; the escaped pipe in the message preserves table structure
-  expect(row.split(/(?<!\\)\|/).length).toBe(5);
-  // Verify the pipe is escaped in the output, preserving information
-  expect(row).toContain('a \\| b');
-});
-
-test('handles messages with backslash-pipe sequences', () => {
-  const xml =
-    '<testsuites><testsuite><testcase name="g">' +
-    '<failure message="already has \\| in it"/></testcase></testsuite></testsuites>';
-  const row = renderSummary(parseJUnit(xml), 'x', true, true).trimEnd().split('\n').at(-1);
-  // Backslash and pipe are treated as separate characters; the pipe gets escaped
-  expect(row.split(/(?<!\\)\|/).length).toBe(5);
-  // The message contains a literal backslash before the pipe; in a markdown table the
-  // backslash must be escaped too (\\), followed by the escaped pipe (\|).
-  expect(row).toContain('already has \\\\\\| in it');
-});
-
-test('decodes XML entities in failure messages', () => {
-  const xml =
-    '<testsuites><testsuite><testcase name="h">' +
-    '<failure message="text &quot;Play&quot; &amp; &quot;Pause&quot; is visible"/></testcase></testsuite></testsuites>';
-  const parsed = parseJUnit(xml);
-  const failedCase = parsed.cases[0];
-  // Verify entities are decoded: &quot; -> " and &amp; -> &
-  expect(failedCase.message).toBe('text "Play" & "Pause" is visible');
-  // Verify the message renders correctly in the table
-  const md = renderSummary(parsed, 'x', true, true);
-  expect(md).toContain('text "Play" & "Pause" is visible');
-});
-
-test('decodes numeric entity references safely without double-decoding', () => {
-  const xml =
-    '<testsuites><testsuite><testcase name="i">' +
-    '<failure message="entity &#38;quot; renders literally"/></testcase></testsuite></testsuites>';
-  const parsed = parseJUnit(xml);
-  const failedCase = parsed.cases[0];
-  // &#38;quot; should decode to &quot; (the literal string), not a quote character
-  expect(failedCase.message).toBe('entity &quot; renders literally');
-  const md = renderSummary(parsed, 'x', true, true);
-  expect(md).toContain('entity &quot; renders literally');
-});
-
-test('distinguishes three states: no file, truncated file, valid empty report', () => {
-  const parsed = { total: 0, failures: 0, cases: [] };
-
-  // Case 1: No file exists (hasFile = false)
-  const noFile = renderSummary(parsed, 'x', false, true);
-  expect(noFile).toContain('_No JUnit report produced — the job failed before Maestro ran._');
-  expect(noFile).not.toContain('mid-write');
-  expect(noFile).not.toContain('_No flows ran._');
-
-  // Case 2: File exists but is truncated/incomplete (hasFile = true, isComplete = false)
-  const truncated = renderSummary(parsed, 'x', true, false);
-  expect(truncated).toContain('_JUnit report is incomplete');
-  expect(truncated).toContain('mid-write');
-  expect(truncated).not.toContain('No JUnit report produced');
-  expect(truncated).not.toContain('_No flows ran._');
-
-  // Case 3: File exists and is complete with zero flows (hasFile = true, isComplete = true)
-  const validEmpty = renderSummary(parsed, 'x', true, true);
-  expect(validEmpty).toContain('_No flows ran._');
-  expect(validEmpty).not.toContain('No JUnit report produced');
-  expect(validEmpty).not.toContain('mid-write');
-});
-
-test('detects complete vs truncated reports', () => {
-  const complete = '<testsuites><testsuite/></testsuites>';
-  const truncated = '<testsuites><testsuite>';
-  const empty = '';
-
-  expect(isCompleteReport(complete)).toBe(true);
-  expect(isCompleteReport(truncated)).toBe(false);
-  expect(isCompleteReport(empty)).toBe(false);
-});
-
-test('truncated report with partial cases shows warning and still renders cases', () => {
-  const truncatedXml = `<testsuites>
-  <testsuite name="e2e">
-    <testcase name="flow-1" time="5.0"/>
-    <testcase name="flow-2" time="3.5">
-      <failure message="timeout"/>
-    </testcase>`;
-  // Note: no closing </testsuite></testsuites>
-
-  const parsed = parseJUnit(truncatedXml);
-  const md = renderSummary(parsed, 'test-run', true, false);
-
-  // The warning must be present and visibly named
-  expect(md).toContain('_JUnit report is incomplete');
-  expect(md).toContain('mid-write');
-
-  // Partial data is still useful and must render
-  expect(md).toContain('flow-1');
-  expect(md).toContain('flow-2');
-  expect(md).toContain('1 failed');
-  expect(md).toContain('2 flows');
-
-  // Warning appears before the table
-  const lines = md.split('\n');
-  const warningIdx = lines.findIndex((l) => l.includes('incomplete'));
-  const tableIdx = lines.findIndex((l) => l.includes('| | Flow | Failure |'));
-  expect(warningIdx).toBeLessThan(tableIdx);
+  test('fails with usage when no report path is given', () => {
+    const { io, stderr } = fakeIo();
+    expect(main({ argv: ['node', 'junit-summary.mjs'], ...io })).toBe(1);
+    expect(stderr()).toContain('usage:');
+  });
 });

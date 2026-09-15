@@ -13,3 +13,12 @@ export function isMain(importMetaUrl) {
     return false;
   }
 }
+
+// Every script's CLI is `main({ argv, env, stdout, stderr }) => exitCode`, so tests drive it
+// in-process with fake streams; this runs it for real when the file is executed directly.
+export function runIfMain(importMetaUrl, main) {
+  if (!isMain(importMetaUrl)) return;
+  process.exit(
+    main({ argv: process.argv, env: process.env, stdout: process.stdout, stderr: process.stderr })
+  );
+}

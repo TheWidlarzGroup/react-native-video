@@ -1,133 +1,120 @@
-// scripts/e2e/use-rn-version.mjs
-// Switches test-app/ to one of the React Native versions in the CI matrix.
-// The floor version needs no directory: the repo's own test-app/package.json and root
-// bun.lock ARE the floor variant, so the default state of the repo always works.
-import { readFileSync, writeFileSync, copyFileSync, existsSync, rmSync } from 'node:fs';
+// Switches test-app/ to one of the React Native versions in the CI matrix, or (--refresh)
+// regenerates that version's lockfile. The floor version needs no directory: the repo's own
+// test-app/package.json and root bun.lock ARE the floor variant, so the default state of
+// the repo always works.
+//
+// Usage: use-rn-version.mjs <version> [--refresh]   (run from the repo root)
+import { copyFileSync, existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
-import { isMain } from './is-main.mjs';
+import { runIfMain } from './is-main.mjs';
 
 export const FLOOR = '0.77';
 const PKG = 'test-app/package.json';
 const ROOT_LOCK = 'bun.lock';
+// bun nests a variant's react-native here, and a later frozen install for another variant
+// leaves that copy in place, so test-app keeps resolving the old version.
 const NESTED_NODE_MODULES = 'test-app/node_modules';
-
-// bun nests a variant's react-native under test-app/node_modules, and a later
-// `bun install --frozen-lockfile` for another variant (or the floor) leaves that nested
-// copy in place, so test-app keeps resolving the OLD version. Drop it on every switch so
-// the next install starts clean.
-function clearNestedNodeModules() {
-  rmSync(NESTED_NODE_MODULES, { recursive: true, force: true });
-}
 
 export function applyOverlay(basePkg, overlay) {
   const overlayDeps = overlay.dependencies ?? {};
   const overlayDevDeps = overlay.devDependencies ?? {};
   const dependencies = { ...basePkg.dependencies, ...overlayDeps };
   const devDependencies = { ...basePkg.devDependencies, ...overlayDevDeps };
-
-  // A dependency the overlay places in one section must not linger in the other —
-  // otherwise moving a package between `dependencies` and `devDependencies` produces
-  // the key in both instead of relocating it.
+  // A package the overlay moves to the other section must not stay in both.
   for (const key of Object.keys(overlayDeps)) delete devDependencies[key];
   for (const key of Object.keys(overlayDevDeps)) delete dependencies[key];
-
   return { ...basePkg, dependencies, devDependencies };
 }
 
-function readJson(path) {
-  return JSON.parse(readFileSync(path, 'utf8'));
-}
-
-function writeJson(path, value) {
-  writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`);
-}
-
-// Runs `bun install` against the just-overlaid package.json, saves the resulting root
-// lockfile as the version's variant, then restores both package.json and the root
-// lockfile to their floor state — even if the install throws (resolution failure,
-// network error, Ctrl-C). The restore always runs; the original error, if any,
-// propagates after it so the caller still sees the failure.
-export function performRefresh(pkgPath, rootLockPath, lockPath, original, overrides = {}) {
-  const runInstall =
-    overrides.runInstall ?? (() => execFileSync('bun', ['install'], { stdio: 'inherit' }));
-  const restoreLock =
-    overrides.restoreLock ??
-    (() => execFileSync('git', ['checkout', '--', rootLockPath], { stdio: 'inherit' }));
-
+// Installs against the overlaid package.json and saves the resulting root lockfile as the
+// variant's. package.json and the root lockfile are then written back byte for byte, even
+// when the install fails: they may carry uncommitted edits, typically the dependency change
+// this refresh is being run for.
+export function refreshVariantLock({ pkgPath, rootLockPath, variantLockPath, overlaidPkg, runInstall }) {
+  const originalPkg = readFileSync(pkgPath);
+  const originalLock = readFileSync(rootLockPath);
+  writeFileSync(pkgPath, overlaidPkg);
   try {
     runInstall();
-    copyFileSync(rootLockPath, lockPath);
+    copyFileSync(rootLockPath, variantLockPath);
   } finally {
-    writeFileSync(pkgPath, original); // leave the working tree on the floor variant
-    restoreLock();
+    writeFileSync(pkgPath, originalPkg);
+    writeFileSync(rootLockPath, originalLock);
   }
 }
 
-// All filesystem effects of switching test-app to a non-floor RN version, with every
-// precondition checked BEFORE anything is written. In particular, a plain switch
-// (no refresh) against a version whose bun.lock does not exist yet must fail without
-// touching package.json — writing the overlay first and discovering the missing
-// lockfile afterwards would leave package.json pointed at the new RN version while
-// bun.lock still resolves the floor, which is the exact inconsistent state this whole
-// mechanism exists to prevent.
-export function applyVersionSwitch(pkgPath, overlayPath, lockPath, rootLockPath, refresh, overrides = {}) {
-  if (!existsSync(overlayPath)) {
-    throw new Error(`no overlay at ${overlayPath}`);
-  }
-  if (!refresh && !existsSync(lockPath)) {
-    throw new Error(`no lockfile at ${lockPath} — run with --refresh first`);
-  }
-
-  const original = readFileSync(pkgPath, 'utf8');
-  writeJson(pkgPath, applyOverlay(readJson(pkgPath), readJson(overlayPath)));
-
-  if (refresh) {
-    performRefresh(pkgPath, rootLockPath, lockPath, original, overrides);
-    return;
-  }
-
-  copyFileSync(lockPath, rootLockPath);
-}
-
-function main() {
-  const version = process.argv[2];
-  const refresh = process.argv.includes('--refresh');
-
-  if (!version) {
-    console.error('usage: use-rn-version.mjs <version> [--refresh]');
-    process.exit(1);
-  }
-
-  clearNestedNodeModules();
+// Every precondition is checked before anything is written or deleted: a switch that fails
+// halfway would leave package.json on one RN version and bun.lock on another.
+export function switchVersion({ root, version, refresh, runInstall }) {
+  const clearNestedNodeModules = () =>
+    rmSync(join(root, NESTED_NODE_MODULES), { recursive: true, force: true });
 
   if (version === FLOOR) {
-    console.log(`[rn-matrix] ${FLOOR} is the floor — repo state used as-is; run bun install --frozen-lockfile`);
-    return;
-  }
-
-  const dir = join('e2e/rn-matrix', version);
-  const overlayPath = join(dir, 'overlay.json');
-  const lockPath = join(dir, 'bun.lock');
-
-  try {
-    applyVersionSwitch(PKG, overlayPath, lockPath, ROOT_LOCK, refresh);
-  } catch (err) {
-    console.error(`[rn-matrix] ${err.message}`);
-    process.exit(1);
-  }
-
-  if (refresh) {
-    // The refresh install left the variant's tree behind; the repo is back on the floor.
     clearNestedNodeModules();
-    console.log(`[rn-matrix] refreshed ${lockPath}; run bun install --frozen-lockfile to reinstall the floor`);
-    return;
+    return 'floor';
   }
-  console.log(`[rn-matrix] switched test-app to RN ${version}; run bun install --frozen-lockfile`);
-  console.log(
-    `[rn-matrix] ${PKG} and ${ROOT_LOCK} are now the ${version} variant — do not commit them.\n` +
-      `[rn-matrix] back to the floor: git checkout -- ${ROOT_LOCK} ${PKG}`
-  );
+
+  const variantDir = join('e2e/rn-matrix', version);
+  const overlayPath = join(root, variantDir, 'overlay.json');
+  const variantLockPath = join(root, variantDir, 'bun.lock');
+  if (!existsSync(overlayPath)) {
+    throw new Error(`no overlay at ${join(variantDir, 'overlay.json')}`);
+  }
+  if (!refresh && !existsSync(variantLockPath)) {
+    throw new Error(`no lockfile at ${join(variantDir, 'bun.lock')} — run with --refresh first`);
+  }
+  const pkgPath = join(root, PKG);
+  const rootLockPath = join(root, ROOT_LOCK);
+  const readJson = (path) => JSON.parse(readFileSync(path, 'utf8'));
+  const overlaidPkg = `${JSON.stringify(applyOverlay(readJson(pkgPath), readJson(overlayPath)), null, 2)}\n`;
+
+  clearNestedNodeModules();
+  if (refresh) {
+    refreshVariantLock({ pkgPath, rootLockPath, variantLockPath, overlaidPkg, runInstall });
+    // The install left the variant's tree behind; the files are back on the floor.
+    clearNestedNodeModules();
+    return 'refreshed';
+  }
+  writeFileSync(pkgPath, overlaidPkg);
+  copyFileSync(variantLockPath, rootLockPath);
+  return 'switched';
 }
 
-if (isMain(import.meta.url)) main();
+export function main({ argv, stdout, stderr, root = process.cwd(), runInstall }) {
+  const args = argv.slice(2);
+  const refresh = args.includes('--refresh');
+  const positional = args.filter((arg) => arg !== '--refresh');
+  const [version] = positional;
+  if (positional.length !== 1 || version.startsWith('-')) {
+    stderr.write('usage: use-rn-version.mjs <version> [--refresh]\n');
+    return 1;
+  }
+
+  let outcome;
+  try {
+    outcome = switchVersion({
+      root,
+      version,
+      refresh,
+      runInstall: runInstall ?? (() => execFileSync('bun', ['install'], { cwd: root, stdio: 'inherit' })),
+    });
+  } catch (err) {
+    stderr.write(`[rn-matrix] ${err.message}\n`);
+    return 1;
+  }
+
+  const variantLock = join('e2e/rn-matrix', version, 'bun.lock');
+  const messages = {
+    floor: `[rn-matrix] ${FLOOR} is the floor — repo state used as-is; run bun install --frozen-lockfile\n`,
+    refreshed: `[rn-matrix] refreshed ${variantLock}; run bun install --frozen-lockfile to reinstall the floor\n`,
+    switched:
+      `[rn-matrix] switched test-app to RN ${version}; run bun install --frozen-lockfile\n` +
+      `[rn-matrix] ${PKG} and ${ROOT_LOCK} are now the ${version} variant — do not commit them.\n` +
+      `[rn-matrix] back to the floor: git checkout -- ${ROOT_LOCK} ${PKG}\n`,
+  };
+  stdout.write(messages[outcome]);
+  return 0;
+}
+
+runIfMain(import.meta.url, main);
