@@ -247,11 +247,16 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
       .setEnableDecoderFallback(true)
 
     // Build the player with the LoadControl
+    val previousPlayer = player
     player = ExoPlayer.Builder(context)
       .setLoadControl(loadControl)
       .setLooper(Looper.getMainLooper())
       .setRenderersFactory(renderersFactory)
       .build()
+    // The player built in the property initializer is only a placeholder. Move any attached view to
+    // the new player and release the old one, otherwise every VideoPlayer leaks an idle ExoPlayer.
+    currentPlayerView?.get()?.player = player
+    previousPlayer.release()
 
     loadedWithSource = true
 
