@@ -51,7 +51,11 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
 - v7 API only in the test app: `useVideoPlayer` + `VideoView` + `useEvent`,
   `player.seekTo()`. No `<Video>` component, no v6 `drm` prop.
 - No check becomes *required* in branch protection before 10–15 consecutive clean runs
-  (the nightly job summary prints the current streak).
+  (the nightly job summary prints the current streak). Only `unit` and `e2e` qualify:
+  they have no path filter on `pull_request`. `lint-workflows` and `Test Documentation
+  Build` are path-filtered and must stay optional, because a workflow skipped by a path
+  filter leaves its check Pending, which blocks merging (a job skipped by `if:` reports
+  Success instead, so any future filter belongs on the callee `maestro` jobs).
 
 ## Test app gotchas
 

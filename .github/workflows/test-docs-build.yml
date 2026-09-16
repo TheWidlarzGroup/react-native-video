@@ -1,5 +1,6 @@
 name: Test Documentation Build
 
+# Path-filtered, so it must never become a required check (see lint-workflows.yml).
 on:
   pull_request:
     branches:

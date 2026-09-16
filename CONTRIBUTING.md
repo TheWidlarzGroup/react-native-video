@@ -86,7 +86,7 @@ Every pull request runs:
 - **`unit`**: lint, typecheck and unit tests on React 18, plus the library's tests and typecheck on React 19.
 - **`e2e`**: the Maestro suite on Android (React Native 0.77, 0.82 and 0.87, API 36) and on iOS (React Native 0.87, iOS 26). A leg takes about 15 minutes on either platform.
 
-Pull requests that only change `docs/` or Markdown files skip both. A first-time contributor's workflows may need a maintainer's approval before they start.
+Both run on every pull request, including docs-only ones, so that they can become required checks: a workflow skipped by a path filter would leave its check pending and block the merge. A first-time contributor's workflows may need a maintainer's approval before they start.
 
 A red E2E leg is a real signal, not something to re-run. Its artifacts contain the JUnit report, a screenshot and view hierarchy at the failing step, and the device log.
 

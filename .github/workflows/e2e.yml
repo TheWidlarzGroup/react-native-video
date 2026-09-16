@@ -3,11 +3,12 @@
 # simultaneous PRs still fit. Rationale and the full matrix: e2e/CI_MATRIX_DESIGN.md.
 name: e2e
 
+# No path filter on pull_request: a workflow skipped by a path filter leaves its
+# required checks Pending forever, only a job skipped by `if:` reports Success. A
+# docs-only pull request therefore costs one macOS run; if that ever matters, the filter
+# belongs in a `changes` job whose output gates the callee `maestro` jobs, never here.
 on:
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '**/*.md'
   # Also on the default branch: a cache entry is only restorable by other branches
   # when it was written on the default branch, so this is what keeps every new pull
   # request warm (and doubles as a post-merge check).
@@ -28,14 +29,15 @@ concurrency:
 permissions:
   contents: read
 
-# Branch protection pins these EXACT status-context strings:
+# These are the EXACT status-context strings branch protection will require once the
+# suite has a green streak (e2e/CONTEXT.md, "Practical rules"); nothing is required yet:
 #   android (0.77) / maestro
 #   android (0.82) / maestro
 #   android (0.87) / maestro
 #   ios / maestro
 # GitHub composes them as "<caller job name here> / <callee job name>", where the
 # callee job is `maestro` in _e2e-android.yml / _e2e-ios.yml. Renaming either side
-# silently detaches the required check. Update branch protection with any rename.
+# silently detaches a required check. Update branch protection with any rename.
 #
 # The single iOS job runs the newest RN version (D13); the floor's iOS build is covered
 # by nightly.

@@ -7,7 +7,8 @@
 # Caches written on the default branch are the ones every pull request can restore,
 # so those are pruned to one-per-family too, never removed entirely. Gradle entries are
 # left alone: gradle/actions/setup-gradle manages its own, and several with the same
-# prefix are live at once (one per React Native version).
+# prefix are live at once (its key hashes the callee job's matrix, which is empty, so the
+# three Android legs may share one entry; check Restored/Saved Key in the job summary).
 name: cache-cleanup
 
 # pull_request_target, not pull_request: a pull request from a fork gets a read-only

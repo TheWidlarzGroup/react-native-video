@@ -2,6 +2,10 @@
 # inputs/outputs on workflow_call and matrix keys, plus shellcheck on run: blocks.
 # The E2E pipeline is seven YAML files that only ever execute in CI; this is the
 # cheapest way to catch a broken `${{ }}` before a 40-minute matrix does.
+#
+# Path-filtered on purpose, so it must never become a required check: a workflow skipped
+# by a path filter leaves its check Pending, which blocks the merge (the same goes for
+# test-docs-build.yml).
 name: lint-workflows
 
 on:

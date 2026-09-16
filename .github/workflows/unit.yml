@@ -5,11 +5,11 @@
 # in the repo exercises React 19 outside the nightly E2E matrix.
 name: unit
 
+# No path filter on pull_request: a workflow skipped by a path filter leaves its
+# required checks Pending forever, only a job skipped by `if:` reports Success. Both
+# jobs are ubuntu and take about 10 minutes, so docs-only pull requests just run them.
 on:
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '**/*.md'
   # Also on the default branch: a cache entry is only restorable by other branches
   # when it was written on the default branch, so this is what keeps every new pull
   # request warm (and doubles as a post-merge check).

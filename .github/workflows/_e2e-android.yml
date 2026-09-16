@@ -35,7 +35,7 @@ permissions:
 jobs:
   run:
     # The status context GitHub shows is "<caller job name> / <this job name>", so this
-    # name is part of every branch-protection rule. See e2e.yml before renaming.
+    # name is what branch protection will require. See e2e.yml before renaming.
     name: maestro
     runs-on: ubuntu-latest
     timeout-minutes: 45
