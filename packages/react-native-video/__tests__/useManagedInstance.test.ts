@@ -42,27 +42,20 @@ function Harness({
   return null;
 }
 
-function mount(props: { dep: unknown; equal?: Harness['equal'] }, strict = false) {
+type MountProps = Omit<Parameters<typeof Harness>[0], 'onObject'>;
+
+function mount(props: MountProps) {
   const seen: Obj[] = [];
-  const el = (p: typeof props) =>
+  const el = (p: MountProps) =>
     React.createElement(Harness, { ...p, onObject: (o: Obj) => seen.push(o) });
   let renderer!: TestRenderer.ReactTestRenderer;
   act(() => {
-    // StrictMode only double-invokes effects on a concurrent root.
-    renderer = TestRenderer.create(
-      strict ? React.createElement(React.StrictMode, null, el(props)) : el(props),
-      strict ? { unstable_isConcurrent: true } : undefined
-    );
+    renderer = TestRenderer.create(el(props));
   });
   return {
     seen,
     current: () => seen.at(-1)!,
-    update: (p: typeof props) =>
-      act(() =>
-        renderer.update(
-          strict ? React.createElement(React.StrictMode, null, el(p)) : el(p)
-        )
-      ),
+    update: (p: MountProps) => act(() => renderer.update(el(p))),
     unmount: () => act(() => renderer.unmount()),
   };
 }
@@ -84,7 +77,8 @@ test('recreates the instance when a dependency changes, cleaning up the old one 
 });
 
 test('uses dependenciesEqualFn instead of reference equality', () => {
-  const equal = (a: unknown, b?: unknown) => JSON.stringify(a) === JSON.stringify(b);
+  const equal = (a: unknown, b?: unknown) =>
+    JSON.stringify(a) === JSON.stringify(b);
   const h = mount({ dep: { uri: 'x' }, equal });
   h.update({ dep: { uri: 'x' }, equal }); // new object, same content
   expect(log).toEqual(['create 1']);

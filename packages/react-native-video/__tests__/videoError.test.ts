@@ -11,7 +11,9 @@ const encoded = (code: string, message: string) => `{%@${code}::${message}@%}`;
 
 test('parses a runtime error code and message out of a native error', () => {
   const err = tryParseNativeVideoError(
-    new Error(`Nitro: ${encoded('source/file-does-not-exist', 'No such file')} at foo`)
+    new Error(
+      `Nitro: ${encoded('source/file-does-not-exist', 'No such file')} at foo`
+    )
   );
   expect(err).toBeInstanceOf(VideoRuntimeError);
   expect(err).toBeInstanceOf(Error);
@@ -24,22 +26,31 @@ test('parses a runtime error code and message out of a native error', () => {
 
 test('view/* codes become VideoComponentError', () => {
   const err = tryParseNativeVideoError({
-    message: encoded('view/picture-in-picture-not-supported', 'PiP unavailable'),
+    message: encoded(
+      'view/picture-in-picture-not-supported',
+      'PiP unavailable'
+    ),
   });
   expect(err).toBeInstanceOf(VideoComponentError);
-  expect((err as VideoComponentError).code).toBe('view/picture-in-picture-not-supported');
+  expect((err as VideoComponentError).code).toBe(
+    'view/picture-in-picture-not-supported'
+  );
 });
 
 test('rewrites the encoded marker inside the stack and carries the stack over', () => {
   const native = new Error(encoded('player/released', 'gone'));
   native.stack = `Error: ${encoded('player/released', 'gone')}\n    at nativeCall (native)`;
   const err = tryParseNativeVideoError(native) as VideoRuntimeError;
-  expect(err.stack).toBe('Error: [player/released]: gone\n    at nativeCall (native)');
+  expect(err.stack).toBe(
+    'Error: [player/released]: gone\n    at nativeCall (native)'
+  );
   expect(native.stack).toBe(err.stack);
 });
 
 test('a native error without a stack yields an undefined stack', () => {
-  const err = tryParseNativeVideoError({ message: encoded('unknown/unknown', 'x') });
+  const err = tryParseNativeVideoError({
+    message: encoded('unknown/unknown', 'x'),
+  });
   expect((err as VideoRuntimeError).stack).toBeUndefined();
 });
 
@@ -57,12 +68,18 @@ test('returns anything that is not an encoded native error untouched', () => {
 });
 
 test('an already-typed VideoRuntimeError passes through unchanged', () => {
-  const typed = new VideoRuntimeError('source/invalid-uri', 'Invalid source URI');
+  const typed = new VideoRuntimeError(
+    'source/invalid-uri',
+    'Invalid source URI'
+  );
   expect(tryParseNativeVideoError(typed)).toBe(typed);
 });
 
 test('VideoError exposes code and message separately from the Error message', () => {
-  const err = new VideoRuntimeError('player/not-initialized', 'call initialize() first');
+  const err = new VideoRuntimeError(
+    'player/not-initialized',
+    'call initialize() first'
+  );
   expect(err.code).toBe('player/not-initialized');
   expect(err.message).toBe('call initialize() first');
   expect(String(err)).toBe('[player/not-initialized]: call initialize() first');

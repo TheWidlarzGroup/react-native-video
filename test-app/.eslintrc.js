@@ -3,8 +3,8 @@ module.exports = {
   extends: ['../config/.eslintrc.js'],
   parserOptions: {
     tsconfigRootDir: __dirname,
-    project: true,
+    // tsconfig.test.json covers the bun:test suites the RN tsconfig excludes.
+    project: ['./tsconfig.json', './tsconfig.test.json'],
   },
-  // Tests run under `bun test` and import bun:test, which the RN tsconfig does not know.
-  ignorePatterns: ['rnv-e2e-plugin.mjs', '*.test.mjs', '*.test.ts'],
+  ignorePatterns: ['rnv-e2e-plugin.mjs', '*.test.mjs'],
 };

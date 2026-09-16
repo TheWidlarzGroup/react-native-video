@@ -47,7 +47,8 @@
   ],
   "scripts": {
     "postinstall": "bun run build || exit 0;",
-    "typecheck": "tsc",
+    "typecheck": "tsc && bun run typecheck:test",
+    "typecheck:test": "tsc -p tsconfig.test.json --noEmit",
     "test": "bun test __tests__",
     "typecheck:web": "tsc -p tsconfig.web.json",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",

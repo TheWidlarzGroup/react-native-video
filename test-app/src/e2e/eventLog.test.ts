@@ -14,9 +14,11 @@ import {
 } from './eventLog';
 
 const markers = (): MarkerId[] => [...eventLog.getMarkers()].sort();
-const feed = (...events: PlayerEvent[]) => events.forEach((e) => eventLog.handle(e));
+const feed = (...events: PlayerEvent[]) =>
+  events.forEach((e) => eventLog.handle(e));
 // Log lines without their timestamp prefix.
-const lines = (): string[] => eventLog.getEntries().map(({ text }) => text.replace(/^\S+ /, ''));
+const lines = (): string[] =>
+  eventLog.getEntries().map(({ text }) => text.replace(/^\S+ /, ''));
 
 beforeEach(() => eventLog.reset());
 
@@ -70,7 +72,9 @@ describe('store', () => {
 
   test('entries are prefixed with a HH:MM:SS.mmm timestamp', () => {
     eventLog.log('x');
-    expect(eventLog.getEntries()[0].text).toMatch(/^\d{2}:\d{2}:\d{2}\.\d{3} x$/);
+    expect(eventLog.getEntries()[0].text).toMatch(
+      /^\d{2}:\d{2}:\d{2}\.\d{3} x$/
+    );
   });
 
   test('reset clears markers, entries, error code and all derived state', () => {
@@ -95,7 +99,11 @@ describe('store', () => {
       { type: 'onPlaybackStateChange', isPlaying: false }, // never seen playing
       { type: 'onVolumeChange', muted: false, volume: 1 } // never seen muted
     );
-    expect(markers()).toEqual(['evt-onEnded', 'evt-onPlaybackStateChanged', 'evt-onProgress']);
+    expect(markers()).toEqual([
+      'evt-onEnded',
+      'evt-onPlaybackStateChanged',
+      'evt-onProgress',
+    ]);
   });
 
   test('MARKER_IDS has no duplicates (EventLogPanel keys markers by id)', () => {
@@ -203,12 +211,18 @@ describe('handle', () => {
     });
 
     test('a later onError replaces the placeholder code', () => {
-      feed({ type: 'onStatusChange', status: 'error' }, { type: 'onError', code: 'E404' });
+      feed(
+        { type: 'onStatusChange', status: 'error' },
+        { type: 'onError', code: 'E404' }
+      );
       expect(eventLog.getErrorCode()).toBe('E404');
     });
 
     test('a later error status keeps the code onError reported', () => {
-      feed({ type: 'onError', code: 'E404' }, { type: 'onStatusChange', status: 'error' });
+      feed(
+        { type: 'onError', code: 'E404' },
+        { type: 'onStatusChange', status: 'error' }
+      );
       expect(eventLog.getErrorCode()).toBe('E404');
     });
   });
@@ -229,10 +243,18 @@ describe('handle', () => {
     });
 
     test('low volume is marked at or below the threshold, and only while unmuted', () => {
-      feed({ type: 'onVolumeChange', muted: false, volume: VOLUME_LOW_THRESHOLD + 0.01 });
+      feed({
+        type: 'onVolumeChange',
+        muted: false,
+        volume: VOLUME_LOW_THRESHOLD + 0.01,
+      });
       feed({ type: 'onVolumeChange', muted: true, volume: 0.1 });
       expect(markers()).not.toContain('evt-volume-low');
-      feed({ type: 'onVolumeChange', muted: false, volume: VOLUME_LOW_THRESHOLD });
+      feed({
+        type: 'onVolumeChange',
+        muted: false,
+        volume: VOLUME_LOW_THRESHOLD,
+      });
       expect(markers()).toContain('evt-volume-low');
     });
   });
@@ -269,16 +291,25 @@ describe('handle', () => {
     test('a silent wrap-around verifies loop only while loop is enabled (ExoPlayer)', () => {
       const end = LOOP_WRAP_FROM_SECONDS + 1.5;
       const start = LOOP_WRAP_TO_SECONDS - 0.5;
-      feed({ type: 'onProgress', currentTime: end }, { type: 'onProgress', currentTime: start });
+      feed(
+        { type: 'onProgress', currentTime: end },
+        { type: 'onProgress', currentTime: start }
+      );
       expect(markers()).not.toContain('evt-loop-verified');
 
       eventLog.setLoopEnabled(true);
       eventLog.setLoopEnabled(false);
-      feed({ type: 'onProgress', currentTime: end }, { type: 'onProgress', currentTime: start });
+      feed(
+        { type: 'onProgress', currentTime: end },
+        { type: 'onProgress', currentTime: start }
+      );
       expect(markers()).not.toContain('evt-loop-verified');
 
       eventLog.setLoopEnabled(true);
-      feed({ type: 'onProgress', currentTime: end }, { type: 'onProgress', currentTime: start });
+      feed(
+        { type: 'onProgress', currentTime: end },
+        { type: 'onProgress', currentTime: start }
+      );
       expect(markers()).toContain('evt-loop-verified');
     });
 
@@ -303,13 +334,19 @@ describe('handle', () => {
       expect(markers()).not.toContain('evt-loop-verified');
       expect(markers()).toContain('evt-seek-back-landed');
       // The seek has been consumed; the next wrap is a real loop restart.
-      feed({ type: 'onProgress', currentTime: 7.9 }, { type: 'onProgress', currentTime: 0.3 });
+      feed(
+        { type: 'onProgress', currentTime: 7.9 },
+        { type: 'onProgress', currentTime: 0.3 }
+      );
       expect(markers()).toContain('evt-loop-verified');
     });
 
     test('progress after btn-seek-1 stays above the wrap threshold', () => {
       eventLog.setLoopEnabled(true);
-      feed({ type: 'onProgress', currentTime: 8 }, { type: 'onProgress', currentTime: 1 });
+      feed(
+        { type: 'onProgress', currentTime: 8 },
+        { type: 'onProgress', currentTime: 1 }
+      );
       expect(markers()).not.toContain('evt-loop-verified');
     });
   });
