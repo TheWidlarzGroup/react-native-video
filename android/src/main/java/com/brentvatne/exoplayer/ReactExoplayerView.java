@@ -240,7 +240,9 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean hasVideoEnded = false;
 
     // Props from React
-    private Source source = new Source();
+    // volatile: RNVLoadControl.shouldContinueLoading reads this from the playback thread while the
+    // setters below run on the UI thread.
+    private volatile Source source = new Source();
     private boolean repeat;
     private String audioTrackType;
     private String audioTrackValue;
@@ -250,7 +252,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private String textTrackValue;
     private boolean disableFocus;
     private boolean focusable = true;
-    private BufferingStrategy.BufferingStrategyEnum bufferingStrategy;
+    private volatile BufferingStrategy.BufferingStrategyEnum bufferingStrategy;
     private boolean disableDisconnectError;
     private boolean preventsDisplaySleepDuringVideoPlayback = true;
     private float mProgressUpdateInterval = 250.0f;
@@ -588,12 +590,18 @@ public class ReactExoplayerView extends FrameLayout implements
     // Applies bufferingStrategy on top of DefaultLoadControl. It wraps rather than extends it (see
     // buildLoadControl) and forwards only methods whose signatures match across Media3 1.8-1.10; a
     // LoadControl method that a newer Media3 starts calling would get the interface default instead.
+    //
+    // One method is deliberately not forwarded: shouldContinuePreloading takes a PlayerId in 1.9+ but
+    // not in 1.8, so no single declaration works on both. ExoPlayer only calls it once a preload
+    // configuration is set, which nothing here does, and the interface default logs a warning and
+    // returns false. Forward it (by reflection, like getAllocator below) if that ever changes.
     private class RNVLoadControl implements LoadControl {
         private final DefaultAllocator allocator = new DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE);
         private final DefaultLoadControl defaultLoadControl;
         private final Runtime runtime = Runtime.getRuntime();
         private final int availableHeapInBytes;
         @Nullable private final Method defaultGetAllocatorForPlayer = findGetAllocatorForPlayer();
+        private boolean allocatorLookupFailureLogged = false;
 
         RNVLoadControl(BufferConfig config) {
             defaultLoadControl = buildLoadControl(config, allocator);
@@ -651,6 +659,12 @@ public class ReactExoplayerView extends FrameLayout implements
                 } catch (ReflectiveOperationException e) {
                     DebugLog.w(TAG, "Falling back to the raw allocator: " + e);
                 }
+            } else if (!allocatorLookupFailureLogged) {
+                // Reaching this method at all means the runtime calls the PlayerId overload, so the
+                // lookup should have found it. Not finding it means DefaultLoadControl's byte limit
+                // is inactive; say so once rather than silently buffering by time alone.
+                allocatorLookupFailureLogged = true;
+                DebugLog.w(TAG, "DefaultLoadControl.getAllocator(PlayerId) not found; its buffered byte limit is disabled");
             }
             return allocator;
         }
