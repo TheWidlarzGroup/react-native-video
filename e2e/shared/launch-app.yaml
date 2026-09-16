@@ -1,0 +1,21 @@
+# Shared by every flow (via runFlow): starts the test app from a clean state and waits
+# until it can receive a deep link. Lives outside e2e/flows/ so `maestro test e2e/flows/`
+# never runs it on its own.
+#
+# A deep link sent before JS subscribes to Linking's 'url' event is silently dropped, so
+# the test app renders e2e-host-ready only once that listener is attached (App.tsx) and
+# nothing opens a scenario before it is visible.
+appId: ${APP_ID}
+---
+- launchApp:
+    clearState: true
+# Generous on purpose: this waits for the app to start, not for library behaviour, and a
+# freshly cleared app on a busy emulator or hosted runner has taken 15-18 s to get here.
+- extendedWaitUntil:
+    visible:
+      id: "e2e-host-ready"
+    timeout: 30000
+# A short settle after first paint while react-native-test-app finishes bootstrapping;
+# observed to matter for scenarios that fail within milliseconds. Not a retry.
+- waitForAnimationToEnd:
+    timeout: 1500

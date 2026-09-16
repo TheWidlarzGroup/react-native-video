@@ -1,0 +1,26 @@
+ws_dir = Pathname.new(__dir__)
+ws_dir = ws_dir.parent until
+  File.exist?("#{ws_dir}/node_modules/react-native-test-app/test_app.rb") ||
+  ws_dir.expand_path.to_s == '/'
+require "#{ws_dir}/node_modules/react-native-test-app/test_app.rb"
+
+workspace 'RNVideoE2E.xcworkspace'
+
+use_test_app!(
+  :hermes_enabled => true,
+  :fabric_enabled => true,
+  # Xcode 26's Apple Clang 21 is stricter about consteval call sites, which breaks
+  # fmt 11.0.2's FMT_STRING(...) usages (fmtlib/fmt#4740, facebook/react-native#55601).
+  # consteval doesn't exist pre-C++20, so building just the fmt pod as C++17 sidesteps
+  # the strict check. Same workaround as example/ios/Podfile. Remove once RN bundles an
+  # fmt release that builds cleanly on Xcode 26.
+  :post_install => lambda do |installer|
+    installer.pods_project.targets.each do |target|
+      next unless target.name == 'fmt'
+
+      target.build_configurations.each do |config|
+        config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
+      end
+    end
+  end
+)

@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["src", "__tests__", "../../config/bun-test.d.ts"],
+  "compilerOptions": {
+    "rootDir": "../.."
+  }
+}

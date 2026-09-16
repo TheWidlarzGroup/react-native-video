@@ -1,0 +1,103 @@
+# Keeps the Actions cache (10 GB per repository, LRU eviction beyond that) from filling
+# up with stale entries:
+#   - when a pull request closes, every cache entry scoped to it is deleted;
+#   - once a day, on every ref, only the newest entry of each cache family is kept,
+#     because every change to a source hash creates a new key and the previous entries
+#     linger until evicted.
+# Caches written on the default branch are the ones every pull request can restore,
+# so those are pruned to one-per-family too, never removed entirely. Gradle entries are
+# left alone: gradle/actions/setup-gradle manages its own, and several with the same
+# prefix are live at once (its key hashes the callee job's matrix, which is empty, so the
+# three Android legs may share one entry; check Restored/Saved Key in the job summary).
+name: cache-cleanup
+
+# pull_request_target, not pull_request: a pull request from a fork gets a read-only
+# token under pull_request, so its caches (Pods, DerivedData, node_modules, Gradle: a few
+# GB each) could never be deleted and would push master's entries out of the 10 GB.
+# pull_request_target is safe here only because the job never checks out, builds or runs
+# anything from the pull request: it reads the PR number and calls the cache API. Keep it
+# that way.
+on:
+  pull_request_target:
+    types: [closed]
+  schedule:
+    - cron: '30 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  closed-pr:
+    if: github.event_name == 'pull_request_target'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      REF: refs/pull/${{ github.event.pull_request.number }}/merge
+    steps:
+      - name: Delete every cache entry scoped to this pull request
+        run: |
+          set -euo pipefail
+          gh cache list --ref "$REF" --limit 200 --json id,key,sizeInBytes \
+            --jq '.[] | "\(.id)\t\(.sizeInBytes)\t\(.key)"' > entries.tsv || true
+          if [ ! -s entries.tsv ]; then echo "no cache entries for ${REF}"; exit 0; fi
+          total=0; failed=0
+          while IFS=$'\t' read -r id size key; do
+            if gh cache delete "$id"; then
+              echo "deleted ${key} ($((size / 1048576)) MB)"
+              total=$((total + size))
+            else
+              echo "::warning::could not delete ${key}"
+              failed=$((failed + 1))
+            fi
+          done < entries.tsv
+          echo "freed $((total / 1048576)) MB"
+          # One failure can be an entry GitHub evicted meanwhile; all of them failing is a
+          # permission problem worth a red run.
+          if [ "$failed" -gt 0 ] && [ "$total" -eq 0 ]; then echo "::error::no cache entry could be deleted"; exit 1; fi
+
+  prune:
+    if: github.event_name != 'pull_request_target'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      # A "family" is the key without its LAST hash segment. Only the last one: the
+      # earlier segments tell live variants apart. The bun key is
+      # <os>-v8-bun-frozen-<patches>-<bun.lock>-<package.json>, and each React Native
+      # version swaps in its own bun.lock, so stripping every hash would keep one RN
+      # version's node_modules and delete the others every night.
+      - name: Keep only the newest entry per cache family and ref
+        run: |
+          set -euo pipefail
+          gh cache list --limit 500 --sort last_accessed_at --order desc \
+            --json id,key,ref,sizeInBytes,lastAccessedAt \
+            --jq '.[] | "\(.id)\t\(.ref)\t\(.sizeInBytes)\t\(.key)"' > entries.tsv || true
+          if [ ! -s entries.tsv ]; then echo "no cache entries"; exit 0; fi
+          declare -A seen
+          freed=0; kept=0; failed=0
+          while IFS=$'\t' read -r id ref size key; do
+            case "$key" in *gradle*) kept=$((kept + 1)); continue ;; esac
+            family=$(echo "$key" | sed -E 's/-[0-9a-f]{32,}$//')
+            slot="${ref}|${family}"
+            if [ -n "${seen[$slot]:-}" ]; then
+              if gh cache delete "$id"; then
+                echo "deleted ${key} on ${ref} ($((size / 1048576)) MB), newer entry kept"
+                freed=$((freed + size))
+              else
+                echo "::warning::could not delete ${key} on ${ref}"
+                failed=$((failed + 1))
+              fi
+            else
+              seen[$slot]=1
+              kept=$((kept + 1))
+            fi
+          done < entries.tsv
+          echo "kept ${kept} entries, freed $((freed / 1048576)) MB"
+          gh api "repos/${GH_REPO}/actions/cache/usage" --jq '"now: \(.active_caches_count) caches, \((.active_caches_size_in_bytes/1073741824*100|round)/100) GB"'
+          if [ "$failed" -gt 0 ] && [ "$freed" -eq 0 ]; then echo "::error::no cache entry could be deleted"; exit 1; fi

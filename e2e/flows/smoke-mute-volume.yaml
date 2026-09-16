@@ -1,0 +1,41 @@
+# Mute, unmute, and a numeric volume change — all reported through onVolumeChange (markers
+# derived in eventLog.ts). evt-unmuted only fires after evt-muted, so it proves a real
+# transition rather than the player's initial (unmuted) default.
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 20000
+# Interact only once the player is idle: the iOS driver defers a tap issued during
+# playback until the app settles, which is the clip's natural end, and a tap landing in
+# the middle of that end transition was lost in CI (right coordinates, no press). Waiting
+# for the end first makes the tap land on an idle player on both platforms. The mute
+# markers still require the press, so nothing here passes vacuously.
+- runFlow: ../shared/wait-for-end.yaml
+- tapOn:
+    id: "btn-mute"
+- extendedWaitUntil:
+    visible:
+      id: "evt-muted"
+    timeout: 5000
+- tapOn:
+    id: "btn-unmute"
+- extendedWaitUntil:
+    visible:
+      id: "evt-unmuted"
+    timeout: 5000
+- tapOn:
+    id: "btn-volume-low"
+- extendedWaitUntil:
+    visible:
+      id: "evt-volume-low"
+    timeout: 5000
+- assertNotVisible:
+    id: "evt-onError"
