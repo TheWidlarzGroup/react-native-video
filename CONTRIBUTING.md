@@ -20,6 +20,12 @@ To get started with the project, run `bun install` in the root directory to inst
 bun install
 ```
 
+Use the Bun version in `.bun-version` (the one CI runs, and the one that wrote the committed `bun.lock`):
+
+```sh
+curl -fsSL https://bun.sh/install | bash -s "bun-v$(cat .bun-version)"
+```
+
 > Since the project relies on Bun workspaces, you cannot use [`npm`](https://github.com/npm/cli) or [`yarn`](https://yarnpkg.com/) for development.
 
 The [example app](/example/) demonstrates usage of the library and is the quickest way to try a change by hand.

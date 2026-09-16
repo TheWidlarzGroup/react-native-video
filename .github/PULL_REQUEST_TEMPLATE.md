@@ -56,9 +56,9 @@ How did you verify the change?
 
 - [ ] I read the [contributing guidelines](https://github.com/TheWidlarzGroup/react-native-video/blob/master/CONTRIBUTING.md).
 - [ ] I added or updated tests that cover this change, or explained under "Test plan" why none apply.
-- [ ] For a bug fix the E2E suite can exercise, this PR includes a Maestro flow that fails without the fix.
+- [ ] For a bug fix the E2E suite can exercise, this PR includes a Maestro flow that fails without the fix, or "Test plan" explains why none does.
 - [ ] `bun run test`, `bun lint` and `bun typecheck` pass locally.
 - [ ] I updated the documentation / README where relevant.
 - [ ] If this changes how the library is used (API, props, events, behavior), I updated the AI agent skill (`skills/react-native-video/`) to match.
 - [ ] This PR is focused on a single concern.
-- [ ] I tested my changes on at least one platform.
+- [ ] I tested my changes on at least one platform, or described under "Test plan" what CI (which runs both) should show.

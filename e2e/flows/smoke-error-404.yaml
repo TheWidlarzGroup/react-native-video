@@ -1,4 +1,5 @@
-# Error path: a 404 source must produce onError (and NOT onLoad).
+# Error path: a 404 source must surface an error status (onError, or onStatusChange('error'),
+# which the app maps onto the same marker while #5083 is open) and NOT onLoad.
 # Opens the mp4 scenario first: on a truly cold launch a scenario that fails before any
 # playback attempt fires no player event at all (e2e/CONTEXT.md, "Flow-design gotchas").
 appId: ${APP_ID}

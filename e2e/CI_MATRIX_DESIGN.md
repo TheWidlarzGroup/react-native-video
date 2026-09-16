@@ -231,7 +231,10 @@ quietly:
 
 ## Not covered
 
-DRM, tvOS and screenshot comparison are not part of the suite.
+DRM, tvOS and screenshot comparison are not part of the suite. The native side of
+`packages/drm-plugin` (Swift/Kotlin) is not compiled by any leg either: `test-app` does not
+depend on `@react-native-video/drm`, and `example/` is not built in CI. Adding the plugin to
+`test-app` (and regenerating the matrix lockfiles) would close that gap without a DRM flow.
 
 ## Open risks
 

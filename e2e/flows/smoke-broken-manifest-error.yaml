@@ -1,4 +1,6 @@
-# Error path: a syntactically broken HLS manifest must produce onError (and NOT onLoad).
+# Error path: a syntactically broken HLS manifest must surface an error status (onError, or
+# onStatusChange('error'), which the app maps onto the same marker while #5083 is open) and
+# NOT onLoad.
 # Opens the mp4 scenario first, like smoke-error-404.yaml.
 appId: ${APP_ID}
 tags: [smoke]

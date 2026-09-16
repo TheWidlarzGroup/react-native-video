@@ -164,8 +164,8 @@ function apply(event: PlayerEvent) {
 
     case 'onStatusChange':
       // A source that resolves initialize() optimistically and fails later only reports
-      // through the status observer, never through onError (see CONTEXT.md). That path
-      // has no code, so it must not replace one onError already reported.
+      // through the status observer, never through onError (#5083, see CONTEXT.md). That
+      // path has no code, so it must not replace one onError already reported.
       if (event.status === 'error') {
         mark('evt-onError');
         if (state.errorCode === '') state.errorCode = STATUS_ERROR_CODE;

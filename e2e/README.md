@@ -75,7 +75,8 @@ deep links (`rnvtest://scenario/<name>`), never via UI navigation.
    tight after playback is running. Clips are 8 s; only HLS's first load waits up to 40 s.
 4. End every flow that expects playback with `assertNotVisible: evt-onError`, so an error
    after the asserted marker still fails it.
-5. Run locally on BOTH platforms before opening a PR.
+5. Run locally on the platforms you have before opening a PR; CI runs both. If you cannot
+   run the suite at all, describe the scenario under "Test plan" in the pull request.
 6. One flow = one scenario = one file. Keep flows independent: each starts from a clean
    launch.
 

@@ -107,8 +107,10 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
 - **`useSyncExternalStore` bails out on same-reference snapshots.** Every mutation in
   `eventLog.ts` produces a new `Set`/array; mutating in place never re-renders.
 - **`onError` only fires from a rejected JS promise or a caught synchronous throw.** A
-  source that resolves `initialize()` optimistically and fails later (a 404 on iOS) only
-  surfaces via `onStatusChange('error')`. The test app listens to both.
+  source that resolves `initialize()` optimistically and fails later (a 404, on both
+  platforms) only surfaces via `onStatusChange('error')` (#5083). The test app maps both
+  onto `evt-onError`, so the error flows pass with the bug open; the fix for #5083 should
+  split the marker and assert `onError` itself.
 - **`initializeOnCreation: true` (the default) defers the `useVideoPlayer` setup callback**
   until the native load reaches `onLoadStart`/`onStatusChange`; a source that fails
   immediately never gets there, so no listener is ever attached. Every scenario source sets
