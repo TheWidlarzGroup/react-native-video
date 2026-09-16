@@ -42,10 +42,11 @@ matrix.
 RN 0.87 needed three changes, all in place:
 
 1. `ReactNativeVideo.podspec` no longer publishes `ios/Video-Bridging-Header.h` as a public
-   header (issue #5084; the same change as PR #5085). `add_nitrogen_files` appends the
-   Nitrogen headers after it, so it led the umbrella header and loaded module `React`
-   first; under the prebuilt core `jsi/jsi.h` belongs to module `React`, and NitroModules'
-   textual `#include "jsi/jsi.h"` then failed to compile.
+   header. This is the podspec fix from #5085 by @GratwickEnt, with the root cause in #5084;
+   the header itself (one `#import`, referenced nowhere) is removed too. `add_nitrogen_files`
+   appends the Nitrogen headers after it, so it led the umbrella header and loaded module
+   `React` first; under the prebuilt core `jsi/jsi.h` belongs to module `React`, and
+   NitroModules' textual `#include "jsi/jsi.h"` then failed to compile.
 2. Three quoted imports of React headers are framework-style — under the prebuilt core
    `RCTBridge.h` is not in the Pods header tree at all. The `<React/…>` form resolves on
    the floor as well:
