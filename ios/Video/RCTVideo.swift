@@ -449,7 +449,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 "currentTime": currentTimeSecs,
                 "playableDuration": RCTVideoUtils.calculatePlayableDuration(_player, withSource: _source),
                 "atValue": currentTime?.value ?? .zero,
-                "currentPlaybackTime": NSNumber(value: Double(currentPlaybackTime?.timeIntervalSince1970 ?? 0 * 1000)).int64Value,
+                "currentPlaybackTime": NSNumber(value: (currentPlaybackTime?.timeIntervalSince1970 ?? 0) * 1000).int64Value,
                 "target": reactTag as Any,
                 "seekableDuration": RCTVideoUtils.calculateSeekableDuration(_player),
             ])
