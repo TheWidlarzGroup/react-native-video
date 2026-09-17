@@ -2141,10 +2141,15 @@ public class ReactExoplayerView extends FrameLayout implements
                 if (textRendererIndex != C.INDEX_UNSET) {
                     TrackGroupArray groups = info.getTrackGroups(textRendererIndex);
                     boolean trackFound = false;
+                    // "index" counts the way getTextTrackInfo numbers the tracks reported
+                    // to JS: a flat position across all groups and their tracks. Comparing
+                    // against trackIndex (the position inside a group) only ever matched 0,
+                    // because text tracks are typically one group per track.
+                    int flatIndex = 0;
                     
                     for (int groupIndex = 0; groupIndex < groups.length; groupIndex++) {
                         TrackGroup group = groups.get(groupIndex);
-                        for (int trackIndex = 0; trackIndex < group.length; trackIndex++) {
+                        for (int trackIndex = 0; trackIndex < group.length; trackIndex++, flatIndex++) {
                             Format format = group.getFormat(trackIndex);
                             
                             boolean isMatch = false;
@@ -2154,7 +2159,7 @@ public class ReactExoplayerView extends FrameLayout implements
                                 isMatch = true;
                             } else if ("index".equals(type)) {
                                 int targetIndex = ReactBridgeUtils.safeParseInt(value, -1);
-                                if (targetIndex == trackIndex) {
+                                if (targetIndex == flatIndex) {
                                     isMatch = true;
                                 }
                             }
