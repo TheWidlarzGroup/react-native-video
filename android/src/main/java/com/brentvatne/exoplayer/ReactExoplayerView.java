@@ -1607,6 +1607,7 @@ public class ReactExoplayerView extends FrameLayout implements
         return videoTracks;
     }
 
+    @WorkerThread
     private ArrayList<VideoTrack> getVideoTrackInfoFromManifest() {
         return this.getVideoTrackInfoFromManifest(0);
     }
