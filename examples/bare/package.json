@@ -48,5 +48,12 @@
   },
   "engines": {
     "node": ">=18"
+  },
+  "jest": {
+    "preset": "react-native",
+    "moduleNameMapper": {
+      "^react$": "<rootDir>/node_modules/react",
+      "^react-native$": "<rootDir>/node_modules/react-native"
+    }
   }
 }
