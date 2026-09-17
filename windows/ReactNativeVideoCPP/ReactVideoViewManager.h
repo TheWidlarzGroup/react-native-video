@@ -49,7 +49,6 @@ struct ReactVideoViewManager : winrt::implements<
 
  private:
   winrt::Microsoft::ReactNative::IReactContext m_reactContext{nullptr};
-  bool m_paused = false;
 };
 
 } // namespace winrt::ReactNativeVideoCPP::implementation
