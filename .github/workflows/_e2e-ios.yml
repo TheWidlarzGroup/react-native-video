@@ -6,33 +6,33 @@ on:
   workflow_call:
     inputs:
       rn-version:
-        description: 'React Native version id, matching e2e/rn-matrix (0.77 is the floor)'
+        description: "React Native version id, matching e2e/rn-matrix (0.77 is the floor)"
         type: string
         required: true
       runner:
-        description: 'macos-26 carries iOS 26 only; macos-15 carries iOS 18 and 26'
+        description: "macos-26 carries iOS 26 only; macos-15 carries iOS 18 and 26"
         type: string
-        default: 'macos-26'
+        default: "macos-26"
       ios-runtime:
-        description: 'iOS simulator runtime major version, e.g. 26'
+        description: "iOS simulator runtime major version, e.g. 26"
         type: string
-        default: '26'
+        default: "26"
       sim-device:
-        description: 'Simulator device name'
+        description: "Simulator device name"
         type: string
-        default: 'iPhone 17'
+        default: "iPhone 17"
       blocking:
-        description: 'false => the job reports but does not fail the calling run'
+        description: "false => the job reports but does not fail the calling run"
         type: boolean
         default: true
       tags:
-        description: 'Maestro tag selection, e.g. --exclude-tags=flaky'
+        description: "Maestro tag selection, e.g. --exclude-tags=flaky"
         type: string
-        default: '--exclude-tags=flaky'
+        default: "--exclude-tags=flaky"
       artifact-name:
-        description: 'Artifact name to upload under. The nightly orchestrator passes the name it expects to download; when empty, one is derived from rn-version/ios-runtime/tags.'
+        description: "Artifact name to upload under. The nightly orchestrator passes the name it expects to download; when empty, one is derived from rn-version/ios-runtime/tags."
         type: string
-        default: ''
+        default: ""
 
 env:
   APP_ID: com.rnvtest.host
@@ -178,7 +178,7 @@ jobs:
       # flows' way. Never fails the leg.
       - name: Warm up (approve the deep-link confirmation once)
         env:
-          MAESTRO_DRIVER_STARTUP_TIMEOUT: '300000'
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: "300000"
         run: |
           maestro test -e APP_ID=${{ env.APP_ID }} e2e/warmup/ios-approve-open-link.yaml || echo "warm-up flow did not pass (non-fatal)"
 
@@ -192,7 +192,7 @@ jobs:
           # (the driver's HTTP server came up 121 s after xcodebuild started in one run,
           # and Maestro gave up at 120 s with "iOS driver not ready in time"). Five
           # minutes leaves headroom without hiding a genuinely broken driver for long.
-          MAESTRO_DRIVER_STARTUP_TIMEOUT: '300000'
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: "300000"
         run: |
           set -euo pipefail
           # shellcheck disable=SC2086 # $TAGS is a list of flags and must word-split
@@ -226,6 +226,21 @@ jobs:
           node scripts/e2e/junit-summary.mjs e2e-report.xml \
             "ios · RN ${{ inputs.rn-version }} · iOS ${{ inputs.ios-runtime }}"
 
+      # The warm-up flow runs without --debug-output, so its logs (and the XCTest runner
+      # log) land in ~/.maestro/tests. They are copied into the workspace rather than
+      # uploaded from there: upload-artifact roots the archive at the least common
+      # ancestor of every matched path, and a path under $HOME moved that root to
+      # /Users/runner. e2e-report.xml then sat at work/<repo>/<repo>/e2e-report.xml inside
+      # the artifact, the nightly report job looks for it at the artifact root, and every
+      # iOS row was scored `missing-report` (red) whatever Maestro said.
+      - name: Collect Maestro home logs
+        if: always()
+        run: |
+          if [ -d "$HOME/.maestro/tests" ]; then
+            cp -R "$HOME/.maestro/tests" maestro-tests
+          fi
+
+      # Every path here must stay inside the workspace (see the step above).
       - name: Upload artifacts
         if: always()
         uses: actions/upload-artifact@v7
@@ -234,7 +249,7 @@ jobs:
           path: |
             e2e-report.xml
             maestro-debug/**
+            maestro-tests/**
             post-mortem/**
             device.log
-            ~/.maestro/tests/**
           if-no-files-found: ignore
