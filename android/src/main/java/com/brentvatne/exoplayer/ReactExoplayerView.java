@@ -1478,7 +1478,14 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     private void videoLoaded() {
-        if (!player.isPlayingAd() && loadVideoStarted) {
+        // player can be null here: ListenerSet posts onEvents() on the main
+        // looper, and if the view is unmounted (releasePlayer() nulls player)
+        // before that posted message is dispatched, this fires against an
+        // already-released player. Most visible in feed-style UIs that
+        // mount/unmount <Video> on scroll or key-remount on source change.
+        // Fixes #4902.
+        if (player == null) return;
+        if (!isPlayingAd() && loadVideoStarted) {
             loadVideoStarted = false;
             if (audioTrackType != null) {
                 setSelectedAudioTrack(audioTrackType, audioTrackValue);
