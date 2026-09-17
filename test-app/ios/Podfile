@@ -22,5 +22,38 @@ use_test_app!(
         config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
       end
     end
+
+    # The setting above only covers the fmt pod's own sources. On RN 0.82 the Swift
+    # compile of NitroModules builds the `fmt` clang module itself (NitroModules -> glog
+    # -> folly -> fmt/format.h) with the consumer's C++20, and hits the same consteval
+    # errors: "could not build module 'fmt'", then "could not build Objective-C module
+    # 'NitroModules'". fmt 11.0.2 has no override for FMT_USE_CONSTEVAL (11.1 added one),
+    # so turn it off in the installed header, which every consumer reads. A no-op where
+    # the pod is absent (RN 0.87 links the prebuilt core). Idempotent.
+    fmt_base = File.join(installer.sandbox.root, 'fmt', 'include', 'fmt', 'base.h')
+    if File.exist?(fmt_base)
+      source = File.read(fmt_base)
+      patched = source.gsub(/^(#\s*define FMT_USE_CONSTEVAL) 1$/, '\1 0')
+      if patched != source
+        File.chmod(0644, fmt_base)
+        File.write(fmt_base, patched)
+      end
+    end
+
+    # Past fmt, the same module build stops in glog: NitroModules 0.37's umbrella reaches
+    # <glog/logging.h> through ReactProp.hpp and React's Fabric headers, which builds the
+    # `glog` clang module, and logging.h includes log_severity.h and vlog_is_on.h inside
+    # `namespace google`. With the generated `module * { export * }` each of those is a
+    # submodule of its own, and clang rejects importing a module inside a namespace
+    # ("import of module 'glog.glog.log_severity' appears within namespace 'google'").
+    # Textual headers are not submodules, so the include is a plain include again.
+    glog_modulemap = File.join(installer.sandbox.target_support_files_root, 'glog', 'glog.modulemap')
+    if File.exist?(glog_modulemap)
+      source = File.read(glog_modulemap)
+      unless source.include?('textual header')
+        textual = %w[log_severity vlog_is_on].map { |h| %(  textual header "glog/#{h}.h"\n) }.join
+        File.write(glog_modulemap, source.sub(/^(\s*umbrella header .*\n)/) { "#{$1}#{textual}" })
+      end
+    end
   end
 )
