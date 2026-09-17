@@ -30,6 +30,20 @@ appId: ${APP_ID}
           timeout: 2500
           optional: true
 - launchApp
+# iOS only: a system "Open in “RNVideoE2E”?" prompt left over from an earlier openLink. It
+# belongs to SpringBoard, so it survives stopApp, clearState and launchApp, and it hides
+# the app from the hierarchy: e2e-host-ready is never visible and the flow fails here, as
+# does every flow after it. The warm-up normally takes the prompt, but on a slow runner it
+# came up after the warm-up had stopped waiting for it, and one iOS 18 nightly leg lost all
+# 10 flows to it. Open (not Cancel) so the approval is recorded and later links go straight
+# through; the relaunch then drops whatever scenario that stale link opened.
+- runFlow:
+    when:
+      platform: iOS
+      visible: "Open"
+    commands:
+      - tapOn: "Open"
+      - launchApp
 # Generous on purpose: this waits for the app to start, not for library behaviour, and a
 # freshly cleared app on a busy emulator or hosted runner has taken 15-18 s to get here.
 - extendedWaitUntil:

@@ -48,6 +48,14 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
   after that confirmation never reaches JS.** The iOS leg runs
   `e2e/warmup/ios-approve-open-link.yaml` once before the suite to take that confirmation
   out of the real flows' way; the shared subflow still handles it defensively.
+- **iOS: an unanswered "Open in app?" prompt outlives the app and hides it.** The prompt
+  belongs to SpringBoard: it survives `stopApp`, `clearState` and `launchApp`, and while it
+  is up the app is missing from the hierarchy, so `e2e-host-ready` never becomes visible.
+  On a slow `macos-15` runner the prompt came up only after the warm-up had stopped
+  waiting for it (no prompt 20 s after `openLink`), and that leg lost all 10 flows.
+  `launch-app.yaml` therefore taps Open on a prompt that is already up after launch and
+  relaunches. Open rather than Cancel, so the approval sticks. The check costs up to ~7 s
+  per launch when there is no prompt, overlapping with the app's own start-up.
 - v7 API only in the test app: `useVideoPlayer` + `VideoView` + `useEvent`,
   `player.seekTo()`. No `<Video>` component, no v6 `drm` prop.
 - No check becomes *required* in branch protection before 10–15 consecutive clean runs
