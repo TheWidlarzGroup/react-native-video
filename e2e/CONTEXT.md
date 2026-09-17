@@ -41,9 +41,14 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
 - **Zero retries.** A flow is never re-run to turn it green — a retry hides exactly the
   race conditions this suite exists to catch. A flow that proves unstable gets quarantined
   (`tags: [flaky]`) with an issue, and drops out of the gate until it is fixed. The single
-  exception is transport, not behaviour: `e2e/shared/open-scenario.yaml` retries the
-  `openLink` command itself, because `simctl openurl` on hosted macOS runners has timed
-  out before the app received anything. What the app then shows is never retried.
+  exception is transport, not behaviour: on iOS the deep link is opened by the fixture
+  server (`POST /__open-link`, `e2e/fixtures/open-link.mjs`), which retries `simctl
+  openurl`, because on hosted macOS runners that command has timed out
+  (NSPOSIXErrorDomain 60) while the link still arrived seconds later. It cannot be done in
+  the flow: Maestro's `retry` and `optional` only catch `MaestroException`, and this
+  failure is an `IllegalStateException`, so a `retry` around `openLink` never ran a second
+  attempt. A link delivered twice is harmless (the screen is keyed on the scenario). What
+  the app then shows is never retried.
 - **iOS: the first deep link on a fresh simulator can raise "Open in app?", and the link
   after that confirmation never reaches JS.** The iOS leg runs
   `e2e/warmup/ios-approve-open-link.yaml` once before the suite to take that confirmation

@@ -1,13 +1,28 @@
 import { test, expect, beforeAll, afterAll } from 'bun:test';
 import { spawn } from 'node:child_process';
+import { chmodSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 const PORT = 8199;
 const BASE = `http://127.0.0.1:${PORT}`;
 let proc;
 
+// Stands in for `xcrun` on the /__open-link route: records its arguments and fails the
+// first call, the way `simctl openurl` times out on a slow runner.
+const fakeDir = mkdtempSync(join(tmpdir(), 'rnv-open-link-'));
+const fakeXcrun = join(fakeDir, 'xcrun');
+const fakeCalls = join(fakeDir, 'calls');
+writeFileSync(
+  fakeXcrun,
+  `#!/bin/sh\necho "$@" >> "${fakeCalls}"\n[ "$(wc -l < "${fakeCalls}")" -gt 1 ] || exit 60\n`
+);
+chmodSync(fakeXcrun, 0o755);
+
 beforeAll(async () => {
   proc = spawn('node', ['e2e/fixtures/serve.mjs', 'e2e/fixtures/media', String(PORT)], {
     stdio: 'ignore',
+    env: { ...process.env, E2E_XCRUN: fakeXcrun, E2E_OPEN_LINK_PAUSE_MS: '10', E2E_SIM_UDID: 'SIM-1' },
   });
   for (let i = 0; i < 50; i++) {
     try {
@@ -20,7 +35,10 @@ beforeAll(async () => {
   throw new Error('server did not start');
 });
 
-afterAll(() => proc?.kill());
+afterAll(() => {
+  proc?.kill();
+  rmSync(fakeDir, { recursive: true, force: true });
+});
 
 test('serves a fixture with the right content type', async () => {
   const res = await fetch(`${BASE}/short.mp4`);
@@ -85,4 +103,27 @@ test('handles open-ended ranges correctly (bytes=N-)', async () => {
   // Verify Content-Length matches actual data
   const contentLength = parseInt(res.headers.get('content-length'), 10);
   expect(data.byteLength).toBe(contentLength);
+});
+
+const openLinkUrl = (link) => `${BASE}/__open-link?url=${encodeURIComponent(link)}`;
+
+test('/__open-link opens a scenario link on the simulator, retrying a failed attempt', async () => {
+  const res = await fetch(openLinkUrl('rnvtest://scenario/mp4'), { method: 'POST' });
+  expect(res.status).toBe(200);
+  expect(await res.json()).toEqual({ ok: true, attempts: 2 });
+  expect(readFileSync(fakeCalls, 'utf8')).toBe(
+    'simctl openurl SIM-1 rnvtest://scenario/mp4\nsimctl openurl SIM-1 rnvtest://scenario/mp4\n'
+  );
+});
+
+test('/__open-link refuses anything but a scenario link', async () => {
+  const before = readFileSync(fakeCalls, 'utf8');
+  for (const link of ['https://example.com', 'rnvtest://scenario/mp4 --help', '']) {
+    expect((await fetch(openLinkUrl(link), { method: 'POST' })).status).toBe(400);
+  }
+  expect(readFileSync(fakeCalls, 'utf8')).toBe(before);
+});
+
+test('/__open-link is POST only', async () => {
+  expect((await fetch(openLinkUrl('rnvtest://scenario/mp4'))).status).toBe(405);
 });

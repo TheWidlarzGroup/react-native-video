@@ -4,6 +4,7 @@
 import { createServer } from 'node:http';
 import { createReadStream, statSync } from 'node:fs';
 import { join, normalize, extname, resolve } from 'node:path';
+import { openLink, scenarioLink } from './open-link.mjs';
 
 const [, , rootArg = 'e2e/fixtures/media', portArg = '8090'] = process.argv;
 const root = resolve(rootArg);
@@ -15,9 +16,42 @@ const TYPES = {
   '.m3u8': 'application/vnd.apple.mpegurl',
 };
 
+const LOOPBACK = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1']);
+
+// The one route that is not a file: iOS flows open their deep link through here, see
+// open-link.mjs. It runs a process, so it only answers the machine it runs on (the
+// Android emulator, which reaches this server from 10.0.2.2, has no use for it) and only
+// for a scenario link. Set E2E_SIM_UDID when more than one simulator is booted.
+async function handleOpenLink(req, res) {
+  const json = (status, body) =>
+    res.writeHead(status, { 'Content-Type': 'application/json' }).end(JSON.stringify(body));
+
+  if (!LOOPBACK.has(req.socket.remoteAddress)) return json(403, { ok: false, error: 'loopback only' });
+  if (req.method !== 'POST') return json(405, { ok: false, error: 'POST only' });
+  const link = scenarioLink(req.url);
+  if (!link) return json(400, { ok: false, error: 'expected ?url=rnvtest://scenario/<name>' });
+
+  const result = await openLink({
+    link,
+    device: process.env.E2E_SIM_UDID || 'booted',
+    xcrun: process.env.E2E_XCRUN || 'xcrun',
+    pauseMs: Number(process.env.E2E_OPEN_LINK_PAUSE_MS || 2000),
+  });
+  console.log(`[fixtures] open-link ${link}: ${JSON.stringify(result)}`);
+  return json(result.ok ? 200 : 502, result);
+}
+
 const server = createServer((req, res) => {
   try {
     const path = decodeURIComponent(new URL(req.url, 'http://x').pathname);
+
+    if (path === '/__open-link') {
+      handleOpenLink(req, res).catch((err) => {
+        console.error(`[fixtures] open-link failed: ${err.message}`);
+        res.destroy();
+      });
+      return;
+    }
     const file = join(root, normalize(path));
 
     if (!file.startsWith(root)) {
