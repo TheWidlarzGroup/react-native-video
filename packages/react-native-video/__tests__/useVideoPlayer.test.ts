@@ -60,7 +60,10 @@ test('an inline config object with the same content does not recreate the player
 test('a config object the caller keeps around is not recreated on re-render', () => {
   // Regression for createSource writing defaults back into the caller's object,
   // which changed useVideoPlayer's JSON key between renders.
-  const stable: VideoConfig = { uri: 'https://x/a.mpd', drm: { licenseServer: 'https://l' } };
+  const stable: VideoConfig = {
+    uri: 'https://x/a.mpd',
+    drm: { licenseUrl: 'https://l' },
+  };
   const h = mount({ source: stable });
   h.update({ source: stable });
   h.update({ source: stable });

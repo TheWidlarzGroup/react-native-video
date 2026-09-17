@@ -7,9 +7,8 @@ import {
   sourceFactory as native,
 } from './helpers/nativeMocks';
 
-const { createSource, createSourceFromUri, createSourceFromVideoConfig } = await import(
-  '../src/core/utils/sourceFactory'
-);
+const { createSource, createSourceFromUri, createSourceFromVideoConfig } =
+  await import('../src/core/utils/sourceFactory');
 
 beforeEach(resetNativeMocks);
 
@@ -46,7 +45,6 @@ test('an asset that does not resolve is a source/invalid-uri error', () => {
 
 test('an existing VideoPlayerSource is returned as-is', () => {
   const existing = { name: 'VideoPlayerSource', uri: 'x' };
-  // @ts-expect-error minimal stand-in for the hybrid object
   expect(createSource(existing)).toBe(existing);
   expect(calls.fromUri).toEqual([]);
   expect(calls.fromVideoConfig).toEqual([]);
@@ -67,19 +65,34 @@ test('a config with a numeric uri resolves the asset and keeps the other fields'
 
 test('drm without a type gets the platform default, an explicit type is kept', () => {
   platform.OS = 'android';
-  createSource({ uri: 'https://x/a.mpd', drm: { licenseServer: 'https://l' } });
-  expect(lastConfig().drm).toEqual({ licenseServer: 'https://l', type: 'widevine' });
+  createSource({ uri: 'https://x/a.mpd', drm: { licenseUrl: 'https://l' } });
+  expect(lastConfig().drm).toEqual({
+    licenseUrl: 'https://l',
+    type: 'widevine',
+  });
 
   platform.OS = 'ios';
-  createSource({ uri: 'https://x/a.m3u8', drm: { licenseServer: 'https://l' } });
-  expect(lastConfig().drm).toEqual({ licenseServer: 'https://l', type: 'fairplay' });
+  createSource({
+    uri: 'https://x/a.m3u8',
+    drm: { licenseUrl: 'https://l' },
+  });
+  expect(lastConfig().drm).toEqual({
+    licenseUrl: 'https://l',
+    type: 'fairplay',
+  });
 
-  createSource({ uri: 'https://x/a.mpd', drm: { licenseServer: 'https://l', type: 'clearkey' } });
-  expect(lastConfig().drm).toEqual({ licenseServer: 'https://l', type: 'clearkey' });
+  createSource({
+    uri: 'https://x/a.mpd',
+    drm: { licenseUrl: 'https://l', type: 'clearkey' },
+  });
+  expect(lastConfig().drm).toEqual({
+    licenseUrl: 'https://l',
+    type: 'clearkey',
+  });
 
   platform.OS = 'web';
-  createSource({ uri: 'https://x/a.mpd', drm: { licenseServer: 'https://l' } });
-  expect(lastConfig().drm).toEqual({ licenseServer: 'https://l' });
+  createSource({ uri: 'https://x/a.mpd', drm: { licenseUrl: 'https://l' } });
+  expect(lastConfig().drm).toEqual({ licenseUrl: 'https://l' });
 });
 
 test('external subtitles get default type and language', () => {
@@ -91,7 +104,12 @@ test('external subtitles get default type and language', () => {
     ],
   });
   expect(lastConfig().externalSubtitles).toEqual([
-    { uri: 'https://x/en.vtt', label: 'English', type: 'auto', language: 'und' },
+    {
+      uri: 'https://x/en.vtt',
+      label: 'English',
+      type: 'auto',
+      language: 'und',
+    },
     { uri: 'https://x/pl.srt', label: 'Polski', type: 'srt', language: 'pl' },
   ]);
 });
@@ -103,7 +121,7 @@ test('does not mutate the caller config', () => {
   // and recreate the player.
   const config = {
     uri: 'https://x/a.mpd',
-    drm: { licenseServer: 'https://l' },
+    drm: { licenseUrl: 'https://l' },
     externalSubtitles: [{ uri: 'https://x/en.vtt' as const, label: 'English' }],
   };
   const before = JSON.stringify(config);
@@ -124,8 +142,9 @@ test('invalid config uris and non-source values are typed errors', () => {
   expect(code(() => createSource({ uri: null }))).toBe('source/invalid-uri');
   // @ts-expect-error runtime guard
   expect(code(() => createSource({ uri: {} }))).toBe('source/invalid-uri');
-  // @ts-expect-error runtime guard
-  expect(code(() => createSourceFromVideoConfig({ uri: '' }))).toBe('source/invalid-uri');
+  expect(code(() => createSourceFromVideoConfig({ uri: '' }))).toBe(
+    'source/invalid-uri'
+  );
   // @ts-expect-error runtime guard
   expect(code(() => createSource(null))).toBe('player/invalid-source');
   // @ts-expect-error runtime guard
@@ -141,8 +160,12 @@ test('native factory errors are parsed into VideoRuntimeError', () => {
     throw new Error('expected throw');
   } catch (e) {
     expect(e).toBeInstanceOf(VideoRuntimeError);
-    expect((e as VideoRuntimeError).code).toBe('source/unsupported-content-type');
+    expect((e as VideoRuntimeError).code).toBe(
+      'source/unsupported-content-type'
+    );
   }
   native.throws = new Error('plain native failure');
-  expect(() => createSource({ uri: 'https://x/a.mp4' })).toThrow('plain native failure');
+  expect(() => createSource({ uri: 'https://x/a.mp4' })).toThrow(
+    'plain native failure'
+  );
 });

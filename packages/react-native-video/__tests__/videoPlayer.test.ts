@@ -10,7 +10,9 @@ beforeEach(resetNativeMocks);
 
 test('a sync method throws the parsed error when nobody listens to onError', () => {
   const player = new VideoPlayer('https://x/a.mp4');
-  native.playThrows = new Error(encoded('player/not-initialized', 'init first'));
+  native.playThrows = new Error(
+    encoded('player/not-initialized', 'init first')
+  );
   try {
     player.play();
     throw new Error('expected throw');
@@ -24,7 +26,9 @@ test('a sync method delivers to onError instead of throwing when a listener exis
   const player = new VideoPlayer('https://x/a.mp4');
   const seen: string[] = [];
   player.addEventListener('onError', (e) => seen.push(e.code));
-  native.playThrows = new Error(encoded('player/not-initialized', 'init first'));
+  native.playThrows = new Error(
+    encoded('player/not-initialized', 'init first')
+  );
   expect(() => player.play()).not.toThrow();
   expect(seen).toEqual(['player/not-initialized']);
 });
@@ -48,7 +52,9 @@ test('an unparsable native error is rethrown as-is, even with an onError listene
 
 test('a rejected native promise rejects with the parsed error when nobody listens', async () => {
   const player = new VideoPlayer('https://x/a.mp4');
-  native.initializeRejects = new Error(encoded('source/file-does-not-exist', 'missing'));
+  native.initializeRejects = new Error(
+    encoded('source/file-does-not-exist', 'missing')
+  );
   const err = await player.initialize().catch((e: unknown) => e);
   expect(err).toBeInstanceOf(VideoRuntimeError);
   expect((err as VideoRuntimeError).code).toBe('source/file-does-not-exist');
@@ -58,7 +64,9 @@ test('a rejected native promise notifies onError and still rejects with the erro
   const player = new VideoPlayer('https://x/a.mp4');
   const seen: string[] = [];
   player.addEventListener('onError', (e) => seen.push(e.code));
-  native.initializeRejects = new Error(encoded('source/file-does-not-exist', 'missing'));
+  native.initializeRejects = new Error(
+    encoded('source/file-does-not-exist', 'missing')
+  );
   const err = await player.initialize().catch((e: unknown) => e);
   expect(seen).toEqual(['source/file-does-not-exist']);
   expect(err).toBeInstanceOf(VideoRuntimeError);

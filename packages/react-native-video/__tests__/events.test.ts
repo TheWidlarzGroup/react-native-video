@@ -63,14 +63,18 @@ test('ALL_PLAYER_EVENTS is exhaustive for addEventListener', () => {
   // instead of at runtime in an app.
   const events = new Events(fakeEmitter().emitter);
   for (const event of ALL_PLAYER_EVENTS) {
-    expect(() => events.addEventListener(event, (() => {}) as never)).not.toThrow();
+    expect(() =>
+      events.addEventListener(event, (() => {}) as never)
+    ).not.toThrow();
   }
 });
 
 test('an unknown event name throws', () => {
   const events = new Events(fakeEmitter().emitter);
   // @ts-expect-error runtime guard
-  expect(() => events.addEventListener('onNope', () => {})).toThrow(/Unsupported event: onNope/);
+  expect(() => events.addEventListener('onNope', () => {})).toThrow(
+    /Unsupported event: onNope/
+  );
 });
 
 test('onError is JS-only: never forwarded to the emitter, delivered to every listener', () => {
@@ -83,7 +87,10 @@ test('onError is JS-only: never forwarded to the emitter, delivered to every lis
 
   const err = new VideoRuntimeError('player/not-initialized', 'x');
   expect(events.trigger(err)).toBe(true);
-  expect(seen).toEqual(['a:player/not-initialized', 'b:player/not-initialized']);
+  expect(seen).toEqual([
+    'a:player/not-initialized',
+    'b:player/not-initialized',
+  ]);
 });
 
 test('trigger reports whether anyone was listening', () => {
@@ -116,6 +123,8 @@ test('clearAllEvents drops JS listeners and clears the native emitter', () => {
   events.addEventListener('onError', () => void calls++);
   events.clearAllEvents();
   expect(fake.cleared).toBe(1);
-  expect(events.trigger(new VideoRuntimeError('unknown/unknown', 'x'))).toBe(false);
+  expect(events.trigger(new VideoRuntimeError('unknown/unknown', 'x'))).toBe(
+    false
+  );
   expect(calls).toBe(0);
 });
