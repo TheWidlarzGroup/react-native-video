@@ -19,7 +19,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _videoURL: NSURL?
 
     /* Required to publish events */
-    private var _eventDispatcher: RCTEventDispatcher?
+    private var _eventDispatcher: RCTEventDispatcherProtocol?
     private var _videoLoadStarted = false
 
     private var _pendingSeek = false
@@ -194,7 +194,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         #endif
     }
 
-    init(eventDispatcher: RCTEventDispatcher!) {
+    init(eventDispatcher: RCTEventDispatcherProtocol!) {
         super.init(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
         ReactNativeVideoManager.shared.registerView(newInstance: self)
         #if USE_GOOGLE_IMA
