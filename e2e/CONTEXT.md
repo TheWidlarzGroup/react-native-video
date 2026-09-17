@@ -93,6 +93,14 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
   padding equal to `StatusBar.currentHeight`, the first marker renders under the status
   bar and Maestro drops it from the hierarchy as invisible ("Skipping invisible child").
   Local runs on API 34 never showed this; API 35/36 do.
+- **API 34 kills an app launched within ~1 s of `pm clear`.** Clearing state removes the
+  previous task; when that removal's 1 s destroy timeout fires, Android 14 kills the
+  package's current process ("Destroy timeout of remove-task" then "Killing <pid> (adj
+  -10000): remove task" in logcat), which by then is the one Maestro just started. The
+  activity survives without a React root: a white screen and no `e2e-host-ready`.
+  `launchApp: {clearState: true}` starts the app ~0.9 s after the clear on a hosted runner,
+  which cost 5 of 30 flows across the API 34 nightly legs and none on API 35/36. Hence
+  `launch-app.yaml` runs `clearState`, waits 2.5 s on Android, then `launchApp`.
 - **Taps are immediate on Android, deferred on iOS.** The iOS driver only delivers a tap
   once the player goes idle (below); the Android driver delivers it at once. Flows that
   must work on both use absolute actions (`btn-play`, `btn-seek-1`, `btn-loop-on`), never
