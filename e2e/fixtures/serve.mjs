@@ -4,7 +4,7 @@
 import { createServer } from 'node:http';
 import { createReadStream, statSync } from 'node:fs';
 import { join, normalize, extname, resolve } from 'node:path';
-import { openLink, scenarioLink } from './open-link.mjs';
+import { openLink, scenarioLink, simulatorDevice } from './open-link.mjs';
 
 const [, , rootArg = 'e2e/fixtures/media', portArg = '8090'] = process.argv;
 const root = resolve(rootArg);
@@ -21,7 +21,8 @@ const LOOPBACK = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1']);
 // The one route that is not a file: iOS flows open their deep link through here, see
 // open-link.mjs. It runs a process, so it only answers the machine it runs on (the
 // Android emulator, which reaches this server from 10.0.2.2, has no use for it) and only
-// for a scenario link. Set E2E_SIM_UDID when more than one simulator is booted.
+// for a scenario link. The flow names the simulator (`&device=<udid>`, from Maestro's
+// SIM_UDID env); without it, E2E_SIM_UDID or whichever simulator is booted.
 async function handleOpenLink(req, res) {
   const json = (status, body) =>
     res.writeHead(status, { 'Content-Type': 'application/json' }).end(JSON.stringify(body));
@@ -30,10 +31,12 @@ async function handleOpenLink(req, res) {
   if (req.method !== 'POST') return json(405, { ok: false, error: 'POST only' });
   const link = scenarioLink(req.url);
   if (!link) return json(400, { ok: false, error: 'expected ?url=rnvtest://scenario/<name>' });
+  const device = simulatorDevice(req.url);
+  if (device === null) return json(400, { ok: false, error: 'device must be a simulator UDID' });
 
   const result = await openLink({
     link,
-    device: process.env.E2E_SIM_UDID || 'booted',
+    device: device || process.env.E2E_SIM_UDID || 'booted',
     xcrun: process.env.E2E_XCRUN || 'xcrun',
     pauseMs: Number(process.env.E2E_OPEN_LINK_PAUSE_MS || 2000),
   });

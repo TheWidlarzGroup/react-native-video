@@ -124,6 +124,17 @@ test('/__open-link refuses anything but a scenario link', async () => {
   expect(readFileSync(fakeCalls, 'utf8')).toBe(before);
 });
 
+test('/__open-link targets the simulator the flow names, and refuses a non-UDID', async () => {
+  const udid = '7D16E67F-1E34-43CB-BD36-B95CCE24981A';
+  const res = await fetch(`${openLinkUrl('rnvtest://scenario/hls')}&device=${udid}`, { method: 'POST' });
+  expect(res.status).toBe(200);
+  expect(readFileSync(fakeCalls, 'utf8').trimEnd().split('\n').at(-1)).toBe(
+    `simctl openurl ${udid} rnvtest://scenario/hls`
+  );
+  const bad = await fetch(`${openLinkUrl('rnvtest://scenario/hls')}&device=booted`, { method: 'POST' });
+  expect(bad.status).toBe(400);
+});
+
 test('/__open-link is POST only', async () => {
   expect((await fetch(openLinkUrl('rnvtest://scenario/mp4'))).status).toBe(405);
 });

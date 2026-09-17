@@ -59,8 +59,9 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
   On a slow `macos-15` runner the prompt came up only after the warm-up had stopped
   waiting for it (no prompt 20 s after `openLink`), and that leg lost all 10 flows.
   `launch-app.yaml` therefore taps Open on a prompt that is already up after launch and
-  relaunches. Open rather than Cancel, so the approval sticks. The check costs up to ~7 s
-  per launch when there is no prompt, overlapping with the app's own start-up.
+  relaunches. Open rather than Cancel, so the approval sticks. With no prompt the check
+  takes ~7 s per launch (Maestro's fixed lookup time for a `when: visible` that is false;
+  7.5 s measured in CI), which did not show up in leg durations against runner variance.
 - v7 API only in the test app: `useVideoPlayer` + `VideoView` + `useEvent`,
   `player.seekTo()`. No `<Video>` component, no v6 `drm` prop.
 - No check becomes *required* in branch protection before 10–15 consecutive clean runs

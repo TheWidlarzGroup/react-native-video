@@ -54,6 +54,16 @@ use_test_app!(
         textual = %w[log_severity vlog_is_on].map { |h| %(  textual header "glog/#{h}.h"\n) }.join
         File.write(glog_modulemap, source.sub(/^(\s*umbrella header .*\n)/) { "#{$1}#{textual}" })
       end
+      # CocoaPods regenerates this file on every `pod install` (the patched content never
+      # matches its template), so it would get a fresh mtime each CI run, and a module map
+      # that looks modified makes clang rebuild the glog module and everything importing
+      # it - most of the incremental build the restored DerivedData is there to skip.
+      # Pin the mtime to a file that comes out of the Pods cache unchanged.
+      stamp_source = File.join(installer.sandbox.root, 'glog', 'src', 'glog', 'logging.h.in')
+      if File.exist?(stamp_source)
+        stamp = File.mtime(stamp_source)
+        File.utime(stamp, stamp, glog_modulemap)
+      end
     end
   end
 )

@@ -19,10 +19,20 @@ const execFileAsync = promisify(execFile);
 // Deliberately narrower than the app's parser: this value becomes a process argument.
 const SCENARIO_LINK = /^rnvtest:\/\/scenario\/[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
+const SIMULATOR_UDID = /^[0-9A-F]{8}(?:-[0-9A-F]{4}){3}-[0-9A-F]{12}$/i;
+
 // The link from `/__open-link?url=<link>`, or null unless it is exactly one scenario link.
 export function scenarioLink(requestUrl) {
   const values = new URL(requestUrl, 'http://x').searchParams.getAll('url');
   return values.length === 1 && SCENARIO_LINK.test(values[0]) ? values[0] : null;
+}
+
+// The simulator from `&device=<udid>`: undefined when absent (the caller falls back to
+// `booted`), null when present but not a UDID.
+export function simulatorDevice(requestUrl) {
+  const values = new URL(requestUrl, 'http://x').searchParams.getAll('device');
+  if (values.length === 0 || (values.length === 1 && values[0] === '')) return undefined;
+  return values.length === 1 && SIMULATOR_UDID.test(values[0]) ? values[0] : null;
 }
 
 export async function openLink({

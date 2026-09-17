@@ -30,11 +30,21 @@ function attribute(attrs, name) {
 // as the element's text (<failure>Assertion is false: ...</failure>), which left the
 // summary's Failure column empty. The attribute wins when both are present: the text is
 // then usually a stack trace.
-const FAILURE_RE = /<(?:failure|error)\b([^>]*?)(?:\/>|>([\s\S]*?)<\/(?:failure|error)>|>)/;
+// Attributes may hold a literal ">" inside quotes, so quoted runs are skipped as a unit.
+const FAILURE_RE = /<(?:failure|error)\b((?:[^>"]|"[^"]*")*?)(?:\/>|>([\s\S]*?)<\/(?:failure|error)>|>)/;
 
+const MAX_BODY_MESSAGE = 300;
+
+// CDATA is verbatim, the text around it is entity-encoded. A body is often a stack trace:
+// the first line says what failed, and the rest would bloat a table cell and the 1 MiB
+// step summary.
 function elementText(inner) {
-  const cdata = /^\s*<!\[CDATA\[([\s\S]*?)\]\]>\s*$/.exec(inner);
-  return cdata ? cdata[1].trim() : decodeXmlEntities(inner).trim();
+  const text = inner
+    .split(/(<!\[CDATA\[[\s\S]*?\]\]>)/)
+    .map((part) => (part.startsWith('<![CDATA[') ? part.slice(9, -3) : decodeXmlEntities(part)))
+    .join('');
+  const firstLine = text.trim().split(/\r?\n/, 1)[0].trim();
+  return firstLine.length > MAX_BODY_MESSAGE ? `${firstLine.slice(0, MAX_BODY_MESSAGE - 1)}…` : firstLine;
 }
 
 export function parseJUnit(xml) {

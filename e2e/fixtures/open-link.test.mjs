@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'bun:test';
-import { scenarioLink, openLink } from './open-link.mjs';
+import { scenarioLink, simulatorDevice, openLink } from './open-link.mjs';
 
 const request = (link) => `/__open-link?url=${encodeURIComponent(link)}`;
 
@@ -32,6 +32,27 @@ describe('scenarioLink', () => {
     expect(
       scenarioLink('/__open-link?url=rnvtest%3A%2F%2Fscenario%2Fmp4&url=rnvtest%3A%2F%2Fscenario%2Fhls')
     ).toBeNull();
+  });
+});
+
+describe('simulatorDevice', () => {
+  const udid = '7D16E67F-1E34-43CB-BD36-B95CCE24981A';
+
+  test('is undefined when the request names no device', () => {
+    expect(simulatorDevice('/__open-link?url=x')).toBeUndefined();
+    expect(simulatorDevice('/__open-link?url=x&device=')).toBeUndefined();
+  });
+
+  test('accepts a simulator UDID', () => {
+    expect(simulatorDevice(`/__open-link?url=x&device=${udid}`)).toBe(udid);
+    expect(simulatorDevice(`/__open-link?url=x&device=${udid.toLowerCase()}`)).toBe(udid.toLowerCase());
+  });
+
+  test('is null for anything else, including simctl keywords and repeats', () => {
+    for (const device of ['booted', 'all', '--help', `${udid} x`, 'iPhone%2017']) {
+      expect(simulatorDevice(`/__open-link?url=x&device=${device}`)).toBeNull();
+    }
+    expect(simulatorDevice(`/__open-link?url=x&device=${udid}&device=${udid}`)).toBeNull();
   });
 });
 

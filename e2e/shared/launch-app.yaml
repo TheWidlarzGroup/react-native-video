@@ -37,10 +37,13 @@ appId: ${APP_ID}
 # came up after the warm-up had stopped waiting for it, and one iOS 18 nightly leg lost all
 # 10 flows to it. Open (not Cancel) so the approval is recorded and later links go straight
 # through; the relaunch then drops whatever scenario that stale link opened.
+# Matched on the prompt's title, not on the button, so a bare "Open" in the app can never
+# trigger it. Checked once, right after launch: a prompt that comes up later still costs
+# this flow, and the next flow's launch clears it.
 - runFlow:
     when:
       platform: iOS
-      visible: "Open"
+      visible: "Open in .*RNVideoE2E.*"
     commands:
       - tapOn: "Open"
       - launchApp

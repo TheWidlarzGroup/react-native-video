@@ -6,9 +6,10 @@
 # `simctl openurl` has timed out (NSPOSIXErrorDomain 60, "Simulator device failed to
 # open") and failed the flow, although the link still arrived seconds later. Maestro's
 # `retry` cannot help, it only catches MaestroException and this is not one, so the
-# transport is retried on the server. Nothing the flows assert on is retried: a marker
-# that does not appear still fails the flow, so the zero-retries rule for the library's
-# behaviour holds.
+# transport is retried on the server. Android has no retry: the `retry` that used to wrap
+# openLink here never fired for a transport failure either, and none has been seen on
+# Android. Nothing the flows assert on is retried: a marker that does not appear still
+# fails the flow, so the zero-retries rule for the library's behaviour holds.
 appId: ${APP_ID}
 ---
 - runFlow:
