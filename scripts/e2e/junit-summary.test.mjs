@@ -49,6 +49,35 @@ describe('parseJUnit', () => {
     });
   });
 
+  // Maestro 2.10 writes the reason as the element's text, not as a `message` attribute:
+  // <failure>Assertion is false: id: evt-muted is visible</failure>
+  describe('failure text in the element body', () => {
+    const body = (inner) => parseJUnit(oneCase(inner)).cases[0].message;
+
+    test('is the message when there is no message attribute', () => {
+      expect(body('<failure>Assertion is false: id: evt-muted is visible</failure>')).toBe(
+        'Assertion is false: id: evt-muted is visible'
+      );
+      expect(body('<error>crashed</error>')).toBe('crashed');
+    });
+
+    test('is entity-decoded and trimmed', () => {
+      expect(body('<failure>\n  text &quot;Play&quot; &amp; &lt;b&gt;\n</failure>')).toBe('text "Play" & <b>');
+    });
+
+    test('is read verbatim from CDATA', () => {
+      expect(body('<failure><![CDATA[a < b &amp; c]]></failure>')).toBe('a < b &amp; c');
+    });
+
+    test('loses to a message attribute', () => {
+      expect(body('<failure message="short">long stack trace</failure>')).toBe('short');
+    });
+
+    test('an empty element still counts as a failure with no message', () => {
+      expect(parseJUnit(oneCase('<failure></failure>')).cases[0]).toEqual({ name: 'f', failed: true, message: '' });
+    });
+  });
+
   test('an empty document has no cases', () => {
     expect(parseJUnit('')).toEqual({ total: 0, failures: 0, cases: [] });
   });

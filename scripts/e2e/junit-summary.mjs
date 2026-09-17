@@ -26,14 +26,25 @@ function attribute(attrs, name) {
   return match ? decodeXmlEntities(match[1]) : '';
 }
 
+// The reason is a `message` attribute in the JUnit convention, but Maestro 2.10 writes it
+// as the element's text (<failure>Assertion is false: ...</failure>), which left the
+// summary's Failure column empty. The attribute wins when both are present: the text is
+// then usually a stack trace.
+const FAILURE_RE = /<(?:failure|error)\b([^>]*?)(?:\/>|>([\s\S]*?)<\/(?:failure|error)>|>)/;
+
+function elementText(inner) {
+  const cdata = /^\s*<!\[CDATA\[([\s\S]*?)\]\]>\s*$/.exec(inner);
+  return cdata ? cdata[1].trim() : decodeXmlEntities(inner).trim();
+}
+
 export function parseJUnit(xml) {
   const cases = [];
   for (const [, attrs, , body = ''] of xml.matchAll(CASE_RE)) {
-    const failure = /<(?:failure|error)\b([^>]*)/.exec(body);
+    const failure = FAILURE_RE.exec(body);
     cases.push({
       name: attribute(attrs, 'name'),
       failed: failure !== null,
-      message: failure ? attribute(failure[1], 'message') : '',
+      message: failure ? attribute(failure[1], 'message') || elementText(failure[2] ?? '') : '',
     });
   }
   return {
