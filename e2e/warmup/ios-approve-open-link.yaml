@@ -16,7 +16,12 @@ appId: ${APP_ID}
       id: "e2e-host-ready"
     timeout: 30000
     optional: true
-- openLink: rnvtest://scenario/mp4
+# Same transport as the real flows. SOFT: a failed open must not skip the tap below.
+- runScript:
+    file: ../shared/open-link-ios.js
+    env:
+      LINK: rnvtest://scenario/mp4
+      SOFT: 'true'
 - extendedWaitUntil:
     visible: "Open"
     timeout: 5000

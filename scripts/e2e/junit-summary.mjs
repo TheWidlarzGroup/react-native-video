@@ -26,14 +26,31 @@ function attribute(attrs, name) {
   return match ? decodeXmlEntities(match[1]) : '';
 }
 
+// Maestro 2.10 writes the reason as the element's text, not the JUnit `message`
+// attribute. The attribute wins when both are present (the text is then a stack trace).
+// Quoted attribute values may contain ">", so they are skipped as a unit.
+const FAILURE_RE = /<(?:failure|error)\b((?:[^>"]|"[^"]*")*?)(?:\/>|>([\s\S]*?)<\/(?:failure|error)>|>)/;
+
+const MAX_BODY_MESSAGE = 300;
+
+// First line only: a body is often a stack trace, and the summary is capped at 1 MiB.
+function elementText(inner) {
+  const text = inner
+    .split(/(<!\[CDATA\[[\s\S]*?\]\]>)/)
+    .map((part) => (part.startsWith('<![CDATA[') ? part.slice(9, -3) : decodeXmlEntities(part)))
+    .join('');
+  const firstLine = text.trim().split(/\r?\n/, 1)[0].trim();
+  return firstLine.length > MAX_BODY_MESSAGE ? `${firstLine.slice(0, MAX_BODY_MESSAGE - 1)}…` : firstLine;
+}
+
 export function parseJUnit(xml) {
   const cases = [];
   for (const [, attrs, , body = ''] of xml.matchAll(CASE_RE)) {
-    const failure = /<(?:failure|error)\b([^>]*)/.exec(body);
+    const failure = FAILURE_RE.exec(body);
     cases.push({
       name: attribute(attrs, 'name'),
       failed: failure !== null,
-      message: failure ? attribute(failure[1], 'message') : '',
+      message: failure ? attribute(failure[1], 'message') || elementText(failure[2] ?? '') : '',
     });
   }
   return {

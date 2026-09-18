@@ -22,5 +22,40 @@ use_test_app!(
         config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
       end
     end
+
+    # RN 0.82: the NitroModules Swift compile builds the `fmt` clang module with C++20 and
+    # fails on consteval ("could not build module 'fmt'"). fmt 11.0.2 has no override for
+    # FMT_USE_CONSTEVAL, so turn it off in the installed header. No-op without the pod
+    # (RN 0.87 links the prebuilt core).
+    fmt_base = File.join(installer.sandbox.root, 'fmt', 'include', 'fmt', 'base.h')
+    if File.exist?(fmt_base)
+      source = File.read(fmt_base)
+      patched = source.gsub(/^(#\s*define FMT_USE_CONSTEVAL) 1$/, '\1 0')
+      if patched != source
+        File.chmod(0644, fmt_base)
+        File.write(fmt_base, patched)
+      end
+    end
+
+    # Same module build, next stop glog: logging.h includes log_severity.h and vlog_is_on.h
+    # inside `namespace google`, and with `module * { export * }` each is a submodule, which
+    # clang rejects ("import of module ... appears within namespace 'google'"). Textual
+    # headers are plain includes again.
+    glog_modulemap = File.join(installer.sandbox.target_support_files_root, 'glog', 'glog.modulemap')
+    if File.exist?(glog_modulemap)
+      source = File.read(glog_modulemap)
+      unless source.include?('textual header')
+        textual = %w[log_severity vlog_is_on].map { |h| %(  textual header "glog/#{h}.h"\n) }.join
+        File.write(glog_modulemap, source.sub(/^(\s*umbrella header .*\n)/) { "#{$1}#{textual}" })
+      end
+      # `pod install` rewrites this file each run; a fresh mtime makes clang rebuild the
+      # glog module and everything importing it, defeating the DerivedData cache. Pin the
+      # mtime to a file that comes out of the Pods cache unchanged.
+      stamp_source = File.join(installer.sandbox.root, 'glog', 'src', 'glog', 'logging.h.in')
+      if File.exist?(stamp_source)
+        stamp = File.mtime(stamp_source)
+        File.utime(stamp, stamp, glog_modulemap)
+      end
+    end
   end
 )

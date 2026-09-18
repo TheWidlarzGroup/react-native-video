@@ -7,8 +7,32 @@
 # nothing opens a scenario before it is visible.
 appId: ${APP_ID}
 ---
-- launchApp:
-    clearState: true
+# Not `launchApp: {clearState: true}`: that starts the app ~0.9 s after `pm clear`, and
+# API 34 kills the package's process when the removed task's 1 s destroy timeout fires,
+# leaving a white screen (details in CONTEXT.md). Maestro has no sleep command; waiting
+# for an id that never exists is the idiom, `optional` makes the timeout a warning.
+- clearState
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "e2e-never-rendered-sleep"
+          timeout: 2500
+          optional: true
+- launchApp
+# iOS: a stale "Open in “RNVideoE2E”?" prompt (SpringBoard's, so it survives clearState
+# and launchApp) hides the app from the hierarchy and would fail every flow from here on.
+# Tap Open so the approval sticks, then relaunch to drop the scenario that link opened.
+# Matched on the title, not the button, so a bare "Open" in the app never triggers it.
+- runFlow:
+    when:
+      platform: iOS
+      visible: "Open in .*RNVideoE2E.*"
+    commands:
+      - tapOn: "Open"
+      - launchApp
 # Generous on purpose: this waits for the app to start, not for library behaviour, and a
 # freshly cleared app on a busy emulator or hosted runner has taken 15-18 s to get here.
 - extendedWaitUntil:

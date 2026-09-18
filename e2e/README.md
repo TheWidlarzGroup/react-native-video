@@ -10,7 +10,9 @@ CI matrix: [`CI_MATRIX_DESIGN.md`](CI_MATRIX_DESIGN.md).
 ./e2e/fixtures/generate.sh
 
 # 2. Serve fixtures (dependency-free — the same server CI starts via
-#    .github/actions/e2e-setup/action.yml; run it from the repo root and leave it running)
+#    .github/actions/e2e-setup/action.yml; run it from the repo root and leave it running).
+#    iOS flows also open their deep links through it, on the booted simulator; with more
+#    than one simulator booted, start it with E2E_SIM_UDID=<udid>.
 node e2e/fixtures/serve.mjs e2e/fixtures/media 8090
 
 # 3. Pick the React Native version and install.
@@ -87,8 +89,9 @@ However a flow was drafted, the committed artifact is plain YAML, reviewed by ha
 - No external network in flows — local fixtures only.
 - Zero retries on anything the flows assert. A flaky flow gets quarantined
   (`tags: [flaky]`) with an issue, never retried into a false green — a retry hides the
-  race the flow just caught. The one retry in the suite wraps the `openLink` transport in
-  `e2e/shared/open-scenario.yaml` (hosted simulators have timed out inside `simctl openurl`
-  before the app saw anything); a scenario screen or marker that does not appear still
+  race the flow just caught. The one retry in the suite is on the iOS deep-link transport:
+  `e2e/shared/open-scenario.yaml` asks the fixture server to open the link, and the server
+  retries `simctl openurl` when it times out on a hosted simulator (Maestro's own `retry`
+  does not catch that failure); a scenario screen or marker that does not appear still
   fails the flow.
 - Bugfix in an E2E-coverable area ⇒ the PR includes a reproducing flow.

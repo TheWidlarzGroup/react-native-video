@@ -41,13 +41,27 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
 - **Zero retries.** A flow is never re-run to turn it green — a retry hides exactly the
   race conditions this suite exists to catch. A flow that proves unstable gets quarantined
   (`tags: [flaky]`) with an issue, and drops out of the gate until it is fixed. The single
-  exception is transport, not behaviour: `e2e/shared/open-scenario.yaml` retries the
-  `openLink` command itself, because `simctl openurl` on hosted macOS runners has timed
-  out before the app received anything. What the app then shows is never retried.
+  exception is transport, not behaviour: on iOS the deep link is opened by the fixture
+  server (`POST /__open-link`, `e2e/fixtures/open-link.mjs`), which retries `simctl
+  openurl`, because on hosted macOS runners that command has timed out
+  (NSPOSIXErrorDomain 60) while the link still arrived seconds later. It cannot be done in
+  the flow: Maestro's `retry` and `optional` only catch `MaestroException`, and this
+  failure is an `IllegalStateException`, so a `retry` around `openLink` never ran a second
+  attempt. A link delivered twice is harmless (the screen is keyed on the scenario). What
+  the app then shows is never retried.
 - **iOS: the first deep link on a fresh simulator can raise "Open in app?", and the link
   after that confirmation never reaches JS.** The iOS leg runs
   `e2e/warmup/ios-approve-open-link.yaml` once before the suite to take that confirmation
   out of the real flows' way; the shared subflow still handles it defensively.
+- **iOS: an unanswered "Open in app?" prompt outlives the app and hides it.** The prompt
+  belongs to SpringBoard: it survives `stopApp`, `clearState` and `launchApp`, and while it
+  is up the app is missing from the hierarchy, so `e2e-host-ready` never becomes visible.
+  On a slow `macos-15` runner the prompt came up only after the warm-up had stopped
+  waiting for it (no prompt 20 s after `openLink`), and that leg lost all 10 flows.
+  `launch-app.yaml` therefore taps Open on a prompt that is already up after launch and
+  relaunches. Open rather than Cancel, so the approval sticks. With no prompt the check
+  takes ~7 s per launch (Maestro's fixed lookup time for a `when: visible` that is false;
+  7.5 s measured in CI), which did not show up in leg durations against runner variance.
 - v7 API only in the test app: `useVideoPlayer` + `VideoView` + `useEvent`,
   `player.seekTo()`. No `<Video>` component, no v6 `drm` prop.
 - No check becomes *required* in branch protection before 10–15 consecutive clean runs
@@ -93,6 +107,14 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
   padding equal to `StatusBar.currentHeight`, the first marker renders under the status
   bar and Maestro drops it from the hierarchy as invisible ("Skipping invisible child").
   Local runs on API 34 never showed this; API 35/36 do.
+- **API 34 kills an app launched within ~1 s of `pm clear`.** Clearing state removes the
+  previous task; when that removal's 1 s destroy timeout fires, Android 14 kills the
+  package's current process ("Destroy timeout of remove-task" then "Killing <pid> (adj
+  -10000): remove task" in logcat), which by then is the one Maestro just started. The
+  activity survives without a React root: a white screen and no `e2e-host-ready`.
+  `launchApp: {clearState: true}` starts the app ~0.9 s after the clear on a hosted runner,
+  which cost 5 of 30 flows across the API 34 nightly legs and none on API 35/36. Hence
+  `launch-app.yaml` runs `clearState`, waits 2.5 s on Android, then `launchApp`.
 - **Taps are immediate on Android, deferred on iOS.** The iOS driver only delivers a tap
   once the player goes idle (below); the Android driver delivers it at once. Flows that
   must work on both use absolute actions (`btn-play`, `btn-seek-1`, `btn-loop-on`), never
