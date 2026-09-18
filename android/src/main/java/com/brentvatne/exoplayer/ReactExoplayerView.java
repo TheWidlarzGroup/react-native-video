@@ -2856,6 +2856,9 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void setControlsStyles(ControlsConfig controlsStyles) {
         controlsConfig = controlsStyles;
+        if (exoPlayerView != null) {
+            exoPlayerView.setHideLiveBadge(controlsConfig.getHideLiveBadge());
+        }
         refreshControlsStyles();
     }
     

@@ -307,6 +307,7 @@ export type ControlsStyles = {
   hideSettingButton?: boolean;
   seekIncrementMS?: number;
   liveLabel?: string;
+  hideLiveBadge?: boolean;
 };
 
 export interface ReactVideoRenderLoaderProps {
