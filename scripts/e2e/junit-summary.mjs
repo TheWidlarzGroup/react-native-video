@@ -26,18 +26,14 @@ function attribute(attrs, name) {
   return match ? decodeXmlEntities(match[1]) : '';
 }
 
-// The reason is a `message` attribute in the JUnit convention, but Maestro 2.10 writes it
-// as the element's text (<failure>Assertion is false: ...</failure>), which left the
-// summary's Failure column empty. The attribute wins when both are present: the text is
-// then usually a stack trace.
-// Attributes may hold a literal ">" inside quotes, so quoted runs are skipped as a unit.
+// Maestro 2.10 writes the reason as the element's text, not the JUnit `message`
+// attribute. The attribute wins when both are present (the text is then a stack trace).
+// Quoted attribute values may contain ">", so they are skipped as a unit.
 const FAILURE_RE = /<(?:failure|error)\b((?:[^>"]|"[^"]*")*?)(?:\/>|>([\s\S]*?)<\/(?:failure|error)>|>)/;
 
 const MAX_BODY_MESSAGE = 300;
 
-// CDATA is verbatim, the text around it is entity-encoded. A body is often a stack trace:
-// the first line says what failed, and the rest would bloat a table cell and the 1 MiB
-// step summary.
+// First line only: a body is often a stack trace, and the summary is capped at 1 MiB.
 function elementText(inner) {
   const text = inner
     .split(/(<!\[CDATA\[[\s\S]*?\]\]>)/)

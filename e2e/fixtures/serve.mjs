@@ -18,11 +18,9 @@ const TYPES = {
 
 const LOOPBACK = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1']);
 
-// The one route that is not a file: iOS flows open their deep link through here, see
-// open-link.mjs. It runs a process, so it only answers the machine it runs on (the
-// Android emulator, which reaches this server from 10.0.2.2, has no use for it) and only
-// for a scenario link. The flow names the simulator (`&device=<udid>`, from Maestro's
-// SIM_UDID env); without it, E2E_SIM_UDID or whichever simulator is booted.
+// The one route that is not a file: iOS flows open their deep link through here (see
+// open-link.mjs). It runs a process, so it answers loopback only, and only for a scenario
+// link. The simulator comes from `&device=<udid>`, else E2E_SIM_UDID, else the booted one.
 async function handleOpenLink(req, res) {
   const json = (status, body) =>
     res.writeHead(status, { 'Content-Type': 'application/json' }).end(JSON.stringify(body));

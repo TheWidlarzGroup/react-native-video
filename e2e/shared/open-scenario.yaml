@@ -1,15 +1,10 @@
 # Shared by every flow (via runFlow): opens the scenario deep link and waits for its
 # screen. Lives outside e2e/flows/ so `maestro test e2e/flows/` never runs it on its own.
 #
-# Android opens the link with Maestro's own `openLink` (adb). iOS goes through the fixture
-# server instead (open-link-ios.js -> POST /__open-link): on a hosted macOS runner
-# `simctl openurl` has timed out (NSPOSIXErrorDomain 60, "Simulator device failed to
-# open") and failed the flow, although the link still arrived seconds later. Maestro's
-# `retry` cannot help, it only catches MaestroException and this is not one, so the
-# transport is retried on the server. Android has no retry: the `retry` that used to wrap
-# openLink here never fired for a transport failure either, and none has been seen on
-# Android. Nothing the flows assert on is retried: a marker that does not appear still
-# fails the flow, so the zero-retries rule for the library's behaviour holds.
+# Android uses Maestro's `openLink`. iOS goes through the fixture server (open-link-ios.js),
+# which retries `simctl openurl` when it times out on a hosted runner - Maestro's `retry`
+# does not catch that failure. Only the transport is retried: a marker that does not
+# appear still fails the flow (zero-retries rule, CONTEXT.md).
 appId: ${APP_ID}
 ---
 - runFlow:

@@ -178,8 +178,7 @@ jobs:
       # flows' way. Never fails the leg.
       - name: Warm up (approve the deep-link confirmation once)
         env:
-          # The flows hand this to the fixture server, which opens their deep links on
-          # exactly this simulator (e2e/shared/open-link-ios.js).
+          # Which simulator the fixture server opens deep links on (open-link-ios.js).
           SIM_UDID: ${{ steps.sim.outputs.udid }}
           MAESTRO_DRIVER_STARTUP_TIMEOUT: '300000'
         run: |
@@ -230,13 +229,10 @@ jobs:
           node scripts/e2e/junit-summary.mjs e2e-report.xml \
             "ios · RN ${{ inputs.rn-version }} · iOS ${{ inputs.ios-runtime }}"
 
-      # The warm-up flow runs without --debug-output, so its logs (and the XCTest runner
-      # log) land in ~/.maestro/tests. They are copied into the workspace rather than
-      # uploaded from there: upload-artifact roots the archive at the least common
-      # ancestor of every matched path, and a path under $HOME moved that root to
-      # /Users/runner. e2e-report.xml then sat at work/<repo>/<repo>/e2e-report.xml inside
-      # the artifact, the nightly report job looks for it at the artifact root, and every
-      # iOS row was scored `missing-report` (red) whatever Maestro said.
+      # The warm-up's logs land in ~/.maestro/tests. Copied into the workspace because
+      # upload-artifact roots the archive at the common ancestor of all paths: a $HOME path
+      # buried e2e-report.xml under work/<repo>/<repo>/, and the report job, which expects
+      # it at the artifact root, scored every iOS leg `missing-report`.
       - name: Collect Maestro home logs
         if: always()
         run: |
