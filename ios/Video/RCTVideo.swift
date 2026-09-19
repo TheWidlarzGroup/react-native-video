@@ -61,8 +61,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _startPosition: Float64 = -1
     var _disableAudioSessionManagement: Bool = false
     var _showNotificationControls = false
-    // Buffer last bitrate value received. Initialized to -2 to ensure -1 (sometimes reported by AVPlayer) is not missed
-    private var _lastBitrate = -2.0
+    // Buffer the last valid bitrate value received
+    private var _lastBitrate = -1.0
     private var _enterPictureInPictureOnLeave = false {
         didSet {
             if isPictureInPictureActive() { return }
@@ -1802,8 +1802,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             return
         }
         guard let lastEvent = accessLog.events.last else { return }
-        if lastEvent.indicatedBitrate != _lastBitrate {
-            _lastBitrate = lastEvent.indicatedBitrate
+        let bitrate = lastEvent.indicatedBitrate >= 0 ? lastEvent.indicatedBitrate : lastEvent.observedBitrate
+        guard bitrate >= 0 else { return }
+        if bitrate != _lastBitrate {
+            _lastBitrate = bitrate
             onVideoBandwidthUpdate?(["bitrate": _lastBitrate, "target": reactTag as Any])
         }
     }
