@@ -15,12 +15,18 @@ tags: [smoke]
     visible:
       id: "evt-paused"
     timeout: 5000
-- tapOn:
-    id: "btn-seek-1"
+- runFlow:
+    file: ../shared/press.yaml
+    env:
+      BUTTON: btn-seek-1
+      NTH: 1
 # btn-play, not a play/pause toggle: on Android a seek from the ended state resumes
 # playback by itself and taps land immediately, so a toggle would pause it again.
-- tapOn:
-    id: "btn-play"
+- runFlow:
+    file: ../shared/press.yaml
+    env:
+      BUTTON: btn-play
+      NTH: 1
 - extendedWaitUntil:
     visible:
       id: "evt-resumed"

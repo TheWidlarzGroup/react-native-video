@@ -14,10 +14,16 @@ tags: [smoke]
     timeout: 40000            # HLS: manifest + first segments over local HTTP; slow hosted simulators
 # Same shape as smoke-seek.yaml: interact only once the player is idle (see there).
 - runFlow: ../shared/wait-for-end.yaml
-- tapOn:
-    id: "btn-seek-5"
-- tapOn:
-    id: "btn-play"
+- runFlow:
+    file: ../shared/press.yaml
+    env:
+      BUTTON: btn-seek-5
+      NTH: 1
+- runFlow:
+    file: ../shared/press.yaml
+    env:
+      BUTTON: btn-play
+      NTH: 1
 - extendedWaitUntil:
     visible:
       id: "evt-onSeek"

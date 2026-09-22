@@ -20,10 +20,16 @@ tags: [smoke]
       id: "evt-onLoad"
     timeout: 20000
 - runFlow: ../shared/wait-for-end.yaml
-- tapOn:
-    id: "btn-seek-5"
-- tapOn:
-    id: "btn-play"
+- runFlow:
+    file: ../shared/press.yaml
+    env:
+      BUTTON: btn-seek-5
+      NTH: 1
+- runFlow:
+    file: ../shared/press.yaml
+    env:
+      BUTTON: btn-play
+      NTH: 1
 - extendedWaitUntil:
     visible:
       id: "evt-onSeek"
@@ -32,6 +38,8 @@ tags: [smoke]
     visible:
       id: "evt-seek-fwd-landed"
     timeout: 5000
+# Bare taps: these are issued during playback and iOS delivers them only at the next end,
+# later than press.yaml waits.
 - tapOn:
     id: "btn-seek-1"
 - tapOn:
