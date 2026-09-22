@@ -24,14 +24,23 @@ tags: [smoke]
 # onEnd, so a flow waiting for end #1 after the tap never sees it. Ended player = idle
 # player, so this tap is immediate on both platforms.
 - runFlow: ../shared/wait-for-end.yaml
-- tapOn:
-    id: "btn-loop-on"
-- tapOn:
-    id: "btn-seek-1"
+- runFlow:
+    file: ../shared/press.yaml
+    env:
+      BUTTON: btn-loop-on
+      NTH: 1
+- runFlow:
+    file: ../shared/press.yaml
+    env:
+      BUTTON: btn-seek-1
+      NTH: 1
 # btn-play, not a play/pause toggle: on Android a seek from the ended state resumes
 # playback by itself and taps land immediately, so a toggle would pause it again.
-- tapOn:
-    id: "btn-play"
+- runFlow:
+    file: ../shared/press.yaml
+    env:
+      BUTTON: btn-play
+      NTH: 1
 - extendedWaitUntil:
     visible:
       id: "evt-loop-verified"

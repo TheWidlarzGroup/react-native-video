@@ -40,15 +40,24 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
 - Keep clips 5–15 s — `onEnded` tests must not wait minutes.
 - **Zero retries.** A flow is never re-run to turn it green — a retry hides exactly the
   race conditions this suite exists to catch. A flow that proves unstable gets quarantined
-  (`tags: [flaky]`) with an issue, and drops out of the gate until it is fixed. The single
-  exception is transport, not behaviour: on iOS the deep link is opened by the fixture
+  (`tags: [flaky]`) with an issue, and drops out of the gate until it is fixed. The only
+  exceptions are transport, not behaviour. On iOS the deep link is opened by the fixture
   server (`POST /__open-link`, `e2e/fixtures/open-link.mjs`), which retries `simctl
   openurl`, because on hosted macOS runners that command has timed out
   (NSPOSIXErrorDomain 60) while the link still arrived seconds later. It cannot be done in
   the flow: Maestro's `retry` and `optional` only catch `MaestroException`, and this
   failure is an `IllegalStateException`, so a `retry` around `openLink` never ran a second
-  attempt. A link delivered twice is harmless (the screen is keyed on the scenario). What
-  the app then shows is never retried.
+  attempt. A link delivered twice is harmless (the screen is keyed on the scenario). The
+  other one is `e2e/shared/press.yaml`, which re-sends a tap only when the app never
+  rendered the `pressed-<testID>-<n>` marker: it is set synchronously in `onPress`, so it
+  proves delivery and nothing else, and a missing marker is a plain assertion failure,
+  which Maestro's `retry` does catch. What the app then shows is never retried.
+- **Android: Maestro's first driver connection can die at start-up** (nightly 2026-09-22,
+  RN 0.87 / API 36: `DeviceServerDiedException ... UNAVAILABLE` on the first flow's first
+  command, 3 s after the driver came up; the other nine flows passed). No mitigation yet.
+  A warm-up run before the suite does not help: every `maestro test` process installs,
+  connects and uninstalls its own driver, so the suite's first connection is still a first
+  connection.
 - **iOS: the first deep link on a fresh simulator can raise "Open in app?", and the link
   after that confirmation never reaches JS.** The iOS leg runs
   `e2e/warmup/ios-approve-open-link.yaml` once before the suite to take that confirmation
@@ -146,6 +155,14 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
 
 ## Flow-design gotchas (Maestro)
 
+- **A tap can be lost between the driver and JS even on an idle player** (#5130). Nightly
+  2026-09-21 and 09-22, iOS 26 with RN 0.87 only: `btn-mute` was tapped 2.4 s after
+  `onEnded`, the simulator log shows touch-down and touch-up reaching the app's window,
+  and `onPress` never ran. Same symptom as the tap lost 264 ms after `onEnded` on
+  2026-09-15, so the settle in `wait-for-end.yaml` is not a complete answer. Flows that
+  press on an idle player go through `e2e/shared/press.yaml`, which re-taps only when the
+  app never rendered `pressed-<testID>-<n>`. Root cause not established; evidence in the
+  issue.
 - **A scenario that fails before any playback attempt fires no player event on a truly
   cold launch.** `smoke-error-404.yaml` and `smoke-broken-manifest-error.yaml` therefore
   open the mp4 scenario first. The root cause is unknown (it looks like a native/Nitro

@@ -111,6 +111,35 @@ describe('store', () => {
   });
 });
 
+describe('press', () => {
+  test('counts presses per control and logs the title', () => {
+    eventLog.press('btn-play', 'play');
+    eventLog.press('btn-mute', 'mute');
+    eventLog.press('btn-play', 'play');
+    expect([...eventLog.getPresses()]).toEqual([
+      ['btn-play', 2],
+      ['btn-mute', 1],
+    ]);
+    expect(lines()).toEqual(['press:play', 'press:mute', 'press:play']);
+  });
+
+  test('a press produces a new snapshot and notifies subscribers', () => {
+    const presses0 = eventLog.getPresses();
+    let calls = 0;
+    const unsubscribe = eventLog.subscribe(() => calls++);
+    eventLog.press('btn-play', 'play');
+    unsubscribe();
+    expect(eventLog.getPresses()).not.toBe(presses0);
+    expect(calls).toBe(1);
+  });
+
+  test('reset clears the counts', () => {
+    eventLog.press('btn-play', 'play');
+    eventLog.reset();
+    expect(eventLog.getPresses().size).toBe(0);
+  });
+});
+
 describe('handle', () => {
   test('onLoad marks and logs the duration', () => {
     feed({ type: 'onLoad', duration: 8 }, { type: 'onLoad', duration: NaN });

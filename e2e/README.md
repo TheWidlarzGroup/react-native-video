@@ -72,7 +72,13 @@ deep links (`rnvtest://scenario/<name>`), never via UI navigation.
    `runFlow: ../shared/open-scenario.yaml` with `SCENARIO`, never with a bare `openLink`:
    that subflow owns the deep-link transport retry, the iOS "Open in app?" confirmation
    and the wait for the scenario screen. To interact after the clip's natural end, wait
-   with `runFlow: ../shared/wait-for-end.yaml`, not on `evt-onEnded` directly.
+   with `runFlow: ../shared/wait-for-end.yaml`, not on `evt-onEnded` directly. Press
+   controls on an idle player through `runFlow: ../shared/press.yaml` with `BUTTON`
+   (testID) and `NTH` (1 for that control's first press in the scenario, 2 for its
+   second): it waits for the app's `pressed-<testID>-<n>` marker and re-sends the tap
+   only if that never appeared, so a tap lost in transport does not fail a flow and a
+   marker the player never produces still does. Taps issued during playback stay bare
+   `tapOn`: iOS delivers them only once the player is idle, later than the subflow waits.
 3. Timeouts: generous on first event after load (emulator decoders are slow to start),
    tight after playback is running. Clips are 8 s; only HLS's first load waits up to 40 s.
 4. End every flow that expects playback with `assertNotVisible: evt-onError`, so an error
@@ -89,9 +95,10 @@ However a flow was drafted, the committed artifact is plain YAML, reviewed by ha
 - No external network in flows — local fixtures only.
 - Zero retries on anything the flows assert. A flaky flow gets quarantined
   (`tags: [flaky]`) with an issue, never retried into a false green — a retry hides the
-  race the flow just caught. The one retry in the suite is on the iOS deep-link transport:
-  `e2e/shared/open-scenario.yaml` asks the fixture server to open the link, and the server
-  retries `simctl openurl` when it times out on a hosted simulator (Maestro's own `retry`
-  does not catch that failure); a scenario screen or marker that does not appear still
-  fails the flow.
+  race the flow just caught. The only retries in the suite are on transport: the iOS
+  deep link (`e2e/shared/open-scenario.yaml` asks the fixture server to open it, and the
+  server retries `simctl openurl` when it times out on a hosted simulator; Maestro's own
+  `retry` does not catch that failure) and the tap in `e2e/shared/press.yaml` (re-sent
+  only when the app never rendered the press marker); a scenario screen or marker that does not
+  appear still fails the flow.
 - Bugfix in an E2E-coverable area ⇒ the PR includes a reproducing flow.
