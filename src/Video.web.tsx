@@ -448,23 +448,25 @@ const useMediaSession = (
   nativeRef: RefObject<HTMLVideoElement | null>,
   showNotification: boolean,
 ) => {
-  const isPlaying = nativeRef.current ? nativeRef.current.paused : false;
-  const progress = nativeRef.current?.currentTime ?? 0;
-  const duration = Number.isFinite(nativeRef.current?.duration)
-    ? nativeRef.current?.duration
-    : undefined;
-  const playbackRate = nativeRef.current?.playbackRate ?? 1;
-
-  const enabled = 'mediaSession' in navigator && showNotification;
+  const enabled =
+    typeof navigator !== 'undefined' &&
+    'mediaSession' in navigator &&
+    showNotification;
 
   useEffect(() => {
-    if (enabled) {
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: metadata?.title,
-        artist: metadata?.artist,
-        artwork: metadata?.imageUri ? [{src: metadata.imageUri}] : undefined,
-      });
+    if (!enabled) {
+      return;
     }
+
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: metadata?.title,
+      artist: metadata?.artist,
+      artwork: metadata?.imageUri ? [{src: metadata.imageUri}] : undefined,
+    });
+
+    return () => {
+      navigator.mediaSession.metadata = null;
+    };
   }, [enabled, metadata]);
 
   useEffect(() => {
@@ -510,22 +512,67 @@ const useMediaSession = (
         // ignored
       }
     }
+
+    return () => {
+      for (const [action] of mediaActions) {
+        try {
+          navigator.mediaSession.setActionHandler(action, null);
+        } catch {
+          // ignored
+        }
+      }
+    };
   }, [enabled, nativeRef]);
 
   useEffect(() => {
-    if (enabled) {
-      navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+    const video = nativeRef.current;
+    if (!enabled || !video) {
+      return;
     }
-  }, [isPlaying, enabled]);
-  useEffect(() => {
-    if (enabled && duration !== undefined) {
+
+    const updatePlaybackState = () => {
+      navigator.mediaSession.playbackState = video.paused
+        ? 'paused'
+        : 'playing';
+    };
+    const updatePositionState = () => {
+      const {currentTime, duration, playbackRate} = video;
+      if (
+        typeof navigator.mediaSession.setPositionState !== 'function' ||
+        !Number.isFinite(currentTime) ||
+        !Number.isFinite(duration) ||
+        duration <= 0 ||
+        playbackRate <= 0
+      ) {
+        return;
+      }
       navigator.mediaSession.setPositionState({
-        position: Math.min(progress, duration),
+        position: Math.min(Math.max(currentTime, 0), duration),
         duration,
-        playbackRate: playbackRate,
+        playbackRate,
       });
-    }
-  }, [progress, duration, playbackRate, enabled]);
+    };
+
+    video.addEventListener('play', updatePlaybackState);
+    video.addEventListener('pause', updatePlaybackState);
+    video.addEventListener('durationchange', updatePositionState);
+    video.addEventListener('ratechange', updatePositionState);
+    video.addEventListener('seeked', updatePositionState);
+    video.addEventListener('timeupdate', updatePositionState);
+    updatePlaybackState();
+    updatePositionState();
+
+    return () => {
+      video.removeEventListener('play', updatePlaybackState);
+      video.removeEventListener('pause', updatePlaybackState);
+      video.removeEventListener('durationchange', updatePositionState);
+      video.removeEventListener('ratechange', updatePositionState);
+      video.removeEventListener('seeked', updatePositionState);
+      video.removeEventListener('timeupdate', updatePositionState);
+      navigator.mediaSession.playbackState = 'none';
+      navigator.mediaSession.setPositionState?.();
+    };
+  }, [enabled, nativeRef]);
 };
 
 Video.displayName = 'Video';
