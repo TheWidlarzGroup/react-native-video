@@ -1182,7 +1182,7 @@ public class ReactExoplayerView extends FrameLayout implements
             case CONTENT_TYPE_OTHER:
                 if ("asset".equals(uri.getScheme())) {
                     try {
-                        DataSource.Factory assetDataSourceFactory = DataSourceUtil.buildAssetDataSourceFactory(themedReactContext, uri);
+                        DataSource.Factory assetDataSourceFactory = DataSourceUtil.buildAssetDataSourceFactory(themedReactContext);
                         mediaSourceFactory = new ProgressiveMediaSource.Factory(assetDataSourceFactory);
                     } catch (Exception e) {
                         throw new IllegalStateException("cannot open input file:" + uri);
