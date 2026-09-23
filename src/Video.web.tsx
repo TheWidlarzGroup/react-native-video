@@ -120,7 +120,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       if (!nativeRef.current) {
         return;
       }
-      nativeRef.current.volume = Math.max(0, Math.min(vol, 100)) / 100;
+      nativeRef.current.volume = Math.max(0, Math.min(vol, 1));
     }, []);
 
     const getCurrentPosition = useCallback(async () => {
