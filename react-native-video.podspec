@@ -26,29 +26,27 @@ Pod::Spec.new do |s|
 
   s.subspec "Video" do |ss|
     ss.source_files = "ios/Video/**/*.{h,m,swift,mm}"
+    swift_flags = ['$(inherited)']
 
     if fabric_enabled
       ss.dependency "react-native-video/Fabric"
     end
 
-    if defined?($RNVideoUseGoogleIMA)
+    if defined?($RNVideoUseGoogleIMA) && $RNVideoUseGoogleIMA
       Pod::UI.puts "RNVideo: enable IMA SDK"
 
       ss.ios.dependency 'GoogleAds-IMA-iOS-SDK', '~> 3.22.1'
       ss.tvos.dependency 'GoogleAds-IMA-tvOS-SDK', '~> 4.2'
-      ss.pod_target_xcconfig = {
-        'OTHER_SWIFT_FLAGS' => '$(inherited) -D USE_GOOGLE_IMA'
-      }
+      swift_flags << '-D USE_GOOGLE_IMA'
     end
-    if defined?($RNVideoUseVideoCaching)
+    if defined?($RNVideoUseVideoCaching) && $RNVideoUseVideoCaching
       Pod::UI.puts "RNVideo: enable Video caching"
       ss.dependency "SPTPersistentCache", "~> 1.1.0"
       ss.dependency "DVAssetLoaderDelegate", "~> 0.3.1"
       ss.source_files = "ios/*/**/*.{h,m,swift,mm}"
-      ss.pod_target_xcconfig = {
-        'OTHER_SWIFT_FLAGS' => '$(inherited) -D USE_VIDEO_CACHING'
-      }
+      swift_flags << '-D USE_VIDEO_CACHING'
     end
+    ss.pod_target_xcconfig = { 'OTHER_SWIFT_FLAGS' => swift_flags.join(' ') }
   end
 
   # Use install_modules_dependencies helper to install the dependencies if React Native version >=0.71.0.
