@@ -63,12 +63,22 @@ void ReactVideoViewManager::UpdateProperties(
     for (auto const &pair : propertyMap) {
       auto const &propertyName = pair.first;
       auto const &propertyValue = pair.second;
-      if (!propertyValue.IsNull()) {
-        if (propertyName == "src") {
+      if (propertyName == "src") {
+        if (propertyValue.IsNull()) {
+          reactVideoView.Clear_Source();
+        } else {
           auto const &srcMap = propertyValue.AsObject();
-          auto const &uri = srcMap.at("uri");
-          reactVideoView.Set_UriString(to_hstring(uri.AsString()));
-        } else if (propertyName == "resizeMode") {
+          auto const uri = srcMap.find("uri");
+          if (uri == srcMap.end() || uri->second.IsNull() || uri->second.AsString().empty()) {
+            reactVideoView.Clear_Source();
+          } else {
+            reactVideoView.Set_UriString(to_hstring(uri->second.AsString()));
+          }
+        }
+        continue;
+      }
+      if (!propertyValue.IsNull()) {
+        if (propertyName == "resizeMode") {
           auto resizeModeString = propertyValue.AsString();
           Stretch resizeMode = Stretch::None;
           if (resizeModeString == "contain") {
