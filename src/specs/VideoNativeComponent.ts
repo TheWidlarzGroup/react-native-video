@@ -199,6 +199,7 @@ export type OnProgressData = Readonly<{
   currentTime: Float;
   playableDuration: Float;
   seekableDuration: Float;
+  currentPlaybackTime: number; // To get EXT-X-PLAYBACK-TIME
 }>;
 
 export type OnBandwidthUpdateData = Readonly<{
