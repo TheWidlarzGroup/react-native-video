@@ -726,7 +726,7 @@ public class ReactExoplayerView extends FrameLayout implements
         // This ensures all props have been settled, to avoid async racing conditions.
         Source runningSource = source;
         mainRunnable = () -> {
-            if (viewHasDropped && runningSource == source) {
+            if (viewHasDropped || runningSource != source) {
                 return;
             }
             try {
@@ -755,32 +755,36 @@ public class ReactExoplayerView extends FrameLayout implements
                     // DRM session manager creation must be done on a different thread to prevent crashes so we start a new thread
                     ExecutorService es = Executors.newSingleThreadExecutor();
                     es.execute(() -> {
-                        // DRM initialization must run on a different thread
-                        if (viewHasDropped && runningSource == source) {
-                            return;
-                        }
-                        if (activity == null) {
-                            DebugLog.e(TAG, "Failed to initialize Player!, null activity");
-                            eventEmitter.onVideoError.invoke("Failed to initialize Player!", new Exception("Current Activity is null!"), "1001");
-                            return;
-                        }
-
-                        // Initialize handler to run on the main thread
-                        activity.runOnUiThread(() -> {
-                            if (viewHasDropped && runningSource == source) {
+                        try {
+                            // DRM initialization must run on a different thread
+                            if (viewHasDropped || runningSource != source) {
                                 return;
                             }
-                            try {
-                                // Source initialization must run on the main thread
-                                initializePlayerSource(runningSource);
-                            } catch (Exception ex) {
-                                self.playerNeedsSource = true;
-                                DebugLog.e(TAG, "Failed to initialize Player! 1");
-                                DebugLog.e(TAG, ex.toString());
-                                ex.printStackTrace();
-                                eventEmitter.onVideoError.invoke(ex.toString(), ex, "1001");
+                            if (activity == null) {
+                                DebugLog.e(TAG, "Failed to initialize Player!, null activity");
+                                eventEmitter.onVideoError.invoke("Failed to initialize Player!", new Exception("Current Activity is null!"), "1001");
+                                return;
                             }
-                        });
+
+                            // Initialize handler to run on the main thread
+                            activity.runOnUiThread(() -> {
+                                if (viewHasDropped || runningSource != source) {
+                                    return;
+                                }
+                                try {
+                                    // Source initialization must run on the main thread
+                                    initializePlayerSource(runningSource);
+                                } catch (Exception ex) {
+                                    self.playerNeedsSource = true;
+                                    DebugLog.e(TAG, "Failed to initialize Player! 1");
+                                    DebugLog.e(TAG, ex.toString());
+                                    ex.printStackTrace();
+                                    eventEmitter.onVideoError.invoke(ex.toString(), ex, "1001");
+                                }
+                            });
+                        } finally {
+                            es.shutdown();
+                        }
                     });
                 } else if (runningSource == source) {
                     initializePlayerSource(runningSource);
