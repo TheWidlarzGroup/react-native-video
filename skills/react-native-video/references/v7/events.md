@@ -26,7 +26,7 @@ const sub = player.addEventListener('onEnd', () => {});
 | `onEnd` | — | Reached the end. |
 | `onReadyToDisplay` | — | First frame ready. |
 | `onStatusChange` | `status: 'idle'\|'loading'\|'readyToPlay'\|'error'` | |
-| `onError` | `error: VideoRuntimeError` | **JS-only:** if you subscribe, runtime errors are delivered here instead of thrown. Also fires when the source fails to load asynchronously (e.g. HTTP 404) or playback fails, with code `player/playback-failed`; `onStatusChange('error')` fires as well. Always handle it. |
+| `onError` | `error: VideoRuntimeError` | If you subscribe, runtime errors are delivered here instead of thrown. Also fires when the source fails to load asynchronously (e.g. HTTP 404) or playback fails, with code `player/playback-failed`; `onStatusChange('error')` fires as well. Always handle it. |
 | `onTimedMetadata` | `{ metadata: { value, identifier }[] }` | iOS/Android. |
 | `onTextTrackDataChanged` | `string[]` | Currently displayed subtitle text. |
 | `onTrackChange` | `TextTrack \| null` | Selected text track changed. |
