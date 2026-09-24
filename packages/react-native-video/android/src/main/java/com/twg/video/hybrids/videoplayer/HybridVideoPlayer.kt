@@ -563,7 +563,13 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
     }
 
     override fun onPlayerError(error: PlaybackException) {
+      // Emit onError only on the transition into ERROR, so one failure is reported once.
+      // Load promises reject instead and never set the error status here.
+      val wasError = status == VideoPlayerStatus.ERROR
       status = VideoPlayerStatus.ERROR
+      if (!wasError) {
+        eventEmitter.onError(PlayerError.PlaybackFailed(error.errorCodeName, error.message).message!!)
+      }
       stopProgressUpdates()
     }
 

@@ -2,11 +2,20 @@ export type LibraryError =
   | 'library/deallocated'
   | 'library/application-context-not-found';
 
+/**
+ * Errors reported by the player.
+ *
+ * `player/playback-failed`: the native player failed after loading started (e.g. HTTP 404,
+ * network loss, decoder failure). `message` holds the platform code and description:
+ * ExoPlayer `errorCodeName` on Android; `NSError` domain, code and description on iOS.
+ * Delivered through `onError`.
+ */
 export type PlayerError =
   | 'player/released'
   | 'player/not-initialized'
   | 'player/asset-not-initialized'
-  | 'player/invalid-source';
+  | 'player/invalid-source'
+  | 'player/playback-failed';
 
 export type SourceError =
   | 'source/invalid-uri'

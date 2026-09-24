@@ -21,6 +21,7 @@
 #include "JFunc_void.hpp"
 #include "JFunc_void_bool.hpp"
 #include "JFunc_void_BandwidthData.hpp"
+#include "JFunc_void_std__string.hpp"
 #include "JFunc_void_onLoadData.hpp"
 #include "JFunc_void_onLoadStartData.hpp"
 #include "JFunc_void_onPlaybackStateChangeData.hpp"
@@ -82,6 +83,7 @@ void registerAllNatives() {
   margelo::nitro::video::JFunc_void_cxx::registerNatives();
   margelo::nitro::video::JFunc_void_bool_cxx::registerNatives();
   margelo::nitro::video::JFunc_void_BandwidthData_cxx::registerNatives();
+  margelo::nitro::video::JFunc_void_std__string_cxx::registerNatives();
   margelo::nitro::video::JFunc_void_onLoadData_cxx::registerNatives();
   margelo::nitro::video::JFunc_void_onLoadStartData_cxx::registerNatives();
   margelo::nitro::video::JFunc_void_onPlaybackStateChangeData_cxx::registerNatives();

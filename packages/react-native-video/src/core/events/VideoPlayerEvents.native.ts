@@ -3,6 +3,10 @@ import type {
   AllPlayerEvents as PlayerEvents,
 } from '../types/Events';
 import type { ListenerSubscription } from '../types/EventEmitter';
+import {
+  tryParseNativeVideoError,
+  VideoRuntimeError,
+} from '../types/VideoError';
 import { VideoPlayerEventsBase } from './VideoPlayerEventsBase';
 
 export class VideoPlayerEvents extends VideoPlayerEventsBase {
@@ -12,17 +16,30 @@ export class VideoPlayerEvents extends VideoPlayerEventsBase {
   ): ListenerSubscription {
     switch (event) {
       // --- JS-only events ---
-      case 'onError':
+      case 'onError': {
         this.jsEventListeners.onError ??= new Set();
         this.jsEventListeners.onError.add(
           callback as JSVideoPlayerEvents['onError']
         );
+        // Asynchronous native failures (e.g. a source that fails to load) have no
+        // promise to reject, so native reports them through the emitter instead.
+        const nativeSubscription = this.eventEmitter.addOnErrorListener(
+          (nativeError) => {
+            const error = tryParseNativeVideoError({ message: nativeError });
+            if (error instanceof VideoRuntimeError) {
+              (callback as JSVideoPlayerEvents['onError'])(error);
+            }
+          }
+        );
         return {
-          remove: () =>
+          remove: () => {
             this.jsEventListeners.onError?.delete(
               callback as JSVideoPlayerEvents['onError']
-            ),
+            );
+            nativeSubscription.remove();
+          },
         };
+      }
       // --- Shared events ---
       case 'onBuffer':
         return this.eventEmitter.addOnBufferListener(
