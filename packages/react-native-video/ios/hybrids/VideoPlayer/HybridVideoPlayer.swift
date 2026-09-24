@@ -29,6 +29,49 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   private var storedPlayerItem: AVPlayerItem?
   private var storedStatus: VideoPlayerStatus = .idle
 
+  // MARK: - Ad gate state
+  //
+  // `adController` owns the ad state machine (see AdPlaybackGate). When it is
+  // nil - no ad SDK linked, or no `ads` config on the source - the gate is
+  // permanently open and everything below behaves exactly as it did before ads
+  // existed.
+  //
+  // Main-thread-only state.
+
+  private(set) var adController: VideoAdControlling?
+
+  /// The user's latched playback intent, tracked separately from `AVPlayer`'s
+  /// actual state. While the gate is closed the `AVPlayer` is deliberately not
+  /// touched, so its rate cannot be used to remember what JS asked for.
+  private var userWantsToPlay = false
+
+  /// The rate JS last asked for. Applied to the `AVPlayer` only once the gate
+  /// is open, so a `rate` assignment cannot start content behind an ad.
+  private var requestedRate: Double?
+
+  /// A loaded content item that `commitPlayerItem` was not allowed to attach
+  /// because the gate was closed. Attached by `adControllerDidOpenGate`.
+  private var pendingContentItem: AVPlayerItem?
+
+  /// The single predicate guarding `AVPlayer.replaceCurrentItem(with:)`.
+  private var allowsContentAttachment: Bool {
+    adController?.allowsContentAttachment ?? true
+  }
+
+  /// Points the ad controller at a (possibly new) source's ad config, creating
+  /// it on first use. A player whose sources never carry an `ads` config never
+  /// builds one, so it pays none of the ad SDK's setup cost.
+  ///
+  /// Main thread only: ad SDKs build UIKit/WebKit objects in their
+  /// initialisers, and Nitro can construct the player off the main thread.
+  private func configureAdController(with ads: VideoAdsConfig?) {
+    if adController == nil {
+      guard ads != nil else { return }
+      adController = VideoAdControllerFactory.make(delegate: self)
+    }
+    adController?.configure(with: ads)
+  }
+
   private struct LoadContext {
     let source: any HybridVideoPlayerSourceSpec
     let token: SourceLoader.Token
@@ -121,6 +164,10 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     self.playerObserver = VideoPlayerObserver(delegate: self)
     self.playerObserver?.initializePlayerObservers()
 
+    runOnMainThreadSync {
+      self.configureAdController(with: source.config.ads)
+    }
+
     if source.config.initializeOnCreation == true {
       let initialLoadContext = try beginLoad()
       Task {
@@ -151,12 +198,16 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   var source: any HybridVideoPlayerSourceSpec {
     get { sourceLoader.withState { storedSource } }
     set {
-      let releasedSource = runOnMainThreadSync {
-        sourceLoader.cancel {
+      let releasedSource = runOnMainThreadSync { () -> (any HybridVideoPlayerSourceSpec)? in
+        let released = sourceLoader.cancel {
           let releasedSource = storedSource
           storedSource = newValue
           return releasedSource
         }
+        // Same generation-token reset as replaceSourceAsync.
+        pendingContentItem = nil
+        configureAdController(with: newValue.config.ads)
+        return released
       }
       withExtendedLifetime(releasedSource) {}
     }
@@ -237,6 +288,13 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
 
   var rate: Double {
     set {
+      // Assigning `player.rate` starts playback as a side effect, so this
+      // setter has to go through the gate too - otherwise `rate = 1` would be
+      // a back door straight past a pending ad decision.
+      requestedRate = newValue
+
+      guard allowsContentAttachment else { return }
+
       if #available(iOS 16.0, tvOS 16.0, *) {
         player.defaultRate = Float(newValue)
       }
@@ -288,7 +346,21 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   var isCurrentlyBuffering: Bool = false
 
   var isPlaying: Bool {
-    return player.rate != 0
+    // An ad break counts as playing: the content player is deliberately paused
+    // underneath it, but lifecycle handling (VideoManager) must still treat the
+    // player as active so that backgrounding pauses the ad and returning
+    // resumes it.
+    return player.rate != 0 || adController?.isPlayingAd == true
+  }
+
+  // MARK: - Ads
+
+  var isPlayingAd: Bool {
+    return adController?.isPlayingAd ?? false
+  }
+
+  var adState: VideoAdState {
+    return adController?.adState ?? .idle
   }
 
   var showNotificationControls: Bool = false {
@@ -348,6 +420,13 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   }
 
   private func releaseOnMainThread() {
+    // Ads first: a live IMAAdsManager can asynchronously touch the player (and
+    // its own internal one) while the rest of this teardown runs.
+    adController?.destroy()
+    adController = nil
+    pendingContentItem = nil
+    userWantsToPlay = false
+
     playerObserver?.invalidatePlayerItemObservers()
     playerObserver?.invalidatePlayerObservers()
     playerObserver = nil
@@ -369,8 +448,42 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       if let bufferConfig = loadedPlayerItem.context.source.config.bufferConfig {
         loadedPlayerItem.item.setBufferConfig(config: bufferConfig)
       }
+
+      // ===================================================================
+      // THE GATE. This is the only place in the library that attaches a
+      // content item to the AVPlayer, so it is the only place that has to be
+      // guarded for "no content frame before the ad decision" to hold.
+      // ===================================================================
+      guard self.allowsContentAttachment else {
+        self.pendingContentItem = loadedPlayerItem.item
+        return
+      }
+
+      self.pendingContentItem = nil
       self.player.replaceCurrentItem(with: loadedPlayerItem.item)
+      self.applyLatchedPlaybackIntent()
     }
+  }
+
+  // MARK: - Playback intent reconciliation
+
+  /// Applies whatever JS asked for while the gate was closed. Only ever called
+  /// with the gate open.
+  private func applyLatchedPlaybackIntent() {
+    guard player.currentItem != nil else { return }
+
+    if let requestedRate, #available(iOS 16.0, tvOS 16.0, *) {
+      player.defaultRate = Float(requestedRate)
+    }
+
+    guard userWantsToPlay else { return }
+    player.play()
+    applyRequestedRateIfNeeded()
+  }
+
+  private func applyRequestedRateIfNeeded() {
+    guard let requestedRate, requestedRate != 1.0 else { return }
+    player.rate = Float(requestedRate)
   }
 
   private func loadPlayerItem(for context: LoadContext) async throws -> LoadedPlayerItem {
@@ -426,13 +539,86 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     return promise
   }
 
+  /// Every JS- and lifecycle-initiated request to start playback funnels
+  /// through here. Nothing else in the library may call `player.play()`.
   func play() throws {
-    player.play()
+    runOnMainThreadSync {
+      userWantsToPlay = true
+
+      if let adController {
+        if adController.isPlayingAd {
+          // Resume the *ad*, not the content underneath it.
+          adController.resumeAd()
+          return
+        }
+
+        // Ads are configured but nobody activated them yet. A play request is
+        // the strongest possible signal of intent, so activate now rather than
+        // sit behind a gate that would otherwise never be opened.
+        if adController.isArmed {
+          adController.activate(completion: {})
+        }
+
+        guard adController.allowsContentAttachment else {
+          // Gated: intent is latched and applied by adControllerDidOpenGate.
+          return
+        }
+      }
+
+      player.play()
+      applyRequestedRateIfNeeded()
+    }
   }
 
+  /// Every JS- and lifecycle-initiated request to stop playback funnels through
+  /// here. Nothing else in the library may call `player.pause()`.
   func pause() throws {
-    wasPlayingInBackground = false
-    player.pause()
+    runOnMainThreadSync {
+      wasPlayingInBackground = false
+      userWantsToPlay = false
+
+      if let adController, adController.isPlayingAd {
+        // Pausing during an ad pauses the ad and clears intent, so content does
+        // not auto-resume when the break ends.
+        adController.pauseAd()
+        return
+      }
+
+      player.pause()
+    }
+  }
+
+  func activateAds() throws -> Promise<Void> {
+    let promise = Promise<Void>()
+
+    guard let adController else {
+      // No ad SDK linked, or no ads configured: nothing gates content.
+      promise.resolve(withResult: ())
+      return promise
+    }
+
+    runOnMainThread {
+      // Never rejects - the gate always fails open, and the promise resolves
+      // as soon as the ad decision is known (the same moment `onAdsResolved`
+      // fires), including via the fail-open watchdog.
+      adController.activate {
+        promise.resolve(withResult: ())
+      }
+    }
+
+    return promise
+  }
+
+  func deactivateAds() throws {
+    runOnMainThread { [weak self] in
+      self?.adController?.deactivate()
+    }
+  }
+
+  func skipAd() throws {
+    runOnMainThread { [weak self] in
+      self?.adController?.skipAd()
+    }
   }
 
   func seekBy(time: Double) throws {
@@ -484,6 +670,14 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       promise.resolve(withResult: ())
       return promise
     case .second(let newSource):
+      // Re-arm the ad session for the new source before anything can load.
+      // `configure` destroys the previous IMAAdsManager and bumps the
+      // generation token, so a late ad response for the old source is dropped.
+      runOnMainThreadSync {
+        pendingContentItem = nil
+        configureAdController(with: newSource.config.ads)
+      }
+
       let replacementContext: LoadContext
       do {
         replacementContext = try replaceSourceAndBeginLoad(with: newSource)
@@ -772,5 +966,40 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
 
   var memorySize: Int {
     isReleased ? 0 : playerItem?.asset.estimatedMemoryUsage ?? 0
+  }
+}
+
+// MARK: - VideoAdControllerDelegate
+
+extension HybridVideoPlayer: VideoAdControllerDelegate {
+
+  var adControllerContentPlayer: AVPlayer { player }
+
+  var adControllerEventEmitter: HybridVideoPlayerEventEmitter? { _eventEmitter }
+
+  func adControllerWillPresentAdBreak(_ controller: VideoAdControlling) {
+    // Stop content without touching `userWantsToPlay`, so that intent survives
+    // the break and content resumes by itself when the gate reopens.
+    player.pause()
+  }
+
+  func adControllerDidOpenGate(_ controller: VideoAdControlling) {
+    if let pendingContentItem {
+      self.pendingContentItem = nil
+      player.replaceCurrentItem(with: pendingContentItem)
+    }
+    applyLatchedPlaybackIntent()
+  }
+
+  func adController(_ controller: VideoAdControlling, didChangeState state: VideoAdState) {
+    _eventEmitter?.onAdStateChange(state)
+    // Entering or leaving an ad break changes what is actually on screen, but
+    // not the content player's rate, so `onPlaybackStateChange` has to be
+    // re-derived here or JS would believe playback stopped for the whole break.
+    updateAndEmitPlaybackState()
+  }
+
+  func adControllerDidChangeAdPlaybackState(_ controller: VideoAdControlling) {
+    updateAndEmitPlaybackState()
   }
 }

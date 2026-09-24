@@ -10,6 +10,14 @@ import type {
 } from '../../core/types/Events';
 import type { TextTrack } from '../../core/types/TextTrack';
 import type { VideoPlayerStatus } from '../../core/types/VideoPlayerStatus';
+import type {
+  AdBreakEvent,
+  AdErrorEvent,
+  AdInfo,
+  AdProgressInfo,
+  AdsResolvedEvent,
+  VideoAdState,
+} from '../../core/types/VideoAdsConfig';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type { VideoPlayerEvents } from '../../core/types/Events';
@@ -200,6 +208,110 @@ export interface VideoPlayerEventEmitter extends HybridObject<{
    */
   addOnVolumeChangeListener(
     listener: (data: onVolumeChangeData) => void
+  ): ListenerSubscription;
+
+  /**
+   * Adds a listener for the `onAdsResolved` event.
+   * @see {@link VideoPlayerEvents.onAdsResolved}
+   * @param listener - The listener to add.
+   * @returns A subscription object that can be used to remove the listener.
+   */
+  addOnAdsResolvedListener(
+    listener: (data: AdsResolvedEvent) => void
+  ): ListenerSubscription;
+
+  /**
+   * Adds a listener for the `onAdBreakStart` event.
+   * @see {@link VideoPlayerEvents.onAdBreakStart}
+   * @param listener - The listener to add.
+   * @returns A subscription object that can be used to remove the listener.
+   */
+  addOnAdBreakStartListener(
+    listener: (data: AdBreakEvent) => void
+  ): ListenerSubscription;
+
+  /**
+   * Adds a listener for the `onAdBreakEnd` event.
+   * @see {@link VideoPlayerEvents.onAdBreakEnd}
+   * @param listener - The listener to add.
+   * @returns A subscription object that can be used to remove the listener.
+   */
+  addOnAdBreakEndListener(
+    listener: (data: AdBreakEvent) => void
+  ): ListenerSubscription;
+
+  /**
+   * Adds a listener for the `onAdProgress` event.
+   * @see {@link VideoPlayerEvents.onAdProgress}
+   * @param listener - The listener to add.
+   * @returns A subscription object that can be used to remove the listener.
+   */
+  addOnAdProgressListener(
+    listener: (data: AdProgressInfo) => void
+  ): ListenerSubscription;
+
+  /**
+   * Adds a listener for the `onAdStart` event.
+   * @see {@link VideoPlayerEvents.onAdStart}
+   * @param listener - The listener to add.
+   * @returns A subscription object that can be used to remove the listener.
+   */
+  addOnAdStartListener(listener: (data: AdInfo) => void): ListenerSubscription;
+
+  /**
+   * Adds a listener for the `onAdComplete` event.
+   * @see {@link VideoPlayerEvents.onAdComplete}
+   * @param listener - The listener to add.
+   * @returns A subscription object that can be used to remove the listener.
+   */
+  addOnAdCompleteListener(
+    listener: (data: AdInfo) => void
+  ): ListenerSubscription;
+
+  /**
+   * Adds a listener for the `onAdSkipped` event.
+   * @see {@link VideoPlayerEvents.onAdSkipped}
+   * @param listener - The listener to add.
+   * @returns A subscription object that can be used to remove the listener.
+   */
+  addOnAdSkippedListener(
+    listener: (data: AdInfo) => void
+  ): ListenerSubscription;
+
+  /**
+   * Adds a listener for the `onAdClicked` event.
+   * @see {@link VideoPlayerEvents.onAdClicked}
+   * @param listener - The listener to add.
+   * @returns A subscription object that can be used to remove the listener.
+   */
+  addOnAdClickedListener(listener: () => void): ListenerSubscription;
+
+  /**
+   * Adds a listener for the `onAdError` event.
+   * @see {@link VideoPlayerEvents.onAdError}
+   * @param listener - The listener to add.
+   * @returns A subscription object that can be used to remove the listener.
+   */
+  addOnAdErrorListener(
+    listener: (data: AdErrorEvent) => void
+  ): ListenerSubscription;
+
+  /**
+   * Adds a listener for the `onAllAdsCompleted` event.
+   * @see {@link VideoPlayerEvents.onAllAdsCompleted}
+   * @param listener - The listener to add.
+   * @returns A subscription object that can be used to remove the listener.
+   */
+  addOnAllAdsCompletedListener(listener: () => void): ListenerSubscription;
+
+  /**
+   * Adds a listener for the `onAdStateChange` event.
+   * @see {@link VideoPlayerEvents.onAdStateChange}
+   * @param listener - The listener to add.
+   * @returns A subscription object that can be used to remove the listener.
+   */
+  addOnAdStateChangeListener(
+    listener: (state: VideoAdState) => void
   ): ListenerSubscription;
 
   /**

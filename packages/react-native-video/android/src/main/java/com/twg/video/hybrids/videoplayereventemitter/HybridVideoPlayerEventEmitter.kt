@@ -103,6 +103,39 @@ class HybridVideoPlayerEventEmitter : HybridVideoPlayerEventEmitterSpec() {
   override fun addOnVolumeChangeListener(listener: (onVolumeChangeData) -> Unit) =
     addListener("onVolumeChange", listener)
 
+  override fun addOnAdsResolvedListener(listener: (AdsResolvedEvent) -> Unit) =
+    addListener("onAdsResolved", listener)
+
+  override fun addOnAdBreakStartListener(listener: (AdBreakEvent) -> Unit) =
+    addListener("onAdBreakStart", listener)
+
+  override fun addOnAdBreakEndListener(listener: (AdBreakEvent) -> Unit) =
+    addListener("onAdBreakEnd", listener)
+
+  override fun addOnAdProgressListener(listener: (AdProgressInfo) -> Unit) =
+    addListener("onAdProgress", listener)
+
+  override fun addOnAdStartListener(listener: (AdInfo) -> Unit) =
+    addListener("onAdStart", listener)
+
+  override fun addOnAdCompleteListener(listener: (AdInfo) -> Unit) =
+    addListener("onAdComplete", listener)
+
+  override fun addOnAdSkippedListener(listener: (AdInfo) -> Unit) =
+    addListener("onAdSkipped", listener)
+
+  override fun addOnAdClickedListener(listener: () -> Unit) =
+    addListener("onAdClicked", listener)
+
+  override fun addOnAdErrorListener(listener: (AdErrorEvent) -> Unit) =
+    addListener("onAdError", listener)
+
+  override fun addOnAllAdsCompletedListener(listener: () -> Unit) =
+    addListener("onAllAdsCompleted", listener)
+
+  override fun addOnAdStateChangeListener(listener: (VideoAdState) -> Unit) =
+    addListener("onAdStateChange", listener)
+
   override fun clearAllListeners() {
     synchronized(lock) {
       listeners.clear()
@@ -173,6 +206,39 @@ class HybridVideoPlayerEventEmitter : HybridVideoPlayerEventEmitterSpec() {
 
   fun onStatusChange(status: VideoPlayerStatus) =
     emitEvent<(VideoPlayerStatus) -> Unit>("onStatusChange") { it(status) }
+
+  fun onAdsResolved(data: AdsResolvedEvent) =
+    emitEvent<(AdsResolvedEvent) -> Unit>("onAdsResolved") { it(data) }
+
+  fun onAdBreakStart(data: AdBreakEvent) =
+    emitEvent<(AdBreakEvent) -> Unit>("onAdBreakStart") { it(data) }
+
+  fun onAdBreakEnd(data: AdBreakEvent) =
+    emitEvent<(AdBreakEvent) -> Unit>("onAdBreakEnd") { it(data) }
+
+  fun onAdProgress(data: AdProgressInfo) =
+    emitEvent<(AdProgressInfo) -> Unit>("onAdProgress") { it(data) }
+
+  fun onAdStart(data: AdInfo) =
+    emitEvent<(AdInfo) -> Unit>("onAdStart") { it(data) }
+
+  fun onAdComplete(data: AdInfo) =
+    emitEvent<(AdInfo) -> Unit>("onAdComplete") { it(data) }
+
+  fun onAdSkipped(data: AdInfo) =
+    emitEvent<(AdInfo) -> Unit>("onAdSkipped") { it(data) }
+
+  fun onAdClicked() =
+    emitEvent<() -> Unit>("onAdClicked") { it() }
+
+  fun onAdError(data: AdErrorEvent) =
+    emitEvent<(AdErrorEvent) -> Unit>("onAdError") { it(data) }
+
+  fun onAllAdsCompleted() =
+    emitEvent<() -> Unit>("onAllAdsCompleted") { it() }
+
+  fun onAdStateChange(state: VideoAdState) =
+    emitEvent<(VideoAdState) -> Unit>("onAdStateChange") { it(state) }
 
   companion object {
     const val TAG = "HybridVideoPlayerEventEmitter"

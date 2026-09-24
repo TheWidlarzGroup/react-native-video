@@ -13,6 +13,7 @@ import {
 } from './types/VideoError';
 import type { VideoPlayerBase } from './types/VideoPlayerBase';
 import type { VideoPlayerStatus } from './types/VideoPlayerStatus';
+import type { VideoAdState } from './types/VideoAdsConfig';
 import { createPlayer } from './utils/playerFactory';
 import { createSource } from './utils/sourceFactory';
 import { VideoPlayerEvents } from './events/VideoPlayerEvents';
@@ -243,6 +244,16 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     return this.player.isPlaying;
   }
 
+  // Is Playing Ad
+  get isPlayingAd(): boolean {
+    return this.player.isPlayingAd;
+  }
+
+  // Ad State
+  get adState(): VideoAdState {
+    return this.player.adState;
+  }
+
   get showNotificationControls(): boolean {
     return this.player.showNotificationControls;
   }
@@ -284,6 +295,26 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   pause(): void {
     try {
       this.player.pause();
+    } catch (error) {
+      this.throwError(error);
+    }
+  }
+
+  async activateAds(): Promise<void> {
+    await this.wrapPromise(this.player.activateAds());
+  }
+
+  deactivateAds(): void {
+    try {
+      this.player.deactivateAds();
+    } catch (error) {
+      this.throwError(error);
+    }
+  }
+
+  skipAd(): void {
+    try {
+      this.player.skipAd();
     } catch (error) {
       this.throwError(error);
     }

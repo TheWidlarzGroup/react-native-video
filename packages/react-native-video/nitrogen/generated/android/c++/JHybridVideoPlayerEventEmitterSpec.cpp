@@ -35,6 +35,20 @@ namespace margelo::nitro::video { struct TimedMetadataObject; }
 namespace margelo::nitro::video { struct TextTrack; }
 // Forward declaration of `onVolumeChangeData` to properly resolve imports.
 namespace margelo::nitro::video { struct onVolumeChangeData; }
+// Forward declaration of `AdsResolvedEvent` to properly resolve imports.
+namespace margelo::nitro::video { struct AdsResolvedEvent; }
+// Forward declaration of `AdBreakEvent` to properly resolve imports.
+namespace margelo::nitro::video { struct AdBreakEvent; }
+// Forward declaration of `AdBreakKind` to properly resolve imports.
+namespace margelo::nitro::video { enum class AdBreakKind; }
+// Forward declaration of `AdProgressInfo` to properly resolve imports.
+namespace margelo::nitro::video { struct AdProgressInfo; }
+// Forward declaration of `AdInfo` to properly resolve imports.
+namespace margelo::nitro::video { struct AdInfo; }
+// Forward declaration of `AdErrorEvent` to properly resolve imports.
+namespace margelo::nitro::video { struct AdErrorEvent; }
+// Forward declaration of `VideoAdState` to properly resolve imports.
+namespace margelo::nitro::video { enum class VideoAdState; }
 
 #include "ListenerSubscription.hpp"
 #include "JListenerSubscription.hpp"
@@ -73,9 +87,7 @@ namespace margelo::nitro::video { struct onVolumeChangeData; }
 #include "JFunc_void_TimedMetadata.hpp"
 #include "JTimedMetadata.hpp"
 #include "TimedMetadataObject.hpp"
-#include <vector>
 #include "JTimedMetadataObject.hpp"
-#include <string>
 #include "JFunc_void_std__vector_std__string_.hpp"
 #include <NitroModules/Null.hpp>
 #include "TextTrack.hpp"
@@ -87,6 +99,26 @@ namespace margelo::nitro::video { struct onVolumeChangeData; }
 #include "onVolumeChangeData.hpp"
 #include "JFunc_void_onVolumeChangeData.hpp"
 #include "JonVolumeChangeData.hpp"
+#include "AdsResolvedEvent.hpp"
+#include "JFunc_void_AdsResolvedEvent.hpp"
+#include "JAdsResolvedEvent.hpp"
+#include "AdBreakEvent.hpp"
+#include "JFunc_void_AdBreakEvent.hpp"
+#include "JAdBreakEvent.hpp"
+#include "AdBreakKind.hpp"
+#include "JAdBreakKind.hpp"
+#include "AdProgressInfo.hpp"
+#include "JFunc_void_AdProgressInfo.hpp"
+#include "JAdProgressInfo.hpp"
+#include "AdInfo.hpp"
+#include "JFunc_void_AdInfo.hpp"
+#include "JAdInfo.hpp"
+#include "AdErrorEvent.hpp"
+#include "JFunc_void_AdErrorEvent.hpp"
+#include "JAdErrorEvent.hpp"
+#include "VideoAdState.hpp"
+#include "JFunc_void_VideoAdState.hpp"
+#include "JVideoAdState.hpp"
 
 namespace margelo::nitro::video {
 
@@ -214,6 +246,61 @@ namespace margelo::nitro::video {
   ListenerSubscription JHybridVideoPlayerEventEmitterSpec::addOnVolumeChangeListener(const std::function<void(const onVolumeChangeData& /* data */)>& listener) {
     static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void_onVolumeChangeData::javaobject> /* listener */)>("addOnVolumeChangeListener_cxx");
     auto __result = method(_javaPart, JFunc_void_onVolumeChangeData_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoPlayerEventEmitterSpec::addOnAdsResolvedListener(const std::function<void(const AdsResolvedEvent& /* data */)>& listener) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void_AdsResolvedEvent::javaobject> /* listener */)>("addOnAdsResolvedListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_AdsResolvedEvent_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoPlayerEventEmitterSpec::addOnAdBreakStartListener(const std::function<void(const AdBreakEvent& /* data */)>& listener) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void_AdBreakEvent::javaobject> /* listener */)>("addOnAdBreakStartListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_AdBreakEvent_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoPlayerEventEmitterSpec::addOnAdBreakEndListener(const std::function<void(const AdBreakEvent& /* data */)>& listener) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void_AdBreakEvent::javaobject> /* listener */)>("addOnAdBreakEndListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_AdBreakEvent_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoPlayerEventEmitterSpec::addOnAdProgressListener(const std::function<void(const AdProgressInfo& /* data */)>& listener) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void_AdProgressInfo::javaobject> /* listener */)>("addOnAdProgressListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_AdProgressInfo_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoPlayerEventEmitterSpec::addOnAdStartListener(const std::function<void(const AdInfo& /* data */)>& listener) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void_AdInfo::javaobject> /* listener */)>("addOnAdStartListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_AdInfo_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoPlayerEventEmitterSpec::addOnAdCompleteListener(const std::function<void(const AdInfo& /* data */)>& listener) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void_AdInfo::javaobject> /* listener */)>("addOnAdCompleteListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_AdInfo_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoPlayerEventEmitterSpec::addOnAdSkippedListener(const std::function<void(const AdInfo& /* data */)>& listener) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void_AdInfo::javaobject> /* listener */)>("addOnAdSkippedListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_AdInfo_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoPlayerEventEmitterSpec::addOnAdClickedListener(const std::function<void()>& listener) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void::javaobject> /* listener */)>("addOnAdClickedListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoPlayerEventEmitterSpec::addOnAdErrorListener(const std::function<void(const AdErrorEvent& /* data */)>& listener) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void_AdErrorEvent::javaobject> /* listener */)>("addOnAdErrorListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_AdErrorEvent_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoPlayerEventEmitterSpec::addOnAllAdsCompletedListener(const std::function<void()>& listener) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void::javaobject> /* listener */)>("addOnAllAdsCompletedListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoPlayerEventEmitterSpec::addOnAdStateChangeListener(const std::function<void(VideoAdState /* state */)>& listener) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void_VideoAdState::javaobject> /* listener */)>("addOnAdStateChangeListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_VideoAdState_cxx::fromCpp(listener));
     return __result->toCpp();
   }
   void JHybridVideoPlayerEventEmitterSpec::clearAllListeners() {
