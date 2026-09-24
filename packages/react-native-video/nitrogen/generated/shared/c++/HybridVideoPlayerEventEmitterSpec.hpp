@@ -88,6 +88,7 @@ namespace margelo::nitro::video {
       virtual ListenerSubscription addOnBufferListener(const std::function<void(bool /* buffering */)>& listener) = 0;
       virtual ListenerSubscription addOnControlsVisibleChangeListener(const std::function<void(bool /* visible */)>& listener) = 0;
       virtual ListenerSubscription addOnEndListener(const std::function<void()>& listener) = 0;
+      virtual ListenerSubscription addOnErrorListener(const std::function<void(const std::string& /* error */)>& listener) = 0;
       virtual ListenerSubscription addOnExternalPlaybackChangeListener(const std::function<void(bool /* externalPlaybackActive */)>& listener) = 0;
       virtual ListenerSubscription addOnLoadListener(const std::function<void(const onLoadData& /* data */)>& listener) = 0;
       virtual ListenerSubscription addOnLoadStartListener(const std::function<void(const onLoadStartData& /* data */)>& listener) = 0;

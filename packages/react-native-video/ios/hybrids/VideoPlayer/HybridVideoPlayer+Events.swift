@@ -71,7 +71,7 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
 
   func onTimeControlStatusChanged(status: AVPlayer.TimeControlStatus) {
     if player.status == .failed || playerItem?.status == .failed {
-      self.status = .error
+      reportAsyncError(playerItem?.error ?? player.error)
       isCurrentlyBuffering = false
       _eventEmitter?.onPlaybackStateChange(
         .init(isPlaying: false, isBuffering: false)
@@ -109,7 +109,7 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
 
   func onPlayerStatusChanged(status: AVPlayer.Status) {
     if status == .failed || playerItem?.status == .failed {
-      self.status = .error
+      reportAsyncError(playerItem?.error ?? player.error)
       isCurrentlyBuffering = false
       updateAndEmitPlaybackState()
     }
@@ -117,7 +117,7 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
 
   func onPlayerItemStatusChanged(status: AVPlayerItem.Status) {
     if status == .failed {
-      self.status = .error
+      reportAsyncError(playerItem?.error ?? player.error)
       isCurrentlyBuffering = false
       updateAndEmitPlaybackState()
       return
@@ -156,7 +156,7 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
       }
 
     case .failed:
-      self.status = .error
+      reportAsyncError(playerItem?.error ?? player.error)
       isCurrentlyBuffering = false
 
     @unknown default:

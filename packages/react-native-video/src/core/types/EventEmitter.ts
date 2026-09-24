@@ -36,6 +36,7 @@ export interface VideoPlayerEventEmitterBase {
     listener: (visible: boolean) => void
   ): ListenerSubscription;
   addOnEndListener(listener: () => void): ListenerSubscription;
+  addOnErrorListener(listener: (error: string) => void): ListenerSubscription;
   addOnExternalPlaybackChangeListener(
     listener: (externalPlaybackActive: boolean) => void
   ): ListenerSubscription;

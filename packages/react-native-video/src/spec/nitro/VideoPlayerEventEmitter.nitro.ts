@@ -79,6 +79,16 @@ export interface VideoPlayerEventEmitter extends HybridObject<{
   addOnEndListener(listener: () => void): ListenerSubscription;
 
   /**
+   * Adds a listener for asynchronous native errors (e.g. a source that fails to load,
+   * or playback that fails later). Delivered to JS as the `onError` event.
+   * @see {@link VideoPlayerEvents.onError}
+   * @param listener - The listener to add. It receives the error encoded as
+   * `{%@<code>::<message>@%}`, the same format as errors thrown by native methods.
+   * @returns A subscription object that can be used to remove the listener.
+   */
+  addOnErrorListener(listener: (error: string) => void): ListenerSubscription;
+
+  /**
    * Adds a listener for the `onExternalPlaybackChange` event.
    * @see {@link VideoPlayerEvents.onExternalPlaybackChange}
    * @param listener - The listener to add.

@@ -161,6 +161,14 @@ namespace margelo::nitro::video {
       auto __value = std::move(__result.value());
       return __value;
     }
+    inline ListenerSubscription addOnErrorListener(const std::function<void(const std::string& /* error */)>& listener) override {
+      auto __result = _swiftPart.addOnErrorListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
     inline ListenerSubscription addOnExternalPlaybackChangeListener(const std::function<void(bool /* externalPlaybackActive */)>& listener) override {
       auto __result = _swiftPart.addOnExternalPlaybackChangeListener(listener);
       if (__result.hasError()) [[unlikely]] {

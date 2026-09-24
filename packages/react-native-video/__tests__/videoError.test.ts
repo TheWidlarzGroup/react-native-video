@@ -24,6 +24,20 @@ test('parses a runtime error code and message out of a native error', () => {
   expect(video.toString()).toBe('[source/file-does-not-exist]: No such file');
 });
 
+test('an async native player failure parses to a VideoRuntimeError', () => {
+  const err = tryParseNativeVideoError({
+    message: encoded(
+      'player/playback-failed',
+      'ERROR_CODE_IO_BAD_HTTP_STATUS: Response code: 404'
+    ),
+  });
+  expect(err).toBeInstanceOf(VideoRuntimeError);
+  expect((err as VideoRuntimeError).code).toBe('player/playback-failed');
+  expect((err as VideoRuntimeError).message).toBe(
+    'ERROR_CODE_IO_BAD_HTTP_STATUS: Response code: 404'
+  );
+});
+
 test('view/* codes become VideoComponentError', () => {
   const err = tryParseNativeVideoError({
     message: encoded(
