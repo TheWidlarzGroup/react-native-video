@@ -5,6 +5,7 @@ class AudioSessionManager {
     static let shared = AudioSessionManager()
 
     private var videoViews = NSHashTable<RCTVideo>.weakObjects()
+    private var pendingViews = NSHashTable<RCTVideo>.weakObjects()
     private var isAudioSessionActive = false
     private var remoteControlEventsActive = false
     private var isAudioSessionManagementForcedDisabled = false
@@ -13,14 +14,12 @@ class AudioSessionManager {
         if isAudioSessionManagementForcedDisabled {
             return true
         }
-        // If no views are registered, disable audio session management
-        if videoViews.allObjects.isEmpty {
-            return true
-        }
+        return managedViews.isEmpty
+    }
 
-        return videoViews.allObjects.contains { view in
-            return view._disableAudioSessionManagement == true
-        }
+    /// disableAudioSessionManagement opts out only the view that sets it, so every decision is based on the remaining views.
+    private var managedViews: [RCTVideo] {
+        return videoViews.allObjects.filter { !$0._disableAudioSessionManagement }
     }
 
     private init() {
@@ -52,30 +51,44 @@ class AudioSessionManager {
     }
 
     func registerView(view: RCTVideo) {
-        if videoViews.contains(view) {
+        if videoViews.contains(view) || pendingViews.contains(view) {
             return
         }
 
-        videoViews.add(view)
-        updateAudioSessionConfiguration()
+        // Called from RCTVideo.init, before any prop (including disableAudioSessionManagement) is set.
+        // Defer to the next main-queue turn so the view's initial props have landed.
+        pendingViews.add(view)
+        DispatchQueue.main.async { [weak self, weak view] in
+            guard let self, let view, self.pendingViews.contains(view) else { return }
+            self.pendingViews.remove(view)
+            self.videoViews.add(view)
+            if !view._disableAudioSessionManagement {
+                self.updateAudioSessionConfiguration()
+            }
+        }
     }
 
     func unregisterView(view: RCTVideo) {
+        pendingViews.remove(view)
         if !videoViews.contains(view) {
             return
         }
 
         videoViews.remove(view)
+        if view._disableAudioSessionManagement {
+            return
+        }
+
         updateAudioSessionConfiguration()
 
-        if videoViews.allObjects.isEmpty && !remoteControlEventsActive {
+        if managedViews.isEmpty && !remoteControlEventsActive {
             deactivateAudioSession()
         }
     }
 
     func updateAudioSessionConfiguration() {
         // Activate audio session if needed
-        let isAnyPlayerPlaying = videoViews.allObjects.contains { view in
+        let isAnyPlayerPlaying = managedViews.contains { view in
             return !view.isMuted() && view._player != nil && view._player?.rate != 0
         }
 
@@ -100,7 +113,7 @@ class AudioSessionManager {
             configureForRemoteControlEvents()
         } else {
             // If no active players, we can deactivate the session
-            if !videoViews.allObjects.contains(where: { view in
+            if !managedViews.contains(where: { view in
                 return view._player != nil && view._player?.rate != 0
             }) {
                 deactivateAudioSession()
@@ -114,7 +127,7 @@ class AudioSessionManager {
     /// Notification that a player's properties have changed
     func playerPropertiesChanged(view: RCTVideo) {
         // Only update if this is a registered view
-        if videoViews.contains(view) {
+        if videoViews.contains(view) && !view._disableAudioSessionManagement {
             updateAudioSessionConfiguration()
         }
     }
@@ -138,25 +151,26 @@ class AudioSessionManager {
     private func configureAudioSession() {
         let audioSession = AVAudioSession.sharedInstance()
         var options: AVAudioSession.CategoryOptions = []
+        let managedViews = self.managedViews
 
         // Check player properties
-        let anyPlayerShowNotificationControls = videoViews.allObjects.contains { view in
+        let anyPlayerShowNotificationControls = managedViews.contains { view in
             return view._showNotificationControls
         }
 
-        let anyPlayerNeedsPiP = videoViews.allObjects.contains { view in
+        let anyPlayerNeedsPiP = managedViews.contains { view in
             return view.isPictureInPictureActive()
         }
 
-        let anyPlayerNeedsBackgroundPlayback = videoViews.allObjects.contains { view in
+        let anyPlayerNeedsBackgroundPlayback = managedViews.contains { view in
             return view._playInBackground
         }
 
-        let anyPlayerPlaying = videoViews.allObjects.contains { view in
+        let anyPlayerPlaying = managedViews.contains { view in
             return !view.isMuted() && view._player != nil && view._player?.rate != 0
         }
 
-        let anyPlayerWantsMixing = videoViews.allObjects.contains { view in
+        let anyPlayerWantsMixing = managedViews.contains { view in
             return view._mixWithOthers == "mix" || view._mixWithOthers == "duck"
         }
 
@@ -170,11 +184,11 @@ class AudioSessionManager {
         if !anyPlayerPlaying {
             options.insert(.mixWithOthers)
         } else if canAllowMixing {
-            let shouldEnableMixing = videoViews.allObjects.contains { view in
+            let shouldEnableMixing = managedViews.contains { view in
                 return view._mixWithOthers == "mix"
             }
 
-            let shouldEnableDucking = videoViews.allObjects.contains { view in
+            let shouldEnableDucking = managedViews.contains { view in
                 return view._mixWithOthers == "duck"
             }
 
@@ -194,15 +208,15 @@ class AudioSessionManager {
             }
         }
 
-        let isAnyPlayerUsingEarpiece = videoViews.allObjects.contains { view in
+        let isAnyPlayerUsingEarpiece = managedViews.contains { view in
             return view._audioOutput == "earpiece"
         }
 
-        let isSilentSwitchIgnore = videoViews.allObjects.contains { view in
+        let isSilentSwitchIgnore = managedViews.contains { view in
             return view._ignoreSilentSwitch == "ignore"
         }
 
-        let isSilentSwitchObey = videoViews.allObjects.contains { view in
+        let isSilentSwitchObey = managedViews.contains { view in
             return view._ignoreSilentSwitch == "obey"
         }
 
