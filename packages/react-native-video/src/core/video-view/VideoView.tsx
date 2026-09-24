@@ -37,7 +37,7 @@ const wrapNativeViewManagerFunction = <T,>(
 };
 
 const updateProps = (manager: VideoViewViewManager, props: VideoViewProps) => {
-  manager.player = (props.player as VideoPlayer).__getNativePlayer();
+  manager.player = (props.player as unknown as VideoPlayer).__getNativePlayer();
   manager.controls = props.controls ?? false;
   manager.pictureInPicture = props.pictureInPicture ?? false;
   manager.autoEnterPictureInPicture = props.autoEnterPictureInPicture ?? false;

@@ -152,6 +152,17 @@ class VideoManager {
     }
   }
 
+  /// The `HybridVideoPlayer` backing `avPlayer`, if it is still registered.
+  ///
+  /// Used by call sites that only hold a raw `AVPlayer` (remote command
+  /// handling) so they can go through `HybridVideoPlayer.play()`/`pause()` —
+  /// the ad-gated playback funnel — instead of driving `AVPlayer` directly.
+  func player(for avPlayer: AVPlayer) -> HybridVideoPlayer? {
+    runOnMainThreadSync { [weak self] in
+      self?.players.allObjects.first { $0.player === avPlayer }
+    }
+  }
+
   /// Clears the resume intent for the player backing `avPlayer` — for remote
   /// (lock screen / Control Center / headset) pauses, which bypass `pause()`.
   func clearBackgroundResumeIntent(for avPlayer: AVPlayer) {

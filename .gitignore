@@ -85,3 +85,5 @@ lib/
 
 # TypeScript
 *.tsbuildinfo
+# Kotlin build daemon scratch
+.kotlin/

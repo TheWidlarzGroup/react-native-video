@@ -6,6 +6,9 @@ buildscript {
         targetSdkVersion = 34
         ndkVersion = "26.1.10909125"
         kotlinVersion = "1.9.24"
+        // Compile react-native-video with Google IMA client-side ads (adds the
+        // media3-exoplayer-ima dependency and the AD_ID permission it brings).
+        useExoplayerIma = true
     }
     repositories {
         google()

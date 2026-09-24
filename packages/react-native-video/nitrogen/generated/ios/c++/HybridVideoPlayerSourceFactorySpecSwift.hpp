@@ -32,6 +32,8 @@ namespace margelo::nitro::video { struct LivePlaybackParams; }
 namespace margelo::nitro::video { struct Resolution; }
 // Forward declaration of `CustomVideoMetadata` to properly resolve imports.
 namespace margelo::nitro::video { struct CustomVideoMetadata; }
+// Forward declaration of `VideoAdsConfig` to properly resolve imports.
+namespace margelo::nitro::video { struct VideoAdsConfig; }
 
 #include <memory>
 #include "HybridVideoPlayerSourceSpec.hpp"
@@ -50,6 +52,7 @@ namespace margelo::nitro::video { struct CustomVideoMetadata; }
 #include "LivePlaybackParams.hpp"
 #include "Resolution.hpp"
 #include "CustomVideoMetadata.hpp"
+#include "VideoAdsConfig.hpp"
 
 #include "ReactNativeVideo-Swift-Cxx-Umbrella.hpp"
 

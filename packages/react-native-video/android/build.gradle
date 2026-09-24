@@ -82,6 +82,7 @@ def supportsNamespace() {
 def ExoplayerDependenciesList = [
   "useExoplayerDash",
   "useExoplayerHls",
+  "useExoplayerIma",
 ]
 
 def ExoplayerDependencies = ExoplayerDependenciesList.collectEntries { property ->
@@ -116,6 +117,7 @@ android {
     buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString()
     buildConfigField "boolean", "USE_EXOPLAYER_DASH", ExoplayerDependencies.useExoplayerDash.toString()
     buildConfigField "boolean", "USE_EXOPLAYER_HLS", ExoplayerDependencies.useExoplayerHls.toString()
+    buildConfigField "boolean", "USE_EXOPLAYER_IMA", ExoplayerDependencies.useExoplayerIma.toString()
 
     externalNativeBuild {
       cmake {
@@ -186,6 +188,16 @@ android {
       if (!ExoplayerDependencies.useExoplayerHls) {
         java.srcDirs += ["src/stubs/hls"]
       }
+
+      // Google IMA client-side ads. Exactly one of these source sets is compiled:
+      // `src/ima` holds the real ImaAdsLoader-backed VideoAdsController, `src/stubs/ima`
+      // holds an unavailable-factory that keeps com.twg.video.core.ads compiling (and
+      // activateAds() failing open) without any IMA class on the classpath.
+      if (ExoplayerDependencies.useExoplayerIma) {
+        java.srcDirs += ["src/ima"]
+      } else {
+        java.srcDirs += ["src/stubs/ima"]
+      }
     }
   }
 }
@@ -237,6 +249,12 @@ dependencies {
 
   if (ExoplayerDependencies.useExoplayerHls) {
     implementation "androidx.media3:media3-exoplayer-hls:$media3_version"
+  }
+
+  // For Google IMA client-side ad insertion. Opt-in (see RNVideo_useExoplayerIma in
+  // gradle.properties) because it transitively adds the AD_ID permission.
+  if (ExoplayerDependencies.useExoplayerIma) {
+    implementation "androidx.media3:media3-exoplayer-ima:$media3_version"
   }
 }
 

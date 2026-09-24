@@ -9,6 +9,14 @@ import type {
 } from './Events';
 import type { TextTrack } from './TextTrack';
 import type { VideoPlayerStatus } from './VideoPlayerStatus';
+import type {
+  AdBreakEvent,
+  AdErrorEvent,
+  AdInfo,
+  AdProgressInfo,
+  AdsResolvedEvent,
+  VideoAdState,
+} from './VideoAdsConfig';
 
 /**
  * A subscription that can be used to remove a listener.
@@ -68,6 +76,33 @@ export interface VideoPlayerEventEmitterBase {
   ): ListenerSubscription;
   addOnVolumeChangeListener(
     listener: (data: onVolumeChangeData) => void
+  ): ListenerSubscription;
+  addOnAdsResolvedListener(
+    listener: (data: AdsResolvedEvent) => void
+  ): ListenerSubscription;
+  addOnAdBreakStartListener(
+    listener: (data: AdBreakEvent) => void
+  ): ListenerSubscription;
+  addOnAdBreakEndListener(
+    listener: (data: AdBreakEvent) => void
+  ): ListenerSubscription;
+  addOnAdProgressListener(
+    listener: (data: AdProgressInfo) => void
+  ): ListenerSubscription;
+  addOnAdStartListener(listener: (data: AdInfo) => void): ListenerSubscription;
+  addOnAdCompleteListener(
+    listener: (data: AdInfo) => void
+  ): ListenerSubscription;
+  addOnAdSkippedListener(
+    listener: (data: AdInfo) => void
+  ): ListenerSubscription;
+  addOnAdClickedListener(listener: () => void): ListenerSubscription;
+  addOnAdErrorListener(
+    listener: (data: AdErrorEvent) => void
+  ): ListenerSubscription;
+  addOnAllAdsCompletedListener(listener: () => void): ListenerSubscription;
+  addOnAdStateChangeListener(
+    listener: (state: VideoAdState) => void
   ): ListenerSubscription;
   clearAllListeners(): void;
 }

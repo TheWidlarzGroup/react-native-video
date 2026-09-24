@@ -90,9 +90,15 @@ export const getVideoSource = (type: VideoType): VideoConfig => {
   const HLS = 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8';
   const MP4 =
     'https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_30MB.mp4';
+  // Google's public sample VAST tag - see AdsManager.tsx. autoActivate is left
+  // at its default (false): the demo calls activateAds()/deactivateAds()
+  // explicitly so the panel's buttons have something to demonstrate.
+  const AD_TAG_URL =
+    'https://pubads.g.doubleclick.net/gampad/ads?iu=/21775744923/external/single_ad_samples&sz=640x480&gdfp_req=1&output=vast&unviewed_position_start=1&env=vp&correlator=';
 
   return {
     uri: type === 'hls' ? HLS : MP4,
+    ads: { adTagUrl: AD_TAG_URL },
     externalSubtitles: [
       {
         label: 'External',

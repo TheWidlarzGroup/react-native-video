@@ -282,7 +282,21 @@ open class HybridVideoPlayerSpec_cxx {
       return self.__implementation.isPlaying
     }
   }
-  
+
+  public final var isPlayingAd: Bool {
+    @inline(__always)
+    get {
+      return self.__implementation.isPlayingAd
+    }
+  }
+
+  public final var adState: Int32 {
+    @inline(__always)
+    get {
+      return self.__implementation.adState.rawValue
+    }
+  }
+
   public final var selectedTrack: bridge.std__optional_TextTrack_ {
     @inline(__always)
     get {
@@ -458,6 +472,47 @@ open class HybridVideoPlayerSpec_cxx {
     }
   }
   
+  @inline(__always)
+  public final func activateAds() -> bridge.Result_std__shared_ptr_Promise_void___ {
+    do {
+      let __result = try self.__implementation.activateAds()
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_void__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve() })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+    }
+  }
+
+  @inline(__always)
+  public final func deactivateAds() -> bridge.Result_void_ {
+    do {
+      try self.__implementation.deactivateAds()
+      return bridge.create_Result_void_()
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_void_(__exceptionPtr)
+    }
+  }
+
+  @inline(__always)
+  public final func skipAd() -> bridge.Result_void_ {
+    do {
+      try self.__implementation.skipAd()
+      return bridge.create_Result_void_()
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_void_(__exceptionPtr)
+    }
+  }
+
   @inline(__always)
   public final func seekBy(time: Double) -> bridge.Result_void_ {
     do {

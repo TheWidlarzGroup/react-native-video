@@ -200,6 +200,105 @@ abstract class HybridVideoPlayerEventEmitterSpec: HybridObject() {
     return __result
   }
   
+  abstract fun addOnAdsResolvedListener(listener: (data: AdsResolvedEvent) -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnAdsResolvedListener_cxx(listener: Func_void_AdsResolvedEvent): ListenerSubscription {
+    val __result = addOnAdsResolvedListener(listener)
+    return __result
+  }
+  
+  abstract fun addOnAdBreakStartListener(listener: (data: AdBreakEvent) -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnAdBreakStartListener_cxx(listener: Func_void_AdBreakEvent): ListenerSubscription {
+    val __result = addOnAdBreakStartListener(listener)
+    return __result
+  }
+  
+  abstract fun addOnAdBreakEndListener(listener: (data: AdBreakEvent) -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnAdBreakEndListener_cxx(listener: Func_void_AdBreakEvent): ListenerSubscription {
+    val __result = addOnAdBreakEndListener(listener)
+    return __result
+  }
+  
+  abstract fun addOnAdProgressListener(listener: (data: AdProgressInfo) -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnAdProgressListener_cxx(listener: Func_void_AdProgressInfo): ListenerSubscription {
+    val __result = addOnAdProgressListener(listener)
+    return __result
+  }
+  
+  abstract fun addOnAdStartListener(listener: (data: AdInfo) -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnAdStartListener_cxx(listener: Func_void_AdInfo): ListenerSubscription {
+    val __result = addOnAdStartListener(listener)
+    return __result
+  }
+  
+  abstract fun addOnAdCompleteListener(listener: (data: AdInfo) -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnAdCompleteListener_cxx(listener: Func_void_AdInfo): ListenerSubscription {
+    val __result = addOnAdCompleteListener(listener)
+    return __result
+  }
+  
+  abstract fun addOnAdSkippedListener(listener: (data: AdInfo) -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnAdSkippedListener_cxx(listener: Func_void_AdInfo): ListenerSubscription {
+    val __result = addOnAdSkippedListener(listener)
+    return __result
+  }
+  
+  abstract fun addOnAdClickedListener(listener: () -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnAdClickedListener_cxx(listener: Func_void): ListenerSubscription {
+    val __result = addOnAdClickedListener(listener)
+    return __result
+  }
+  
+  abstract fun addOnAdErrorListener(listener: (data: AdErrorEvent) -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnAdErrorListener_cxx(listener: Func_void_AdErrorEvent): ListenerSubscription {
+    val __result = addOnAdErrorListener(listener)
+    return __result
+  }
+  
+  abstract fun addOnAllAdsCompletedListener(listener: () -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnAllAdsCompletedListener_cxx(listener: Func_void): ListenerSubscription {
+    val __result = addOnAllAdsCompletedListener(listener)
+    return __result
+  }
+  
+  abstract fun addOnAdStateChangeListener(listener: (state: VideoAdState) -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnAdStateChangeListener_cxx(listener: Func_void_VideoAdState): ListenerSubscription {
+    val __result = addOnAdStateChangeListener(listener)
+    return __result
+  }
+  
   @DoNotStrip
   @Keep
   abstract fun clearAllListeners(): Unit

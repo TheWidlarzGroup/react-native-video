@@ -22,6 +22,8 @@ namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 namespace margelo::nitro::video { enum class MixAudioMode; }
 // Forward declaration of `IgnoreSilentSwitchMode` to properly resolve imports.
 namespace margelo::nitro::video { enum class IgnoreSilentSwitchMode; }
+// Forward declaration of `VideoAdState` to properly resolve imports.
+namespace margelo::nitro::video { enum class VideoAdState; }
 // Forward declaration of `TextTrack` to properly resolve imports.
 namespace margelo::nitro::video { struct TextTrack; }
 
@@ -31,6 +33,7 @@ namespace margelo::nitro::video { struct TextTrack; }
 #include "VideoPlayerStatus.hpp"
 #include "MixAudioMode.hpp"
 #include "IgnoreSilentSwitchMode.hpp"
+#include "VideoAdState.hpp"
 #include "TextTrack.hpp"
 #include <optional>
 #include <string>
@@ -171,6 +174,13 @@ namespace margelo::nitro::video {
     inline bool getIsPlaying() noexcept override {
       return _swiftPart.isPlaying();
     }
+    inline bool getIsPlayingAd() noexcept override {
+      return _swiftPart.isPlayingAd();
+    }
+    inline VideoAdState getAdState() noexcept override {
+      auto __result = _swiftPart.getAdState();
+      return static_cast<VideoAdState>(__result);
+    }
     inline std::optional<TextTrack> getSelectedTrack() noexcept override {
       auto __result = _swiftPart.getSelectedTrack();
       return __result;
@@ -230,6 +240,26 @@ namespace margelo::nitro::video {
     }
     inline void pause() override {
       auto __result = _swiftPart.pause();
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+    }
+    inline std::shared_ptr<Promise<void>> activateAds() override {
+      auto __result = _swiftPart.activateAds();
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline void deactivateAds() override {
+      auto __result = _swiftPart.deactivateAds();
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+    }
+    inline void skipAd() override {
+      auto __result = _swiftPart.skipAd();
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

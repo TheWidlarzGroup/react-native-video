@@ -29,6 +29,14 @@ object VideoManager : LifecycleEventListener {
 
   private var currentPipVideoView: WeakReference<VideoView>? = null
 
+  // A PiP request that arrived while an ad was on screen, deferred until the ad break ends.
+  private var pendingPipVideoView: WeakReference<VideoView>? = null
+  private var pendingPipTimeout: Runnable? = null
+  private val pendingPipHandler = android.os.Handler(android.os.Looper.getMainLooper())
+
+  /** How long a deferred PiP request stays valid before it is dropped. */
+  private const val PENDING_PIP_TIMEOUT_MS = 30_000L
+
   var audioFocusManager = AudioFocusManager()
 
   private var lastPlayedNitroId: Int? = null
@@ -49,12 +57,22 @@ object VideoManager : LifecycleEventListener {
 
   fun requestPictureInPicture(videoView: VideoView): Boolean {
     Log.d(TAG, "PiP requested for video nitroId: ${videoView.nitroId}")
-    
+
     if (videoView.isInPictureInPicture) {
       Log.d(TAG, "Video nitroId: ${videoView.nitroId} is already in PiP")
       return true
     }
-    
+
+    // Ad gate, explicit-request path. Entering PiP while an ad is on screen (or imminent)
+    // would shrink the ad into a window where its skip/learn-more UI is unreachable, so the
+    // request is deferred and retried once the ad break ends.
+    if (videoView.hybridPlayer?.isAdActive == true) {
+      Log.d(TAG, "PiP deferred for nitroId: ${videoView.nitroId} - an ad is active")
+      deferPictureInPictureRequest(videoView)
+      return false
+    }
+
+
     // Exit PiP from current video if there is one
     currentPipVideoView?.get()?.let { currentPipVideo ->
       if (currentPipVideo != videoView && currentPipVideo.isInPictureInPicture) {
@@ -87,6 +105,64 @@ object VideoManager : LifecycleEventListener {
     return success
   }
   
+  // ------------ Ad gating for Picture-in-Picture ------------
+
+  @MainThread
+  private fun deferPictureInPictureRequest(videoView: VideoView) {
+    clearPendingPictureInPicture()
+    pendingPipVideoView = WeakReference(videoView)
+    val timeout = Runnable {
+      Log.d(TAG, "Deferred PiP request expired for nitroId: ${videoView.nitroId}")
+      clearPendingPictureInPicture()
+    }
+    pendingPipTimeout = timeout
+    pendingPipHandler.postDelayed(timeout, PENDING_PIP_TIMEOUT_MS)
+  }
+
+  @MainThread
+  private fun clearPendingPictureInPicture() {
+    pendingPipTimeout?.let { pendingPipHandler.removeCallbacks(it) }
+    pendingPipTimeout = null
+    pendingPipVideoView = null
+  }
+
+  /**
+   * Drops any deferred PiP request that belongs to [player] - its source changed, its ads were
+   * deactivated, or it is being released.
+   */
+  fun cancelPendingPictureInPicture(player: HybridVideoPlayer) {
+    runOnMainThreadSync {
+      if (pendingPipVideoView?.get()?.hybridPlayer === player) {
+        clearPendingPictureInPicture()
+      }
+    }
+  }
+
+  /**
+   * An ad break on [player] ended (or the ad session failed open). Re-enables system-driven
+   * auto-enter PiP and retries a PiP request that was deferred because of the ad - once.
+   */
+  fun onAdActivityEnded(player: HybridVideoPlayer) {
+    runOnMainThreadSync {
+      // Auto-enter PiP (API 31+) is system-driven and never goes through
+      // requestPictureInPicture, so it is suppressed/restored purely through the params.
+      refreshPictureInPictureParams()
+
+      val view = pendingPipVideoView?.get()
+      clearPendingPictureInPicture()
+
+      if (view == null || view.hybridPlayer !== player) {
+        return@runOnMainThreadSync
+      }
+      if (player.isReleaseStarted || player.isAdActive) {
+        return@runOnMainThreadSync
+      }
+
+      Log.d(TAG, "Retrying deferred PiP for nitroId: ${view.nitroId} after ad break ended")
+      requestPictureInPicture(view)
+    }
+  }
+
   fun notifyPictureInPictureExited(videoView: VideoView) {
     Log.d(TAG, "PiP exit notification for video nitroId: ${videoView.nitroId}")
     currentPipVideoView?.get()?.let { currentPipVideo ->

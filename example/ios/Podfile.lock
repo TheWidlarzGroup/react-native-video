@@ -5,6 +5,7 @@ PODS:
   - FBLazyVector (0.77.3)
   - fmt (11.0.2)
   - glog (0.3.5)
+  - GoogleAds-IMA-iOS-SDK (3.33.0)
   - hermes-engine (0.77.3):
     - hermes-engine/Pre-built (= 0.77.3)
   - hermes-engine/Pre-built (0.77.3)
@@ -1565,9 +1566,10 @@ PODS:
     - React-logger (= 0.77.3)
     - React-perflogger (= 0.77.3)
     - React-utils (= 0.77.3)
-  - ReactNativeVideo (7.0.0-beta.8):
+  - ReactNativeVideo (7.0.0-beta.11):
     - DoubleConversion
     - glog
+    - GoogleAds-IMA-iOS-SDK (~> 3.33)
     - hermes-engine
     - NitroModules
     - RCT-Folly (= 2024.11.18.00)
@@ -1587,7 +1589,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - ReactNativeVideoDrm (7.0.0-beta.8):
+  - ReactNativeVideoDrm (7.0.0-beta.11):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1691,6 +1693,7 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - GoogleAds-IMA-iOS-SDK
     - SocketRocket
 
 EXTERNAL SOURCES:
@@ -1843,6 +1846,7 @@ SPEC CHECKSUMS:
   FBLazyVector: 23d8c5470c648a635893dc0956c6dbaead54b656
   fmt: a40bb5bd0294ea969aaaba240a927bd33d878cdd
   glog: eb93e2f488219332457c3c4eafd2738ddc7e80b8
+  GoogleAds-IMA-iOS-SDK: 3ded22b764c34813ede69005fefd270afc3576ee
   hermes-engine: b2187dbe13edb0db8fcb2a93a69c1987a30d98a4
   NitroModules: bb34ba5ce1c2ba59eafca7ec912dd9a6a5957ce7
   RCT-Folly: e78785aa9ba2ed998ea4151e314036f6c49e6d82
@@ -1904,11 +1908,11 @@ SPEC CHECKSUMS:
   ReactAppDependencyProvider: 31015410a4a53b9fd0a908ad4d6e3e2b9a25086a
   ReactCodegen: 53316394e985ded1babc7f143c90c77d2bb1b43c
   ReactCommon: bf4612cba0fa356b529385029f470d5529dddde4
-  ReactNativeVideo: c9c7b36a616e95e5905d2b3fb7583c3117f77629
-  ReactNativeVideoDrm: de11a8ece7a6c385d4b55a95c1c930ae636cca94
+  ReactNativeVideo: d8bf1d15b9e4e48e5c7e5e8a6bd4a57265047e5d
+  ReactNativeVideoDrm: 5d5975d266ee11eb02cbc2a337d74a2fa9a1b95d
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: 92f3bb322c40a86b7233b815854730442e01b8c4
 
-PODFILE CHECKSUM: 10a28875cc439e051fa4a3bf738ec88fdb44b22b
+PODFILE CHECKSUM: d0b93d6378112136d09dd7e750ca4dadaf8145ba
 
 COCOAPODS: 1.16.2

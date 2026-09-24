@@ -30,6 +30,8 @@ namespace margelo::nitro::video { struct LivePlaybackParams; }
 namespace margelo::nitro::video { struct Resolution; }
 // Forward declaration of `CustomVideoMetadata` to properly resolve imports.
 namespace margelo::nitro::video { struct CustomVideoMetadata; }
+// Forward declaration of `VideoAdsConfig` to properly resolve imports.
+namespace margelo::nitro::video { struct VideoAdsConfig; }
 // Forward declaration of `VideoInformation` to properly resolve imports.
 namespace margelo::nitro::video { struct VideoInformation; }
 // Forward declaration of `VideoOrientation` to properly resolve imports.
@@ -50,6 +52,7 @@ namespace margelo::nitro::video { enum class VideoOrientation; }
 #include "LivePlaybackParams.hpp"
 #include "Resolution.hpp"
 #include "CustomVideoMetadata.hpp"
+#include "VideoAdsConfig.hpp"
 #include "VideoInformation.hpp"
 #include "VideoOrientation.hpp"
 

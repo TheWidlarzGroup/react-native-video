@@ -467,6 +467,193 @@ open class HybridVideoPlayerEventEmitterSpec_cxx {
   }
   
   @inline(__always)
+  public final func addOnAdsResolvedListener(listener: bridge.Func_void_AdsResolvedEvent) -> bridge.Result_ListenerSubscription_ {
+    do {
+      let __result = try self.__implementation.addOnAdsResolvedListener(listener: { () -> (AdsResolvedEvent) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_AdsResolvedEvent(listener)
+        return { (__data: AdsResolvedEvent) -> Void in
+          __wrappedFunction.call(__data)
+        }
+      }())
+      let __resultCpp = __result
+      return bridge.create_Result_ListenerSubscription_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_ListenerSubscription_(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func addOnAdBreakStartListener(listener: bridge.Func_void_AdBreakEvent) -> bridge.Result_ListenerSubscription_ {
+    do {
+      let __result = try self.__implementation.addOnAdBreakStartListener(listener: { () -> (AdBreakEvent) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_AdBreakEvent(listener)
+        return { (__data: AdBreakEvent) -> Void in
+          __wrappedFunction.call(__data)
+        }
+      }())
+      let __resultCpp = __result
+      return bridge.create_Result_ListenerSubscription_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_ListenerSubscription_(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func addOnAdBreakEndListener(listener: bridge.Func_void_AdBreakEvent) -> bridge.Result_ListenerSubscription_ {
+    do {
+      let __result = try self.__implementation.addOnAdBreakEndListener(listener: { () -> (AdBreakEvent) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_AdBreakEvent(listener)
+        return { (__data: AdBreakEvent) -> Void in
+          __wrappedFunction.call(__data)
+        }
+      }())
+      let __resultCpp = __result
+      return bridge.create_Result_ListenerSubscription_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_ListenerSubscription_(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func addOnAdProgressListener(listener: bridge.Func_void_AdProgressInfo) -> bridge.Result_ListenerSubscription_ {
+    do {
+      let __result = try self.__implementation.addOnAdProgressListener(listener: { () -> (AdProgressInfo) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_AdProgressInfo(listener)
+        return { (__data: AdProgressInfo) -> Void in
+          __wrappedFunction.call(__data)
+        }
+      }())
+      let __resultCpp = __result
+      return bridge.create_Result_ListenerSubscription_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_ListenerSubscription_(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func addOnAdStartListener(listener: bridge.Func_void_AdInfo) -> bridge.Result_ListenerSubscription_ {
+    do {
+      let __result = try self.__implementation.addOnAdStartListener(listener: { () -> (AdInfo) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_AdInfo(listener)
+        return { (__data: AdInfo) -> Void in
+          __wrappedFunction.call(__data)
+        }
+      }())
+      let __resultCpp = __result
+      return bridge.create_Result_ListenerSubscription_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_ListenerSubscription_(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func addOnAdCompleteListener(listener: bridge.Func_void_AdInfo) -> bridge.Result_ListenerSubscription_ {
+    do {
+      let __result = try self.__implementation.addOnAdCompleteListener(listener: { () -> (AdInfo) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_AdInfo(listener)
+        return { (__data: AdInfo) -> Void in
+          __wrappedFunction.call(__data)
+        }
+      }())
+      let __resultCpp = __result
+      return bridge.create_Result_ListenerSubscription_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_ListenerSubscription_(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func addOnAdSkippedListener(listener: bridge.Func_void_AdInfo) -> bridge.Result_ListenerSubscription_ {
+    do {
+      let __result = try self.__implementation.addOnAdSkippedListener(listener: { () -> (AdInfo) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_AdInfo(listener)
+        return { (__data: AdInfo) -> Void in
+          __wrappedFunction.call(__data)
+        }
+      }())
+      let __resultCpp = __result
+      return bridge.create_Result_ListenerSubscription_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_ListenerSubscription_(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func addOnAdClickedListener(listener: bridge.Func_void) -> bridge.Result_ListenerSubscription_ {
+    do {
+      let __result = try self.__implementation.addOnAdClickedListener(listener: { () -> () -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void(listener)
+        return { () -> Void in
+          __wrappedFunction.call()
+        }
+      }())
+      let __resultCpp = __result
+      return bridge.create_Result_ListenerSubscription_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_ListenerSubscription_(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func addOnAdErrorListener(listener: bridge.Func_void_AdErrorEvent) -> bridge.Result_ListenerSubscription_ {
+    do {
+      let __result = try self.__implementation.addOnAdErrorListener(listener: { () -> (AdErrorEvent) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_AdErrorEvent(listener)
+        return { (__data: AdErrorEvent) -> Void in
+          __wrappedFunction.call(__data)
+        }
+      }())
+      let __resultCpp = __result
+      return bridge.create_Result_ListenerSubscription_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_ListenerSubscription_(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func addOnAllAdsCompletedListener(listener: bridge.Func_void) -> bridge.Result_ListenerSubscription_ {
+    do {
+      let __result = try self.__implementation.addOnAllAdsCompletedListener(listener: { () -> () -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void(listener)
+        return { () -> Void in
+          __wrappedFunction.call()
+        }
+      }())
+      let __resultCpp = __result
+      return bridge.create_Result_ListenerSubscription_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_ListenerSubscription_(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func addOnAdStateChangeListener(listener: bridge.Func_void_VideoAdState) -> bridge.Result_ListenerSubscription_ {
+    do {
+      let __result = try self.__implementation.addOnAdStateChangeListener(listener: { () -> (VideoAdState) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_VideoAdState(listener)
+        return { (__state: VideoAdState) -> Void in
+          __wrappedFunction.call(__state.rawValue)
+        }
+      }())
+      let __resultCpp = __result
+      return bridge.create_Result_ListenerSubscription_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_ListenerSubscription_(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
   public final func clearAllListeners() -> bridge.Result_void_ {
     do {
       try self.__implementation.clearAllListeners()

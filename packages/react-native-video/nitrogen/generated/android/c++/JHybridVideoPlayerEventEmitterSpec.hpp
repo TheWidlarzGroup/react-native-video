@@ -73,6 +73,17 @@ namespace margelo::nitro::video {
     ListenerSubscription addOnTextTrackDataChangedListener(const std::function<void(const std::vector<std::string>& /* data */)>& listener) override;
     ListenerSubscription addOnTrackChangeListener(const std::function<void(const std::optional<std::variant<nitro::NullType, TextTrack>>& /* track */)>& listener) override;
     ListenerSubscription addOnVolumeChangeListener(const std::function<void(const onVolumeChangeData& /* data */)>& listener) override;
+    ListenerSubscription addOnAdsResolvedListener(const std::function<void(const AdsResolvedEvent& /* data */)>& listener) override;
+    ListenerSubscription addOnAdBreakStartListener(const std::function<void(const AdBreakEvent& /* data */)>& listener) override;
+    ListenerSubscription addOnAdBreakEndListener(const std::function<void(const AdBreakEvent& /* data */)>& listener) override;
+    ListenerSubscription addOnAdProgressListener(const std::function<void(const AdProgressInfo& /* data */)>& listener) override;
+    ListenerSubscription addOnAdStartListener(const std::function<void(const AdInfo& /* data */)>& listener) override;
+    ListenerSubscription addOnAdCompleteListener(const std::function<void(const AdInfo& /* data */)>& listener) override;
+    ListenerSubscription addOnAdSkippedListener(const std::function<void(const AdInfo& /* data */)>& listener) override;
+    ListenerSubscription addOnAdClickedListener(const std::function<void()>& listener) override;
+    ListenerSubscription addOnAdErrorListener(const std::function<void(const AdErrorEvent& /* data */)>& listener) override;
+    ListenerSubscription addOnAllAdsCompletedListener(const std::function<void()>& listener) override;
+    ListenerSubscription addOnAdStateChangeListener(const std::function<void(VideoAdState /* state */)>& listener) override;
     void clearAllListeners() override;
 
   private:

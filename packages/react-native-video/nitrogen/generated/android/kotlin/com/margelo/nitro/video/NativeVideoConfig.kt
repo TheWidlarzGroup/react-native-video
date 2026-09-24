@@ -37,7 +37,10 @@ data class NativeVideoConfig(
   val metadata: CustomVideoMetadata?,
   @DoNotStrip
   @Keep
-  val initializeOnCreation: Boolean?
+  val initializeOnCreation: Boolean?,
+  @DoNotStrip
+  @Keep
+  val ads: VideoAdsConfig?
 ) {
   /* primary constructor */
 
@@ -49,8 +52,8 @@ data class NativeVideoConfig(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(uri: String, externalSubtitles: Array<NativeExternalSubtitle>?, drm: NativeDrmParams?, headers: Map<String, String>?, bufferConfig: BufferConfig?, metadata: CustomVideoMetadata?, initializeOnCreation: Boolean?): NativeVideoConfig {
-      return NativeVideoConfig(uri, externalSubtitles, drm, headers, bufferConfig, metadata, initializeOnCreation)
+    private fun fromCpp(uri: String, externalSubtitles: Array<NativeExternalSubtitle>?, drm: NativeDrmParams?, headers: Map<String, String>?, bufferConfig: BufferConfig?, metadata: CustomVideoMetadata?, initializeOnCreation: Boolean?, ads: VideoAdsConfig?): NativeVideoConfig {
+      return NativeVideoConfig(uri, externalSubtitles, drm, headers, bufferConfig, metadata, initializeOnCreation, ads)
     }
   }
 }

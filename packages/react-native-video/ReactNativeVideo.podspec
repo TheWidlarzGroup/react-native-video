@@ -32,9 +32,32 @@ Pod::Spec.new do |s|
   # Cxx to Swift bridging helpers
   s.public_header_files = ["ios/Video-Bridging-Header.h"]
 
-  s.pod_target_xcconfig = {
+  pod_target_xcconfig = {
     "GCC_PREPROCESSOR_DEFINITIONS" => "$(inherited) FOLLY_NO_CONFIG FOLLY_CFG_NO_COROUTINES FOLLY_MOBILE"
   }
+
+  # Google IMA client-side ad insertion is opt-in: apps that never show ads
+  # should not pay the binary-size / privacy-manifest cost of linking the SDK.
+  #
+  # Enable it from the app's Podfile, *before* `use_native_modules!`:
+  #
+  #   $RNVideoUseGoogleIMA = true
+  #
+  # Without the flag every ad API stays present but inert (activateAds()
+  # resolves immediately, the playback gate never closes).
+  if defined?($RNVideoUseGoogleIMA) && $RNVideoUseGoogleIMA
+    puts "[ReactNativeVideo] $RNVideoUseGoogleIMA is set, linking GoogleAds-IMA-iOS-SDK..."
+
+    # IMA 3.33.0 requires iOS 15.0; this podspec already targets
+    # min_ios_version_supported (>= 15.1 on RN 0.77+), so no bump is needed.
+    s.dependency "GoogleAds-IMA-iOS-SDK", "~> 3.33"
+
+    pod_target_xcconfig["SWIFT_ACTIVE_COMPILATION_CONDITIONS"] =
+      "$(inherited) RNV_GOOGLE_IMA"
+    pod_target_xcconfig["GCC_PREPROCESSOR_DEFINITIONS"] += " RNV_GOOGLE_IMA=1"
+  end
+
+  s.pod_target_xcconfig = pod_target_xcconfig
 
   # Try to manually add the dependencies
   # because they are not automatically added by expo

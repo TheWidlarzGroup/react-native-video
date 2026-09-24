@@ -5,6 +5,7 @@ import type { MixAudioMode } from './MixAudioMode';
 import type { TextTrack } from './TextTrack';
 import type { VideoPlayerSourceBase } from './VideoPlayerSourceBase';
 import type { VideoPlayerStatus } from './VideoPlayerStatus';
+import type { VideoAdState } from './VideoAdsConfig';
 
 import type { VideoConfig, VideoSource } from './VideoConfig';
 
@@ -120,6 +121,18 @@ export interface VideoPlayerBase {
   readonly isPlaying: boolean;
 
   /**
+   * Whether an ad is currently playing.
+   * @note This is a read-only property. See {@link VideoConfig.ads}.
+   */
+  readonly isPlayingAd: boolean;
+
+  /**
+   * The state of the native ad/playback gate.
+   * @note This is a read-only property. See {@link VideoConfig.ads}.
+   */
+  readonly adState: VideoAdState;
+
+  /**
    * Manually initialize the player. You don't need to call this method manually, unless you set `initializeOnCreation` to false in {@link VideoConfig}
    */
   initialize(): Promise<void>;
@@ -140,6 +153,28 @@ export interface VideoPlayerBase {
    * Pause playback of player.
    */
   pause(): void;
+
+  /**
+   * Activates the ad session configured via {@link VideoConfig.ads} (a no-op
+   * if no `ads` config is present, or if already activated for the current
+   * source). Requests ads if not already requested and resolves once the ad
+   * decision has been made (i.e. once it's known whether an ad will play) -
+   * not once ad playback finishes.
+   * @note You don't need to call this if {@link VideoAdsConfig.autoActivate} is true.
+   */
+  activateAds(): Promise<void>;
+
+  /**
+   * Deactivates/tears down the current ad session, if any. Safe to call even
+   * if no ad session is active.
+   */
+  deactivateAds(): void;
+
+  /**
+   * Skips the currently playing ad, if it is skippable and past its skip
+   * offset. A no-op otherwise.
+   */
+  skipAd(): void;
 
   /**
    * Seek by given time.

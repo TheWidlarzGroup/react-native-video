@@ -102,12 +102,21 @@ class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
     initializePlayerViewContorollerObservers()
   }
   
+  /// AVKit can rebuild the `contentOverlayView` subtree when it re-parents the
+  /// player view for fullscreen or PiP, which would orphan the IMA ad
+  /// container. Re-assert it after every such transition.
+  private func reassertAdContainer() {
+    view?.reassertAdContainer()
+  }
+
   func playerViewControllerDidStartPictureInPicture(_: AVPlayerViewController) {
     delegate?.onPictureInPictureChange(true)
+    reassertAdContainer()
   }
-  
+
   func playerViewControllerDidStopPictureInPicture(_: AVPlayerViewController) {
     delegate?.onPictureInPictureChange(false)
+    reassertAdContainer()
   }
   
   func playerViewControllerWillStartPictureInPicture(_: AVPlayerViewController) {
@@ -142,11 +151,13 @@ class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
         }
 
         self.delegate?.willEnterFullscreen()
+        self.reassertAdContainer()
 
         return
       }
 
       self.delegate?.onFullscreenChange(false)
+      self.reassertAdContainer()
     }
   }
   
@@ -166,11 +177,13 @@ class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
         }
 
         self.delegate?.willExitFullscreen()
+        self.reassertAdContainer()
 
         return
       }
 
       self.delegate?.onFullscreenChange(true)
+      self.reassertAdContainer()
     }
   }
 }

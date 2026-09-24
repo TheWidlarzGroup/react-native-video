@@ -1,5 +1,6 @@
 import type { BufferConfig } from './BufferConfig';
 import type { DrmParams } from './DrmParams';
+import type { VideoAdsConfig } from './VideoAdsConfig';
 
 export type VideoSource = number | string;
 
@@ -61,6 +62,12 @@ export type VideoConfig = {
    * @default true
    */
   initializeOnCreation?: boolean;
+  /**
+   * Native Google IMA client-side ad insertion configuration.
+   * Swaps atomically with the source - replacing the source cancels any
+   * in-flight or active ad session for the previous source.
+   */
+  ads?: VideoAdsConfig;
 };
 
 // @internal
