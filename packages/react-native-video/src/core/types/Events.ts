@@ -3,6 +3,14 @@ import type { VideoRuntimeError } from './VideoError';
 import type { VideoOrientation } from './VideoOrientation';
 import type { VideoPlayerSourceBase } from './VideoPlayerSourceBase';
 import type { VideoPlayerStatus } from './VideoPlayerStatus';
+import type {
+  AdBreakEvent,
+  AdErrorEvent,
+  AdInfo,
+  AdProgressInfo,
+  AdsResolvedEvent,
+  VideoAdState,
+} from './VideoAdsConfig';
 
 export interface VideoPlayerEvents {
   /**
@@ -95,10 +103,81 @@ export interface VideoPlayerEvents {
    * Called when the player status changes.
    */
   onStatusChange: (status: VideoPlayerStatus) => void;
+  /**
+   * Called once the ad decision for the current activation has resolved -
+   * i.e. once it's known whether an ad will play. This is the signal to
+   * drop any app-level ad-loading UI, whether or not an ad actually plays.
+   */
+  onAdsResolved: (data: AdsResolvedEvent) => void;
+  /**
+   * Called when an ad break (pre-roll/mid-roll/post-roll) starts. Content
+   * playback is gated for the duration of the break.
+   */
+  onAdBreakStart: (data: AdBreakEvent) => void;
+  /**
+   * Called when an ad break ends and content playback is allowed to resume.
+   */
+  onAdBreakEnd: (data: AdBreakEvent) => void;
+  /**
+   * Called periodically while an ad is playing.
+   */
+  onAdProgress: (data: AdProgressInfo) => void;
+  /**
+   * Called when the currently playing ad starts.
+   */
+  onAdStart: (data: AdInfo) => void;
+  /**
+   * Called when the currently playing ad completes.
+   */
+  onAdComplete: (data: AdInfo) => void;
+  /**
+   * Called when the currently playing ad is skipped by the user.
+   */
+  onAdSkipped: (data: AdInfo) => void;
+  /**
+   * Called when the user clicks/taps through an ad.
+   */
+  onAdClicked: () => void;
+  /**
+   * Called when an ad request or ad playback error occurs. If `fatal` is
+   * true, the ad break has ended and content playback will resume/start.
+   */
+  onAdError: (data: AdErrorEvent) => void;
+  /**
+   * Called when all ad breaks for the current source have completed.
+   */
+  onAllAdsCompleted: () => void;
+  /**
+   * Called when the native ad/playback gate state changes.
+   */
+  onAdStateChange: (state: VideoAdState) => void;
 }
+
+/**
+ * Every client-side ad event as one tagged union: `type` is the event name, `data` its payload
+ * (`undefined` for the events that carry none). Delivered through the single `onAdEvent`
+ * listener, so an app that follows ads adds one listener instead of eleven.
+ */
+export type AdEvent =
+  | { type: 'adsResolved'; data: AdsResolvedEvent }
+  | { type: 'adBreakStart'; data: AdBreakEvent }
+  | { type: 'adBreakEnd'; data: AdBreakEvent }
+  | { type: 'adProgress'; data: AdProgressInfo }
+  | { type: 'adStart'; data: AdInfo }
+  | { type: 'adComplete'; data: AdInfo }
+  | { type: 'adSkipped'; data: AdInfo }
+  | { type: 'adClicked'; data: undefined }
+  | { type: 'adError'; data: AdErrorEvent }
+  | { type: 'allAdsCompleted'; data: undefined }
+  | { type: 'adStateChange'; data: VideoAdState };
 
 export interface JSVideoPlayerEvents {
   onError: (error: VideoRuntimeError) => void;
+  /**
+   * One listener for all ad events: `{ type, data }`, e.g. `{ type: 'adStart', data }`.
+   * Equivalent to subscribing to each `onAd*` event; the individual events stay available.
+   */
+  onAdEvent: (event: AdEvent) => void;
 }
 
 export type AllPlayerEvents = VideoPlayerEvents & JSVideoPlayerEvents;
@@ -256,6 +335,7 @@ export const ALL_PLAYER_EVENTS: (keyof AllPlayerEvents)[] =
     'onControlsVisibleChange',
     'onEnd',
     'onError',
+    'onAdEvent',
     'onExternalPlaybackChange',
     'onLoad',
     'onLoadStart',
@@ -268,7 +348,18 @@ export const ALL_PLAYER_EVENTS: (keyof AllPlayerEvents)[] =
     'onTextTrackDataChanged',
     'onTrackChange',
     'onVolumeChange',
-    'onStatusChange'
+    'onStatusChange',
+    'onAdsResolved',
+    'onAdBreakStart',
+    'onAdBreakEnd',
+    'onAdProgress',
+    'onAdStart',
+    'onAdComplete',
+    'onAdSkipped',
+    'onAdClicked',
+    'onAdError',
+    'onAllAdsCompleted',
+    'onAdStateChange'
   );
 
 export const ALL_VIEW_EVENTS: (keyof VideoViewEvents)[] =

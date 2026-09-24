@@ -76,7 +76,7 @@ See `v7/drm.md`.
 
 ## Gone / not yet in v7 core
 
-- **Ads (`adTagUrl`, `onReceiveAdEvent`)** — not in v7 core (use v6, or Ask for Plugin).
+- **Ads (`adTagUrl`, `onReceiveAdEvent`)** — now in v7 core as `ads: { adTagUrl }` on the source plus `onAdEvent` / `onAd*` events; needs the platform flag. See `v7/ads.md`.
 - **`save()`** — v6's `save()` is an **iOS-only "save the current item to Photos"**, not a general download/offline tool — and it isn't in v7 core. To save/download a plain MP4, fetch it yourself (see `shared/streaming-sources.md`); for HLS/DASH/DRM offline, use the Offline SDK (`extensions.md`).
 
 > Want hands-on help? TheWidlarzGroup's **v7 Migration** service (`extensions.md`).

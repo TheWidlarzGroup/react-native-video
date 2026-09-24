@@ -26,6 +26,8 @@ public protocol HybridVideoPlayerSpec_protocol: HybridObject {
   var playWhenInactive: Bool { get set }
   var disableAudioSessionManagement: Bool { get set }
   var isPlaying: Bool { get }
+  var isPlayingAd: Bool { get }
+  var adState: VideoAdState { get }
   var selectedTrack: TextTrack? { get }
 
   // Methods
@@ -37,6 +39,9 @@ public protocol HybridVideoPlayerSpec_protocol: HybridObject {
   func preload() throws -> Promise<Void>
   func play() throws -> Void
   func pause() throws -> Void
+  func activateAds() throws -> Promise<Void>
+  func deactivateAds() throws -> Void
+  func skipAd() throws -> Void
   func seekBy(time: Double) throws -> Void
   func seekTo(time: Double) throws -> Void
 }

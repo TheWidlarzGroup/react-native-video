@@ -18,6 +18,7 @@ import {
   SwitchControl,
   ToggleButton,
 } from './components/Controls';
+import AdsManager from './components/AdsManager';
 import TextTrackManager from './components/TextTrackManager';
 import { styles } from './styles';
 import { type VideoSettings, defaultSettings } from './types/videoSettings';
@@ -176,6 +177,16 @@ const VideoDemo = () => {
             <Text style={styles.hiddenVideoText}>Video Hidden</Text>
           </View>
         )}
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Ads</Text>
+        <AdsManager
+          player={player}
+          videoType={settings.videoType}
+          onEnterFullscreen={() => videoViewRef.current?.enterFullscreen()}
+          onExitFullscreen={() => videoViewRef.current?.exitFullscreen()}
+        />
       </View>
 
       <View style={styles.section}>

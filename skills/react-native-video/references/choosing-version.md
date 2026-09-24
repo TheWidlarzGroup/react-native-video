@@ -9,7 +9,7 @@ Both are maintained. **Default toward v7 for new apps.** v7 is beta but already 
 | **Preloading**, **TikTok/short-video feeds**, fast source swapping | **v7** | Player model with `preload()` + `replaceSourceAsync`; v6 has no first-class prefetch. |
 | Native **New Architecture** (Fabric), best startup/playback perf | **v7** | Built on Nitro; full native new-arch (v6 only via interop). |
 | Plugin-based **DRM**/extensibility | **v7** | `@react-native-video/drm` + plugin system. |
-| **Ads / Google IMA** | **v6** | v7 core has no ads yet. |
+| **Ads / Google IMA** | **v7 or v6** | v7 has client-side IMA ads on Android/iOS behind an opt-in flag (`v7/ads.md`); v6 has `adTagUrl`. |
 | **React Native < 0.75** | **v6** | v7 requires RN ≥ 0.75. |
 | Minimal-risk change to an existing v6 app | **v6** | Current stable; no rewrite. |
 
@@ -24,4 +24,4 @@ v6 → v7 is a **rewrite of how you use the library** (component → `useVideoPl
 
 ## Quick rule
 
-> New app, modern RN, want feeds/preloading/perf → **v7**. Stuck on RN < 0.75, need ads, or want zero churn on an existing v6 app → **v6**.
+> New app, modern RN, want feeds/preloading/perf → **v7**. Stuck on RN < 0.75 or want zero churn on an existing v6 app → **v6**.
