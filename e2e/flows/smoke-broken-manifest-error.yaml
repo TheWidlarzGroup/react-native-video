@@ -1,6 +1,5 @@
-# Error path: a syntactically broken HLS manifest must surface an error status (onError, or
-# onStatusChange('error'), which the app maps onto the same marker while #5083 is open) and
-# NOT onLoad.
+# Error path: a syntactically broken HLS manifest must report exactly one onError, the error
+# status, and NOT onLoad.
 # Opens the mp4 scenario first, like smoke-error-404.yaml.
 appId: ${APP_ID}
 tags: [smoke]
@@ -22,7 +21,13 @@ tags: [smoke]
     visible:
       id: "evt-onError"
     timeout: 20000
+- extendedWaitUntil:
+    visible:
+      id: "evt-status-error"
+    timeout: 20000
 - assertVisible:
     id: "evt-error-code"      # exact code differs per platform; not pinned yet
 - assertNotVisible:
     id: "evt-onLoad"
+- assertNotVisible:
+    id: "evt-onError-repeated"
