@@ -1,4 +1,4 @@
-name: Close inactive issues
+name: Mark inactive issues as stale
 
 on:
   schedule:
@@ -17,10 +17,9 @@ jobs:
       - uses: actions/stale@v11
         with:
           days-before-issue-stale: 30
-          days-before-issue-close: 14
+          days-before-issue-close: -1
           stale-issue-label: "stale"
-          stale-issue-message: "This issue is stale because it has been open for 30 days with no activity. It will be closed in 14 days if there is no further activity."
-          close-issue-message: "This issue was closed because it has been inactive for 14 days since being marked as stale."
+          stale-issue-message: "This issue is stale because it has been open for 30 days with no activity. It will not be closed automatically, but please add a comment if it is still relevant."
           exempt-issue-labels: "good first issue,No Stale,Accepted"
           days-before-pr-stale: -1
           days-before-pr-close: -1
