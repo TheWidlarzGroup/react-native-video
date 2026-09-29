@@ -25,10 +25,14 @@ export class VideoPlayerEvents extends VideoPlayerEventsBase {
         // promise to reject, so native reports them through the emitter instead.
         const nativeSubscription = this.eventEmitter.addOnErrorListener(
           (nativeError) => {
-            const error = tryParseNativeVideoError({ message: nativeError });
-            if (error instanceof VideoRuntimeError) {
-              (callback as JSVideoPlayerEvents['onError'])(error);
-            }
+            const parsed = tryParseNativeVideoError({ message: nativeError });
+            // A payload that does not parse is still a failure: report it rather
+            // than drop it, so `onError` never stays silent.
+            const error =
+              parsed instanceof VideoRuntimeError
+                ? parsed
+                : new VideoRuntimeError('player/playback-failed', nativeError);
+            (callback as JSVideoPlayerEvents['onError'])(error);
           }
         );
         return {

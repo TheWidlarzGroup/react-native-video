@@ -38,6 +38,28 @@ test('an async native player failure parses to a VideoRuntimeError', () => {
   );
 });
 
+test('a message containing "@" parses in full', () => {
+  const err = tryParseNativeVideoError({
+    message: encoded(
+      'source/invalid-uri',
+      'Invalid source URI: https://user@host/a.mp4'
+    ),
+  });
+  expect(err).toBeInstanceOf(VideoRuntimeError);
+  expect((err as VideoRuntimeError).message).toBe(
+    'Invalid source URI: https://user@host/a.mp4'
+  );
+});
+
+test('a message containing "@" is rewritten in the stack too', () => {
+  const native = new Error(encoded('player/released', 'a@b'));
+  native.stack = `Error: ${encoded('player/released', 'a@b')}\n    at nativeCall (native)`;
+  const err = tryParseNativeVideoError(native) as VideoRuntimeError;
+  expect(err.stack).toBe(
+    'Error: [player/released]: a@b\n    at nativeCall (native)'
+  );
+});
+
 test('view/* codes become VideoComponentError', () => {
   const err = tryParseNativeVideoError({
     message: encoded(

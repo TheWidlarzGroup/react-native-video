@@ -86,3 +86,34 @@ test('removing the onError subscription removes the native listener too', () => 
   expect(received).toHaveLength(1);
   expect(nativeErrorSubscriptionRemoved).toBe(true);
 });
+
+test('a native message containing "@" still reaches onError with its code', () => {
+  const events = new VideoPlayerEvents(fakeEmitter);
+  const received: unknown[] = [];
+  events.addEventListener('onError', (error) => received.push(error));
+
+  reportNativeError(
+    '{%@player/playback-failed::NSURLErrorDomain -1100: https://user@host/a.m3u8@%}'
+  );
+
+  expect(received).toHaveLength(1);
+  const error = received[0] as VideoRuntimeError;
+  expect(error.code).toBe('player/playback-failed');
+  expect(error.message).toBe(
+    'NSURLErrorDomain -1100: https://user@host/a.m3u8'
+  );
+});
+
+test('a native payload that does not parse is reported, not dropped', () => {
+  const events = new VideoPlayerEvents(fakeEmitter);
+  const received: unknown[] = [];
+  events.addEventListener('onError', (error) => received.push(error));
+
+  reportNativeError('Response code: 404');
+
+  expect(received).toHaveLength(1);
+  expect(received[0]).toBeInstanceOf(VideoRuntimeError);
+  const error = received[0] as VideoRuntimeError;
+  expect(error.code).toBe('player/playback-failed');
+  expect(error.message).toBe('Response code: 404');
+});
