@@ -26,7 +26,8 @@ tags: [smoke]
       id: "evt-status-error"
     timeout: 20000
 - assertVisible:
-    id: "evt-error-code"      # exact code differs per platform; not pinned yet
+    id: "evt-error-code"
+    text: "error-code:player/playback-failed"   # same code on both platforms
 - assertNotVisible:
     id: "evt-onLoad"
 - assertNotVisible:
