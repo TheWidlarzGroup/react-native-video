@@ -5,6 +5,7 @@ import type {
 import type { ListenerSubscription } from '../types/EventEmitter';
 import {
   tryParseNativeVideoError,
+  VideoError,
   VideoRuntimeError,
 } from '../types/VideoError';
 import { VideoPlayerEventsBase } from './VideoPlayerEventsBase';
@@ -28,9 +29,10 @@ export class VideoPlayerEvents extends VideoPlayerEventsBase {
             const parsed = tryParseNativeVideoError({ message: nativeError });
             // A payload that does not parse is still a failure: report it rather
             // than drop it, so `onError` never stays silent.
+            // A parsed error keeps its own code, whatever its class (e.g. `view/*`).
             const error =
-              parsed instanceof VideoRuntimeError
-                ? parsed
+              parsed instanceof VideoError
+                ? (parsed as VideoRuntimeError)
                 : new VideoRuntimeError('player/playback-failed', nativeError);
             (callback as JSVideoPlayerEvents['onError'])(error);
           }

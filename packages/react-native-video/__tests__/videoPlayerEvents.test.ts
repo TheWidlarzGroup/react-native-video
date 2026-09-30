@@ -117,3 +117,16 @@ test('a native payload that does not parse is reported, not dropped', () => {
   expect(error.code).toBe('player/playback-failed');
   expect(error.message).toBe('Response code: 404');
 });
+
+test('a parsed view error keeps its code instead of becoming playback-failed', () => {
+  const events = new VideoPlayerEvents(fakeEmitter);
+  const received: unknown[] = [];
+  events.addEventListener('onError', (error) => received.push(error));
+
+  reportNativeError('{%@view/not-found::View was not found@%}');
+
+  expect(received).toHaveLength(1);
+  const error = received[0] as VideoRuntimeError;
+  expect(error.code).toBe('view/not-found');
+  expect(error.message).toBe('View was not found');
+});
