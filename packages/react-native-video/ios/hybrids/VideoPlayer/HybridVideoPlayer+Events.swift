@@ -45,7 +45,14 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
     )
   }
 
+  /// A failed item can still fire buffer callbacks. They must not move the status out of
+  /// `.error`, or the next failure callback would report the same failure again.
+  private var hasFailed: Bool {
+    player.status == .failed || playerItem?.status == .failed
+  }
+
   func onPlaybackBufferEmpty() {
+    guard !hasFailed else { return }
     isCurrentlyBuffering = true
     status = .loading
     updateAndEmitPlaybackState()
@@ -58,6 +65,7 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
   }
 
   func onPlaybackLikelyToKeepUp() {
+    guard !hasFailed else { return }
     isCurrentlyBuffering = false
     if player.timeControlStatus != .waitingToPlayAtSpecifiedRate {
       status = .readytoplay
