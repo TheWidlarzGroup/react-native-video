@@ -1,6 +1,6 @@
 {
   "name": "react-native-video-monorepo",
-  "packageManager": "bun@1.1.42",
+  "packageManager": "bun@1.3.1",
   "version": "7.0.0-beta.11",
   "private": true,
   "repository": "https://github.com/TheWidlarzGroup/react-native-video",
@@ -9,6 +9,7 @@
     "packages/react-native-video",
     "packages/drm-plugin",
     "example",
+    "test-app",
     "docs"
   ],
   "scripts": {
@@ -16,12 +17,14 @@
     "specs": "bun --filter=\"./packages/**\" specs",
     "lint": "bun --filter=\"**\" lint",
     "typecheck": "bun --filter=\"**\" typecheck",
+    "test": "bun test e2e scripts test-app packages/react-native-video/__tests__",
     "clean": "git clean -xdf",
     "react-native-video": "bun run --cwd packages/react-native-video",
     "drm-plugin": "bun run --cwd packages/drm-plugin",
     "example": "bun run --cwd example",
+    "test-app": "bun run --cwd test-app",
     "docs": "bun run --cwd docs",
-    "postinstall": "patch-package --patch-dir example/patches",
+    "postinstall": "patch-package --patch-dir example/patches && patch-package --patch-dir test-app/patches",
     "release:github": "release-it --preRelease beta",
     "release": "./scripts/release.sh"
   },

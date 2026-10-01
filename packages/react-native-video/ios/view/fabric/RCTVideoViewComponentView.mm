@@ -5,7 +5,7 @@
 #import <react/renderer/components/RNCVideoViewSpec/Props.h>
 #import <react/renderer/components/RNCVideoViewSpec/RCTComponentViewHelpers.h>
 
-#import "RCTFabricComponentsPlugins.h"
+#import <React/RCTFabricComponentsPlugins.h>
 
 #import "ReactNativeVideo-Swift-Cxx-Umbrella.hpp"
 
