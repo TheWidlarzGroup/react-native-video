@@ -47,7 +47,9 @@
   ],
   "scripts": {
     "postinstall": "bun run build || exit 0;",
-    "typecheck": "tsc",
+    "typecheck": "tsc && bun run typecheck:test",
+    "typecheck:test": "tsc -p tsconfig.test.json --noEmit",
+    "test": "bun test __tests__",
     "typecheck:web": "tsc -p tsconfig.web.json",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
@@ -88,9 +90,11 @@
     "eslint-plugin-prettier": "^5.0.1",
     "nitrogen": "0.35.0",
     "prettier": "^3.0.3",
+    "@types/react-test-renderer": "^18.0.0",
     "react": "18.3.1",
     "react-native": "^0.77.0",
     "react-native-builder-bob": "^0.40.0",
+    "react-test-renderer": "18.3.1",
     "react-native-nitro-modules": "0.35.0",
     "typescript": "^5.2.2"
   },

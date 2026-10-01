@@ -1,5 +1,6 @@
 name: Test Documentation Build
 
+# Path-filtered, so it must never become a required check (see lint-workflows.yml).
 on:
   pull_request:
     branches:
@@ -17,7 +18,7 @@ jobs:
     name: Test Documentation Build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 

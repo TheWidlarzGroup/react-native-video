@@ -1,0 +1,96 @@
+name: e2e setup
+description: Swap RN version, install frozen, bundle the test app's JS, install Maestro, start the fixture server
+
+inputs:
+  rn-version:
+    description: 'React Native version id, matching e2e/rn-matrix (0.77 is the floor)'
+    required: true
+  platform:
+    description: 'android or ios — selects which JS bundle to build'
+    required: true
+  fixture-port:
+    description: 'Port for the local media fixture server'
+    default: '8090'
+    required: false
+
+runs:
+  using: composite
+  steps:
+    # Must precede the install: it rewrites test-app/package.json and the root bun.lock.
+    - name: Select React Native version
+      run: node scripts/e2e/use-rn-version.mjs ${{ inputs.rn-version }}
+      shell: bash
+
+    # No node_modules cache on macOS: measured 287 s to save the tree against an 82 s
+    # install, and the restore is not free either.
+    - uses: ./.github/actions/setup-bun
+      with:
+        frozen: 'true'
+        cache: ${{ runner.os == 'macOS' && 'false' || 'true' }}
+
+    # Fail before any native build if the install did not yield the requested version.
+    - name: Verify resolved React Native version
+      working-directory: test-app
+      shell: bash
+      env:
+        EXPECTED: ${{ inputs.rn-version }}
+      run: |
+        set -euo pipefail
+        # Resolve from inside test-app/, the way Metro, pod install and gradle do.
+        RESOLVED=$(node -p "require('react-native/package.json').version") || {
+          echo "::error::could not resolve react-native from test-app/ — install did not complete" >&2
+          exit 1
+        }
+        echo "requested ${EXPECTED}, resolved ${RESOLVED}"
+        case "$RESOLVED" in
+          "$EXPECTED" | "$EXPECTED".*) ;;
+          *)
+            echo "::error::resolved react-native ${RESOLVED} does not match requested ${EXPECTED} — a stale node_modules tree was installed" >&2
+            exit 1
+            ;;
+        esac
+
+    # react-native-test-app does not bundle JS in Gradle or Xcode. It embeds the files
+    # listed under `resources` in test-app/app.json (dist/) at build time and falls back
+    # to a Metro dev server when they are missing — and no Metro runs in CI. On iOS the
+    # bundle must exist before `pod install`, which is when RNTA resolves those resources.
+    - name: Bundle the test app's JS
+      working-directory: test-app
+      shell: bash
+      run: |
+        set -euo pipefail
+        bun run build:${{ inputs.platform }}
+        test -s dist/main.${{ inputs.platform }}.jsbundle
+
+    # A pinned release, verified by checksum, instead of piping the get.maestro.mobile.dev
+    # installer into bash: a Maestro release cannot turn the gate red without a change in
+    # this repo, and neither a changed installer nor a swapped archive runs here. Bump both
+    # values together, after running the suite locally with the new version
+    # (`shasum -a 256 maestro.zip`).
+    - name: Install Maestro
+      shell: bash
+      env:
+        MAESTRO_VERSION: 2.10.0
+        MAESTRO_SHA256: 29b675e10cc12080e445e9bfb2e2b4e4dfb9c0f2e30d5884120d258b5e1cd991
+      run: |
+        set -euo pipefail
+        ZIP="$RUNNER_TEMP/maestro.zip"
+        curl -fsSL -o "$ZIP" "https://github.com/mobile-dev-inc/maestro/releases/download/cli-${MAESTRO_VERSION}/maestro.zip"
+        if command -v sha256sum >/dev/null; then CHECK=(sha256sum -c -); else CHECK=(shasum -a 256 -c -); fi
+        echo "${MAESTRO_SHA256}  ${ZIP}" | "${CHECK[@]}"
+        unzip -q "$ZIP" -d "$RUNNER_TEMP"
+        mkdir -p "$HOME/.maestro"
+        cp -R "$RUNNER_TEMP/maestro/." "$HOME/.maestro/"
+        echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+        "$HOME/.maestro/bin/maestro" --version
+
+    - name: Start fixture server
+      shell: bash
+      run: |
+        node e2e/fixtures/serve.mjs e2e/fixtures/media ${{ inputs.fixture-port }} &
+        for i in $(seq 1 30); do
+          curl -sf "http://localhost:${{ inputs.fixture-port }}/short.mp4" -o /dev/null && exit 0
+          sleep 1
+        done
+        echo "fixture server did not come up" >&2
+        exit 1
