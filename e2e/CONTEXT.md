@@ -141,6 +141,15 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
   `onError`, `evt-status-error` only by `onStatusChange('error')`, and `evt-onError-repeated`
   by a second `onError` in one scenario. An async failure (a 404, on both platforms)
   reports both events, but `onError` only once (#5083); the error flows assert all three.
+  `smoke-error-mid-playback.yaml` does the same for a failure after `onLoad`: its HLS
+  fixture (`missing-segment/`) has two real segments and then a 404. It asserts on
+  Android only. On iOS (Simulator, iOS 26.5) AVPlayer handles this source in one of two
+  ways. Usually it does not fail the item: `AVPlayerItem.status` stays `.readyToPlay`, no
+  `AVPlayerItemFailedToPlayToEndTime` is posted, the 404 only shows up as an
+  `AVPlayerItemNewErrorLogEntry` (CoreMediaErrorDomain -12938), and playback ends after
+  the second segment with `onEnd`. The library reports item and player failures, not
+  error-log entries, so there is no `onError`. Sometimes (seen on the first launch after
+  an install) the item fails before `onLoad`, with one `onError`.
 - **`initializeOnCreation: true` (the default) defers the `useVideoPlayer` setup callback**
   until the native load reaches `onLoadStart`/`onStatusChange`; a source that fails
   immediately never gets there, so no listener is ever attached. Every scenario source sets
