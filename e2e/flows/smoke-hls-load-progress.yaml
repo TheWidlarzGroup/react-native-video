@@ -1,0 +1,19 @@
+# HLS VOD: manifest parses, playback starts, progress advances past 2 s
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: hls
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 40000            # HLS: manifest + first segments over local HTTP; slow hosted simulators
+- extendedWaitUntil:
+    visible:
+      id: "evt-progress-gt-2s"
+    timeout: 15000
+- assertNotVisible:
+    id: "evt-onError"

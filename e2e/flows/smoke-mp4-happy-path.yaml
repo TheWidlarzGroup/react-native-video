@@ -1,0 +1,24 @@
+# mp4 happy path: load -> progress -> natural end (fixture is 8 s)
+# Run: maestro test -e APP_ID=<bundle/package id> e2e/flows/smoke-mp4-happy-path.yaml
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 20000            # generous: emulator software decoder cold start
+- extendedWaitUntil:
+    visible:
+      id: "evt-progress-gt-2s"
+    timeout: 15000
+- extendedWaitUntil:
+    visible:
+      id: "evt-onEnded"
+    timeout: 20000            # clip is 8 s; must arrive well within this
+- assertNotVisible:
+    id: "evt-onError"
