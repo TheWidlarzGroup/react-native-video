@@ -87,6 +87,51 @@ test('removing the onError subscription removes the native listener too', () => 
   expect(nativeErrorSubscriptionRemoved).toBe(true);
 });
 
+test('a callback added twice gets one native error once, and one remove() detaches it', () => {
+  const events = new VideoPlayerEvents(fakeEmitter);
+  const received: unknown[] = [];
+  const callback = (error: unknown) => received.push(error);
+  const subscription = events.addEventListener('onError', callback);
+  events.addEventListener('onError', callback);
+
+  reportNativeError(NOT_FOUND);
+  expect(received).toHaveLength(1);
+
+  subscription.remove();
+  reportNativeError(NOT_FOUND);
+
+  expect(received).toHaveLength(1);
+  expect(nativeErrorListeners.size).toBe(0);
+});
+
+test('the native listener stays while another onError listener is subscribed', () => {
+  const events = new VideoPlayerEvents(fakeEmitter);
+  const first: unknown[] = [];
+  const second: unknown[] = [];
+  const subscription = events.addEventListener('onError', (error) =>
+    first.push(error)
+  );
+  events.addEventListener('onError', (error) => second.push(error));
+
+  subscription.remove();
+  reportNativeError(NOT_FOUND);
+
+  expect(first).toHaveLength(0);
+  expect(second).toHaveLength(1);
+});
+
+test('onError listeners added after clearAllEvents get native errors again', () => {
+  const events = new VideoPlayerEvents(fakeEmitter);
+  events.addEventListener('onError', () => {});
+  events.clearAllEvents();
+
+  const received: unknown[] = [];
+  events.addEventListener('onError', (error) => received.push(error));
+  reportNativeError(NOT_FOUND);
+
+  expect(received).toHaveLength(1);
+});
+
 test('a native message containing "@" still reaches onError with its code', () => {
   const events = new VideoPlayerEvents(fakeEmitter);
   const received: unknown[] = [];
