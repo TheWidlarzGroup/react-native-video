@@ -69,7 +69,7 @@ The `VideoPlayer` class, through `VideoPlayerEvents`, supports the following eve
 Additionally, the `VideoPlayer` instance itself has an `onError` property:
 
 -   `onError: (error: ` [VideoRuntimeError](../api-reference/interfaces/VideoRuntimeError.md) `) => void` - Fired when an error occurs. The callback receives the `VideoRuntimeError` object.
-    `onError` also fires when the source fails to load asynchronously (e.g. HTTP 404) or playback fails, with code `player/playback-failed` on iOS and Android; `onStatusChange('error')` fires as well. On web these failures carry a `web/*` code instead (`web/aborted`, `web/network`, `web/decode`, `web/unsupported-source`).
+    `onError` also fires when the source fails to load asynchronously (e.g. HTTP 404) or playback fails, with code `player/playback-failed` on iOS and Android; `onStatusChange('error')` fires as well. On web these failures carry a `web/*` code instead (`web/aborted`, `web/network`, `web/decode`, `web/unsupported-source`), or `unknown/unknown` when the browser reports no known cause.
 
 **Benefits of `useEvent`**:
 
