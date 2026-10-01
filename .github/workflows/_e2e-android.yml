@@ -129,7 +129,20 @@ jobs:
 
       # x86_64 only: that is the emulator ABI; the other three would be built and thrown away.
       - name: Build test app APK
-        run: cd test-app/android && ./gradlew assembleDebug --build-cache --no-daemon -PreactNativeArchitectures=x86_64
+        working-directory: test-app/android
+        run: |
+          set -euo pipefail
+          for attempt in 1 2; do
+            if ./gradlew assembleDebug --build-cache --no-daemon -PreactNativeArchitectures=x86_64 2>&1 | tee "gradle-attempt-${attempt}.log"; then
+              exit 0
+            fi
+            if [ "$attempt" -eq 2 ] || ! grep -qE 'Received status code (403|429|5[0-9]{2}) from server' "gradle-attempt-${attempt}.log"; then
+              exit 1
+            fi
+            echo "dependency download failed (attempt ${attempt}/2), retrying in 30 s" >&2
+            sleep 30
+          done
+          exit 1
 
       # Without the intent filter every flow fails at openLink with "unable to resolve
       # Intent"; fail here instead, with both manifests in the log.

@@ -19,20 +19,31 @@ tags: [smoke]
 # for the end first makes the tap land on an idle player on both platforms. The mute
 # markers still require the press, so nothing here passes vacuously.
 - runFlow: ../shared/wait-for-end.yaml
-- tapOn:
-    id: "btn-mute"
+# press.yaml re-sends a tap the app never received (a tap lost in transport is what
+# turned this flow red in nightly); the markers below are still asserted exactly once.
+- runFlow:
+    file: ../shared/press.yaml
+    env:
+      BUTTON: btn-mute
+      NTH: 1
 - extendedWaitUntil:
     visible:
       id: "evt-muted"
     timeout: 5000
-- tapOn:
-    id: "btn-unmute"
+- runFlow:
+    file: ../shared/press.yaml
+    env:
+      BUTTON: btn-unmute
+      NTH: 1
 - extendedWaitUntil:
     visible:
       id: "evt-unmuted"
     timeout: 5000
-- tapOn:
-    id: "btn-volume-low"
+- runFlow:
+    file: ../shared/press.yaml
+    env:
+      BUTTON: btn-volume-low
+      NTH: 1
 - extendedWaitUntil:
     visible:
       id: "evt-volume-low"

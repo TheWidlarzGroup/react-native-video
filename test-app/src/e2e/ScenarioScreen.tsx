@@ -128,7 +128,7 @@ export function ScenarioScreen({ scenario }: { scenario: ScenarioName }) {
             testID={id}
             title={title}
             onPress={() => {
-              eventLog.log(`press:${title}`);
+              eventLog.press(id, title);
               press(player);
             }}
           />

@@ -1,9 +1,11 @@
 /**
  * Minimal event log store for E2E.
  * Design goal: expose player state as TEXT with stable testIDs so Maestro can assert on it.
- * Two surfaces:
+ * Three surfaces:
  *  - markers: monotonic booleans ("this event type has happened at least once",
  *    or a derived condition like progress > 2s). Constant testIDs -> trivial assertions.
+ *  - presses: how many times each control was pressed, rendered as one marker per press
+ *    (`pressed-<testID>-<n>`) so a flow can prove its tap arrived.
  *  - entries: human-readable chronological log (debugging, screenshots in CI artifacts).
  *
  * All marker derivation happens in `handle()`, a pure function of the event sequence, so
@@ -72,6 +74,10 @@ type State = {
   // replaced on every change and never mutated in place.
   markers: ReadonlySet<MarkerId>;
   entries: readonly LogEntry[];
+  // Presses per control testID. EventLogPanel renders `pressed-<testID>-<n>` for every
+  // n up to the count, so a flow can wait for a specific press (e2e/shared/press.yaml)
+  // on a marker that never scrolls out of view, unlike the log below.
+  presses: ReadonlyMap<string, number>;
   errorCode: string;
   // Derived-marker bookkeeping.
   endCount: number;
@@ -83,6 +89,7 @@ type State = {
 const initialState = (): State => ({
   markers: new Set(),
   entries: [],
+  presses: new Map(),
   errorCode: '',
   endCount: 0,
   loopEnabled: false,
@@ -226,6 +233,15 @@ export const eventLog = {
     append(line);
     emit();
   },
+  // Called synchronously in a control's onPress, before the control touches the player.
+  press(id: string, title: string) {
+    state.presses = new Map(state.presses).set(
+      id,
+      (state.presses.get(id) ?? 0) + 1
+    );
+    append(`press:${title}`);
+    emit();
+  },
   // Called by btn-loop-on: the wrap-around rule in handle only applies while loop is on.
   setLoopEnabled(enabled: boolean) {
     state.loopEnabled = enabled;
@@ -236,6 +252,7 @@ export const eventLog = {
   },
   getMarkers: (): ReadonlySet<MarkerId> => state.markers,
   getEntries: (): readonly LogEntry[] => state.entries,
+  getPresses: (): ReadonlyMap<string, number> => state.presses,
   getErrorCode: (): string => state.errorCode,
   subscribe(listener: () => void) {
     listeners.add(listener);
