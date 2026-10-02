@@ -144,7 +144,9 @@ enum RCTPlayerOperations {
             return
         }
 
-        if !paused { player.pause() }
+        if !paused {
+            player.pause()
+        }
 
         player.seek(
             to: cmSeekTime, toleranceBefore: tolerance, toleranceAfter: tolerance,
