@@ -45,7 +45,14 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
     )
   }
 
+  /// A failed item can still fire buffer callbacks. They must not move the status out of
+  /// `.error`, or the next failure callback would report the same failure again.
+  private var hasFailed: Bool {
+    player.status == .failed || playerItem?.status == .failed
+  }
+
   func onPlaybackBufferEmpty() {
+    guard !hasFailed else { return }
     isCurrentlyBuffering = true
     status = .loading
     updateAndEmitPlaybackState()
@@ -58,6 +65,7 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
   }
 
   func onPlaybackLikelyToKeepUp() {
+    guard !hasFailed else { return }
     isCurrentlyBuffering = false
     if player.timeControlStatus != .waitingToPlayAtSpecifiedRate {
       status = .readytoplay
@@ -71,7 +79,7 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
 
   func onTimeControlStatusChanged(status: AVPlayer.TimeControlStatus) {
     if player.status == .failed || playerItem?.status == .failed {
-      self.status = .error
+      reportAsyncError(playerItem?.error ?? player.error)
       isCurrentlyBuffering = false
       _eventEmitter?.onPlaybackStateChange(
         .init(isPlaying: false, isBuffering: false)
@@ -109,7 +117,7 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
 
   func onPlayerStatusChanged(status: AVPlayer.Status) {
     if status == .failed || playerItem?.status == .failed {
-      self.status = .error
+      reportAsyncError(playerItem?.error ?? player.error)
       isCurrentlyBuffering = false
       updateAndEmitPlaybackState()
     }
@@ -117,7 +125,7 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
 
   func onPlayerItemStatusChanged(status: AVPlayerItem.Status) {
     if status == .failed {
-      self.status = .error
+      reportAsyncError(playerItem?.error ?? player.error)
       isCurrentlyBuffering = false
       updateAndEmitPlaybackState()
       return
@@ -156,7 +164,7 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
       }
 
     case .failed:
-      self.status = .error
+      reportAsyncError(playerItem?.error ?? player.error)
       isCurrentlyBuffering = false
 
     @unknown default:

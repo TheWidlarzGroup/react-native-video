@@ -39,6 +39,7 @@ enum PlayerError: VideoError {
   case invalidSource
   case invalidTrackUrl(url: String)
   case cancelled
+  case playbackFailed(error: Error?)
   
   var code: String {
     switch self {
@@ -52,6 +53,8 @@ enum PlayerError: VideoError {
       return "player/invalid-track-url"
     case .cancelled:
       return "player/cancelled"
+    case .playbackFailed:
+      return "player/playback-failed"
     }
   }
   
@@ -67,6 +70,11 @@ enum PlayerError: VideoError {
       return "Invalid track URL: \(url)"
     case .cancelled:
       return "Operation was cancelled"
+    case let .playbackFailed(error: error):
+      guard let error = error as NSError? else {
+        return "Playback failed"
+      }
+      return "\(error.domain) \(error.code): \(error.localizedDescription)"
     }
   }
 }
@@ -162,7 +170,7 @@ protocol VideoError {
 }
 
 extension VideoError {
-  private func getMessage() -> String {
+  func getMessage() -> String {
     return "{%@\(code)::\(message)@%}"
   }
 

@@ -3,26 +3,56 @@ import type {
   AllPlayerEvents as PlayerEvents,
 } from '../types/Events';
 import type { ListenerSubscription } from '../types/EventEmitter';
+import {
+  tryParseNativeVideoError,
+  VideoError,
+  VideoRuntimeError,
+} from '../types/VideoError';
 import { VideoPlayerEventsBase } from './VideoPlayerEventsBase';
 
 export class VideoPlayerEvents extends VideoPlayerEventsBase {
+  // One native subscription feeds every `onError` listener, so a callback added twice
+  // is called once per failure, like for errors raised in JS.
+  private nativeErrorSubscription?: ListenerSubscription;
+
   addEventListener<Event extends keyof PlayerEvents>(
     event: Event,
     callback: PlayerEvents[Event]
   ): ListenerSubscription {
     switch (event) {
       // --- JS-only events ---
-      case 'onError':
+      case 'onError': {
         this.jsEventListeners.onError ??= new Set();
         this.jsEventListeners.onError.add(
           callback as JSVideoPlayerEvents['onError']
         );
+        // Asynchronous native failures (e.g. a source that fails to load) have no
+        // promise to reject, so native reports them through the emitter instead.
+        this.nativeErrorSubscription ??= this.eventEmitter.addOnErrorListener(
+          (nativeError) => {
+            const parsed = tryParseNativeVideoError({ message: nativeError });
+            // A payload that does not parse is still a failure: report it rather
+            // than drop it, so `onError` never stays silent.
+            // A parsed error keeps its own code, whatever its class. Native only sends
+            // `player/*` codes here, so a `view/*` error is not expected.
+            const error =
+              parsed instanceof VideoError
+                ? (parsed as VideoRuntimeError)
+                : new VideoRuntimeError('player/playback-failed', nativeError);
+            this.triggerJSEvent('onError', error);
+          }
+        );
         return {
-          remove: () =>
-            this.jsEventListeners.onError?.delete(
-              callback as JSVideoPlayerEvents['onError']
-            ),
+          remove: () => {
+            const listeners = this.jsEventListeners.onError;
+            listeners?.delete(callback as JSVideoPlayerEvents['onError']);
+            if (!listeners?.size) {
+              this.nativeErrorSubscription?.remove();
+              this.nativeErrorSubscription = undefined;
+            }
+          },
         };
+      }
       // --- Shared events ---
       case 'onBuffer':
         return this.eventEmitter.addOnBufferListener(
@@ -104,5 +134,11 @@ export class VideoPlayerEvents extends VideoPlayerEventsBase {
       default:
         throw new Error(`[React Native Video] Unsupported event: ${event}`);
     }
+  }
+
+  clearAllEvents() {
+    super.clearAllEvents();
+    // The native listener is gone with the others: subscribe again on the next `onError`.
+    this.nativeErrorSubscription = undefined;
   }
 }
