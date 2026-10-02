@@ -117,6 +117,10 @@ abstract class HybridVideoPlayerSpec: HybridObject() {
   @get:Keep
   abstract val selectedTrack: TextTrack?
 
+  @get:DoNotStrip
+  @get:Keep
+  abstract val selectedVideoTrackId: String?
+
   // Methods
   @DoNotStrip
   @Keep
@@ -129,7 +133,15 @@ abstract class HybridVideoPlayerSpec: HybridObject() {
   @DoNotStrip
   @Keep
   abstract fun selectTextTrack(textTrack: Variant_NullType_TextTrack?): Unit
-  
+
+  @DoNotStrip
+  @Keep
+  abstract fun getAvailableVideoTracks(): Array<VideoTrack>
+
+  @DoNotStrip
+  @Keep
+  abstract fun selectVideoTrack(trackId: String?): Unit
+
   @DoNotStrip
   @Keep
   abstract fun release(): Unit

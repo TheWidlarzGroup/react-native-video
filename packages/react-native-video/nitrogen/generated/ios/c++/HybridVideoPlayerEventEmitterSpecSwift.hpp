@@ -38,6 +38,10 @@ namespace margelo::nitro::video { struct TimedMetadata; }
 namespace margelo::nitro::video { struct TimedMetadataObject; }
 // Forward declaration of `TextTrack` to properly resolve imports.
 namespace margelo::nitro::video { struct TextTrack; }
+// Forward declaration of `VideoTrackChangeData` to properly resolve imports.
+namespace margelo::nitro::video { struct VideoTrackChangeData; }
+// Forward declaration of `VideoTrack` to properly resolve imports.
+namespace margelo::nitro::video { struct VideoTrack; }
 // Forward declaration of `onVolumeChangeData` to properly resolve imports.
 namespace margelo::nitro::video { struct onVolumeChangeData; }
 
@@ -61,6 +65,8 @@ namespace margelo::nitro::video { struct onVolumeChangeData; }
 #include <NitroModules/Null.hpp>
 #include "TextTrack.hpp"
 #include <variant>
+#include "VideoTrackChangeData.hpp"
+#include "VideoTrack.hpp"
 #include "onVolumeChangeData.hpp"
 
 #include "ReactNativeVideo-Swift-Cxx-Umbrella.hpp"
@@ -259,6 +265,14 @@ namespace margelo::nitro::video {
     }
     inline ListenerSubscription addOnTrackChangeListener(const std::function<void(const std::optional<std::variant<nitro::NullType, TextTrack>>& /* track */)>& listener) override {
       auto __result = _swiftPart.addOnTrackChangeListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline ListenerSubscription addOnVideoTrackChangeListener(const std::function<void(const VideoTrackChangeData& /* data */)>& listener) override {
+      auto __result = _swiftPart.addOnVideoTrackChangeListener(listener);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

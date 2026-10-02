@@ -5,6 +5,7 @@ import {
   useVideoPlayer,
   VideoView,
   type VideoPlayer,
+  type VideoTrack,
 } from 'react-native-video';
 import { eventLog, PROGRESS_MARKER_SECONDS } from './eventLog';
 import { EventLogPanel } from './EventLogPanel';
@@ -144,6 +145,23 @@ const CONTROLS: Control[] = [
     },
   },
   {
+    id: 'btn-quality-low',
+    title: 'quality low',
+    press: (p) => {
+      const lowest = p
+        .getAvailableVideoTracks()
+        .reduce<
+          VideoTrack | undefined
+        >((min, t) => (min === undefined || (t.height ?? Infinity) < (min.height ?? Infinity) ? t : min), undefined);
+      if (lowest) p.selectVideoTrack(lowest.id);
+    },
+  },
+  {
+    id: 'btn-quality-auto',
+    title: 'quality auto',
+    press: (p) => p.selectVideoTrack(),
+  },
+  {
     id: 'btn-loop-on',
     title: 'loop',
     press: (p) => {
@@ -184,6 +202,15 @@ function logPlayerEvents(player: VideoPlayer) {
   );
   player.addEventListener('onPlaybackRateChange', (rate) =>
     eventLog.handle({ type: 'onPlaybackRateChange', rate })
+  );
+  player.addEventListener(
+    'onVideoTrackChange',
+    ({ availableTracks, selectedTrackId }) =>
+      eventLog.handle({
+        type: 'onVideoTrackChange',
+        tracks: availableTracks,
+        selectedTrackId,
+      })
   );
 }
 
