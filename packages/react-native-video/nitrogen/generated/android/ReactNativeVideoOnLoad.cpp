@@ -23,6 +23,7 @@
 #include "JFunc_void_BandwidthData.hpp"
 #include "JFunc_void_onLoadData.hpp"
 #include "JFunc_void_onLoadStartData.hpp"
+#include "JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload.hpp"
 #include "JFunc_void_onPlaybackStateChangeData.hpp"
 #include "JFunc_void_double.hpp"
 #include "JFunc_void_onProgressData.hpp"
@@ -31,8 +32,13 @@
 #include "JFunc_void_std__vector_std__string_.hpp"
 #include "JFunc_void_std__optional_std__variant_nitro__NullType__TextTrack__.hpp"
 #include "JFunc_void_onVolumeChangeData.hpp"
+#include "JFunc_void_AdsResolvedEvent.hpp"
+#include "JFunc_void_AdBreakEvent.hpp"
+#include "JFunc_void_AdProgressInfo.hpp"
+#include "JFunc_void_AdInfo.hpp"
+#include "JFunc_void_AdErrorEvent.hpp"
+#include "JFunc_void_VideoAdState.hpp"
 #include "JHybridVideoPlayerSourceSpec.hpp"
-#include "JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload.hpp"
 #include "JHybridVideoPlayerSourceFactorySpec.hpp"
 #include "JHybridVideoViewViewManagerSpec.hpp"
 #include "JHybridVideoViewViewManagerFactorySpec.hpp"
@@ -84,6 +90,7 @@ void registerAllNatives() {
   margelo::nitro::video::JFunc_void_BandwidthData_cxx::registerNatives();
   margelo::nitro::video::JFunc_void_onLoadData_cxx::registerNatives();
   margelo::nitro::video::JFunc_void_onLoadStartData_cxx::registerNatives();
+  margelo::nitro::video::JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload_cxx::registerNatives();
   margelo::nitro::video::JFunc_void_onPlaybackStateChangeData_cxx::registerNatives();
   margelo::nitro::video::JFunc_void_double_cxx::registerNatives();
   margelo::nitro::video::JFunc_void_onProgressData_cxx::registerNatives();
@@ -92,8 +99,13 @@ void registerAllNatives() {
   margelo::nitro::video::JFunc_void_std__vector_std__string__cxx::registerNatives();
   margelo::nitro::video::JFunc_void_std__optional_std__variant_nitro__NullType__TextTrack___cxx::registerNatives();
   margelo::nitro::video::JFunc_void_onVolumeChangeData_cxx::registerNatives();
+  margelo::nitro::video::JFunc_void_AdsResolvedEvent_cxx::registerNatives();
+  margelo::nitro::video::JFunc_void_AdBreakEvent_cxx::registerNatives();
+  margelo::nitro::video::JFunc_void_AdProgressInfo_cxx::registerNatives();
+  margelo::nitro::video::JFunc_void_AdInfo_cxx::registerNatives();
+  margelo::nitro::video::JFunc_void_AdErrorEvent_cxx::registerNatives();
+  margelo::nitro::video::JFunc_void_VideoAdState_cxx::registerNatives();
   margelo::nitro::video::JHybridVideoPlayerSourceSpec::CxxPart::registerNatives();
-  margelo::nitro::video::JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload_cxx::registerNatives();
   margelo::nitro::video::JHybridVideoPlayerSourceFactorySpec::CxxPart::registerNatives();
   margelo::nitro::video::JHybridVideoViewViewManagerSpec::CxxPart::registerNatives();
   margelo::nitro::video::JHybridVideoViewViewManagerFactorySpec::CxxPart::registerNatives();

@@ -33,6 +33,18 @@ namespace margelo::nitro::video { struct TimedMetadata; }
 namespace margelo::nitro::video { struct TextTrack; }
 // Forward declaration of `onVolumeChangeData` to properly resolve imports.
 namespace margelo::nitro::video { struct onVolumeChangeData; }
+// Forward declaration of `AdsResolvedEvent` to properly resolve imports.
+namespace margelo::nitro::video { struct AdsResolvedEvent; }
+// Forward declaration of `AdBreakEvent` to properly resolve imports.
+namespace margelo::nitro::video { struct AdBreakEvent; }
+// Forward declaration of `AdProgressInfo` to properly resolve imports.
+namespace margelo::nitro::video { struct AdProgressInfo; }
+// Forward declaration of `AdInfo` to properly resolve imports.
+namespace margelo::nitro::video { struct AdInfo; }
+// Forward declaration of `AdErrorEvent` to properly resolve imports.
+namespace margelo::nitro::video { struct AdErrorEvent; }
+// Forward declaration of `VideoAdState` to properly resolve imports.
+namespace margelo::nitro::video { enum class VideoAdState; }
 
 #include "ListenerSubscription.hpp"
 #include <functional>
@@ -50,6 +62,12 @@ namespace margelo::nitro::video { struct onVolumeChangeData; }
 #include <variant>
 #include <optional>
 #include "onVolumeChangeData.hpp"
+#include "AdsResolvedEvent.hpp"
+#include "AdBreakEvent.hpp"
+#include "AdProgressInfo.hpp"
+#include "AdInfo.hpp"
+#include "AdErrorEvent.hpp"
+#include "VideoAdState.hpp"
 
 namespace margelo::nitro::video {
 
@@ -101,6 +119,17 @@ namespace margelo::nitro::video {
       virtual ListenerSubscription addOnTextTrackDataChangedListener(const std::function<void(const std::vector<std::string>& /* data */)>& listener) = 0;
       virtual ListenerSubscription addOnTrackChangeListener(const std::function<void(const std::optional<std::variant<nitro::NullType, TextTrack>>& /* track */)>& listener) = 0;
       virtual ListenerSubscription addOnVolumeChangeListener(const std::function<void(const onVolumeChangeData& /* data */)>& listener) = 0;
+      virtual ListenerSubscription addOnAdsResolvedListener(const std::function<void(const AdsResolvedEvent& /* data */)>& listener) = 0;
+      virtual ListenerSubscription addOnAdBreakStartListener(const std::function<void(const AdBreakEvent& /* data */)>& listener) = 0;
+      virtual ListenerSubscription addOnAdBreakEndListener(const std::function<void(const AdBreakEvent& /* data */)>& listener) = 0;
+      virtual ListenerSubscription addOnAdProgressListener(const std::function<void(const AdProgressInfo& /* data */)>& listener) = 0;
+      virtual ListenerSubscription addOnAdStartListener(const std::function<void(const AdInfo& /* data */)>& listener) = 0;
+      virtual ListenerSubscription addOnAdCompleteListener(const std::function<void(const AdInfo& /* data */)>& listener) = 0;
+      virtual ListenerSubscription addOnAdSkippedListener(const std::function<void(const AdInfo& /* data */)>& listener) = 0;
+      virtual ListenerSubscription addOnAdClickedListener(const std::function<void()>& listener) = 0;
+      virtual ListenerSubscription addOnAdErrorListener(const std::function<void(const AdErrorEvent& /* data */)>& listener) = 0;
+      virtual ListenerSubscription addOnAllAdsCompletedListener(const std::function<void()>& listener) = 0;
+      virtual ListenerSubscription addOnAdStateChangeListener(const std::function<void(VideoAdState /* state */)>& listener) = 0;
       virtual void clearAllListeners() = 0;
 
     protected:

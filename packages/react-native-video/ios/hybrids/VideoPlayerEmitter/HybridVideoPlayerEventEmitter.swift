@@ -119,6 +119,50 @@ class HybridVideoPlayerEventEmitter: HybridVideoPlayerEventEmitterSpec {
     addListener(eventName: "onVolumeChange", listener: listener)
   }
 
+  func addOnAdsResolvedListener(listener: @escaping (AdsResolvedEvent) -> Void) throws -> ListenerSubscription {
+    addListener(eventName: "onAdsResolved", listener: listener)
+  }
+
+  func addOnAdBreakStartListener(listener: @escaping (AdBreakEvent) -> Void) throws -> ListenerSubscription {
+    addListener(eventName: "onAdBreakStart", listener: listener)
+  }
+
+  func addOnAdBreakEndListener(listener: @escaping (AdBreakEvent) -> Void) throws -> ListenerSubscription {
+    addListener(eventName: "onAdBreakEnd", listener: listener)
+  }
+
+  func addOnAdProgressListener(listener: @escaping (AdProgressInfo) -> Void) throws -> ListenerSubscription {
+    addListener(eventName: "onAdProgress", listener: listener)
+  }
+
+  func addOnAdStartListener(listener: @escaping (AdInfo) -> Void) throws -> ListenerSubscription {
+    addListener(eventName: "onAdStart", listener: listener)
+  }
+
+  func addOnAdCompleteListener(listener: @escaping (AdInfo) -> Void) throws -> ListenerSubscription {
+    addListener(eventName: "onAdComplete", listener: listener)
+  }
+
+  func addOnAdSkippedListener(listener: @escaping (AdInfo) -> Void) throws -> ListenerSubscription {
+    addListener(eventName: "onAdSkipped", listener: listener)
+  }
+
+  func addOnAdClickedListener(listener: @escaping () -> Void) throws -> ListenerSubscription {
+    addListener(eventName: "onAdClicked", listener: listener)
+  }
+
+  func addOnAdErrorListener(listener: @escaping (AdErrorEvent) -> Void) throws -> ListenerSubscription {
+    addListener(eventName: "onAdError", listener: listener)
+  }
+
+  func addOnAllAdsCompletedListener(listener: @escaping () -> Void) throws -> ListenerSubscription {
+    addListener(eventName: "onAllAdsCompleted", listener: listener)
+  }
+
+  func addOnAdStateChangeListener(listener: @escaping (VideoAdState) -> Void) throws -> ListenerSubscription {
+    addListener(eventName: "onAdStateChange", listener: listener)
+  }
+
   func clearAllListeners() throws {
     listeners.removeAll()
   }
@@ -199,5 +243,49 @@ class HybridVideoPlayerEventEmitter: HybridVideoPlayerEventEmitterSpec {
 
   func onVolumeChange(_ data: onVolumeChangeData) {
     emitEvent(eventName: "onVolumeChange") { (callback: (onVolumeChangeData) throws -> Void) in try callback(data) }
+  }
+
+  func onAdsResolved(_ data: AdsResolvedEvent) {
+    emitEvent(eventName: "onAdsResolved") { (callback: (AdsResolvedEvent) throws -> Void) in try callback(data) }
+  }
+
+  func onAdBreakStart(_ data: AdBreakEvent) {
+    emitEvent(eventName: "onAdBreakStart") { (callback: (AdBreakEvent) throws -> Void) in try callback(data) }
+  }
+
+  func onAdBreakEnd(_ data: AdBreakEvent) {
+    emitEvent(eventName: "onAdBreakEnd") { (callback: (AdBreakEvent) throws -> Void) in try callback(data) }
+  }
+
+  func onAdProgress(_ data: AdProgressInfo) {
+    emitEvent(eventName: "onAdProgress") { (callback: (AdProgressInfo) throws -> Void) in try callback(data) }
+  }
+
+  func onAdStart(_ data: AdInfo) {
+    emitEvent(eventName: "onAdStart") { (callback: (AdInfo) throws -> Void) in try callback(data) }
+  }
+
+  func onAdComplete(_ data: AdInfo) {
+    emitEvent(eventName: "onAdComplete") { (callback: (AdInfo) throws -> Void) in try callback(data) }
+  }
+
+  func onAdSkipped(_ data: AdInfo) {
+    emitEvent(eventName: "onAdSkipped") { (callback: (AdInfo) throws -> Void) in try callback(data) }
+  }
+
+  func onAdClicked() {
+    emitEvent(eventName: "onAdClicked") { (callback: () throws -> Void) in try callback() }
+  }
+
+  func onAdError(_ data: AdErrorEvent) {
+    emitEvent(eventName: "onAdError") { (callback: (AdErrorEvent) throws -> Void) in try callback(data) }
+  }
+
+  func onAllAdsCompleted() {
+    emitEvent(eventName: "onAllAdsCompleted") { (callback: () throws -> Void) in try callback() }
+  }
+
+  func onAdStateChange(_ state: VideoAdState) {
+    emitEvent(eventName: "onAdStateChange") { (callback: (VideoAdState) throws -> Void) in try callback(state) }
   }
 }

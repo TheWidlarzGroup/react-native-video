@@ -12,6 +12,7 @@ import type {
 import type { WebVideoPlayer } from './types/WebVideoPlayer';
 import type { VideoPlayerSourceBase } from './types/VideoPlayerSourceBase';
 import type { VideoPlayerStatus } from './types/VideoPlayerStatus';
+import type { VideoAdState } from './types/VideoAdsConfig';
 import { VideoPlayerEvents } from './events/VideoPlayerEvents';
 import { MediaSessionHandler } from './web/MediaSession';
 import { WebEventEmitter } from './web/WebEventEmitter';
@@ -247,6 +248,17 @@ class VideoPlayer extends VideoPlayerEvents implements WebVideoPlayer {
     return false;
   }
   set disableAudioSessionManagement(_: boolean) {}
+
+  // Native Google IMA ad insertion is not implemented on web.
+  get isPlayingAd(): boolean {
+    return false;
+  }
+  get adState(): VideoAdState {
+    return 'idle';
+  }
+  async activateAds(): Promise<void> {}
+  deactivateAds(): void {}
+  skipAd(): void {}
 
   // --- Media Session ---
 

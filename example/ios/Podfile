@@ -8,6 +8,11 @@ require Pod::Executable.execute_command('node', ['-p',
 platform :ios, min_ios_version_supported
 prepare_react_native_project!
 
+# Link the Google IMA SDK into react-native-video so this example app exercises
+# the real client-side ad insertion path. Must be set before `use_native_modules!`
+# evaluates ReactNativeVideo.podspec.
+$RNVideoUseGoogleIMA = true
+
 
 ENV['RCT_NEW_ARCH_ENABLED'] = '1'
 if ENV['RCT_NEW_ARCH_ENABLED'] == '1'

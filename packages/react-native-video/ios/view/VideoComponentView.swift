@@ -142,6 +142,9 @@ import UIKit
       if let existingController = self.playerViewController,
         existingController.player === player
       {
+        // The controller may have been built before the player's ad session
+        // was configured (or before a source swap re-armed it).
+        self.attachAdContainer(to: existingController)
         return
       }
 
@@ -177,8 +180,27 @@ import UIKit
         playerView.addSubview(controller.view)
         controller.didMove(toParent: parentVC)
         self.playerViewController = controller
+
+        // The IMA ad UI (skip button, countdown, click-through) has to live in
+        // AVKit's contentOverlayView rather than a sibling view, so that it
+        // travels with AVKit's fullscreen re-parenting.
+        self.attachAdContainer(to: controller)
       }
     }
+  }
+
+  /// Hands the current player's ad container to this AVPlayerViewController.
+  /// Safe to call repeatedly.
+  func attachAdContainer(to controller: AVPlayerViewController) {
+    guard let player = player as? HybridVideoPlayer else { return }
+    player.adController?.attach(to: controller)
+  }
+
+  /// AVKit can rebuild `contentOverlayView`'s subtree across fullscreen and
+  /// PiP transitions, so the ad container is re-asserted afterwards.
+  func reassertAdContainer() {
+    guard let player = player as? HybridVideoPlayer else { return }
+    player.adController?.reassertAdContainer()
   }
 
   // Helper to find nearest UIViewController

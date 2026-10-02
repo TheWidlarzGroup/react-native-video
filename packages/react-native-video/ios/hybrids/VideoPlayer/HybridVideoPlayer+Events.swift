@@ -17,6 +17,11 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
     // Finished — don't resume it on return.
     wasPlayingInBackground = false
 
+    // Tell the ad SDK the content is over so it can play a post-roll. Without
+    // this, a post-roll scheduled by the ad tag never fires: the SDK only ever
+    // sees the content playhead stop short of the end.
+    adController?.contentDidComplete()
+
     if loop {
       currentTime = 0
       try? play()
@@ -210,6 +215,23 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
   }
 
   func updateAndEmitPlaybackState() {
+    // While an ad break is on screen the content player is deliberately paused
+    // underneath it and its item may not even be attached yet, so its rate and
+    // buffering state describe something the viewer cannot see. Report the ad's
+    // own state instead - which is what `isPlaying` (the property) already
+    // does, and what Android reports naturally because ads there share the
+    // content player. Without this, an app driving a play/pause button off
+    // `onPlaybackStateChange` sees `isPlaying: false` for the whole break and
+    // its "resume" call lands on `resumeAd()` of an already-playing ad, i.e.
+    // taps appear to do nothing at all.
+    if let adController, adController.isPlayingAd {
+      _eventEmitter?.onPlaybackStateChange(
+        .init(isPlaying: !adController.isAdPaused, isBuffering: false)
+      )
+      _eventEmitter?.onBuffer(false)
+      return
+    }
+
     let isPlaying = player.rate > 0 && !isCurrentlyBuffering
 
     _eventEmitter?.onPlaybackStateChange(
