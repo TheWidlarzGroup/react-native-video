@@ -31,6 +31,7 @@ public protocol HybridVideoPlayerEventEmitterSpec_protocol: HybridObject {
   func addOnTimedMetadataListener(listener: @escaping (_ data: TimedMetadata) -> Void) throws -> ListenerSubscription
   func addOnTextTrackDataChangedListener(listener: @escaping (_ data: [String]) -> Void) throws -> ListenerSubscription
   func addOnTrackChangeListener(listener: @escaping (_ track: Variant_NullType_TextTrack?) -> Void) throws -> ListenerSubscription
+  func addOnVideoTrackChangeListener(listener: @escaping (_ data: VideoTrackChangeData) -> Void) throws -> ListenerSubscription
   func addOnVolumeChangeListener(listener: @escaping (_ data: onVolumeChangeData) -> Void) throws -> ListenerSubscription
   func clearAllListeners() throws -> Void
 }

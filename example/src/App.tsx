@@ -19,6 +19,7 @@ import {
   ToggleButton,
 } from './components/Controls';
 import TextTrackManager from './components/TextTrackManager';
+import VideoQualityManager from './components/VideoQualityManager';
 import { styles } from './styles';
 import { type VideoSettings, defaultSettings } from './types/videoSettings';
 import { formatTime } from './utils/time';
@@ -365,6 +366,11 @@ const VideoDemo = () => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Text Tracks</Text>
         <TextTrackManager player={player} />
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Video Quality</Text>
+        <VideoQualityManager player={player} />
       </View>
 
       <View style={styles.section}>

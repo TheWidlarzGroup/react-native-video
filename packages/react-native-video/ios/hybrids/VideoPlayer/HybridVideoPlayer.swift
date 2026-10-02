@@ -285,6 +285,37 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   // Text track selection state
   private var selectedExternalTrackIndex: Int? = nil
 
+  // MARK: - Video track (quality) selection state
+  //
+  // Main-thread-only, like the ad gate state above. Quality selection is a pure
+  // imperative call on the live player: nothing here touches `source` or
+  // `bufferConfig`, so a quality pick can never make JS recreate the player.
+
+  /// The id the user pinned through `selectVideoTrack`, or nil for automatic.
+  /// Deliberately outlives the `AVPlayerItem` it was applied to - it is a
+  /// request about the source, and every source replacement builds a new item.
+  private var requestedVideoTrackId: String?
+
+  /// The current source's rendition ladder, best first. Empty for non-HLS
+  /// sources, and until the master playlist has been fetched.
+  private var cachedVideoRenditions: [VideoRendition] = []
+
+  /// Which URL `cachedVideoRenditions` describes. Fetching the master playlist
+  /// is a real extra HTTP request (AVPlayer fetches it too but exposes none of
+  /// it), so it is done once per source.
+  private var cachedVideoRenditionsURL: URL?
+  private var videoRenditionLoadTask: Task<Void, Never>?
+
+  /// The rendition actually on screen, nearest-matched from the access log.
+  private var activeVideoTrackId: String?
+
+  /// True while caps written by a pin are still on the item. Returning to Auto
+  /// needs to know it has something to undo, by which point
+  /// `requestedVideoTrackId` is already nil.
+  private var hasPinnedVideoQuality = false
+
+  private var videoQualityRecheckWorkItem: DispatchWorkItem?
+
   var isCurrentlyBuffering: Bool = false
 
   var isPlaying: Bool {
@@ -348,6 +379,16 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   }
 
   private func releaseOnMainThread() {
+    videoRenditionLoadTask?.cancel()
+    videoRenditionLoadTask = nil
+    videoQualityRecheckWorkItem?.cancel()
+    videoQualityRecheckWorkItem = nil
+    cachedVideoRenditions = []
+    cachedVideoRenditionsURL = nil
+    activeVideoTrackId = nil
+    requestedVideoTrackId = nil
+    hasPinnedVideoQuality = false
+
     playerObserver?.invalidatePlayerItemObservers()
     playerObserver?.invalidatePlayerObservers()
     playerObserver = nil
@@ -369,6 +410,10 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       if let bufferConfig = loadedPlayerItem.context.source.config.bufferConfig {
         loadedPlayerItem.item.setBufferConfig(config: bufferConfig)
       }
+
+      // Off-main manifest fetch for the quality ladder.
+      self.beginVideoRenditionLoad(for: loadedPlayerItem.context.source)
+
       self.player.replaceCurrentItem(with: loadedPlayerItem.item)
     }
   }
@@ -762,6 +807,218 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       language: selectedOption.locale?.identifier,
       selected: true
     )
+  }
+
+  // MARK: - Video Track (Quality) Management
+  //
+  // AVFoundation has no concept of "play this exact HLS variant". The closest it
+  // offers is a set of caps on the AVPlayerItem that constrain which variants
+  // its ABR algorithm may choose. Everything below is built on that, which is
+  // why the reported state distinguishes what was *requested*
+  // (`selectedTrackId`) from what is actually *playing* (`activeTrackId`).
+
+  func getAvailableVideoTracks() throws -> [VideoTrack] {
+    runOnMainThreadSync { videoTracksSnapshot() }
+  }
+
+  var selectedVideoTrackId: String? {
+    runOnMainThreadSync { requestedVideoTrackId }
+  }
+
+  func selectVideoTrack(trackId: String?) throws {
+    runOnMainThreadSync {
+      requestedVideoTrackId = trackId
+      // Applied right now if the item is already ready; otherwise the
+      // `.readyToPlay` hook in HybridVideoPlayer+Events.swift picks it up, since
+      // AVFoundation ignores these properties before then.
+      applyVideoQualityCaps()
+      emitVideoTrackChange()
+    }
+  }
+
+  private func videoTracksSnapshot() -> [VideoTrack] {
+    cachedVideoRenditions.map { $0.videoTrack(selected: $0.id == requestedVideoTrackId) }
+  }
+
+  private func emitVideoTrackChange() {
+    _eventEmitter?.onVideoTrackChange(
+      VideoTrackChangeData(
+        availableTracks: videoTracksSnapshot(),
+        selectedTrackId: requestedVideoTrackId,
+        activeTrackId: activeVideoTrackId
+      )
+    )
+  }
+
+  /// Fetches and caches the rendition ladder for a newly committed source.
+  /// Main thread only.
+  private func beginVideoRenditionLoad(for source: any HybridVideoPlayerSourceSpec) {
+    guard let url = (source as? NativeVideoPlayerSourceSpec)?.url else { return }
+    guard cachedVideoRenditionsURL != url else { return }
+
+    videoRenditionLoadTask?.cancel()
+    cachedVideoRenditionsURL = url
+    cachedVideoRenditions = []
+    activeVideoTrackId = nil
+
+    guard url.pathExtension == "m3u8" else {
+      // Progressive sources have a single rendition, so there is nothing to
+      // choose from and any pin carried over from a previous source is void.
+      requestedVideoTrackId = nil
+      applyVideoQualityCaps()
+      emitVideoTrackChange()
+      return
+    }
+
+    videoRenditionLoadTask = Task.detached(priority: .utility) { [weak self] in
+      let renditions = (try? await VideoTrackUtils.loadRenditions(from: url)) ?? []
+      guard !Task.isCancelled else { return }
+
+      await MainActor.run {
+        guard let self, self.cachedVideoRenditionsURL == url else { return }
+        self.cachedVideoRenditions = renditions
+        // A pin names a rung of a specific ladder. If the new source has no such
+        // rung, fall back to automatic rather than keep reporting a selection
+        // that cannot be honoured.
+        if let requested = self.requestedVideoTrackId,
+          !renditions.contains(where: { $0.id == requested })
+        {
+          self.requestedVideoTrackId = nil
+        }
+        self.applyVideoQualityCaps()
+        self.emitVideoTrackChange()
+      }
+    }
+  }
+
+  /// Hook for the `.readyToPlay` transition and for source replacement: a pin
+  /// outlives the item it was written to, so every new item has to have it
+  /// written again.
+  func applyVideoQualityCapsIfReady() {
+    runOnMainThreadSync { applyVideoQualityCaps() }
+  }
+
+  /// Main thread only.
+  private func applyVideoQualityCaps() {
+    // Deliberately the library's own committed content item, not
+    // `player.currentItem`: during an ad break the content item may not be
+    // attached at all, and capping whatever the player happens to be holding
+    // would write these properties onto the wrong item.
+    guard let item = playerItem else { return }
+    // On iOS 13+ these properties are ignored when set before the item is ready
+    // to play, and silently so - nothing reports the write was dropped.
+    guard item.status == .readyToPlay else { return }
+
+    videoQualityRecheckWorkItem?.cancel()
+    videoQualityRecheckWorkItem = nil
+
+    guard
+      let requestedVideoTrackId,
+      let index = cachedVideoRenditions.firstIndex(where: { $0.id == requestedVideoTrackId })
+    else {
+      guard hasPinnedVideoQuality else { return }
+      hasPinnedVideoQuality = false
+      clearVideoQualityCaps(on: item)
+      return
+    }
+
+    let rendition = cachedVideoRenditions[index]
+
+    // Deliberately not the rendition's own bitrate. AVFoundation does not
+    // document whether it compares `<` or `<=` against the cap, and an exact cap
+    // cannot separate the same-resolution/different-bitrate rendition pairs real
+    // ladders contain. The midpoint to the next-higher rendition admits this one
+    // and excludes the next. The top rendition has no next, so it gets headroom.
+    let cap: Double =
+      index == 0
+      ? Double(rendition.bitrate) * 1.5
+      : (Double(rendition.bitrate) + Double(cachedVideoRenditions[index - 1].bitrate)) / 2.0
+    let size = CGSize(width: rendition.width, height: rendition.height)
+
+    hasPinnedVideoQuality = true
+
+    // Two-step write. Setting these once is not reliable; zeroing first and
+    // writing the real values on a later runloop turn is.
+    zeroVideoQualityCaps(on: item)
+
+    DispatchQueue.main.async { [weak self, weak item] in
+      guard let self, let item else { return }
+      guard self.requestedVideoTrackId == rendition.id else { return }
+      self.writeVideoQualityCaps(cap: cap, size: size, on: item)
+      self.armVideoQualityRecheck(for: rendition, cap: cap, size: size)
+    }
+  }
+
+  private func zeroVideoQualityCaps(on item: AVPlayerItem) {
+    // Apple's documented "no limit" sentinels.
+    item.preferredPeakBitRate = 0
+    item.preferredPeakBitRateForExpensiveNetworks = 0
+    item.preferredMaximumResolution = .zero
+    item.preferredMaximumResolutionForExpensiveNetworks = .zero
+  }
+
+  private func clearVideoQualityCaps(on item: AVPlayerItem) {
+    zeroVideoQualityCaps(on: item)
+
+    // Auto must not silently defeat Data Saver: whatever caps the app configured
+    // through `bufferConfig` go straight back on.
+    if let bufferConfig = source.config.bufferConfig {
+      item.setBufferConfig(config: bufferConfig)
+    }
+  }
+
+  private func writeVideoQualityCaps(cap: Double, size: CGSize, on item: AVPlayerItem) {
+    item.preferredPeakBitRate = cap
+    item.preferredMaximumResolution = size
+    // The `ForExpensiveNetworks` variants take precedence over the base ones on
+    // cellular. Without them a manual pick would be silently overridden by Data
+    // Saver's cellular cap, and a manual pick is supposed to win outright.
+    item.preferredPeakBitRateForExpensiveNetworks = cap
+    item.preferredMaximumResolutionForExpensiveNetworks = size
+  }
+
+  /// One-shot re-application. AVFoundation is unreliable specifically when the
+  /// cap is *raised* - it will happily stay on the low variant it already has.
+  /// A seek would force the switch but re-buffers and stalls, which defeats the
+  /// point of a seamless quality change, so this only writes the caps once more
+  /// and otherwise lets `activeTrackId` report the truth.
+  private func armVideoQualityRecheck(for rendition: VideoRendition, cap: Double, size: CGSize) {
+    videoQualityRecheckWorkItem?.cancel()
+
+    let work = DispatchWorkItem { [weak self] in
+      guard let self else { return }
+      self.videoQualityRecheckWorkItem = nil
+      guard self.requestedVideoTrackId == rendition.id,
+        let item = self.playerItem,
+        let indicated = item.accessLog()?.events.last?.indicatedBitrate,
+        let actual = VideoTrackUtils.nearestRendition(to: indicated, in: self.cachedVideoRenditions),
+        actual.id != rendition.id
+      else { return }
+
+      self.writeVideoQualityCaps(cap: cap, size: size, on: item)
+    }
+
+    videoQualityRecheckWorkItem = work
+    DispatchQueue.main.asyncAfter(deadline: .now() + 4.0, execute: work)
+  }
+
+  /// Parallel hop off the access log that already feeds `onBandwidthUpdate`.
+  /// Only emits when the mapped rendition actually changes - the access log
+  /// fires often, and re-emitting an unchanged ladder on every entry would be
+  /// pure noise on the JS side.
+  func updateActiveVideoTrack(indicatedBitrate: Double) {
+    runOnMainThreadSync {
+      guard !cachedVideoRenditions.isEmpty else { return }
+      guard
+        let match = VideoTrackUtils.nearestRendition(
+          to: indicatedBitrate,
+          in: cachedVideoRenditions
+        ), match.id != activeVideoTrackId
+      else { return }
+
+      activeVideoTrackId = match.id
+      emitVideoTrackChange()
+    }
   }
 
   // MARK: - Memory Management
