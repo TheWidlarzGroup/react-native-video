@@ -82,9 +82,19 @@ class HLSManifestParser {
   }
 
   /// Parses M3U8 manifest content and returns parsed information
-  static func parseM3U8Manifest(_ content: String) throws -> HLSManifestInfo {
+  ///
+  /// `baseURL` is the URL the manifest itself was fetched from; when given, each
+  /// variant's URI (the line that follows its `#EXT-X-STREAM-INF`) is resolved
+  /// against it so callers get absolute rendition URLs. Passing `nil` keeps the
+  /// URI exactly as the manifest spelled it.
+  static func parseM3U8Manifest(_ content: String, baseURL: URL? = nil) throws -> HLSManifestInfo {
     let lines = content.components(separatedBy: .newlines)
     var info = HLSManifestInfo()
+
+    // Set while walking the lines: an `#EXT-X-STREAM-INF` tag declares a variant
+    // whose URI is the *next* non-blank, non-comment line, so the parsed
+    // attributes have to be held until that line is reached.
+    var pendingStreamIndex: Int?
 
     for line in lines {
       let trimmedLine = line.trimmingCharacters(in: .whitespaces)
@@ -103,7 +113,23 @@ class HLSManifestParser {
       if trimmedLine.hasPrefix("#EXT-X-STREAM-INF:") {
         let streamInfo = parseStreamInf(trimmedLine)
         info.streams.append(streamInfo)
+        pendingStreamIndex = info.streams.count - 1
+        continue
       }
+
+      guard let index = pendingStreamIndex else { continue }
+
+      // Blank lines and any other tag between the STREAM-INF and its URI are
+      // skipped rather than mistaken for the URI.
+      if trimmedLine.isEmpty || trimmedLine.hasPrefix("#") { continue }
+
+      if let baseURL {
+        info.streams[index].uri = URL(string: trimmedLine, relativeTo: baseURL)?.absoluteURL
+          ?? URL(string: trimmedLine)
+      } else {
+        info.streams[index].uri = URL(string: trimmedLine)
+      }
+      pendingStreamIndex = nil
     }
 
     if !info.isValid {
@@ -113,41 +139,63 @@ class HLSManifestParser {
     return info
   }
 
+  /// Splits an HLS attribute list on commas that are not inside a quoted string.
+  ///
+  /// Needed because attribute *values* legally contain commas
+  /// (`CODECS="avc1.4d4020,mp4a.40.2"`), and because a naive substring search for
+  /// `BANDWIDTH=` also matches inside `AVERAGE-BANDWIDTH=`.
+  static func splitAttributeList(_ attributes: Substring) -> [Substring] {
+    var parts: [Substring] = []
+    var insideQuotes = false
+    var startIndex = attributes.startIndex
+
+    var index = attributes.startIndex
+    while index < attributes.endIndex {
+      let character = attributes[index]
+      if character == "\"" {
+        insideQuotes.toggle()
+      } else if character == "," && !insideQuotes {
+        parts.append(attributes[startIndex..<index])
+        startIndex = attributes.index(after: index)
+      }
+      index = attributes.index(after: index)
+    }
+    parts.append(attributes[startIndex...])
+
+    return parts
+  }
+
   /// Parses EXT-X-STREAM-INF line to extract stream information
   private static func parseStreamInf(_ line: String) -> HLSStreamInfo {
     var streamInfo = HLSStreamInfo()
 
-    // Parse RESOLUTION
-    if let resolutionRange = line.range(of: "RESOLUTION=") {
-      let afterResolution = line[resolutionRange.upperBound...]
-      if let commaRange = afterResolution.range(of: ",") {
-        let resolutionValue = String(afterResolution[..<commaRange.lowerBound])
-        let components = resolutionValue.components(separatedBy: "x")
-        if components.count == 2 {
-          streamInfo.width = Int(components[0])
-          streamInfo.height = Int(components[1])
-        }
-      } else {
-        // Resolution is at the end of the line
-        let resolutionValue = String(afterResolution)
-        let components = resolutionValue.components(separatedBy: "x")
-        if components.count == 2 {
-          streamInfo.width = Int(components[0])
-          streamInfo.height = Int(components[1])
-        }
-      }
-    }
+    guard let colonIndex = line.firstIndex(of: ":") else { return streamInfo }
+    let attributes = line[line.index(after: colonIndex)...]
 
-    // Parse BANDWIDTH
-    if let bandwidthRange = line.range(of: "BANDWIDTH=") {
-      let afterBandwidth = line[bandwidthRange.upperBound...]
-      if let commaRange = afterBandwidth.range(of: ",") {
-        let bandwidthValue = String(afterBandwidth[..<commaRange.lowerBound])
-        streamInfo.bandwidth = Int(bandwidthValue)
-      } else {
-        // Bandwidth is at the end of the line
-        let bandwidthValue = String(afterBandwidth)
-        streamInfo.bandwidth = Int(bandwidthValue)
+    for attribute in splitAttributeList(attributes) {
+      guard let equalsIndex = attribute.firstIndex(of: "=") else { continue }
+      let key = attribute[..<equalsIndex].trimmingCharacters(in: .whitespaces)
+      var value = attribute[attribute.index(after: equalsIndex)...]
+        .trimmingCharacters(in: .whitespaces)
+      if value.hasPrefix("\"") && value.hasSuffix("\"") && value.count >= 2 {
+        value = String(value.dropFirst().dropLast())
+      }
+
+      // Exact key matches only - `BANDWIDTH` and `AVERAGE-BANDWIDTH` are
+      // different attributes and either may come first in the list.
+      switch key {
+      case "RESOLUTION":
+        let components = value.components(separatedBy: "x")
+        if components.count == 2 {
+          streamInfo.width = Int(components[0])
+          streamInfo.height = Int(components[1])
+        }
+      case "BANDWIDTH":
+        streamInfo.bandwidth = Int(value)
+      case "AVERAGE-BANDWIDTH":
+        streamInfo.averageBandwidth = Int(value)
+      default:
+        break
       }
     }
 
@@ -167,4 +215,8 @@ struct HLSStreamInfo {
   var width: Int?
   var height: Int?
   var bandwidth: Int?
+  var averageBandwidth: Int?
+  /// The variant playlist this `#EXT-X-STREAM-INF` points at, resolved against
+  /// the master playlist's URL when `parseM3U8Manifest` was given one.
+  var uri: URL?
 }

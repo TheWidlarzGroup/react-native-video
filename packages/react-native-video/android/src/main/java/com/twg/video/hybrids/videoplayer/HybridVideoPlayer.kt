@@ -5,6 +5,7 @@ import android.os.Looper
 import android.util.Log
 import androidx.annotation.MainThread
 import androidx.media3.common.C
+import androidx.media3.common.Format
 import androidx.media3.common.Metadata
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.PlaybackParameters
@@ -12,6 +13,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.Tracks
 import androidx.media3.common.text.CueGroup
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.DecoderReuseEvaluation
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
@@ -37,6 +39,7 @@ import com.twg.video.core.utils.Threading.mainThreadProperty
 import com.twg.video.core.utils.Threading.runOnMainThread
 import com.twg.video.core.utils.Threading.runOnMainThreadSync
 import com.twg.video.core.utils.VideoOrientationUtils
+import com.twg.video.core.utils.VideoTrackUtils
 import com.twg.video.view.VideoView
 import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicBoolean
@@ -100,6 +103,11 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
 
   // Text track selection state
   private var selectedExternalTrackIndex: Int? = null
+
+  // Video track (quality) selection state. The whole VideoTrack is kept, not just its id, so the
+  // pick can be resolved again by resolution/bitrate after the track set changes and ids shift.
+  private var requestedVideoTrack: VideoTrack? = null
+  private var lastVideoTrackChangeSignature: String? = null
 
   private companion object {
     const val PROGRESS_UPDATE_INTERVAL_MS = 250L
@@ -507,6 +515,18 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
         )
       )
     }
+
+    /**
+     * The renderer switching input format is the only reliable signal that the *rendition on
+     * screen* changed - onTracksChanged does not fire when adaptive selection moves within a group.
+     */
+    override fun onVideoInputFormatChanged(
+      eventTime: AnalyticsListener.EventTime,
+      format: Format,
+      decoderReuseEvaluation: DecoderReuseEvaluation?
+    ) {
+      emitVideoTrackChange()
+    }
   }
 
   private val playerListener = object : Player.Listener {
@@ -687,6 +707,8 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
 
     override fun onTracksChanged(tracks: Tracks) {
       super.onTracksChanged(tracks)
+      reapplyRequestedVideoTrack()
+      emitVideoTrackChange()
     }
   }
 
@@ -707,4 +729,70 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
 
   override val selectedTrack: TextTrack?
     get() = TextTrackUtils.getSelectedTrack(player, source)
+
+  // MARK: - Video Track (quality) Management
+
+  override fun getAvailableVideoTracks(): Array<VideoTrack> =
+    VideoTrackUtils.getAvailableVideoTracks(player)
+
+  override fun selectVideoTrack(trackId: String?) {
+    requestedVideoTrack = if (trackId == null) {
+      VideoTrackUtils.selectVideoTrack(player, null)
+      null
+    } else {
+      // Remember the request even when it doesn't resolve yet: a pick made before the tracks are
+      // known is applied by onTracksChanged as soon as they are.
+      VideoTrackUtils.selectVideoTrack(player, trackId)
+        ?: VideoTrackUtils.getAvailableVideoTracks(player).firstOrNull { it.id == trackId }
+        ?: VideoTrack(
+          id = trackId,
+          label = trackId,
+          language = null,
+          selected = false,
+          width = null,
+          height = null,
+          bitrate = null,
+        )
+    }
+    emitVideoTrackChange(force = true)
+  }
+
+  override val selectedVideoTrackId: String?
+    get() = requestedVideoTrack?.id
+
+  /**
+   * Re-asserts the user's quality pick against the current track set.
+   *
+   * ExoPlayer silently drops a [androidx.media3.common.TrackSelectionOverride] whose media track
+   * group is gone, which is exactly what a track change means (new source, or content re-attaching
+   * after an ad break) - without this the player would quietly fall back to adaptive selection.
+   */
+  private fun reapplyRequestedVideoTrack() {
+    val desired = requestedVideoTrack ?: return
+    val available = VideoTrackUtils.getAvailableVideoTracks(player)
+    val match = VideoTrackUtils.findEquivalent(available, desired) ?: return
+    requestedVideoTrack = match
+    // Cheap when it's already in force: ExoPlayer no-ops on unchanged track selection parameters.
+    VideoTrackUtils.selectVideoTrack(player, match.id)
+  }
+
+  /**
+   * Emits onVideoTrackChange. Unless [force]d (a direct selectVideoTrack call, which always wants
+   * an ack), it stays quiet while the available set, the active track and the pick are all
+   * unchanged - onTracksChanged fires for unrelated reasons too.
+   */
+  private fun emitVideoTrackChange(force: Boolean = false) {
+    val available = VideoTrackUtils.getAvailableVideoTracks(player)
+    val activeId = available.firstOrNull { it.selected }?.id
+    val signature = "${available.joinToString("|") { it.id }}#$activeId#${requestedVideoTrack?.id}"
+    if (!force && signature == lastVideoTrackChangeSignature) return
+    lastVideoTrackChangeSignature = signature
+    eventEmitter.onVideoTrackChange(
+      VideoTrackChangeData(
+        availableTracks = available,
+        selectedTrackId = requestedVideoTrack?.id,
+        activeTrackId = activeId,
+      )
+    )
+  }
 }

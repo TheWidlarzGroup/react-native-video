@@ -66,6 +66,10 @@ namespace margelo::nitro::video { struct VideoInformation; }
 namespace margelo::nitro::video { enum class VideoOrientation; }
 // Forward declaration of `VideoPlayerStatus` to properly resolve imports.
 namespace margelo::nitro::video { enum class VideoPlayerStatus; }
+// Forward declaration of `VideoTrackChangeData` to properly resolve imports.
+namespace margelo::nitro::video { struct VideoTrackChangeData; }
+// Forward declaration of `VideoTrack` to properly resolve imports.
+namespace margelo::nitro::video { struct VideoTrack; }
 // Forward declaration of `onLoadData` to properly resolve imports.
 namespace margelo::nitro::video { struct onLoadData; }
 // Forward declaration of `onLoadStartData` to properly resolve imports.
@@ -107,6 +111,8 @@ namespace margelo::nitro::video { struct onVolumeChangeData; }
 #include "VideoInformation.hpp"
 #include "VideoOrientation.hpp"
 #include "VideoPlayerStatus.hpp"
+#include "VideoTrack.hpp"
+#include "VideoTrackChangeData.hpp"
 #include "onLoadData.hpp"
 #include "onLoadStartData.hpp"
 #include "onPlaybackStateChangeData.hpp"
