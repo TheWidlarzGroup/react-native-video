@@ -41,6 +41,8 @@
     "scripts": {
         "lint": "yarn eslint .",
         "build": "yarn tsc",
+        "tsc": "tsc -p tsconfig.json && yarn test:types",
+        "test:types": "tsc -p tests/types/tsconfig.json",
         "prepare": "yarn build",
         "xbasic": "yarn --cwd examples/basic",
         "docs": "yarn --cwd docs build",
