@@ -55,35 +55,37 @@ export const createSourceFromVideoConfig = (
     throw new VideoRuntimeError('source/invalid-uri', 'Invalid source URI');
   }
 
-  if (config.externalSubtitles) {
-    config.externalSubtitles = parseExternalSubtitles(config.externalSubtitles);
+  // Never write defaults back into the caller's object: useVideoPlayer keys the player
+  // on JSON.stringify(source), so mutating a config the caller keeps around (a module
+  // constant, a useMemo/useState value) would change that key on the next render and
+  // destroy and recreate the player.
+  const { externalSubtitles, drm, ...rest } = config;
+  const nativeConfig: NativeVideoConfig = {
+    ...rest,
+    // Set default value for initializeOnCreation (true)
+    initializeOnCreation: config.initializeOnCreation ?? true,
+  };
+
+  if (externalSubtitles) {
+    nativeConfig.externalSubtitles = parseExternalSubtitles(externalSubtitles);
   }
 
-  // Ensure platform-based default for DRM type if DRM is provided without a type
-  if (config.drm && config.drm.type === undefined) {
-    const defaultDrmType = Platform.select({
-      android: 'widevine',
-      ios: 'fairplay',
-      default: undefined,
-    });
-
-    if (defaultDrmType) {
-      config.drm = {
-        ...config.drm,
-        type: defaultDrmType,
-      };
-    }
-  }
-
-  // Set default value for initializeOnCreation (true)
-  if (config.initializeOnCreation === undefined) {
-    config.initializeOnCreation = true;
+  if (drm) {
+    // Ensure platform-based default for DRM type if DRM is provided without a type
+    const type =
+      drm.type ??
+      Platform.select({
+        android: 'widevine',
+        ios: 'fairplay',
+        default: undefined,
+      });
+    nativeConfig.drm = (
+      type ? { ...drm, type } : drm
+    ) as NativeVideoConfig['drm'];
   }
 
   try {
-    return VideoPlayerSourceFactory.fromVideoConfig(
-      config as NativeVideoConfig
-    );
+    return VideoPlayerSourceFactory.fromVideoConfig(nativeConfig);
   } catch (error) {
     throw tryParseNativeVideoError(error);
   }
