@@ -6,6 +6,7 @@ on:
       - master
     paths:
       - '.github/workflows/build-android.yml'
+      - '.github/actions/setup-node/**'
       - 'android/**'
       - 'examples/bare/android/**'
       - 'yarn.lock'
@@ -13,6 +14,7 @@ on:
   pull_request:
     paths:
       - '.github/workflows/build-android.yml'
+      - '.github/actions/setup-node/**'
       - 'android/**'
       - 'examples/bare/android/**'
       - 'yarn.lock'
