@@ -450,6 +450,23 @@ open class HybridVideoPlayerEventEmitterSpec_cxx {
   }
   
   @inline(__always)
+  public final func addOnAudioTrackChangeListener(listener: bridge.Func_void_AudioTrackChangeData) -> bridge.Result_ListenerSubscription_ {
+    do {
+      let __result = try self.__implementation.addOnAudioTrackChangeListener(listener: { () -> (AudioTrackChangeData) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_AudioTrackChangeData(listener)
+        return { (__data: AudioTrackChangeData) -> Void in
+          __wrappedFunction.call(__data)
+        }
+      }())
+      let __resultCpp = __result
+      return bridge.create_Result_ListenerSubscription_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_ListenerSubscription_(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
   public final func addOnVolumeChangeListener(listener: bridge.Func_void_onVolumeChangeData) -> bridge.Result_ListenerSubscription_ {
     do {
       let __result = try self.__implementation.addOnVolumeChangeListener(listener: { () -> (onVolumeChangeData) -> Void in

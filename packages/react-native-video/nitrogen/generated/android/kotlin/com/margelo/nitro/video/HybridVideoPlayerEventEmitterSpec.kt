@@ -191,6 +191,15 @@ abstract class HybridVideoPlayerEventEmitterSpec: HybridObject() {
     return __result
   }
   
+  abstract fun addOnAudioTrackChangeListener(listener: (data: AudioTrackChangeData) -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnAudioTrackChangeListener_cxx(listener: Func_void_AudioTrackChangeData): ListenerSubscription {
+    val __result = addOnAudioTrackChangeListener(listener)
+    return __result
+  }
+  
   abstract fun addOnVolumeChangeListener(listener: (data: onVolumeChangeData) -> Unit): ListenerSubscription
   
   @DoNotStrip
