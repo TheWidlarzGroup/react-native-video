@@ -253,9 +253,12 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
       .setLooper(Looper.getMainLooper())
       .setRenderersFactory(renderersFactory)
       .build()
-    // The player built in the property initializer is only a placeholder. Move any attached view to
-    // the new player and release the old one, otherwise every VideoPlayer leaks an idle ExoPlayer.
+    // Release the previous player (the placeholder, or an earlier one if initialize() runs again)
+    // so it doesn't leak. Remove the listeners first, like completeRelease(), so a release timeout
+    // doesn't report an error on this player.
     currentPlayerView?.get()?.player = player
+    previousPlayer.removeListener(playerListener)
+    previousPlayer.removeAnalyticsListener(analyticsListener)
     previousPlayer.release()
 
     loadedWithSource = true
