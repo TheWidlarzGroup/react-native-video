@@ -48,6 +48,7 @@
         "docs:llms-full": "node scripts/generate-llms-full.js",
         "release": "release-it",
         "test": "echo no test available",
+        "test:web": "yarn build && node --test tests/Video.web.test.mjs",
         "check-ios": "scripts/swift-format.sh && scripts/swift-lint.sh && scripts/clang-format.sh",
         "check-android": "scripts/kotlin-lint.sh",
         "check-all": "yarn check-android; yarn check-ios; yarn lint",
