@@ -10,6 +10,10 @@ declare module 'bun:test' {
   export function beforeEach(fn: Hook): void;
   export function afterEach(fn: Hook): void;
 
+  export const mock: {
+    module(specifier: string, factory: () => unknown): void;
+  };
+
   export interface Matchers {
     toBe(expected: unknown): void;
     toEqual(expected: unknown): void;
@@ -18,10 +22,29 @@ declare module 'bun:test' {
     toMatch(expected: string | RegExp): void;
     toContain(expected: unknown): void;
     toBeNull(): void;
+    toBeDefined(): void;
     toBeUndefined(): void;
-    toThrow(expected?: string | RegExp | Error): void;
+    toBeGreaterThan(expected: number): void;
+    toBeLessThan(expected: number): void;
+    toThrow(
+      expected?:
+        | string
+        | RegExp
+        | Error
+        | (abstract new (...args: never[]) => Error),
+    ): void;
     not: Matchers;
+    resolves: AsyncMatchers;
   }
+
+  // `expect(promise).resolves.<matcher>()` awaits the promise, so every matcher is async.
+  type AsyncMatchers = {
+    [K in Exclude<keyof Matchers, 'not' | 'resolves'>]: Matchers[K] extends (
+      ...args: infer A
+    ) => void
+      ? (...args: A) => Promise<void>
+      : never;
+  };
 
   export function expect(actual: unknown): Matchers;
 }
