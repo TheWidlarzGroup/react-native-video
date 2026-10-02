@@ -398,3 +398,49 @@ describe('handle', () => {
     });
   });
 });
+
+describe('video track markers', () => {
+  const tracks = [
+    { id: 'hi', height: 360 },
+    { id: 'mid', height: 180 },
+    { id: 'low', height: 90 },
+  ];
+
+  test('listing, pinning the lowest rendition, then clearing the pin sets the markers in order', () => {
+    feed({ type: 'onVideoTrackChange', tracks });
+    expect(markers()).toEqual(['evt-video-tracks-listed']);
+
+    feed({ type: 'onVideoTrackChange', tracks, selectedTrackId: 'low' });
+    expect(markers()).toEqual([
+      'evt-video-track-pinned',
+      'evt-video-tracks-listed',
+    ]);
+
+    feed({ type: 'onVideoTrackChange', tracks });
+    expect(markers()).toEqual([
+      'evt-video-track-auto',
+      'evt-video-track-pinned',
+      'evt-video-tracks-listed',
+    ]);
+  });
+
+  test('pinning a rendition other than the lowest does not count as pinned', () => {
+    feed({ type: 'onVideoTrackChange', tracks, selectedTrackId: 'mid' });
+    expect(markers()).toEqual(['evt-video-tracks-listed']);
+  });
+
+  test('automatic selection alone is not a restore: it needs a pin first', () => {
+    feed({ type: 'onVideoTrackChange', tracks });
+    feed({ type: 'onVideoTrackChange', tracks });
+    expect(markers()).toEqual(['evt-video-tracks-listed']);
+  });
+
+  test('a partial rendition list is not the full ladder', () => {
+    feed({
+      type: 'onVideoTrackChange',
+      tracks: tracks.slice(1),
+      selectedTrackId: 'low',
+    });
+    expect(markers()).toEqual([]);
+  });
+});

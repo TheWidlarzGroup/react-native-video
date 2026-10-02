@@ -35,6 +35,9 @@ export const MARKER_IDS = [
   'evt-volume-low', // onVolumeChange volume <= 0.35 while not muted
   'evt-rate-2x',
   'evt-rate-0-5x',
+  'evt-video-tracks-listed', // onVideoTrackChange lists all three renditions
+  'evt-video-track-pinned', // ...then reports the lowest rendition as the pinned selection
+  'evt-video-track-auto', // ...then reports no pinned selection again (automatic)
   // An unassisted loop restart: see LOOP_VERIFIED_END_COUNT and the wrap-around rule in
   // handle('onProgress') — AVPlayer reports each loop as onEnd, ExoPlayer wraps silently,
   // so both are covered (see smoke-loop.yaml).
@@ -54,8 +57,15 @@ export type PlayerEvent =
   | { type: 'onPlaybackStateChange'; isPlaying: boolean }
   | { type: 'onSeek'; seekTime: number }
   | { type: 'onVolumeChange'; muted: boolean; volume: number }
-  | { type: 'onPlaybackRateChange'; rate: number };
+  | { type: 'onPlaybackRateChange'; rate: number }
+  | {
+      type: 'onVideoTrackChange';
+      tracks: readonly { id: string; height?: number }[];
+      selectedTrackId?: string;
+    };
 
+// Renditions in the hls-quality fixture (e2e/fixtures/generate.sh).
+export const VIDEO_TRACK_COUNT = 3;
 export const PROGRESS_MARKER_SECONDS = 2;
 export const SEEK_FORWARD_LANDED_SECONDS = 4;
 export const SEEK_BACK_LANDED_SECONDS = 2;
@@ -222,6 +232,36 @@ function apply(event: PlayerEvent) {
       if (event.rate === 0.5) mark('evt-rate-0-5x');
       append(`onPlaybackRateChange ${event.rate}`);
       return;
+
+    case 'onVideoTrackChange': {
+      // The fixture has three renditions; "lowest" is the one with the smallest height.
+      if (event.tracks.length === VIDEO_TRACK_COUNT)
+        mark('evt-video-tracks-listed');
+      const lowest = event.tracks.reduce<
+        { id: string; height?: number } | undefined
+      >(
+        (min, track) =>
+          min === undefined ||
+          (track.height ?? Infinity) < (min.height ?? Infinity)
+            ? track
+            : min,
+        undefined
+      );
+      if (
+        event.selectedTrackId !== undefined &&
+        event.tracks.length === VIDEO_TRACK_COUNT &&
+        event.selectedTrackId === lowest?.id
+      ) {
+        mark('evt-video-track-pinned');
+      } else if (
+        event.selectedTrackId === undefined &&
+        state.markers.has('evt-video-track-pinned')
+      ) {
+        mark('evt-video-track-auto');
+      }
+      append(`onVideoTrackChange selected=${event.selectedTrackId ?? 'auto'}`);
+      return;
+    }
 
     default:
       // A new PlayerEvent type fails to compile here until it is handled.
