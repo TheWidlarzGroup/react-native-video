@@ -23,6 +23,7 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.margelo.nitro.NitroModules
 import com.margelo.nitro.video.HybridVideoPlayer
 import com.margelo.nitro.video.ResizeMode
+import com.margelo.nitro.video.SubtitleStyle
 import com.margelo.nitro.video.SurfaceType
 import com.margelo.nitro.video.VideoViewEventsEmitter
 import com.twg.video.core.LibraryError
@@ -38,6 +39,7 @@ import com.twg.video.core.extensions.toAspectRatioFrameLayout
 import com.twg.video.core.utils.PictureInPictureUtils
 import com.twg.video.core.utils.PictureInPictureUtils.createDisabledPictureInPictureParams
 import com.twg.video.core.utils.SmallVideoPlayerOptimizer
+import com.twg.video.core.utils.SubtitleStyleUtils
 import com.twg.video.R.layout.player_view_surface
 import com.twg.video.R.layout.player_view_texture
 
@@ -116,6 +118,14 @@ class VideoView @JvmOverloads constructor(
       }
     }
 
+  var subtitleStyle: SubtitleStyle = SubtitleStyle(null, null, null, null, null, null, null)
+    set(value) {
+      field = value
+      runOnMainThread {
+        applySubtitleStyle()
+      }
+    }
+
   var keepScreenAwake: Boolean
     get() = playerView.keepScreenOn
     set(value) {
@@ -171,6 +181,10 @@ class VideoView @JvmOverloads constructor(
     playerView.resizeMode = resizeMode.toAspectRatioFrameLayout()
   }
 
+  private fun applySubtitleStyle() {
+    playerView.subtitleView?.let { SubtitleStyleUtils.apply(it, subtitleStyle) }
+  }
+
   @SuppressLint("InflateParams")
   private fun createPlayerView(): PlayerView {
     return when (surfaceType) {
@@ -181,6 +195,8 @@ class VideoView @JvmOverloads constructor(
       setShutterBackgroundColor(Color.TRANSPARENT)
       setShowSubtitleButton(true)
       useController = false
+
+      subtitleView?.let { SubtitleStyleUtils.apply(it, subtitleStyle) }
 
       // Apply optimizations based on video player size if needed
       configureForSmallPlayer()

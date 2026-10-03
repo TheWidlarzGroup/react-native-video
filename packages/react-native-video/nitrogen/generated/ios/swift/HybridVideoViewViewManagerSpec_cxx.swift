@@ -217,6 +217,17 @@ open class HybridVideoViewViewManagerSpec_cxx {
       self.__implementation.surfaceType = margelo.nitro.video.SurfaceType(rawValue: newValue)!
     }
   }
+  
+  public final var subtitleStyle: SubtitleStyle {
+    @inline(__always)
+    get {
+      return self.__implementation.subtitleStyle
+    }
+    @inline(__always)
+    set {
+      self.__implementation.subtitleStyle = newValue
+    }
+  }
 
   // Methods
   @inline(__always)
