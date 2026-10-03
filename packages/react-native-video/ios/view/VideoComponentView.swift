@@ -90,6 +90,42 @@ import UIKit
     }
   }
 
+  public var subtitleStyle = SubtitleStyle(
+    fontScale: nil, foregroundColor: nil, backgroundColor: nil, windowColor: nil, edgeType: nil, edgeColor: nil, bottomPadding: nil
+  ) {
+    didSet {
+      DispatchQueue.main.async { [weak self] in
+        self?.applySubtitleStyle()
+      }
+    }
+  }
+
+  private var currentItemObservation: NSKeyValueObservation?
+
+  private func applySubtitleStyle() {
+    guard let player = player as? HybridVideoPlayer else { return }
+    guard let currentItem = player.player.currentItem else { return }
+
+    currentItem.textStyleRules = SubtitleStyleUtils.buildTextStyleRules(from: subtitleStyle)
+
+    // AVFoundation only re-renders a legible cue's appearance when the selection changes or a
+    // new cue starts - a `textStyleRules` update alone is picked up on the *next* cue transition,
+    // not applied to a cue that's already on screen (including a paused frame). Re-asserting the
+    // current selection (without changing which option is selected) forces AVKit to redraw the
+    // currently-displayed cue with the new style immediately, with no visible seek/jump.
+    if let group = currentItem.asset.mediaSelectionGroup(forMediaCharacteristic: .legible),
+      let selectedOption = currentItem.currentMediaSelection.selectedMediaOption(in: group) {
+      currentItem.select(nil, in: group)
+      currentItem.select(selectedOption, in: group)
+    } else if let textTrack = currentItem.tracks.first(where: { $0.assetTrack?.mediaType == .text }) {
+      // No selection group (e.g. an external subtitle on a plain MP4, added as an always-on
+      // composition track rather than a selectable legible option) - toggling the player item
+      // track's own `isEnabled` forces AVFoundation to redraw it with the current style.
+      textTrack.isEnabled = false
+      textTrack.isEnabled = true
+    }
+  }
+
   @objc public var nitroId: NSNumber = -1 {
     didSet {
       VideoComponentView.globalViewsMap.setObject(self, forKey: nitroId)
@@ -143,6 +179,14 @@ import UIKit
         existingController.player === player
       {
         return
+      }
+
+      // Re-applies subtitleStyle to whichever AVPlayerItem is current - .initial covers an item
+      // that's already attached by the time this runs, .new covers every later source change.
+      self.currentItemObservation = player.observe(\.currentItem, options: [.new, .initial]) { [weak self] _, _ in
+        DispatchQueue.main.async {
+          self?.applySubtitleStyle()
+        }
       }
 
       // Remove previous controller if any

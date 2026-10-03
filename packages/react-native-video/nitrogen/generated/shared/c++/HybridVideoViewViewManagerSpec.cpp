@@ -28,6 +28,8 @@ namespace margelo::nitro::video {
       prototype.registerHybridSetter("keepScreenAwake", &HybridVideoViewViewManagerSpec::setKeepScreenAwake);
       prototype.registerHybridGetter("surfaceType", &HybridVideoViewViewManagerSpec::getSurfaceType);
       prototype.registerHybridSetter("surfaceType", &HybridVideoViewViewManagerSpec::setSurfaceType);
+      prototype.registerHybridGetter("subtitleStyle", &HybridVideoViewViewManagerSpec::getSubtitleStyle);
+      prototype.registerHybridSetter("subtitleStyle", &HybridVideoViewViewManagerSpec::setSubtitleStyle);
       prototype.registerHybridMethod("enterFullscreen", &HybridVideoViewViewManagerSpec::enterFullscreen);
       prototype.registerHybridMethod("exitFullscreen", &HybridVideoViewViewManagerSpec::exitFullscreen);
       prototype.registerHybridMethod("enterPictureInPicture", &HybridVideoViewViewManagerSpec::enterPictureInPicture);

@@ -1,5 +1,6 @@
 import type { HybridObject } from 'react-native-nitro-modules';
 import type { ResizeMode } from '../../core/types/ResizeMode';
+import type { SubtitleStyle } from '../../core/types/SubtitleStyle';
 import type { VideoPlayer } from './VideoPlayer.nitro';
 import type { ListenerSubscription } from './VideoPlayerEventEmitter.nitro';
 
@@ -22,6 +23,7 @@ export interface VideoViewViewManager extends HybridObject<{
   canEnterPictureInPicture(): boolean;
   keepScreenAwake: boolean;
   surfaceType: SurfaceType;
+  subtitleStyle: SubtitleStyle;
 
   // Event listeners
 
