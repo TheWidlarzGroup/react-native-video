@@ -3,6 +3,7 @@ import { NitroModules } from 'react-native-nitro-modules';
 import type { VideoPlayer as VideoPlayerImpl } from '../spec/nitro/VideoPlayer.nitro';
 import type { VideoPlayerSource } from '../spec/nitro/VideoPlayerSource.nitro';
 import type { IgnoreSilentSwitchMode } from './types/IgnoreSilentSwitchMode';
+import type { AudioTrack } from './types/AudioTrack';
 import type { MixAudioMode } from './types/MixAudioMode';
 import type { TextTrack } from './types/TextTrack';
 import type { NoAutocomplete } from './types/Utils';
@@ -340,6 +341,29 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   // Selected Text Track
   get selectedTrack(): TextTrack | undefined {
     return this.player.selectedTrack;
+  }
+
+  // Audio Track Management
+  getAvailableAudioTracks(): AudioTrack[] {
+    try {
+      return this.player.getAvailableAudioTracks();
+    } catch (error) {
+      this.throwError(error);
+      return [];
+    }
+  }
+
+  selectAudioTrack(trackId?: string): void {
+    try {
+      this.player.selectAudioTrack(trackId);
+    } catch (error) {
+      this.throwError(error);
+    }
+  }
+
+  // Selected Audio Track
+  get selectedAudioTrackId(): string | undefined {
+    return this.player.selectedAudioTrackId;
   }
 }
 
