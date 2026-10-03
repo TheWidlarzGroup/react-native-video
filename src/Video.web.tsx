@@ -10,7 +10,8 @@ import React, {
 } from 'react';
 import {StyleProp, ViewStyle} from 'react-native';
 import {unstable_createElement} from 'react-native-web';
-import type {ReactVideoProps, VideoMetadata, VideoRef} from './types';
+import type {ReactVideoProps, VideoMetadata} from './types/video';
+import type {VideoRef} from './types/video-ref';
 
 // Define a style prop that is accepted and transformed by React Native Web
 // for the native `video` element.
