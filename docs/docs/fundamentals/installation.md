@@ -14,6 +14,7 @@ React Native Video is a library that allows you to play various kinds of video i
 ### System Requirements
 - iOS `15.0` or higher
 - Android `6.0` or higher
+- tvOS `15.1` or higher (TV apps use `react-native-tvos`)
 
 ### Minimal Package Requirements
 - `react-native` `0.75.0` or higher
@@ -53,6 +54,10 @@ And then run the project:
 npx react-native run-ios # run on iOS
 npx react-native run-android # run on Android
 ```
+
+## TV setup
+
+Use `react-native-tvos` for Android TV and tvOS apps. For tvOS, set the app's Podfile platform to `:tvos, '15.1'` or higher and run `pod install`. The player and DRM plugin use the same APIs and Nitro architecture as mobile.
 
 ## Patch for react-native < 0.80
 

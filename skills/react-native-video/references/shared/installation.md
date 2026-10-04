@@ -11,6 +11,7 @@ cd ios && pod install
 - iOS **15.0+**, Android **minSdkVersion 24**.
 - RN **< 0.80** on Android: a small `react-native-nitro-modules` patch is recommended so errors are surfaced instead of thrown as unknown (see the v7 install docs).
 - Works on New and Old Architecture.
+- Android TV and tvOS: use `react-native-tvos`. tvOS requires **15.1+**; set the app's Podfile platform to `:tvos, '15.1'` or higher and run `pod install`. The DRM plugin also supports tvOS.
 
 ## v6
 

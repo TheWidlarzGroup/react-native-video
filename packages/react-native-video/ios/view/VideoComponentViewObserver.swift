@@ -126,6 +126,33 @@ class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
     completionHandler(isViewAttached)
   }
   
+  #if os(tvOS)
+  func playerViewController(
+    _ playerViewController: AVPlayerViewController,
+    willResumePlaybackAfterUserNavigatedFrom oldTime: CMTime,
+    to targetTime: CMTime
+  ) {
+    guard let player = view?.player as? HybridVideoPlayer,
+          player.player === playerViewController.player,
+          targetTime.isNumeric,
+          CMTimeCompare(oldTime, targetTime) != 0 else { return }
+
+    // AVKit calls this once for completed user navigation, not scrub previews
+    // or programmatic seeks (which already emit onSeek from HybridVideoPlayer).
+    player._eventEmitter?.onSeek(targetTime.seconds)
+  }
+
+  func playerViewControllerWillBeginDismissalTransition(_: AVPlayerViewController) {
+    view?.willDismissFullscreen()
+  }
+
+  func playerViewControllerDidEndDismissalTransition(_: AVPlayerViewController) {
+    // Restore containment after UIKit finishes removing the modal presentation.
+    DispatchQueue.main.async { [weak self] in
+      self?.view?.didDismissFullscreen()
+    }
+  }
+  #else
   func playerViewController(
     _: AVPlayerViewController,
     willEndFullScreenPresentationWithAnimationCoordinator coordinator: UIViewControllerTransitionCoordinator
@@ -173,4 +200,5 @@ class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
       self.delegate?.onFullscreenChange(true)
     }
   }
+  #endif
 }
