@@ -21,8 +21,9 @@ class VideoDecoderInfoModule(reactContext: ReactApplicationContext?) : ReactCont
             p.resolve(widevineLevel)
             return
         }
+        var mediaDrm: MediaDrm? = null
         try {
-            val mediaDrm = MediaDrm(WIDEVINE_UUID)
+            mediaDrm = MediaDrm(WIDEVINE_UUID)
             val securityProperty = mediaDrm.getPropertyString(SECURITY_LEVEL_PROPERTY)
             widevineLevel = when (securityProperty) {
                 "L1" -> 1
@@ -32,6 +33,8 @@ class VideoDecoderInfoModule(reactContext: ReactApplicationContext?) : ReactCont
             }
         } catch (e: UnsupportedSchemeException) {
             e.printStackTrace()
+        } finally {
+            mediaDrm?.release()
         }
         p.resolve(widevineLevel)
     }
@@ -58,7 +61,7 @@ class VideoDecoderInfoModule(reactContext: ReactApplicationContext?) : ReactCont
         val isHardwareAccelerated = mRegularCodecs.codecInfos.any {
             it.name.equals(codecName, ignoreCase = true) && it.isHardwareAccelerated
         }
-        p?.resolve(if (isHardwareAccelerated) "software" else "hardware")
+        p?.resolve(if (isHardwareAccelerated) "hardware" else "software")
     }
 
     @ReactMethod
