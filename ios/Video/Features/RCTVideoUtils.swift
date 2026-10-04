@@ -256,20 +256,21 @@ enum RCTVideoUtils {
     static func getValidTextTracks(asset: AVAsset, assetOptions: NSDictionary?, mixComposition: AVMutableComposition,
                                    textTracks: [TextTrack]?) async -> [TextTrack] {
         var validTextTracks: [TextTrack] = []
-        var tracks: [([AVAssetTrack], AVURLAsset)] = []
+        var tracks: [([AVAssetTrack], AVURLAsset, TextTrack)] = []
 
         let videoTracks = await RCTVideoAssetsUtils.getTracks(asset: asset, withMediaType: .video)
-        guard let videoAsset = videoTracks?.first else { return validTextTracks }
+        guard videoTracks?.first != nil else { return validTextTracks }
 
         if let textTracks, !textTracks.isEmpty {
             for textTrack in textTracks {
-                var textURLAsset: AVURLAsset!
+                let textURLAsset: AVURLAsset
                 let textUri: String = textTrack.uri
 
                 if textUri.lowercased().hasPrefix("http") {
-                    textURLAsset = AVURLAsset(url: NSURL(string: textUri)! as URL, options: (assetOptions as! [String: Any]))
+                    guard let textURL = URL(string: textUri) else { continue }
+                    textURLAsset = AVURLAsset(url: textURL, options: assetOptions as? [String: Any])
                 } else {
-                    let isDisabledTrack: Bool! = textTrack.type == "disabled"
+                    let isDisabledTrack = textTrack.type == "disabled"
                     let searchPath: FileManager.SearchPathDirectory = isDisabledTrack ? .cachesDirectory : .documentDirectory
                     textURLAsset = AVURLAsset(
                         url: RCTVideoUtils.urlFilePath(filepath: textUri as NSString?, searchPath: searchPath) as URL,
@@ -278,20 +279,22 @@ enum RCTVideoUtils {
                 }
 
                 if let track = await RCTVideoAssetsUtils.getTracks(asset: textURLAsset, withMediaType: .text) {
-                    tracks.append((track, textURLAsset))
+                    tracks.append((track, textURLAsset, textTrack))
                 }
             }
 
-            for (index, tracksPair) in tracks.enumerated() {
-                let (tracks, trackAsset) = tracksPair
+            for tracksPair in tracks {
+                let (tracks, trackAsset, textTrack) = tracksPair
                 guard let track = tracks.first else { continue } // fix when there's no textTrackAsset
 
-                let textCompTrack: AVMutableCompositionTrack! = mixComposition.addMutableTrack(withMediaType: AVMediaType.text,
-                                                                                               preferredTrackID: kCMPersistentTrackID_Invalid)
+                guard let textCompTrack = mixComposition.addMutableTrack(
+                    withMediaType: AVMediaType.text,
+                    preferredTrackID: kCMPersistentTrackID_Invalid
+                ) else { continue }
 
                 do {
                     try textCompTrack.insertTimeRange(CMTimeRangeMake(start: .zero, duration: trackAsset.duration), of: track, at: .zero)
-                    validTextTracks.append(textTracks[index])
+                    validTextTracks.append(textTrack)
                 } catch {
                     // TODO: upgrade error by call some props callback to better inform user
                     print("Error occurred on textTrack insert attempt: \(error.localizedDescription)")
@@ -301,9 +304,8 @@ enum RCTVideoUtils {
         }
 
         if !validTextTracks.isEmpty {
-            let emptyVttFile: TextTrack? = self.createEmptyVttFile()
-            if emptyVttFile != nil {
-                validTextTracks.append(emptyVttFile!)
+            if let emptyVttFile = self.createEmptyVttFile() {
+                validTextTracks.append(emptyVttFile)
             }
         }
 
