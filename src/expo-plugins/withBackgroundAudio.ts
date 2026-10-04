@@ -16,9 +16,12 @@ export const withBackgroundAudio: ConfigPlugin<boolean> = (
         config.modResults.UIBackgroundModes = [...modes, 'audio'];
       }
     } else {
-      config.modResults.UIBackgroundModes = modes.filter(
-        (mode: string) => mode !== 'audio',
-      );
+      const remainingModes = modes.filter((mode: string) => mode !== 'audio');
+      if (remainingModes.length > 0) {
+        config.modResults.UIBackgroundModes = remainingModes;
+      } else {
+        delete config.modResults.UIBackgroundModes;
+      }
     }
 
     return config;
