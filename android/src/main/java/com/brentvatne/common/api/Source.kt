@@ -89,7 +89,26 @@ class Source {
      */
     var sideLoadedTextTracks: SideLoadedTextTrackList? = null
 
-    override fun hashCode(): Int = Objects.hash(uriString, uri, startPositionMs, cropStartMs, cropEndMs, extension, metadata, headers, adsProps)
+    override fun hashCode(): Int =
+        Objects.hash(
+            uri,
+            cropStartMs,
+            cropEndMs,
+            startPositionMs,
+            extension,
+            drmProps,
+            contentStartTime,
+            cmcdProps,
+            sideLoadedTextTracks,
+            adsProps,
+            minLoadRetryCount,
+            isLocalAssetFile,
+            isAsset,
+            bufferConfig,
+            textTracksAllowChunklessPreparation,
+            headers,
+            metadata
+        )
 
     /** return true if this and src are equals  */
     override fun equals(other: Any?): Boolean {
@@ -108,7 +127,10 @@ class Source {
                 minLoadRetryCount == other.minLoadRetryCount &&
                 isLocalAssetFile == other.isLocalAssetFile &&
                 isAsset == other.isAsset &&
-                bufferConfig == other.bufferConfig
+                bufferConfig == other.bufferConfig &&
+                textTracksAllowChunklessPreparation == other.textTracksAllowChunklessPreparation &&
+                headers == other.headers &&
+                metadata == other.metadata
             )
     }
 
@@ -131,6 +153,16 @@ class Source {
 
         /** image uri to display */
         var imageUri: Uri? = null
+
+        override fun equals(other: Any?): Boolean =
+            other is Metadata &&
+                title == other.title &&
+                subtitle == other.subtitle &&
+                description == other.description &&
+                artist == other.artist &&
+                imageUri == other.imageUri
+
+        override fun hashCode(): Int = Objects.hash(title, subtitle, description, artist, imageUri)
 
         companion object {
             private const val PROP_SRC_METADATA_TITLE = "title"

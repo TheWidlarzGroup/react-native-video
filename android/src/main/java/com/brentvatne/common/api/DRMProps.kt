@@ -4,6 +4,7 @@ import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetArray
 import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetBool
 import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetString
 import com.facebook.react.bridge.ReadableMap
+import java.util.Objects
 import java.util.UUID
 
 /**
@@ -44,6 +45,8 @@ class DRMProps {
             multiDrm == other.multiDrm &&
             drmLicenseHeader.contentDeepEquals(other.drmLicenseHeader) // drmLicenseHeader is never null
     }
+
+    override fun hashCode(): Int = Objects.hash(drmType, drmLicenseServer, multiDrm, drmLicenseHeader.contentHashCode())
 
     companion object {
         private const val PROP_DRM_TYPE = "type"

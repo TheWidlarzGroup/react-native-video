@@ -4,6 +4,7 @@ import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetDouble
 import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetFloat
 import com.brentvatne.common.toolbox.ReactBridgeUtils.safeGetInt
 import com.facebook.react.bridge.ReadableMap
+import java.util.Objects
 
 /**
  * Class representing bufferConfig for host.
@@ -42,6 +43,21 @@ class BufferConfig {
             )
     }
 
+    override fun hashCode(): Int =
+        Objects.hash(
+            cacheSize,
+            minBufferMs,
+            maxBufferMs,
+            bufferForPlaybackMs,
+            bufferForPlaybackAfterRebufferMs,
+            backBufferDurationMs,
+            maxHeapAllocationPercent,
+            minBackBufferMemoryReservePercent,
+            minBufferMemoryReservePercent,
+            initialBitrate,
+            live
+        )
+
     class Live {
         var maxPlaybackSpeed: Float = BufferConfigPropUnsetDouble.toFloat()
         var minPlaybackSpeed: Float = BufferConfigPropUnsetDouble.toFloat()
@@ -59,6 +75,8 @@ class BufferConfig {
                     targetOffsetMs == other.targetOffsetMs
                 )
         }
+
+        override fun hashCode(): Int = Objects.hash(maxPlaybackSpeed, minPlaybackSpeed, maxOffsetMs, minOffsetMs, targetOffsetMs)
 
         companion object {
             private const val PROP_BUFFER_CONFIG_LIVE_MAX_PLAYBACK_SPEED = "maxPlaybackSpeed"
