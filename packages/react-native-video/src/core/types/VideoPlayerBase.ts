@@ -1,5 +1,6 @@
 import type { ListenerSubscription } from './EventEmitter';
 import type { AllPlayerEvents } from './Events';
+import type { AudioTrack } from './AudioTrack';
 import type { IgnoreSilentSwitchMode } from './IgnoreSilentSwitchMode';
 import type { MixAudioMode } from './MixAudioMode';
 import type { TextTrack } from './TextTrack';
@@ -184,6 +185,34 @@ export interface VideoPlayerBase {
    * @returns The currently selected text track, or undefined if none is selected
    */
   readonly selectedTrack?: TextTrack;
+
+  /**
+   * All alternate audio tracks available for the current source (e.g.
+   * different languages or commentary tracks). Empty until the source's
+   * manifest has loaded - subscribe to `onAudioTrackChange` to know when
+   * this becomes populated.
+   */
+  getAvailableAudioTracks(): AudioTrack[];
+
+  /**
+   * Select an audio track, or pass `undefined` for the default track.
+   *
+   * @param trackId - id from {@link getAvailableAudioTracks}, or `undefined` for default.
+   * @note Unlike {@link selectVideoTrack}, this is a real, exact selection on
+   *       both platforms - not an approximation - since alternate audio tracks
+   *       have a genuine native selection API (AVFoundation media selection
+   *       groups on iOS, Media3 track overrides on Android), the same
+   *       mechanism {@link selectTextTrack} already uses.
+   * @note Safe to call before the source is loaded; the selection is latched
+   *       and applied once tracks are known.
+   */
+  selectAudioTrack(trackId?: string): void;
+
+  /**
+   * The id passed to the last {@link selectAudioTrack} call, or undefined
+   * when the default track is active.
+   */
+  readonly selectedAudioTrackId?: string;
 
   /**
    * Whether to show notification controls (lock screen / control center).
