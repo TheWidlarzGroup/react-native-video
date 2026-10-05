@@ -19,6 +19,8 @@ namespace margelo::nitro::video { class HybridVideoPlayerSpec; }
 namespace margelo::nitro::video { enum class ResizeMode; }
 // Forward declaration of `SurfaceType` to properly resolve imports.
 namespace margelo::nitro::video { enum class SurfaceType; }
+// Forward declaration of `SubtitleStyle` to properly resolve imports.
+namespace margelo::nitro::video { struct SubtitleStyle; }
 // Forward declaration of `ListenerSubscription` to properly resolve imports.
 namespace margelo::nitro::video { struct ListenerSubscription; }
 
@@ -27,6 +29,7 @@ namespace margelo::nitro::video { struct ListenerSubscription; }
 #include <optional>
 #include "ResizeMode.hpp"
 #include "SurfaceType.hpp"
+#include "SubtitleStyle.hpp"
 #include "ListenerSubscription.hpp"
 #include <functional>
 
@@ -71,6 +74,8 @@ namespace margelo::nitro::video {
       virtual void setKeepScreenAwake(bool keepScreenAwake) = 0;
       virtual SurfaceType getSurfaceType() = 0;
       virtual void setSurfaceType(SurfaceType surfaceType) = 0;
+      virtual SubtitleStyle getSubtitleStyle() = 0;
+      virtual void setSubtitleStyle(const SubtitleStyle& subtitleStyle) = 0;
 
     public:
       // Methods
