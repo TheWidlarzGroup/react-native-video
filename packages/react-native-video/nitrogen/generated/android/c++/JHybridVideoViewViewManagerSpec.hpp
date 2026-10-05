@@ -64,6 +64,8 @@ namespace margelo::nitro::video {
     void setKeepScreenAwake(bool keepScreenAwake) override;
     SurfaceType getSurfaceType() override;
     void setSurfaceType(SurfaceType surfaceType) override;
+    SubtitleStyle getSubtitleStyle() override;
+    void setSubtitleStyle(const SubtitleStyle& subtitleStyle) override;
 
   public:
     // Methods
