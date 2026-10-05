@@ -20,7 +20,9 @@ export const MARKER_IDS = [
   'evt-onProgress',
   'evt-progress-gt-2s',
   'evt-onEnded',
-  'evt-onError',
+  'evt-onError', // onError itself, never the error status
+  'evt-onError-repeated', // a second onError in one scenario: one failure must report once
+  'evt-status-error', // onStatusChange('error')
   'evt-onPlaybackStateChanged',
   'evt-playing', // isPlaying seen true at least once
   'evt-paused', // isPlaying seen false after having been true (real pause, not initial state)
@@ -80,6 +82,7 @@ type State = {
   presses: ReadonlyMap<string, number>;
   errorCode: string;
   // Derived-marker bookkeeping.
+  errorCount: number;
   endCount: number;
   loopEnabled: boolean;
   seekPending: boolean;
@@ -91,6 +94,7 @@ const initialState = (): State => ({
   entries: [],
   presses: new Map(),
   errorCode: '',
+  errorCount: 0,
   endCount: 0,
   loopEnabled: false,
   seekPending: false,
@@ -165,16 +169,17 @@ function apply(event: PlayerEvent) {
 
     case 'onError':
       mark('evt-onError');
+      state.errorCount += 1;
+      if (state.errorCount > 1) mark('evt-onError-repeated');
       state.errorCode = event.code;
       append(`onError code=${event.code}`);
       return;
 
     case 'onStatusChange':
-      // A source that resolves initialize() optimistically and fails later only reports
-      // through the status observer, never through onError (#5083, see CONTEXT.md). That
-      // path has no code, so it must not replace one onError already reported.
+      // A separate marker, so a flow can assert onError and the error status apart. The
+      // status has no code, so it must not replace one onError already reported.
       if (event.status === 'error') {
-        mark('evt-onError');
+        mark('evt-status-error');
         if (state.errorCode === '') state.errorCode = STATUS_ERROR_CODE;
       }
       append(`status:${event.status}`);
