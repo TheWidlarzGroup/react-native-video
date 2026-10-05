@@ -296,6 +296,19 @@ open class HybridVideoPlayerSpec_cxx {
     }
   }
 
+  public final var selectedAudioTrackId: bridge.std__optional_std__string_ {
+    @inline(__always)
+    get {
+      return { () -> bridge.std__optional_std__string_ in
+        if let __unwrappedValue = self.__implementation.selectedAudioTrackId {
+          return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
+        } else {
+          return .init()
+        }
+      }()
+    }
+  }
+
   // Methods
   @inline(__always)
   public final func replaceSourceAsync(source: bridge.std__optional_std__variant_nitro__NullType__std__shared_ptr_HybridVideoPlayerSourceSpec___) -> bridge.Result_std__shared_ptr_Promise_void___ {
@@ -387,6 +400,42 @@ open class HybridVideoPlayerSpec_cxx {
     }
   }
   
+  @inline(__always)
+  public final func getAvailableAudioTracks() -> bridge.Result_std__vector_AudioTrack__ {
+    do {
+      let __result = try self.__implementation.getAvailableAudioTracks()
+      let __resultCpp = { () -> bridge.std__vector_AudioTrack_ in
+        var __vector = bridge.create_std__vector_AudioTrack_(__result.count)
+        for __item in __result {
+          __vector.push_back(__item)
+        }
+        return __vector
+      }()
+      return bridge.create_Result_std__vector_AudioTrack__(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__vector_AudioTrack__(__exceptionPtr)
+    }
+  }
+
+  @inline(__always)
+  public final func selectAudioTrack(trackId: bridge.std__optional_std__string_) -> bridge.Result_void_ {
+    do {
+      try self.__implementation.selectAudioTrack(trackId: { () -> String? in
+        if bridge.has_value_std__optional_std__string_(trackId) {
+          let __unwrapped = bridge.get_std__optional_std__string_(trackId)
+          return String(__unwrapped)
+        } else {
+          return nil
+        }
+      }())
+      return bridge.create_Result_void_()
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_void_(__exceptionPtr)
+    }
+  }
+
   @inline(__always)
   public final func release() -> bridge.Result_void_ {
     do {

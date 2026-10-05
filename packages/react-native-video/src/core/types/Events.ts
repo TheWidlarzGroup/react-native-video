@@ -1,3 +1,4 @@
+import type { AudioTrack } from './AudioTrack';
 import type { TextTrack } from './TextTrack';
 import type { VideoRuntimeError } from './VideoError';
 import type { VideoOrientation } from './VideoOrientation';
@@ -88,6 +89,13 @@ export interface VideoPlayerEvents {
    */
   onTrackChange: (track: TextTrack | null) => void;
   /**
+   * Called when the set of available audio tracks changes (e.g. once the
+   * source's manifest has loaded), or when the selected track changes.
+   * Audio selection is exact on both platforms - there's no separate
+   * "actually playing" signal to reconcile.
+   */
+  onAudioTrackChange: (data: AudioTrackChangeData) => void;
+  /**
    * Called when the volume of the player changes.
    */
   onVolumeChange: (data: onVolumeChangeData) => void;
@@ -171,6 +179,13 @@ export interface onLoadData {
    * The orientation of the video.
    */
   orientation: VideoOrientation;
+}
+
+export interface AudioTrackChangeData {
+  /** Every audio track currently known for this source. */
+  availableTracks: AudioTrack[];
+  /** The id the user picked via `selectAudioTrack`, or undefined for the default track. */
+  selectedTrackId?: string;
 }
 
 export type SourceType = 'local' | 'network';
@@ -267,6 +282,7 @@ export const ALL_PLAYER_EVENTS: (keyof AllPlayerEvents)[] =
     'onTimedMetadata',
     'onTextTrackDataChanged',
     'onTrackChange',
+    'onAudioTrackChange',
     'onVolumeChange',
     'onStatusChange'
   );
