@@ -13,6 +13,12 @@ class SideLoadedTextTrack {
     var title: String? = null
     var uri: Uri = Uri.EMPTY
     var type: String? = null
+
+    override fun equals(other: Any?): Boolean {
+        if (other == null || other !is SideLoadedTextTrack) return false
+        return language == other.language && title == other.title && uri == other.uri && type == other.type
+    }
+
     companion object {
         val SIDELOAD_TEXT_TRACK_LANGUAGE = "language"
         val SIDELOAD_TEXT_TRACK_TITLE = "title"
