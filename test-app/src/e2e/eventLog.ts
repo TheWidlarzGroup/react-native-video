@@ -1,9 +1,11 @@
 /**
  * Minimal event log store for E2E.
  * Design goal: expose player state as TEXT with stable testIDs so Maestro can assert on it.
- * Two surfaces:
+ * Three surfaces:
  *  - markers: monotonic booleans ("this event type has happened at least once",
  *    or a derived condition like progress > 2s). Constant testIDs -> trivial assertions.
+ *  - presses: how many times each control was pressed, rendered as one marker per press
+ *    (`pressed-<testID>-<n>`) so a flow can prove its tap arrived.
  *  - entries: human-readable chronological log (debugging, screenshots in CI artifacts).
  *
  * All marker derivation happens in `handle()`, a pure function of the event sequence, so
@@ -18,7 +20,9 @@ export const MARKER_IDS = [
   'evt-onProgress',
   'evt-progress-gt-2s',
   'evt-onEnded',
-  'evt-onError',
+  'evt-onError', // onError itself, never the error status
+  'evt-onError-repeated', // a second onError in one scenario: one failure must report once
+  'evt-status-error', // onStatusChange('error')
   'evt-onPlaybackStateChanged',
   'evt-playing', // isPlaying seen true at least once
   'evt-paused', // isPlaying seen false after having been true (real pause, not initial state)
@@ -72,8 +76,13 @@ type State = {
   // replaced on every change and never mutated in place.
   markers: ReadonlySet<MarkerId>;
   entries: readonly LogEntry[];
+  // Presses per control testID. EventLogPanel renders `pressed-<testID>-<n>` for every
+  // n up to the count, so a flow can wait for a specific press (e2e/shared/press.yaml)
+  // on a marker that never scrolls out of view, unlike the log below.
+  presses: ReadonlyMap<string, number>;
   errorCode: string;
   // Derived-marker bookkeeping.
+  errorCount: number;
   endCount: number;
   loopEnabled: boolean;
   seekPending: boolean;
@@ -83,7 +92,9 @@ type State = {
 const initialState = (): State => ({
   markers: new Set(),
   entries: [],
+  presses: new Map(),
   errorCode: '',
+  errorCount: 0,
   endCount: 0,
   loopEnabled: false,
   seekPending: false,
@@ -158,16 +169,17 @@ function apply(event: PlayerEvent) {
 
     case 'onError':
       mark('evt-onError');
+      state.errorCount += 1;
+      if (state.errorCount > 1) mark('evt-onError-repeated');
       state.errorCode = event.code;
       append(`onError code=${event.code}`);
       return;
 
     case 'onStatusChange':
-      // A source that resolves initialize() optimistically and fails later only reports
-      // through the status observer, never through onError (#5083, see CONTEXT.md). That
-      // path has no code, so it must not replace one onError already reported.
+      // A separate marker, so a flow can assert onError and the error status apart. The
+      // status has no code, so it must not replace one onError already reported.
       if (event.status === 'error') {
-        mark('evt-onError');
+        mark('evt-status-error');
         if (state.errorCode === '') state.errorCode = STATUS_ERROR_CODE;
       }
       append(`status:${event.status}`);
@@ -226,6 +238,15 @@ export const eventLog = {
     append(line);
     emit();
   },
+  // Called synchronously in a control's onPress, before the control touches the player.
+  press(id: string, title: string) {
+    state.presses = new Map(state.presses).set(
+      id,
+      (state.presses.get(id) ?? 0) + 1
+    );
+    append(`press:${title}`);
+    emit();
+  },
   // Called by btn-loop-on: the wrap-around rule in handle only applies while loop is on.
   setLoopEnabled(enabled: boolean) {
     state.loopEnabled = enabled;
@@ -236,6 +257,7 @@ export const eventLog = {
   },
   getMarkers: (): ReadonlySet<MarkerId> => state.markers,
   getEntries: (): readonly LogEntry[] => state.entries,
+  getPresses: (): ReadonlyMap<string, number> => state.presses,
   getErrorCode: (): string => state.errorCode,
   subscribe(listener: () => void) {
     listeners.add(listener);

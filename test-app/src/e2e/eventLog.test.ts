@@ -92,6 +92,9 @@ describe('store', () => {
     expect(markers()).toEqual([]);
     expect(eventLog.getEntries()).toEqual([]);
     expect(eventLog.getErrorCode()).toBe('');
+    feed({ type: 'onError', code: 'boom' }); // the error count restarted too
+    expect(markers()).toEqual(['evt-onError']);
+    eventLog.reset();
 
     feed(
       { type: 'onEnd' }, // endCount restarted: no loop verification
@@ -108,6 +111,35 @@ describe('store', () => {
 
   test('MARKER_IDS has no duplicates (EventLogPanel keys markers by id)', () => {
     expect(new Set(MARKER_IDS).size).toBe(MARKER_IDS.length);
+  });
+});
+
+describe('press', () => {
+  test('counts presses per control and logs the title', () => {
+    eventLog.press('btn-play', 'play');
+    eventLog.press('btn-mute', 'mute');
+    eventLog.press('btn-play', 'play');
+    expect([...eventLog.getPresses()]).toEqual([
+      ['btn-play', 2],
+      ['btn-mute', 1],
+    ]);
+    expect(lines()).toEqual(['press:play', 'press:mute', 'press:play']);
+  });
+
+  test('a press produces a new snapshot and notifies subscribers', () => {
+    const presses0 = eventLog.getPresses();
+    let calls = 0;
+    const unsubscribe = eventLog.subscribe(() => calls++);
+    eventLog.press('btn-play', 'play');
+    unsubscribe();
+    expect(eventLog.getPresses()).not.toBe(presses0);
+    expect(calls).toBe(1);
+  });
+
+  test('reset clears the counts', () => {
+    eventLog.press('btn-play', 'play');
+    eventLog.reset();
+    expect(eventLog.getPresses().size).toBe(0);
   });
 });
 
@@ -205,7 +237,7 @@ describe('handle', () => {
       expect(markers()).toEqual([]);
       expect(eventLog.getErrorCode()).toBe('');
       feed({ type: 'onStatusChange', status: 'error' });
-      expect(markers()).toEqual(['evt-onError']);
+      expect(markers()).toEqual(['evt-status-error']);
       expect(eventLog.getErrorCode()).toBe(STATUS_ERROR_CODE);
       expect(lines()).toEqual(['status:loading', 'status:error']);
     });
@@ -224,6 +256,21 @@ describe('handle', () => {
         { type: 'onStatusChange', status: 'error' }
       );
       expect(eventLog.getErrorCode()).toBe('E404');
+    });
+
+    test('an error status plus one onError is not a repeated onError', () => {
+      feed(
+        { type: 'onStatusChange', status: 'error' },
+        { type: 'onError', code: 'E404' }
+      );
+      expect(markers()).toEqual(['evt-onError', 'evt-status-error']);
+    });
+
+    test('a second onError in one scenario is marked as repeated', () => {
+      feed({ type: 'onError', code: 'E404' });
+      expect(markers()).toEqual(['evt-onError']);
+      feed({ type: 'onError', code: 'E404' });
+      expect(markers()).toEqual(['evt-onError', 'evt-onError-repeated']);
     });
   });
 

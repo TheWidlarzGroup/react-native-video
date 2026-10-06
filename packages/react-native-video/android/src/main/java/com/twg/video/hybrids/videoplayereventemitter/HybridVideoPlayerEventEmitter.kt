@@ -64,6 +64,9 @@ class HybridVideoPlayerEventEmitter : HybridVideoPlayerEventEmitterSpec() {
   override fun addOnEndListener(listener: () -> Unit) =
     addListener("onEnd", listener)
 
+  override fun addOnErrorListener(listener: (String) -> Unit) =
+    addListener("onError", listener)
+
   override fun addOnExternalPlaybackChangeListener(listener: (Boolean) -> Unit) =
     addListener("onExternalPlaybackChange", listener)
 
@@ -128,6 +131,9 @@ class HybridVideoPlayerEventEmitter : HybridVideoPlayerEventEmitterSpec() {
 
   fun onEnd() =
     emitEvent<() -> Unit>("onEnd") { it() }
+
+  fun onError(error: String) =
+    emitEvent<(String) -> Unit>("onError") { it(error) }
 
   fun onExternalPlaybackChange(isExternalPlayback: Boolean) =
     emitEvent<(Boolean) -> Unit>("onExternalPlaybackChange") { it(isExternalPlayback) }

@@ -20,6 +20,7 @@ namespace margelo::nitro::video {
       prototype.registerHybridMethod("addOnBufferListener", &HybridVideoPlayerEventEmitterSpec::addOnBufferListener);
       prototype.registerHybridMethod("addOnControlsVisibleChangeListener", &HybridVideoPlayerEventEmitterSpec::addOnControlsVisibleChangeListener);
       prototype.registerHybridMethod("addOnEndListener", &HybridVideoPlayerEventEmitterSpec::addOnEndListener);
+      prototype.registerHybridMethod("addOnErrorListener", &HybridVideoPlayerEventEmitterSpec::addOnErrorListener);
       prototype.registerHybridMethod("addOnExternalPlaybackChangeListener", &HybridVideoPlayerEventEmitterSpec::addOnExternalPlaybackChangeListener);
       prototype.registerHybridMethod("addOnLoadListener", &HybridVideoPlayerEventEmitterSpec::addOnLoadListener);
       prototype.registerHybridMethod("addOnLoadStartListener", &HybridVideoPlayerEventEmitterSpec::addOnLoadStartListener);

@@ -167,6 +167,8 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
       return@mainThreadProperty playerVolume == 0.0
     },
     set = { value ->
+      if (value == muted) return@mainThreadProperty
+
       if (value) {
         userVolume = volume
         player.volume = 0f
@@ -247,13 +249,23 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
       .setEnableDecoderFallback(true)
 
     // Build the player with the LoadControl
+    val previousPlayer = player
     player = ExoPlayer.Builder(context)
       .setLoadControl(loadControl)
       .setLooper(Looper.getMainLooper())
       .setRenderersFactory(renderersFactory)
       .build()
+    // Release the previous player (the placeholder, or an earlier one if initialize() runs again)
+    // so it doesn't leak. Remove the listeners first, like completeRelease(), so a release timeout
+    // doesn't report an error on this player.
+    currentPlayerView?.get()?.player = player
+    previousPlayer.removeListener(playerListener)
+    previousPlayer.removeAnalyticsListener(analyticsListener)
+    previousPlayer.release()
 
     loadedWithSource = true
+
+    applyVideoQualityConstraints()
 
     player.addListener(playerListener)
     player.addAnalyticsListener(analyticsListener)
@@ -267,6 +279,37 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
     status = VideoPlayerStatus.LOADING
     ensureNotReleased()
     startProgressUpdates()
+  }
+
+  /**
+   * Applies `bufferConfig.preferredMaximumResolution` and
+   * `preferredPeakBitRate` to the player's track selection.
+   *
+   * Both options were previously iOS-only in practice: they are applied to the
+   * `AVPlayerItem` in `AVPlayerItem+setBufferConfig.swift`, while Android read
+   * only the buffering fields off the same config and silently ignored these
+   * two. ExoPlayer expresses the same constraints through
+   * `TrackSelectionParameters`, which this file's sibling `TextTrackUtils`
+   * already uses for text-track selection.
+   *
+   * Called from `initializePlayer`, which every caller runs inside
+   * `runOnMainThreadSync` — `trackSelectionParameters` must be set on the
+   * player's application thread.
+   */
+  private fun applyVideoQualityConstraints() {
+    val config = bufferConfig ?: return
+    val maxResolution = config.preferredMaximumResolution
+    val maxBitRate = config.preferredPeakBitRate
+
+    if (maxResolution == null && maxBitRate == null) return
+
+    player.trackSelectionParameters = player.trackSelectionParameters
+      .buildUpon()
+      .apply {
+        maxResolution?.let { setMaxVideoSize(it.width.toInt(), it.height.toInt()) }
+        maxBitRate?.let { setMaxVideoBitrate(it.toInt()) }
+      }
+      .build()
   }
 
   private fun ensureNotReleased() {
@@ -563,7 +606,13 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
     }
 
     override fun onPlayerError(error: PlaybackException) {
+      // Emit onError only on the transition into ERROR, so one failure is reported once.
+      // Load promises reject instead and never set the error status here.
+      val wasError = status == VideoPlayerStatus.ERROR
       status = VideoPlayerStatus.ERROR
+      if (!wasError) {
+        eventEmitter.onError(PlayerError.PlaybackFailed(error.errorCodeName, error.message).message!!)
+      }
       stopProgressUpdates()
     }
 

@@ -49,6 +49,52 @@ describe('parseJUnit', () => {
     });
   });
 
+  // Maestro 2.10 writes the reason as the element's text, not as a `message` attribute:
+  // <failure>Assertion is false: id: evt-muted is visible</failure>
+  describe('failure text in the element body', () => {
+    const body = (inner) => parseJUnit(oneCase(inner)).cases[0].message;
+
+    test('is the message when there is no message attribute', () => {
+      expect(body('<failure>Assertion is false: id: evt-muted is visible</failure>')).toBe(
+        'Assertion is false: id: evt-muted is visible'
+      );
+      expect(body('<error>crashed</error>')).toBe('crashed');
+    });
+
+    test('is entity-decoded and trimmed', () => {
+      expect(body('<failure>\n  text &quot;Play&quot; &amp; &lt;b&gt;\n</failure>')).toBe('text "Play" & <b>');
+    });
+
+    test('is read verbatim from CDATA', () => {
+      expect(body('<failure><![CDATA[a < b &amp; c]]></failure>')).toBe('a < b &amp; c');
+    });
+
+    test('joins several CDATA sections and the text around them', () => {
+      expect(body('<failure>a &amp; <![CDATA[b < c]]> d <![CDATA[&amp;]]></failure>')).toBe('a & b < c d &amp;');
+    });
+
+    test('keeps only the first line, capped, of a long body such as a stack trace', () => {
+      expect(body('<error>java.lang.IllegalStateException: boom\n\tat a.b(C.kt:1)\n\tat d.e(F.kt:2)</error>')).toBe(
+        'java.lang.IllegalStateException: boom'
+      );
+      const long = body(`<failure>${'x'.repeat(1000)}</failure>`);
+      expect(long).toHaveLength(300);
+      expect(long.endsWith('…')).toBe(true);
+    });
+
+    test('loses to a message attribute', () => {
+      expect(body('<failure message="short">long stack trace</failure>')).toBe('short');
+    });
+
+    test('an empty element still counts as a failure with no message', () => {
+      expect(parseJUnit(oneCase('<failure></failure>')).cases[0]).toEqual({ name: 'f', failed: true, message: '' });
+    });
+  });
+
+  test('a ">" inside the message attribute does not cut the message short', () => {
+    expect(parseJUnit(oneCase('<failure message="a > b" type="x">trace</failure>')).cases[0].message).toBe('a > b');
+  });
+
   test('an empty document has no cases', () => {
     expect(parseJUnit('')).toEqual({ total: 0, failures: 0, cases: [] });
   });
