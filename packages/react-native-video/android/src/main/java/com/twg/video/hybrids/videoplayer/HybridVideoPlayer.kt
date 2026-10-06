@@ -167,6 +167,8 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
       return@mainThreadProperty playerVolume == 0.0
     },
     set = { value ->
+      if (value == muted) return@mainThreadProperty
+
       if (value) {
         userVolume = volume
         player.volume = 0f
