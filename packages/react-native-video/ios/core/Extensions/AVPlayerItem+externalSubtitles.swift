@@ -9,13 +9,13 @@ import AVFoundation
 import Foundation
 
 extension AVPlayerItem {
-  static func withExternalSubtitles(for asset: AVURLAsset, config: NativeVideoConfig) async throws
+  static func withExternalSubtitles(for asset: AVAsset, config: NativeVideoConfig) async throws
     -> AVPlayerItem
   {
     if config.externalSubtitles?.isEmpty != false {
       return AVPlayerItem(asset: asset)
     }
-      
+
     let supportedExternalSubtitles = config.externalSubtitles?.filter { subtitle in
       ExternalSubtitlesUtils.isSubtitleTypeSupported(subtitle: subtitle)
     }
@@ -23,10 +23,12 @@ extension AVPlayerItem {
     if supportedExternalSubtitles?.isEmpty == true {
       return AVPlayerItem(asset: asset)
     }
-      
-    if asset.url.pathExtension == "m3u8" {
-        return try await ExternalSubtitlesUtils.modifyStreamManifestWithExternalSubtitles(
-          for: asset, config: config)
+
+    if let urlAsset = asset as? AVURLAsset,
+      urlAsset.url.pathExtension.lowercased() == "m3u8"
+    {
+      return try await ExternalSubtitlesUtils.modifyStreamManifestWithExternalSubtitles(
+        for: urlAsset, config: config)
     }
 
     return try await ExternalSubtitlesUtils.createCompositionWithExternalSubtitles(

@@ -8,14 +8,14 @@
 import Foundation
 import NitroModules
 
-struct ListenerPair {
+private struct ListenerPair {
   let id: UUID
   let eventName: String
   let callback: Any
 }
 
 class HybridVideoPlayerEventEmitter: HybridVideoPlayerEventEmitterSpec {
-  var listeners: [ListenerPair] = []
+  private let listeners = ListenerStore<ListenerPair>()
 
   // MARK: - Private helpers
 
@@ -28,7 +28,7 @@ class HybridVideoPlayerEventEmitter: HybridVideoPlayerEventEmitterSpec {
   }
 
   private func emitEvent<T>(eventName: String, invoke: (T) throws -> Void) {
-    for pair in listeners where pair.eventName == eventName {
+    for pair in listeners.snapshot() where pair.eventName == eventName {
       if let callback = pair.callback as? T {
         do {
           try invoke(callback)
@@ -65,6 +65,10 @@ class HybridVideoPlayerEventEmitter: HybridVideoPlayerEventEmitterSpec {
 
   func addOnEndListener(listener: @escaping () -> Void) throws -> ListenerSubscription {
     addListener(eventName: "onEnd", listener: listener)
+  }
+
+  func addOnErrorListener(listener: @escaping (String) -> Void) throws -> ListenerSubscription {
+    addListener(eventName: "onError", listener: listener)
   }
 
   func addOnExternalPlaybackChangeListener(listener: @escaping (Bool) -> Void) throws -> ListenerSubscription {
@@ -147,6 +151,10 @@ class HybridVideoPlayerEventEmitter: HybridVideoPlayerEventEmitterSpec {
 
   func onEnd() {
     emitEvent(eventName: "onEnd") { (callback: () throws -> Void) in try callback() }
+  }
+
+  func onError(_ error: String) {
+    emitEvent(eventName: "onError") { (callback: (String) throws -> Void) in try callback(error) }
   }
 
   func onExternalPlaybackChange(_ isExternalPlaybackActive: Bool) {

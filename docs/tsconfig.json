@@ -5,7 +5,19 @@
     "../config/tsconfig.json"
   ],
   "compilerOptions": {
-    "baseUrl": "."
+    "baseUrl": ".",
+    // docs runs React 19 while example/ and test-app/ pin React 18, so @types/react 18
+    // stays hoisted at the root and both docs and @docusaurus/types get their own nested
+    // copy of 19.x. Two physical copies of the same version are two distinct types to
+    // TypeScript, which makes every Docusaurus component fail as a JSX element. Pinning
+    // the resolution collapses them onto one identity.
+    // "@site/*" is re-declared because "paths" replaces the inherited map wholesale
+    // rather than merging with @docusaurus/tsconfig.
+    "paths": {
+      "@site/*": ["./*"],
+      "react": ["./node_modules/@types/react"],
+      "react-dom": ["./node_modules/@types/react-dom"]
+    }
   },
   "exclude": [".docusaurus", "build"]
 }

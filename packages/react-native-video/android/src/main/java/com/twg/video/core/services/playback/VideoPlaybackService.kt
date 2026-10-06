@@ -1,35 +1,29 @@
 package com.twg.video.core.services.playback
 
-import android.app.Activity
-import android.app.PendingIntent
-import android.content.Intent
-import android.os.Binder
-import android.os.IBinder
-import android.util.Log
-import androidx.annotation.OptIn
-import androidx.media3.common.util.BitmapLoader
-import androidx.media3.common.util.UnstableApi
-import androidx.media3.session.DefaultMediaNotificationProvider
-import androidx.media3.session.SimpleBitmapLoader
-import androidx.media3.session.MediaSession
-import androidx.media3.session.MediaSessionService
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Intent
+import android.os.Binder
 import android.os.Build
+import android.os.IBinder
+import android.util.Log
+import androidx.annotation.MainThread
+import androidx.annotation.OptIn
 import androidx.core.app.NotificationCompat
-import com.margelo.nitro.NitroModules
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.session.MediaSession
+import androidx.media3.session.MediaSessionService
 import com.margelo.nitro.video.HybridVideoPlayer
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 
-class VideoPlaybackServiceBinder(val service: VideoPlaybackService): Binder()
+class VideoPlaybackServiceBinder(val service: VideoPlaybackService) : Binder()
 
 @OptIn(UnstableApi::class)
 class VideoPlaybackService : MediaSessionService() {
-  private var mediaSessionsList = mutableMapOf<HybridVideoPlayer, MediaSession>()
-  private var binder = VideoPlaybackServiceBinder(this)
-  private var sourceActivity: Class<Activity>? = null // retained for future deep-links; currently unused
+  // Service callbacks and all public mutation below are confined to the main looper.
+  private val mediaSessionsList = mutableMapOf<HybridVideoPlayer, MediaSession>()
+  private val binder = VideoPlaybackServiceBinder(this)
   private var isForeground = false
   private var cachedLaunchIntent: Intent? = null
 
@@ -39,8 +33,8 @@ class VideoPlaybackService : MediaSessionService() {
   }
 
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-    // Ensure we call startForeground quickly on newer Android versions to avoid
-    // ForegroundServiceDidNotStartInTimeException when startForegroundService(...) was used.
+    // A foreground start has a strict promotion deadline. Register-before-start means a valid
+    // request already has a session; stale requests are promoted and removed in the same callback.
     try {
       if (!isForeground && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         startForeground(PLACEHOLDER_NOTIFICATION_ID, createPlaceholderNotification())
@@ -50,75 +44,39 @@ class VideoPlaybackService : MediaSessionService() {
       Log.e(TAG, "Failed to start foreground service!")
     }
 
+    if (mediaSessionsList.isEmpty()) {
+      stopIfNoPlayers()
+      stopSelf(startId)
+      return START_NOT_STICKY
+    }
+
     return super.onStartCommand(intent, flags, startId)
   }
 
-  // Player Registry
-  fun registerPlayer(player: HybridVideoPlayer, from: Class<Activity>) {
-    if (mediaSessionsList.containsKey(player)) {
-      return
+  @MainThread
+  fun registerPlayer(player: HybridVideoPlayer): Boolean {
+    if (player.isReleaseStarted || (!player.playInBackground && !player.showNotificationControls)) {
+      return false
     }
-    sourceActivity = from
 
-    val builder = MediaSession.Builder(this, player.player)
-      .setId("RNVideoPlaybackService_" + player.hashCode())
-      .setCallback(VideoPlaybackCallback())
-
-    // Ensure tapping the notification opens the app via sessionActivity
-    try {
-      var launchIntent = cachedLaunchIntent
-      if (launchIntent == null) {
-        launchIntent = packageManager.getLaunchIntentForPackage(packageName)
-        cachedLaunchIntent = launchIntent
-      }
-
-      if (launchIntent != null) {
-        // Clone the intent before modifying it to avoid mutating the cached instance
-        val intentToUse = launchIntent.clone() as Intent
-        intentToUse.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        val contentIntent = PendingIntent.getActivity(
-          this,
-          0,
-          intentToUse,
-          PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        builder.setSessionActivity(contentIntent)
-      }
-    } catch (_: Exception) {}
-
-
-    val mediaSession = builder.build()
-
-    mediaSessionsList[player] = mediaSession
-    addSession(mediaSession)
+    ensurePlayerSession(player)
+    return mediaSessionsList.containsKey(player)
   }
 
+  @MainThread
   fun unregisterPlayer(player: HybridVideoPlayer) {
-    val session = mediaSessionsList.remove(player)
-    session?.release()
+    mediaSessionsList.remove(player)?.release()
     stopIfNoPlayers()
   }
 
+  @MainThread
   fun updatePlayerPreferences(player: HybridVideoPlayer) {
-    val session = mediaSessionsList[player]
-    if (session == null) {
-      // If not registered but now needs it, register
-      if (player.playInBackground || player.showNotificationControls) {
-        val activity = try { NitroModules.applicationContext?.currentActivity } catch (_: Exception) { null }
-        if (activity != null) registerPlayer(player, activity.javaClass)
-      }
-      return
-    }
-
-    // If no longer needs registration, unregister and possibly stop service
-    if (!player.playInBackground && !player.showNotificationControls) {
+    if (player.isReleaseStarted || (!player.playInBackground && !player.showNotificationControls)) {
       unregisterPlayer(player)
-      stopIfNoPlayers()
-      return
+    } else {
+      ensurePlayerSession(player)
     }
   }
-
-  // Callbacks
 
   override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? = null
 
@@ -128,17 +86,34 @@ class VideoPlaybackService : MediaSessionService() {
   }
 
   override fun onTaskRemoved(rootIntent: Intent?) {
-    stopForegroundSafely()
-    cleanup()
-    stopSelf()
+    cleanupService()
   }
 
   override fun onDestroy() {
-    stopForegroundSafely()
-    cleanup()
+    cleanupService()
     super.onDestroy()
   }
 
+  @MainThread
+  private fun stopIfNoPlayers() {
+    if (mediaSessionsList.isNotEmpty()) return
+    stopForegroundSafely()
+    isForeground = false
+    stopSelf()
+  }
+
+  @MainThread
+  private fun cleanupService() {
+    stopForegroundSafely()
+    isForeground = false
+    stopSelf()
+
+    val sessions = mediaSessionsList.values.toList()
+    mediaSessionsList.clear()
+    sessions.forEach(MediaSession::release)
+  }
+
+  @MainThread
   private fun stopForegroundSafely() {
     try {
       stopForeground(STOP_FOREGROUND_REMOVE)
@@ -147,29 +122,38 @@ class VideoPlaybackService : MediaSessionService() {
     }
   }
 
-  private fun cleanup() {
-    stopForegroundSafely()
-    stopSelf()
-    mediaSessionsList.forEach { (_, session) ->
-      session.release()
-    }
-    mediaSessionsList.clear()
-  }
+  @MainThread
+  private fun ensurePlayerSession(player: HybridVideoPlayer) {
+    if (mediaSessionsList.containsKey(player)) return
 
-  // Stop the service if there are no active media sessions (no players need it)
-  fun stopIfNoPlayers() {
-    if (mediaSessionsList.isEmpty()) {
-      // Remove placeholder notification and stop the service when no active players exist
-      try {
-        if (isForeground) {
-          stopForegroundSafely()
-          isForeground = false
-        }
-      } catch (_: Exception) {
-        Log.e(TAG, "Failed to stop foreground service!")
+    val builder = MediaSession.Builder(this, player.player)
+      .setId("RNVideoPlaybackService_" + player.hashCode())
+      .setCallback(VideoPlaybackCallback())
+
+    try {
+      var launchIntent = cachedLaunchIntent
+      if (launchIntent == null) {
+        launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+        cachedLaunchIntent = launchIntent
       }
-      cleanup()
-    }
+
+      if (launchIntent != null) {
+        val intentToUse = launchIntent.clone() as Intent
+        intentToUse.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        builder.setSessionActivity(
+          PendingIntent.getActivity(
+            this,
+            0,
+            intentToUse,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+          )
+        )
+      }
+    } catch (_: Exception) {}
+
+    val mediaSession = builder.build()
+    mediaSessionsList[player] = mediaSession
+    addSession(mediaSession)
   }
 
   companion object {
@@ -180,17 +164,17 @@ class VideoPlaybackService : MediaSessionService() {
   }
 
   private fun createPlaceholderNotification(): Notification {
-    val nm = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+    val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       try {
-        if (nm.getNotificationChannel(NOTIFICATION_CHANNEL_ID) == null) {
+        if (notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_ID) == null) {
           val channel = NotificationChannel(
             NOTIFICATION_CHANNEL_ID,
             "Media playback",
             NotificationManager.IMPORTANCE_LOW
           )
           channel.setShowBadge(false)
-          nm.createNotificationChannel(channel)
+          notificationManager.createNotificationChannel(channel)
         }
       } catch (_: Exception) {
         Log.e(TAG, "Failed to create notification channel!")
@@ -202,7 +186,8 @@ class VideoPlaybackService : MediaSessionService() {
       if (labelRes != 0) {
         getString(labelRes)
       } else {
-        applicationInfo.nonLocalizedLabel?.toString() ?: applicationInfo.loadLabel(packageManager).toString()
+        applicationInfo.nonLocalizedLabel?.toString()
+          ?: applicationInfo.loadLabel(packageManager).toString()
       }
     } catch (_: Exception) {
       "Media Playback"

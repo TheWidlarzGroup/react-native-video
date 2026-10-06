@@ -2,14 +2,24 @@ export type LibraryError =
   | 'library/deallocated'
   | 'library/application-context-not-found';
 
+/**
+ * Errors reported by the player.
+ *
+ * `player/playback-failed`: the native player failed after loading started (e.g. HTTP 404,
+ * network loss, decoder failure). `message` holds the platform code and description:
+ * ExoPlayer `errorCodeName` on Android; `NSError` domain, code and description on iOS.
+ * Delivered through `onError`.
+ */
 export type PlayerError =
   | 'player/released'
   | 'player/not-initialized'
   | 'player/asset-not-initialized'
-  | 'player/invalid-source';
+  | 'player/invalid-source'
+  | 'player/playback-failed';
 
 export type SourceError =
   | 'source/invalid-uri'
+  | 'source/photo-library-asset-not-found'
   | 'source/missing-read-file-permission'
   | 'source/file-does-not-exist'
   | 'source/failed-to-initialize-asset'
@@ -77,15 +87,18 @@ export class VideoRuntimeError extends VideoError<
   LibraryError | PlayerError | SourceError | UnknownError
 > {}
 
+// (...){%@(match[1])::(match[2])@%}(...)
+// The message runs up to the first `@%}`, so it may contain `@` itself (e.g. a URL with
+// credentials in a native error description).
+const ENCODED_ERROR_REGEX = /\{%@([^:]+)::([\s\S]+?)@%\}/;
+
 /**
  * Check if the message contains code and message
  */
 const getCodeAndMessage = (
   message: string
 ): { code: string; message: string } | null => {
-  // (...){%@(match[1])::(match[2]);@%}(...)
-  const regex = /\{%@([^:]+)::([^@]+)@%\}/;
-  const match = message.match(regex);
+  const match = message.match(ENCODED_ERROR_REGEX);
 
   if (
     match &&
@@ -109,10 +122,7 @@ const getCodeAndMessage = (
 const maybeFixErrorStack = (error: object) => {
   if ('stack' in error && typeof error.stack === 'string') {
     const stack = error.stack;
-
-    // (...){%@(match[1])::(match[2]);@%}(...)
-    const regex = /\{%@([^:]+)::([^@]+)@%\}/;
-    const match = stack.match(regex);
+    const match = stack.match(ENCODED_ERROR_REGEX);
 
     if (
       match &&
@@ -120,7 +130,10 @@ const maybeFixErrorStack = (error: object) => {
       typeof match[1] === 'string' &&
       typeof match[2] === 'string'
     ) {
-      error.stack = error.stack.replace(regex, `[${match[1]}]: ${match[2]}`);
+      error.stack = error.stack.replace(
+        ENCODED_ERROR_REGEX,
+        `[${match[1]}]: ${match[2]}`
+      );
     }
   }
 };

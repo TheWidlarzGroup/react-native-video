@@ -19,6 +19,7 @@ public protocol HybridVideoPlayerEventEmitterSpec_protocol: HybridObject {
   func addOnBufferListener(listener: @escaping (_ buffering: Bool) -> Void) throws -> ListenerSubscription
   func addOnControlsVisibleChangeListener(listener: @escaping (_ visible: Bool) -> Void) throws -> ListenerSubscription
   func addOnEndListener(listener: @escaping () -> Void) throws -> ListenerSubscription
+  func addOnErrorListener(listener: @escaping (_ error: String) -> Void) throws -> ListenerSubscription
   func addOnExternalPlaybackChangeListener(listener: @escaping (_ externalPlaybackActive: Bool) -> Void) throws -> ListenerSubscription
   func addOnLoadListener(listener: @escaping (_ data: onLoadData) -> Void) throws -> ListenerSubscription
   func addOnLoadStartListener(listener: @escaping (_ data: onLoadStartData) -> Void) throws -> ListenerSubscription

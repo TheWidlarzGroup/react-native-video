@@ -1,0 +1,31 @@
+{
+  "name": "RNVideoE2E",
+  "displayName": "RNVideoE2E",
+  "singleApp": "RNVideoE2E",
+  "ios": {
+    "bundleIdentifier": "com.rnvtest.host"
+  },
+  "android": {
+    "package": "com.rnvtest.host"
+  },
+  "plugins": [
+    "./rnv-e2e-plugin.mjs"
+  ],
+  "components": [
+    {
+      "appKey": "RNVideoE2E",
+      "displayName": "RNVideoE2E",
+      "slug": "RNVideoE2E"
+    }
+  ],
+  "resources": {
+    "android": [
+      "dist/res",
+      "dist/main.android.jsbundle"
+    ],
+    "ios": [
+      "dist/assets",
+      "dist/main.ios.jsbundle"
+    ]
+  }
+}

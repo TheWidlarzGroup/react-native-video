@@ -1,6 +1,6 @@
 import AVFoundation
 
-extension AVURLAsset {
+extension AVAsset {
   func getAssetInformation() async throws -> VideoInformation {
     // Default values
     var bitrate = Double.nan
@@ -11,7 +11,13 @@ extension AVURLAsset {
     var isLive = false
     var orientation: VideoOrientation = .unknown
 
-    let fileSize = try await VideoFileHelper.getFileSize(for: url)
+    let url = (self as? AVURLAsset)?.url
+    let fileSize: Int64
+    if let url {
+      fileSize = try await VideoFileHelper.getFileSize(for: url)
+    } else {
+      fileSize = -1
+    }
 
     // Check if asset is live stream
     if duration.flags.contains(.indefinite) {
@@ -34,7 +40,7 @@ extension AVURLAsset {
       if #available(iOS 14.0, tvOS 14.0, visionOS 1.0, *) {
         isHDR = videoTrack.hasMediaCharacteristic(.containsHDRVideo)
       }
-    } else if url.pathExtension == "m3u8" {
+    } else if let url, url.pathExtension.lowercased() == "m3u8" {
       // For HLS streams, we cannot get video track information directly
       // So we download manifest and try to extract video information from it
 

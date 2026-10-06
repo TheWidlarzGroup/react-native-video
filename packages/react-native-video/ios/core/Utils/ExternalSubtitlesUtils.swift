@@ -18,7 +18,7 @@ enum ExternalSubtitlesUtils {
   }
 
   static func createCompositionWithExternalSubtitles(
-    for asset: AVURLAsset,
+    for asset: AVAsset,
     config: NativeVideoConfig
   ) async throws -> AVPlayerItem {
     let supportedSubtitles = (config.externalSubtitles ?? []).filter { subtitle in

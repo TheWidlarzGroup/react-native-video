@@ -1,0 +1,45 @@
+# Shared by every flow (via runFlow): starts the test app from a clean state and waits
+# until it can receive a deep link. Lives outside e2e/flows/ so `maestro test e2e/flows/`
+# never runs it on its own.
+#
+# A deep link sent before JS subscribes to Linking's 'url' event is silently dropped, so
+# the test app renders e2e-host-ready only once that listener is attached (App.tsx) and
+# nothing opens a scenario before it is visible.
+appId: ${APP_ID}
+---
+# Not `launchApp: {clearState: true}`: that starts the app ~0.9 s after `pm clear`, and
+# API 34 kills the package's process when the removed task's 1 s destroy timeout fires,
+# leaving a white screen (details in CONTEXT.md). Maestro has no sleep command; waiting
+# for an id that never exists is the idiom, `optional` makes the timeout a warning.
+- clearState
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "e2e-never-rendered-sleep"
+          timeout: 2500
+          optional: true
+- launchApp
+# iOS: a stale "Open in “RNVideoE2E”?" prompt (SpringBoard's, so it survives clearState
+# and launchApp) hides the app from the hierarchy and would fail every flow from here on.
+# Tap Open so the approval sticks, then relaunch to drop the scenario that link opened.
+# Matched on the title, not the button, so a bare "Open" in the app never triggers it.
+- runFlow:
+    when:
+      platform: iOS
+      visible: "Open in .*RNVideoE2E.*"
+    commands:
+      - tapOn: "Open"
+      - launchApp
+# Generous on purpose: this waits for the app to start, not for library behaviour, and a
+# freshly cleared app on a busy emulator or hosted runner has taken 15-18 s to get here.
+- extendedWaitUntil:
+    visible:
+      id: "e2e-host-ready"
+    timeout: 30000
+# A short settle after first paint while react-native-test-app finishes bootstrapping;
+# observed to matter for scenarios that fail within milliseconds. Not a retry.
+- waitForAnimationToEnd:
+    timeout: 1500

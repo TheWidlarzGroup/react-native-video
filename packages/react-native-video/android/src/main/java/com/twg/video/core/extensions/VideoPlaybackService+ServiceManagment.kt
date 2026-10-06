@@ -1,59 +1,36 @@
 package com.twg.video.core.extensions
 
 import android.content.Context
-import android.content.Context.BIND_AUTO_CREATE
-import android.content.Context.BIND_INCLUDE_CAPABILITIES
 import android.content.Intent
 import android.os.Build
-import androidx.annotation.OptIn
-import androidx.media3.common.util.UnstableApi
-import com.margelo.nitro.NitroModules
-import com.margelo.nitro.video.HybridVideoPlayer
 import com.twg.video.core.services.playback.VideoPlaybackService
 import com.twg.video.core.services.playback.VideoPlaybackServiceConnection
 
-fun VideoPlaybackService.Companion.startService(
-  context: Context,
-  serviceConnection: VideoPlaybackServiceConnection
-) {
-  val reactContext = NitroModules.applicationContext ?: return
+fun VideoPlaybackService.Companion.updateService(
+  connection: VideoPlaybackServiceConnection
+) = connection.update()
 
-  val intent = Intent(context, VideoPlaybackService::class.java)
-  intent.action = VIDEO_PLAYBACK_SERVICE_INTERFACE
+internal fun VideoPlaybackService.Companion.requestSystemStart(context: Context): Boolean {
+  val intent = Intent(context, VideoPlaybackService::class.java).apply {
+    action = VIDEO_PLAYBACK_SERVICE_INTERFACE
+  }
 
-  // Use startForegroundService on O+ so the service has the opportunity to call
-  // startForeground(...) quickly and avoid ForegroundServiceDidNotStartInTimeException.
-  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-    try {
-      reactContext.startForegroundService(intent)
+  if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+    return try {
+      context.startService(intent) != null
     } catch (_: Exception) {
-      // Fall back to startService if anything goes wrong
-      try { reactContext.startService(intent) } catch (_: Exception) {}
+      false
     }
-  } else {
-    reactContext.startService(intent)
   }
 
-  val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-    BIND_AUTO_CREATE or BIND_INCLUDE_CAPABILITIES
-  } else {
-    BIND_AUTO_CREATE
+  return try {
+    context.startForegroundService(intent) != null
+  } catch (_: Exception) {
+    // Preserve the existing best-effort fallback for devices rejecting a foreground start.
+    try {
+      context.startService(intent) != null
+    } catch (_: Exception) {
+      false
+    }
   }
-
-  context.bindService(intent, serviceConnection, flags)
-}
-
-@OptIn(UnstableApi::class)
-fun VideoPlaybackService.Companion.stopService(
-  player: HybridVideoPlayer,
-  serviceConnection: VideoPlaybackServiceConnection
-) {
-  try {
-    // Unregister the player first; this might stop the service if no players remain
-    serviceConnection.unregisterPlayer(player)
-    // Ask service (if still connected) to stop when idle
-    try { serviceConnection.serviceBinder?.service?.stopIfNoPlayers() } catch (_: Exception) {}
-    // Then unbind
-    NitroModules.applicationContext?.currentActivity?.unbindService(serviceConnection)
-  } catch (_: Exception) {}
 }

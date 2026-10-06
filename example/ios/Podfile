@@ -39,5 +39,18 @@ target 'VideoExample' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+
+    # Xcode 26's Apple Clang 21 is stricter about consteval call sites, which breaks
+    # fmt 11.0.2's FMT_STRING(...) usages (https://github.com/fmtlib/fmt/issues/4740,
+    # https://github.com/facebook/react-native/issues/55601, #5080). consteval doesn't
+    # exist pre-C++20, so building just the fmt pod as C++17 sidesteps the strict check.
+    # TODO: Verify and remove after updating RN to version 0.84 or later
+    installer.pods_project.targets.each do |target|
+      if target.name == 'fmt'
+        target.build_configurations.each do |config|
+          config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
+        end
+      end
+    end
   end
 end

@@ -3,6 +3,7 @@ package com.margelo.nitro.video
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import androidx.annotation.MainThread
 import androidx.media3.common.C
 import androidx.media3.common.Metadata
 import androidx.media3.common.PlaybackException
@@ -26,8 +27,7 @@ import com.margelo.nitro.core.Promise
 import com.twg.video.core.LibraryError
 import com.twg.video.core.PlayerError
 import com.twg.video.core.VideoManager
-import com.twg.video.core.extensions.startService
-import com.twg.video.core.extensions.stopService
+import com.twg.video.core.extensions.updateService
 import com.twg.video.core.player.OnAudioFocusChangedListener
 import com.twg.video.core.recivers.AudioBecomingNoisyReceiver
 import com.twg.video.core.services.playback.VideoPlaybackService
@@ -39,7 +39,17 @@ import com.twg.video.core.utils.Threading.runOnMainThreadSync
 import com.twg.video.core.utils.VideoOrientationUtils
 import com.twg.video.view.VideoView
 import java.lang.ref.WeakReference
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.max
+
+internal fun Player.setPlaybackRate(rate: Double) {
+  if (rate <= 0.0) {
+    pause()
+    return
+  }
+
+  playbackParameters = playbackParameters.withSpeed(rate.toFloat())
+}
 
 @UnstableApi
 @DoNotStrip
@@ -66,6 +76,9 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   }
 
   var loadedWithSource = false
+  private val releaseStarted = AtomicBoolean(false)
+  internal val isReleaseStarted: Boolean
+    get() = releaseStarted.get()
   private var currentPlayerView: WeakReference<PlayerView>? = null
 
   var wasAutoPaused = false
@@ -83,7 +96,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   private val audioBecomingNoisyReceiver = AudioBecomingNoisyReceiver()
 
   // Service Connection
-  private val videoPlaybackServiceConnection = VideoPlaybackServiceConnection(WeakReference(this))
+  private val videoPlaybackServiceConnection = VideoPlaybackServiceConnection(WeakReference(this), context)
 
   // Text track selection state
   private var selectedExternalTrackIndex: Int? = null
@@ -107,20 +120,12 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
     }
 
   override var showNotificationControls: Boolean = false
+    get() = runOnMainThreadSync { field }
     set(value) {
-      val wasRunning = (field || playInBackground)
-      val shouldRun = (value || playInBackground)
-
-      if (shouldRun && !wasRunning) {
-        VideoPlaybackService.startService(context, videoPlaybackServiceConnection)
+      runOnMainThreadSync {
+        field = value
+        VideoPlaybackService.updateService(videoPlaybackServiceConnection)
       }
-      if (!shouldRun && wasRunning) {
-        VideoPlaybackService.stopService(this, videoPlaybackServiceConnection)
-      }
-
-      field = value
-      // Inform service to refresh notification/session layout
-      try { videoPlaybackServiceConnection.serviceBinder?.service?.updatePlayerPreferences(this) } catch (_: Exception) {}
     }
 
   // Player Properties
@@ -162,6 +167,8 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
       return@mainThreadProperty playerVolume == 0.0
     },
     set = { value ->
+      if (value == muted) return@mainThreadProperty
+
       if (value) {
         userVolume = volume
         player.volume = 0f
@@ -178,7 +185,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   override var rate: Double by mainThreadProperty(
     get = { player.playbackParameters.speed.toDouble() },
     set = { value ->
-      player.playbackParameters = player.playbackParameters.withSpeed(value.toFloat())
+      player.setPlaybackRate(value)
     }
   )
 
@@ -195,19 +202,12 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   override var disableAudioSessionManagement: Boolean = false
 
   override var playInBackground: Boolean = false
+    get() = runOnMainThreadSync { field }
     set(value) {
-      val shouldRun = (value || showNotificationControls)
-      val wasRunning = (field || showNotificationControls)
-
-      if (shouldRun && !wasRunning) {
-        VideoPlaybackService.startService(context, videoPlaybackServiceConnection)
+      runOnMainThreadSync {
+        field = value
+        VideoPlaybackService.updateService(videoPlaybackServiceConnection)
       }
-      if (!shouldRun && wasRunning) {
-        VideoPlaybackService.stopService(this, videoPlaybackServiceConnection)
-      }
-      field = value
-      // Update preferences to refresh notifications/registration
-      try { videoPlaybackServiceConnection.serviceBinder?.service?.updatePlayerPreferences(this) } catch (_: Exception) {}
     }
 
   override var playWhenInactive: Boolean = false
@@ -249,30 +249,82 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
       .setEnableDecoderFallback(true)
 
     // Build the player with the LoadControl
+    val previousPlayer = player
     player = ExoPlayer.Builder(context)
       .setLoadControl(loadControl)
       .setLooper(Looper.getMainLooper())
       .setRenderersFactory(renderersFactory)
       .build()
+    // Release the previous player (the placeholder, or an earlier one if initialize() runs again)
+    // so it doesn't leak. Remove the listeners first, like completeRelease(), so a release timeout
+    // doesn't report an error on this player.
+    currentPlayerView?.get()?.player = player
+    previousPlayer.removeListener(playerListener)
+    previousPlayer.removeAnalyticsListener(analyticsListener)
+    previousPlayer.release()
 
     loadedWithSource = true
+
+    applyVideoQualityConstraints()
 
     player.addListener(playerListener)
     player.addAnalyticsListener(analyticsListener)
     player.setMediaSource(hybridSource.mediaSource)
+    ensureNotReleased()
 
     // Emit onLoadStart
     val sourceType = if (hybridSource.uri.startsWith("http")) SourceType.NETWORK else SourceType.LOCAL
     eventEmitter.onLoadStart(onLoadStartData(sourceType = sourceType, source = hybridSource))
+    ensureNotReleased()
     status = VideoPlayerStatus.LOADING
+    ensureNotReleased()
     startProgressUpdates()
+  }
+
+  /**
+   * Applies `bufferConfig.preferredMaximumResolution` and
+   * `preferredPeakBitRate` to the player's track selection.
+   *
+   * Both options were previously iOS-only in practice: they are applied to the
+   * `AVPlayerItem` in `AVPlayerItem+setBufferConfig.swift`, while Android read
+   * only the buffering fields off the same config and silently ignored these
+   * two. ExoPlayer expresses the same constraints through
+   * `TrackSelectionParameters`, which this file's sibling `TextTrackUtils`
+   * already uses for text-track selection.
+   *
+   * Called from `initializePlayer`, which every caller runs inside
+   * `runOnMainThreadSync` — `trackSelectionParameters` must be set on the
+   * player's application thread.
+   */
+  private fun applyVideoQualityConstraints() {
+    val config = bufferConfig ?: return
+    val maxResolution = config.preferredMaximumResolution
+    val maxBitRate = config.preferredPeakBitRate
+
+    if (maxResolution == null && maxBitRate == null) return
+
+    player.trackSelectionParameters = player.trackSelectionParameters
+      .buildUpon()
+      .apply {
+        maxResolution?.let { setMaxVideoSize(it.width.toInt(), it.height.toInt()) }
+        maxBitRate?.let { setMaxVideoBitrate(it.toInt()) }
+      }
+      .build()
+  }
+
+  private fun ensureNotReleased() {
+    if (releaseStarted.get()) {
+      throw PlayerError.Cancelled
+    }
   }
 
   override fun initialize(): Promise<Unit> {
     return Promise.async {
       return@async runOnMainThreadSync {
+        ensureNotReleased()
         initializePlayer()
         player.prepare()
+        ensureNotReleased()
       }
     }
   }
@@ -280,14 +332,17 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   constructor(source: HybridVideoPlayerSource) : this() {
     this.source = source
 
-    runOnMainThread {
-      if (source.config.initializeOnCreation == true) {
-        initializePlayer()
-        player.prepare()
+    runOnMainThreadSync {
+      try {
+        if (source.config.initializeOnCreation == true) {
+          initializePlayer()
+          player.prepare()
+        }
+        VideoManager.registerPlayer(this)
+      } catch (_: PlayerError.Cancelled) {
+        // Initialization was cancelled by release.
       }
     }
-
-    VideoManager.registerPlayer(this)
   }
 
   override fun play() {
@@ -319,18 +374,18 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
         return@async
       }
 
-      val hybridSource = source as? HybridVideoPlayerSource ?: throw PlayerError.InvalidSource
-
-      val oldSource = this.source as? HybridVideoPlayerSource
-      oldSource?.sourceLoader?.cancel()
-
       runOnMainThreadSync {
-        // Update source
+        ensureNotReleased()
+        val hybridSource = source as? HybridVideoPlayerSource ?: throw PlayerError.InvalidSource
+        val oldSource = this.source as? HybridVideoPlayerSource
+        oldSource?.sourceLoader?.cancel()
+
         this.source = source
         player.setMediaSource(hybridSource.mediaSource)
+        ensureNotReleased()
 
-        // Prepare player
         player.prepare()
+        ensureNotReleased()
       }
     }
   }
@@ -338,6 +393,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   override fun preload(): Promise<Unit> {
     return Promise.async {
       runOnMainThreadSync {
+        ensureNotReleased()
         if (!loadedWithSource) {
           initializePlayer()
         }
@@ -347,17 +403,27 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
         }
 
         player.prepare()
+        ensureNotReleased()
       }
     }
   }
 
   override fun release() {
-    if (playInBackground || showNotificationControls) {
-      VideoPlaybackService.stopService(this, videoPlaybackServiceConnection)
+    if (!releaseStarted.compareAndSet(false, true)) {
+      return
     }
 
-    runOnMainThread {
+    // Defer teardown until the current main-thread callback chain has finished.
+    progressHandler.post { completeRelease() }
+  }
+
+  @MainThread
+  private fun completeRelease() {
+    VideoPlaybackService.updateService(videoPlaybackServiceConnection)
+
+    try {
       VideoManager.unregisterPlayer(this)
+    } finally {
       stopProgressUpdates()
       loadedWithSource = false
 
@@ -540,7 +606,13 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
     }
 
     override fun onPlayerError(error: PlaybackException) {
+      // Emit onError only on the transition into ERROR, so one failure is reported once.
+      // Load promises reject instead and never set the error status here.
+      val wasError = status == VideoPlayerStatus.ERROR
       status = VideoPlayerStatus.ERROR
+      if (!wasError) {
+        eventEmitter.onError(PlayerError.PlaybackFailed(error.errorCodeName, error.message).message!!)
+      }
       stopProgressUpdates()
     }
 
