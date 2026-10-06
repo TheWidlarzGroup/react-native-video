@@ -199,6 +199,7 @@ export type OnProgressData = Readonly<{
   currentTime: Float;
   playableDuration: Float;
   seekableDuration: Float;
+  currentPlaybackTime?: Double;
 }>;
 
 export type OnBandwidthUpdateData = Readonly<{
