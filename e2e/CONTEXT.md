@@ -137,11 +137,19 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
   how the two-root problem above was found.
 - **`useSyncExternalStore` bails out on same-reference snapshots.** Every mutation in
   `eventLog.ts` produces a new `Set`/array; mutating in place never re-renders.
-- **`onError` only fires from a rejected JS promise or a caught synchronous throw.** A
-  source that resolves `initialize()` optimistically and fails later (a 404, on both
-  platforms) only surfaces via `onStatusChange('error')` (#5083). The test app maps both
-  onto `evt-onError`, so the error flows pass with the bug open; the fix for #5083 should
-  split the marker and assert `onError` itself.
+- **`onError` and the error status are separate markers.** `evt-onError` is set only by
+  `onError`, `evt-status-error` only by `onStatusChange('error')`, and `evt-onError-repeated`
+  by a second `onError` in one scenario. An async failure (a 404, on both platforms)
+  reports both events, but `onError` only once (#5083); the error flows assert all three.
+  `smoke-error-mid-playback.yaml` does the same for a failure after `onLoad`: its HLS
+  fixture (`missing-segment/`) has two real segments and then a 404. It asserts on
+  Android only. On iOS (Simulator, iOS 26.5) AVPlayer handles this source in one of two
+  ways. Usually it does not fail the item: `AVPlayerItem.status` stays `.readyToPlay`, no
+  `AVPlayerItemFailedToPlayToEndTime` is posted, the 404 only shows up as an
+  `AVPlayerItemNewErrorLogEntry` (CoreMediaErrorDomain -12938), and playback ends after
+  the second segment with `onEnd`. The library reports item and player failures, not
+  error-log entries, so there is no `onError`. Sometimes (seen on the first launch after
+  an install) the item fails before `onLoad`, with one `onError`.
 - **`initializeOnCreation: true` (the default) defers the `useVideoPlayer` setup callback**
   until the native load reaches `onLoadStart`/`onStatusChange`; a source that fails
   immediately never gets there, so no listener is ever attached. Every scenario source sets

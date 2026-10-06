@@ -186,6 +186,20 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     }
   }
 
+  /// Reports an asynchronous failure of the current item (e.g. a 404): sets the error status
+  /// and emits `onError` only on the transition into `.error`, so a failure seen by several
+  /// observers is reported once. Load promises reject instead and never call this.
+  func reportAsyncError(_ error: Error?) {
+    let previous = sourceLoader.withState { () -> VideoPlayerStatus in
+      let previous = storedStatus
+      storedStatus = .error
+      return previous
+    }
+    guard previous != .error else { return }
+    _eventEmitter?.onStatusChange(.error)
+    _eventEmitter?.onError(PlayerError.playbackFailed(error: error).getMessage())
+  }
+
   var isReleased: Bool { sourceLoader.isClosed }
 
   var eventEmitter: HybridVideoPlayerEventEmitterSpec

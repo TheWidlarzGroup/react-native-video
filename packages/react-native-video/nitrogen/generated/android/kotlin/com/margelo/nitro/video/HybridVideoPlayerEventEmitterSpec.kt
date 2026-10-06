@@ -83,6 +83,15 @@ abstract class HybridVideoPlayerEventEmitterSpec: HybridObject() {
     return __result
   }
   
+  abstract fun addOnErrorListener(listener: (error: String) -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnErrorListener_cxx(listener: Func_void_std__string): ListenerSubscription {
+    val __result = addOnErrorListener(listener)
+    return __result
+  }
+  
   abstract fun addOnExternalPlaybackChangeListener(listener: (externalPlaybackActive: Boolean) -> Unit): ListenerSubscription
   
   @DoNotStrip
