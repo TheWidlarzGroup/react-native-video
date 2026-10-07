@@ -2,6 +2,7 @@
 export const SCENARIO_NAMES = [
   'mp4',
   'mp4-preload', // same clip, started with preload() instead of initialize()+play()
+  'mp4-release-mid-playback', // same clip; replaceSourceAsync(null) once progress > 2 s
   'hls',
   'error-404',
   'broken-manifest',

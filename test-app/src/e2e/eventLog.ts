@@ -42,16 +42,14 @@ export const MARKER_IDS = [
   // Player lifecycle (smoke-mp4-happy-path, smoke-preload, smoke-replace-source,
   // smoke-release-source; cases ported from #4743):
   'evt-initial-idle', // player.status read as 'idle' right after creation
-  'evt-status-loading', // onStatusChange('loading')
-  'evt-status-ready', // onStatusChange('readyToPlay')
-  'evt-ready-after-loading', // readyToPlay reported after loading had been (the order)
+  'evt-ready-after-loading', // the FIRST readyToPlay came after a loading status
   'evt-duration-fixture', // onLoad duration within FIXTURE_DURATION_SECONDS +- tolerance
   'evt-replace-resolved', // replaceSourceAsync() resolved
   'evt-replace-rejected', // replaceSourceAsync() rejected
-  'evt-onLoad-repeated', // a second onLoad: the replacement source loaded
-  'evt-reloaded-from-start', // first onProgress after that second onLoad is < 2 s
-  'evt-onEnded-repeated', // a second onEnd: the replacement source played through
-  'evt-idle-after-release', // onStatusChange('idle') once replaceSourceAsync(null) was requested
+  'evt-replacement-loaded', // onLoad after replaceSourceAsync(source) was requested
+  'evt-reloaded-from-start', // first onProgress after that onLoad is < RELOAD_START_SECONDS
+  'evt-ended-after-replace', // onEnd after replaceSourceAsync(source) was requested
+  'evt-idle-after-release', // player.status read as 'idle' once replaceSourceAsync(null) resolved
 ] as const;
 
 export type MarkerId = (typeof MARKER_IDS)[number];
@@ -70,6 +68,10 @@ export type PlayerEvent =
   | { type: 'onPlaybackRateChange'; rate: number }
   // player.status read synchronously in the setup callback, before any load starts.
   | { type: 'initialStatus'; status: VideoPlayerStatus }
+  // player.status read after replaceSourceAsync(null) resolved and native teardown ran.
+  // Read, not listened for: both native players detach every emitter listener during
+  // release, so no onStatusChange can report the idle status (see ScenarioScreen).
+  | { type: 'statusAfterRelease'; status: VideoPlayerStatus }
   // The three moments of a replaceSourceAsync() issued by a control.
   | {
       type: 'replaceSource';
@@ -91,6 +93,8 @@ export const LOOP_WRAP_TO_SECONDS = 0.75;
 // segment durations, which may differ from the mp4 by a fraction of a second.
 export const FIXTURE_DURATION_SECONDS = 8;
 export const FIXTURE_DURATION_TOLERANCE_SECONDS = 1;
+// A replacement source must start near 0; its own rule, independent of the seek rules.
+export const RELOAD_START_SECONDS = 2;
 // Set when the player reports an error status without a code (see handle).
 export const STATUS_ERROR_CODE = 'status/error';
 
@@ -113,11 +117,14 @@ type State = {
   seekPending: boolean;
   lastProgress: number | null;
   loadCount: number;
+  // Status order: only the first readyToPlay is judged against an earlier loading.
+  loadingSeen: boolean;
+  readySeen: boolean;
+  // replaceSourceAsync(source) was requested: only an onLoad/onEnd after it counts as the
+  // replacement loading/ending (Android re-emits onLoad on every re-buffer and replay).
+  replaceRequested: boolean;
   // The next onProgress tells where the replacement source started (see onLoad).
   reloadPending: boolean;
-  // Android also reports 'idle' at the natural end of a clip, so an idle status only
-  // counts as "released" once replaceSourceAsync(null) has been requested.
-  releaseRequested: boolean;
 };
 
 const initialState = (): State => ({
@@ -131,8 +138,10 @@ const initialState = (): State => ({
   seekPending: false,
   lastProgress: null,
   loadCount: 0,
+  loadingSeen: false,
+  readySeen: false,
+  replaceRequested: false,
   reloadPending: false,
-  releaseRequested: false,
 });
 
 let state = initialState();
@@ -163,8 +172,8 @@ function apply(event: PlayerEvent) {
     case 'onLoad':
       mark('evt-onLoad');
       state.loadCount += 1;
-      if (state.loadCount >= 2) {
-        mark('evt-onLoad-repeated');
+      if (state.replaceRequested) {
+        mark('evt-replacement-loaded');
         state.reloadPending = true;
       }
       if (
@@ -181,11 +190,11 @@ function apply(event: PlayerEvent) {
       const t = event.currentTime;
       // derived markers: assert text, not numbers
       if (t > PROGRESS_MARKER_SECONDS) mark('evt-progress-gt-2s');
-      // A replaced source must start from its beginning: the first progress after the
-      // second onLoad proves it, the way the seek markers prove where a seek landed.
+      // A replaced source must start from its beginning: the first progress after its
+      // onLoad proves it, the way the seek markers prove where a seek landed.
       if (state.reloadPending) {
         state.reloadPending = false;
-        if (t < SEEK_BACK_LANDED_SECONDS) mark('evt-reloaded-from-start');
+        if (t < RELOAD_START_SECONDS) mark('evt-reloaded-from-start');
       }
       // The seek markers are derived from the FIRST progress after an onSeek, so
       // natural playback can never satisfy them: a forward seek must report > 4 s, a
@@ -214,7 +223,7 @@ function apply(event: PlayerEvent) {
       // A marker is a one-shot boolean, so proving `loop` restarted playback needs a
       // real counter: smoke-loop.yaml taps play once to get from end #1 to end #2, then
       // makes no further taps — only `loop` itself can produce a #3.
-      if (state.endCount >= 2) mark('evt-onEnded-repeated');
+      if (state.replaceRequested) mark('evt-ended-after-replace');
       if (state.endCount >= LOOP_VERIFIED_END_COUNT) mark('evt-loop-verified');
       append(`onEnded (#${state.endCount})`);
       return;
@@ -234,17 +243,12 @@ function apply(event: PlayerEvent) {
         mark('evt-status-error');
         if (state.errorCode === '') state.errorCode = STATUS_ERROR_CODE;
       }
-      if (event.status === 'loading') mark('evt-status-loading');
-      if (event.status === 'readyToPlay') {
-        mark('evt-status-ready');
-        // Order, not just presence: a player that reports readyToPlay without having
-        // reported loading first would still set both plain markers.
-        if (state.markers.has('evt-status-loading')) {
-          mark('evt-ready-after-loading');
-        }
-      }
-      if (event.status === 'idle' && state.releaseRequested) {
-        mark('evt-idle-after-release');
+      if (event.status === 'loading') state.loadingSeen = true;
+      if (event.status === 'readyToPlay' && !state.readySeen) {
+        state.readySeen = true;
+        // Order, judged once: the first readyToPlay must follow a loading. A later
+        // readyToPlay after a re-buffer must not satisfy it retroactively.
+        if (state.loadingSeen) mark('evt-ready-after-loading');
       }
       append(`status:${event.status}`);
       return;
@@ -293,12 +297,17 @@ function apply(event: PlayerEvent) {
       return;
 
     case 'replaceSource':
-      if (event.phase === 'requested' && event.source === 'null') {
-        state.releaseRequested = true;
+      if (event.phase === 'requested' && event.source !== 'null') {
+        state.replaceRequested = true;
       }
       if (event.phase === 'resolved') mark('evt-replace-resolved');
       if (event.phase === 'rejected') mark('evt-replace-rejected');
       append(`replaceSource(${event.source}) ${event.phase}`);
+      return;
+
+    case 'statusAfterRelease':
+      if (event.status === 'idle') mark('evt-idle-after-release');
+      append(`statusAfterRelease:${event.status}`);
       return;
 
     default:

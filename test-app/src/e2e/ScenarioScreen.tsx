@@ -6,51 +6,86 @@ import {
   VideoView,
   type VideoPlayer,
 } from 'react-native-video';
-import { eventLog } from './eventLog';
+import { eventLog, PROGRESS_MARKER_SECONDS } from './eventLog';
 import { EventLogPanel } from './EventLogPanel';
 import type { ScenarioName } from './deepLink';
 import { SCENARIO_SOURCES } from './fixtures';
 
 /**
- * replaceSourceAsync() is awaited here and followed by play() from JS, so the flow needs
- * one tap on an idle player. A separate play tap after the replacement could be issued
- * while the new source already plays, and iOS delivers such taps only once the player is
- * idle again (e2e/CONTEXT.md). Whether the player is reusable after
- * replaceSourceAsync(null) is an open question (the docs say yes, both native players
- * release for good), so no control loads a source after it.
+ * replaceSourceAsync() is awaited here and, for a new source, followed by play() from
+ * JS, so the flow needs one tap on an idle player. A separate play tap after the
+ * replacement could be issued while the new source already plays, and iOS delivers such
+ * taps only once the player is idle again (e2e/CONTEXT.md). The rejection handler is the
+ * second `then` argument, so a failure of the play() that follows is never logged as the
+ * replacement rejecting.
  */
 function replaceSource(player: VideoPlayer, target: 'hls' | 'null') {
-  eventLog.handle({
-    type: 'replaceSource',
-    phase: 'requested',
-    source: target,
-  });
+  const report = (phase: 'requested' | 'resolved' | 'rejected') =>
+    eventLog.handle({ type: 'replaceSource', phase, source: target });
+  report('requested');
   player
     .replaceSourceAsync(target === 'null' ? null : SCENARIO_SOURCES.hls)
-    .then(() => {
-      eventLog.handle({
-        type: 'replaceSource',
-        phase: 'resolved',
-        source: target,
-      });
-      if (target === 'hls') player.play();
-    })
-    .catch(() => {
-      eventLog.handle({
-        type: 'replaceSource',
-        phase: 'rejected',
-        source: target,
-      });
-    });
+    .then(
+      () => {
+        report('resolved');
+        if (target === 'null') {
+          reportStatusAfterRelease(player);
+        } else {
+          try {
+            player.play();
+          } catch (error) {
+            eventLog.log(`play after replace threw: ${String(error)}`);
+          }
+        }
+      },
+      () => report('rejected')
+    );
+}
+
+const STATUS_AFTER_RELEASE_TIMEOUT_MS = 2000;
+const STATUS_AFTER_RELEASE_POLL_MS = 50;
+
+/**
+ * Reads player.status once replaceSourceAsync(null) has resolved. Read, not listened
+ * for: both native players detach every emitter listener while releasing, so no
+ * onStatusChange can deliver the idle status (whether the player is reusable afterwards
+ * is an open question, e2e/CONTEXT.md). Native defers the teardown by one main-thread
+ * turn, so the status is polled briefly; the last value read is reported either way.
+ */
+function reportStatusAfterRelease(player: VideoPlayer) {
+  const deadline = Date.now() + STATUS_AFTER_RELEASE_TIMEOUT_MS;
+  const poll = () => {
+    const status = player.status;
+    if (status === 'idle' || Date.now() >= deadline) {
+      eventLog.handle({ type: 'statusAfterRelease', status });
+      return;
+    }
+    setTimeout(poll, STATUS_AFTER_RELEASE_POLL_MS);
+  };
+  poll();
 }
 
 /**
  * How a scenario starts its load once every listener is attached. The preload scenario
- * only prepares the source, so a flow can assert that nothing plays until btn-play; every
- * other scenario initializes and plays.
+ * only prepares the source, so a flow can assert that nothing plays until btn-play. The
+ * release scenario plays and then calls replaceSourceAsync(null) itself, from JS, once
+ * playback has passed PROGRESS_MARKER_SECONDS: a release during playback proves that the
+ * release stops playback (the clip must not reach its end), and needs no tap, which iOS
+ * would defer until the end anyway. Every other scenario initializes and plays.
  */
 function startScenario(scenario: ScenarioName, player: VideoPlayer) {
   eventLog.handle({ type: 'initialStatus', status: player.status });
+
+  if (scenario === 'mp4-release-mid-playback') {
+    let released = false;
+    player.addEventListener('onProgress', ({ currentTime }) => {
+      if (!released && currentTime > PROGRESS_MARKER_SECONDS) {
+        released = true;
+        replaceSource(player, 'null');
+      }
+    });
+  }
+
   const load =
     scenario === 'mp4-preload'
       ? player.preload()
@@ -120,11 +155,6 @@ const CONTROLS: Control[] = [
     id: 'btn-replace-hls',
     title: 'replace hls',
     press: (p) => replaceSource(p, 'hls'),
-  },
-  {
-    id: 'btn-replace-null',
-    title: 'replace null',
-    press: (p) => replaceSource(p, 'null'),
   },
 ];
 

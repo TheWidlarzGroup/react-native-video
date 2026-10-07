@@ -157,13 +157,16 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
   `player.initialize()` explicitly. Because setup then runs synchronously during the first
   render, the event log is reset at the top of setup, not in an effect (an effect would
   run after the first events and wipe them).
-- **Android reports `idle` at the natural end of a clip** (ExoPlayer `STATE_ENDED`), iOS
-  does not. So "the player went idle because it was released" cannot be a plain status
-  marker: `evt-idle-after-release` counts an idle status only once `btn-replace-null`
-  (`replaceSourceAsync(null)`) has been requested. Likewise `evt-ready-after-loading`
-  encodes the order loading → readyToPlay, and `evt-reloaded-from-start` judges the first
-  progress after a second `onLoad`, like the seek markers judge the first progress after
-  `onSeek`.
+- **A released player reports nothing.** Both native players detach every emitter
+  listener while releasing (`replaceSourceAsync(null)` releases), before they set the
+  idle status, and Android already reports `idle` at the natural end of a clip. So the
+  release scenario does not listen for idle: it calls `replaceSourceAsync(null)` from JS
+  during playback and then reads `player.status` (`evt-idle-after-release`), which is
+  what the #4743 test did. The other lifecycle markers are anchored the same way:
+  `evt-ready-after-loading` judges only the first `readyToPlay`, and the replacement
+  markers (`evt-replacement-loaded`, `evt-reloaded-from-start`, `evt-ended-after-replace`)
+  only count events after `replaceSourceAsync(source)` was requested, because Android
+  re-emits `onLoad` on every re-buffer and replay.
 - **Reuse after `replaceSourceAsync(null)` is an open question.** The docs say the player
   stays usable; both native players release it for good and reject the next load with
   `player/cancelled`. `smoke-release-source.yaml` asserts only what both agree on (the

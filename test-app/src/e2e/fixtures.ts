@@ -22,6 +22,7 @@ const fixture = (path: string): VideoConfig => ({
 export const SCENARIO_SOURCES: Record<ScenarioName, VideoConfig> = {
   'mp4': fixture('short.mp4'), // 8 s, testsrc + sine audio
   'mp4-preload': fixture('short.mp4'),
+  'mp4-release-mid-playback': fixture('short.mp4'),
   'hls': fixture('hls/index.m3u8'), // ~8 s VOD, 2 s segments
   'error-404': fixture('does-not-exist.mp4'),
   'broken-manifest': fixture('broken/index.m3u8'),
