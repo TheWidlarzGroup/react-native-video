@@ -232,7 +232,8 @@ test('withReactNativeVideo registers only the mods its props ask for', () => {
   const none = withReactNativeVideo(baseConfig(), {}) as any;
   expect(none.mods.ios?.infoPlist).toBeUndefined();
   expect(none.mods.android?.gradleProperties).toBeUndefined();
-  expect(none.mods.android?.manifest).toBeDefined(); // notification controls always
+  expect(none.mods.android?.manifest).toBeDefined(); // playback service by default
+  expect(none.android?.permissions).toEqual(FOREGROUND_PERMISSIONS);
 
   const all = withReactNativeVideo(baseConfig(), {
     enableBackgroundAudio: true,
@@ -242,6 +243,13 @@ test('withReactNativeVideo registers only the mods its props ask for', () => {
   expect(all.mods.ios.infoPlist).toBeDefined();
   expect(all.mods.android.gradleProperties).toBeDefined();
   expect(all.mods.android.manifest).toBeDefined();
+
+  // Opting out of the playback service leaves the manifest and the permissions alone.
+  const noService = withReactNativeVideo(baseConfig(), {
+    enableAndroidPlaybackService: false,
+  }) as any;
+  expect(noService.mods?.android?.manifest).toBeUndefined();
+  expect(noService.android?.permissions).toEqual([]);
 });
 
 function podfileProject(content: string) {
