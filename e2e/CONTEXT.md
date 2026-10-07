@@ -157,6 +157,18 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
   `player.initialize()` explicitly. Because setup then runs synchronously during the first
   render, the event log is reset at the top of setup, not in an effect (an effect would
   run after the first events and wipe them).
+- **Android reports `idle` at the natural end of a clip** (ExoPlayer `STATE_ENDED`), iOS
+  does not. So "the player went idle because it was released" cannot be a plain status
+  marker: `evt-idle-after-release` counts an idle status only once `btn-replace-null`
+  (`replaceSourceAsync(null)`) has been requested. Likewise `evt-ready-after-loading`
+  encodes the order loading → readyToPlay, and `evt-reloaded-from-start` judges the first
+  progress after a second `onLoad`, like the seek markers judge the first progress after
+  `onSeek`.
+- **Reuse after `replaceSourceAsync(null)` is an open question.** The docs say the player
+  stays usable; both native players release it for good and reject the next load with
+  `player/cancelled`. `smoke-release-source.yaml` asserts only what both agree on (the
+  promise resolves, status idle, no error) and loads nothing afterwards, so it cements
+  neither answer. Resolve the docs/native disagreement first, then extend the flow.
 - **`onError` is JS-only and un-buffered.** Register listeners with
   `player.addEventListener(...)` inside the setup callback, not via `useEvent` in the
   component body, or a fast local failure is lost.
