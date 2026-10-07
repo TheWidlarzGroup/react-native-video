@@ -1,5 +1,6 @@
 import { test, expect } from 'bun:test';
 import {
+  chmodSync,
   mkdtempSync,
   mkdirSync,
   readFileSync,
@@ -8,13 +9,17 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import type { ExpoConfig } from '@expo/config-types';
+import type { ConfigPlugin } from '@expo/config-plugins';
 import { withBackgroundAudio } from '../src/expo-plugins/withBackgroundAudio';
 import { withAndroidPictureInPicture } from '../src/expo-plugins/withAndroidPictureInPicture';
 import { withAndroidExtensions } from '../src/expo-plugins/withAndroidExtensions';
 import { withAndroidNotificationControls } from '../src/expo-plugins/withAndroidNotificationControls';
 import { writeToPodfile } from '../src/expo-plugins/writeToPodfile';
 import withReactNativeVideo from '../src/expo-plugins/withReactNativeVideo';
+
+// The config type the plugins are declared with, without depending on @expo/config-types
+// directly (the package only depends on @expo/config-plugins).
+type ExpoConfig = Parameters<ConfigPlugin>[0];
 
 // Config plugins only register mod functions; prebuild runs them later with the parsed
 // native file as `modResults`. This invokes one registered mod the way prebuild does.
@@ -110,7 +115,7 @@ test('withAndroidPictureInPicture flags .MainActivity and tolerates its absence'
   ).resolves.toBeDefined();
 });
 
-test('withAndroidExtensions writes both flags, defaults to true, and replaces stale entries', async () => {
+test('withAndroidExtensions writes both flags, defaults missing keys to true, and replaces stale entries', async () => {
   const props = (v: unknown) =>
     (v as { type: string; key: string; value: string }[]).filter(
       (p) => p.type === 'property'
@@ -137,9 +142,10 @@ test('withAndroidExtensions writes both flags, defaults to true, and replaces st
     'gradleProperties',
     stale
   );
+  // A key left out of a partial object keeps its documented default (true).
   expect(props(explicit)).toEqual([
     { type: 'property', key: 'other', value: 'x' },
-    { type: 'property', key: 'RNVideo_useExoplayerDash', value: 'false' },
+    { type: 'property', key: 'RNVideo_useExoplayerDash', value: 'true' },
     { type: 'property', key: 'RNVideo_useExoplayerHls', value: 'false' },
   ]);
 
@@ -177,8 +183,11 @@ test('withAndroidNotificationControls adds the playback service and its permissi
     'androidx.media3.session.MediaSessionService'
   );
   // In the manifest, not only in config.android.permissions: expo prebuild runs its own
-  // permissions mod before this one, so a permission added to the config here is lost.
+  // permissions mod before this plugin's manifest mod, so a permission added to the config
+  // from inside that mod would be lost.
   expect(permissions(m)).toEqual(FOREGROUND_PERMISSIONS);
+  // And in the config, so `expo config` and other plugins see what the manifest gets.
+  expect(config.android?.permissions).toEqual(FOREGROUND_PERMISSIONS);
 });
 
 test('withAndroidNotificationControls adds the service to a manifest with no <service> yet', async () => {
@@ -252,9 +261,9 @@ test('writeToPodfile targets `use_test_app!` in react-native-test-app mode', () 
   try {
     writeToPodfile(p.root, 'RNVideoUseVideoCaching', 'true', true);
     const content = p.read();
-    expect(content.indexOf('$RNVideoUseVideoCaching = true')).toBeLessThan(
-      content.indexOf('use_test_app!')
-    );
+    const idx = content.indexOf('$RNVideoUseVideoCaching = true');
+    expect(idx).toBeGreaterThan(-1);
+    expect(idx).toBeLessThan(content.indexOf('use_test_app!'));
   } finally {
     p.rm();
   }
@@ -275,5 +284,21 @@ test('writeToPodfile skips a key that is already defined and a Podfile without a
   } finally {
     defined.rm();
     noAnchor.rm();
+  }
+});
+
+test('writeToPodfile still throws when the Podfile cannot be written', () => {
+  // Only a missing anchor is downgraded to a warning; a Podfile that cannot be written is
+  // a real failure that must stop prebuild.
+  const p = podfileProject("platform :ios, '15.1'\n");
+  const podfile = join(p.root, 'ios', 'Podfile');
+  chmodSync(podfile, 0o444);
+  try {
+    expect(() =>
+      writeToPodfile(p.root, 'RNVideoUseVideoCaching', 'true')
+    ).toThrow(/EACCES|EPERM/);
+  } finally {
+    chmodSync(podfile, 0o644);
+    p.rm();
   }
 });

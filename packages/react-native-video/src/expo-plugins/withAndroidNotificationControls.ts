@@ -12,13 +12,24 @@ const PERMISSIONS = [
 ];
 
 export const withAndroidNotificationControls: ConfigPlugin = (oldConfig) => {
-  return withAndroidManifest(oldConfig, (config) => {
+  // The permissions go through Expo's own helper, at plugin level: it adds them to
+  // `config.android.permissions` right away (so Expo's built-in permissions mod writes them
+  // whenever it runs) and registers a manifest mod of its own. Adding them from inside the
+  // manifest mod below is too late: `expo prebuild` registers its built-in mods after the
+  // app's plugins and runs the last-registered first, so the permissions would never reach
+  // AndroidManifest.xml.
+  const withPermissions = AndroidConfig.Permissions.withPermissions(
+    oldConfig,
+    PERMISSIONS
+  );
+
+  return withAndroidManifest(withPermissions, (config) => {
     const mainApplication = AndroidConfig.Manifest.getMainApplication(
       config.modResults
     );
     if (!mainApplication) {
       console.warn(
-        'AndroidManifest.xml is missing an <activity android:name=".MainActivity" /> element - skipping adding Notification Controls related config.'
+        'AndroidManifest.xml is missing an <application android:name=".MainApplication"> element - skipping adding Notification Controls related config.'
       );
       return config;
     }
@@ -49,11 +60,6 @@ export const withAndroidNotificationControls: ConfigPlugin = (oldConfig) => {
       });
     }
 
-    // Write the permissions into the manifest itself. Adding them to
-    // `config.android.permissions` from inside this mod is too late: `expo prebuild`
-    // registers its own permissions mod after the app's plugins, so it runs first and
-    // has already written the manifest by the time this mod changes the config.
-    AndroidConfig.Permissions.ensurePermissions(config.modResults, PERMISSIONS);
     return config;
   });
 };
