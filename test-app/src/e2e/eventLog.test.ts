@@ -9,6 +9,8 @@ import {
   SEEK_FORWARD_LANDED_SECONDS,
   STATUS_ERROR_CODE,
   VOLUME_LOW_THRESHOLD,
+  FIXTURE_DURATION_SECONDS,
+  FIXTURE_DURATION_TOLERANCE_SECONDS,
   type MarkerId,
   type PlayerEvent,
 } from './eventLog';
@@ -33,8 +35,11 @@ describe('store', () => {
     expect(eventLog.getEntries()).not.toBe(entries0);
 
     const markers1 = eventLog.getMarkers();
-    feed({ type: 'onEnd' }); // evt-onEnded is already set
-    expect(eventLog.getMarkers()).toBe(markers1);
+    feed({ type: 'onProgress', currentTime: 0.2 }); // evt-onProgress, a new marker
+    const markers2 = eventLog.getMarkers();
+    expect(markers2).not.toBe(markers1);
+    feed({ type: 'onProgress', currentTime: 0.3 }); // evt-onProgress is already set
+    expect(eventLog.getMarkers()).toBe(markers2);
   });
 
   test('subscribers are notified once per call and stop after unsubscribing', () => {
@@ -145,9 +150,13 @@ describe('press', () => {
 
 describe('handle', () => {
   test('onLoad marks and logs the duration', () => {
-    feed({ type: 'onLoad', duration: 8 }, { type: 'onLoad', duration: NaN });
+    feed({ type: 'onLoad', duration: 42 });
     expect(markers()).toEqual(['evt-onLoad']);
-    expect(lines()).toEqual(['onLoad duration=8', 'onLoad duration=NaN']);
+    feed({ type: 'onLoad', duration: NaN });
+    expect(lines()).toEqual([
+      'onLoad duration=42 (#1)',
+      'onLoad duration=NaN (#2)',
+    ]);
   });
 
   test('onProgress marks progress past the threshold, exclusive', () => {
@@ -232,14 +241,15 @@ describe('handle', () => {
       expect(lines()).toEqual(['onError code=source/invalid-uri']);
     });
 
-    test('an error status marks and stores a placeholder code; other statuses only log', () => {
+    test('an error status marks and stores a placeholder code; other statuses never touch the code', () => {
       feed({ type: 'onStatusChange', status: 'loading' });
-      expect(markers()).toEqual([]);
+      expect(markers()).toEqual(['evt-status-loading']);
       expect(eventLog.getErrorCode()).toBe('');
+      eventLog.reset();
       feed({ type: 'onStatusChange', status: 'error' });
       expect(markers()).toEqual(['evt-status-error']);
       expect(eventLog.getErrorCode()).toBe(STATUS_ERROR_CODE);
-      expect(lines()).toEqual(['status:loading', 'status:error']);
+      expect(lines()).toEqual(['status:error']);
     });
 
     test('a later onError replaces the placeholder code', () => {
@@ -329,7 +339,7 @@ describe('handle', () => {
   describe('loop', () => {
     test('the third onEnd verifies loop (AVPlayer reports every pass)', () => {
       feed({ type: 'onEnd' }, { type: 'onEnd' });
-      expect(markers()).toEqual(['evt-onEnded']);
+      expect(markers()).toEqual(['evt-onEnded', 'evt-onEnded-repeated']);
       feed({ type: 'onEnd' });
       expect(markers()).toContain('evt-loop-verified');
       expect(lines()).toEqual(['onEnded (#1)', 'onEnded (#2)', 'onEnded (#3)']);
@@ -396,5 +406,125 @@ describe('handle', () => {
       );
       expect(markers()).not.toContain('evt-loop-verified');
     });
+  });
+});
+
+describe('lifecycle (ported from #4743)', () => {
+  test('the initial status marks idle only when it was idle', () => {
+    feed({ type: 'initialStatus', status: 'loading' });
+    expect(markers()).toEqual([]);
+    feed({ type: 'initialStatus', status: 'idle' });
+    expect(markers()).toEqual(['evt-initial-idle']);
+    expect(lines()).toEqual(['initialStatus:loading', 'initialStatus:idle']);
+  });
+
+  test('readyToPlay after loading marks the order, readyToPlay alone does not', () => {
+    feed({ type: 'onStatusChange', status: 'readyToPlay' });
+    expect(markers()).toEqual(['evt-status-ready']);
+    feed({ type: 'onStatusChange', status: 'loading' });
+    expect(markers()).toEqual(['evt-status-loading', 'evt-status-ready']);
+    // A later readyToPlay (e.g. after a rebuffer) now has loading before it.
+    feed({ type: 'onStatusChange', status: 'readyToPlay' });
+    expect(markers()).toContain('evt-ready-after-loading');
+  });
+
+  test('the duration marker accepts the fixture length within its tolerance', () => {
+    feed({
+      type: 'onLoad',
+      duration:
+        FIXTURE_DURATION_SECONDS + FIXTURE_DURATION_TOLERANCE_SECONDS + 0.01,
+    });
+    expect(markers()).toEqual(['evt-onLoad']);
+    feed({
+      type: 'onLoad',
+      duration: FIXTURE_DURATION_SECONDS - FIXTURE_DURATION_TOLERANCE_SECONDS,
+    });
+    expect(markers()).toContain('evt-duration-fixture');
+  });
+
+  test('a second onLoad marks the reload and the first progress after it must be near 0', () => {
+    feed(
+      { type: 'onLoad', duration: 8 },
+      { type: 'onProgress', currentTime: 8 }
+    );
+    expect(markers()).not.toContain('evt-onLoad-repeated');
+    feed({ type: 'onLoad', duration: 8 });
+    expect(markers()).toContain('evt-onLoad-repeated');
+    // The position the previous clip ended at does not count as a restart.
+    feed({ type: 'onProgress', currentTime: SEEK_BACK_LANDED_SECONDS });
+    expect(markers()).not.toContain('evt-reloaded-from-start');
+    // Only the FIRST progress after the reload is judged.
+    feed({ type: 'onProgress', currentTime: 0.1 });
+    expect(markers()).not.toContain('evt-reloaded-from-start');
+    feed(
+      { type: 'onLoad', duration: 8 },
+      { type: 'onProgress', currentTime: 0.1 }
+    );
+    expect(markers()).toContain('evt-reloaded-from-start');
+    expect(lines()[0]).toBe('onLoad duration=8 (#1)');
+  });
+
+  test('a reload does not disturb a pending seek and vice versa', () => {
+    feed(
+      { type: 'onLoad', duration: 8 },
+      { type: 'onLoad', duration: 8 },
+      { type: 'onSeek', seekTime: 5 },
+      { type: 'onProgress', currentTime: 5.2 }
+    );
+    expect(markers()).toContain('evt-seek-fwd-landed');
+    expect(markers()).not.toContain('evt-reloaded-from-start');
+  });
+
+  test('a second onEnd marks the repeated end before loop is verified', () => {
+    feed({ type: 'onEnd' });
+    expect(markers()).toEqual(['evt-onEnded']);
+    feed({ type: 'onEnd' });
+    expect(markers()).toEqual(['evt-onEnded', 'evt-onEnded-repeated']);
+  });
+
+  test('replaceSourceAsync phases mark resolved or rejected and are logged', () => {
+    feed({ type: 'replaceSource', phase: 'requested', source: 'hls' });
+    expect(markers()).toEqual([]);
+    feed({ type: 'replaceSource', phase: 'resolved', source: 'hls' });
+    expect(markers()).toEqual(['evt-replace-resolved']);
+    feed({ type: 'replaceSource', phase: 'rejected', source: 'hls' });
+    expect(markers()).toEqual(['evt-replace-rejected', 'evt-replace-resolved']);
+    expect(lines()).toEqual([
+      'replaceSource(hls) requested',
+      'replaceSource(hls) resolved',
+      'replaceSource(hls) rejected',
+    ]);
+  });
+
+  test('idle counts as released only after replaceSourceAsync(null) was requested', () => {
+    // Android reports idle at the natural end of a clip (ExoPlayer STATE_ENDED).
+    feed({ type: 'onStatusChange', status: 'idle' });
+    expect(markers()).toEqual([]);
+    feed({ type: 'replaceSource', phase: 'requested', source: 'hls' });
+    feed({ type: 'onStatusChange', status: 'idle' });
+    expect(markers()).toEqual([]);
+    feed({ type: 'replaceSource', phase: 'requested', source: 'null' });
+    feed({ type: 'onStatusChange', status: 'idle' });
+    expect(markers()).toEqual(['evt-idle-after-release']);
+  });
+
+  test('reset clears the lifecycle bookkeeping', () => {
+    feed(
+      { type: 'onLoad', duration: 8 },
+      { type: 'onLoad', duration: 8 },
+      { type: 'onEnd' },
+      { type: 'replaceSource', phase: 'requested', source: 'null' }
+    );
+    eventLog.reset();
+    feed(
+      { type: 'onLoad', duration: 8 },
+      { type: 'onEnd' },
+      { type: 'onStatusChange', status: 'idle' }
+    );
+    expect(markers()).toEqual([
+      'evt-duration-fixture',
+      'evt-onEnded',
+      'evt-onLoad',
+    ]);
   });
 });

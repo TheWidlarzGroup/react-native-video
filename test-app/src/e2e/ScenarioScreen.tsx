@@ -11,6 +11,55 @@ import { EventLogPanel } from './EventLogPanel';
 import type { ScenarioName } from './deepLink';
 import { SCENARIO_SOURCES } from './fixtures';
 
+/**
+ * replaceSourceAsync() is awaited here and followed by play() from JS, so the flow needs
+ * one tap on an idle player. A separate play tap after the replacement could be issued
+ * while the new source already plays, and iOS delivers such taps only once the player is
+ * idle again (e2e/CONTEXT.md). Whether the player is reusable after
+ * replaceSourceAsync(null) is an open question (the docs say yes, both native players
+ * release for good), so no control loads a source after it.
+ */
+function replaceSource(player: VideoPlayer, target: 'hls' | 'null') {
+  eventLog.handle({
+    type: 'replaceSource',
+    phase: 'requested',
+    source: target,
+  });
+  player
+    .replaceSourceAsync(target === 'null' ? null : SCENARIO_SOURCES.hls)
+    .then(() => {
+      eventLog.handle({
+        type: 'replaceSource',
+        phase: 'resolved',
+        source: target,
+      });
+      if (target === 'hls') player.play();
+    })
+    .catch(() => {
+      eventLog.handle({
+        type: 'replaceSource',
+        phase: 'rejected',
+        source: target,
+      });
+    });
+}
+
+/**
+ * How a scenario starts its load once every listener is attached. The preload scenario
+ * only prepares the source, so a flow can assert that nothing plays until btn-play; every
+ * other scenario initializes and plays.
+ */
+function startScenario(scenario: ScenarioName, player: VideoPlayer) {
+  eventLog.handle({ type: 'initialStatus', status: player.status });
+  const load =
+    scenario === 'mp4-preload'
+      ? player.preload()
+      : player.initialize().then(() => player.play());
+  load.catch(() => {
+    // Surfaced by the onError listener.
+  });
+}
+
 type Control = {
   id: string;
   title: string;
@@ -67,6 +116,16 @@ const CONTROLS: Control[] = [
       p.loop = true;
     },
   },
+  {
+    id: 'btn-replace-hls',
+    title: 'replace hls',
+    press: (p) => replaceSource(p, 'hls'),
+  },
+  {
+    id: 'btn-replace-null',
+    title: 'replace null',
+    press: (p) => replaceSource(p, 'null'),
+  },
 ];
 
 // Marker derivation lives in eventLog.handle(); this only maps payloads.
@@ -110,11 +169,7 @@ export function ScenarioScreen({ scenario }: { scenario: ScenarioName }) {
     eventLog.reset();
     eventLog.log(`scenario:${scenario}`);
     logPlayerEvents(p);
-    p.initialize()
-      .then(() => p.play())
-      .catch(() => {
-        // Surfaced by the onError listener.
-      });
+    startScenario(scenario, p);
   });
 
   return (

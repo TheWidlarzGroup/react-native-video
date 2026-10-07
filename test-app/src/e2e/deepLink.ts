@@ -1,6 +1,7 @@
 // Kept free of react-native imports so bun can unit-test it (deepLink.test.ts).
 export const SCENARIO_NAMES = [
   'mp4',
+  'mp4-preload', // same clip, started with preload() instead of initialize()+play()
   'hls',
   'error-404',
   'broken-manifest',

@@ -39,6 +39,19 @@ export const MARKER_IDS = [
   // handle('onProgress') — AVPlayer reports each loop as onEnd, ExoPlayer wraps silently,
   // so both are covered (see smoke-loop.yaml).
   'evt-loop-verified',
+  // Player lifecycle (smoke-mp4-happy-path, smoke-preload, smoke-replace-source,
+  // smoke-release-source; cases ported from #4743):
+  'evt-initial-idle', // player.status read as 'idle' right after creation
+  'evt-status-loading', // onStatusChange('loading')
+  'evt-status-ready', // onStatusChange('readyToPlay')
+  'evt-ready-after-loading', // readyToPlay reported after loading had been (the order)
+  'evt-duration-fixture', // onLoad duration within FIXTURE_DURATION_SECONDS +- tolerance
+  'evt-replace-resolved', // replaceSourceAsync() resolved
+  'evt-replace-rejected', // replaceSourceAsync() rejected
+  'evt-onLoad-repeated', // a second onLoad: the replacement source loaded
+  'evt-reloaded-from-start', // first onProgress after that second onLoad is < 2 s
+  'evt-onEnded-repeated', // a second onEnd: the replacement source played through
+  'evt-idle-after-release', // onStatusChange('idle') once replaceSourceAsync(null) was requested
 ] as const;
 
 export type MarkerId = (typeof MARKER_IDS)[number];
@@ -54,7 +67,15 @@ export type PlayerEvent =
   | { type: 'onPlaybackStateChange'; isPlaying: boolean }
   | { type: 'onSeek'; seekTime: number }
   | { type: 'onVolumeChange'; muted: boolean; volume: number }
-  | { type: 'onPlaybackRateChange'; rate: number };
+  | { type: 'onPlaybackRateChange'; rate: number }
+  // player.status read synchronously in the setup callback, before any load starts.
+  | { type: 'initialStatus'; status: VideoPlayerStatus }
+  // The three moments of a replaceSourceAsync() issued by a control.
+  | {
+      type: 'replaceSource';
+      phase: 'requested' | 'resolved' | 'rejected';
+      source: 'hls' | 'null';
+    };
 
 export const PROGRESS_MARKER_SECONDS = 2;
 export const SEEK_FORWARD_LANDED_SECONDS = 4;
@@ -66,6 +87,10 @@ export const LOOP_VERIFIED_END_COUNT = 3;
 // lands below LOOP_WRAP_TO_SECONDS, so it cannot be mistaken for a wrap.
 export const LOOP_WRAP_FROM_SECONDS = 6;
 export const LOOP_WRAP_TO_SECONDS = 0.75;
+// Both fixture clips (short.mp4, hls/index.m3u8) are 8 s; HLS reports the sum of its
+// segment durations, which may differ from the mp4 by a fraction of a second.
+export const FIXTURE_DURATION_SECONDS = 8;
+export const FIXTURE_DURATION_TOLERANCE_SECONDS = 1;
 // Set when the player reports an error status without a code (see handle).
 export const STATUS_ERROR_CODE = 'status/error';
 
@@ -87,6 +112,12 @@ type State = {
   loopEnabled: boolean;
   seekPending: boolean;
   lastProgress: number | null;
+  loadCount: number;
+  // The next onProgress tells where the replacement source started (see onLoad).
+  reloadPending: boolean;
+  // Android also reports 'idle' at the natural end of a clip, so an idle status only
+  // counts as "released" once replaceSourceAsync(null) has been requested.
+  releaseRequested: boolean;
 };
 
 const initialState = (): State => ({
@@ -99,6 +130,9 @@ const initialState = (): State => ({
   loopEnabled: false,
   seekPending: false,
   lastProgress: null,
+  loadCount: 0,
+  reloadPending: false,
+  releaseRequested: false,
 });
 
 let state = initialState();
@@ -128,7 +162,18 @@ function apply(event: PlayerEvent) {
   switch (event.type) {
     case 'onLoad':
       mark('evt-onLoad');
-      append(`onLoad duration=${event.duration}`);
+      state.loadCount += 1;
+      if (state.loadCount >= 2) {
+        mark('evt-onLoad-repeated');
+        state.reloadPending = true;
+      }
+      if (
+        Math.abs(event.duration - FIXTURE_DURATION_SECONDS) <=
+        FIXTURE_DURATION_TOLERANCE_SECONDS
+      ) {
+        mark('evt-duration-fixture');
+      }
+      append(`onLoad duration=${event.duration} (#${state.loadCount})`);
       return;
 
     case 'onProgress': {
@@ -136,6 +181,12 @@ function apply(event: PlayerEvent) {
       const t = event.currentTime;
       // derived markers: assert text, not numbers
       if (t > PROGRESS_MARKER_SECONDS) mark('evt-progress-gt-2s');
+      // A replaced source must start from its beginning: the first progress after the
+      // second onLoad proves it, the way the seek markers prove where a seek landed.
+      if (state.reloadPending) {
+        state.reloadPending = false;
+        if (t < SEEK_BACK_LANDED_SECONDS) mark('evt-reloaded-from-start');
+      }
       // The seek markers are derived from the FIRST progress after an onSeek, so
       // natural playback can never satisfy them: a forward seek must report > 4 s, a
       // backward one < 2 s.
@@ -163,6 +214,7 @@ function apply(event: PlayerEvent) {
       // A marker is a one-shot boolean, so proving `loop` restarted playback needs a
       // real counter: smoke-loop.yaml taps play once to get from end #1 to end #2, then
       // makes no further taps — only `loop` itself can produce a #3.
+      if (state.endCount >= 2) mark('evt-onEnded-repeated');
       if (state.endCount >= LOOP_VERIFIED_END_COUNT) mark('evt-loop-verified');
       append(`onEnded (#${state.endCount})`);
       return;
@@ -181,6 +233,18 @@ function apply(event: PlayerEvent) {
       if (event.status === 'error') {
         mark('evt-status-error');
         if (state.errorCode === '') state.errorCode = STATUS_ERROR_CODE;
+      }
+      if (event.status === 'loading') mark('evt-status-loading');
+      if (event.status === 'readyToPlay') {
+        mark('evt-status-ready');
+        // Order, not just presence: a player that reports readyToPlay without having
+        // reported loading first would still set both plain markers.
+        if (state.markers.has('evt-status-loading')) {
+          mark('evt-ready-after-loading');
+        }
+      }
+      if (event.status === 'idle' && state.releaseRequested) {
+        mark('evt-idle-after-release');
       }
       append(`status:${event.status}`);
       return;
@@ -221,6 +285,20 @@ function apply(event: PlayerEvent) {
       if (event.rate === 2) mark('evt-rate-2x');
       if (event.rate === 0.5) mark('evt-rate-0-5x');
       append(`onPlaybackRateChange ${event.rate}`);
+      return;
+
+    case 'initialStatus':
+      if (event.status === 'idle') mark('evt-initial-idle');
+      append(`initialStatus:${event.status}`);
+      return;
+
+    case 'replaceSource':
+      if (event.phase === 'requested' && event.source === 'null') {
+        state.releaseRequested = true;
+      }
+      if (event.phase === 'resolved') mark('evt-replace-resolved');
+      if (event.phase === 'rejected') mark('evt-replace-rejected');
+      append(`replaceSource(${event.source}) ${event.phase}`);
       return;
 
     default:
