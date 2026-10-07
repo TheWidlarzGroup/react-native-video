@@ -17,8 +17,10 @@ export type PlayerError =
   | 'player/invalid-source'
   | 'player/playback-failed'
   /**
-   * The load was superseded by a newer `initialize()`/`replaceSourceAsync()` call. Not a
-   * failure: the promise rejects, but `onError` is not called.
+   * The load did not run to completion: a newer `initialize()`/`preload()`/
+   * `replaceSourceAsync()` superseded it, or the native player had been released (for
+   * example by `replaceSourceAsync(null)`). The promise rejects either way; a load
+   * superseded from JS is not reported to `onError`, a released player is.
    */
   | 'player/cancelled';
 
@@ -29,7 +31,7 @@ export type SourceError =
   | 'source/file-does-not-exist'
   | 'source/failed-to-initialize-asset'
   | 'source/unsupported-content-type'
-  /** The source load was cancelled by a newer load. Rejects, never reaches `onError`. */
+  /** The source load was cancelled (a newer load, or the source was released). */
   | 'source/cancelled';
 
 export type VideoViewError =

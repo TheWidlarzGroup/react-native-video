@@ -35,6 +35,8 @@ export type FakePlayer = {
 export const player = {
   playThrows: null as unknown,
   initializeRejects: null as unknown,
+  // When set, initialize() returns this instead of resolving/rejecting immediately.
+  initializeImpl: null as (() => Promise<void>) | null,
   replaceSourceRejects: null as unknown,
   released: 0,
   // Every native player the fake factory handed out, oldest first.
@@ -49,6 +51,7 @@ export function resetNativeMocks() {
   sourceFactory.throws = null;
   player.playThrows = null;
   player.initializeRejects = null;
+  player.initializeImpl = null;
   player.replaceSourceRejects = null;
   player.released = 0;
   player.created = [];
@@ -134,10 +137,12 @@ mock.module('react-native-nitro-modules', () => ({
               play: () => {
                 if (player.playThrows) throw player.playThrows;
               },
-              initialize: () =>
-                player.initializeRejects
+              initialize: () => {
+                if (player.initializeImpl) return player.initializeImpl();
+                return player.initializeRejects
                   ? Promise.reject(player.initializeRejects)
-                  : Promise.resolve(),
+                  : Promise.resolve();
+              },
               replaceSourceAsync: (nextSource: unknown) => {
                 if (player.replaceSourceRejects) {
                   return Promise.reject(player.replaceSourceRejects);

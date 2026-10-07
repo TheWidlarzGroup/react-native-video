@@ -86,17 +86,44 @@ test('a second release() inside the grace window does not release the native pla
   expect(native.released).toBe(1);
 });
 
-test('a cancelled load rejects with player/cancelled but is not delivered to onError', async () => {
-  // A newer initialize()/replaceSourceAsync() superseded this one: not a failure.
+test('a load superseded by a newer load rejects with player/cancelled but is not delivered to onError', async () => {
   const player = new VideoPlayer('https://x/a.mp4');
   const seen: string[] = [];
   player.addEventListener('onError', (e) => seen.push(e.code));
+
+  let rejectFirst!: (error: unknown) => void;
+  native.initializeImpl = () =>
+    new Promise<void>((_, reject) => {
+      rejectFirst = reject;
+    });
+  const first = player.initialize().catch((e: unknown) => e);
+
+  // A newer load from JS supersedes the first one; native then cancels it.
+  native.initializeImpl = null;
+  await player.replaceSourceAsync('https://x/b.mp4');
+  rejectFirst(
+    new Error(encoded('player/cancelled', 'Operation was cancelled'))
+  );
+
+  expect(((await first) as VideoRuntimeError).code).toBe('player/cancelled');
+  expect(seen).toEqual([]);
+});
+
+test('a cancellation with no newer load (the player was released) is delivered to onError', async () => {
+  // Both platforms reject every load with player/cancelled once the native player has
+  // been released, e.g. by replaceSourceAsync(null). Nothing superseded that load, so the
+  // app must hear about it.
+  const player = new VideoPlayer('https://x/a.mp4');
+  const seen: string[] = [];
+  player.addEventListener('onError', (e) => seen.push(e.code));
+  await player.replaceSourceAsync(null);
+
   native.initializeRejects = new Error(
     encoded('player/cancelled', 'Operation was cancelled')
   );
   const err = await player.initialize().catch((e: unknown) => e);
   expect((err as VideoRuntimeError).code).toBe('player/cancelled');
-  expect(seen).toEqual([]);
+  expect(seen).toEqual(['player/cancelled']);
 });
 
 test('replaceSourceAsync with an invalid source notifies onError and rejects', async () => {
