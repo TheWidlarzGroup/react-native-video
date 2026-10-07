@@ -9,7 +9,7 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import type { ConfigPlugin } from '@expo/config-plugins';
+import { AndroidConfig, type ConfigPlugin } from '@expo/config-plugins';
 import { withBackgroundAudio } from '../src/expo-plugins/withBackgroundAudio';
 import { withAndroidPictureInPicture } from '../src/expo-plugins/withAndroidPictureInPicture';
 import { withAndroidExtensions } from '../src/expo-plugins/withAndroidExtensions';
@@ -211,6 +211,23 @@ test('withAndroidNotificationControls does not duplicate the service or its perm
   expect(permissions(twice)).toEqual(FOREGROUND_PERMISSIONS);
 });
 
+test('the permissions survive Expo registering its own permissions mod after this plugin', async () => {
+  // expo prebuild applies the app's plugins first and its built-in mods afterwards, and a
+  // mod registered later runs earlier. Expo's permissions mod therefore runs before this
+  // plugin's manifest mod; the permissions must already be in config.android.permissions
+  // by then, which is what withPermissions at plugin level guarantees.
+  let config = withAndroidNotificationControls(baseConfig());
+  config = AndroidConfig.Permissions.withPermissions(config, []);
+  const m = await runMod(
+    config,
+    'android',
+    'manifest',
+    manifest({ service: false })
+  );
+  expect(permissions(m)).toEqual(FOREGROUND_PERMISSIONS);
+  expect(services(m)).toHaveLength(1);
+});
+
 test('withReactNativeVideo registers only the mods its props ask for', () => {
   const none = withReactNativeVideo(baseConfig(), {}) as any;
   expect(none.mods.ios?.infoPlist).toBeUndefined();
@@ -287,18 +304,22 @@ test('writeToPodfile skips a key that is already defined and a Podfile without a
   }
 });
 
-test('writeToPodfile still throws when the Podfile cannot be written', () => {
-  // Only a missing anchor is downgraded to a warning; a Podfile that cannot be written is
-  // a real failure that must stop prebuild.
-  const p = podfileProject("platform :ios, '15.1'\n");
-  const podfile = join(p.root, 'ios', 'Podfile');
-  chmodSync(podfile, 0o444);
-  try {
-    expect(() =>
-      writeToPodfile(p.root, 'RNVideoUseVideoCaching', 'true')
-    ).toThrow(/EACCES|EPERM/);
-  } finally {
-    chmodSync(podfile, 0o644);
-    p.rm();
+// Root ignores file permissions, so the read-only Podfile would be written anyway.
+test.skipIf(process.getuid?.() === 0)(
+  'writeToPodfile still throws when the Podfile cannot be written',
+  () => {
+    // Only a missing anchor is downgraded to a warning; a Podfile that cannot be written is
+    // a real failure that must stop prebuild.
+    const p = podfileProject("platform :ios, '15.1'\n");
+    const podfile = join(p.root, 'ios', 'Podfile');
+    chmodSync(podfile, 0o444);
+    try {
+      expect(() =>
+        writeToPodfile(p.root, 'RNVideoUseVideoCaching', 'true')
+      ).toThrow(/EACCES|EPERM/);
+    } finally {
+      chmodSync(podfile, 0o644);
+      p.rm();
+    }
   }
-});
+);
