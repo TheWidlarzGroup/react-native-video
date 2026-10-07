@@ -8,6 +8,10 @@
 #pragma once
 
 // Forward declarations of C++ defined types
+// Forward declaration of `AudioTrackChangeData` to properly resolve imports.
+namespace margelo::nitro::video { struct AudioTrackChangeData; }
+// Forward declaration of `AudioTrack` to properly resolve imports.
+namespace margelo::nitro::video { struct AudioTrack; }
 // Forward declaration of `BandwidthData` to properly resolve imports.
 namespace margelo::nitro::video { struct BandwidthData; }
 // Forward declaration of `BufferConfig` to properly resolve imports.
@@ -78,6 +82,8 @@ namespace margelo::nitro::video { struct onProgressData; }
 namespace margelo::nitro::video { struct onVolumeChangeData; }
 
 // Include C++ defined types
+#include "AudioTrack.hpp"
+#include "AudioTrackChangeData.hpp"
 #include "BandwidthData.hpp"
 #include "BufferConfig.hpp"
 #include "CustomVideoMetadata.hpp"

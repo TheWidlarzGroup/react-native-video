@@ -345,15 +345,15 @@ class VideoPlayer extends VideoPlayerEvents implements WebVideoPlayer {
     return this.getAvailableTextTracks().find((x) => x.selected);
   }
 
-  // Audio/video tracks: web-only, ~16% browser support (Safari only, flags in Chrome/Firefox)
+  // Audio/video tracks: ~16% browser support (Safari only, flags in Chrome/Firefox)
   getAvailableAudioTracks(): AudioTrack[] {
     return getTracks(this._media.video, 'audioTracks');
   }
-  selectAudioTrack(t: AudioTrack | null): void {
-    selectTrack(this._media.video, 'audioTracks', t?.id ?? null);
+  selectAudioTrack(trackId?: string): void {
+    selectTrack(this._media.video, 'audioTracks', trackId ?? null);
   }
-  get selectedAudioTrack(): AudioTrack | undefined {
-    return this.getAvailableAudioTracks().find((x) => x.selected);
+  get selectedAudioTrackId(): string | undefined {
+    return this.getAvailableAudioTracks().find((x) => x.selected)?.id;
   }
 
   getAvailableVideoTracks(): VideoTrack[] {

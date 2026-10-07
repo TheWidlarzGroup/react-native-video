@@ -25,6 +25,8 @@ namespace margelo::nitro::video { enum class MixAudioMode; }
 namespace margelo::nitro::video { enum class IgnoreSilentSwitchMode; }
 // Forward declaration of `TextTrack` to properly resolve imports.
 namespace margelo::nitro::video { struct TextTrack; }
+// Forward declaration of `AudioTrack` to properly resolve imports.
+namespace margelo::nitro::video { struct AudioTrack; }
 
 #include <memory>
 #include "HybridVideoPlayerSourceSpec.hpp"
@@ -33,6 +35,8 @@ namespace margelo::nitro::video { struct TextTrack; }
 #include "MixAudioMode.hpp"
 #include "IgnoreSilentSwitchMode.hpp"
 #include "TextTrack.hpp"
+#include "AudioTrack.hpp"
+#include <string>
 #include <optional>
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/Null.hpp>
@@ -94,12 +98,15 @@ namespace margelo::nitro::video {
       virtual void setDisableAudioSessionManagement(bool disableAudioSessionManagement) = 0;
       virtual bool getIsPlaying() = 0;
       virtual std::optional<TextTrack> getSelectedTrack() = 0;
+      virtual std::optional<std::string> getSelectedAudioTrackId() = 0;
 
     public:
       // Methods
       virtual std::shared_ptr<Promise<void>> replaceSourceAsync(const std::optional<std::variant<nitro::NullType, std::shared_ptr<HybridVideoPlayerSourceSpec>>>& source) = 0;
       virtual std::vector<TextTrack> getAvailableTextTracks() = 0;
       virtual void selectTextTrack(const std::optional<std::variant<nitro::NullType, TextTrack>>& textTrack) = 0;
+      virtual std::vector<AudioTrack> getAvailableAudioTracks() = 0;
+      virtual void selectAudioTrack(const std::optional<std::string>& trackId) = 0;
       virtual void release() = 0;
       virtual std::shared_ptr<Promise<void>> initialize() = 0;
       virtual std::shared_ptr<Promise<void>> preload() = 0;

@@ -5,6 +5,7 @@ export const SCENARIO_NAMES = [
   'error-404',
   'broken-manifest',
   'error-mid-playback',
+  'audio-tracks',
 ] as const;
 
 export type ScenarioName = (typeof SCENARIO_NAMES)[number];
