@@ -26,7 +26,7 @@ const sub = player.addEventListener('onEnd', () => {});
 | `onEnd` | — | Reached the end. |
 | `onReadyToDisplay` | — | First frame ready. |
 | `onStatusChange` | `status: 'idle'\|'loading'\|'readyToPlay'\|'error'` | |
-| `onError` | `error: VideoRuntimeError` | If you subscribe, runtime errors are delivered here instead of thrown. Also fires when the source fails to load asynchronously (e.g. HTTP 404) or playback fails, with code `player/playback-failed` on iOS/Android and a `web/*` code on web (`web/aborted`, `web/network`, `web/decode`, `web/unsupported-source`, else `unknown/unknown`); `onStatusChange('error')` fires as well. Always handle it. |
+| `onError` | `error: VideoRuntimeError` | If you subscribe, errors from the synchronous methods (`play`, `pause`, `seekTo`, `seekBy`, `selectTextTrack`, …) are delivered here instead of thrown. The async methods (`initialize`, `preload`, `replaceSourceAsync`) deliver here **and** reject their promise, so always `await` them in a `try/catch`. Also fires when the source fails to load asynchronously (e.g. HTTP 404) or playback fails, with code `player/playback-failed` on iOS/Android and a `web/*` code on web (`web/aborted`, `web/network`, `web/decode`, `web/unsupported-source`, else `unknown/unknown`); `onStatusChange('error')` fires as well. Always handle it. |
 | `onTimedMetadata` | `{ metadata: { value, identifier }[] }` | iOS/Android. |
 | `onTextTrackDataChanged` | `string[]` | Currently displayed subtitle text. |
 | `onTrackChange` | `TextTrack \| null` | Selected text track changed. |
@@ -44,6 +44,6 @@ const sub = player.addEventListener('onEnd', () => {});
 <VideoView player={player} onFullscreenChange={(full) => {}} />
 ```
 
-> Error handling: subscribing to `onError` switches v7 from "throw" to "callback" mode — wire it up so playback errors don't crash.
+> Error handling: subscribing to `onError` switches the synchronous methods from "throw" to "callback" mode — wire it up so playback errors don't crash. `initialize()`, `preload()` and `replaceSourceAsync()` still reject on failure (with the same `VideoRuntimeError`), so `await` them in a `try/catch`.
 
 > **Retry on error:** on `onError`, reload the source — `player.replaceSourceAsync(currentSource)` (or remount via a `key`) — with your own backoff and a retry button.

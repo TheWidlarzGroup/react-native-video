@@ -227,7 +227,8 @@ It is recommended to use `replaceSourceAsync(null)` when you want to free resour
 ### Error Handling
 
 -   The `onError` callback, if provided, will be called when a `VideoRuntimeError` occurs. This allows you to handle issues like network errors, invalid source, or platform-specific playback problems.
--   If `onError` is not provided, errors might be thrown as exceptions.
+-   Synchronous methods (`play()`, `pause()`, `seekTo()`, `seekBy()`, `selectTextTrack()`, …) throw the `VideoRuntimeError` when no `onError` listener is attached, and deliver it to `onError` instead of throwing when one is.
+-   Asynchronous methods (`initialize()`, `preload()`, `replaceSourceAsync()`) always reject their promise with the `VideoRuntimeError`. With an `onError` listener attached, the error is delivered to `onError` as well. Wrap these calls in `try/catch` (or attach `.catch`) so a failed load does not surface as an unhandled promise rejection.
 
 ### Using with Hooks (`useVideoPlayer`)
 
