@@ -28,12 +28,14 @@ export type FakePlayer = {
   released: number;
   play: () => void;
   initialize: () => Promise<void>;
+  replaceSourceAsync: (source: unknown) => Promise<void>;
   release: () => void;
 };
 
 export const player = {
   playThrows: null as unknown,
   initializeRejects: null as unknown,
+  replaceSourceRejects: null as unknown,
   released: 0,
   // Every native player the fake factory handed out, oldest first.
   created: [] as FakePlayer[],
@@ -47,6 +49,7 @@ export function resetNativeMocks() {
   sourceFactory.throws = null;
   player.playThrows = null;
   player.initializeRejects = null;
+  player.replaceSourceRejects = null;
   player.released = 0;
   player.created = [];
 }
@@ -135,6 +138,13 @@ mock.module('react-native-nitro-modules', () => ({
                 player.initializeRejects
                   ? Promise.reject(player.initializeRejects)
                   : Promise.resolve(),
+              replaceSourceAsync: (nextSource: unknown) => {
+                if (player.replaceSourceRejects) {
+                  return Promise.reject(player.replaceSourceRejects);
+                }
+                fake.source = nextSource;
+                return Promise.resolve();
+              },
               release: () => {
                 fake.released++;
                 player.released++;

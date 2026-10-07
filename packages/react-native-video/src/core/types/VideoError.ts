@@ -15,7 +15,12 @@ export type PlayerError =
   | 'player/not-initialized'
   | 'player/asset-not-initialized'
   | 'player/invalid-source'
-  | 'player/playback-failed';
+  | 'player/playback-failed'
+  /**
+   * The load was superseded by a newer `initialize()`/`replaceSourceAsync()` call. Not a
+   * failure: the promise rejects, but `onError` is not called.
+   */
+  | 'player/cancelled';
 
 export type SourceError =
   | 'source/invalid-uri'
@@ -23,7 +28,9 @@ export type SourceError =
   | 'source/missing-read-file-permission'
   | 'source/file-does-not-exist'
   | 'source/failed-to-initialize-asset'
-  | 'source/unsupported-content-type';
+  | 'source/unsupported-content-type'
+  /** The source load was cancelled by a newer load. Rejects, never reaches `onError`. */
+  | 'source/cancelled';
 
 export type VideoViewError =
   | 'view/not-found'

@@ -79,9 +79,49 @@ test('a resolved native promise resolves', async () => {
   await expect(player.initialize()).resolves.toBeUndefined();
 });
 
-test('release tears down the native player once and blocks further access', () => {
+test('a second release() inside the grace window does not release the native player again', () => {
   const player = new VideoPlayer('https://x/a.mp4');
   player.release();
   player.release();
   expect(native.released).toBe(1);
+});
+
+test('a cancelled load rejects with player/cancelled but is not delivered to onError', async () => {
+  // A newer initialize()/replaceSourceAsync() superseded this one: not a failure.
+  const player = new VideoPlayer('https://x/a.mp4');
+  const seen: string[] = [];
+  player.addEventListener('onError', (e) => seen.push(e.code));
+  native.initializeRejects = new Error(
+    encoded('player/cancelled', 'Operation was cancelled')
+  );
+  const err = await player.initialize().catch((e: unknown) => e);
+  expect((err as VideoRuntimeError).code).toBe('player/cancelled');
+  expect(seen).toEqual([]);
+});
+
+test('replaceSourceAsync with an invalid source notifies onError and rejects', async () => {
+  // createSource throws synchronously; it must take the same path as a native rejection.
+  const player = new VideoPlayer('https://x/a.mp4');
+  const seen: string[] = [];
+  player.addEventListener('onError', (e) => seen.push(e.code));
+  const err = await player
+    .replaceSourceAsync({ uri: '' })
+    .catch((e: unknown) => e);
+  expect((err as VideoRuntimeError).code).toBe('source/invalid-uri');
+  expect(seen).toEqual(['source/invalid-uri']);
+});
+
+test('a rejected replaceSourceAsync rejects with the parsed error', async () => {
+  const player = new VideoPlayer('https://x/a.mp4');
+  native.replaceSourceRejects = new Error(encoded('source/invalid-uri', 'bad'));
+  const err = await player
+    .replaceSourceAsync('https://x/b.mp4')
+    .catch((e: unknown) => e);
+  expect(err).toBeInstanceOf(VideoRuntimeError);
+  expect((err as VideoRuntimeError).code).toBe('source/invalid-uri');
+});
+
+test('replaceSourceAsync(null) resolves', async () => {
+  const player = new VideoPlayer('https://x/a.mp4');
+  await expect(player.replaceSourceAsync(null)).resolves.toBeUndefined();
 });
