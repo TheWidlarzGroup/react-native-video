@@ -8,9 +8,8 @@
 # original test did too. Releasing during playback, from JS, also proves that the
 # release stops playback and needs no tap (iOS would defer one until the end).
 #
-# Whether the player can load a source again afterwards is deliberately not asserted:
-# the docs say it can, both native players release it for good (open question noted in
-# e2e/CONTEXT.md), and a flow must not cement either answer.
+# Nothing is loaded afterwards: on iOS and Android replaceSourceAsync(null) releases the
+# native player like release() (documented in #5154), so a later load is rejected.
 appId: ${APP_ID}
 tags: [smoke]
 ---

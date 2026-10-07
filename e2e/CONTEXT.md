@@ -167,11 +167,10 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
   markers (`evt-replacement-loaded`, `evt-reloaded-from-start`, `evt-ended-after-replace`)
   only count events after `replaceSourceAsync(source)` was requested, because Android
   re-emits `onLoad` on every re-buffer and replay.
-- **Reuse after `replaceSourceAsync(null)` is an open question.** The docs say the player
-  stays usable; both native players release it for good and reject the next load with
-  `player/cancelled`. `smoke-release-source.yaml` asserts only what both agree on (the
-  promise resolves, status idle, no error) and loads nothing afterwards, so it cements
-  neither answer. Resolve the docs/native disagreement first, then extend the flow.
+- **`replaceSourceAsync(null)` releases the native player** on iOS and Android, like
+  `release()` (the docs said otherwise until #5154; web keeps the player loadable).
+  `smoke-release-source.yaml` therefore asserts the promise, the idle status and the
+  stopped playback, and loads nothing afterwards: a released player cannot.
 - **`onError` is JS-only and un-buffered.** Register listeners with
   `player.addEventListener(...)` inside the setup callback, not via `useEvent` in the
   component body, or a fast local failure is lost.

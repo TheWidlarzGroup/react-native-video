@@ -48,8 +48,8 @@ const STATUS_AFTER_RELEASE_POLL_MS = 50;
 /**
  * Reads player.status once replaceSourceAsync(null) has resolved. Read, not listened
  * for: both native players detach every emitter listener while releasing, so no
- * onStatusChange can deliver the idle status (whether the player is reusable afterwards
- * is an open question, e2e/CONTEXT.md). Native defers the teardown by one main-thread
+ * onStatusChange can deliver the idle status (replaceSourceAsync(null) releases the native
+ * player like release(), e2e/CONTEXT.md). Native defers the teardown by one main-thread
  * turn, so the status is polled briefly; the last value read is reported either way.
  */
 function reportStatusAfterRelease(player: VideoPlayer) {
