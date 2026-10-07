@@ -67,6 +67,7 @@ RCT_EXPORT_VIEW_PROPERTY(onReceiveAdEvent, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onTextTracks, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onAudioTracks, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onTextTrackDataChanged, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onTimeUpdate, RCTDirectEventBlock); // Pass time update events
 
 RCT_EXTERN_METHOD(seekCmd : (nonnull NSNumber*)reactTag time : (nonnull NSNumber*)time tolerance : (nonnull NSNumber*)tolerance)
 RCT_EXTERN_METHOD(setLicenseResultCmd : (nonnull NSNumber*)reactTag license : (NSString*)license licenseUrl : (NSString*)licenseUrl)
