@@ -79,9 +79,7 @@ export const createSourceFromVideoConfig = (
         ios: 'fairplay',
         default: undefined,
       });
-    nativeConfig.drm = (
-      type ? { ...drm, type } : drm
-    ) as NativeVideoConfig['drm'];
+    nativeConfig.drm = type ? { ...drm, type } : drm;
   }
 
   try {
