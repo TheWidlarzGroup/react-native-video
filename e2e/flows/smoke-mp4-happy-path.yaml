@@ -1,11 +1,7 @@
-# mp4 happy path: idle -> loading -> readyToPlay, load with the fixture's duration,
-# progress, natural end (clip is 8 s). The status markers are the cases ported from
-# #4743 ("Status" and "should get video duration"): evt-ready-after-loading is set only
-# when the first readyToPlay was reported after loading, so it asserts the order of the
-# two. iOS reports onLoad as soon as the item is ready and readyToPlay only once the
-# buffer allows playback (or playback starts), a moment later, so that marker is waited
-# for, not asserted right after onLoad.
-# Run: maestro test -e APP_ID=<bundle/package id> e2e/flows/smoke-mp4-happy-path.yaml
+# mp4 happy path: idle before the load, load with the fixture's duration, progress,
+# natural end (clip is 8 s). evt-initial-idle and evt-duration-fixture are two of the
+# cases ported from #4743 ("Status" and "should get video duration"); the status order
+# idle -> loading -> readyToPlay lives in smoke-status-order.yaml, quarantined (see there).
 appId: ${APP_ID}
 tags: [smoke]
 ---
@@ -22,10 +18,6 @@ tags: [smoke]
     id: "evt-initial-idle"    # player.status was 'idle' before the load started
 - assertVisible:
     id: "evt-duration-fixture" # reported with onLoad itself
-- extendedWaitUntil:
-    visible:
-      id: "evt-ready-after-loading"
-    timeout: 10000            # iOS: readyToPlay follows onLoad once the buffer allows playback
 - extendedWaitUntil:
     visible:
       id: "evt-progress-gt-2s"

@@ -167,6 +167,12 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
   markers (`evt-replacement-loaded`, `evt-reloaded-from-start`, `evt-ended-after-replace`)
   only count events after `replaceSourceAsync(source)` was requested, because Android
   re-emits `onLoad` on every re-buffer and replay.
+- **iOS sometimes never reports `readyToPlay`** while a clip plays (issue #5155): the
+  status stays `loading` from the item assignment to `onEnded`. `smoke-status-order.yaml`
+  asserts the idle → loading → readyToPlay order and is quarantined (`tags: [flaky]`) until
+  the issue is fixed; the happy path asserts only `evt-initial-idle` and the duration.
+  `smoke-preload.yaml` also waits for `evt-ready-after-loading` and has not shown this
+  (no `play()`, so the status comes through the paused path); if it does, quarantine it too.
 - **`replaceSourceAsync(null)` releases the native player** on iOS and Android, like
   `release()` (the docs said otherwise until #5154; web keeps the player loadable).
   `smoke-release-source.yaml` therefore asserts the promise, the idle status and the
