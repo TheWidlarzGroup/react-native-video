@@ -14,11 +14,18 @@ function fakeEmitter() {
     {},
     {
       get(_, prop: string) {
-        if (prop === 'clearAllListeners') return () => void cleared++;
+        if (prop === 'clearAllListeners')
+          return () => {
+            cleared++;
+          };
         if (typeof prop === 'string' && /^addOn[A-Za-z]+Listener$/.test(prop)) {
           return (listener: unknown) => {
             calls.push({ method: prop, listener });
-            return { remove: () => void removed.push(prop) };
+            return {
+              remove: () => {
+                removed.push(prop);
+              },
+            };
           };
         }
         return undefined;
@@ -77,13 +84,15 @@ test('an unknown event name throws', () => {
   );
 });
 
-test('onError is JS-only: never forwarded to the emitter, delivered to every listener', () => {
+test('onError listeners share one native subscription and each receive a JS error', () => {
   const fake = fakeEmitter();
   const events = new Events(fake.emitter);
   const seen: string[] = [];
   events.addEventListener('onError', (e) => seen.push(`a:${e.code}`));
   events.addEventListener('onError', (e) => seen.push(`b:${e.code}`));
-  expect(fake.calls).toHaveLength(0);
+  // Asynchronous native failures arrive through the emitter's onError, but one native
+  // subscription feeds every JS listener (videoPlayerEvents.test.ts covers that path).
+  expect(fake.calls.map((c) => c.method)).toEqual(['addOnErrorListener']);
 
   const err = new VideoRuntimeError('player/not-initialized', 'x');
   expect(events.trigger(err)).toBe(true);
@@ -109,7 +118,9 @@ test('trigger reports whether anyone was listening', () => {
 test('the same onError callback is not registered twice', () => {
   const events = new Events(fakeEmitter().emitter);
   let calls = 0;
-  const cb = () => void calls++;
+  const cb = () => {
+    calls++;
+  };
   events.addEventListener('onError', cb);
   events.addEventListener('onError', cb);
   events.trigger(new VideoRuntimeError('unknown/unknown', 'x'));
@@ -120,7 +131,9 @@ test('clearAllEvents drops JS listeners and clears the native emitter', () => {
   const fake = fakeEmitter();
   const events = new Events(fake.emitter);
   let calls = 0;
-  events.addEventListener('onError', () => void calls++);
+  events.addEventListener('onError', () => {
+    calls++;
+  });
   events.clearAllEvents();
   expect(fake.cleared).toBe(1);
   expect(events.trigger(new VideoRuntimeError('unknown/unknown', 'x'))).toBe(

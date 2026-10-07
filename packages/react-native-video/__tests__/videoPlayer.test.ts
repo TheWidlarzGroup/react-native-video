@@ -44,7 +44,9 @@ test('after the last onError listener is removed, errors throw again', () => {
 test('an unparsable native error is rethrown as-is, even with an onError listener', () => {
   const player = new VideoPlayer('https://x/a.mp4');
   let calls = 0;
-  player.addEventListener('onError', () => void calls++);
+  player.addEventListener('onError', () => {
+    calls++;
+  });
   native.playThrows = new Error('plain');
   expect(() => player.play()).toThrow('plain');
   expect(calls).toBe(0);
