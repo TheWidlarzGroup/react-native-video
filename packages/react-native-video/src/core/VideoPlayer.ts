@@ -267,7 +267,8 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
    * Releases the player's native resources and releases native state.
    * After calling this method, the player is no longer usable.
    * Accessing any properties or methods of the player after calling this method will throw an error.
-   * If you want to clean player resource use `replaceSourceAsync` with `null` instead.
+   * `replaceSourceAsync(null)` releases the native player the same way on iOS and Android;
+   * to play another video, call `replaceSourceAsync(newSource)` on a live player or create a new one.
    */
   release(): void {
     this.__destroy();
