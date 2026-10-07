@@ -1,0 +1,38 @@
+# replaceSourceAsync(null): the promise resolves, the player reports the idle status and
+# no error. Ported from #4743 ("should replace source with null to release resources").
+#
+# evt-idle-after-release only counts an idle status reported after btn-replace-null was
+# pressed: Android also reports idle at the natural end of a clip, which this flow waits
+# for first. Whether the player can load a source again afterwards is deliberately not
+# asserted: the docs say it can, both native players release it for good (open question
+# tracked from the review of #5097), and a flow must not cement either answer.
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 20000
+- runFlow: ../shared/wait-for-end.yaml
+- runFlow:
+    file: ../shared/press.yaml
+    env:
+      BUTTON: btn-replace-null
+      NTH: 1
+- extendedWaitUntil:
+    visible:
+      id: "evt-replace-resolved"
+    timeout: 5000
+- extendedWaitUntil:
+    visible:
+      id: "evt-idle-after-release"
+    timeout: 5000
+- assertNotVisible:
+    id: "evt-replace-rejected"
+- assertNotVisible:
+    id: "evt-onError"

@@ -1,4 +1,7 @@
-# mp4 happy path: load -> progress -> natural end (fixture is 8 s)
+# mp4 happy path: idle -> loading -> readyToPlay, load with the fixture's duration,
+# progress, natural end (clip is 8 s). The status markers are the cases ported from
+# #4743 ("Status" and "should get video duration"): evt-ready-after-loading is set only
+# when readyToPlay was reported after loading, so it asserts the order of the two.
 # Run: maestro test -e APP_ID=<bundle/package id> e2e/flows/smoke-mp4-happy-path.yaml
 appId: ${APP_ID}
 tags: [smoke]
@@ -12,6 +15,12 @@ tags: [smoke]
     visible:
       id: "evt-onLoad"
     timeout: 20000            # generous: emulator software decoder cold start
+- assertVisible:
+    id: "evt-initial-idle"    # player.status was 'idle' before the load started
+- assertVisible:
+    id: "evt-ready-after-loading"
+- assertVisible:
+    id: "evt-duration-fixture"
 - extendedWaitUntil:
     visible:
       id: "evt-progress-gt-2s"
