@@ -53,6 +53,50 @@ export class VideoPlayerEvents extends VideoPlayerEventsBase {
           },
         };
       }
+      case 'onAdEvent': {
+        const emit = callback as JSVideoPlayerEvents['onAdEvent'];
+        const emitter = this.eventEmitter;
+        // Composed from the individual native listeners, so no native change is involved.
+        const subscriptions = [
+          emitter.addOnAdsResolvedListener((data) =>
+            emit({ type: 'adsResolved', data })
+          ),
+          emitter.addOnAdBreakStartListener((data) =>
+            emit({ type: 'adBreakStart', data })
+          ),
+          emitter.addOnAdBreakEndListener((data) =>
+            emit({ type: 'adBreakEnd', data })
+          ),
+          emitter.addOnAdProgressListener((data) =>
+            emit({ type: 'adProgress', data })
+          ),
+          emitter.addOnAdStartListener((data) =>
+            emit({ type: 'adStart', data })
+          ),
+          emitter.addOnAdCompleteListener((data) =>
+            emit({ type: 'adComplete', data })
+          ),
+          emitter.addOnAdSkippedListener((data) =>
+            emit({ type: 'adSkipped', data })
+          ),
+          emitter.addOnAdClickedListener(() =>
+            emit({ type: 'adClicked', data: undefined })
+          ),
+          emitter.addOnAdErrorListener((data) =>
+            emit({ type: 'adError', data })
+          ),
+          emitter.addOnAllAdsCompletedListener(() =>
+            emit({ type: 'allAdsCompleted', data: undefined })
+          ),
+          emitter.addOnAdStateChangeListener((data) =>
+            emit({ type: 'adStateChange', data })
+          ),
+        ];
+        return {
+          remove: () =>
+            subscriptions.forEach((subscription) => subscription.remove()),
+        };
+      }
       // --- Shared events ---
       case 'onBuffer':
         return this.eventEmitter.addOnBufferListener(
@@ -101,6 +145,50 @@ export class VideoPlayerEvents extends VideoPlayerEventsBase {
       case 'onStatusChange':
         return this.eventEmitter.addOnStatusChangeListener(
           callback as PlayerEvents['onStatusChange']
+        );
+      case 'onAdsResolved':
+        return this.eventEmitter.addOnAdsResolvedListener(
+          callback as PlayerEvents['onAdsResolved']
+        );
+      case 'onAdBreakStart':
+        return this.eventEmitter.addOnAdBreakStartListener(
+          callback as PlayerEvents['onAdBreakStart']
+        );
+      case 'onAdBreakEnd':
+        return this.eventEmitter.addOnAdBreakEndListener(
+          callback as PlayerEvents['onAdBreakEnd']
+        );
+      case 'onAdProgress':
+        return this.eventEmitter.addOnAdProgressListener(
+          callback as PlayerEvents['onAdProgress']
+        );
+      case 'onAdStart':
+        return this.eventEmitter.addOnAdStartListener(
+          callback as PlayerEvents['onAdStart']
+        );
+      case 'onAdComplete':
+        return this.eventEmitter.addOnAdCompleteListener(
+          callback as PlayerEvents['onAdComplete']
+        );
+      case 'onAdSkipped':
+        return this.eventEmitter.addOnAdSkippedListener(
+          callback as PlayerEvents['onAdSkipped']
+        );
+      case 'onAdClicked':
+        return this.eventEmitter.addOnAdClickedListener(
+          callback as PlayerEvents['onAdClicked']
+        );
+      case 'onAdError':
+        return this.eventEmitter.addOnAdErrorListener(
+          callback as PlayerEvents['onAdError']
+        );
+      case 'onAllAdsCompleted':
+        return this.eventEmitter.addOnAllAdsCompletedListener(
+          callback as PlayerEvents['onAllAdsCompleted']
+        );
+      case 'onAdStateChange':
+        return this.eventEmitter.addOnAdStateChangeListener(
+          callback as PlayerEvents['onAdStateChange']
         );
       // --- Native-only events ---
       case 'onAudioBecomingNoisy':

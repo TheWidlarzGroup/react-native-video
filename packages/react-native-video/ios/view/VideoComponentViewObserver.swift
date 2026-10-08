@@ -58,6 +58,89 @@ final class VideoViewDelegate: NSObject, VideoComponentViewDelegate {
   }
 }
 
+/// Keeps the interface orientation in step with the phone while the video is fullscreen.
+/// AVKit's fullscreen does not follow device rotation on its own when the host app's
+/// root view controller is portrait-biased (the video then stays portrait or is drawn
+/// sideways), so rotation is requested explicitly through the window scene.
+final class FullscreenOrientationHandler {
+  private let playerViewController: () -> AVPlayerViewController?
+  private var isActive = false
+
+  init(playerViewController: @escaping () -> AVPlayerViewController?) {
+    self.playerViewController = playerViewController
+  }
+
+  func start() {
+    guard !isActive else { return }
+    isActive = true
+    UIDevice.current.beginGeneratingDeviceOrientationNotifications()
+    NotificationCenter.default.addObserver(
+      self, selector: #selector(deviceOrientationDidChange),
+      name: UIDevice.orientationDidChangeNotification, object: nil)
+
+    // Entering while the phone is already on its side: go landscape right away. A phone
+    // held upright is left to AVKit, which turns landscape video sideways by itself.
+    if UIDevice.current.orientation.isLandscape {
+      apply(UIDevice.current.orientation)
+    }
+  }
+
+  func stop() {
+    guard isActive else { return }
+    isActive = false
+    NotificationCenter.default.removeObserver(
+      self, name: UIDevice.orientationDidChangeNotification, object: nil)
+    UIDevice.current.endGeneratingDeviceOrientationNotifications()
+
+    // Back inline: follow the phone, portrait if it is flat or unknown.
+    let current = UIDevice.current.orientation
+    apply(current.isLandscape ? current : .portrait)
+  }
+
+  deinit {
+    if isActive {
+      NotificationCenter.default.removeObserver(self)
+      UIDevice.current.endGeneratingDeviceOrientationNotifications()
+    }
+  }
+
+  @objc private func deviceOrientationDidChange() {
+    let orientation = UIDevice.current.orientation
+    // Face up/down and upside-down are ignored: they say nothing about how to lay out.
+    guard orientation.isLandscape || orientation == .portrait else { return }
+    apply(orientation)
+  }
+
+  func apply(_ deviceOrientation: UIDeviceOrientation) {
+    // Device and interface landscape are mirrored.
+    let mask: UIInterfaceOrientationMask
+    switch deviceOrientation {
+    case .landscapeLeft: mask = .landscapeRight
+    case .landscapeRight: mask = .landscapeLeft
+    default: mask = .portrait
+    }
+
+    DispatchQueue.main.async { [weak self] in
+      guard let self else { return }
+      let controller = self.playerViewController()
+      let window = controller?.view.window
+        ?? UIApplication.shared.connectedScenes.compactMap { ($0 as? UIWindowScene)?.windows.first }.first
+
+      if #available(iOS 16.0, *) {
+        controller?.setNeedsUpdateOfSupportedInterfaceOrientations()
+        window?.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
+        // Denied when the host app does not allow that orientation: nothing to do then.
+        window?.windowScene?.requestGeometryUpdate(.iOS(interfaceOrientations: mask)) { _ in }
+      } else {
+        let target: UIInterfaceOrientation = mask == .landscapeRight ? .landscapeRight
+          : mask == .landscapeLeft ? .landscapeLeft : .portrait
+        UIDevice.current.setValue(target.rawValue, forKey: "orientation")
+        UIViewController.attemptRotationToDeviceOrientation()
+      }
+    }
+  }
+}
+
 class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
   private weak var view: VideoComponentView?
   
@@ -73,6 +156,10 @@ class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
   
   // playerViewController observers
   var onReadyToDisplayObserver: NSKeyValueObservation?
+
+  private lazy var orientationHandler = FullscreenOrientationHandler { [weak self] in
+    self?.playerViewController
+  }
   
   init(view: VideoComponentView) {
     self.view = view
@@ -102,12 +189,21 @@ class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
     initializePlayerViewContorollerObservers()
   }
   
+  /// AVKit can rebuild the `contentOverlayView` subtree when it re-parents the
+  /// player view for fullscreen or PiP, which would orphan the IMA ad
+  /// container. Re-assert it after every such transition.
+  private func reassertAdContainer() {
+    view?.reassertAdContainer()
+  }
+
   func playerViewControllerDidStartPictureInPicture(_: AVPlayerViewController) {
     delegate?.onPictureInPictureChange(true)
+    reassertAdContainer()
   }
-  
+
   func playerViewControllerDidStopPictureInPicture(_: AVPlayerViewController) {
     delegate?.onPictureInPictureChange(false)
+    reassertAdContainer()
   }
   
   func playerViewControllerWillStartPictureInPicture(_: AVPlayerViewController) {
@@ -142,11 +238,14 @@ class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
         }
 
         self.delegate?.willEnterFullscreen()
+        self.reassertAdContainer()
 
         return
       }
 
+      self.orientationHandler.stop()
       self.delegate?.onFullscreenChange(false)
+      self.reassertAdContainer()
     }
   }
   
@@ -166,11 +265,14 @@ class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
         }
 
         self.delegate?.willExitFullscreen()
+        self.reassertAdContainer()
 
         return
       }
 
+      self.orientationHandler.start()
       self.delegate?.onFullscreenChange(true)
+      self.reassertAdContainer()
     }
   }
 }
