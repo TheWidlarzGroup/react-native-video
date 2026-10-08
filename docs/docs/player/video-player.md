@@ -54,7 +54,7 @@ The `VideoPlayer` class offers a comprehensive set of methods and properties to 
 | `replaceSourceAsync(source: VideoSource \| VideoConfig \| null)` | Replaces the current video source with a new one. Pass `null` to release the current source without replacing it. |
 | `initialize()` | Manually initialize the underlying native player item when `initializeOnCreation` was set to `false`. No-op if already initialized. |
 | `preload()` | Ensures the media source is set and prepared (buffering started) without starting playback. If not yet initialized it will initialize first. |
-| `release()` | Releases the player's native resources. The player is no longer usable after calling this method. **Note:** If you intend to reuse the player instance with a different source, use `replaceSourceAsync(null)` to clear resources instead of `release()`. |
+| `release()` | Releases the player's native resources. The player is no longer usable after calling this method. **Note:** on iOS and Android `replaceSourceAsync(null)` releases the native player the same way; to play another video, call `replaceSourceAsync(newSource)` on a live player or create a new one. |
 
 ### Properties
 
@@ -204,7 +204,148 @@ By default, the player initializes automatically after construction. If you need
     1.  The current native player resources associated with the old source are released (similar to `release()` but specifically for the source).
     2.  A new native player instance (or reconfigured existing one) is prepared for the `newSource`.
     3.  The loading lifecycle events (`onLoadStart`, `onLoad`, etc.) will fire for the new source.
--   `replaceSourceAsync(null)`: This effectively unloads the current video and releases its associated resources without loading a new one. This is useful for freeing up memory if the player is temporarily not needed but might be used again later.
+-   `replaceSourceAsync(null)`: Unloads the current video and releases its resources without loading a new one. On iOS and Android this releases the native player, exactly like `release()`: a later `replaceSourceAsync(newSource)` is rejected and no further events are delivered. On web it only unloads the media, and the player can load a new source later.
+
+### Releasing Resources
+
+-   `replaceSourceAsync(newSource)` is the way to switch videos on one player: the old source's resources are released and the new one loads.
+-   `release()` frees the native player; the instance is unusable afterwards. `useVideoPlayer` calls it for you on unmount, so call it yourself only on players you created with `new VideoPlayer(...)`.
+-   `replaceSourceAsync(null)` releases the native player too (iOS and Android). It differs from `release()` only in that the JS object keeps answering (`status` reads `idle`) instead of throwing. There is no way to "park" a player without a source and load into it later: create a new one when it is needed again.
+
+:::danger
+After calling `release()`, the player instance becomes unusable. Any subsequent calls to its methods or property access will result in errors.
+:::
+
+### Error Handling
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `onError?` | `(error: VideoRuntimeError) => void` | A callback function that is invoked when a runtime error occurs in the player. You can use this to catch and handle errors gracefully. |
+
+### Buffer Config
+
+You can fine‑tune buffering via `bufferConfig` on the `VideoConfig` you pass to `useVideoPlayer`/`VideoPlayer`. This controls how much data is buffered, live latency targets, and iOS network constraints.
+
+Example
+
+```ts
+const player = new VideoPlayer({
+  source: {
+    uri: 'https://example.com/stream.m3u8',
+    bufferConfig: {
+      // Android
+      minBufferMs: 5000,
+      maxBufferMs: 10000,
+      // iOS
+      preferredForwardBufferDurationMs: 3000,
+      // Live (cross‑platform target)
+      livePlayback: { targetOffsetMs: 500 },
+    },
+  },
+});
+```
+
+#### Android
+Properties below are Android‑only
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `minBufferMs` | `number` | Minimum media duration the player attempts to keep buffered (ms). Default: 5000. |
+| `maxBufferMs` | `number` | Maximum media duration the player attempts to buffer (ms). Default: 10000. |
+| `bufferForPlaybackMs` | `number` | Media that must be buffered before playback can start or resume after user action (ms). Default: 1000. |
+| `bufferForPlaybackAfterRebufferMs` | `number` | Media that must be buffered to resume after a rebuffer (ms). Default: 2000. |
+| `backBufferDurationMs` | `number` | Duration kept behind the current position to allow instant rewind without rebuffer (ms). |
+| `livePlayback.minPlaybackSpeed` | `number` | Minimum playback speed used to maintain target live offset. |
+| `livePlayback.maxPlaybackSpeed` | `number` | Maximum playback speed used to catch up to target live offset. |
+| `livePlayback.minOffsetMs` | `number` | Minimum allowed live offset (ms). |
+| `livePlayback.maxOffsetMs` | `number` | Maximum allowed live offset (ms). |
+| `livePlayback.targetOffsetMs` | `number` | Target live offset the player tries to maintain (ms). |
+
+#### iOS, visionOS, tvOS
+Properties below are Apple platforms‑only
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `preferredForwardBufferDurationMs` | `number` | Preferred duration the player attempts to retain ahead of the playhead (ms). |
+| `preferredPeakBitRate` | `number` | Desired limit of network bandwidth for loading the current item (bits per second). |
+| `preferredMaximumResolution` | `{ width: number; height: number }` | Preferred maximum video resolution. Android: applied as `maxVideoSize`. |
+| `preferredPeakBitRateForExpensiveNetworks` | `number` | Bandwidth limit for expensive networks (e.g., cellular), in bits per second. |
+| `preferredMaximumResolutionForExpensiveNetworks` | `{ width: number; height: number }` | Preferred maximum resolution on expensive networks. |
+| `livePlayback.targetOffsetMs` | `number` | Target live offset (ms) the player will try to maintain. |
+
+## DRM
+
+Protected content is supported via a plugin. See the full DRM guide: [DRM](./drm.md).
+
+Quick notes:
+- Install and enable the official plugin `@react-native-video/drm` and call `enable()` at app startup before creating players.
+- Pass DRM configuration on the source using the `drm` property of `VideoConfig` (see the DRM guide for platform specifics and `getLicense` examples).
+- If you defer initialization (`initializeOnCreation: false`), be sure to call `await player.initialize()` (or `preload()`) before expecting DRM license acquisition events.
+
+## Player Lifecycle
+
+Understanding the lifecycle of the `VideoPlayer` is crucial for managing resources effectively and ensuring a smooth user experience.
+
+### Creation and Initialization
+
+1. **Instantiation**: A `VideoPlayer` instance is created by calling its constructor with a video source (URL, `VideoSource`, or `VideoConfig`).
+    ```typescript
+    const player = new VideoPlayer('https://example.com/video.mp4');
+    ```
+2. **Native Player Allocation**: A lightweight native player object is allocated immediately.
+3. **Asset Initialization**: By default (unless you opt out) the underlying media item is prepared **asynchronously right after creation**. You can control this with `initializeOnCreation` inside `VideoConfig`.
+
+#### Deferred Initialization (Advanced)
+
+If you pass a `VideoConfig` with `{ initializeOnCreation: false }`, the player will skip preparing the media item automatically. This is useful when:
+
+- You need to batch‑create many players without incurring immediate decoding / network cost
+- You want to attach event handlers before any network requests happen
+- You want explicit control over when buffering begins (e.g. on user interaction)
+
+To initialize later, call:
+```ts
+await player.initialize();
+// or preload if you also want it prepared & ready
+await player.preload();
+```
+
+#### Initialization Methods Comparison
+
+| Method | When to use | What it does |
+|--------|-------------|--------------|
+| `initialize()` | You deferred initialization and now want to create the native player item / media source | Creates & attaches the underlying player item / media source without starting playback |
+| `preload()` | You want the player item prepared (buffering kicked off) ahead of an upcoming `play()` call | Ensures the media source is set and prepared; resolves once preparation started (may already be initialized) |
+| Implicit (default) | `initializeOnCreation` not set or `true` | Automatically schedules initialization after JS construction |
+
+:::info
+By default, the player initializes automatically after construction. If you need to defer initialization, set `initializeOnCreation: false` in the config. You can then call `player.initialize()` or `player.preload()` later to start the player.
+:::
+
+### Playing a Video
+
+1.  **Loading**: When the player (auto) initializes, `preload()` is called, or after `replaceSourceAsync()`, the player starts loading the video metadata and buffering content.
+    -   `onLoadStart`: Fired when the video starts loading.
+    -   `onLoad`: Fired when the video metadata is loaded and the player is ready to play (duration, dimensions, etc., are available).
+    -   `onBuffer`: Fired when buffering starts or ends.
+2.  **Playback**: Once enough data is buffered, playback begins.
+    -   `onPlaybackStateChange`: Fired when the playback state changes (e.g., from `buffering` to `playing`).
+    -   `onProgress`: Fired periodically with the current playback time.
+    -   `onReadyToDisplay`: Fired when the first frame is ready to be displayed.
+
+### Controlling Playback
+
+-   `pause()`: Pauses playback. `status` changes to `paused`.
+-   `seekTo(time)`, `seekBy(time)`: Changes the current playback position. `onSeek` is fired when the seek operation completes.
+-   `set volume(value)`, `set muted(value)`, `set loop(value)`, `set rate(value)`: Modify player properties. Corresponding events like `onVolumeChange` or `onPlaybackRateChange` might be fired.
+
+### Changing Source
+
+-   `replaceSourceAsync(newSource)`: This method allows you to change the video source dynamically.
+    1.  The current native player resources associated with the old source are released (similar to `release()` but specifically for the source).
+    2.  A new native player instance (or reconfigured existing one) is prepared for the `newSource`.
+    3.  The loading lifecycle events (`onLoadStart`, `onLoad`, etc.) will fire for the new source.
+-   `replaceSourceAsync(null)`: Unloads the current video and releases its resources without loading a new one. On iOS and Android this releases the native player, exactly like `release()`: a later `replaceSourceAsync(newSource)` is rejected and no further events are delivered. On web it only unloads the media, and the player can load a new source later.
 
 ### Releasing Resources
 
