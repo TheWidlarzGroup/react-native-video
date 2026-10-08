@@ -22,8 +22,10 @@ The most battle-tested open-source video player component for React Native with 
 | 🧠 Advanced control over playback and buffering | ✅ Available |
 | 🔐 DRM: Widevine & FairPlay ([See free DRM stream example](https://www.thewidlarzgroup.com/services/free-drm-token-generator-for-video?utm_source=rnv&utm_medium=readme&utm_id=free-drm)) | ✅ Available |
 | 🌐 Basic Web Support | ✅ Available |
-| 📺 TV Support | 📝 [TODO](https://github.com/TheWidlarzGroup/react-native-video/issues/4607) |
+| 📺 Android TV & tvOS Support | ✅ Available |
 | 🥽 VisionOS Support | 📝 [TODO](https://github.com/TheWidlarzGroup/react-native-video/issues/4608) |
+
+TV apps use `react-native-tvos` with the existing Nitro playback architecture. tvOS requires version 15.1 or later; interactive native AVKit playback controls are available in fullscreen.
 
 
 
