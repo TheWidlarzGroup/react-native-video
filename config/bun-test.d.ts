@@ -6,6 +6,9 @@ declare module 'bun:test' {
 
   export function describe(name: string, fn: () => void): void;
   export function test(name: string, fn: Hook): void;
+  export namespace test {
+    function skipIf(condition: boolean): (name: string, fn: Hook) => void;
+  }
   export const it: typeof test;
   export function beforeEach(fn: Hook): void;
   export function afterEach(fn: Hook): void;

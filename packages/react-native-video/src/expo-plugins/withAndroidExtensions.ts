@@ -30,9 +30,9 @@ export const withAndroidExtensions: ConfigPlugin<
         'RNVideo_',
         ''
       ) as keyof typeof androidExtensions;
-      const value = androidExtensions
-        ? (androidExtensions[valueKey] ?? false)
-        : false;
+      // Each extension is documented as `@default true`, so a key left out of a partial
+      // object keeps its default instead of switching the extension off.
+      const value = androidExtensions?.[valueKey] ?? true;
 
       config.modResults.push({
         type: 'property',

@@ -18,10 +18,23 @@ export const writeToPodfile = (
     return;
   }
 
-  if (testApp) {
-    mergeTestAppPodfile(podfileContent, podfilePath, key, value);
-  } else {
-    mergeExpoPodfile(podfileContent, podfilePath, key, value);
+  // mergeContents throws ERR_NO_MATCH when its anchor is missing rather than reporting
+  // `didMerge: false`; a Podfile this plugin does not understand should warn, not abort
+  // prebuild. Anything else (e.g. a Podfile that cannot be written) is a real failure.
+  try {
+    if (testApp) {
+      mergeTestAppPodfile(podfileContent, podfilePath, key, value);
+    } else {
+      mergeExpoPodfile(podfileContent, podfilePath, key, value);
+    }
+  } catch (error) {
+    if ((error as { code?: unknown }).code !== 'ERR_NO_MATCH') {
+      throw error;
+    }
+    const anchor = testApp ? 'use_test_app!' : 'platform :ios';
+    console.warn(
+      `RNV - Failed to write "$${key} = ${value}" to Podfile: could not find \`${anchor}\`. Add the line to ios/Podfile yourself.`
+    );
   }
 };
 

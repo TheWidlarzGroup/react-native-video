@@ -22,7 +22,9 @@ const withRNVideo: ConfigPlugin<ConfigProps> = (config, props = {}) => {
     config = withBackgroundAudio(config, props.enableBackgroundAudio);
   }
 
-  config = withAndroidNotificationControls(config);
+  if (props.enableAndroidPlaybackService !== false) {
+    config = withAndroidNotificationControls(config);
+  }
 
   return config;
 };

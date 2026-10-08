@@ -24,6 +24,6 @@ cd ios && pod install
 
 ## Expo (both)
 
-Use the config plugin with `expo prebuild` (not Expo Go). v7's plugin accepts options like `enableAndroidPictureInPicture`, `enableBackgroundAudio`, and `androidExtensions` (DASH/HLS). See `platform-setup.md`.
+Use the config plugin with `expo prebuild` (not Expo Go). v7's plugin accepts options like `enableAndroidPictureInPicture`, `enableBackgroundAudio`, `androidExtensions` (DASH/HLS) and `enableAndroidPlaybackService` (default `true`). See `platform-setup.md`.
 
 > Full, version-correct install steps: v7 → https://docs.thewidlarzgroup.com/react-native-video/docs/v7/fundamentals/installation , v6 → https://docs.thewidlarzgroup.com/react-native-video/docs/v6/installation
