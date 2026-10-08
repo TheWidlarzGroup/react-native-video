@@ -157,6 +157,26 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
   `player.initialize()` explicitly. Because setup then runs synchronously during the first
   render, the event log is reset at the top of setup, not in an effect (an effect would
   run after the first events and wipe them).
+- **A released player reports nothing.** Both native players detach every emitter
+  listener while releasing (`replaceSourceAsync(null)` releases), before they set the
+  idle status, and Android already reports `idle` at the natural end of a clip. So the
+  release scenario does not listen for idle: it calls `replaceSourceAsync(null)` from JS
+  during playback and then reads `player.status` (`evt-idle-after-release`), which is
+  what the #4743 test did. The other lifecycle markers are anchored the same way:
+  `evt-ready-after-loading` judges only the first `readyToPlay`, and the replacement
+  markers (`evt-replacement-loaded`, `evt-reloaded-from-start`, `evt-ended-after-replace`)
+  only count events after `replaceSourceAsync(source)` was requested, because Android
+  re-emits `onLoad` on every re-buffer and replay.
+- **iOS sometimes never reports `readyToPlay`** while a clip plays (issue #5155): the
+  status stays `loading` from the item assignment to `onEnded`. `smoke-status-order.yaml`
+  asserts the idle → loading → readyToPlay order and is quarantined (`tags: [flaky]`) until
+  the issue is fixed; the happy path asserts only `evt-initial-idle` and the duration.
+  `smoke-preload.yaml` also waits for `evt-ready-after-loading` and has not shown this
+  (no `play()`, so the status comes through the paused path); if it does, quarantine it too.
+- **`replaceSourceAsync(null)` releases the native player** on iOS and Android, like
+  `release()` (the docs said otherwise until #5154; web keeps the player loadable).
+  `smoke-release-source.yaml` therefore asserts the promise, the idle status and the
+  stopped playback, and loads nothing afterwards: a released player cannot.
 - **`onError` is JS-only and un-buffered.** Register listeners with
   `player.addEventListener(...)` inside the setup callback, not via `useEvent` in the
   component body, or a fast local failure is lost.

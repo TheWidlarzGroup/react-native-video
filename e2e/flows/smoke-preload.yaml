@@ -1,0 +1,52 @@
+# preload(): the source is prepared (status readyToPlay) but nothing plays until play().
+# The scenario starts with preload() instead of initialize()+play() (ScenarioScreen).
+# Ported from #4743 ("should preload player without playing"), as a flow.
+#
+# The "nothing plays" half is a negative assertion, so it is taken after the player has
+# been ready for a while (the optional wait below is a 3 s pause, not an expectation).
+# The positive half follows: one play tap on the idle, preloaded player must produce
+# playback through to the clip's end.
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4-preload
+- extendedWaitUntil:
+    visible:
+      id: "evt-initial-idle"
+    timeout: 5000
+- extendedWaitUntil:
+    visible:
+      id: "evt-ready-after-loading"
+    timeout: 20000            # generous: emulator software decoder cold start
+- extendedWaitUntil:
+    visible:
+      id: "evt-playing"
+    timeout: 3000
+    optional: true            # a pause: nothing is expected to appear
+- assertNotVisible:
+    id: "evt-playing"
+- assertNotVisible:
+    id: "evt-progress-gt-2s"
+- runFlow:
+    file: ../shared/press.yaml
+    env:
+      BUTTON: btn-play
+      NTH: 1
+- extendedWaitUntil:
+    visible:
+      id: "evt-playing"
+    timeout: 5000
+- extendedWaitUntil:
+    visible:
+      id: "evt-progress-gt-2s"
+    timeout: 10000
+- extendedWaitUntil:
+    visible:
+      id: "evt-onEnded"
+    timeout: 20000
+- assertNotVisible:
+    id: "evt-onError"
