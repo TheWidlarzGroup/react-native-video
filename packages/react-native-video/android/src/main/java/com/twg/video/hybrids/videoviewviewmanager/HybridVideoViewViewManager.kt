@@ -98,6 +98,12 @@ class HybridVideoViewViewManager(nitroId: Int): HybridVideoViewViewManagerSpec()
       videoView.get()?.surfaceType = value
     }
 
+  override var subtitleStyle: SubtitleStyle
+    get() = videoView.get()?.subtitleStyle ?: SubtitleStyle(null, null, null, null, null, null, null)
+    set(value) {
+      videoView.get()?.subtitleStyle = value
+    }
+
   // MARK: - Private helpers
 
   private fun <T> addListener(eventName: String, listener: T): ListenerSubscription {
