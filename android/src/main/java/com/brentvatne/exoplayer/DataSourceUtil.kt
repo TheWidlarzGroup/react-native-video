@@ -1,10 +1,8 @@
 package com.brentvatne.exoplayer
 
-import android.net.Uri
 import androidx.media3.common.util.Util
 import androidx.media3.datasource.AssetDataSource
 import androidx.media3.datasource.DataSource
-import androidx.media3.datasource.DataSpec
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.HttpDataSource
 import androidx.media3.datasource.okhttp.OkHttpDataSource
@@ -79,10 +77,5 @@ object DataSourceUtil {
     }
 
     @JvmStatic
-    fun buildAssetDataSourceFactory(context: ReactContext?, srcUri: Uri?): DataSource.Factory {
-        val dataSpec = DataSpec(srcUri!!)
-        val rawResourceDataSource = AssetDataSource(context!!)
-        rawResourceDataSource.open(dataSpec)
-        return DataSource.Factory { rawResourceDataSource }
-    }
+    fun buildAssetDataSourceFactory(context: ReactContext): DataSource.Factory = DataSource.Factory { AssetDataSource(context) }
 }
