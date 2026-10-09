@@ -8,25 +8,25 @@ import type {VideoSaveData} from '../types/video-ref';
 
 // @TODO rename to "Spec" when applying new arch
 export interface VideoManagerType {
-  seekCmd: (reactTag: Int32, time: Float, tolerance?: Float) => Promise<void>;
-  setPlayerPauseStateCmd: (reactTag: Int32, paused: boolean) => Promise<void>;
+  seekCmd: (reactTag: Int32, time: Float, tolerance?: Float) => void;
+  setPlayerPauseStateCmd: (reactTag: Int32, paused: boolean) => void;
   setLicenseResultCmd: (
     reactTag: Int32,
     result: string,
     licenseUrl: string,
-  ) => Promise<void>;
+  ) => void;
   setLicenseResultErrorCmd: (
     reactTag: Int32,
     error: string,
     licenseUrl: string,
-  ) => Promise<void>;
-  setFullScreenCmd: (reactTag: Int32, fullScreen: boolean) => Promise<void>;
-  setSourceCmd: (reactTag: Int32, source?: UnsafeObject) => Promise<void>;
-  setVolumeCmd: (reactTag: Int32, volume: number) => Promise<void>;
-  enterPictureInPictureCmd: (reactTag: number) => Promise<void>;
-  exitPictureInPictureCmd: (reactTag: number) => Promise<void>;
-  save: (reactTag: Int32, option: UnsafeObject) => Promise<VideoSaveData>;
-  getCurrentPosition: (reactTag: Int32) => Promise<Int32>;
+  ) => void;
+  setFullScreenCmd: (reactTag: Int32, fullScreen: boolean) => void;
+  setSourceCmd: (reactTag: Int32, source?: UnsafeObject) => void;
+  setVolumeCmd: (reactTag: Int32, volume: number) => void;
+  enterPictureInPictureCmd: (reactTag: Int32) => void;
+  exitPictureInPictureCmd: (reactTag: Int32) => void;
+  save?: (reactTag: Int32, option: UnsafeObject) => Promise<VideoSaveData>;
+  getCurrentPosition: (reactTag: Int32) => Promise<number>;
 }
 
 export default NativeModules.VideoManager as VideoManagerType;
