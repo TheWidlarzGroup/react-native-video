@@ -21,21 +21,21 @@ extension DRMManager {
             throw RCTVideoError.invalidContentId
         }
 
-        pendingLicenses[loadedLicenseUrl] = keyRequest
-
         DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            self.pendingLicenses[loadedLicenseUrl, default: []].append(keyRequest)
             onGetLicense([
                 "licenseUrl": licenseServerUrl,
                 "loadedLicenseUrl": loadedLicenseUrl,
                 "contentId": assetId,
                 "spcBase64": spcData.base64EncodedString(),
-                "target": self?.reactTag as Any,
+                "target": self.reactTag as Any,
             ])
         }
     }
 
     func setJSLicenseResult(license: String, licenseUrl: String) {
-        guard let keyContentRequest = pendingLicenses[licenseUrl] else {
+        guard let keyContentRequest = pendingLicenses[licenseUrl]?.first else {
             setJSLicenseError(error: "Loading request for licenseUrl \(licenseUrl) not found", licenseUrl: licenseUrl)
             return
         }
@@ -45,9 +45,9 @@ extension DRMManager {
             return
         }
 
+        takePendingLicense(for: licenseUrl)
         do {
             try finishProcessingContentKeyRequest(keyRequest: keyContentRequest, license: responseData)
-            pendingLicenses.removeValue(forKey: licenseUrl)
         } catch {
             handleError(error, for: keyContentRequest)
         }
@@ -56,13 +56,27 @@ extension DRMManager {
     func setJSLicenseError(error: String, licenseUrl: String) {
         let rctError = RCTVideoError.fromJSPart(error)
 
-        DispatchQueue.main.async { [weak self] in
-            self?.onVideoError?([
+        guard let keyContentRequest = takePendingLicense(for: licenseUrl) else {
+            onVideoError?([
                 "error": RCTVideoErrorHandler.createError(from: rctError),
-                "target": self?.reactTag as Any,
+                "target": reactTag as Any,
             ])
+            return
         }
 
-        pendingLicenses.removeValue(forKey: licenseUrl)
+        handleError(rctError, for: keyContentRequest)
+    }
+
+    @discardableResult
+    private func takePendingLicense(for licenseUrl: String) -> AVContentKeyRequest? {
+        guard var requests = pendingLicenses[licenseUrl], !requests.isEmpty else { return nil }
+
+        let request = requests.removeFirst()
+        if requests.isEmpty {
+            pendingLicenses.removeValue(forKey: licenseUrl)
+        } else {
+            pendingLicenses[licenseUrl] = requests
+        }
+        return request
     }
 }
