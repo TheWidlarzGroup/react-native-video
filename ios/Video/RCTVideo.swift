@@ -1121,7 +1121,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 if let playerViewController = _playerViewController {
                     if _controls {
                         // prevents crash https://github.com/TheWidlarzGroup/react-native-video/issues/3040
-                        self._playerViewController?.removeFromParent()
+                        playerViewController.willMove(toParent: nil)
+                        playerViewController.removeFromParent()
                     }
 
                     viewController.present(playerViewController, animated: true, completion: { [weak self] in
@@ -1202,6 +1203,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 _playerViewController.view.topAnchor.constraint(equalTo: self.topAnchor),
                 _playerViewController.view.bottomAnchor.constraint(equalTo: self.bottomAnchor),
             ])
+            if let viewController {
+                _playerViewController.didMove(toParent: viewController)
+            }
         }
 
         _playerObserver.playerViewController = _playerViewController
@@ -1268,6 +1272,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 }
             } else {
                 DispatchQueue.main.async {
+                    self._playerViewController?.willMove(toParent: nil)
                     self._playerViewController?.view.removeFromSuperview()
                     self._playerViewController?.removeFromParent()
                     self._playerViewController = nil
@@ -1467,6 +1472,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         self.removePlayerLayer()
 
         if let _playerViewController {
+            _playerViewController.willMove(toParent: nil)
             _playerViewController.view.removeFromSuperview()
             _playerViewController.removeFromParent()
             _playerViewController.rctDelegate = nil
