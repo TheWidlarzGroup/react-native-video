@@ -18,6 +18,7 @@ import {
   SwitchControl,
   ToggleButton,
 } from './components/Controls';
+import SubtitleStyleManager from './components/SubtitleStyleManager';
 import TextTrackManager from './components/TextTrackManager';
 import { styles } from './styles';
 import { type VideoSettings, defaultSettings } from './types/videoSettings';
@@ -170,6 +171,7 @@ const VideoDemo = () => {
             onFullscreenChange={handleFullscreenChange}
             onPictureInPictureChange={handlePictureInPictureChange}
             resizeMode={settings.resizeMode}
+            subtitleStyle={settings.subtitleStyle}
           />
         ) : (
           <View style={styles.hiddenVideo}>
@@ -365,6 +367,16 @@ const VideoDemo = () => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Text Tracks</Text>
         <TextTrackManager player={player} />
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Subtitle Style</Text>
+        <SubtitleStyleManager
+          style={settings.subtitleStyle}
+          onChange={(subtitleStyle) =>
+            updateSetting('subtitleStyle', subtitleStyle)
+          }
+        />
       </View>
 
       <View style={styles.section}>

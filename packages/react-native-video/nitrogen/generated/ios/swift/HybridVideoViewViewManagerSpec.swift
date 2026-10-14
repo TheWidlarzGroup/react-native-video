@@ -17,6 +17,7 @@ public protocol HybridVideoViewViewManagerSpec_protocol: HybridObject {
   var resizeMode: ResizeMode { get set }
   var keepScreenAwake: Bool { get set }
   var surfaceType: SurfaceType { get set }
+  var subtitleStyle: SubtitleStyle { get set }
 
   // Methods
   func enterFullscreen() throws -> Void
