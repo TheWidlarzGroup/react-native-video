@@ -5,7 +5,7 @@ The OS-level setup is the same; the JS surface differs.
 ## Native setup
 
 - **iOS:** add `audio` to `UIBackgroundModes` in `Info.plist` (or via the Expo plugin). Required for audio to continue in the background.
-- **Android:** background playback runs through a media service + notification; for Expo enable `enableBackgroundAudio` in the config plugin.
+- **Android:** background playback runs through a media service + notification. Bare: declare `VideoPlaybackService` and the `FOREGROUND_SERVICE` / `FOREGROUND_SERVICE_MEDIA_PLAYBACK` permissions in `AndroidManifest.xml`. Expo: the config plugin does this by default (`enableAndroidPlaybackService`, default `true`); `enableBackgroundAudio` is iOS-only.
 
 ## What each option does
 

@@ -16,7 +16,7 @@
 
 ## Expo
 
-Use the config plugin in `app.json`/`app.config.js` and run `expo prebuild` (not Expo Go). v7 plugin options: `enableAndroidPictureInPicture`, `enableBackgroundAudio`, `androidExtensions: { useExoplayerDash, useExoplayerHls }`.
+Use the config plugin in `app.json`/`app.config.js` and run `expo prebuild` (not Expo Go). v7 plugin options: `enableAndroidPictureInPicture`, `enableBackgroundAudio` (iOS `UIBackgroundModes` only), `androidExtensions: { useExoplayerDash, useExoplayerHls }`, `enableAndroidPlaybackService` (default `true`: registers the Android playback service + `FOREGROUND_SERVICE*` permissions needed by `playInBackground` / `showNotificationControls`; set `false` only if the app uses neither).
 
 ```json
 { "plugins": [["react-native-video", {

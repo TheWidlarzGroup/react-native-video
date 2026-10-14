@@ -25,8 +25,12 @@ export class VideoPlayerEventsBase {
     event: Event,
     ...params: Parameters<JSVideoPlayerEvents[Event]>
   ): boolean {
-    if (!this.jsEventListeners[event]) return false;
-    this.jsEventListeners[event]?.forEach((fn) => fn(...params));
+    // An event whose last listener was removed still has an (empty) Set; that must read
+    // as "nobody listening", or VideoPlayer.throwError would swallow the error instead
+    // of throwing it.
+    const listeners = this.jsEventListeners[event];
+    if (!listeners || listeners.size === 0) return false;
+    listeners.forEach((fn) => fn(...params));
     return true;
   }
 

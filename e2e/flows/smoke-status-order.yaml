@@ -1,0 +1,28 @@
+# Status order on a plain load-and-play: idle before the load, then loading, then the
+# first readyToPlay (evt-ready-after-loading is set only when the first readyToPlay was
+# reported after loading). Ported from #4743 ("Status").
+#
+# QUARANTINED (tags: [flaky], issue #5155): on iOS the readyToPlay status is sometimes
+# never reported although the clip plays to its end (seen in CI on consecutive runs of
+# the same code: one pass, one fail). Runs in the nightly quarantine leg, not in the
+# gate, until #5155 is fixed; then drop the tag.
+appId: ${APP_ID}
+tags: [smoke, flaky]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 20000
+- assertVisible:
+    id: "evt-initial-idle"
+- extendedWaitUntil:
+    visible:
+      id: "evt-ready-after-loading"
+    timeout: 10000            # iOS: readyToPlay follows onLoad once the buffer allows playback
+- assertNotVisible:
+    id: "evt-onError"

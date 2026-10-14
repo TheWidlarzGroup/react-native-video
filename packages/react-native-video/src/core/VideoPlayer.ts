@@ -17,8 +17,18 @@ import { createPlayer } from './utils/playerFactory';
 import { createSource } from './utils/sourceFactory';
 import { VideoPlayerEvents } from './events/VideoPlayerEvents';
 
+const isCancellation = (error: unknown) =>
+  error instanceof VideoRuntimeError &&
+  (error.code === 'player/cancelled' || error.code === 'source/cancelled');
+
 class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   private _player: VideoPlayerImpl | undefined;
+  private _released = false;
+  // Bumped by every load started from JS (initialize, preload, replaceSourceAsync). A load
+  // that rejects with a cancellation while a newer one exists was superseded by that newer
+  // load: not a failure. A cancellation with no newer load (e.g. the native player was
+  // released by replaceSourceAsync(null)) is reported like any other error.
+  private _loadGeneration = 0;
   private _releaseTimeout: ReturnType<typeof setTimeout> | undefined;
 
   protected get player(): VideoPlayerImpl {
@@ -46,7 +56,10 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
    * @internal
    */
   __destroy() {
-    if (this._player === undefined) return;
+    // `_player` stays set for a grace period after release (see below), so a second
+    // release inside that window must not tear the native player down again.
+    if (this._player === undefined || this._released) return;
+    this._released = true;
 
     this.clearAllEvents();
 
@@ -83,16 +96,27 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   }
 
   /**
+   * Parses a native error to VideoRuntimeError and delivers it to `onError` listeners.
+   * @returns the parsed error and whether an `onError` listener handled it
+   * @internal
+   */
+  private reportError(error: unknown): { error: unknown; handled: boolean } {
+    const parsedError = tryParseNativeVideoError(error);
+    const handled =
+      parsedError instanceof VideoRuntimeError &&
+      this.triggerJSEvent('onError', parsedError);
+
+    return { error: parsedError, handled };
+  }
+
+  /**
    * Handles parsing native errors to VideoRuntimeError and calling onError if provided
    * @internal
    */
   private throwError(error: unknown) {
-    const parsedError = tryParseNativeVideoError(error);
+    const { error: parsedError, handled } = this.reportError(error);
 
-    if (
-      parsedError instanceof VideoRuntimeError &&
-      this.triggerJSEvent('onError', parsedError as VideoRuntimeError)
-    ) {
+    if (handled) {
       // We don't throw errors if onError is provided
       return;
     }
@@ -110,15 +134,26 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   }
 
   /**
-   * Wraps a promise to try parsing native errors to VideoRuntimeError
+   * Runs a native load (initialize, preload, replaceSourceAsync). A rejection is parsed to
+   * VideoRuntimeError, delivered to `onError` listeners (like `throwError`) and re-thrown,
+   * so `await` never hangs and never rejects with `undefined`. The call runs inside the
+   * wrapper so that a synchronous throw (an invalid source, a released player) takes the
+   * same path as a native rejection. A cancellation caused by a newer load started from JS
+   * only rejects: `onError` is for failures, and a superseded load is not one.
    * @internal
    */
-  private wrapPromise<T>(promise: Promise<T>) {
-    return new Promise<T>((resolve, reject) => {
-      promise.then(resolve).catch((error) => {
-        reject(this.throwError(error));
-      });
-    });
+  private async wrapLoad<T>(run: () => Promise<T>): Promise<T> {
+    const generation = ++this._loadGeneration;
+
+    try {
+      return await run();
+    } catch (error) {
+      const parsedError = tryParseNativeVideoError(error);
+      if (isCancellation(parsedError) && generation !== this._loadGeneration) {
+        throw parsedError;
+      }
+      throw this.reportError(parsedError).error;
+    }
   }
 
   // Source
@@ -252,13 +287,13 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   }
 
   async initialize(): Promise<void> {
-    await this.wrapPromise(this.player.initialize());
+    await this.wrapLoad(() => this.player.initialize());
 
     this.updateMemorySize();
   }
 
   async preload(): Promise<void> {
-    await this.wrapPromise(this.player.preload());
+    await this.wrapLoad(() => this.player.preload());
 
     this.updateMemorySize();
   }
@@ -310,7 +345,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   ): Promise<void> {
     this.updateMemorySize();
 
-    await this.wrapPromise(
+    await this.wrapLoad(() =>
       this.player.replaceSourceAsync(
         source === null ? null : createSource(source)
       )

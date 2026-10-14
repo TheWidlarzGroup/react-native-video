@@ -1,0 +1,42 @@
+# replaceSourceAsync(null) during playback: the promise resolves, player.status reads
+# 'idle' afterwards, playback stops (the clip never reaches its end) and no error was
+# reported. Ported from #4743 ("should replace source with null to release resources").
+#
+# The scenario releases from JS once progress passes 2 s and then reads player.status
+# (ScenarioScreen): both native players detach every emitter listener while releasing,
+# so no onStatusChange can deliver the idle status, and a status read is what the
+# original test did too. Releasing during playback, from JS, also proves that the
+# release stops playback and needs no tap (iOS would defer one until the end).
+#
+# Nothing is loaded afterwards: on iOS and Android replaceSourceAsync(null) releases the
+# native player like release() (documented in #5154), so a later load is rejected.
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4-release-mid-playback
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 20000
+- extendedWaitUntil:
+    visible:
+      id: "evt-progress-gt-2s"
+    timeout: 15000
+- extendedWaitUntil:
+    visible:
+      id: "evt-replace-resolved"
+    timeout: 10000
+- extendedWaitUntil:
+    visible:
+      id: "evt-idle-after-release"
+    timeout: 5000
+- assertNotVisible:
+    id: "evt-replace-rejected"
+- assertNotVisible:
+    id: "evt-onEnded"          # released at ~2 s of 8 s: playback must not have run on
+- assertNotVisible:
+    id: "evt-onError"
