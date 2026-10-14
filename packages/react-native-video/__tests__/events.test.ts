@@ -49,7 +49,11 @@ class Events extends VideoPlayerEvents {
   }
 }
 
-const nativeEvents = ALL_PLAYER_EVENTS.filter((e) => e !== 'onError');
+// `onError` and `onAdEvent` have no native event of their own: onError is raised in JS and
+// onAdEvent is composed from the individual ad listeners (see adEvents.test.ts).
+const nativeEvents = ALL_PLAYER_EVENTS.filter(
+  (e) => e !== 'onError' && e !== 'onAdEvent'
+);
 
 test('every native event routes to the emitter method of the same name', () => {
   const fake = fakeEmitter();

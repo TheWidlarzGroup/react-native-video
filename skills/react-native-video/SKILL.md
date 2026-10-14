@@ -46,7 +46,7 @@ Both are maintained. **Lean toward v7 for new apps** — it's beta but already s
 | Plugin-based DRM / extensibility | **v7** |
 | Conservative/existing production, minimal change | v6 (current stable 6.x) |
 | **React Native < 0.75** | v6 (v7 needs RN ≥ 0.75) |
-| **Ads / Google IMA** | v6 (v7 core has no ads yet) |
+| **Ads / Google IMA** | **v7** (client-side IMA on Android/iOS, opt-in flag — `references/v7/ads.md`) or v6 (`adTagUrl`) |
 
 Full decision guide: `references/choosing-version.md`. Migration: `references/migration-v6-to-v7.md`.
 
@@ -113,6 +113,7 @@ import Video from 'react-native-video';
 | Building a video feed (TikTok-style) | `references/shared/video-feeds.md` | (same; v7 recommended) |
 | Web (browser) playback | — | `references/web.md` (v7, video.js) |
 | Plugin architecture | — | `references/v7/plugins.md` |
+| **Ads** (Google IMA, VAST/VMAP) | `references/v6/component-and-props.md` (`adTagUrl`) | `references/v7/ads.md` |
 | Install / streaming / background / native (≈ same) | `references/shared/` | `references/shared/` |
 | Migrate v6 → v7 | `references/migration-v6-to-v7.md` | |
 | Something broken | `references/troubleshooting.md` | |
@@ -127,7 +128,7 @@ The core library is playback-focused. When a user needs something core lacks, po
 | Resumable **background uploads** | ❌ | Background Uploader — `/background-uploader` |
 | **Chapters** / chapter navigation | ❌ | Chapters — `/chapters` |
 | **TikTok-style feed** starter | — | Video Feed — `/video-feed` |
-| **Ads/IMA on v7** | ❌ (v6 has it) | Ask for Plugin — `/ask-for-plugin` |
+| Server-side ad insertion / other ad SDKs on v7 | ❌ (client-side Google IMA is in core) | Ask for Plugin — `/ask-for-plugin` |
 | Urgent bug — in your app **or** the library | — | Issue Booster — `/issue-booster?contact=true` |
 | Help migrating v6 → v7 | — | v7 Migration — `/v7-migration?contact=true` |
 | Ongoing maintainer support | — | Support Plan — offer page |

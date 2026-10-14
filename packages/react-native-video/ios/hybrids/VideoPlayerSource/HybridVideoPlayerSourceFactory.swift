@@ -22,7 +22,8 @@ class HybridVideoPlayerSourceFactory: HybridVideoPlayerSourceFactorySpec {
       headers: nil,
       bufferConfig: nil,
       metadata: nil,
-      initializeOnCreation: true
+      initializeOnCreation: true,
+      ads: nil
     )
     return try HybridVideoPlayerSource(config: config)
   }

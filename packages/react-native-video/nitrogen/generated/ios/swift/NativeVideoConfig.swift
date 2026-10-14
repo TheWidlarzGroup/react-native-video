@@ -18,7 +18,7 @@ public extension NativeVideoConfig {
   /**
    * Create a new instance of `NativeVideoConfig`.
    */
-  init(uri: String, externalSubtitles: [NativeExternalSubtitle]?, drm: NativeDrmParams?, headers: Dictionary<String, String>?, bufferConfig: BufferConfig?, metadata: CustomVideoMetadata?, initializeOnCreation: Bool?) {
+  init(uri: String, externalSubtitles: [NativeExternalSubtitle]?, drm: NativeDrmParams?, headers: Dictionary<String, String>?, bufferConfig: BufferConfig?, metadata: CustomVideoMetadata?, initializeOnCreation: Bool?, ads: VideoAdsConfig?) {
     self.init(std.string(uri), { () -> bridge.std__optional_std__vector_NativeExternalSubtitle__ in
       if let __unwrappedValue = externalSubtitles {
         return bridge.create_std__optional_std__vector_NativeExternalSubtitle__({ () -> bridge.std__vector_NativeExternalSubtitle_ in
@@ -64,6 +64,12 @@ public extension NativeVideoConfig {
     }(), { () -> bridge.std__optional_bool_ in
       if let __unwrappedValue = initializeOnCreation {
         return bridge.create_std__optional_bool_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_VideoAdsConfig_ in
+      if let __unwrappedValue = ads {
+        return bridge.create_std__optional_VideoAdsConfig_(__unwrappedValue)
       } else {
         return .init()
       }
@@ -132,5 +138,10 @@ public extension NativeVideoConfig {
         return nil
       }
     }()
+  }
+  
+  @inline(__always)
+  var ads: VideoAdsConfig? {
+    return self.__ads.value
   }
 }

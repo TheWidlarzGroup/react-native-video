@@ -73,9 +73,58 @@ const getDRMSource = (): VideoConfig => {
   throw new Error('DRM is not supported on this platform');
 };
 
+const ADS_HOST = 'https://pubads.g.doubleclick.net/gampad/ads';
+const SINGLE_AD = `${ADS_HOST}?iu=/21775744923/external/single_ad_samples&sz=640x480&ciu_szs=300x250%2C728x90&gdfp_req=1&output=vast&unviewed_position_start=1&env=vp&impl=s&correlator=`;
+// cmsid/vid make Google's sample server place the mid-roll cue point (at 15 s).
+const VMAP_AD = `${ADS_HOST}?iu=/21775744923/external/vmap_ad_samples&sz=640x480&ciu_szs=300x250&gdfp_req=1&ad_rule=1&output=vmap&unviewed_position_start=1&env=vp&impl=s&cmsid=496&vid=short_onecue&correlator=`;
+
+export type AdTag = { id: string; label: string; url: string };
+
+/** Google's public IMA sample tags (https://developers.google.com/interactive-media-ads/docs/sdks/html5/client-side/tags). */
+export const AD_TAGS: AdTag[] = [
+  {
+    id: 'linear',
+    label: 'Pre-roll (single)',
+    url: `${SINGLE_AD}&cust_params=sample_ct%3Dlinear`,
+  },
+  {
+    id: 'skippable',
+    label: 'Skippable',
+    url: `${SINGLE_AD}&cust_params=sample_ct%3Dskippablelinear`,
+  },
+  {
+    id: 'vmap-pre',
+    label: 'VMAP pre-roll',
+    url: `${VMAP_AD}&cust_params=sample_ar%3Dpreonly`,
+  },
+  {
+    id: 'vmap-post',
+    label: 'VMAP post-roll',
+    url: `${VMAP_AD}&cust_params=sample_ar%3Dpostonly`,
+  },
+  {
+    id: 'vmap-pre-mid-post',
+    label: 'VMAP pre + mid + post',
+    url: `${VMAP_AD}&cust_params=sample_ar%3Dpremidpost`,
+  },
+  {
+    id: 'vmap-pod',
+    label: 'VMAP pre + mid pod + post',
+    url: `${VMAP_AD}&cust_params=sample_ar%3Dpremidpostpod`,
+  },
+];
+
 export type VideoType = 'hls' | 'mp4' | 'drm';
 
-export const getVideoSource = (type: VideoType): VideoConfig => {
+/**
+ * `adTagUrl` is only passed when an ad format is picked in the Ads panel: the app opens
+ * (and the Video Type buttons switch) without any ad session, so every ad test starts
+ * from a plain source instead of from a pre-armed one.
+ */
+export const getVideoSource = (
+  type: VideoType,
+  adTagUrl?: string
+): VideoConfig => {
   if (type === 'drm') {
     if (!isDRMPluginEnabled) {
       enableDRMPlugin();
@@ -90,9 +139,11 @@ export const getVideoSource = (type: VideoType): VideoConfig => {
   const HLS = 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8';
   const MP4 =
     'https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_30MB.mp4';
-
   return {
     uri: type === 'hls' ? HLS : MP4,
+    // autoActivate is left at its default (false): the Ads panel calls
+    // activateAds()/deactivateAds() explicitly so its buttons have something to show.
+    ...(adTagUrl ? { ads: { adTagUrl } } : {}),
     externalSubtitles: [
       {
         label: 'External',

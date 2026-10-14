@@ -18,11 +18,26 @@ import androidx.media3.exoplayer.source.MergingMediaSource
 import com.margelo.nitro.video.HybridVideoPlayerSource
 import com.twg.video.core.LibraryError
 import com.twg.video.core.SourceError
+import com.twg.video.core.ads.AdsMediaSourceWrapper
 import com.twg.video.core.plugins.PluginsRegistry
 
+/**
+ * Builds the playable [MediaSource] for [source].
+ *
+ * @param adsMediaSourceWrapper optional terminal step. When non-null the finished content
+ * source is wrapped in an `AdsMediaSource` (Google IMA). This is deliberately the *last*
+ * thing that happens: DASH/HLS/progressive factory selection, DRM and every
+ * `PluginsRegistry` override all still apply to the content source exactly as before, and
+ * the ad creatives are played by a separate, DRM-free factory owned by the ads controller.
+ */
 @OptIn(UnstableApi::class)
 @Throws(SourceError::class)
-fun buildMediaSource(context: Context, source: HybridVideoPlayerSource, mediaItem: MediaItem): MediaSource {
+fun buildMediaSource(
+  context: Context,
+  source: HybridVideoPlayerSource,
+  mediaItem: MediaItem,
+  adsMediaSourceWrapper: AdsMediaSourceWrapper? = null
+): MediaSource {
   val uri = source.uri.toUri()
 
   // Explanation:
@@ -35,7 +50,8 @@ fun buildMediaSource(context: Context, source: HybridVideoPlayerSource, mediaIte
   )
 
   if (!source.config.externalSubtitles.isNullOrEmpty()) {
-    return buildExternalSubtitlesMediaSource(context, source)
+    val subtitlesSource = buildExternalSubtitlesMediaSource(context, source)
+    return adsMediaSourceWrapper?.wrap(subtitlesSource, mediaItem) ?: subtitlesSource
   }
 
   val mediaSourceFactory: MediaSource.Factory = when (type) {
@@ -59,11 +75,13 @@ fun buildMediaSource(context: Context, source: HybridVideoPlayerSource, mediaIte
     mediaSourceFactory.setDrmSessionManagerProvider { drmSessionManager }
   }
 
-  return PluginsRegistry.shared.overrideMediaSourceFactory(
+  val contentMediaSource = PluginsRegistry.shared.overrideMediaSourceFactory(
     source,
     mediaSourceFactory,
     dataSourceFactory
   ).createMediaSource(mediaItem)
+
+  return adsMediaSourceWrapper?.wrap(contentMediaSource, mediaItem) ?: contentMediaSource
 }
 
 @OptIn(UnstableApi::class)

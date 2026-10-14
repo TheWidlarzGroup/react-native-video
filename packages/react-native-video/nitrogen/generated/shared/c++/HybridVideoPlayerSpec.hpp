@@ -23,6 +23,8 @@ namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 namespace margelo::nitro::video { enum class MixAudioMode; }
 // Forward declaration of `IgnoreSilentSwitchMode` to properly resolve imports.
 namespace margelo::nitro::video { enum class IgnoreSilentSwitchMode; }
+// Forward declaration of `VideoAdState` to properly resolve imports.
+namespace margelo::nitro::video { enum class VideoAdState; }
 // Forward declaration of `TextTrack` to properly resolve imports.
 namespace margelo::nitro::video { struct TextTrack; }
 
@@ -32,6 +34,7 @@ namespace margelo::nitro::video { struct TextTrack; }
 #include "VideoPlayerStatus.hpp"
 #include "MixAudioMode.hpp"
 #include "IgnoreSilentSwitchMode.hpp"
+#include "VideoAdState.hpp"
 #include "TextTrack.hpp"
 #include <optional>
 #include <NitroModules/Promise.hpp>
@@ -93,6 +96,8 @@ namespace margelo::nitro::video {
       virtual bool getDisableAudioSessionManagement() = 0;
       virtual void setDisableAudioSessionManagement(bool disableAudioSessionManagement) = 0;
       virtual bool getIsPlaying() = 0;
+      virtual bool getIsPlayingAd() = 0;
+      virtual VideoAdState getAdState() = 0;
       virtual std::optional<TextTrack> getSelectedTrack() = 0;
 
     public:
@@ -105,6 +110,9 @@ namespace margelo::nitro::video {
       virtual std::shared_ptr<Promise<void>> preload() = 0;
       virtual void play() = 0;
       virtual void pause() = 0;
+      virtual std::shared_ptr<Promise<void>> activateAds() = 0;
+      virtual void deactivateAds() = 0;
+      virtual void skipAd() = 0;
       virtual void seekBy(double time) = 0;
       virtual void seekTo(double time) = 0;
 
