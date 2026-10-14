@@ -31,14 +31,30 @@ useVideoPlayer({
 
 > iOS supports only `.vtt` external subtitles. Embedded tracks (in the HLS/DASH manifest) work via `getAvailableTextTracks()` on both platforms.
 
-## Audio / video track selection
+## Video quality (track) selection
 
-Audio/video **track selection** is a **web** capability (experimental — Safari-leaning). On native, the player handles **text** track selection (above). Cast to `WebVideoPlayer` for `getAvailableAudioTracks()/selectAudioTrack()` and `getAvailableVideoTracks()/selectVideoTrack()`:
+Real selection on native (Android/iOS) — pin a specific HLS rendition, or go back to automatic adaptive selection:
+
+```tsx
+const tracks = player.getAvailableVideoTracks(); // VideoTrack[]
+player.selectVideoTrack(tracks[0].id);           // or call with no argument for automatic
+const requestedId = player.selectedVideoTrackId; // what was requested
+```
+
+`VideoTrack = { id, label, language?, selected, width?, height?, bitrate? }`.
+
+React to changes via `onVideoTrackChange` → `{ availableTracks, selectedTrackId?, activeTrackId? }` (see `events.md`).
+
+**Platforms enforce a pin differently**: Android is a hard track-selection override (selected == active, always). iOS has no rendition-selection API, so a pin is enforced as a resolution/bitrate cap — the player may still adapt within or below the cap, and `activeTrackId` (not `selectedVideoTrackId`) is what reports the rendition actually rendering.
+
+## Audio track selection
+
+Audio **track selection** is a **web** capability (experimental — Safari-leaning). On native, the player handles **text** and **video quality** track selection (above), but not yet alternate audio tracks. Cast to `WebVideoPlayer` for `getAvailableAudioTracks()/selectAudioTrack()` on web:
 
 ```tsx
 import type { WebVideoPlayer } from 'react-native-video';
 const web = player as WebVideoPlayer;
-web.selectVideoTrack(web.getAvailableVideoTracks()[0]);
+web.selectAudioTrack(web.getAvailableAudioTracks()[0]);
 ```
 
-The `AudioTrack` / `VideoTrack` types (`{ id, label, language?, selected }`) are exported for use with these web APIs.
+The `AudioTrack` type (`{ id, label, language?, selected }`) is exported for use with this web API.
