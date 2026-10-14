@@ -4,6 +4,27 @@ import type { VideoPlayerBase } from '../../core/types/VideoPlayerBase';
 import type { VideoPlayerEventEmitter } from './VideoPlayerEventEmitter.nitro';
 import type { VideoPlayerSource } from './VideoPlayerSource.nitro';
 
+/**
+ * IMPORTANT - nitrogen cannot regenerate this HybridObject's native spec.
+ *
+ * `bun run specs` fails on `VideoPlayer` with:
+ *   "The TypeScript type 'Event' cannot be represented in C++!"
+ * caused by `VideoPlayerBase.addEventListener<Event extends keyof AllPlayerEvents>`
+ * (a generic method) structurally flattening into this interface. Reproduced on
+ * both nitrogen 0.35.0 and 0.37.1 (the latest at time of writing), on a clean
+ * unmodified checkout - this is not caused by any one change to this file.
+ *
+ * Consequence: nitrogen/generated/{shared/c++,ios/swift,ios/c++,android/kotlin,
+ * android/c++}/HybridVideoPlayerSpec.* are hand-maintained, not regenerated -
+ * same as ios/core/Spec/NativeVideoPlayerSpec.swift already explicitly is.
+ * Any change to VideoPlayerBase's member list requires hand-editing those files
+ * directly, pattern-matched against the existing members (see git history on
+ * this file for a worked example: isPlayingAd/adState/activateAds/deactivateAds/
+ * skipAd were added this way). Do not run `bun run specs` and blindly accept its
+ * output for this HybridObject or its dependents - on this codebase it has also
+ * been observed to silently change unrelated, already-correct generated files
+ * (e.g. onLoadStartData's bridged source type) that nobody asked to change.
+ */
 export interface VideoPlayer
   extends HybridObject<{ ios: 'swift'; android: 'kotlin' }>, VideoPlayerBase {
   // Override with (hybrid) VideoPlayerSource

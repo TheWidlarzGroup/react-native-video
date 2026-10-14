@@ -17,6 +17,8 @@ namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 namespace margelo::nitro::video { enum class MixAudioMode; }
 // Forward declaration of `IgnoreSilentSwitchMode` to properly resolve imports.
 namespace margelo::nitro::video { enum class IgnoreSilentSwitchMode; }
+// Forward declaration of `VideoAdState` to properly resolve imports.
+namespace margelo::nitro::video { enum class VideoAdState; }
 // Forward declaration of `TextTrack` to properly resolve imports.
 namespace margelo::nitro::video { struct TextTrack; }
 
@@ -31,6 +33,8 @@ namespace margelo::nitro::video { struct TextTrack; }
 #include "JMixAudioMode.hpp"
 #include "IgnoreSilentSwitchMode.hpp"
 #include "JIgnoreSilentSwitchMode.hpp"
+#include "VideoAdState.hpp"
+#include "JVideoAdState.hpp"
 #include "TextTrack.hpp"
 #include <optional>
 #include "JTextTrack.hpp"
@@ -199,6 +203,16 @@ namespace margelo::nitro::video {
     auto __result = method(_javaPart);
     return static_cast<bool>(__result);
   }
+  bool JHybridVideoPlayerSpec::getIsPlayingAd() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jboolean()>("isPlayingAd");
+    auto __result = method(_javaPart);
+    return static_cast<bool>(__result);
+  }
+  VideoAdState JHybridVideoPlayerSpec::getAdState() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JVideoAdState>()>("getAdState");
+    auto __result = method(_javaPart);
+    return __result->toCpp();
+  }
   std::optional<TextTrack> JHybridVideoPlayerSpec::getSelectedTrack() {
     static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JTextTrack>()>("getSelectedTrack");
     auto __result = method(_javaPart);
@@ -279,6 +293,29 @@ namespace margelo::nitro::video {
   }
   void JHybridVideoPlayerSpec::pause() {
     static const auto method = _javaPart->javaClassStatic()->getMethod<void()>("pause");
+    method(_javaPart);
+  }
+  std::shared_ptr<Promise<void>> JHybridVideoPlayerSpec::activateAds() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>()>("activateAds");
+    auto __result = method(_javaPart);
+    return [&]() {
+      auto __promise = Promise<void>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& /* unit */) {
+        __promise->resolve();
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  void JHybridVideoPlayerSpec::deactivateAds() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void()>("deactivateAds");
+    method(_javaPart);
+  }
+  void JHybridVideoPlayerSpec::skipAd() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void()>("skipAd");
     method(_javaPart);
   }
   void JHybridVideoPlayerSpec::seekBy(double time) {

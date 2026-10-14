@@ -8,6 +8,16 @@ export type { AudioTrack } from './core/types/AudioTrack';
 export type { TextTrack } from './core/types/TextTrack';
 export type { VideoTrack } from './core/types/VideoTrack';
 export type { VideoConfig, VideoSource } from './core/types/VideoConfig';
+export type {
+  AdBreakEvent,
+  AdBreakKind,
+  AdErrorEvent,
+  AdInfo,
+  AdProgressInfo,
+  AdsResolvedEvent,
+  VideoAdsConfig,
+  VideoAdState,
+} from './core/types/VideoAdsConfig';
 export type { WebVideoPlayer } from './core/types/WebVideoPlayer';
 export type {
   LibraryError,

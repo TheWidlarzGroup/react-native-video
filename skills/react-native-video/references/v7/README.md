@@ -28,6 +28,7 @@ return <VideoView player={player} controls style={{ flex: 1 }} />;
 - DRM (separate `@react-native-video/drm` package) → `drm.md`
 - Tracks / subtitles → `tracks-subtitles.md`
 - PiP / fullscreen / controls → `pip-fullscreen-controls.md`
+- Ads (Google IMA, VAST/VMAP) → `ads.md`
 - Plugin architecture → `plugins.md`
 - Install / streaming / background / native setup → `../shared/`
 - Coming from v6? → `../migration-v6-to-v7.md`
