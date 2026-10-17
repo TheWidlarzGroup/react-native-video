@@ -183,7 +183,10 @@ export class KeplerMedia {
     this.destroyed = true;
     this.pending = [];
     // Read now: the view's own cleanup may detach the surface while we wait below.
-    const surface = this.surface;
+    // Released before initialize() resolved: the surface never reached w3cmedia.
+    const surface = this.initialized ? this.surface : null;
+    // From here the getters give the defaults: the player is being deinitialized.
+    this.initialized = false;
     try {
       await this.ready;
     } catch {
@@ -193,8 +196,7 @@ export class KeplerMedia {
       this.video.removeEventListener(type, listener)
     );
     try {
-      // Released before initialize() resolved: the surface never reached w3cmedia.
-      if (this.initialized && surface !== null) {
+      if (surface !== null) {
         this.video.clearSurfaceHandle(surface);
       }
       this.video.pause();

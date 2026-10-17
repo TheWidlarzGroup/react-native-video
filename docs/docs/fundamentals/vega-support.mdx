@@ -124,6 +124,6 @@ Checked on a Fire TV Stick 4K Select (Vega OS, React Native 0.83).
 - `onLoad` reports the size as `0x0`: w3cmedia in URL mode does not give the video size.
 - `mixAudioMode`, `ignoreSilentSwitchMode`, `playWhenInactive`, `setAudioSessionManagementDisabled`, `keepScreenAwake` and the source's `metadata` do nothing on Vega.
 - `showNotificationControls = false` does not take the remote back from a player that had it; the next player that sets it to `true` takes it over.
-- A superseded load does not reject with `player/cancelled` as on iOS and Android; `release()` never throws.
+- A superseded load does not reject with `player/cancelled` as on iOS and Android. `release()` never throws; after it, `initialize()`, `preload()` and `replaceSourceAsync()` reject with `player/released`, as on iOS and Android, while `play()`, `pause()` and `seekTo()` do nothing.
 - Sources must be URLs (strings): `require('./video.mp4')` is not supported on Vega.
 - A `useEvent(player, 'onLoadStart', …)` subscription can miss the first `onLoadStart` of a player that loads very fast; listen in the `useVideoPlayer` setup callback instead, as on other platforms.

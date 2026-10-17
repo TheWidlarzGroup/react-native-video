@@ -110,6 +110,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   }
 
   get status(): VideoPlayerStatus {
+    if (this._released) return 'idle';
     if (this._initError || this._media.error) return 'error';
     if (this._media.isEnded || !this._sourceLoaded) return 'idle';
     if (this._media.readyState >= HAVE_FUTURE_DATA) return 'readyToPlay';
@@ -207,6 +208,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   // --- Playback actions ---
 
   async initialize(): Promise<void> {
+    this.throwIfReleased();
     this.loadSource();
     await this._ready;
   }
@@ -247,6 +249,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
       | NoAutocomplete<VideoPlayerSourceBase>
       | null
   ): Promise<void> {
+    this.throwIfReleased();
     if (!source) {
       this._source = undefined;
       this._sourceLoaded = false;
@@ -275,6 +278,16 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     this._sourceLoaded = false;
     if (config.initializeOnCreation !== false) {
       await this.initialize();
+    }
+  }
+
+  /** As on iOS and Android. */
+  private throwIfReleased() {
+    if (this._released) {
+      throw new VideoRuntimeError(
+        'player/released',
+        "You can't access player after it's released"
+      );
     }
   }
 

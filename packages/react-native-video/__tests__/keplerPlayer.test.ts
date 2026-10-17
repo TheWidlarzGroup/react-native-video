@@ -242,6 +242,36 @@ test('release clears the surface, then deinitializes, and stops the events', asy
   expect(native.calls[native.calls.length - 1]).toBe('deinitialize');
 });
 
+test('after release, loads reject with player/released and the state no longer reads w3cmedia', async () => {
+  const { player, native } = await ready();
+  native.paused = false;
+  native.readyState = 4;
+  native.duration = 100;
+  player.release();
+  await flush();
+  // As on iOS and Android; w3cmedia is deinitialized, so it is not asked any more.
+  expect(player.status).toBe('idle');
+  expect(player.isPlaying).toBe(false);
+  expect(Number.isNaN(player.duration)).toBe(true);
+  for (const load of [
+    () => player.initialize(),
+    () => player.preload(),
+    () => player.replaceSourceAsync('https://cdn.test/other.mp4'),
+    () =>
+      player.replaceSourceAsync({
+        uri: 'https://cdn.test/other.mp4',
+        initializeOnCreation: false,
+      }),
+  ]) {
+    const failure = (await load().catch((e: unknown) => e)) as InstanceType<
+      typeof VideoRuntimeError
+    >;
+    expect(failure).toBeInstanceOf(VideoRuntimeError);
+    expect(failure.code).toBe('player/released');
+  }
+  expect(native.calls[native.calls.length - 1]).toBe('deinitialize');
+});
+
 test('a media error arrives as onError with the w3cmedia code', async () => {
   const { player, native } = await ready();
   const seen = record(player, ['onError', 'onStatusChange']);
