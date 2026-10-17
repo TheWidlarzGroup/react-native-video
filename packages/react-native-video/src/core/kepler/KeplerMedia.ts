@@ -182,6 +182,8 @@ export class KeplerMedia {
     if (this.destroyed) return;
     this.destroyed = true;
     this.pending = [];
+    // Read now: the view's own cleanup may detach the surface while we wait below.
+    const surface = this.surface;
     try {
       await this.ready;
     } catch {
@@ -192,8 +194,8 @@ export class KeplerMedia {
     );
     try {
       // Released before initialize() resolved: the surface never reached w3cmedia.
-      if (this.initialized && this.surface !== null) {
-        this.video.clearSurfaceHandle(this.surface);
+      if (this.initialized && surface !== null) {
+        this.video.clearSurfaceHandle(surface);
       }
       this.video.pause();
     } catch {

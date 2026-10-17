@@ -68,3 +68,22 @@ test('the shown player pauses when the app goes to the background', async () => 
   view.unmount();
   expect(w3c.appState.size).toBe(0);
 });
+
+test('the surface is cleared before deinitialize() when the owner releases the player with the view', async () => {
+  const { a, na } = await twoPlayers();
+  // Like useVideoPlayer: the owner's cleanup runs before the view's.
+  function Owner() {
+    React.useEffect(() => () => a.release(), []);
+    return React.createElement(VideoView, { player: a as never });
+  }
+  let renderer!: TestRenderer.ReactTestRenderer;
+  act(() => {
+    renderer = TestRenderer.create(React.createElement(Owner));
+  });
+  act(() => w3c.surface!.onSurfaceViewCreated('s1'));
+  act(() => renderer.unmount());
+  await flush();
+  const clear = na.calls.indexOf('clearSurfaceHandle(s1)');
+  expect(clear).toBeGreaterThan(-1);
+  expect(clear).toBeLessThan(na.calls.indexOf('deinitialize'));
+});
