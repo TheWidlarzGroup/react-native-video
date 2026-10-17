@@ -11,16 +11,11 @@ import { VideoRuntimeError } from './types/VideoError';
 import type { VideoPlayerBase } from './types/VideoPlayerBase';
 import type { VideoPlayerSourceBase } from './types/VideoPlayerSourceBase';
 import type { VideoPlayerStatus } from './types/VideoPlayerStatus';
+// By full name: Metro would pick the .kepler file anyway, and the bun tests need this one.
 import { VideoPlayerEvents } from './events/VideoPlayerEvents.kepler';
 import { KeplerEventEmitter } from './kepler/KeplerEventEmitter';
 import { HAVE_FUTURE_DATA, KeplerMedia } from './kepler/KeplerMedia';
-
-const warned = new Set<string>();
-const warnOnce = (feature: string) => {
-  if (warned.has(feature)) return;
-  warned.add(feature);
-  console.warn(`[react-native-video] ${feature} is not supported on Vega yet.`);
-};
+import { warnOnce } from './kepler/warnOnce';
 
 /**
  * Vega OS (Fire TV) backend: one w3cmedia `VideoPlayer` from
@@ -29,11 +24,15 @@ const warnOnce = (feature: string) => {
  */
 class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   private _media: KeplerMedia;
+  /** Like `_media.ready`, but rejects with the error that onError reported. */
+  private _ready: Promise<void>;
+  private _initError: VideoRuntimeError | null = null;
   private _source: NativeVideoConfig | undefined;
   /** Set when `initializeOnCreation: false` delays the load until initialize()/preload(). */
   private _sourceLoaded = false;
   private _released = false;
   private _showNotificationControls = false;
+  private _playInBackground = false;
   private _componentInstance: (() => unknown) | null = null;
 
   constructor(source: VideoSource | VideoConfig | VideoPlayerSourceBase) {
@@ -44,18 +43,18 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     emitter.getSource = () => this.source;
     this._media = media;
 
-    media.ready.catch((error: unknown) => {
-      emitter.__emit('onStatusChange', 'error');
-      emitter.__emit(
-        'onError',
-        new VideoRuntimeError(
-          'player/not-initialized',
-          `w3cmedia VideoPlayer could not start: ${String(error)}`
-        )
+    this._ready = media.ready.catch((cause: unknown) => {
+      const error = new VideoRuntimeError(
+        'player/not-initialized',
+        `w3cmedia VideoPlayer could not start: ${String(cause)}`
       );
+      this._initError = error;
+      emitter.__emit('onStatusChange', 'error');
+      emitter.__emit('onError', error);
+      throw error;
     });
+    this._ready.catch(() => {}); // the app hears it through onError
 
-    // A failed start is reported above, through onError.
     this.replaceSourceAsync(source).catch(() => {});
   }
 
@@ -75,6 +74,11 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   __setComponentInstance(getInstance: (() => unknown) | null) {
     this._componentInstance = getInstance;
     this.focusMediaControls();
+  }
+
+  /** @internal Pauses when the app leaves the screen, unless `playInBackground`. */
+  __onAppStateChange(state: unknown) {
+    if (state === 'background' && !this._playInBackground) this.pause();
   }
 
   /** @internal */
@@ -106,7 +110,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   }
 
   get status(): VideoPlayerStatus {
-    if (this._media.error) return 'error';
+    if (this._initError || this._media.error) return 'error';
     if (this._media.isEnded || !this._sourceLoaded) return 'idle';
     if (this._media.readyState >= HAVE_FUTURE_DATA) return 'readyToPlay';
     return 'loading';
@@ -171,6 +175,16 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     }
   }
 
+  // --- Background ---
+
+  /** On Vega: false pauses the player a `VideoView` shows when the app goes to the background. */
+  get playInBackground(): boolean {
+    return this._playInBackground;
+  }
+  set playInBackground(value: boolean) {
+    this._playInBackground = value;
+  }
+
   // --- Not used on Vega (no-op) ---
 
   get mixAudioMode(): MixAudioMode {
@@ -181,10 +195,6 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     return 'auto';
   }
   set ignoreSilentSwitchMode(_: IgnoreSilentSwitchMode) {}
-  get playInBackground(): boolean {
-    return false;
-  }
-  set playInBackground(_: boolean) {}
   get playWhenInactive(): boolean {
     return false;
   }
@@ -198,7 +208,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
 
   async initialize(): Promise<void> {
     this.loadSource();
-    await this._media.ready;
+    await this._ready;
   }
 
   async preload(): Promise<void> {
@@ -210,6 +220,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   }
 
   play(): void {
+    if (!this._source) return;
     this.loadSource();
     this._media.play();
   }
@@ -219,11 +230,12 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   }
 
   seekTo(time: number): void {
+    if (!this._source) return;
     this._media.seek(time);
   }
 
   seekBy(time: number): void {
-    this.seekTo(this.currentTime + time);
+    this.seekTo((this._media.pendingSeek ?? this.currentTime) + time);
   }
 
   // --- Source management ---
@@ -238,7 +250,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     if (!source) {
       this._source = undefined;
       this._sourceLoaded = false;
-      this._media.pause();
+      this._media.unload();
       return;
     }
 
@@ -256,9 +268,6 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     const config = (
       'config' in source ? source.config : source
     ) as NativeVideoConfig;
-    if (config.headers && Object.keys(config.headers).length > 0) {
-      warnOnce('`headers`');
-    }
     if (config.drm) warnOnce('`drm`');
     if (config.externalSubtitles?.length) warnOnce('`externalSubtitles`');
 
@@ -273,7 +282,9 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   private loadSource() {
     if (this._sourceLoaded || !this._source) return;
     this._sourceLoaded = true;
-    this._media.setSource(this._source.uri);
+    const { uri, headers } = this._source;
+    const hasHeaders = headers && Object.keys(headers).length > 0;
+    this._media.setSource(uri, hasHeaders ? headers : undefined);
   }
 
   // --- Tracks (not on Vega yet) ---

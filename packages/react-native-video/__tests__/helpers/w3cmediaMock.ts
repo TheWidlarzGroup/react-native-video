@@ -13,12 +13,21 @@ export const w3c = {
   /** When set, initialize() rejects with it. */
   initRejects: null as unknown,
   componentInstance: { name: 'app' } as unknown,
+  /** Props of the last rendered KeplerVideoSurfaceView. */
+  surface: null as null | {
+    onSurfaceViewCreated: (handle: string) => void;
+    onSurfaceViewDestroyed: (handle: string) => void;
+  },
+  /** Listeners added with addAppStateListener('change', …). */
+  appState: new Set<(state: string) => void>(),
 };
 
 export function resetW3c() {
   w3c.created = [];
   w3c.holdInit = false;
   w3c.initRejects = null;
+  w3c.surface = null;
+  w3c.appState.clear();
 }
 
 export class FakeW3cPlayer {
@@ -31,6 +40,7 @@ export class FakeW3cPlayer {
   playbackRate = 1;
   duration = NaN;
   paused = true;
+  seeking = false;
   readyState = 0;
   videoWidth = 0;
   videoHeight = 0;
@@ -83,6 +93,20 @@ export class FakeW3cPlayer {
     this.calls.push('pause');
   }
 
+  setSrcWithCustomHeaders(url: string, headers?: Record<string, string>) {
+    this.calls.push(`src=${url} headers=${JSON.stringify(headers)}`);
+    this._src = url;
+  }
+
+  removeAttribute(name: string) {
+    this.calls.push(`removeAttribute(${name})`);
+    if (name === 'src') this._src = '';
+  }
+
+  load() {
+    this.calls.push('load');
+  }
+
   get src() {
     return this._src;
   }
@@ -130,11 +154,21 @@ export async function flush() {
 
 mock.module('@amazon-devices/react-native-w3cmedia', () => ({
   VideoPlayer: FakeW3cPlayer,
-  KeplerVideoSurfaceView: () => null,
+  KeplerVideoSurfaceView: (props: typeof w3c.surface) => {
+    w3c.surface = props;
+    return null;
+  },
 }));
 
 mock.module('@amazon-devices/react-native-kepler', () => ({
   useKeplerAppStateManager: () => ({
     getComponentInstance: () => w3c.componentInstance,
+    addAppStateListener: (
+      _event: string,
+      listener: (state: string) => void
+    ) => {
+      w3c.appState.add(listener);
+      return { remove: () => w3c.appState.delete(listener) };
+    },
   }),
 }));

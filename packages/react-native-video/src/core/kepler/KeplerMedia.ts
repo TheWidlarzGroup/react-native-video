@@ -1,4 +1,5 @@
 import { VideoPlayer as W3cVideoPlayer } from '@amazon-devices/react-native-w3cmedia';
+import { warnOnce } from './warnOnce';
 
 /** HTMLMediaElement.HAVE_FUTURE_DATA */
 export const HAVE_FUTURE_DATA = 3;
@@ -7,8 +8,9 @@ export const HAVE_FUTURE_DATA = 3;
  * One w3cmedia `VideoPlayer` behind the synchronous API of `VideoPlayer`.
  *
  * w3cmedia accepts no call before `initialize()` resolves, so earlier commands wait and run
- * in order. It also differs from an HTML `<video>` in two places this class hides:
- * `paused` stays false after `ended`, and `seeked` reports the time from before the seek.
+ * in order. This class also keeps what w3cmedia gets wrong compared with an HTML `<video>`:
+ * whether the video has ended (`paused` stays false after `ended`) and where the last seek
+ * went (`seeked` reports the time from before the seek).
  */
 export class KeplerMedia {
   readonly video: W3cVideoPlayer;
@@ -25,6 +27,12 @@ export class KeplerMedia {
   private seekTarget: number | null = null;
   // Written before initialize(): read back from here until the player exists.
   private state = { muted: false, volume: 1, rate: 1, loop: false };
+  private ownListeners: Array<[string, () => void]> = [
+    ['ended', () => (this.ended = true)],
+    // The remote and voice start w3cmedia directly, so play() is not the only way back.
+    ['play', () => (this.ended = false)],
+    ['seeking', () => (this.ended = false)],
+  ];
 
   constructor() {
     this.video = new W3cVideoPlayer();
@@ -37,12 +45,13 @@ export class KeplerMedia {
       queued.forEach((command) => command());
     });
     this.ready.catch(() => {}); // reported through initialize() and onError
-    this.run(() => this.video.addEventListener('ended', this.onEnded));
+    // Queued first, so this state is current when the player's event listeners run.
+    this.run(() => {
+      this.ownListeners.forEach(([type, listener]) =>
+        this.video.addEventListener(type, listener)
+      );
+    });
   }
-
-  private onEnded = () => {
-    this.ended = true;
-  };
 
   /** Runs now when the player is initialized, otherwise right after `initialize()`. */
   run(command: () => void): void {
@@ -51,13 +60,33 @@ export class KeplerMedia {
     else this.pending.push(command);
   }
 
-  setSource(uri: string): void {
+  setSource(uri: string, headers?: Record<string, string>): void {
+    this.newSource();
+    this.run(() => {
+      // setSrcWithCustomHeaders is in newer w3cmedia versions only.
+      if (headers && this.video.setSrcWithCustomHeaders) {
+        this.video.setSrcWithCustomHeaders(uri, headers);
+        return;
+      }
+      if (headers) warnOnce('`headers` (with this w3cmedia version)');
+      this.video.src = uri;
+    });
+  }
+
+  /** Stops and drops the current video, like `removeAttribute('src')` on the web. */
+  unload(): void {
+    this.newSource();
+    this.run(() => {
+      this.video.pause();
+      this.video.removeAttribute('src');
+      this.video.load();
+    });
+  }
+
+  private newSource() {
     this.sourceId++;
     this.ended = false;
     this.seekTarget = null;
-    this.run(() => {
-      this.video.src = uri;
-    });
   }
 
   play(): void {
@@ -79,11 +108,21 @@ export class KeplerMedia {
     });
   }
 
-  /** The time the last seek went to; w3cmedia's own `currentTime` at `seeked` is stale. */
-  takeSeekTarget(): number {
-    const target = this.seekTarget ?? this.currentTime;
+  /** Where the seek in flight goes, if there is one. */
+  get pendingSeek(): number | null {
+    return this.seekTarget;
+  }
+
+  /**
+   * The time the last seek went to; w3cmedia's own `currentTime` at `seeked` is stale.
+   * Null for the jump back to the start of a loop, which is not a seek.
+   */
+  takeSeekTarget(): number | null {
+    const target = this.seekTarget;
     this.seekTarget = null;
-    return target;
+    if (target !== null) return target;
+    const atLoopPoint = this.loop && this.currentTime >= this.duration - 1;
+    return atLoopPoint ? null : this.currentTime;
   }
 
   setMuted(muted: boolean): void {
@@ -148,9 +187,14 @@ export class KeplerMedia {
     } catch {
       return;
     }
-    this.video.removeEventListener('ended', this.onEnded);
+    this.ownListeners.forEach(([type, listener]) =>
+      this.video.removeEventListener(type, listener)
+    );
     try {
-      if (this.surface !== null) this.video.clearSurfaceHandle(this.surface);
+      // Released before initialize() resolved: the surface never reached w3cmedia.
+      if (this.initialized && this.surface !== null) {
+        this.video.clearSurfaceHandle(this.surface);
+      }
       this.video.pause();
     } catch {
       // The player is released below anyway.

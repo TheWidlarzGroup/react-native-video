@@ -1,7 +1,9 @@
 /**
- * The parts of the Vega SDK packages that the Vega backend uses. Both packages are in every
- * Vega app and are not on other platforms, so the library declares the few members it needs
- * instead of depending on them.
+ * Type shim for the two Vega SDK packages, limited to the members the Vega backend uses.
+ *
+ * Why not devDependencies: @amazon-devices/react-native-kepler 4.x needs React 19 and 2.x pins
+ * React 18.2 / RN 0.72, while this repo builds with React 18.3 / RN 0.77. Both packages are in
+ * every Vega app (optional peers here), so the real types are used when an app type-checks.
  */
 declare module '@amazon-devices/react-native-w3cmedia' {
   import type { ComponentType } from 'react';
@@ -28,6 +30,13 @@ declare module '@amazon-devices/react-native-w3cmedia' {
     setMediaControlFocus(componentInstance: unknown): Promise<void>;
     play(): Promise<void>;
     pause(): void;
+    load(): void;
+    removeAttribute(name: string): void;
+    /** Not in older w3cmedia versions. */
+    setSrcWithCustomHeaders?(
+      url: string,
+      headers?: Record<string, string>
+    ): void;
     src: string;
     autoplay: boolean;
     loop: boolean;
@@ -37,6 +46,7 @@ declare module '@amazon-devices/react-native-w3cmedia' {
     currentTime: number;
     readonly duration: number;
     readonly paused: boolean;
+    readonly seeking: boolean;
     readonly readyState: number;
     readonly videoWidth: number;
     readonly videoHeight: number;
@@ -60,6 +70,10 @@ declare module '@amazon-devices/react-native-kepler' {
   export interface IKeplerAppStateManager {
     /** The app's component instance, for `setMediaControlFocus`. */
     getComponentInstance(): unknown;
+    addAppStateListener(
+      event: 'change',
+      listener: (state: unknown) => void
+    ): { remove(): void };
   }
   export function useKeplerAppStateManager(): IKeplerAppStateManager;
 }

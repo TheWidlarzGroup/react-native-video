@@ -16,9 +16,9 @@ const MEDIA_ERRORS: Record<number, string> = {
  * w3cmedia events to react-native-video events, like `webDOMEvents.ts` does for the web.
  * Where w3cmedia differs from an HTML `<video>`:
  * - `loadstart` comes twice per source (at `src` and again after the metadata): sent once;
- * - `durationchange` comes before `loadedmetadata`, when the size is still 0x0: `onLoad` waits
- *   for the metadata;
+ * - `durationchange` comes before `loadedmetadata`: `onLoad` waits for the metadata;
  * - `seeked` carries the time from before the seek: `onSeek` sends the seek target;
+ * - with `loop`, the jump back to the start also sends `seeked`: not reported as a seek;
  * - after `ended` there is no `pause` and `paused` stays false: the end is sent as a pause.
  */
 export function attachKeplerMediaEvents(
@@ -60,9 +60,11 @@ export function attachKeplerMediaEvents(
 
   return [
     on('loadstart', () => {
-      if (loadStartSent === media.sourceId) return;
+      const source = getSource();
+      // No URI: the loadstart that answers an unload (`replaceSourceAsync(null)`).
+      if (!source.uri || loadStartSent === media.sourceId) return;
       loadStartSent = media.sourceId;
-      emit('onLoadStart', { sourceType: 'network', source: getSource() });
+      emit('onLoadStart', { sourceType: 'network', source });
     }),
     on('loadedmetadata', sendLoad),
     on('durationchange', sendLoad),
@@ -83,7 +85,11 @@ export function attachKeplerMediaEvents(
         bufferDuration: media.bufferAhead,
       });
     }),
-    on('seeked', () => emit('onSeek', media.takeSeekTarget())),
+    on('seeked', () => {
+      if (video.seeking) return; // a later seek is still running: report that one
+      const target = media.takeSeekTarget();
+      if (target !== null) emit('onSeek', target);
+    }),
     on('ended', () => {
       emit('onPlaybackStateChange', playbackState());
       emit('onEnd');

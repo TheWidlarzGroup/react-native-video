@@ -44,12 +44,20 @@ const VideoView = forwardRef<VideoViewRef, VideoViewProps>(
     ref
   ) => {
     const player = nPlayer as unknown as VideoPlayer;
-    const appState = useKeplerAppStateManager();
+    // Kept in a ref: the hook may return a new object on every render.
+    const appState = useRef(useKeplerAppStateManager());
 
     useEffect(() => {
-      player.__setComponentInstance(() => appState.getComponentInstance());
-      return () => player.__setComponentInstance(null);
-    }, [player, appState]);
+      const manager = appState.current;
+      player.__setComponentInstance(() => manager.getComponentInstance());
+      const subscription = manager.addAppStateListener('change', (state) =>
+        player.__onAppStateChange(state)
+      );
+      return () => {
+        subscription.remove();
+        player.__setComponentInstance(null);
+      };
+    }, [player]);
 
     useImperativeHandle(
       ref,
