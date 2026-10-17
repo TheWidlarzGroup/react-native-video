@@ -16,7 +16,9 @@ function Player() {
 
 - `manifest.toml` must list the media services under `[wants]` (`com.amazon.media.server`, `com.amazon.media.playersession.service`, `com.amazon.mediabuffer.service`, …); without them the video stays black.
 - Remote and voice play/pause also need the `com.amazon.category.kepler.media` category and the `IMediaPlaybackServer` interface provider in `manifest.toml`.
-- Sources must be **URL strings** of files the platform opens by URL (for example MP4). No HLS/DASH, DRM, text tracks or request headers yet.
+- Sources must be **URL strings** of files the platform opens by URL (for example MP4). No HLS/DASH, DRM or text tracks yet. Request `headers` work with w3cmedia versions that have `setSrcWithCustomHeaders`.
+- `initialize()` / `preload()` resolve when the player has started, not when the video has loaded: wait for `onLoad`.
+- The player a `VideoView` shows pauses when the app goes to the background, unless `playInBackground = true`.
 - `onLoad` reports the size as `0x0` (w3cmedia does not give it in URL mode).
 - Fullscreen and Picture-in-Picture do nothing on a TV; there are no built-in controls.
 

@@ -106,21 +106,24 @@ Checked on a Fire TV Stick 4K Select (Vega OS, React Native 0.83).
 | Volume / Mute | ✅ | |
 | Remote play/pause | ✅ | `showNotificationControls = true`, with the manifest entries above. Voice ("Alexa, pause") goes through the same media controls; not checked with this backend yet |
 | Resize mode | ✅ | contain, cover, stretch (`none` behaves as contain) |
-| Preload / `initializeOnCreation: false` | ✅ | |
-| Source change | ✅ | `replaceSourceAsync`, or a new source in `useVideoPlayer` |
-| Events | ✅ | load, status, buffering, playback state, progress, seek, end, volume, rate, error |
+| Preload / `initializeOnCreation: false` | ✅ | `initialize()` and `preload()` resolve when the w3cmedia player has started, not when the video has loaded: wait for `onLoad` |
+| Source change | ✅ | `replaceSourceAsync`, or a new source in `useVideoPlayer`; `replaceSourceAsync(null)` stops and unloads the video |
+| Events | ✅ | `onLoadStart`, `onLoad`, `onReadyToDisplay`, `onStatusChange`, `onBuffer`, `onPlaybackStateChange`, `onProgress`, `onSeek`, `onEnd`, `onVolumeChange`, `onPlaybackRateChange`, `onError` |
+| Background | ✅ | The player a `VideoView` shows pauses when the app goes to the background, unless `playInBackground = true` |
 | Loop | ✅ | |
 | Playback rate | ✅ | |
 | HLS / DASH | ❌ | Files the platform opens by URL (for example MP4) only; adaptive streams need w3cmedia's MSE mode |
 | Text tracks (subtitles) | ❌ | Not yet |
 | DRM | ❌ | Not yet |
-| Request headers | ❌ | Not yet; a warning is logged once |
+| Request headers | ✅ | Through w3cmedia's `setSrcWithCustomHeaders`. Older w3cmedia versions without it load the URL without headers and log a warning once |
 | Fullscreen / Picture-in-Picture | — | Not on a TV; the methods do nothing |
 | Ads | ❌ | Not in v7 core |
 
 ## Known limitations
 
 - `onLoad` reports the size as `0x0`: w3cmedia in URL mode does not give the video size.
-- `mixAudioMode`, `ignoreSilentSwitchMode`, `playInBackground`, `playWhenInactive` and `setAudioSessionManagementDisabled` do nothing on Vega.
+- `mixAudioMode`, `ignoreSilentSwitchMode`, `playWhenInactive`, `setAudioSessionManagementDisabled`, `keepScreenAwake` and the source's `metadata` do nothing on Vega.
+- `showNotificationControls = false` does not take the remote back from a player that had it; the next player that sets it to `true` takes it over.
+- A superseded load does not reject with `player/cancelled` as on iOS and Android; `release()` never throws.
 - Sources must be URLs (strings): `require('./video.mp4')` is not supported on Vega.
 - A `useEvent(player, 'onLoadStart', …)` subscription can miss the first `onLoadStart` of a player that loads very fast; listen in the `useVideoPlayer` setup callback instead, as on other platforms.
