@@ -115,7 +115,7 @@ test('after the end the player is not playing and idle, though w3cmedia keeps pa
   expect(player.isPlaying).toBe(false);
   expect(player.status).toBe('idle');
   expect(seen).toEqual([
-    ['onPlaybackStateChange', { isPlaying: false, isBuffering: true }],
+    ['onPlaybackStateChange', { isPlaying: false, isBuffering: false }],
     ['onEnd'],
     ['onStatusChange', 'idle'],
   ]);

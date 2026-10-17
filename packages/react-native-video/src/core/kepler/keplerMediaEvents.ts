@@ -27,7 +27,9 @@ export function attachKeplerMediaEvents(
   emit: Emit
 ): Cleanup[] {
   const video = media.video;
-  const isBuffering = () => media.readyState < HAVE_FUTURE_DATA;
+  // After the end w3cmedia keeps readyState at 2, which is not buffering.
+  const isBuffering = () =>
+    !media.isEnded && media.readyState < HAVE_FUTURE_DATA;
   const playbackState = () => ({
     isPlaying: !media.paused,
     isBuffering: isBuffering(),
