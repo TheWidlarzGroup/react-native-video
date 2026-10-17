@@ -1901,7 +1901,11 @@ public class ReactExoplayerView extends FrameLayout implements
         }
 
         if (isPaused && isSeeking && !buffering) {
-            eventEmitter.onVideoSeek.invoke(player.getCurrentPosition(), seekPosition);
+            // Player events are delivered asynchronously, so this can run after releasePlayer()
+            // has already set `player` to null.
+            if (player != null) {
+                eventEmitter.onVideoSeek.invoke(player.getCurrentPosition(), seekPosition);
+            }
             isSeeking = false;
         }
 
