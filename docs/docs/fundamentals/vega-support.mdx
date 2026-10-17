@@ -106,7 +106,7 @@ Checked on a Fire TV Stick 4K Select (Vega OS, React Native 0.83).
 | Volume / Mute | ✅ | |
 | Remote play/pause | ✅ | `showNotificationControls = true`, with the manifest entries above. Voice ("Alexa, pause") goes through the same media controls; not checked with this backend yet |
 | Resize mode | ✅ | contain, cover, stretch (`none` behaves as contain) |
-| Preload / `initializeOnCreation: false` | ✅ | `initialize()` and `preload()` resolve when the w3cmedia player has started, not when the video has loaded: wait for `onLoad` |
+| Preload / `initializeOnCreation: false` | ✅ | With `initializeOnCreation: false` the w3cmedia player is created at `initialize()`, `preload()` or `play()`. `initialize()` and `preload()` resolve when the w3cmedia player has started, not when the video has loaded: wait for `onLoad` |
 | Source change | ✅ | `replaceSourceAsync`, or a new source in `useVideoPlayer`; `replaceSourceAsync(null)` stops and unloads the video |
 | Events | ✅ | `onLoadStart`, `onLoad`, `onReadyToDisplay`, `onStatusChange`, `onBuffer`, `onPlaybackStateChange`, `onProgress`, `onSeek`, `onEnd`, `onVolumeChange`, `onPlaybackRateChange`, `onError` |
 | Background | ✅ | The player a `VideoView` shows pauses when the app goes to the background, unless `playInBackground = true` |

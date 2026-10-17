@@ -175,17 +175,63 @@ test('a surface reported twice is set once; a new surface replaces the old one',
   ]);
 });
 
-test('initializeOnCreation false loads the source only at initialize()', async () => {
+test('initializeOnCreation false starts w3cmedia and loads the source only at initialize()', async () => {
   const { player, native } = await ready({
     uri: URI,
     initializeOnCreation: false,
   });
-  expect(native.calls).toEqual(['initialize']);
+  expect(native.calls).toEqual([]);
   expect(player.status).toBe('idle');
 
   await player.initialize();
   expect(native.calls).toEqual(['initialize', `src=${URI}`]);
   expect(player.status).toBe('loading');
+});
+
+test('a player released before it was started never starts w3cmedia', async () => {
+  const { player, native } = await ready({
+    uri: URI,
+    initializeOnCreation: false,
+  });
+  player.__attachSurface('s1');
+  player.release();
+  player.play();
+  await flush();
+  expect(native.calls).toEqual([]);
+});
+
+test('initializeOnCreation false: initialize() without a source still resolves', async () => {
+  const { player, native } = await ready({
+    uri: URI,
+    initializeOnCreation: false,
+  });
+  await player.replaceSourceAsync(null);
+  const done = await Promise.race([
+    player.initialize().then(() => 'done'),
+    flush().then(() => 'waiting'),
+  ]);
+  expect(done).toBe('done');
+  expect(native.calls[0]).toBe('initialize');
+});
+
+test('initializeOnCreation false: play() alone starts w3cmedia and plays', async () => {
+  const { player, native } = await ready({
+    uri: URI,
+    initializeOnCreation: false,
+  });
+  player.play();
+  await flush();
+  expect(native.calls).toEqual(['initialize', `src=${URI}`, 'play']);
+});
+
+test('releasing a player that never started finishes at once', async () => {
+  const { KeplerMedia } = await import('../src/core/kepler/KeplerMedia');
+  const media = new KeplerMedia();
+  const done = await Promise.race([
+    media.destroy().then(() => 'done'),
+    flush().then(() => 'waiting'),
+  ]);
+  expect(done).toBe('done');
 });
 
 test('a null source unloads the video, and play() waits for a new source', async () => {

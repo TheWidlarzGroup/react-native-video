@@ -209,6 +209,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
 
   async initialize(): Promise<void> {
     this.throwIfReleased();
+    this._media.start();
     this.loadSource();
     await this._ready;
   }

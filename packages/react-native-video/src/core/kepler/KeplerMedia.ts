@@ -14,11 +14,13 @@ export const HAVE_FUTURE_DATA = 3;
  */
 export class KeplerMedia {
   readonly video: W3cVideoPlayer;
-  /** Resolves when the player is initialized; rejects when it cannot start. */
+  /** Resolves when the player is initialized; rejects when it cannot start. Waits for start(). */
   readonly ready: Promise<void>;
   /** Changes with every source, so per-source events can be sent once. */
   sourceId = 0;
 
+  private started = false;
+  private begin: () => void = () => {};
   private initialized = false;
   private destroyed = false;
   private pending: Array<() => void> = [];
@@ -36,7 +38,9 @@ export class KeplerMedia {
 
   constructor() {
     this.video = new W3cVideoPlayer();
-    this.ready = this.video.initialize().then(() => {
+    this.ready = new Promise<void>((resolve) => {
+      this.begin = () => resolve(this.video.initialize());
+    }).then(() => {
       if (this.destroyed) return;
       this.initialized = true;
       this.video.autoplay = false;
@@ -53,6 +57,13 @@ export class KeplerMedia {
     });
   }
 
+  /** Initializes the w3cmedia player, once. Until then commands wait and nothing is allocated. */
+  start(): void {
+    if (this.started || this.destroyed) return;
+    this.started = true;
+    this.begin();
+  }
+
   /** Runs now when the player is initialized, otherwise right after `initialize()`. */
   run(command: () => void): void {
     if (this.destroyed) return;
@@ -62,6 +73,7 @@ export class KeplerMedia {
 
   setSource(uri: string, headers?: Record<string, string>): void {
     this.newSource();
+    this.start();
     this.run(() => {
       // setSrcWithCustomHeaders is in newer w3cmedia versions only.
       if (headers && this.video.setSrcWithCustomHeaders) {
@@ -187,6 +199,7 @@ export class KeplerMedia {
     const surface = this.initialized ? this.surface : null;
     // From here the getters give the defaults: the player is being deinitialized.
     this.initialized = false;
+    if (!this.started) return; // w3cmedia was never initialized: nothing to release
     try {
       await this.ready;
     } catch {
