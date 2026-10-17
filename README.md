@@ -22,6 +22,7 @@ The most battle-tested open-source video player component for React Native with 
 | 🧠 Advanced control over playback and buffering | ✅ Available |
 | 🔐 DRM: Widevine & FairPlay ([See free DRM stream example](https://www.thewidlarzgroup.com/services/free-drm-token-generator-for-video?utm_source=rnv&utm_medium=readme&utm_id=free-drm)) | ✅ Available |
 | 🌐 Basic Web Support | ✅ Available |
+| 🔥 Basic Vega OS (Fire TV) Support | ✅ Available |
 | 📺 TV Support | 📝 [TODO](https://github.com/TheWidlarzGroup/react-native-video/issues/4607) |
 | 🥽 VisionOS Support | 📝 [TODO](https://github.com/TheWidlarzGroup/react-native-video/issues/4608) |
 
