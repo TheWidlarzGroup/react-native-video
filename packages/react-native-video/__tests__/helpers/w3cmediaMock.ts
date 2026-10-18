@@ -1,6 +1,5 @@
-// A fake `@amazon-devices/react-native-w3cmedia` VideoPlayer for the Vega backend.
-// Like nativeMocks.ts, the module mock is registered once per process; tests drive the
-// fakes through the exported state. Import it before the Vega modules under test.
+// Fake `@amazon-devices/react-native-w3cmedia` for the Vega backend, registered once per
+// process like nativeMocks.ts. Import it before the Vega modules under test.
 import { mock } from 'bun:test';
 
 type Listener = () => void;

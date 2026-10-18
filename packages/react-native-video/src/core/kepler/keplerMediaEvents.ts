@@ -13,13 +13,13 @@ const MEDIA_ERRORS: Record<number, string> = {
 };
 
 /**
- * w3cmedia events to react-native-video events, like `webDOMEvents.ts` does for the web.
- * Where w3cmedia differs from an HTML `<video>`:
- * - `loadstart` comes twice per source (at `src` and again after the metadata): sent once;
- * - `durationchange` comes before `loadedmetadata`: `onLoad` waits for the metadata;
- * - `seeked` carries the time from before the seek: `onSeek` sends the seek target;
- * - with `loop`, the jump back to the start also sends `seeked`: not reported as a seek;
- * - after `ended` there is no `pause` and `paused` stays false: the end is sent as a pause.
+ * w3cmedia events → react-native-video events, like `webDOMEvents.ts`.
+ * w3cmedia differences handled here:
+ * - `loadstart` fires twice per source: sent once
+ * - `durationchange` comes before `loadedmetadata`: `onLoad` waits for metadata
+ * - `seeked` has the pre-seek time: `onSeek` sends the target
+ * - a `loop` restart fires `seeked`: not a seek
+ * - no `pause` after `ended`: the end is sent as a pause
  */
 export function attachKeplerMediaEvents(
   media: KeplerMedia,
@@ -27,7 +27,7 @@ export function attachKeplerMediaEvents(
   emit: Emit
 ): Cleanup[] {
   const video = media.video;
-  // After the end w3cmedia keeps readyState at 2, which is not buffering.
+  // After the end readyState stays at 2: not buffering.
   const isBuffering = () =>
     !media.isEnded && media.readyState < HAVE_FUTURE_DATA;
   const playbackState = () => ({
@@ -61,7 +61,7 @@ export function attachKeplerMediaEvents(
   return [
     on('loadstart', () => {
       const source = getSource();
-      // No URI: the loadstart that answers an unload (`replaceSourceAsync(null)`).
+      // No URI: the loadstart after an unload (`replaceSourceAsync(null)`).
       if (!source.uri || loadStartSent === media.sourceId) return;
       loadStartSent = media.sourceId;
       emit('onLoadStart', { sourceType: 'network', source });

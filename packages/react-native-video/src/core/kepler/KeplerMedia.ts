@@ -5,18 +5,15 @@ import { warnOnce } from './warnOnce';
 export const HAVE_FUTURE_DATA = 3;
 
 /**
- * One w3cmedia `VideoPlayer` behind the synchronous API of `VideoPlayer`.
- *
- * w3cmedia accepts no call before `initialize()` resolves, so earlier commands wait and run
- * in order. This class also keeps what w3cmedia gets wrong compared with an HTML `<video>`:
- * whether the video has ended (`paused` stays false after `ended`) and where the last seek
- * went (`seeked` reports the time from before the seek).
+ * One w3cmedia `VideoPlayer` behind the synchronous `VideoPlayer` API.
+ * Commands wait for `initialize()`. Also tracks what w3cmedia reports wrong:
+ * the end (`paused` stays false) and the last seek target (`seeked` is stale).
  */
 export class KeplerMedia {
   readonly video: W3cVideoPlayer;
-  /** Resolves when the player is initialized; rejects when it cannot start. Waits for start(). */
+  /** Settles after start(): resolves on init, rejects if init fails. */
   readonly ready: Promise<void>;
-  /** Changes with every source, so per-source events can be sent once. */
+  /** Bumped per source, so per-source events fire once. */
   sourceId = 0;
 
   private started = false;
@@ -27,11 +24,11 @@ export class KeplerMedia {
   private surface: string | null = null;
   private ended = false;
   private seekTarget: number | null = null;
-  // Written before initialize(): read back from here until the player exists.
+  // Set before initialize(); read from here until the player exists.
   private state = { muted: false, volume: 1, rate: 1, loop: false };
   private ownListeners: Array<[string, () => void]> = [
     ['ended', () => (this.ended = true)],
-    // The remote and voice start w3cmedia directly, so play() is not the only way back.
+    // Remote and voice resume w3cmedia without play().
     ['play', () => (this.ended = false)],
     ['seeking', () => (this.ended = false)],
   ];
@@ -49,7 +46,7 @@ export class KeplerMedia {
       queued.forEach((command) => command());
     });
     this.ready.catch(() => {}); // reported through initialize() and onError
-    // Queued first, so this state is current when the player's event listeners run.
+    // Queued first: this state is current when the listeners run.
     this.run(() => {
       this.ownListeners.forEach(([type, listener]) =>
         this.video.addEventListener(type, listener)
@@ -57,14 +54,14 @@ export class KeplerMedia {
     });
   }
 
-  /** Initializes the w3cmedia player, once. Until then commands wait and nothing is allocated. */
+  /** Initializes w3cmedia once; nothing is allocated before. */
   start(): void {
     if (this.started || this.destroyed) return;
     this.started = true;
     this.begin();
   }
 
-  /** Runs now when the player is initialized, otherwise right after `initialize()`. */
+  /** Runs now, or right after `initialize()`. */
   run(command: () => void): void {
     if (this.destroyed) return;
     if (this.initialized) command();
@@ -85,7 +82,7 @@ export class KeplerMedia {
     });
   }
 
-  /** Stops and drops the current video, like `removeAttribute('src')` on the web. */
+  /** Like `removeAttribute('src')` on the web. */
   unload(): void {
     this.newSource();
     this.run(() => {
@@ -120,15 +117,12 @@ export class KeplerMedia {
     });
   }
 
-  /** Where the seek in flight goes, if there is one. */
+  /** Target of the seek in flight. */
   get pendingSeek(): number | null {
     return this.seekTarget;
   }
 
-  /**
-   * The time the last seek went to; w3cmedia's own `currentTime` at `seeked` is stale.
-   * Null for the jump back to the start of a loop, which is not a seek.
-   */
+  /** Last seek target (`currentTime` at `seeked` is stale); null for a loop restart. */
   takeSeekTarget(): number | null {
     const target = this.seekTarget;
     this.seekTarget = null;
@@ -165,7 +159,7 @@ export class KeplerMedia {
     });
   }
 
-  /** Remote and voice play/pause go to this player (needs the media entries in manifest.toml). */
+  /** Remote and voice play/pause control this player (needs manifest entries). */
   takeMediaControlFocus(componentInstance: unknown): void {
     this.run(() => {
       this.video.setMediaControlFocus(componentInstance).catch(() => {});
@@ -194,10 +188,9 @@ export class KeplerMedia {
     if (this.destroyed) return;
     this.destroyed = true;
     this.pending = [];
-    // Read now: the view's own cleanup may detach the surface while we wait below.
-    // Released before initialize() resolved: the surface never reached w3cmedia.
+    // Read now: the view may detach it while we wait. Before init it never reached w3cmedia.
     const surface = this.initialized ? this.surface : null;
-    // From here the getters give the defaults: the player is being deinitialized.
+    // The getters return defaults from here on.
     this.initialized = false;
     if (!this.started) return; // w3cmedia was never initialized: nothing to release
     try {

@@ -11,24 +11,23 @@ import { VideoRuntimeError } from './types/VideoError';
 import type { VideoPlayerBase } from './types/VideoPlayerBase';
 import type { VideoPlayerSourceBase } from './types/VideoPlayerSourceBase';
 import type { VideoPlayerStatus } from './types/VideoPlayerStatus';
-// By full name: Metro would pick the .kepler file anyway, and the bun tests need this one.
+// Explicit path for the bun tests; Metro picks the .kepler file either way.
 import { VideoPlayerEvents } from './events/VideoPlayerEvents.kepler';
 import { KeplerEventEmitter } from './kepler/KeplerEventEmitter';
 import { HAVE_FUTURE_DATA, KeplerMedia } from './kepler/KeplerMedia';
 import { warnOnce } from './kepler/warnOnce';
 
 /**
- * Vega OS (Fire TV) backend: one w3cmedia `VideoPlayer` from
- * `@amazon-devices/react-native-w3cmedia`, in URL mode (MP4 and other files the platform
- * player opens by URL). Structured like `VideoPlayer.web.ts`.
+ * Vega OS (Fire TV) backend: one w3cmedia `VideoPlayer` in URL mode.
+ * Structured like `VideoPlayer.web.ts`.
  */
 class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   private _media: KeplerMedia;
-  /** Like `_media.ready`, but rejects with the error that onError reported. */
+  /** `_media.ready` that rejects with the error reported to onError. */
   private _ready: Promise<void>;
   private _initError: VideoRuntimeError | null = null;
   private _source: NativeVideoConfig | undefined;
-  /** Set when `initializeOnCreation: false` delays the load until initialize()/preload(). */
+  /** False while `initializeOnCreation: false` delays the load. */
   private _sourceLoaded = false;
   private _released = false;
   private _showNotificationControls = false;
@@ -70,13 +69,13 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     this._media.detachSurface(handle);
   }
 
-  /** @internal The app's component instance, needed for remote and voice play/pause. */
+  /** @internal For remote and voice play/pause. */
   __setComponentInstance(getInstance: (() => unknown) | null) {
     this._componentInstance = getInstance;
     this.focusMediaControls();
   }
 
-  /** @internal Pauses when the app leaves the screen, unless `playInBackground`. */
+  /** @internal Pauses in the background unless `playInBackground`. */
   __onAppStateChange(state: unknown) {
     if (state === 'background' && !this._playInBackground) this.pause();
   }
@@ -155,12 +154,9 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     this._media.setRate(rate);
   }
 
-  // --- Remote and voice (Vega media controls) ---
+  // --- Media controls ---
 
-  /**
-   * On Vega: true gives the remote's play/pause and "Alexa, pause" to this player, once
-   * a `VideoView` shows it. Needs the media entries in the app's manifest.toml.
-   */
+  /** Vega: remote play/pause and "Alexa, pause" control this player (needs manifest entries). */
   get showNotificationControls(): boolean {
     return this._showNotificationControls;
   }
@@ -178,7 +174,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
 
   // --- Background ---
 
-  /** On Vega: false pauses the player a `VideoView` shows when the app goes to the background. */
+  /** Vega: false pauses the shown player when the app goes to the background. */
   get playInBackground(): boolean {
     return this._playInBackground;
   }
@@ -186,7 +182,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     this._playInBackground = value;
   }
 
-  // --- Not used on Vega (no-op) ---
+  // --- Unsupported on Vega (no-op) ---
 
   get mixAudioMode(): MixAudioMode {
     return 'auto';
@@ -292,7 +288,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     }
   }
 
-  /** Hands the source to w3cmedia once: at creation, or at initialize()/preload()/play(). */
+  /** Loads the source into w3cmedia once: at creation or at initialize/preload/play. */
   private loadSource() {
     if (this._sourceLoaded || !this._source) return;
     this._sourceLoaded = true;

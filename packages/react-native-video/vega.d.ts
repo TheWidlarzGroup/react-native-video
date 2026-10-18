@@ -1,9 +1,7 @@
 /**
- * Type shim for the two Vega SDK packages, limited to the members the Vega backend uses.
- *
- * Why not devDependencies: @amazon-devices/react-native-kepler 4.x needs React 19 and 2.x pins
- * React 18.2 / RN 0.72, while this repo builds with React 18.3 / RN 0.77. Both packages are in
- * every Vega app (optional peers here), so the real types are used when an app type-checks.
+ * Types for the two Vega SDK packages, limited to what the Vega backend uses.
+ * Not devDependencies: their React pins conflict with this repo's React 18.3 / RN 0.77.
+ * Apps type-check against the real packages.
  */
 declare module '@amazon-devices/react-native-w3cmedia' {
   import type { ComponentType } from 'react';
@@ -20,7 +18,7 @@ declare module '@amazon-devices/react-native-w3cmedia' {
     end(index: number): number;
   }
 
-  /** HTMLMediaElement on Vega's native media player. Nothing works before `initialize()`. */
+  /** HTMLMediaElement on Vega's native player; call `initialize()` first. */
   export class VideoPlayer {
     constructor();
     initialize(): Promise<void>;

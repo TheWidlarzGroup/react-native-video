@@ -1,6 +1,6 @@
 const warned = new Set<string>();
 
-/** Names a feature Vega cannot honour, once per app run. */
+/** Warns once per app run about a feature Vega does not support. */
 export function warnOnce(feature: string): void {
   if (warned.has(feature)) return;
   warned.add(feature);

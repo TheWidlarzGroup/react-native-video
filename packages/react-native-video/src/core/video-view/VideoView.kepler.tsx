@@ -20,8 +20,8 @@ const SCALING_MODE = {
 } as const;
 
 /**
- * Vega view: a w3cmedia surface that the player draws into. Fullscreen and picture in
- * picture do not exist on a TV, and there are no built-in controls, so those props do nothing.
+ * Vega view: a w3cmedia surface the player draws into.
+ * Fullscreen, picture in picture and controls props are no-ops on TV.
  */
 const VideoView = forwardRef<VideoViewRef, VideoViewProps>(
   (
@@ -44,7 +44,7 @@ const VideoView = forwardRef<VideoViewRef, VideoViewProps>(
     ref
   ) => {
     const player = nPlayer as unknown as VideoPlayer;
-    // Kept in a ref: the hook may return a new object on every render.
+    // A ref: the hook may return a new object on every render.
     const appState = useRef(useKeplerAppStateManager());
 
     useEffect(() => {
@@ -72,7 +72,7 @@ const VideoView = forwardRef<VideoViewRef, VideoViewProps>(
       []
     );
 
-    // The surface outlives a player: a new source gives a new player, which takes it over.
+    // A new source creates a new player, which takes over this surface.
     const surface = useRef<string | null>(null);
     const current = useRef(player);
     current.current = player;

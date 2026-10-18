@@ -5,12 +5,11 @@ import { attachKeplerMediaEvents } from './keplerMediaEvents';
 
 /**
  * String-based event emitter for Vega, like `WebEventEmitter`.
- * The w3cmedia listeners are attached once the player is initialized.
  */
 export class KeplerEventEmitter {
   private _listeners: Map<string, Set<(...args: any[]) => void>> = new Map();
   private _cleanup: (() => void) | null = null;
-  /** Set by the player right after construction, before any w3cmedia event can arrive. */
+  /** Set by the player right after construction. */
   getSource!: () => VideoPlayerSourceBase;
 
   constructor(media: KeplerMedia) {
@@ -48,7 +47,7 @@ export class KeplerEventEmitter {
     this._listeners.clear();
   }
 
-  /** @internal Lets the player report errors that do not come from w3cmedia. */
+  /** @internal Errors that do not come from w3cmedia. */
   __emit(event: string, ...args: any[]) {
     this._emit(event, ...args);
   }

@@ -4,9 +4,7 @@ import { VideoPlayerEventsBase } from './VideoPlayerEventsBase';
 import type { KeplerEventEmitter } from '../kepler/KeplerEventEmitter';
 
 /**
- * Vega event dispatch, like the web one: all events go through KeplerEventEmitter.
- * VideoPlayer.kepler.ts imports it directly, so nothing on Vega reaches
- * VideoPlayerEvents.native.ts, which needs Nitro.
+ * Vega event dispatch — all events go through KeplerEventEmitter (no Nitro).
  */
 export class VideoPlayerEvents extends VideoPlayerEventsBase {
   addEventListener<Event extends keyof PlayerEvents>(
