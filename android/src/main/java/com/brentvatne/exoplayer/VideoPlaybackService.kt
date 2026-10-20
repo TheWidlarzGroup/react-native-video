@@ -21,7 +21,7 @@ import androidx.media3.session.MediaStyleNotificationHelper
 import androidx.media3.session.SessionCommand
 import com.brentvatne.common.toolbox.DebugLog
 import com.brentvatne.react.R
-import okhttp3.internal.immutableListOf
+import java.util.Collections
 
 class PlaybackServiceBinder(val service: VideoPlaybackService) : Binder()
 
@@ -59,7 +59,7 @@ class VideoPlaybackService : MediaSessionService() {
         val mediaSession = MediaSession.Builder(this, player)
             .setId("RNVideoPlaybackService_" + player.hashCode())
             .setCallback(VideoPlaybackCallback())
-            .setCustomLayout(immutableListOf(seekForwardBtn, seekBackwardBtn))
+            .setCustomLayout(Collections.unmodifiableList(listOf(seekForwardBtn, seekBackwardBtn)))
             .build()
 
         mediaSessionsList[player] = mediaSession
