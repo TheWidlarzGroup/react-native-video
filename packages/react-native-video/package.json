@@ -99,9 +99,19 @@
     "typescript": "^5.2.2"
   },
   "peerDependencies": {
+    "@amazon-devices/react-native-kepler": "*",
+    "@amazon-devices/react-native-w3cmedia": ">=2.1.0",
     "react": "*",
     "react-native": "*",
     "react-native-nitro-modules": ">=0.35.0"
+  },
+  "peerDependenciesMeta": {
+    "@amazon-devices/react-native-kepler": {
+      "optional": true
+    },
+    "@amazon-devices/react-native-w3cmedia": {
+      "optional": true
+    }
   },
   "release-it": {
     "npm": {
