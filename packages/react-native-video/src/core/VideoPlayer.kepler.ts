@@ -29,6 +29,8 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   private _source: NativeVideoConfig | undefined;
   /** False while `initializeOnCreation: false` delays the load. */
   private _sourceLoaded = false;
+  /** A seek before the source is loaded: made right after the load. */
+  private _startAt: number | null = null;
   private _released = false;
   private _showNotificationControls = false;
   private _playInBackground = false;
@@ -230,11 +232,19 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
 
   seekTo(time: number): void {
     if (!this._source) return;
-    this._media.seek(time);
+    // As on Android, the target stays inside the video.
+    const duration = this.duration;
+    const target = Math.max(0, duration > 0 ? Math.min(time, duration) : time);
+    if (!this._sourceLoaded) {
+      this._startAt = target;
+      return;
+    }
+    this._media.seek(target);
   }
 
   seekBy(time: number): void {
-    this.seekTo((this._media.pendingSeek ?? this.currentTime) + time);
+    const from = this._startAt ?? this._media.pendingSeek ?? this.currentTime;
+    this.seekTo(from + time);
   }
 
   // --- Source management ---
@@ -250,6 +260,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     if (!source) {
       this._source = undefined;
       this._sourceLoaded = false;
+      this._startAt = null;
       this._media.unload();
       return;
     }
@@ -273,7 +284,9 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
 
     this._source = config;
     this._sourceLoaded = false;
-    if (config.initializeOnCreation !== false) {
+    this._startAt = null;
+    // A player that already runs loads the new source now, as on Android and the web.
+    if (config.initializeOnCreation !== false || this._media.isStarted) {
       await this.initialize();
     }
   }
@@ -295,6 +308,10 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     const { uri, headers } = this._source;
     const hasHeaders = headers && Object.keys(headers).length > 0;
     this._media.setSource(uri, hasHeaders ? headers : undefined);
+    if (this._startAt !== null) {
+      this._media.seek(this._startAt);
+      this._startAt = null;
+    }
   }
 
   // --- Tracks (not on Vega yet) ---

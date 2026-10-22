@@ -24,6 +24,8 @@ export class KeplerMedia {
   private surface: string | null = null;
   private ended = false;
   private seekTarget: number | null = null;
+  /** A seek made before the media loaded: w3cmedia drops it, so it is made again. */
+  private startAt: number | null = null;
   // Set before initialize(); read from here until the player exists.
   private state = { muted: false, volume: 1, rate: 1, loop: false };
   private ownListeners: Array<[string, () => void]> = [
@@ -31,12 +33,19 @@ export class KeplerMedia {
     // Remote and voice resume w3cmedia without play().
     ['play', () => (this.ended = false)],
     ['seeking', () => (this.ended = false)],
+    ['loadedmetadata', () => this.seekAgain()],
   ];
 
   constructor() {
     this.video = new W3cVideoPlayer();
-    this.ready = new Promise<void>((resolve) => {
-      this.begin = () => resolve(this.video.initialize());
+    this.ready = new Promise<void>((resolve, reject) => {
+      this.begin = () => {
+        try {
+          resolve(this.video.initialize());
+        } catch (error) {
+          reject(error); // a throw before the promise counts as a failed init
+        }
+      };
     }).then(() => {
       if (this.destroyed) return;
       this.initialized = true;
@@ -96,6 +105,7 @@ export class KeplerMedia {
     this.sourceId++;
     this.ended = false;
     this.seekTarget = null;
+    this.startAt = null;
   }
 
   play(): void {
@@ -113,8 +123,18 @@ export class KeplerMedia {
     this.ended = false;
     this.seekTarget = time;
     this.run(() => {
+      // Before the media loads (readyState 0) w3cmedia drops a seek without an error.
+      this.startAt = this.video.readyState === 0 ? time : null;
       this.video.currentTime = time;
     });
+  }
+
+  private seekAgain() {
+    const time = this.startAt;
+    this.startAt = null;
+    if (time !== null && Math.abs(this.video.currentTime - time) > 0.5) {
+      this.video.currentTime = time;
+    }
   }
 
   /** Target of the seek in flight. */
@@ -215,6 +235,10 @@ export class KeplerMedia {
 
   get isInitialized(): boolean {
     return this.initialized;
+  }
+  /** w3cmedia was asked to initialize (by a source, initialize() or play()). */
+  get isStarted(): boolean {
+    return this.started;
   }
   get isEnded(): boolean {
     return this.ended;

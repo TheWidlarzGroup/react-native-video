@@ -11,6 +11,8 @@ export const w3c = {
   holdInit: false,
   /** When set, initialize() rejects with it. */
   initRejects: null as unknown,
+  /** When set, initialize() throws it at once, before returning a promise. */
+  initThrows: null as unknown,
   componentInstance: { name: 'app' } as unknown,
   /** Props of the last rendered KeplerVideoSurfaceView. */
   surface: null as null | {
@@ -25,6 +27,7 @@ export function resetW3c() {
   w3c.created = [];
   w3c.holdInit = false;
   w3c.initRejects = null;
+  w3c.initThrows = null;
   w3c.surface = null;
   w3c.appState.clear();
 }
@@ -56,6 +59,7 @@ export class FakeW3cPlayer {
 
   initialize(): Promise<void> {
     this.calls.push('initialize');
+    if (w3c.initThrows) throw w3c.initThrows;
     if (w3c.initRejects) return Promise.reject(w3c.initRejects);
     if (!w3c.holdInit) return Promise.resolve();
     return new Promise((resolve) => (this._finishInit = resolve));

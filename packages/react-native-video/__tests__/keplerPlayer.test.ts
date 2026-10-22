@@ -138,6 +138,64 @@ test('the remote can start the player again after the end', async () => {
   ]);
 });
 
+test('a seek before the media has loaded is made again when it loads, because w3cmedia drops it', async () => {
+  const { player, native } = await ready();
+  const seen = record(player, ['onSeek']);
+  player.seekTo(42);
+  native.setTime(0); // w3cmedia: readyState 0, the seek is lost without an event
+  native.readyState = 1;
+  native.emit('loadedmetadata');
+  expect(native.calls.filter((call) => call === 'currentTime=42')).toHaveLength(
+    2
+  );
+  native.emit('seeked');
+  expect(seen).toEqual([['onSeek', 42]]);
+});
+
+test('a seek before the media has loaded is not made twice when w3cmedia kept it', async () => {
+  const { player, native } = await ready();
+  player.seekTo(42);
+  native.readyState = 1;
+  native.emit('loadedmetadata');
+  expect(native.calls.filter((call) => call === 'currentTime=42')).toHaveLength(
+    1
+  );
+});
+
+test('a seek after the media has loaded is made once', async () => {
+  const { player, native } = await ready();
+  native.readyState = 4;
+  player.seekTo(42);
+  native.setTime(0);
+  native.emit('loadedmetadata');
+  expect(native.calls.filter((call) => call === 'currentTime=42')).toHaveLength(
+    1
+  );
+});
+
+test('a new source forgets a seek that waited for the old one to load', async () => {
+  const { player, native } = await ready();
+  player.seekTo(42);
+  await player.replaceSourceAsync('https://cdn.test/other.mp4');
+  native.setTime(0);
+  native.readyState = 1;
+  native.emit('loadedmetadata');
+  expect(native.calls.filter((call) => call === 'currentTime=42')).toHaveLength(
+    1
+  );
+});
+
+test('seeks stay inside the video, as on Android', async () => {
+  const { player, native } = await ready();
+  native.duration = 60;
+  native.readyState = 4;
+  player.seekTo(-7);
+  player.seekTo(75);
+  expect(
+    native.calls.filter((call) => call.startsWith('currentTime='))
+  ).toEqual(['currentTime=0', 'currentTime=60']);
+});
+
 test('several seeks in a row send one onSeek, with the last target', async () => {
   const { player, native } = await ready();
   const seen = record(player, ['onSeek']);
@@ -186,6 +244,35 @@ test('initializeOnCreation false starts w3cmedia and loads the source only at in
   await player.initialize();
   expect(native.calls).toEqual(['initialize', `src=${URI}`]);
   expect(player.status).toBe('loading');
+});
+
+test('initializeOnCreation false: a seek before play() starts the video there', async () => {
+  const { player, native } = await ready({
+    uri: URI,
+    initializeOnCreation: false,
+  });
+  player.seekTo(120);
+  player.seekBy(5);
+  player.play();
+  await flush();
+  expect(native.calls).toEqual([
+    'initialize',
+    `src=${URI}`,
+    'currentTime=125',
+    'play',
+  ]);
+});
+
+test('initializeOnCreation false on a player that already plays replaces the video at once', async () => {
+  const { player, native } = await ready();
+  player.play();
+  await flush();
+  await player.replaceSourceAsync({
+    uri: 'https://cdn.test/other.mp4',
+    initializeOnCreation: false,
+  });
+  expect(native.calls.slice(-1)).toEqual(['src=https://cdn.test/other.mp4']);
+  expect(player.source.uri).toBe('https://cdn.test/other.mp4');
 });
 
 test('a player released before it was started never starts w3cmedia', async () => {
@@ -344,6 +431,19 @@ test('a player that cannot start reports it through onError, status and initiali
   const failure = await player.initialize().catch((e: unknown) => e);
   expect(failure).toBe(error);
   expect(await player.preload().catch((e: unknown) => e)).toBe(error);
+});
+
+test('a w3cmedia initialize() that throws at once is reported like one that rejects', async () => {
+  w3c.initThrows = new Error('module missing');
+  const player = new VideoPlayer(URI);
+  const seen = record(player, ['onError']);
+  await flush();
+  const error = seen[0]![1] as InstanceType<typeof VideoRuntimeError>;
+  expect(error.code).toBe('player/not-initialized');
+  expect(error.message).toContain('module missing');
+  expect(player.status).toBe('error');
+  expect(await player.initialize().catch((e: unknown) => e)).toBe(error);
+  expect(() => player.play()).not.toThrow();
 });
 
 test('showNotificationControls gives the remote and Alexa to the player once a view shows it', async () => {
