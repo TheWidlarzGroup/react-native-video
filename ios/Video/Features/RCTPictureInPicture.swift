@@ -93,7 +93,7 @@ import React
         }
     }
 #else
-    class RCTPictureInPicture: NSObject {
+    class RCTPictureInPicture: NSObject, AVPictureInPictureControllerDelegate {
         let _pipController: NSObject? = nil
 
         func setRestoreUserInterfaceForPIPStopCompletionHandler(_: Bool) {}
