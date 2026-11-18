@@ -101,6 +101,8 @@ mock.module('react-native', () => ({
       platform.OS in spec ? spec[platform.OS] : spec.default,
   },
   Image: { resolveAssetSource: () => assets.resolved },
+  View: 'View',
+  StyleSheet: { absoluteFillObject: {} },
 }));
 
 mock.module('react-native-nitro-modules', () => ({

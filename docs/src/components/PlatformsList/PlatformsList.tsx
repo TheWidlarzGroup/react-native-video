@@ -8,6 +8,7 @@ type Platform =
   | 'tvOS'
   | 'Windows UWP'
   | 'Web'
+  | 'Vega OS'
   | 'All';
 
 interface Platforms {

@@ -17,7 +17,7 @@ metadata:
 
 ## Overview
 
-react-native-video plays video/audio on iOS (AVPlayer), Android (ExoPlayer/Media3), and web (video.js). **v6 and v7 are different APIs**: v6 is one imperative `<Video>` component; v7 is a player-object model (`useVideoPlayer` + `VideoView`). Work out the version first, then read the matching reference file.
+react-native-video plays video/audio on iOS (AVPlayer), Android (ExoPlayer/Media3), web (video.js), and Vega OS / Fire TV (w3cmedia, v7). **v6 and v7 are different APIs**: v6 is one imperative `<Video>` component; v7 is a player-object model (`useVideoPlayer` + `VideoView`). Work out the version first, then read the matching reference file.
 
 ## Step 0 — Detect the version FIRST (the most common mistake)
 
@@ -112,6 +112,7 @@ import Video from 'react-native-video';
 | Pause on navigation / app background, one-at-a-time | `references/shared/lifecycle-and-navigation.md` | (same) |
 | Building a video feed (TikTok-style) | `references/shared/video-feeds.md` | (same; v7 recommended) |
 | Web (browser) playback | — | `references/web.md` (v7, video.js) |
+| Vega OS (Fire TV) playback | — | `references/vega.md` (v7, w3cmedia) |
 | Plugin architecture | — | `references/v7/plugins.md` |
 | Install / streaming / background / native (≈ same) | `references/shared/` | `references/shared/` |
 | Migrate v6 → v7 | `references/migration-v6-to-v7.md` | |
