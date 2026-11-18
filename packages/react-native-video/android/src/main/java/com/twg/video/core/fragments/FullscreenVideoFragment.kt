@@ -31,6 +31,10 @@ class FullscreenVideoFragment(private val videoView: VideoView) : Fragment() {
   private var originalPlayerParent: ViewGroup? = null
   private var originalPlayerLayoutParams: ViewGroup.LayoutParams? = null
   private var rootContentViews: List<View> = listOf()
+  private var previousFocusedView: View? = null
+  private val isTelevision: Boolean
+    get() = videoView.resources.configuration.uiMode and Configuration.UI_MODE_TYPE_MASK ==
+      Configuration.UI_MODE_TYPE_TELEVISION
 
   // Back press callback to handle back navigation
   private val backPressCallback = object : OnBackPressedCallback(true) {
@@ -110,6 +114,10 @@ class FullscreenVideoFragment(private val videoView: VideoView) : Fragment() {
   }
 
   private fun enterFullscreenMode() {
+    if (isTelevision) {
+      previousFocusedView = requireActivity().window.decorView.findFocus()
+    }
+
     // Store original parent and layout params
     originalPlayerParent = videoView.playerView.parent as? ViewGroup
     originalPlayerLayoutParams = videoView.playerView.layoutParams
@@ -151,6 +159,10 @@ class FullscreenVideoFragment(private val videoView: VideoView) : Fragment() {
 
     // We need show controls in fullscreen
     videoView.playerView.useController = true
+
+    if (isTelevision) {
+      videoView.playerView.requestFocus()
+    }
 
     setupFullscreenButton()
     videoView.playerView.setShowSubtitleButton(true)
@@ -241,6 +253,16 @@ class FullscreenVideoFragment(private val videoView: VideoView) : Fragment() {
     // Now add it back to the original parent if it's not already the parent
     if (videoView.playerView.parent != originalPlayerParent) {
       originalPlayerParent?.addView(videoView.playerView, originalPlayerLayoutParams)
+    }
+
+    if (isTelevision) {
+      val restoredFocus = previousFocusedView
+        ?.takeIf { it.isAttachedToWindow && it.isShown }
+        ?.requestFocus() == true
+      if (!restoredFocus) {
+        videoView.playerView.requestFocus()
+      }
+      previousFocusedView = null
     }
 
     // Remove this fragment

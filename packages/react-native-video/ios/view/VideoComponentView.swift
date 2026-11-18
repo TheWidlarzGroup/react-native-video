@@ -21,6 +21,12 @@ import UIKit
   var delegate: VideoViewDelegate?
   private var playerView: UIView? = nil
 
+  #if os(tvOS)
+  private weak var fullscreenParent: UIViewController?
+  private weak var fullscreenFocusView: UIView?
+  private var fullscreenTransitionInProgress = false
+  #endif
+
   private var observer: VideoComponentViewObserver? {
     didSet {
       playerViewController?.delegate = observer
@@ -71,6 +77,7 @@ import UIKit
 
   public var autoEnterPictureInPicture: Bool = false {
     didSet {
+      #if !os(tvOS)
       DispatchQueue.main.async { [weak self] in
         guard let self = self, let playerViewController = self.playerViewController else { return }
 
@@ -78,6 +85,7 @@ import UIKit
         playerViewController.canStartPictureInPictureAutomaticallyFromInline =
           self.autoEnterPictureInPicture
       }
+      #endif
     }
   }
 
@@ -159,17 +167,21 @@ import UIKit
       controller.view.backgroundColor = .clear
 
       // We manage this manually in NowPlayingInfoCenterManager
+      #if !os(tvOS)
       controller.updatesNowPlayingInfoCenter = false
+      #endif
 
-      if #available(iOS 16.0, *) {
+      if #available(iOS 16.0, tvOS 16.0, *) {
         if let initialSpeed = controller.speeds.first(where: { $0.rate == player.rate }) {
           controller.selectSpeed(initialSpeed)
         }
       }
        // Disable video frame analysis to prevent visual lookup
+      #if !os(tvOS)
       if #available(iOS 16.0, iPadOS 16.0, macCatalyst 18.0, *) {
         controller.allowsVideoFrameAnalysis = false
       }
+      #endif
 
       // Find nearest UIViewController
       if let parentVC = self.findViewController() {
@@ -216,6 +228,11 @@ import UIKit
   public override func layoutSubviews() {
     super.layoutSubviews()
 
+    #if os(tvOS)
+    // AVKit owns the presented controller's layout until it returns inline.
+    guard fullscreenParent == nil else { return }
+    #endif
+
     // Update the frame of the playerViewController's view when the view's layout changes
     playerViewController?.view.frame = playerView?.bounds ?? .zero
     playerViewController?.contentOverlayView?.frame = playerView?.bounds ?? .zero
@@ -229,9 +246,32 @@ import UIKit
       throw VideoViewError.viewIsDeallocated.error()
     }
 
+    #if os(tvOS)
+    DispatchQueue.main.async { [weak self] in
+      guard let self, self.fullscreenParent == nil,
+        !self.fullscreenTransitionInProgress,
+        let parent = playerViewController.parent,
+        parent.presentedViewController == nil else { return }
+
+      self.fullscreenParent = parent
+      self.fullscreenFocusView = UIFocusSystem.focusSystem(for: self)?.focusedItem as? UIView
+      self.fullscreenTransitionInProgress = true
+      self.delegate?.willEnterFullscreen()
+
+      playerViewController.willMove(toParent: nil)
+      playerViewController.view.removeFromSuperview()
+      playerViewController.removeFromParent()
+      parent.present(playerViewController, animated: true) { [weak self] in
+        guard let self else { return }
+        self.fullscreenTransitionInProgress = false
+        self.delegate?.onFullscreenChange(true)
+      }
+    }
+    #else
     DispatchQueue.main.async {
       playerViewController.enterFullscreen(animated: true)
     }
+    #endif
   }
 
   public func exitFullscreen() throws {
@@ -239,10 +279,48 @@ import UIKit
       throw VideoViewError.viewIsDeallocated.error()
     }
 
+    #if os(tvOS)
+    DispatchQueue.main.async { [weak self] in
+      guard let self, self.fullscreenParent != nil,
+        !self.fullscreenTransitionInProgress else { return }
+      self.willDismissFullscreen()
+      playerViewController.dismiss(animated: true) { [weak self] in
+        self?.didDismissFullscreen()
+      }
+    }
+    #else
     DispatchQueue.main.async {
       playerViewController.exitFullscreen(animated: true)
     }
+    #endif
   }
+
+  #if os(tvOS)
+  func willDismissFullscreen() {
+    guard fullscreenParent != nil, !fullscreenTransitionInProgress else { return }
+    fullscreenTransitionInProgress = true
+    delegate?.willExitFullscreen()
+  }
+
+  func didDismissFullscreen() {
+    guard let parent = fullscreenParent, let playerViewController, let playerView else { return }
+    fullscreenParent = nil
+    fullscreenTransitionInProgress = false
+
+    parent.addChild(playerViewController)
+    playerViewController.view.frame = playerView.bounds
+    playerView.addSubview(playerViewController.view)
+    playerViewController.didMove(toParent: parent)
+
+    if let focusView = fullscreenFocusView, focusView.window != nil,
+      let focusSystem = UIFocusSystem.focusSystem(for: focusView) {
+      focusSystem.requestFocusUpdate(to: focusView)
+      focusSystem.updateFocusIfNeeded()
+    }
+    fullscreenFocusView = nil
+    delegate?.onFullscreenChange(false)
+  }
+  #endif
 
   public func startPictureInPicture() throws {
     guard let playerViewController else {

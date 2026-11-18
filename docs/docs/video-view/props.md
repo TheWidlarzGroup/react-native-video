@@ -19,6 +19,10 @@ keywords: [VideoView props, player, controls, resizeMode, surfaceType, picture-i
 | `keepScreenAwake` | `boolean` | No | `true` | Whether to keep the device screen awake while the video view is mounted. |
 | `surfaceType` | `'surface' \| 'texture'` | No (Android only) | `'surface'` | (Android) Underlying native view type. `'surface'` uses a SurfaceView (better performance, no transforms/overlap), `'texture'` uses a TextureView (supports animations, transforms, overlapping UI) at a small performance cost. Ignored on iOS. |
 
+## TV controls
+
+Android TV uses Media3's native D-pad controls when the player has focus. On tvOS, enable `controls` and call `enterFullscreen()` on the `VideoView` ref to use AVKit's interactive playback UI; inline transport controls are not supported. Exiting fullscreen restores the previous focus.
+
 ## Android: Choosing a surface type
 
 :::info Android Only
