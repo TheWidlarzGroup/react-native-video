@@ -25,11 +25,13 @@ enum ExternalSubtitlesUtils {
       isSubtitleTypeSupported(subtitle: subtitle)
     }
 
+    // The source's headers (e.g. auth cookies) also for its subtitles
+    let assetOptions = ["AVURLAssetHTTPHeaderFieldsKey": config.headers ?? [:]]
     let subtitles: [(NativeExternalSubtitle, AVURLAsset)] = try supportedSubtitles.map { subtitle in
       guard let url = URL(string: subtitle.uri) else {
         throw PlayerError.invalidTrackUrl(url: subtitle.uri).error()
       }
-      return (subtitle, AVURLAsset(url: url))
+      return (subtitle, AVURLAsset(url: url, options: assetOptions))
     }
 
     let mainDuration = try await asset.load(.duration)
@@ -104,7 +106,8 @@ enum ExternalSubtitlesUtils {
 
     let subtitleInjector = HLSSubtitleInjector(
       manifestUrl: asset.url,
-      externalSubtitles: supportedSubtitles
+      externalSubtitles: supportedSubtitles,
+      headers: config.headers ?? [:]
     )
     let modifiedAsset = subtitleInjector.createModifiedAsset()
     let playerItem = AVPlayerItem(asset: modifiedAsset)

@@ -5,6 +5,8 @@ import NitroModules
 class HLSSubtitleInjector: NSObject {
   private let originalManifestUrl: URL
   private let externalSubtitles: [NativeExternalSubtitle]
+  // The source's headers, for every request made for it (e.g. auth cookies)
+  private let headers: [String: String]
   private var modifiedManifestContent: String?
   private static let customScheme = "rnv-hls"
   private static let subtitleScheme = "rnv-hls-subtitles"
@@ -14,15 +16,16 @@ class HLSSubtitleInjector: NSObject {
     qos: .userInitiated
   )
 
-  init(manifestUrl: URL, externalSubtitles: [NativeExternalSubtitle]) {
+  init(manifestUrl: URL, externalSubtitles: [NativeExternalSubtitle], headers: [String: String]) {
     self.originalManifestUrl = manifestUrl
     self.externalSubtitles = externalSubtitles
+    self.headers = headers
     super.init()
   }
 
   func createModifiedAsset() -> AVURLAsset {
     let customURL = createCustomURL(from: originalManifestUrl)
-    let asset = AVURLAsset(url: customURL)
+    let asset = AVURLAsset(url: customURL, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
     asset.resourceLoader.setDelegate(
       self,
       queue: Self.resourceLoaderQueue
@@ -44,7 +47,8 @@ class HLSSubtitleInjector: NSObject {
       return cached
     }
 
-    let originalContent = try await HLSManifestParser.downloadManifest(from: originalManifestUrl)
+    let originalContent = try await HLSManifestParser.downloadManifest(
+      from: originalManifestUrl, headers: headers)
     let modifiedContent = try modifyM3U8Content(
       originalContent,
       with: externalSubtitles
@@ -293,7 +297,8 @@ extension HLSSubtitleInjector: AVAssetResourceLoaderDelegate {
           throw SourceError.invalidUri(uri: "Invalid subtitle URI: \(subtitle.uri)").error()
         }
 
-        let (vttData, response) = try await URLSession.shared.data(from: subtitleURL)
+        let (vttData, response) = try await URLSession.shared.data(
+          for: URLRequest(url: subtitleURL, headers: headers))
 
         guard let httpResponse = response as? HTTPURLResponse,
           200...299 ~= httpResponse.statusCode
