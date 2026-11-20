@@ -10,7 +10,7 @@ Control happens on the **player instance** (not props, not a ref to a component)
 | `pause()` | Pause. |
 | `seekTo(seconds)` | **Absolute** seek. (v6's `seek()` → this.) |
 | `seekBy(seconds)` | **Relative** seek (e.g. `seekBy(-10)`). |
-| `replaceSourceAsync(source \| null)` | Change the source (or `null` to clear). Source is otherwise immutable. Returns a Promise. |
+| `replaceSourceAsync(source \| null)` | Change the source. `null` unloads it and, on iOS/Android, releases the native player like `release()` (no later load; create a new player). Source is otherwise immutable. Returns a Promise. |
 | `preload()` | Pre-buffer before showing — key for feeds; returns a Promise. |
 | `initialize()` | Only needed when `initializeOnCreation: false`. |
 | `release()` | Free native resources; the player is unusable afterward. `useVideoPlayer` does this for you on unmount. |
