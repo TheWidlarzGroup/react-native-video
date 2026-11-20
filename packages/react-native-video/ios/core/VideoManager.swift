@@ -140,6 +140,17 @@ class VideoManager {
     }
   }
   
+  /// A player builds its ad controller lazily, when a source with an `ads` config is first
+  /// loaded - which can be after the views showing it already built their
+  /// `AVPlayerViewController` (the only other time the ad container is attached). Without
+  /// this the container never reaches the screen and IMA, which refuses a request from a
+  /// container that is not in a window, never answers. Main thread only.
+  func refreshAdContainers(for player: HybridVideoPlayer) {
+    for view in videoView.allObjects where (view.player as? HybridVideoPlayer) === player {
+      view.attachAdContainerToCurrentController()
+    }
+  }
+
   func unregister(view: VideoComponentView) {
     runOnMainThreadSync {
       videoView.remove(view)
@@ -149,6 +160,17 @@ class VideoManager {
   func requestAudioSessionUpdate() {
     runOnMainThread { [weak self] in
       self?.updateAudioSessionConfiguration()
+    }
+  }
+
+  /// The `HybridVideoPlayer` backing `avPlayer`, if it is still registered.
+  ///
+  /// Used by call sites that only hold a raw `AVPlayer` (remote command
+  /// handling) so they can go through `HybridVideoPlayer.play()`/`pause()` —
+  /// the ad-gated playback funnel — instead of driving `AVPlayer` directly.
+  func player(for avPlayer: AVPlayer) -> HybridVideoPlayer? {
+    runOnMainThreadSync { [weak self] in
+      self?.players.allObjects.first { $0.player === avPlayer }
     }
   }
 

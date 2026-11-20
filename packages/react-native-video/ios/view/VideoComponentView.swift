@@ -142,6 +142,9 @@ import UIKit
       if let existingController = self.playerViewController,
         existingController.player === player
       {
+        // The controller may have been built before the player's ad session
+        // was configured (or before a source swap re-armed it).
+        self.attachAdContainer(to: existingController)
         return
       }
 
@@ -177,7 +180,55 @@ import UIKit
         playerView.addSubview(controller.view)
         controller.didMove(toParent: parentVC)
         self.playerViewController = controller
+
+        // The IMA ad UI (skip button, countdown, click-through) has to live in
+        // AVKit's contentOverlayView rather than a sibling view, so that it
+        // travels with AVKit's fullscreen re-parenting.
+        self.attachAdContainer(to: controller)
       }
+    }
+  }
+
+  /// Hands the current player's ad container to this AVPlayerViewController.
+  /// Safe to call repeatedly.
+  func attachAdContainer(to controller: AVPlayerViewController) {
+    guard let player = player as? HybridVideoPlayer else { return }
+    player.adController?.attach(to: controller)
+  }
+
+  /// Attaches the player's ad container to the controller this view already has, for an ad
+  /// controller that was created after the controller was built.
+  func attachAdContainerToCurrentController() {
+    guard let controller = playerViewController else { return }
+    attachAdContainer(to: controller)
+  }
+
+  /// AVKit can rebuild `contentOverlayView`'s subtree across fullscreen and
+  /// PiP transitions, so the ad container is re-asserted afterwards.
+  func reassertAdContainer() {
+    guard let player = player as? HybridVideoPlayer else { return }
+    player.adController?.reassertAdContainer()
+  }
+
+  /// Runs a fullscreen transition. AVKit crashes (UIKit hierarchy check) if IMA's child
+  /// view controller is still attached to the old parent when it moves the ad container,
+  /// and it only reports `willBeginFullScreenPresentation` after that point, so the child
+  /// is detached here, before the request. AVKit also declines a request that arrives in
+  /// the same run-loop turn as the change, hence the short delay - only when an ad
+  /// controller actually had something to detach, so fullscreen without ads is unchanged.
+  private func performFullscreenTransition(_ transition: @escaping () -> Void) {
+    let hadAdChild =
+      (player as? HybridVideoPlayer)?.adController?.prepareAdContainerForTransition() ?? false
+
+    if hadAdChild {
+      DispatchQueue.main.asyncAfter(deadline: .now() + 0.25, execute: transition)
+      // A request AVKit ignores (already in that state) runs no completion, which would
+      // leave the child detached. Re-asserting is idempotent.
+      DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+        self?.reassertAdContainer()
+      }
+    } else {
+      transition()
     }
   }
 
@@ -229,8 +280,8 @@ import UIKit
       throw VideoViewError.viewIsDeallocated.error()
     }
 
-    DispatchQueue.main.async {
-      playerViewController.enterFullscreen(animated: true)
+    DispatchQueue.main.async { [weak self] in
+      self?.performFullscreenTransition { playerViewController.enterFullscreen(animated: true) }
     }
   }
 
@@ -239,8 +290,8 @@ import UIKit
       throw VideoViewError.viewIsDeallocated.error()
     }
 
-    DispatchQueue.main.async {
-      playerViewController.exitFullscreen(animated: true)
+    DispatchQueue.main.async { [weak self] in
+      self?.performFullscreenTransition { playerViewController.exitFullscreen(animated: true) }
     }
   }
 
