@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.Window
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
@@ -31,6 +32,9 @@ class FullscreenVideoFragment(private val videoView: VideoView) : Fragment() {
   private var originalPlayerParent: ViewGroup? = null
   private var originalPlayerLayoutParams: ViewGroup.LayoutParams? = null
   private var rootContentViews: List<View> = listOf()
+
+  // The window's system bars before fullscreen, restored on exit (saved once, onResume hides again)
+  private var barsBeforeFullscreen: SystemBarsState? = null
 
   // Back press callback to handle back navigation
   private val backPressCallback = object : OnBackPressedCallback(true) {
@@ -174,6 +178,9 @@ class FullscreenVideoFragment(private val videoView: VideoView) : Fragment() {
   private fun hideSystemUI() {
     val currentActivity = requireActivity()
     container?.let { container ->
+      if (barsBeforeFullscreen == null) {
+        barsBeforeFullscreen = currentSystemBars(currentActivity.window)
+      }
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
         container.fitsSystemWindows = false
         container.windowInsetsController?.let { controller ->
@@ -181,27 +188,46 @@ class FullscreenVideoFragment(private val videoView: VideoView) : Fragment() {
           controller.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
       } else {
-        currentActivity.window.decorView.systemUiVisibility = (
-          View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-          or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-          or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-          or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-          or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-          or View.SYSTEM_UI_FLAG_FULLSCREEN
-        )
+        // Keep the app's own flags (e.g. light status bar)
+        val decorView = currentActivity.window.decorView
+        decorView.systemUiVisibility = decorView.systemUiVisibility or LEGACY_FULLSCREEN_FLAGS
       }
     }
   }
 
   @Suppress("DEPRECATION")
   private fun restoreSystemUI() {
-    val currentActivity = requireActivity()
+    val before = barsBeforeFullscreen ?: return
+    barsBeforeFullscreen = null
+    val window = requireActivity().window
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-      container?.windowInsetsController?.show(WindowInsets.Type.systemBars())
+      window.insetsController?.let { controller ->
+        // Bars the app had hidden stay hidden
+        controller.show(WindowInsets.Type.systemBars() and before.hiddenBars.inv())
+        before.behavior?.let { controller.systemBarsBehavior = it }
+      }
     } else {
-      currentActivity.window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+      val decorView = window.decorView
+      decorView.systemUiVisibility =
+        (decorView.systemUiVisibility and LEGACY_FULLSCREEN_FLAGS.inv()) or before.legacyFlags
+      // Without it the app stays laid out as in fullscreen (black strip at the bottom on Android 10)
+      decorView.requestApplyInsets()
     }
   }
+
+  @Suppress("DEPRECATION")
+  private fun currentSystemBars(window: Window): SystemBarsState =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+      val insets = window.decorView.rootWindowInsets
+      SystemBarsState(
+        hiddenBars = listOf(WindowInsets.Type.statusBars(), WindowInsets.Type.navigationBars())
+          .filter { insets?.isVisible(it) == false }
+          .fold(0, Int::or),
+        behavior = window.insetsController?.systemBarsBehavior,
+      )
+    } else {
+      SystemBarsState(legacyFlags = window.decorView.systemUiVisibility and LEGACY_FULLSCREEN_FLAGS)
+    }
 
   fun exitFullscreen() {
     // Remove back press callback since we're exiting
@@ -261,5 +287,25 @@ class FullscreenVideoFragment(private val videoView: VideoView) : Fragment() {
     if (videoView.isInFullscreen) {
       exitFullscreen()
     }
+  }
+
+  private class SystemBarsState(
+    // Android 11+
+    val hiddenBars: Int = 0,
+    val behavior: Int? = null,
+    // Before Android 11: values of LEGACY_FULLSCREEN_FLAGS
+    val legacyFlags: Int = 0,
+  )
+
+  private companion object {
+    // Set by fullscreen before Android 11
+    @Suppress("DEPRECATION")
+    const val LEGACY_FULLSCREEN_FLAGS =
+      View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
+        View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
+        View.SYSTEM_UI_FLAG_FULLSCREEN
   }
 }
