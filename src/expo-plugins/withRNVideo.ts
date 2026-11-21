@@ -14,42 +14,37 @@ const pkg = require('../../package.json');
 const withRNVideo: ConfigPlugin<ConfigProps> = (config, props = {}) => {
   const androidPermissions = [];
 
+  config = withNotificationControls(
+    config,
+    props.enableNotificationControls ?? false,
+  );
   if (props.enableNotificationControls) {
-    config = withNotificationControls(config, props.enableNotificationControls);
     androidPermissions.push('android.permission.FOREGROUND_SERVICE');
     androidPermissions.push(
       'android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK',
     );
   }
 
-  if (props.enableAndroidPictureInPicture) {
-    config = withAndroidPictureInPicture(
-      config,
-      props.enableAndroidPictureInPicture,
-    );
-  }
+  config = withAndroidPictureInPicture(
+    config,
+    props.enableAndroidPictureInPicture ?? false,
+  );
 
   if (props.androidExtensions != null) {
     config = withAndroidExtensions(config, props.androidExtensions);
   }
 
-  if (props.enableADSExtension) {
-    config = withAds(config, {
-      enableADSExtension: props.enableADSExtension,
-      testApp: props.reactNativeTestApp,
-    });
-  }
+  config = withAds(config, {
+    enableADSExtension: props.enableADSExtension ?? false,
+    testApp: props.reactNativeTestApp,
+  });
 
-  if (props.enableCacheExtension) {
-    config = withCaching(config, {
-      enableCachingExtension: props.enableCacheExtension,
-      testApp: props.reactNativeTestApp,
-    });
-  }
+  config = withCaching(config, {
+    enableCachingExtension: props.enableCacheExtension ?? false,
+    testApp: props.reactNativeTestApp,
+  });
 
-  if (props.enableBackgroundAudio) {
-    config = withBackgroundAudio(config, props.enableBackgroundAudio);
-  }
+  config = withBackgroundAudio(config, props.enableBackgroundAudio ?? false);
 
   config = withPermissions(config, androidPermissions);
 

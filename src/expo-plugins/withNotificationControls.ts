@@ -7,37 +7,32 @@ export const withNotificationControls: ConfigPlugin<boolean> = (
   return withAndroidManifest(c, (config) => {
     const manifest = config.modResults.manifest;
 
-    if (!enableNotificationControls) {
-      return config;
-    }
-
     if (!manifest.application) {
-      console.warn(
-        'AndroidManifest.xml is missing an <application> element - skipping adding notification controls related config.',
-      );
+      if (enableNotificationControls) {
+        console.warn(
+          'AndroidManifest.xml is missing an <application> element - skipping adding notification controls related config.',
+        );
+      }
       return config;
     }
 
-    // Add the service to the AndroidManifest.xml
-    manifest.application.map((application) => {
-      if (!application.service) {
-        application.service = [];
-      }
-
-      // We check if the VideoPlaybackService is already defined in the AndroidManifest.xml
-      // to prevent adding duplicate service entries. If the service exists, we will remove
-      // it before adding the updated configuration to ensure there are no conflicts or redundant
-      // service declarations in the manifest.
-      const existingServiceIndex = application.service.findIndex(
+    manifest.application.forEach((application) => {
+      const services = (application.service ?? []).filter(
         (service) =>
-          service?.$?.['android:name'] ===
+          service?.$?.['android:name'] !==
           'com.brentvatne.exoplayer.VideoPlaybackService',
       );
-      if (existingServiceIndex !== -1) {
-        application.service.splice(existingServiceIndex, 1);
+
+      if (!enableNotificationControls) {
+        if (services.length > 0) {
+          application.service = services;
+        } else {
+          delete application.service;
+        }
+        return;
       }
 
-      application.service.push({
+      services.push({
         $: {
           'android:name': 'com.brentvatne.exoplayer.VideoPlaybackService',
           'android:exported': 'false',
@@ -56,8 +51,7 @@ export const withNotificationControls: ConfigPlugin<boolean> = (
           },
         ],
       });
-
-      return application;
+      application.service = services;
     });
 
     return config;
