@@ -46,7 +46,6 @@
     "!**/.*"
   ],
   "scripts": {
-    "postinstall": "bun run build || exit 0;",
     "typecheck": "tsc && bun run typecheck:test",
     "typecheck:test": "tsc -p tsconfig.test.json --noEmit",
     "test": "bun test __tests__",
