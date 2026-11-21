@@ -197,8 +197,20 @@ void ReactVideoView::Set_IsLoopingEnabled(bool value) {
 void ReactVideoView::Set_UriString(hstring const &value) {
   m_uriString = value;
   if (m_player != nullptr) {
-    auto uri = Uri(m_uriString);
-    m_player.Source(MediaSource::CreateFromUri(uri));
+    try {
+      auto uri = Uri(m_uriString);
+      m_player.Source(MediaSource::CreateFromUri(uri));
+    } catch (...) {
+      Clear_Source();
+      OnMediaFailed(nullptr, nullptr);
+    }
+  }
+}
+
+void ReactVideoView::Clear_Source() {
+  m_uriString = L"";
+  if (m_player != nullptr) {
+    m_player.Source(nullptr);
   }
 }
 
@@ -261,6 +273,10 @@ void ReactVideoView::Set_PlaybackRate(double rate) {
   if (m_player != nullptr) {
     m_player.PlaybackSession().PlaybackRate(rate);
   }
+}
+
+bool ReactVideoView::IsPaused() const noexcept {
+  return m_isPaused;
 }
 
 bool ReactVideoView::IsPlaying(MediaPlaybackState currentState) {
