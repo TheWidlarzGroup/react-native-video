@@ -25,6 +25,10 @@ jobs:
           WORKING_DIRECTORY: ios
   Swift-Format:
     runs-on: macos-latest
+    env:
+      # Pinned: Homebrew always installs the newest SwiftFormat, and new releases add
+      # rules that reformat code which was clean the day before.
+      SWIFTFORMAT_VERSION: '0.54.5'
     defaults:
       run:
         working-directory: ./ios
@@ -32,7 +36,12 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install SwiftFormat
-        run: brew install swiftformat
+        run: |
+          set -euo pipefail
+          curl -fsSL "https://github.com/nicklockwood/SwiftFormat/releases/download/${SWIFTFORMAT_VERSION}/swiftformat.zip" -o "$RUNNER_TEMP/swiftformat.zip"
+          unzip -o "$RUNNER_TEMP/swiftformat.zip" -d "$RUNNER_TEMP/swiftformat"
+          chmod +x "$RUNNER_TEMP/swiftformat/swiftformat"
+          echo "$RUNNER_TEMP/swiftformat" >> "$GITHUB_PATH"
 
       - name: Format Swift code
         run: swiftformat --verbose .
