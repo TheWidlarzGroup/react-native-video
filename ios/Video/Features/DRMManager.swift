@@ -17,7 +17,7 @@ class DRMManager: NSObject, DRMManagerSpec {
     var onGetLicense: RCTDirectEventBlock?
 
     /// Licenses handled by onGetLicense (from JS side)
-    var pendingLicenses: [String: AVContentKeyRequest] = [:]
+    var pendingLicenses: [String: [AVContentKeyRequest]] = [:]
 
     override init() {
         #if targetEnvironment(simulator)
