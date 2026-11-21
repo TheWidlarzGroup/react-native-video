@@ -378,7 +378,7 @@ Triggered every `progressUpdateInterval` milliseconds, providing information abo
 | currentTime      | number | Current playback position (seconds)                                   |
 | playableDuration | number | Duration that can be played using only the buffer (seconds)          |
 | seekableDuration | number | Duration that can be seeked to (usually the total length of the media) |
-| currentPlaybackTime | number? | Android/iOS epoch time in milliseconds for HLS live streams with `EXT-X-PROGRAM-DATE-TIME` |
+| currentPlaybackTime | number? | Android/iOS epoch time in milliseconds for HLS live streams with `EXT-X-PROGRAM-DATE-TIME`. Without that tag the value is a placeholder (iOS `0`, Android based on `C.TIME_UNSET`), so only use it for streams that have it |
 
 **Example:**
 ```javascript
