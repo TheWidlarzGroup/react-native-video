@@ -44,11 +44,17 @@ export type ReactVideoSourceProperties = {
   bufferConfig?: BufferConfig;
 };
 
-export type ReactVideoSource = Readonly<
-  Omit<ReactVideoSourceProperties, 'uri'> & {
-    uri?: string | NodeRequire;
-  }
->;
+/**
+ * Video source accepted by {@linkcode ReactVideoProps.source}.
+ * Metro bundled assets may be passed directly or as the `uri` value.
+ */
+export type ReactVideoSource =
+  | ImageRequireSource
+  | Readonly<
+      Omit<ReactVideoSourceProperties, 'uri'> & {
+        uri?: string | NodeRequire | ImageRequireSource;
+      }
+    >;
 
 export type ReactVideoPosterSource = ImageURISource | ImageRequireSource;
 
