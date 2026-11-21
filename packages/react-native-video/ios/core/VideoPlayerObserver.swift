@@ -24,6 +24,7 @@ protocol VideoPlayerObserverDelegate: AnyObject {
   func onPlayerItemStatusChanged(status: AVPlayerItem.Status)
   func onBandwidthUpdate(bitrate: Double)
   func onProgressUpdate(currentTime: Double, bufferDuration: Double)
+  func onMediaSelectionChanged()
 }
 
 extension VideoPlayerObserverDelegate {
@@ -42,6 +43,7 @@ extension VideoPlayerObserverDelegate {
   func onPlayerItemStatusChanged(status: AVPlayerItem.Status) {}
   func onBandwidthUpdate(bitrate: Double) {}
   func onProgressUpdate(currentTime: Double, bufferDuration: Double) {}
+  func onMediaSelectionChanged() {}
 }
 
 class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVPlayerItemLegibleOutputPushDelegate {
@@ -67,7 +69,8 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
   var playbackBufferFullObserver: NSKeyValueObservation?
   var playerItemStatusObserver: NSKeyValueObservation?
   var playerItemAccessLogObserver: NSObjectProtocol?
-  
+  var playerItemMediaSelectionObserver: NSObjectProtocol?
+
   var metadataOutput: AVPlayerItemMetadataOutput?
   var legibleOutput: AVPlayerItemLegibleOutput?
   
@@ -153,7 +156,18 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
     ) { [weak self] notification in
       self?.onPlayerAccessLog(playerItem: playerItem)
     }
-    
+
+    // `selectMediaOptionAutomatically` is applied asynchronously by AVFoundation, so
+    // `currentMediaSelection` can still be stale right after the call returns. This is
+    // the signal that a media selection group actually changed its option.
+    playerItemMediaSelectionObserver = NotificationCenter.default.addObserver(
+      forName: AVPlayerItem.mediaSelectionDidChangeNotification,
+      object: playerItem,
+      queue: .main
+    ) { [weak self] _ in
+      self?.delegate?.onMediaSelectionChanged()
+    }
+
     setupBufferObservers(for: playerItem)
     
     playerItemStatusObserver = playerItem.observe(\.status, options: [.new]) { [weak self] _, change in
@@ -178,6 +192,10 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
     if let playerItemAccessLogObserver = playerItemAccessLogObserver {
       NotificationCenter.default.removeObserver(playerItemAccessLogObserver)
       self.playerItemAccessLogObserver = nil
+    }
+    if let playerItemMediaSelectionObserver = playerItemMediaSelectionObserver {
+      NotificationCenter.default.removeObserver(playerItemMediaSelectionObserver)
+      self.playerItemMediaSelectionObserver = nil
     }
     // Invalidate KVO observers
     clearBufferObservers()
