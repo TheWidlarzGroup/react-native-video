@@ -44,6 +44,7 @@ const updateProps = (manager: VideoViewViewManager, props: VideoViewProps) => {
   manager.resizeMode = props.resizeMode ?? 'none';
   manager.keepScreenAwake = props.keepScreenAwake ?? true;
   manager.surfaceType = props.surfaceType ?? 'surface';
+  manager.subtitleStyle = props.subtitleStyle ?? {};
 };
 
 /**

@@ -66,6 +66,12 @@ abstract class HybridVideoViewViewManagerSpec: HybridObject() {
   @set:DoNotStrip
   @set:Keep
   abstract var surfaceType: SurfaceType
+  
+  @get:DoNotStrip
+  @get:Keep
+  @set:DoNotStrip
+  @set:Keep
+  abstract var subtitleStyle: SubtitleStyle
 
   // Methods
   @DoNotStrip

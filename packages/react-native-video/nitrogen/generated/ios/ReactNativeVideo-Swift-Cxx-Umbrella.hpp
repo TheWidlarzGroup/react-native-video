@@ -50,6 +50,10 @@ namespace margelo::nitro::video { enum class ResizeMode; }
 namespace margelo::nitro::video { struct Resolution; }
 // Forward declaration of `SourceType` to properly resolve imports.
 namespace margelo::nitro::video { enum class SourceType; }
+// Forward declaration of `SubtitleEdgeType` to properly resolve imports.
+namespace margelo::nitro::video { enum class SubtitleEdgeType; }
+// Forward declaration of `SubtitleStyle` to properly resolve imports.
+namespace margelo::nitro::video { struct SubtitleStyle; }
 // Forward declaration of `SubtitleType` to properly resolve imports.
 namespace margelo::nitro::video { enum class SubtitleType; }
 // Forward declaration of `SurfaceType` to properly resolve imports.
@@ -99,6 +103,8 @@ namespace margelo::nitro::video { struct onVolumeChangeData; }
 #include "ResizeMode.hpp"
 #include "Resolution.hpp"
 #include "SourceType.hpp"
+#include "SubtitleEdgeType.hpp"
+#include "SubtitleStyle.hpp"
 #include "SubtitleType.hpp"
 #include "SurfaceType.hpp"
 #include "TextTrack.hpp"
