@@ -6,6 +6,7 @@ import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.SurfaceView
+import android.view.TextureView
 import android.view.View
 import android.view.View.MeasureSpec
 import android.widget.FrameLayout
@@ -241,6 +242,9 @@ class ExoPlayerView @JvmOverloads constructor(context: Context, attrs: Attribute
         playerViewLayoutChangeListeners.forEach(targetPlayerView::addOnLayoutChangeListener)
 
         applySecureSurface(targetPlayerView, viewType)
+        // A TextureView is opaque by default. 6.15.0 made it non-opaque, and layouts that
+        // draw under or around the video rely on that.
+        (targetPlayerView.videoSurfaceView as? TextureView)?.isOpaque = false
         applySubtitleStyle(targetPlayerView, localStyle)
     }
 
