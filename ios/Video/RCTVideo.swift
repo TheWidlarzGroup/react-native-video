@@ -1,10 +1,10 @@
 import AVFoundation
 import AVKit
 import Foundation
+import React
 #if USE_GOOGLE_IMA
     import GoogleInteractiveMediaAds
 #endif
-import React
 
 // MARK: - RCTVideo
 
@@ -874,20 +874,18 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 _player?.pause()
                 _player?.rate = 0.0
             }
+        } else if _adPlaying {
+            #if USE_GOOGLE_IMA
+                _imaAdsManager.getAdsManager()?.resume()
+            #endif
         } else {
-            if _adPlaying {
-                #if USE_GOOGLE_IMA
-                    _imaAdsManager.getAdsManager()?.resume()
-                #endif
+            if #available(iOS 10.0, *), !_automaticallyWaitsToMinimizeStalling {
+                _player?.playImmediately(atRate: _rate)
             } else {
-                if #available(iOS 10.0, *), !_automaticallyWaitsToMinimizeStalling {
-                    _player?.playImmediately(atRate: _rate)
-                } else {
-                    _player?.play()
-                    _player?.rate = _rate
-                }
+                _player?.play()
                 _player?.rate = _rate
             }
+            _player?.rate = _rate
         }
 
         _paused = paused
@@ -1320,7 +1318,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     func videoPlayerViewControllerWillDismiss(playerViewController: AVPlayerViewController) {
         if _playerViewController == playerViewController
             && _fullscreenPlayerPresented,
-            let onVideoFullscreenPlayerWillDismiss {
+           let onVideoFullscreenPlayerWillDismiss {
             _playerObserver.removePlayerViewControllerObservers()
             onVideoFullscreenPlayerWillDismiss(["target": reactTag as Any])
         }
@@ -1571,8 +1569,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func handleReadyToPlay() {
-        guard let _playerItem else { return }
-        guard let source = _source else { return }
+        guard let _playerItem, let source = _source else { return }
         Task {
             if self._pendingSeek {
                 self.setSeek(NSNumber(value: self._pendingSeekTime), NSNumber(value: 100))
@@ -1737,11 +1734,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         guard let bounds = RCTVideoUtils.getCurrentWindow()?.bounds else { return }
 
-        if !oldRect!.equalTo(newRect!) {
-            if let reactVC = self.reactViewController() {
-                reactVC.view.frame = bounds
-                reactVC.view.setNeedsLayout()
-            }
+        if !oldRect!.equalTo(newRect!), let reactVC = self.reactViewController() {
+            reactVC.view.frame = bounds
+            reactVC.view.setNeedsLayout()
         }
     }
 
@@ -1815,12 +1810,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func handleAVPlayerAccess(notification: NSNotification!) {
-        guard onVideoBandwidthUpdate != nil else { return }
-
-        guard let accessLog = (notification.object as? AVPlayerItem)?.accessLog() else {
-            return
-        }
-        guard let lastEvent = accessLog.events.last else { return }
+        guard onVideoBandwidthUpdate != nil, let accessLog = (notification.object as? AVPlayerItem)?.accessLog(),
+              let lastEvent = accessLog.events.last else { return }
         if lastEvent.indicatedBitrate != _lastBitrate {
             _lastBitrate = lastEvent.indicatedBitrate
             onVideoBandwidthUpdate?(["bitrate": _lastBitrate, "target": reactTag as Any])
@@ -1886,10 +1877,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 initPictureinPicture()
             }
 
-            if _pip?._pipController == nil, let playerViewController = _playerViewController, _controls {
-                if let existingPlayerLayer = findPlayerLayer(in: playerViewController.view) {
-                    _pip?.setupPipController(existingPlayerLayer)
-                }
+            if _pip?._pipController == nil, let playerViewController = _playerViewController, _controls,
+               let existingPlayerLayer = findPlayerLayer(in: playerViewController.view) {
+                _pip?.setupPipController(existingPlayerLayer)
             }
 
             _pip?.enterPictureInPicture()
