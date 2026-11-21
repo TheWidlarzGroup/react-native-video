@@ -105,9 +105,14 @@ import androidx.media3.exoplayer.upstream.CmcdConfiguration;
 import androidx.media3.exoplayer.upstream.DefaultAllocator;
 import androidx.media3.exoplayer.upstream.DefaultBandwidthMeter;
 import androidx.media3.exoplayer.util.EventLogger;
+import androidx.media3.extractor.Extractor;
+import androidx.media3.extractor.ExtractorsFactory;
 import androidx.media3.extractor.metadata.emsg.EventMessage;
 import androidx.media3.extractor.metadata.id3.Id3Frame;
 import androidx.media3.extractor.metadata.id3.TextInformationFrame;
+import androidx.media3.extractor.text.DefaultSubtitleParserFactory;
+import androidx.media3.extractor.text.SubtitleExtractor;
+import androidx.media3.extractor.text.SubtitleParser;
 import androidx.media3.session.MediaSessionService;
 
 import com.brentvatne.common.api.AdsProps;
@@ -1112,12 +1117,6 @@ public class ReactExoplayerView extends FrameLayout implements
             mediaItemBuilder.setMediaMetadata(customMetadata);
         }
         
-        // Add external subtitles to MediaItem
-        List<MediaItem.SubtitleConfiguration> subtitleConfigurations = buildSubtitleConfigurations();
-        if (subtitleConfigurations != null) {
-            mediaItemBuilder.setSubtitleConfigurations(subtitleConfigurations);
-        }
-        
         if (source.getAdsProps() != null) {
             Uri adTagUrl = source.getAdsProps().getAdTagUrl();
             if (adTagUrl != null) {
@@ -1240,6 +1239,11 @@ public class ReactExoplayerView extends FrameLayout implements
                 )
                 .createMediaSource(mediaItem);
 
+        List<MediaItem.SubtitleConfiguration> subtitleConfigurations = buildSubtitleConfigurations();
+        if (subtitleConfigurations != null) {
+            mediaSource = mergeSideLoadedTextTracks(mediaSource, subtitleConfigurations);
+        }
+
         if (cropStartMs >= 0 && cropEndMs >= 0) {
             return new ClippingMediaSource(mediaSource, cropStartMs * 1000, cropEndMs * 1000);
         } else if (cropStartMs >= 0) {
@@ -1305,6 +1309,41 @@ public class ReactExoplayerView extends FrameLayout implements
         }
 
         return subtitleConfigurations.isEmpty() ? null : subtitleConfigurations;
+    }
+
+    /**
+     * Merges side-loaded text tracks into the media source, the way Media3's DefaultMediaSourceFactory does.
+     * The per-type factories in buildMediaSource (progressive, HLS, DASH, SmoothStreaming, RTSP) ignore
+     * MediaItem.subtitleConfigurations, so tracks set only there never reach the player.
+     * Each track is parsed into cues during extraction, as Media3 does by default since 1.4. (Media3 also loads
+     * such tracks lazily, but that option, ProgressiveMediaSource.Factory#enableLazyLoadingWithSingleTrack, is
+     * package-private, so side-loaded files are fetched while the media is prepared.)
+     */
+    private MediaSource mergeSideLoadedTextTracks(MediaSource mediaSource, List<MediaItem.SubtitleConfiguration> subtitleConfigurations) {
+        SubtitleParser.Factory subtitleParserFactory = new DefaultSubtitleParserFactory();
+        List<MediaSource> mediaSources = new ArrayList<>();
+        mediaSources.add(mediaSource);
+        for (MediaItem.SubtitleConfiguration subtitleConfiguration : subtitleConfigurations) {
+            Format format = new Format.Builder()
+                    .setSampleMimeType(subtitleConfiguration.mimeType)
+                    .setLanguage(subtitleConfiguration.language)
+                    .setSelectionFlags(subtitleConfiguration.selectionFlags)
+                    .setRoleFlags(subtitleConfiguration.roleFlags)
+                    .setLabel(subtitleConfiguration.label)
+                    .setId(subtitleConfiguration.id)
+                    .build();
+            if (!subtitleParserFactory.supportsFormat(format)) {
+                DebugLog.w(TAG, "Unsupported side-loaded text track type: " + subtitleConfiguration.mimeType);
+                continue;
+            }
+            ExtractorsFactory extractorsFactory = () -> new Extractor[] {
+                    new SubtitleExtractor(subtitleParserFactory.create(format), format)
+            };
+            mediaSources.add(new ProgressiveMediaSource.Factory(mediaDataSourceFactory, extractorsFactory)
+                    .setLoadErrorHandlingPolicy(config.buildLoadErrorHandlingPolicy(source.getMinLoadRetryCount()))
+                    .createMediaSource(MediaItem.fromUri(subtitleConfiguration.uri)));
+        }
+        return mediaSources.size() == 1 ? mediaSource : new MergingMediaSource(mediaSources.toArray(new MediaSource[0]));
     }
 
     private void releasePlayer() {
