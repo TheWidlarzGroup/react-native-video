@@ -110,6 +110,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     {
       source,
       style,
+      pointerEvents,
       resizeMode,
       poster,
       posterResizeMode,
@@ -871,7 +872,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     );
 
     return (
-      <View style={style}>
+      <View style={style} pointerEvents={pointerEvents}>
         <NativeVideoComponent
           ref={nativeRef}
           {...rest}
