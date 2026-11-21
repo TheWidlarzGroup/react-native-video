@@ -188,6 +188,9 @@ Adjust the control styles. This prop is needed only if `controls={true}` and is 
 | hideSettingButton                   | boolean | Hides the settings button. Default is `true`.                       |
 | seekIncrementMS                     | number  | Defines the seek increment in milliseconds. Default is `10000`.     |
 | liveLabel                           | string  | Sets a label for live video.                                        |
+| hideLiveBadge                       | boolean | Hides the LIVE badge drawn over live streams. Default is `false`.   |
+
+`hideLiveBadge` also applies when `controls={false}`: the badge is drawn on the video surface, not by the controller.
 
 **Example with default values:**
 
@@ -206,7 +209,8 @@ controlsStyles={{
   hideNotificationBarOnFullScreenMode: true,
   hideSettingButton: true,
   seekIncrementMS: 10000,
-  liveLabel: "LIVE"
+  liveLabel: "LIVE",
+  hideLiveBadge: false
 }}
 ```
 

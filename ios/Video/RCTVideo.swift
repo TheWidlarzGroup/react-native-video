@@ -65,7 +65,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _lastBitrate = -2.0
     private var _enterPictureInPictureOnLeave = false {
         didSet {
-            if isPictureInPictureActive() { return }
+            if isPictureInPictureActive() {
+                return
+            }
             if _enterPictureInPictureOnLeave {
                 initPictureinPicture()
             } else {
@@ -341,7 +343,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc
     func applicationWillResignActive(notification _: NSNotification!) {
         let isExternalPlaybackActive = getIsExternalPlaybackActive()
-        if _playInBackground || _playWhenInactive || !_isPlaying || isExternalPlaybackActive { return }
+        if _playInBackground || _playWhenInactive || !_isPlaying || isExternalPlaybackActive {
+            return
+        }
 
         _player?.pause()
         _player?.rate = 0.0
@@ -350,7 +354,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc
     func applicationDidBecomeActive(notification _: NSNotification!) {
         let isExternalPlaybackActive = getIsExternalPlaybackActive()
-        if _playInBackground || _playWhenInactive || !_isPlaying || isExternalPlaybackActive { return }
+        if _playInBackground || _playWhenInactive || !_isPlaying || isExternalPlaybackActive {
+            return
+        }
 
         // Resume the player or any other tasks that should continue when the app becomes active.
         _player?.play()
@@ -364,7 +370,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             _player?.rate = _rate
         }
         let isExternalPlaybackActive = getIsExternalPlaybackActive()
-        if !_playInBackground || isExternalPlaybackActive || isPictureInPictureActive() { return }
+        if !_playInBackground || isExternalPlaybackActive || isPictureInPictureActive() {
+            return
+        }
         // Needed to play sound in background. See https://developer.apple.com/library/ios/qa/qa1668/_index.html
         _playerLayer?.player = nil
         _playerViewController?.player = nil
@@ -380,7 +388,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc
     func screenWillLock() {
         let isActiveBackgroundPip = isPictureInPictureActive() && UIApplication.shared.applicationState != .active
-        if _playInBackground || !_isPlaying || !isActiveBackgroundPip { return }
+        if _playInBackground || !_isPlaying || !isActiveBackgroundPip {
+            return
+        }
 
         _player?.pause()
         _player?.rate = 0.0
@@ -389,7 +399,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc
     func screenDidUnlock() {
         let isActiveBackgroundPip = isPictureInPictureActive() && UIApplication.shared.applicationState != .active
-        if _paused || !isActiveBackgroundPip { return }
+        if _paused || !isActiveBackgroundPip {
+            return
+        }
 
         _player?.play()
         _player?.rate = _rate
@@ -1452,6 +1464,13 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _drmManager = nil
         _playerObserver.clearPlayer()
 
+        // AVPictureInPictureController(playerLayer:) holds a strong reference to
+        // the AVPlayerLayer, and the layer holds the AVPlayer, so tear PiP down
+        // with the rest of the playback state instead of leaving both alive
+        // until this view deallocates.
+        _pip?.deinitPipController()
+        _pip = nil
+        _playerLayer?.player = nil
         self.removePlayerLayer()
 
         if let _playerViewController {
