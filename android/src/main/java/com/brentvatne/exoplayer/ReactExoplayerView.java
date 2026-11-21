@@ -1361,6 +1361,8 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     private void updateResumePosition() {
+        // Listener callbacks can still reach this after releasePlayer() has cleared the player (see #4902).
+        if (player == null) return;
         resumeWindow = player.getCurrentMediaItemIndex();
         resumePosition = player.isCurrentMediaItemSeekable() ? Math.max(0, player.getCurrentPosition())
                 : C.TIME_UNSET;
