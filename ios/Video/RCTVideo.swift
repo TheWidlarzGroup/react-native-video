@@ -1464,6 +1464,13 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _drmManager = nil
         _playerObserver.clearPlayer()
 
+        // AVPictureInPictureController(playerLayer:) holds a strong reference to
+        // the AVPlayerLayer, and the layer holds the AVPlayer, so tear PiP down
+        // with the rest of the playback state instead of leaving both alive
+        // until this view deallocates.
+        _pip?.deinitPipController()
+        _pip = nil
+        _playerLayer?.player = nil
         self.removePlayerLayer()
 
         if let _playerViewController {
