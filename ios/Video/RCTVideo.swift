@@ -1466,6 +1466,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     // MARK: - Lifecycle
 
     override func removeFromSuperview() {
+        // Cancel a setSrc that is still in flight. Otherwise it completes after this
+        // teardown and creates a new AVPlayer for a view that is gone, and that view and
+        // player are never released (#3567). setupPlayer() already returns early when
+        // isSetSourceOngoing is false.
+        isSetSourceOngoing = false
+        nextSource = nil
         #if USE_GOOGLE_IMA
             // Stop ads together with the rest of playback (#3722, #4866). The manager itself is kept,
             // because other code paths still call into it after removal (#3911).
