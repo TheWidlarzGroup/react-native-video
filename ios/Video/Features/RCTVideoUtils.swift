@@ -140,24 +140,20 @@ enum RCTVideoUtils {
 
         let audioTracks = NSMutableArray()
 
-        let group = await RCTVideoAssetsUtils.getMediaSelectionGroup(asset: asset, for: .audible)
+        guard let group = await RCTVideoAssetsUtils.getMediaSelectionGroup(asset: asset, for: .audible) else {
+            return []
+        }
+        let selectedOption = player.currentItem?.currentMediaSelection.selectedMediaOption(in: group)
 
-        for i in 0 ..< (group?.options.count ?? 0) {
-            let currentOption = group?.options[i]
-            var title = ""
-            let values = currentOption?.commonMetadata.map(\.value)
-            if (values?.count ?? 0) > 0, let value = values?[0] {
-                title = value as! String
-            }
-            let language: String = currentOption?.extendedLanguageTag ?? ""
-
-            let selectedOption: AVMediaSelectionOption? = player.currentItem?.currentMediaSelection.selectedMediaOption(in: group!)
+        for (index, currentOption) in group.options.enumerated() {
+            let title = currentOption.commonMetadata.compactMap(\.stringValue).first ?? ""
+            let language = currentOption.extendedLanguageTag ?? ""
 
             let audioTrack = [
-                "index": NSNumber(value: i),
+                "index": NSNumber(value: index),
                 "title": title,
                 "language": language,
-                "selected": currentOption?.displayName == selectedOption?.displayName,
+                "selected": currentOption.displayName == selectedOption?.displayName,
             ] as [String: Any]
             audioTracks.add(audioTrack)
         }
@@ -172,22 +168,19 @@ enum RCTVideoUtils {
 
         // if streaming video, we extract the text tracks
         var textTracks: [TextTrack] = []
-        let group = await RCTVideoAssetsUtils.getMediaSelectionGroup(asset: asset, for: .legible)
+        guard let group = await RCTVideoAssetsUtils.getMediaSelectionGroup(asset: asset, for: .legible) else {
+            return []
+        }
+        let selectedOption = player.currentItem?.currentMediaSelection.selectedMediaOption(in: group)
 
-        for i in 0 ..< (group?.options.count ?? 0) {
-            let currentOption = group?.options[i]
-            var title = ""
-            let values = currentOption?.commonMetadata.map(\.value)
-            if (values?.count ?? 0) > 0, let value = values?[0] {
-                title = value as! String
-            }
-            let language: String = currentOption?.extendedLanguageTag ?? ""
-            let selectedOption: AVMediaSelectionOption? = player.currentItem?.currentMediaSelection.selectedMediaOption(in: group!)
+        for (index, currentOption) in group.options.enumerated() {
+            let title = currentOption.commonMetadata.compactMap(\.stringValue).first ?? ""
+            let language = currentOption.extendedLanguageTag ?? ""
             let textTrack = TextTrack([
-                "index": NSNumber(value: i),
+                "index": NSNumber(value: index),
                 "title": title,
                 "language": language as Any,
-                "selected": currentOption?.displayName == selectedOption?.displayName,
+                "selected": currentOption.displayName == selectedOption?.displayName,
             ])
             textTracks.append(textTrack)
         }
