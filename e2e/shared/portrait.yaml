@@ -1,0 +1,10 @@
+# Turns an Android device back to portrait. Flows that rotate the device run it from
+# onFlowComplete, which Maestro runs after a pass and after a fail, so a flow that fails
+# while in landscape doesn't leave the next flow rotated.
+appId: ${APP_ID}
+---
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - setOrientation: PORTRAIT
