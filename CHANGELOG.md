@@ -1,4 +1,11 @@
+# Changelog
 
+## [6.19.2](https://github.com/moskalakamil/react-native-video/compare/v6.19.1...v6.19.2) (2026-04-28)
+
+
+### Bug Fixes
+
+* replace `absoluteFillObject` with `absoluteFill` ([#4880](https://github.com/moskalakamil/react-native-video/issues/4880)) ([ae7ff4f](https://github.com/moskalakamil/react-native-video/commit/ae7ff4fa07ce9234575664a541bbd2f557ff051c))
 
 ## [6.19.1](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.19.0...v6.19.1) (2026-03-15)
 
@@ -765,7 +772,7 @@
 * add release-it ([#3342](https://github.com/react-native-video/react-native-video/issues/3342)) ([da27089](https://github.com/react-native-video/react-native-video/commit/da270891fbce485bb132825a336638f2af98408d))
 * **ios:** add onBandwidthUpdate event ([#3331](https://github.com/react-native-video/react-native-video/issues/3331)) ([9054db3](https://github.com/react-native-video/react-native-video/commit/9054db35d7d5e4e6d54739fc9349576c03522d7c))
 
-## Changelog
+#
 
 ## Next
 - Android, iOS: add onVolumeChange event #3322
