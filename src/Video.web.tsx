@@ -159,7 +159,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
               navigationUI: 'hide',
             });
             if (orientation === 'all' || !orientation || autorotate) {
-              screen.orientation.unlock();
+              screen.orientation?.unlock?.();
             } else {
               await screen.orientation.lock(orientation);
             }
@@ -167,7 +167,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
             if (document.fullscreenElement) {
               await document.exitFullscreen();
             }
-            screen.orientation.unlock();
+            screen.orientation?.unlock?.();
           }
         } catch (e) {
           // Changing fullscreen status without a button click is not allowed so it throws.
