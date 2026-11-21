@@ -1546,7 +1546,7 @@ public class ReactExoplayerView extends FrameLayout implements
         }
         TrackGroupArray groups = info.getTrackGroups(index);
         TrackSelectionArray selectionArray = player.getCurrentTrackSelections();
-        TrackSelection selection = selectionArray.get(C.TRACK_TYPE_AUDIO);
+        TrackSelection selection = selectionArray.get(index);
 
 
         for (int groupIndex = 0; groupIndex < groups.length; ++groupIndex) {
@@ -1698,7 +1698,7 @@ public class ReactExoplayerView extends FrameLayout implements
         }
         
         TrackSelectionArray selectionArray = player.getCurrentTrackSelections();
-        TrackSelection selection = selectionArray.get(C.TRACK_TYPE_TEXT);
+        TrackSelection selection = selectionArray.get(index);
         TrackGroupArray groups = info.getTrackGroups(index);
 
         for (int groupIndex = 0; groupIndex < groups.length; ++groupIndex) {
@@ -1740,7 +1740,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
         TrackGroupArray groups = info.getTrackGroups(index);
         TrackSelectionArray selectionArray = player.getCurrentTrackSelections();
-        TrackSelection selection = selectionArray.get(C.TRACK_TYPE_AUDIO);
+        TrackSelection selection = selectionArray.get(index);
 
         for (int groupIndex = 0; groupIndex < groups.length; ++groupIndex) {
             TrackGroup group = groups.get(groupIndex);
@@ -1776,7 +1776,7 @@ public class ReactExoplayerView extends FrameLayout implements
         
         TrackGroupArray groups = info.getTrackGroups(index);
         TrackSelectionArray selectionArray = player.getCurrentTrackSelections();
-        TrackSelection selection = selectionArray.get(C.TRACK_TYPE_TEXT);
+        TrackSelection selection = selectionArray.get(index);
 
         for (int groupIndex = 0; groupIndex < groups.length; ++groupIndex) {
             TrackGroup group = groups.get(groupIndex);
