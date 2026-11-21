@@ -149,6 +149,7 @@ import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -229,7 +230,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean useCache = false;
     private boolean disableCache = false;
     private ControlsConfig controlsConfig = new ControlsConfig();
-    private ArrayList<Integer> rootViewChildrenOriginalVisibility = new ArrayList<Integer>();
+    private Map<View, Integer> rootViewChildrenOriginalVisibility = new HashMap<View, Integer>();
 
     /*
      * When user is seeking first called is on onPositionDiscontinuity -> DISCONTINUITY_REASON_SEEK
@@ -405,6 +406,19 @@ public class ReactExoplayerView extends FrameLayout implements
     public void cleanUpResources() {
         stopPlayback();
         themedReactContext.removeLifecycleEventListener(this);
+        if (exoPlayerView != null && exoPlayerView.getParent() != null && exoPlayerView.getParent() != this) {
+            ((ViewGroup) exoPlayerView.getParent()).removeView(exoPlayerView);
+        }
+        if (!rootViewChildrenOriginalVisibility.isEmpty()) {
+            for (Map.Entry<View, Integer> entry : rootViewChildrenOriginalVisibility.entrySet()) {
+                View child = entry.getKey();
+                Integer visibility = entry.getValue();
+                if (child != null && visibility != null) {
+                    child.setVisibility(visibility);
+                }
+            }
+            rootViewChildrenOriginalVisibility.clear();
+        }
         releasePlayer();
         viewHasDropped = true;
     }
@@ -2571,6 +2585,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
         View decorView = currentActivity.getWindow().getDecorView();
         ViewGroup rootView = decorView.findViewById(android.R.id.content);
+        if (rootView == null) return;
 
         LayoutParams layoutParams = new LayoutParams(
                 LayoutParams.MATCH_PARENT,
@@ -2581,19 +2596,28 @@ public class ReactExoplayerView extends FrameLayout implements
             if (parent != null) {
                 parent.removeView(exoPlayerView);
             }
+            rootViewChildrenOriginalVisibility.clear();
             for (int i = 0; i < rootView.getChildCount(); i++) {
-                if (rootView.getChildAt(i) != exoPlayerView) {
-                    rootViewChildrenOriginalVisibility.add(rootView.getChildAt(i).getVisibility());
-                    rootView.getChildAt(i).setVisibility(View.GONE);
+                View child = rootView.getChildAt(i);
+                if (child != null && child != exoPlayerView) {
+                    rootViewChildrenOriginalVisibility.put(child, child.getVisibility());
+                    child.setVisibility(View.GONE);
                 }
             }
             rootView.addView(exoPlayerView, layoutParams);
         } else {
             rootView.removeView(exoPlayerView);
             if (!rootViewChildrenOriginalVisibility.isEmpty()) {
-                for (int i = 0; i < rootView.getChildCount(); i++) {
-                    rootView.getChildAt(i).setVisibility(rootViewChildrenOriginalVisibility.get(i));
+                for (Map.Entry<View, Integer> entry : rootViewChildrenOriginalVisibility.entrySet()) {
+                    View child = entry.getKey();
+                    Integer visibility = entry.getValue();
+                    if (child != null && visibility != null) {
+                        child.setVisibility(visibility);
+                    }
                 }
+                rootViewChildrenOriginalVisibility.clear();
+            }
+            if (exoPlayerView.getParent() == null) {
                 addView(exoPlayerView, 0, layoutParams);
                 reLayoutControls();
             }
@@ -2621,9 +2645,15 @@ public class ReactExoplayerView extends FrameLayout implements
         ViewGroup rootView = decorView.findViewById(android.R.id.content);
 
         if (!rootViewChildrenOriginalVisibility.isEmpty()) {
-            if (exoPlayerView.getParent().equals(rootView)) rootView.removeView(exoPlayerView);
-            for (int i = 0; i < rootView.getChildCount(); i++) {
-                rootView.getChildAt(i).setVisibility(rootViewChildrenOriginalVisibility.get(i));
+            if (rootView != null && rootView.equals(exoPlayerView.getParent())) {
+                rootView.removeView(exoPlayerView);
+            }
+            for (Map.Entry<View, Integer> entry : rootViewChildrenOriginalVisibility.entrySet()) {
+                View child = entry.getKey();
+                Integer visibility = entry.getValue();
+                if (child != null && visibility != null) {
+                    child.setVisibility(visibility);
+                }
             }
             rootViewChildrenOriginalVisibility.clear();
         }
