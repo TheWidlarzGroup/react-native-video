@@ -1598,15 +1598,19 @@ public class ReactExoplayerView extends FrameLayout implements
             if (source.getContentStartTime() != -1) {
                 ExecutorService es = Executors.newSingleThreadExecutor();
                 es.execute(() -> {
-                    // To prevent ANRs caused by getVideoTrackInfo we run this on a different thread and notify the player only when we're done
-                    ArrayList<VideoTrack> videoTracks = getVideoTrackInfoFromManifest();
-                    if (videoTracks != null) {
-                        isUsingContentResolution = true;
+                    try {
+                        // To prevent ANRs caused by getVideoTrackInfo we run this on a different thread and notify the player only when we're done
+                        ArrayList<VideoTrack> videoTracks = getVideoTrackInfoFromManifest();
+                        if (videoTracks != null) {
+                            isUsingContentResolution = true;
+                        }
+                        eventEmitter.onVideoLoad.invoke(duration, currentPosition, width, height,
+                                audioTracks, textTracks, videoTracks, trackId );
+
+                        updateSubtitleButtonVisibility();
+                    } finally {
+                        es.shutdown();
                     }
-                    eventEmitter.onVideoLoad.invoke(duration, currentPosition, width, height,
-                            audioTracks, textTracks, videoTracks, trackId );
-                    
-                    updateSubtitleButtonVisibility();
                 });
                 return;
             }
@@ -1758,12 +1762,14 @@ public class ReactExoplayerView extends FrameLayout implements
         try {
             ArrayList<VideoTrack> results = result.get(3000, TimeUnit.MILLISECONDS);
             if (results == null && retryCount < 1) {
-                return this.getVideoTrackInfoFromManifest(++retryCount);
+                return this.getVideoTrackInfoFromManifest(retryCount + 1);
             }
-            es.shutdown();
             return results;
         } catch (Exception e) {
             DebugLog.w(TAG, "error in getVideoTrackInfoFromManifest handling request:" + e.getMessage());
+        } finally {
+            result.cancel(true);
+            es.shutdownNow();
         }
 
         return null;
