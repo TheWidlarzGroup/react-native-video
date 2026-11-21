@@ -1075,18 +1075,21 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     private void cleanupPlaybackService() {
+        ServiceConnection connection = playbackServiceConnection;
+        playbackServiceConnection = null;
+
         try {
             if(player != null && playbackServiceBinder != null) {
                 playbackServiceBinder.getService().unregisterPlayer(player);
             }
 
-            playbackServiceBinder = null;
-
-            if(playbackServiceConnection != null) {
-                themedReactContext.unbindService(playbackServiceConnection);
+            if(connection != null) {
+                themedReactContext.unbindService(connection);
             }
         } catch(Exception e) {
-            DebugLog.w(TAG, "Cloud not cleanup playback service");
+            DebugLog.w(TAG, "Could not clean up playback service");
+        } finally {
+            playbackServiceBinder = null;
         }
     }
 
@@ -1309,10 +1312,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
     private void releasePlayer() {
         if (player != null) {
-            if(playbackServiceBinder != null) {
-                playbackServiceBinder.getService().unregisterPlayer(player);
-                themedReactContext.unbindService(playbackServiceConnection);
-            }
+            cleanupPlaybackService();
 
             updateResumePosition();
             player.release();
