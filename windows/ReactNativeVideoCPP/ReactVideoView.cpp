@@ -202,6 +202,14 @@ void ReactVideoView::Set_UriString(hstring const &value) {
   }
 }
 
+void ReactVideoView::Clear_Source() {
+  m_uriString = L"";
+  if (m_player != nullptr) {
+    m_player.Pause();
+    m_player.Source(nullptr);
+  }
+}
+
 void ReactVideoView::Set_Paused(bool value) {
   m_isPaused = value;
   if (m_player != nullptr) {
