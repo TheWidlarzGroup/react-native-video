@@ -20,11 +20,12 @@ struct ReactVideoView : ReactVideoViewT<ReactVideoView> {
   void Set_ProgressUpdateInterval(int64_t interval);
   void Set_AutoPlay(bool autoPlay);
   void Set_PlaybackRate(double rate);
+  bool IsPaused() const noexcept;
 
  private:
   hstring m_uriString;
   bool m_isLoopingEnabled = false;
-  bool m_isPaused = true;
+  bool m_isPaused = false;
   bool m_isMuted = false;
   bool m_useControls = false;
   bool m_fullScreen = false;
