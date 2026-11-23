@@ -1608,14 +1608,23 @@ public class ReactExoplayerView extends FrameLayout implements
                 ExecutorService es = Executors.newSingleThreadExecutor();
                 es.execute(() -> {
                     // To prevent ANRs caused by getVideoTrackInfo we run this on a different thread and notify the player only when we're done
-                    ArrayList<VideoTrack> videoTracks = getVideoTrackInfoFromManifest();
-                    if (videoTracks != null) {
-                        isUsingContentResolution = true;
-                    }
-                    eventEmitter.onVideoLoad.invoke(duration, currentPosition, width, height,
-                            audioTracks, textTracks, videoTracks, trackId );
-                    
-                    updateSubtitleButtonVisibility();
+                    final ArrayList<VideoTrack> manifestTracks = getVideoTrackInfoFromManifest();
+                    // The rest reads the player and updates views, so it goes back to the main thread.
+                    mainHandler.post(() -> {
+                        if (player == null) return;
+                        ArrayList<VideoTrack> videoTracks = manifestTracks;
+                        if (videoTracks != null) {
+                            isUsingContentResolution = true;
+                        } else {
+                            // No representation matches contentStartTime (a VOD manifest, for example):
+                            // report the player's own tracks, as without contentStartTime.
+                            videoTracks = getVideoTrackInfo();
+                        }
+                        eventEmitter.onVideoLoad.invoke(duration, currentPosition, width, height,
+                                audioTracks, textTracks, videoTracks, trackId);
+
+                        updateSubtitleButtonVisibility();
+                    });
                 });
                 return;
             }
