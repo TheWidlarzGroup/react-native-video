@@ -48,8 +48,8 @@ export interface SubtitleStyle {
   edgeColor?: string;
   /**
    * Extra space to keep clear beneath the subtitle, as a fraction of the video's height
-   * (`0.08` keeps the bottom 8% of the frame clear). Leaves the platform default untouched
-   * when unset.
+   * (`0.08` keeps the bottom 8% of the frame clear). When unset, Android uses `0.08` and iOS
+   * applies nothing, leaving the system's own placement untouched.
    *
    * @remarks
    * On Android this is purely additive - it reserves blank space without otherwise changing
@@ -57,7 +57,7 @@ export interface SubtitleStyle {
    * pins the cue's vertical position outright (overriding the system's own placement, including
    * its multi-line/dual-subtitle collision avoidance) rather than padding around a position it
    * still controls. Prefer leaving this unset on iOS unless you need the position pinned.
-   * @default 0.08
+   * @default 0.08 on Android; unset (system placement) on iOS
    */
   bottomPadding?: number;
 }

@@ -2,9 +2,13 @@ import AVFoundation
 import CoreMedia
 
 enum SubtitleStyleUtils {
-  /// Builds the `AVTextStyleRule` that reproduces `style`, or `nil` when every field is unset
-  /// (meaning the system/embedded default styling should be left untouched).
-  static func buildTextStyleRules(from style: SubtitleStyle) -> [AVTextStyleRule]? {
+  /// Builds the `AVTextStyleRule`s that reproduce `style`, or an empty array when every field is
+  /// unset (meaning the system/embedded default styling should be left untouched).
+  ///
+  /// Never returns `nil`: assigning `nil` to `AVPlayerItem.textStyleRules` crashes inside
+  /// MediaToolbox (`itemfig_setTextMarkupArray`) on the composition-backed item that external
+  /// subtitles produce, whereas an empty array safely clears the rules.
+  static func buildTextStyleRules(from style: SubtitleStyle) -> [AVTextStyleRule] {
     var attributes: [String: Any] = [:]
 
     if let fontScale = style.fontScale {
@@ -28,8 +32,8 @@ enum SubtitleStyleUtils {
         NSNumber(value: linePosition)
     }
 
-    guard !attributes.isEmpty else { return nil }
-    guard let rule = AVTextStyleRule(textMarkupAttributes: attributes) else { return nil }
+    guard !attributes.isEmpty else { return [] }
+    guard let rule = AVTextStyleRule(textMarkupAttributes: attributes) else { return [] }
     return [rule]
   }
 

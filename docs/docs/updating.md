@@ -119,6 +119,10 @@ Many props and methods from the v6 `<Video>` component have been moved to the `V
 
 see [VideoPlayer](./player/player.md) for more details.
 
+#### Subtitle styling
+
+v6 had a `subtitleStyle` prop on `<Video>` (`fontSize`, `paddingTop`, `paddingBottom`, `paddingLeft`, `paddingRight`, `opacity`, `subtitlesFollowVideo`). v7 has a `subtitleStyle` prop on `<VideoView>` with the **same name but a different shape**: `fontScale`, `foregroundColor`, `backgroundColor`, `windowColor`, `edgeType`, `edgeColor` and `bottomPadding`. v6 keys are not accepted; see [Subtitle styling](./player/subtitle-styling.md).
+
 #### Methods
 
 Imperative methods previously called on the `<Video>` component's ref are now methods on the `VideoPlayer` instance.

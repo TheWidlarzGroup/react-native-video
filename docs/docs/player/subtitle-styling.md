@@ -42,7 +42,7 @@ All fields are optional - anything left unset falls back to the platform's own d
 | `edgeType`        | `SubtitleEdgeType` | Android, iOS   | `'none' \| 'outline' \| 'dropShadow' \| 'raised' \| 'depressed'`. Defaults to `'none'`. |
 | `windowColor`     | `string`           | Android only   | Color of the padded caption window surrounding the background box.            |
 | `edgeColor`       | `string`           | Android only   | Color of the edge/outline drawn around each character, when `edgeType` isn't `'none'`. |
-| `bottomPadding`   | `number`           | Android, iOS (different semantics - see below) | Extra space to keep clear beneath the subtitle, as a fraction of the video's height. `0.08` keeps the bottom 8% of the frame clear. Defaults to `0.08` on Android. |
+| `bottomPadding`   | `number`           | Android, iOS (different semantics - see below) | Extra space to keep clear beneath the subtitle, as a fraction of the video's height. `0.08` keeps the bottom 8% of the frame clear. Defaults to `0.08` on Android; on iOS nothing is applied when unset. |
 
 ### Platform notes
 
@@ -51,6 +51,10 @@ All fields are optional - anything left unset falls back to the platform's own d
 - Colors are parsed the same way on both platforms: `#RRGGBB`, or `#AARRGGBB` with the alpha channel first (matching Android's `Color.parseColor`), not the `#RRGGBBAA` (alpha-last) convention some CSS tooling uses.
 - The style re-applies automatically whenever the source changes (a `replaceSourceAsync` call, or an ad break ending) - you don't need to re-set `subtitleStyle` after swapping sources.
 - **iOS live updates**: AVFoundation only redraws a legible cue's appearance when its selection changes or a new cue starts - assigning a new `AVTextStyleRule` alone has no visible effect on a cue that's *already* on screen (including a paused frame), it only takes effect from the next cue transition onward. To make a live `subtitleStyle` change show up immediately, the native layer forces a redraw itself: it re-asserts the current legible media selection for tracks that have one (HLS/native text tracks), or toggles the player item track's `isEnabled` for ones that don't (e.g. an external subtitle on a plain MP4, which AVFoundation adds as an always-on composition track rather than a selectable option). This is handled automatically - no action needed when using `subtitleStyle`.
+
+### iOS redraw behavior
+
+On iOS, a style change updates the cue that's currently on screen immediately only while the video is **paused**. While playing, the new style is applied from the next cue onward, which avoids re-selecting the subtitle track on every change (for example while dragging a slider).
 
 ### `bottomPadding` behaves differently per platform
 

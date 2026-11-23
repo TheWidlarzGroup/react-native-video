@@ -108,10 +108,14 @@ import UIKit
 
     currentItem.textStyleRules = SubtitleStyleUtils.buildTextStyleRules(from: subtitleStyle)
 
-    // AVFoundation only re-renders a legible cue's appearance when the selection changes or a
-    // new cue starts - a `textStyleRules` update alone is picked up on the *next* cue transition,
-    // not applied to a cue that's already on screen (including a paused frame). Re-asserting the
-    // current selection (without changing which option is selected) forces AVKit to redraw the
+    // While playing, the next cue picks the new rules up on its own, and forcing a re-selection
+    // would trigger AVFoundation's re-selection side effects on every style change (e.g. a slider).
+    // Only redraw the on-screen cue while paused, where nothing else would refresh it.
+    guard !player.isPlaying else { return }
+
+    // A `textStyleRules` update alone is only picked up on the *next* cue transition, not applied
+    // to a cue that's already on screen (including a paused frame). Re-asserting the current
+    // selection (without changing which option is selected) forces AVKit to redraw the
     // currently-displayed cue with the new style immediately, with no visible seek/jump.
     if let group = currentItem.asset.mediaSelectionGroup(forMediaCharacteristic: .legible),
       let selectedOption = currentItem.currentMediaSelection.selectedMediaOption(in: group) {
