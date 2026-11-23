@@ -219,13 +219,16 @@ class VideoManager {
       player.showNotificationControls
     }
     
+    // Configure first: iOS decides whether to interrupt other apps' audio when the session is
+    // activated, so activating it while the category still carries .mixWithOthers (the idle
+    // mode) leaves Spotify/Music playing under the video.
+    configureAudioSession()
+
     if isAnyPlayerPlaying || anyPlayerNeedsNotMixWithOthers || anyPlayerNeedsNotificationControls || remoteControlEventsActive {
       activateAudioSession()
     } else {
       deactivateAudioSession()
     }
-    
-    configureAudioSession()
   }
 
   private func configureAudioSession() {
