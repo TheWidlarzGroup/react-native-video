@@ -744,7 +744,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   /**
    * The track the user picked, or - while they haven't picked one - the one ExoPlayer chose.
    *
-   * Unlike video quality there is no separate "active" id in the event payload, because audio
+   * There is no separate "requested" vs "active" id in the event payload, because audio
    * selection is exact: whatever is selected *is* what's playing. So this reports the real
    * selection rather than only an explicit request, and is never null while audio exists.
    */
@@ -755,9 +755,8 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
    * Re-asserts the user's audio pick against the current track set.
    *
    * ExoPlayer silently drops a [androidx.media3.common.TrackSelectionOverride] whose media track
-   * group is gone, which is exactly what a track change means (new source, or content re-attaching
-   * after an ad break). This is general ExoPlayer behaviour, not video-specific - without it an
-   * audio pick would quietly decay back to the default language on the next source.
+   * group is gone, which is exactly what a track change means (e.g. a new source). Without this
+   * hook an audio pick would quietly decay back to the default language on the next source.
    *
    * Reloading the *same* content doesn't need this: Media3's TrackGroup equality is id + formats,
    * so the old override still matches the new groups. (Verified: that pick survives with this hook

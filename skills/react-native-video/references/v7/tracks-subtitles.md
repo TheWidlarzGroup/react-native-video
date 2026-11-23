@@ -45,7 +45,9 @@ const currentId = player.selectedAudioTrackId;   // string | undefined
 
 React to changes via `onAudioTrackChange` → `{ availableTracks: AudioTrack[], selectedTrackId?: string }` (see `events.md`).
 
-Unlike video quality (below), there's no separate "requested vs. actually playing" split: the selection *is* what plays on both platforms.
+There's no separate "requested vs. actually playing" split: the selection *is* what plays on both platforms.
+
+Track ids are only valid for the source they came from (on iOS they are positional): don't reuse an id an app saved earlier on a different source; re-resolve it from `getAvailableAudioTracks()` by `language`/`label`.
 
 ## Video track (quality) selection
 

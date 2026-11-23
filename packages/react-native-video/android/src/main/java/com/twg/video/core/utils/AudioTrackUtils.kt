@@ -74,7 +74,7 @@ object AudioTrackUtils {
    * Ids prefer `Format.id`, which for audio is a manifest-declared rendition identity and so
    * usually survives a re-prepare of the same content - but it is optional, and the positional
    * fallback is not stable at all. Matching on the track's actual characteristics is what lets a
-   * user's pick survive a source replacement or content re-attaching after an ad break.
+   * user's pick survive a source replacement or the player re-preparing its content.
    */
   fun findEquivalent(available: Array<AudioTrack>, desired: AudioTrack): AudioTrack? =
     available.firstOrNull { it.id == desired.id }

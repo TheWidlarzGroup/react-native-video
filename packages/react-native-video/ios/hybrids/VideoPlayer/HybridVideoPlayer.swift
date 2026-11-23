@@ -301,11 +301,10 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
 
   // MARK: - Audio track selection state
   //
-  // Main-thread-only. Deliberately far smaller than the video-quality state
-  // above: alternate audio renditions are a real AVFoundation media selection
-  // group, exactly like text tracks, so a pick is an exact switch rather than a
-  // cap on an ABR algorithm. There is nothing to approximate, hence no
-  // requested/active split, no caps and no recheck timer.
+  // Main-thread-only. Alternate audio renditions are a real AVFoundation media
+  // selection group, exactly like text tracks, so a pick is an exact switch
+  // rather than a hint to an ABR algorithm. There is nothing to approximate,
+  // hence no requested/active split and no recheck timer.
 
   /// The id the user asked for through `selectAudioTrack`, or nil for
   /// automatic. Kept only because a call can legitimately arrive before the
@@ -806,7 +805,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   // `AVMediaSelectionGroup`), differing only in media characteristic
   // (`.audible` instead of `.legible`). `AVPlayerItem.select(_:in:)` switches
   // the rendition outright and takes effect on the next few sample buffers -
-  // this is a real selection, unlike the video-quality caps above.
+  // this is a real selection, not a preference the player may ignore.
 
   func getAvailableAudioTracks() throws -> [AudioTrack] {
     runOnMainThreadSync { audioTracksSnapshot() }
@@ -836,10 +835,9 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   /// The committed content item and its audible selection group, or nil when
   /// either does not exist yet.
   ///
-  /// Prefers the library's own committed item over `player.currentItem`: during
-  /// an ad break the content item may not be attached to the `AVPlayer` at all,
-  /// and selecting on whatever the player happens to be holding would target
-  /// the wrong item.
+  /// Prefers the library's own committed item over `player.currentItem`, so the
+  /// selection always targets the item this player loaded for the current
+  /// source rather than whatever the `AVPlayer` happens to be holding.
   /// Main thread only.
   private func audioSelectionContext() -> (item: AVPlayerItem, group: AVMediaSelectionGroup)? {
     guard let item = playerItem ?? player.currentItem else { return nil }

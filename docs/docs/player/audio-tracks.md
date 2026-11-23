@@ -82,11 +82,15 @@ useEvent(player, 'onAudioTrackChange', (data) => {
 
 Built on Media3's `TrackSelectionOverride` — the same mechanism used for text tracks. Ids prefer the manifest-declared rendition identity (`Format.id` — the HLS `EXT-X-MEDIA` or DASH `AdaptationSet` entry), falling back to a positional id (`audio-$group-$track`) only where `Format.id` is absent or not distinct across all tracks.
 
-Tracks the device can't decode are filtered out of `getAvailableAudioTracks()` entirely — forcing a selection onto an unsupported track would throw a native exception and kill playback outright, not just fail open the way an unsupported video rendition does.
+Tracks the device can't decode are filtered out of `getAvailableAudioTracks()` entirely — forcing a selection onto an unsupported track would throw a native exception and kill playback outright.
 
 ### iOS
 
 Built on `AVMediaSelectionGroup`/`AVPlayerItem.select(_:in:)` with the `.audible` media characteristic — the same construct text tracks already use, just a different characteristic. Ids are positional (`audio-$index-$displayName-$language`), since nothing on `AVMediaSelectionOption` is both stable and unique (two English options — stereo and 5.1, or original and described — can share a display name and language tag).
+
+:::note
+An audio track id saved by your app (for example as a user preference) is only valid for the same source. Ids can differ between sources, and on iOS they are positional, so after a source change look the track up again with `getAvailableAudioTracks()` (match on `language`/`label`) instead of reusing a stored id.
+:::
 
 `channels` is only ever reported for the track actually being rendered — `AVMediaSelectionOption` carries no channel count of its own, so it's read from the loaded track's format description, and reporting that count against the *other* options would be a guess.
 
