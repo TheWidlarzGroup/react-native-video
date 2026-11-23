@@ -100,6 +100,10 @@ Returning to Auto clears the override but deliberately never calls `setTrackType
 
 The rendition ladder is parsed directly from the HLS master playlist's `#EXT-X-STREAM-INF` entries, since AVFoundation exposes no rendition-enumeration API of its own. The chosen cap is deliberately *not* the rendition's own bitrate — it's the midpoint to the next-higher rendition (with headroom for the top rung) — since AVFoundation doesn't document whether its comparison is `<` or `<=`, and an exact cap can't separate same-resolution/different-bitrate rendition pairs that real ladders contain.
 
+The master playlist is fetched once per source with the source's own `headers`, so header-authenticated streams work too. This is a second request for the playlist (AVFoundation fetches it as well but exposes none of it); the result is cached for the life of the source. If that fetch fails (for example a 403), playback is unaffected but `getAvailableVideoTracks()` stays empty, and a `[RNV] Could not load HLS renditions` line is printed.
+
+A manual pick also overrides the cellular caps (`preferredPeakBitRateForExpensiveNetworks` / `preferredMaximumResolutionForExpensiveNetworks`), so a pinned rendition beats Data Saver on cellular. Returning to Auto restores whatever caps you configured through `bufferConfig`.
+
 Caps are written twice (zeroed, then re-written a runloop turn later) because a single write isn't reliably honored, and are re-armed once more ~4s after a pin in case AVFoundation hasn't moved yet — after that, `activeTrackId` is left to report the truth rather than fighting AVFoundation further.
 
 ## Troubleshooting
@@ -107,4 +111,5 @@ Caps are written twice (zeroed, then re-written a runloop turn later) because a 
 - **Raised the cap on iOS but playback stays on the low rendition**: this is a real AVFoundation limitation, not a bug here — once it drops, it won't climb back up on its own. The reliable pattern for an app that needs an exact rung is to let the pin ride the *next* source/item rather than expecting a live upgrade.
 - **Pinned a rendition on iOS and it briefly undershoots past the target**: also expected — AVFoundation's post-switch throughput estimate is pessimistic immediately after a cap change. It settles within a couple of seconds.
 - **A rendition is missing from `getAvailableVideoTracks()` on Android**: check whether the device can decode it. Unsupported renditions are excluded rather than offered and then hard-locking playback to a black screen on selection.
+- **`getAvailableVideoTracks()` returns an empty array on iOS for a source with `headers`**: check the device log for `[RNV] Could not load HLS renditions`. The playlist request failed (typically 401/403); make sure the headers are valid for the master playlist URL.
 - **`getAvailableVideoTracks()` returns an empty array**: either the manifest hasn't loaded yet (wait for the first `onVideoTrackChange`), or the source is progressive (non-HLS) and genuinely has only one rendition.

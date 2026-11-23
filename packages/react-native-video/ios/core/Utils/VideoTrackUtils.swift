@@ -51,13 +51,19 @@ enum VideoTrackUtils {
   /// its quality control when there is nothing to choose from). The gate matches
   /// the existing one in `AVURLAsset.getAssetInformation()`.
   ///
+  /// `headers` must be the source's own request headers: a header-gated stream
+  /// answers 403 to an anonymous playlist fetch even though AVPlayer, which sends
+  /// them, plays it fine.
+  ///
   /// This is a second HTTP request for the master playlist - AVPlayer fetches it
   /// too but exposes none of it - so callers are expected to cache the result
   /// per source.
-  static func loadRenditions(from url: URL) async throws -> [VideoRendition] {
+  static func loadRenditions(from url: URL, headers: [String: String] = [:]) async throws
+    -> [VideoRendition]
+  {
     guard url.pathExtension == "m3u8" else { return [] }
 
-    let manifest = try await HLSManifestParser.downloadManifest(from: url)
+    let manifest = try await HLSManifestParser.downloadManifest(from: url, headers: headers)
     let info = try HLSManifestParser.parseM3U8Manifest(manifest, baseURL: url)
 
     return renditions(from: info.streams)

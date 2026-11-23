@@ -318,6 +318,9 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   /// is a real extra HTTP request (AVPlayer fetches it too but exposes none of
   /// it), so it is done once per source.
   private var cachedVideoRenditionsURL: URL?
+  /// The headers that fetch was made with, so replacing a source with the same
+  /// URL but different headers (e.g. a refreshed token) fetches again.
+  private var cachedVideoRenditionsHeaders: [String: String] = [:]
   private var videoRenditionLoadTask: Task<Void, Never>?
 
   /// The rendition actually on screen, nearest-matched from the access log.
@@ -399,6 +402,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     videoQualityRecheckWorkItem = nil
     cachedVideoRenditions = []
     cachedVideoRenditionsURL = nil
+    cachedVideoRenditionsHeaders = [:]
     activeVideoTrackId = nil
     requestedVideoTrackId = nil
     hasPinnedVideoQuality = false
@@ -868,10 +872,12 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   /// Main thread only.
   private func beginVideoRenditionLoad(for source: any HybridVideoPlayerSourceSpec) {
     guard let url = (source as? NativeVideoPlayerSourceSpec)?.url else { return }
-    guard cachedVideoRenditionsURL != url else { return }
+    let headers = source.config.headers ?? [:]
+    guard cachedVideoRenditionsURL != url || cachedVideoRenditionsHeaders != headers else { return }
 
     videoRenditionLoadTask?.cancel()
     cachedVideoRenditionsURL = url
+    cachedVideoRenditionsHeaders = headers
     cachedVideoRenditions = []
     activeVideoTrackId = nil
 
@@ -885,11 +891,20 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     }
 
     videoRenditionLoadTask = Task.detached(priority: .utility) { [weak self] in
-      let renditions = (try? await VideoTrackUtils.loadRenditions(from: url)) ?? []
+      var renditions: [VideoRendition] = []
+      do {
+        renditions = try await VideoTrackUtils.loadRenditions(from: url, headers: headers)
+      } catch {
+        // Playback is unaffected, but the quality list stays empty - say why
+        // (e.g. a 403 from a gated playlist) instead of failing silently.
+        print("[RNV] Could not load HLS renditions from \(url.absoluteString): \(error)")
+      }
       guard !Task.isCancelled else { return }
 
       await MainActor.run {
-        guard let self, self.cachedVideoRenditionsURL == url else { return }
+        guard let self, self.cachedVideoRenditionsURL == url,
+          self.cachedVideoRenditionsHeaders == headers
+        else { return }
         self.cachedVideoRenditions = renditions
         // A pin names a rung of a specific ladder. If the new source has no such
         // rung, fall back to automatic rather than keep reporting a selection
