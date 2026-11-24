@@ -140,14 +140,6 @@ Provides a custom chapter source for tvOS. This prop takes an array of objects w
 
 ---
 
-### `currentPlaybackTime`
-
-<PlatformsList types={['Android', 'iOS']} />
-
-When playing an HLS live stream with an `EXT-X-PROGRAM-DATE-TIME` tag, this property contains the epoch value in milliseconds.
-
----
-
 ### `controls`
 
 <PlatformsList types={['Android', 'iOS', 'visionOS', 'web']} />
@@ -188,6 +180,9 @@ Adjust the control styles. This prop is needed only if `controls={true}` and is 
 | hideSettingButton                   | boolean | Hides the settings button. Default is `true`.                       |
 | seekIncrementMS                     | number  | Defines the seek increment in milliseconds. Default is `10000`.     |
 | liveLabel                           | string  | Sets a label for live video.                                        |
+| hideLiveBadge                       | boolean | Hides the LIVE badge drawn over live streams. Default is `false`.   |
+
+`hideLiveBadge` also applies when `controls={false}`: the badge is drawn on the video surface, not by the controller.
 
 **Example with default values:**
 
@@ -206,7 +201,8 @@ controlsStyles={{
   hideNotificationBarOnFullScreenMode: true,
   hideSettingButton: true,
   seekIncrementMS: 10000,
-  liveLabel: "LIVE"
+  liveLabel: "LIVE",
+  hideLiveBadge: false
 }}
 ```
 
