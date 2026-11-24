@@ -760,9 +760,15 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       return nil
     }
 
+    // Same rule as getAvailableTextTracks(), so the id matches the one in the list
+    let name =
+      selectedOption.commonMetadata.first(where: { $0.commonKey == .commonKeyTitle })?
+      .stringValue
+      ?? selectedOption.displayName
+
     let isExternal =
       source.config.externalSubtitles?.contains { subtitle in
-        selectedOption.displayName.contains(subtitle.label)
+        name.contains(subtitle.label)
       } ?? false
 
     let trackId =
