@@ -11,6 +11,8 @@ class HLSSubtitleInjector: NSObject {
   private static let customScheme = "rnv-hls"
   private static let subtitleScheme = "rnv-hls-subtitles"
   private static let subtitleGroupID = "rnv-subs"
+  // BANDWIDTH is required on a variant; the real bitrate of a bare media playlist is unknown.
+  private static let wrappedVariantBandwidth = 1_000_000
   private static let resourceLoaderQueue = DispatchQueue(
     label: "com.nitro.HLSSubtitleInjector.resourceLoaderQueue",
     qos: .userInitiated
@@ -61,6 +63,20 @@ class HLSSubtitleInjector: NSObject {
     _ originalContent: String,
     with externalSubtitles: [NativeExternalSubtitle]
   ) throws -> String {
+    // A media playlist (segments, no variants) cannot carry subtitle renditions, so serve a
+    // one-variant master playlist that points at it.
+    if !originalContent.contains("#EXT-X-STREAM-INF") && originalContent.contains("#EXTINF") {
+      var masterLines = ["#EXTM3U"]
+      for (index, subtitle) in externalSubtitles.enumerated() {
+        masterLines.append(createSubtitleTrackEntry(for: subtitle, index: index))
+      }
+      masterLines.append(
+        "#EXT-X-STREAM-INF:BANDWIDTH=\(Self.wrappedVariantBandwidth),SUBTITLES=\"\(Self.subtitleGroupID)\""
+      )
+      masterLines.append(originalManifestUrl.absoluteString)
+      return masterLines.joined(separator: "\n")
+    }
+
     let lines = originalContent.components(separatedBy: .newlines)
     var modifiedLines: [String] = []
     var foundExtM3U = false
