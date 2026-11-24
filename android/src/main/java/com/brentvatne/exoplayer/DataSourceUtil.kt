@@ -30,10 +30,12 @@ object DataSourceUtil {
 
     @JvmStatic
     fun getDefaultDataSourceFactory(context: ReactContext, bandwidthMeter: DefaultBandwidthMeter?, requestHeaders: Map<String, String>?): DataSource.Factory {
-        if (defaultDataSourceFactory == null || !requestHeaders.isNullOrEmpty()) {
-            defaultDataSourceFactory = buildDataSourceFactory(context, bandwidthMeter, requestHeaders)
+        if (!requestHeaders.isNullOrEmpty()) {
+            return buildDataSourceFactory(context, bandwidthMeter, requestHeaders)
         }
-        return defaultDataSourceFactory as DataSource.Factory
+        return defaultDataSourceFactory ?: buildDataSourceFactory(context, bandwidthMeter, requestHeaders).also {
+            defaultDataSourceFactory = it
+        }
     }
 
     @JvmStatic
@@ -42,10 +44,12 @@ object DataSourceUtil {
         bandwidthMeter: DefaultBandwidthMeter?,
         requestHeaders: Map<String, String>?
     ): HttpDataSource.Factory {
-        if (defaultHttpDataSourceFactory == null || !requestHeaders.isNullOrEmpty()) {
-            defaultHttpDataSourceFactory = buildHttpDataSourceFactory(context, bandwidthMeter, requestHeaders)
+        if (!requestHeaders.isNullOrEmpty()) {
+            return buildHttpDataSourceFactory(context, bandwidthMeter, requestHeaders)
         }
-        return defaultHttpDataSourceFactory as HttpDataSource.Factory
+        return defaultHttpDataSourceFactory ?: buildHttpDataSourceFactory(context, bandwidthMeter, requestHeaders).also {
+            defaultHttpDataSourceFactory = it
+        }
     }
 
     private fun buildDataSourceFactory(
