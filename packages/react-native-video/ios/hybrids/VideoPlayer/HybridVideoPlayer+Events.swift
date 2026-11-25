@@ -178,6 +178,10 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
     _eventEmitter?.onTextTrackDataChanged(texts.map { $0.string })
   }
 
+  func onMediaSelectionChanged() {
+    emitSelectedTextTrackIfChanged()
+  }
+
   func onTimedMetadataChanged(timedMetadata: [AVMetadataItem]) {
     var metadata: [TimedMetadataObject] = []
     for item in timedMetadata {
@@ -199,6 +203,8 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
   }
 
   func onPlayerItemChange(player _: AVPlayer, playerItem: AVPlayerItem?) {
+    // The new item starts with its own selection.
+    emitSelectedTextTrackIfChanged()
     guard showNotificationControls, let playerItem else { return }
     DispatchQueue.main.async {
       NowPlayingInfoCenterManager.shared.updateStaticInfo(ifCurrentItem: playerItem)

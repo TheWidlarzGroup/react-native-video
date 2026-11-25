@@ -298,6 +298,8 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
 
   // Text track selection state
   private var selectedExternalTrackIndex: Int? = nil
+  // The text track last reported by onTrackChange, nil for none.
+  private var emittedTextTrackId: String? = nil
 
   var isCurrentlyBuffering: Bool = false
 
@@ -691,7 +693,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     guard let textTrack = textTrack else {
       currentItem.select(nil, in: mediaSelection)
       selectedExternalTrackIndex = nil
-      _eventEmitter?.onTrackChange(nil)
+      emitSelectedTextTrackIfChanged()
       return
     }
 
@@ -699,14 +701,14 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     case .first(_):
       currentItem.select(nil, in: mediaSelection)
       selectedExternalTrackIndex = nil
-      _eventEmitter?.onTrackChange(nil)
+      emitSelectedTextTrackIfChanged()
       return
     case .second(let textTrack):
       // If textTrack id is empty, deselect any selected track
       if textTrack.id.isEmpty {
         currentItem.select(nil, in: mediaSelection)
         selectedExternalTrackIndex = nil
-        _eventEmitter?.onTrackChange(nil)
+        emitSelectedTextTrackIfChanged()
         return
       }
 
@@ -718,7 +720,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
           let option = mediaSelection.options[trackIndex]
           currentItem.select(option, in: mediaSelection)
           selectedExternalTrackIndex = trackIndex
-          _eventEmitter?.onTrackChange(.second(textTrack))
+          emitSelectedTextTrackIfChanged()
         }
       } else if textTrack.id.hasPrefix("builtin-") {
         for option in mediaSelection.options {
@@ -727,12 +729,20 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
           if optionId == textTrack.id {
             currentItem.select(option, in: mediaSelection)
             selectedExternalTrackIndex = nil
-            _eventEmitter?.onTrackChange(.second(textTrack))
+            emitSelectedTextTrackIfChanged()
             return
           }
         }
       }
     }
+  }
+
+  // Reports a selection change once, made here or in the native controls (they post it as well).
+  func emitSelectedTextTrackIfChanged() {
+    let track = selectedTrack
+    guard track?.id != emittedTextTrackId else { return }
+    emittedTextTrackId = track?.id
+    _eventEmitter?.onTrackChange(track.map { .second($0) })
   }
 
   var selectedTrack: TextTrack? {

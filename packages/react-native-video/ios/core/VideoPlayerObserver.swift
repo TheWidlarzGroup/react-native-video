@@ -13,6 +13,7 @@ protocol VideoPlayerObserverDelegate: AnyObject {
   func onPlayerItemChange(player: AVPlayer, playerItem: AVPlayerItem?)
   func onPlayerItemWillChange(hasNewPlayerItem: Bool)
   func onTextTrackDataChanged(texts: [NSAttributedString])
+  func onMediaSelectionChanged()
   func onTimedMetadataChanged(timedMetadata: [AVMetadataItem])
   func onRateChanged(rate: Float, reason: AVPlayer.RateDidChangeReason?)
   func onPlaybackBufferEmpty()
@@ -31,6 +32,7 @@ extension VideoPlayerObserverDelegate {
   func onPlayerItemChange(player: AVPlayer, playerItem: AVPlayerItem?) {}
   func onPlayerItemWillChange(hasNewPlayerItem: Bool) {}
   func onTextTrackDataChanged(texts: [NSAttributedString]) {}
+  func onMediaSelectionChanged() {}
   func onTimedMetadataChanged(timedMetadata: [AVMetadataItem]) {}
   func onRateChanged(rate: Float, reason: AVPlayer.RateDidChangeReason?) {}
   func onPlaybackBufferEmpty() {}
@@ -67,6 +69,7 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
   var playbackBufferFullObserver: NSKeyValueObservation?
   var playerItemStatusObserver: NSKeyValueObservation?
   var playerItemAccessLogObserver: NSObjectProtocol?
+  var playerItemMediaSelectionObserver: NSObjectProtocol?
   
   var metadataOutput: AVPlayerItemMetadataOutput?
   var legibleOutput: AVPlayerItemLegibleOutput?
@@ -153,6 +156,15 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
     ) { [weak self] notification in
       self?.onPlayerAccessLog(playerItem: playerItem)
     }
+
+    // Also posted for a selection made in the native controls.
+    playerItemMediaSelectionObserver = NotificationCenter.default.addObserver(
+      forName: AVPlayerItem.mediaSelectionDidChangeNotification,
+      object: playerItem,
+      queue: nil
+    ) { [weak self] _ in
+      self?.delegate?.onMediaSelectionChanged()
+    }
     
     setupBufferObservers(for: playerItem)
     
@@ -178,6 +190,10 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
     if let playerItemAccessLogObserver = playerItemAccessLogObserver {
       NotificationCenter.default.removeObserver(playerItemAccessLogObserver)
       self.playerItemAccessLogObserver = nil
+    }
+    if let playerItemMediaSelectionObserver = playerItemMediaSelectionObserver {
+      NotificationCenter.default.removeObserver(playerItemMediaSelectionObserver)
+      self.playerItemMediaSelectionObserver = nil
     }
     // Invalidate KVO observers
     clearBufferObservers()
