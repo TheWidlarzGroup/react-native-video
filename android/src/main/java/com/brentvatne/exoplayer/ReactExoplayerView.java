@@ -27,6 +27,7 @@ import android.os.Message;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -144,11 +145,13 @@ import com.google.ads.interactivemedia.v3.api.ImaSdkFactory;
 import com.google.ads.interactivemedia.v3.api.ImaSdkSettings;
 import com.google.common.collect.ImmutableList;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -229,7 +232,12 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean useCache = false;
     private boolean disableCache = false;
     private ControlsConfig controlsConfig = new ControlsConfig();
-    private ArrayList<Integer> rootViewChildrenOriginalVisibility = new ArrayList<Integer>();
+    private final Map<View, Integer> rootViewChildrenOriginalVisibility = new HashMap<>();
+    // The activity has one PiP window, so only one player moves its view into the root: the one that called
+    // enterPictureInPictureMode(); otherwise (auto-enter, or PiP started by the app) the first one with
+    // enterPictureInPictureOnLeave, or failing that the first one notified.
+    private static WeakReference<ReactExoplayerView> pictureInPictureOwner = new WeakReference<>(null);
+    private static boolean pictureInPictureOwnerIsFallback = false;
 
     /*
      * When user is seeking first called is on onPositionDiscontinuity -> DISCONTINUITY_REASON_SEEK
@@ -405,6 +413,8 @@ public class ReactExoplayerView extends FrameLayout implements
     public void cleanUpResources() {
         stopPlayback();
         themedReactContext.removeLifecycleEventListener(this);
+        if (pictureInPictureOwner.get() == this) pictureInPictureOwner = new WeakReference<>(null);
+        restoreRootViewChildren(false);
         releasePlayer();
         viewHasDropped = true;
     }
@@ -2586,41 +2596,65 @@ public class ReactExoplayerView extends FrameLayout implements
             return;
         }
 
+        if (!isInPictureInPicture) {
+            pictureInPictureOwner = new WeakReference<>(null);
+            restoreRootViewChildren(true);
+            return;
+        }
+
+        ReactExoplayerView owner = pictureInPictureOwner.get();
+        if (owner == null || (owner != this && pictureInPictureOwnerIsFallback && enterPictureInPictureOnLeave)) {
+            if (owner != null) owner.restoreRootViewChildren(true);
+            pictureInPictureOwner = new WeakReference<>(this);
+            pictureInPictureOwnerIsFallback = !enterPictureInPictureOnLeave;
+            owner = this;
+        }
+        if (owner != this) return;
+
+        ViewGroup rootView = getActivityRootView();
+        if (rootView == null || exoPlayerView.getParent() == rootView) return;
+        ViewGroup parent = (ViewGroup) exoPlayerView.getParent();
+        if (parent != null) {
+            parent.removeView(exoPlayerView);
+        }
+        rootViewChildrenOriginalVisibility.clear();
+        for (int i = 0; i < rootView.getChildCount(); i++) {
+            View child = rootView.getChildAt(i);
+            rootViewChildrenOriginalVisibility.put(child, child.getVisibility());
+            child.setVisibility(View.GONE);
+        }
+        rootView.addView(exoPlayerView, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+    }
+
+    @Nullable
+    private ViewGroup getActivityRootView() {
         Activity currentActivity = themedReactContext.getCurrentActivity();
-        if (currentActivity == null) return;
+        if (currentActivity == null) return null;
+        return currentActivity.getWindow().getDecorView().findViewById(android.R.id.content);
+    }
 
-        View decorView = currentActivity.getWindow().getDecorView();
-        ViewGroup rootView = decorView.findViewById(android.R.id.content);
-
-        LayoutParams layoutParams = new LayoutParams(
-                LayoutParams.MATCH_PARENT,
-                LayoutParams.MATCH_PARENT);
-
-        if (isInPictureInPicture) {
-            ViewGroup parent = (ViewGroup)exoPlayerView.getParent();
-            if (parent != null) {
-                parent.removeView(exoPlayerView);
-            }
-            for (int i = 0; i < rootView.getChildCount(); i++) {
-                if (rootView.getChildAt(i) != exoPlayerView) {
-                    rootViewChildrenOriginalVisibility.add(rootView.getChildAt(i).getVisibility());
-                    rootView.getChildAt(i).setVisibility(View.GONE);
-                }
-            }
-            rootView.addView(exoPlayerView, layoutParams);
-        } else {
-            rootView.removeView(exoPlayerView);
-            if (!rootViewChildrenOriginalVisibility.isEmpty()) {
-                for (int i = 0; i < rootView.getChildCount(); i++) {
-                    rootView.getChildAt(i).setVisibility(rootViewChildrenOriginalVisibility.get(i));
-                }
-                addView(exoPlayerView, 0, layoutParams);
-                reLayoutControls();
-            }
+    /** Takes exoPlayerView out of the activity root and shows the views that were hidden for PiP. */
+    private void restoreRootViewChildren(boolean reattach) {
+        ViewParent parent = exoPlayerView.getParent();
+        if (!rootViewChildrenOriginalVisibility.isEmpty() && parent instanceof ViewGroup && parent != this) {
+            ((ViewGroup) parent).removeView(exoPlayerView);
+        }
+        for (Map.Entry<View, Integer> entry : rootViewChildrenOriginalVisibility.entrySet()) {
+            entry.getKey().setVisibility(entry.getValue());
+        }
+        rootViewChildrenOriginalVisibility.clear();
+        if (reattach && exoPlayerView.getParent() == null) {
+            addView(exoPlayerView, 0, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+            reLayoutControls();
         }
     }
 
     public void enterPictureInPictureMode() {
+        boolean claimed = pictureInPictureOwner.get() == null;
+        if (claimed) {
+            pictureInPictureOwner = new WeakReference<>(this);
+            pictureInPictureOwnerIsFallback = false;
+        }
         PictureInPictureParams _pipParams = null;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             ArrayList<RemoteAction> actions = PictureInPictureUtil.getPictureInPictureActions(themedReactContext, isPaused, pictureInPictureReceiver);
@@ -2630,23 +2664,17 @@ public class ReactExoplayerView extends FrameLayout implements
             }
             _pipParams = pictureInPictureParamsBuilder.build();
         }
-        PictureInPictureUtil.enterPictureInPictureMode(themedReactContext, _pipParams);
+        boolean entered = PictureInPictureUtil.enterPictureInPictureMode(themedReactContext, _pipParams);
+        if (!entered && claimed && pictureInPictureOwner.get() == this) {
+            pictureInPictureOwner = new WeakReference<>(null);
+        }
     }
 
     public void exitPictureInPictureMode() {
         Activity currentActivity = themedReactContext.getCurrentActivity();
         if (currentActivity == null) return;
 
-        View decorView = currentActivity.getWindow().getDecorView();
-        ViewGroup rootView = decorView.findViewById(android.R.id.content);
-
-        if (!rootViewChildrenOriginalVisibility.isEmpty()) {
-            if (exoPlayerView.getParent().equals(rootView)) rootView.removeView(exoPlayerView);
-            for (int i = 0; i < rootView.getChildCount(); i++) {
-                rootView.getChildAt(i).setVisibility(rootViewChildrenOriginalVisibility.get(i));
-            }
-            rootViewChildrenOriginalVisibility.clear();
-        }
+        restoreRootViewChildren(true);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && currentActivity.isInPictureInPictureMode()) {
             currentActivity.moveTaskToBack(false);
