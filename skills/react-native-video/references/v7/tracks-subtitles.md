@@ -29,6 +29,8 @@ useVideoPlayer({
 });
 ```
 
+External subtitles start turned off on both platforms: select one with `selectTextTrack` (match it by `language`).
+
 > iOS supports only `.vtt` external subtitles. Embedded tracks (in the HLS/DASH manifest) work via `getAvailableTextTracks()` on both platforms.
 
 ## Audio / video track selection
