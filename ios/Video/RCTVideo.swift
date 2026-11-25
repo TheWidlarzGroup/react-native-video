@@ -200,7 +200,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         super.init(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
         ReactNativeVideoManager.shared.registerView(newInstance: self)
         #if USE_GOOGLE_IMA
-            _imaAdsManager = RCTIMAAdsManager(video: self, isPictureInPictureActive: isPictureInPictureActive)
+            // A method reference here would capture self strongly: RCTVideo -> RCTIMAAdsManager -> closure -> RCTVideo,
+            // so the view never deallocated and deinit never released the ads (#4866).
+            _imaAdsManager = RCTIMAAdsManager(video: self, isPictureInPictureActive: { [weak self] in
+                self?.isPictureInPictureActive() ?? false
+            })
         #endif
 
         _eventDispatcher = eventDispatcher
@@ -280,7 +284,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         #if USE_GOOGLE_IMA
-            _imaAdsManager = RCTIMAAdsManager(video: self, isPictureInPictureActive: isPictureInPictureActive)
+            // A method reference here would capture self strongly: RCTVideo -> RCTIMAAdsManager -> closure -> RCTVideo,
+            // so the view never deallocated and deinit never released the ads (#4866).
+            _imaAdsManager = RCTIMAAdsManager(video: self, isPictureInPictureActive: { [weak self] in
+                self?.isPictureInPictureActive() ?? false
+            })
         #endif
     }
 
@@ -1458,6 +1466,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     // MARK: - Lifecycle
 
     override func removeFromSuperview() {
+        #if USE_GOOGLE_IMA
+            // Stop ads together with the rest of playback (#3722, #4866). The manager itself is kept,
+            // because other code paths still call into it after removal (#3911).
+            _imaAdsManager.releaseAds()
+        #endif
         self._player?.replaceCurrentItem(with: nil)
         if let player = _player {
             player.pause()
