@@ -82,8 +82,7 @@ export interface VideoPlayerEvents {
    */
   onTextTrackDataChanged: (texts: string[]) => void;
   /**
-   * Called when the selected text track changes: by `selectTextTrack`, the native controls or a
-   * new source.
+   * Called when the selected text track changes.
    * @param track - The newly selected text track, or null if no track is selected
    * @platform Android, Ios
    */
