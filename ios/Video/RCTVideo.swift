@@ -928,17 +928,19 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             return
         }
 
+        // The seek pauses the player itself; with controls that pause must not turn into `paused`
+        let wasPaused = _paused
         RCTPlayerOperations.seek(
             player: player,
             playerItem: item,
-            paused: _paused,
+            paused: wasPaused,
             seekTime: time.floatValue,
             seekTolerance: tolerance.floatValue
         ) { [weak self] (_: Bool) in
             guard let self else { return }
 
             self._playerObserver.addTimeObserverIfNotSet()
-            self.setPaused(self._paused)
+            self.setPaused(wasPaused)
             self.onVideoSeek?(["currentTime": NSNumber(value: Float(CMTimeGetSeconds(item.currentTime()))),
                                "seekTime": time,
                                "target": self.reactTag as Any])
