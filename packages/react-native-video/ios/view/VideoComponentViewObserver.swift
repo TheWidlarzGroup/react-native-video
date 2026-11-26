@@ -127,10 +127,13 @@ class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
   }
   
   func playerViewController(
-    _: AVPlayerViewController,
+    _ playerViewController: AVPlayerViewController,
     willEndFullScreenPresentationWithAnimationCoordinator coordinator: UIViewControllerTransitionCoordinator
   ) {
     delegate?.willExitFullscreen()
+    // AVKit pauses the player when native fullscreen is dismissed; resume it, as v6 does.
+    let player = playerViewController.player
+    let wasPlaying = player?.timeControlStatus == .playing
 
     coordinator.animate(alongsideTransition: nil) { [weak self] context in
       guard let self = self else { return }
@@ -147,6 +150,9 @@ class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
       }
 
       self.delegate?.onFullscreenChange(false)
+      if wasPlaying {
+        player?.play()
+      }
     }
   }
   
