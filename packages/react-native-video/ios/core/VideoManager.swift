@@ -16,6 +16,9 @@ class VideoManager {
   private let videoView = NSHashTable<VideoComponentView>.weakObjects()
   
   private var isAudioSessionActive = false
+  private var isInterrupted = false
+  // A background app can only resume with a mixable session; cleared when it is in front again (#4825)
+  private var mixUntilForeground = false
   private var remoteControlEventsActive = false
 
   /// Global flag to force disable audio session management
@@ -105,6 +108,8 @@ class VideoManager {
     runOnMainThread { [player] in
       self.players.add(player)
       PluginsRegistry.shared.notifyPlayerCreated(player: player)
+      // AVPlayer activates the session on play(), so the category has to be set before (#5140)
+      self.updateAudioSessionConfiguration()
     }
   }
   
@@ -207,6 +212,11 @@ class VideoManager {
       return
     }
 
+    // Reconfiguring during an interruption makes the system's own resume fail (#4825)
+    if isInterrupted || players.allObjects.contains(where: { $0.wasInterruptedWhilePlaying }) {
+      return
+    }
+
     let isAnyPlayerPlaying = players.allObjects.contains { hybridPlayer in
       hybridPlayer.player.isMuted == false && hybridPlayer.player.rate != 0
     }
@@ -219,13 +229,13 @@ class VideoManager {
       player.showNotificationControls
     }
     
+    configureAudioSession()
+
     if isAnyPlayerPlaying || anyPlayerNeedsNotMixWithOthers || anyPlayerNeedsNotificationControls || remoteControlEventsActive {
       activateAudioSession()
     } else {
       deactivateAudioSession()
     }
-    
-    configureAudioSession()
   }
 
   private func configureAudioSession() {
@@ -356,6 +366,10 @@ class VideoManager {
   }
   
   func determineAudioMixingMode() -> MixAudioMode {
+    if mixUntilForeground {
+      return .mixwithothers
+    }
+
     let activePlayers = players.allObjects.filter { player in
       player.isPlaying && player.player.isMuted != true
     }
@@ -418,6 +432,7 @@ class VideoManager {
       case .began:
         // The interruption deactivated our session — keep the cache honest.
         self.isAudioSessionActive = false
+        self.isInterrupted = true
         // Not a system background pause; don't auto-resume after an interruption.
         for player in self.players.allObjects {
           player.wasPlayingInBackground = false
@@ -425,7 +440,17 @@ class VideoManager {
 
       case .ended:
         // Interruption ended, check if we should resume audio session
+        self.isInterrupted = false
         if options?.contains(.shouldResume) == true {
+          for player in self.players.allObjects {
+            player.wasInterruptedWhilePlaying = false
+          }
+          self.mixUntilForeground = UIApplication.shared.applicationState != .active
+          self.updateAudioSessionConfiguration()
+        } else {
+          for player in self.players.allObjects {
+            player.wasInterruptedWhilePlaying = false
+          }
           self.updateAudioSessionConfiguration()
         }
 
@@ -521,6 +546,12 @@ class VideoManager {
         }
 
         player.wasPlayingInBackground = false
+      }
+
+      self.isInterrupted = false
+      self.mixUntilForeground = false
+      for player in self.players.allObjects {
+        player.wasInterruptedWhilePlaying = false
       }
 
       // Re-assert the session — it may have been deactivated by the system while backgrounded.

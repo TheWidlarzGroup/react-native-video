@@ -292,6 +292,8 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
 
   var wasAutoPaused: Bool = false
 
+  var wasInterruptedWhilePlaying: Bool = false
+
   /// Whether the player was playing when backgrounded — used to resume it on
   /// return if the system paused background playback.
   var wasPlayingInBackground: Bool = false

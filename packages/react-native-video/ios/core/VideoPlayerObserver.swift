@@ -108,9 +108,9 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
       self.delegate?.onRateChanged(rate: player.rate, reason: reason)
     }
 
-    playerTimeControlStatusObserver = player.observe(\.timeControlStatus, options: [.new]) { [weak self] _, change in
-      guard let status = change.newValue else { return }
-      self?.delegate?.onTimeControlStatusChanged(status: status)
+    // change.newValue is always nil for enum key paths, so read the player (#5140)
+    playerTimeControlStatusObserver = player.observe(\.timeControlStatus, options: [.new]) { [weak self] player, _ in
+      self?.delegate?.onTimeControlStatusChanged(status: player.timeControlStatus)
     }
     
     playerExternalPlaybackActiveObserver = player.observe(\.isExternalPlaybackActive, options: [.new]) { [weak self] _, change in
@@ -123,9 +123,8 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
       self?.delegate?.onVolumeChanged(volume: volume)
     }
     
-    playerStatusObserver = player.observe(\.status, options: [.new]) { [weak self] _, change in
-      guard let status = change.newValue else { return }
-      self?.delegate?.onPlayerStatusChanged(status: status)
+    playerStatusObserver = player.observe(\.status, options: [.new]) { [weak self] player, _ in
+      self?.delegate?.onPlayerStatusChanged(status: player.status)
     }
     
     // 500ms interval TODO: Make this configurable
