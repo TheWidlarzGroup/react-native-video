@@ -163,6 +163,23 @@ class VideoManager {
     }
   }
 
+  // Leaving the app pauses a player without playInBackground; in PiP it has to keep playing
+  func pictureInPictureWillStart(view: VideoComponentView?) {
+    runOnMainThread { [weak self, weak view] in
+      guard let self, let viewPlayer = view?.player as AnyObject? else { return }
+      for player in self.players.allObjects where player === viewPlayer && player.wasAutoPaused {
+        player.wasAutoPaused = false
+        try? player.play()
+      }
+    }
+  }
+
+  private func isInPictureInPicture(_ player: HybridVideoPlayer) -> Bool {
+    videoView.allObjects.contains { view in
+      view.isPictureInPictureActive && (view.player as AnyObject?) === player
+    }
+  }
+
   // MARK: - Remote Control Events
   func setRemoteControlEventsActive(_ active: Bool) {
     runOnMainThread { [weak self] in
@@ -468,7 +485,8 @@ class VideoManager {
       guard let self else { return }
       // Pause all players when the app is about to become inactive
       for player in self.players.allObjects {
-        if player.playInBackground || player.playWhenInactive || !player.isPlaying || player.player.isExternalPlaybackActive == true {
+        if player.playInBackground || player.playWhenInactive || !player.isPlaying || player.player.isExternalPlaybackActive == true
+          || self.isInPictureInPicture(player) {
           continue
         }
 
@@ -496,6 +514,10 @@ class VideoManager {
       guard let self else { return }
       // Pause all players when the app enters background
       for player in self.players.allObjects {
+        if self.isInPictureInPicture(player) {
+          continue
+        }
+
         if player.playInBackground || player.player.isExternalPlaybackActive == true || !player.isPlaying {
           player.wasPlayingInBackground = player.playInBackground && player.isPlaying
           continue
