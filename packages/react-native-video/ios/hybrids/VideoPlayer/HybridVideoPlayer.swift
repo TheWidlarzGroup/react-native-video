@@ -262,7 +262,12 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     }
   }
 
-  var loop: Bool = false
+  var loop: Bool = false {
+    didSet {
+      // A player that stops at the end cannot be started again from the background
+      player.actionAtItemEnd = loop ? .none : .pause
+    }
+  }
 
   var mixAudioMode: MixAudioMode = .auto {
     didSet {

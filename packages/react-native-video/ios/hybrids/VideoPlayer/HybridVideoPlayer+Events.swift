@@ -19,7 +19,9 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
 
     if loop {
       currentTime = 0
-      try? play()
+      if player.rate == 0 {
+        try? play()
+      }
     }
   }
 
