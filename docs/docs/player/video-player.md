@@ -111,7 +111,7 @@ const player = new VideoPlayer({
 The player treats that part as the whole video: `currentTime` is `0` at `cropStart`, `duration` is the length of the part, `seekTo()` and `seekBy()` move inside it, `onEnd` is emitted at `cropEnd`, and `loop` restarts from `cropStart`. `startPosition` counts from `cropStart`.
 
 :::note
-A `cropStart` that is not greater than `0` and a `cropEnd` that is not greater than `cropStart` are ignored. On iOS the scrubber of the native controls still shows the whole video. On the web both options are ignored.
+A `cropStart` that is not greater than `0` and a `cropEnd` that is not greater than `cropStart` are ignored, as are `NaN` and `Infinity`. A seek past `cropEnd` stops at `cropEnd`. Cropping is not supported for live streams. On iOS the scrubber of the native controls still shows the whole video. On the web both options are ignored.
 :::
 
 ### Buffer Config

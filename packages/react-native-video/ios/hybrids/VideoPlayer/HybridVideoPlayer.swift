@@ -233,11 +233,19 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
 
   var currentTime: Double {
     set {
-      _eventEmitter?.onSeek(newValue)
-      // Time is counted from `cropStart` when the source is cropped
+      // Time is counted from `cropStart` when the source is cropped, and a seek past
+      // `cropEnd` stops at `cropEnd`, as on Android.
+      var target = max(0, newValue)
+      if let item = player.currentItem, item.forwardPlaybackEndTime.isNumeric {
+        let croppedDuration = item.croppedDuration
+        if croppedDuration.isFinite {
+          target = min(target, croppedDuration)
+        }
+      }
+      _eventEmitter?.onSeek(target)
       let cropStart = player.currentItem?.cropStartSeconds ?? 0
       player.seek(
-        to: CMTime(seconds: max(0, newValue) + cropStart, preferredTimescale: 1000),
+        to: CMTime(seconds: target + cropStart, preferredTimescale: 1000),
         toleranceBefore: .zero,
         toleranceAfter: .zero
       )

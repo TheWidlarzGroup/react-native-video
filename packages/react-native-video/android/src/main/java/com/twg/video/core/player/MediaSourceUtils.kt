@@ -115,8 +115,17 @@ fun buildExternalSubtitlesMediaSource(context: Context, source: HybridVideoPlaye
 // The clipped source reports positions and duration relative to that part.
 @OptIn(UnstableApi::class)
 fun clipMediaSource(mediaSource: MediaSource, config: NativeVideoConfig): MediaSource {
-  val cropStartMs = config.cropStart?.toLong()?.takeIf { it > 0 } ?: 0L
-  val cropEndMs = config.cropEnd?.toLong()?.takeIf { it > cropStartMs }
+  // ClippingMediaSource takes microseconds. Larger values would overflow Long, so they (and
+  // Infinity) count as no crop: a `cropEnd` like that plays to the end of the source.
+  val maxCropMs = Long.MAX_VALUE / 1000
+  val cropStartMs = config.cropStart
+    ?.takeIf { it.isFinite() && it > 0 && it < maxCropMs }
+    ?.toLong()
+    ?: 0L
+  val cropEndMs = config.cropEnd
+    ?.takeIf { it.isFinite() && it < maxCropMs }
+    ?.toLong()
+    ?.takeIf { it > cropStartMs }
 
   if (cropStartMs == 0L && cropEndMs == null) {
     return mediaSource

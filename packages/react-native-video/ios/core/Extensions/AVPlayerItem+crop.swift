@@ -13,13 +13,14 @@ extension AVPlayerItem {
 
   /// Applies `cropStart` and `cropEnd` (milliseconds). Values that make no range are ignored.
   func setCrop(start cropStart: Double?, end cropEnd: Double?) {
-    let startMs = max(0, cropStart ?? 0)
+    // NaN and Infinity count as not set, as on Android
+    let startMs = cropStart.flatMap { $0.isFinite ? max(0, $0) : nil } ?? 0
 
     if startMs > 0 {
       reversePlaybackEndTime = CMTime(seconds: startMs / 1000, preferredTimescale: 1000)
     }
 
-    if let cropEnd, cropEnd > startMs {
+    if let cropEnd, cropEnd.isFinite, cropEnd > startMs {
       forwardPlaybackEndTime = CMTime(seconds: cropEnd / 1000, preferredTimescale: 1000)
     }
   }
