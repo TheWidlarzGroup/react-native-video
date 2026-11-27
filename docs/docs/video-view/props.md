@@ -26,7 +26,7 @@ keywords: [VideoView props, player, controls, resizeMode, surfaceType, picture-i
 
 ## Poster, loader and shutter
 
-`poster`, `renderLoader` and `shutterColor` cover the video from the moment a source starts loading until the player reports [`onReadyToDisplay`](../player/events.md). They come back when the player loads another source. For audio-only sources the cover stays, so a poster works as artwork.
+`poster`, `renderLoader` and `shutterColor` cover the video from the moment a source starts loading until the player reports [`onReadyToDisplay`](../player/events.md). They come back when the player loads another source. For audio-only sources the cover stays, so a poster works as artwork. The cover follows the player, not the view: two views that show the same player uncover together, when the first frame appears in either of them.
 
 ```tsx
 // An image URL

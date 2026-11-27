@@ -293,6 +293,26 @@ test('overlay props that arrive after mount do not recreate the video view', () 
   expect(videoUnmounts).toBe(0);
 });
 
+test('an overlay added after mount stays on the video inside a parent with a border', () => {
+  const style = { width: 320, height: 180 };
+  const r = mountHost({ hasOverlay: false, style });
+  act(() =>
+    one(r, 'NativeVideo')[0]!.props.onLayout(layoutEvent(13, 23, 320, 180))
+  );
+  act(() => r.update(host({ hasOverlay: true, style })));
+
+  // A child at left 0, top 0 lands at (3, 3): the parent has a 3 pt border.
+  const probe = one(r, 'View').find((v) => v.props.onLayout != null)!;
+  act(() => probe.props.onLayout(layoutEvent(3, 3, 0, 0)));
+
+  expect(one(r, 'View')[0]!.props.style[1]).toEqual({
+    left: 10,
+    top: 20,
+    width: 320,
+    height: 180,
+  });
+});
+
 test('a view mounted with overlay props keeps its wrapper when they go away', () => {
   const style = { flex: 1 };
   const r = mountHost({ hasOverlay: true, style });

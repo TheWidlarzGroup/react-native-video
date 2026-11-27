@@ -56,6 +56,14 @@ let didWarnAboutLoaderAndPoster = false;
 const NO_TOUCHES = { pointerEvents: 'none' } as const;
 // The overlay as a sibling of the video view, placed over the video's frame.
 const SIBLING_COVER = { position: 'absolute', pointerEvents: 'none' } as const;
+const ORIGIN_PROBE = {
+  position: 'absolute',
+  pointerEvents: 'none',
+  left: 0,
+  top: 0,
+  width: 0,
+  height: 0,
+} as const;
 
 interface VideoViewOverlayComponentProps extends VideoViewOverlayProps {
   player: VideoPlayerBase;
@@ -218,6 +226,18 @@ export const VideoViewOverlayHost = ({
   }
   const overlay = () => renderOverlay(addedToMountedView.current === true);
 
+  // Where a child placed at left 0, top 0 lands in the parent. The video's frame is
+  // measured from the parent's outer edge, but absolute children start inside its
+  // border, so a parent with a border would shift the cover by the border's width.
+  const origin = React.useRef({ x: 0, y: 0 });
+  const trackOrigin = React.useCallback((event: LayoutChangeEvent) => {
+    const { x, y } = event.nativeEvent.layout;
+    if (x !== origin.current.x || y !== origin.current.y) {
+      origin.current = { x, y };
+      setFrameVersion((version) => version + 1);
+    }
+  }, []);
+
   const trackFrame = React.useCallback((event: LayoutChangeEvent) => {
     frame.current = event.nativeEvent.layout;
     // Views that never get an overlay only remember the frame, they don't re-render.
@@ -236,15 +256,20 @@ export const VideoViewOverlayHost = ({
     );
   }
 
-  const { x, y, width, height } = frame.current ?? {};
+  const { x = 0, y = 0, width, height } = frame.current ?? {};
+  const left = x - origin.current.x;
+  const top = y - origin.current.y;
 
   return (
     <>
       {renderVideo({ style, onLayout: trackFrame })}
       {hasOverlay && frame.current != null ? (
-        <View style={[SIBLING_COVER, { left: x, top: y, width, height }]}>
+        <View style={[SIBLING_COVER, { left, top, width, height }]}>
           {overlay()}
         </View>
+      ) : null}
+      {hasOverlay ? (
+        <View style={ORIGIN_PROBE} onLayout={trackOrigin} />
       ) : null}
     </>
   );
