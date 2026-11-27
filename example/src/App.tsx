@@ -20,6 +20,7 @@ import {
 } from './components/Controls';
 import AdsManager from './components/AdsManager';
 import TextTrackManager from './components/TextTrackManager';
+import VideoQualityManager from './components/VideoQualityManager';
 import { styles } from './styles';
 import { type VideoSettings, defaultSettings } from './types/videoSettings';
 import { formatTime } from './utils/time';
@@ -235,6 +236,11 @@ const VideoDemo = () => {
             />
           ))}
         </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Video Quality</Text>
+        <VideoQualityManager player={player} />
       </View>
 
       <View style={styles.section}>

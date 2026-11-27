@@ -116,44 +116,19 @@ namespace margelo::nitro::video::bridge::swift {
     };
   }
   
+  // pragma MARK: std::function<void(const std::string& /* error */)>
+  Func_void_std__string create_Func_void_std__string(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = ReactNativeVideo::Func_void_std__string::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const std::string& error) mutable -> void {
+      swiftClosure.call(error);
+    };
+  }
+  
   // pragma MARK: std::function<void(const onLoadData& /* data */)>
   Func_void_onLoadData create_Func_void_onLoadData(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = ReactNativeVideo::Func_void_onLoadData::fromUnsafe(swiftClosureWrapper);
     return [swiftClosure = std::move(swiftClosure)](const onLoadData& data) mutable -> void {
       swiftClosure.call(data);
-    };
-  }
-  
-  // pragma MARK: std::function<void(const std::string& /* result */)>
-  Func_void_std__string create_Func_void_std__string(void* NON_NULL swiftClosureWrapper) noexcept {
-    auto swiftClosure = ReactNativeVideo::Func_void_std__string::fromUnsafe(swiftClosureWrapper);
-    return [swiftClosure = std::move(swiftClosure)](const std::string& result) mutable -> void {
-      swiftClosure.call(result);
-    };
-  }
-  
-  // pragma MARK: std::function<std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(const OnGetLicensePayload& /* payload */)>
-  Func_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload create_Func_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload(void* NON_NULL swiftClosureWrapper) noexcept {
-    auto swiftClosure = ReactNativeVideo::Func_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload::fromUnsafe(swiftClosureWrapper);
-    return [swiftClosure = std::move(swiftClosure)](const OnGetLicensePayload& payload) mutable -> std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>> {
-      auto __result = swiftClosure.call(payload);
-      return __result;
-    };
-  }
-  
-  // pragma MARK: std::function<void(const std::shared_ptr<Promise<std::string>>& /* result */)>
-  Func_void_std__shared_ptr_Promise_std__string__ create_Func_void_std__shared_ptr_Promise_std__string__(void* NON_NULL swiftClosureWrapper) noexcept {
-    auto swiftClosure = ReactNativeVideo::Func_void_std__shared_ptr_Promise_std__string__::fromUnsafe(swiftClosureWrapper);
-    return [swiftClosure = std::move(swiftClosure)](const std::shared_ptr<Promise<std::string>>& result) mutable -> void {
-      swiftClosure.call(result);
-    };
-  }
-  
-  // pragma MARK: std::function<void(const VideoInformation& /* result */)>
-  Func_void_VideoInformation create_Func_void_VideoInformation(void* NON_NULL swiftClosureWrapper) noexcept {
-    auto swiftClosure = ReactNativeVideo::Func_void_VideoInformation::fromUnsafe(swiftClosureWrapper);
-    return [swiftClosure = std::move(swiftClosure)](const VideoInformation& result) mutable -> void {
-      swiftClosure.call(result);
     };
   }
   
@@ -221,6 +196,14 @@ namespace margelo::nitro::video::bridge::swift {
     };
   }
   
+  // pragma MARK: std::function<void(const VideoTrackChangeData& /* data */)>
+  Func_void_VideoTrackChangeData create_Func_void_VideoTrackChangeData(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = ReactNativeVideo::Func_void_VideoTrackChangeData::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const VideoTrackChangeData& data) mutable -> void {
+      swiftClosure.call(data);
+    };
+  }
+  
   // pragma MARK: std::function<void(const onVolumeChangeData& /* data */)>
   Func_void_onVolumeChangeData create_Func_void_onVolumeChangeData(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = ReactNativeVideo::Func_void_onVolumeChangeData::fromUnsafe(swiftClosureWrapper);
@@ -274,6 +257,31 @@ namespace margelo::nitro::video::bridge::swift {
     auto swiftClosure = ReactNativeVideo::Func_void_VideoAdState::fromUnsafe(swiftClosureWrapper);
     return [swiftClosure = std::move(swiftClosure)](VideoAdState state) mutable -> void {
       swiftClosure.call(static_cast<int>(state));
+    };
+  }
+  
+  // pragma MARK: std::function<std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(const OnGetLicensePayload& /* payload */)>
+  Func_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload create_Func_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = ReactNativeVideo::Func_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const OnGetLicensePayload& payload) mutable -> std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>> {
+      auto __result = swiftClosure.call(payload);
+      return __result;
+    };
+  }
+  
+  // pragma MARK: std::function<void(const std::shared_ptr<Promise<std::string>>& /* result */)>
+  Func_void_std__shared_ptr_Promise_std__string__ create_Func_void_std__shared_ptr_Promise_std__string__(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = ReactNativeVideo::Func_void_std__shared_ptr_Promise_std__string__::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const std::shared_ptr<Promise<std::string>>& result) mutable -> void {
+      swiftClosure.call(result);
+    };
+  }
+  
+  // pragma MARK: std::function<void(const VideoInformation& /* result */)>
+  Func_void_VideoInformation create_Func_void_VideoInformation(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = ReactNativeVideo::Func_void_VideoInformation::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const VideoInformation& result) mutable -> void {
+      swiftClosure.call(result);
     };
   }
   

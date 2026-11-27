@@ -48,6 +48,8 @@ namespace margelo::nitro::video { struct LivePlaybackParams; }
 namespace margelo::nitro::video { struct NativeDrmParams; }
 // Forward declaration of `NativeExternalSubtitle` to properly resolve imports.
 namespace margelo::nitro::video { struct NativeExternalSubtitle; }
+// Forward declaration of `NativeVideoConfig` to properly resolve imports.
+namespace margelo::nitro::video { struct NativeVideoConfig; }
 // Forward declaration of `OnGetLicensePayload` to properly resolve imports.
 namespace margelo::nitro::video { struct OnGetLicensePayload; }
 // Forward declaration of `Resolution` to properly resolve imports.
@@ -72,6 +74,10 @@ namespace margelo::nitro::video { struct VideoInformation; }
 namespace margelo::nitro::video { enum class VideoOrientation; }
 // Forward declaration of `VideoPlayerStatus` to properly resolve imports.
 namespace margelo::nitro::video { enum class VideoPlayerStatus; }
+// Forward declaration of `VideoTrackChangeData` to properly resolve imports.
+namespace margelo::nitro::video { struct VideoTrackChangeData; }
+// Forward declaration of `VideoTrack` to properly resolve imports.
+namespace margelo::nitro::video { struct VideoTrack; }
 // Forward declaration of `onLoadData` to properly resolve imports.
 namespace margelo::nitro::video { struct onLoadData; }
 // Forward declaration of `onLoadStartData` to properly resolve imports.
@@ -120,6 +126,7 @@ namespace ReactNativeVideo { class HybridVideoViewViewManagerSpec_cxx; }
 #include "LivePlaybackParams.hpp"
 #include "NativeDrmParams.hpp"
 #include "NativeExternalSubtitle.hpp"
+#include "NativeVideoConfig.hpp"
 #include "OnGetLicensePayload.hpp"
 #include "Resolution.hpp"
 #include "SourceType.hpp"
@@ -132,6 +139,8 @@ namespace ReactNativeVideo { class HybridVideoViewViewManagerSpec_cxx; }
 #include "VideoInformation.hpp"
 #include "VideoOrientation.hpp"
 #include "VideoPlayerStatus.hpp"
+#include "VideoTrack.hpp"
+#include "VideoTrackChangeData.hpp"
 #include "onLoadData.hpp"
 #include "onLoadStartData.hpp"
 #include "onPlaybackStateChangeData.hpp"
@@ -365,6 +374,17 @@ namespace margelo::nitro::video::bridge::swift {
     return optional.value();
   }
   
+  // pragma MARK: std::vector<VideoTrack>
+  /**
+   * Specialized version of `std::vector<VideoTrack>`.
+   */
+  using std__vector_VideoTrack_ = std::vector<VideoTrack>;
+  inline std::vector<VideoTrack> create_std__vector_VideoTrack_(size_t size) noexcept {
+    std::vector<VideoTrack> vector;
+    vector.reserve(size);
+    return vector;
+  }
+
   // pragma MARK: std::shared_ptr<HybridVideoPlayerSpec>
   /**
    * Specialized version of `std::shared_ptr<HybridVideoPlayerSpec>`.
@@ -376,6 +396,46 @@ namespace margelo::nitro::video::bridge::swift {
   // pragma MARK: std::weak_ptr<HybridVideoPlayerSpec>
   using std__weak_ptr_HybridVideoPlayerSpec_ = std::weak_ptr<HybridVideoPlayerSpec>;
   inline std__weak_ptr_HybridVideoPlayerSpec_ weakify_std__shared_ptr_HybridVideoPlayerSpec_(const std::shared_ptr<HybridVideoPlayerSpec>& strong) noexcept { return strong; }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<void>>>
+  using Result_std__shared_ptr_Promise_void___ = Result<std::shared_ptr<Promise<void>>>;
+  inline Result_std__shared_ptr_Promise_void___ create_Result_std__shared_ptr_Promise_void___(const std::shared_ptr<Promise<void>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<void>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_void___ create_Result_std__shared_ptr_Promise_void___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<void>>>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::vector<TextTrack>>
+  using Result_std__vector_TextTrack__ = Result<std::vector<TextTrack>>;
+  inline Result_std__vector_TextTrack__ create_Result_std__vector_TextTrack__(const std::vector<TextTrack>& value) noexcept {
+    return Result<std::vector<TextTrack>>::withValue(value);
+  }
+  inline Result_std__vector_TextTrack__ create_Result_std__vector_TextTrack__(const std::exception_ptr& error) noexcept {
+    return Result<std::vector<TextTrack>>::withError(error);
+  }
+
+  // pragma MARK: Result<std::vector<VideoTrack>>
+  // Hand-added for the same reason as Result<std::vector<TextTrack>> above -
+  // only reachable through VideoPlayer's spec, which nitrogen cannot generate,
+  // so it never emits this instantiation. Needed by
+  // HybridVideoPlayerSpec_cxx.swift's getAvailableVideoTracks().
+  using Result_std__vector_VideoTrack__ = Result<std::vector<VideoTrack>>;
+  inline Result_std__vector_VideoTrack__ create_Result_std__vector_VideoTrack__(const std::vector<VideoTrack>& value) noexcept {
+    return Result<std::vector<VideoTrack>>::withValue(value);
+  }
+  inline Result_std__vector_VideoTrack__ create_Result_std__vector_VideoTrack__(const std::exception_ptr& error) noexcept {
+    return Result<std::vector<VideoTrack>>::withError(error);
+  }
+
+  // pragma MARK: Result<void>
+  using Result_void_ = Result<void>;
+  inline Result_void_ create_Result_void_() noexcept {
+    return Result<void>::withValue();
+  }
+  inline Result_void_ create_Result_void_(const std::exception_ptr& error) noexcept {
+    return Result<void>::withError(error);
+  }
   
   // pragma MARK: std::shared_ptr<HybridVideoPlayerFactorySpec>
   /**
@@ -396,33 +456,6 @@ namespace margelo::nitro::video::bridge::swift {
   }
   inline Result_std__shared_ptr_HybridVideoPlayerSpec__ create_Result_std__shared_ptr_HybridVideoPlayerSpec__(const std::exception_ptr& error) noexcept {
     return Result<std::shared_ptr<HybridVideoPlayerSpec>>::withError(error);
-  }
-  
-  // pragma MARK: Result<std::shared_ptr<Promise<void>>>
-  using Result_std__shared_ptr_Promise_void___ = Result<std::shared_ptr<Promise<void>>>;
-  inline Result_std__shared_ptr_Promise_void___ create_Result_std__shared_ptr_Promise_void___(const std::shared_ptr<Promise<void>>& value) noexcept {
-    return Result<std::shared_ptr<Promise<void>>>::withValue(value);
-  }
-  inline Result_std__shared_ptr_Promise_void___ create_Result_std__shared_ptr_Promise_void___(const std::exception_ptr& error) noexcept {
-    return Result<std::shared_ptr<Promise<void>>>::withError(error);
-  }
-  
-  // pragma MARK: Result<std::vector<TextTrack>>
-  using Result_std__vector_TextTrack__ = Result<std::vector<TextTrack>>;
-  inline Result_std__vector_TextTrack__ create_Result_std__vector_TextTrack__(const std::vector<TextTrack>& value) noexcept {
-    return Result<std::vector<TextTrack>>::withValue(value);
-  }
-  inline Result_std__vector_TextTrack__ create_Result_std__vector_TextTrack__(const std::exception_ptr& error) noexcept {
-    return Result<std::vector<TextTrack>>::withError(error);
-  }
-  
-  // pragma MARK: Result<void>
-  using Result_void_ = Result<void>;
-  inline Result_void_ create_Result_void_() noexcept {
-    return Result<void>::withValue();
-  }
-  inline Result_void_ create_Result_void_(const std::exception_ptr& error) noexcept {
-    return Result<void>::withError(error);
   }
   
   // pragma MARK: std::function<void(bool /* hasAudioFocus */)>
@@ -504,6 +537,389 @@ namespace margelo::nitro::video::bridge::swift {
   Func_void_onLoadData create_Func_void_onLoadData(void* NON_NULL swiftClosureWrapper) noexcept;
   inline Func_void_onLoadData_Wrapper wrap_Func_void_onLoadData(Func_void_onLoadData value) noexcept {
     return Func_void_onLoadData_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::function<void(const onLoadStartData& /* data */)>
+  /**
+   * Specialized version of `std::function<void(const onLoadStartData&)>`.
+   */
+  using Func_void_onLoadStartData = std::function<void(const onLoadStartData& /* data */)>;
+  /**
+   * Wrapper class for a `std::function<void(const onLoadStartData& / * data * /)>`, this can be used from Swift.
+   */
+  class Func_void_onLoadStartData_Wrapper final {
+  public:
+    explicit Func_void_onLoadStartData_Wrapper(std::function<void(const onLoadStartData& /* data */)>&& func): _function(std::make_unique<std::function<void(const onLoadStartData& /* data */)>>(std::move(func))) {}
+    inline void call(onLoadStartData data) const noexcept {
+      _function->operator()(data);
+    }
+  private:
+    std::unique_ptr<std::function<void(const onLoadStartData& /* data */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_onLoadStartData create_Func_void_onLoadStartData(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_onLoadStartData_Wrapper wrap_Func_void_onLoadStartData(Func_void_onLoadStartData value) noexcept {
+    return Func_void_onLoadStartData_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::function<void(const onPlaybackStateChangeData& /* data */)>
+  /**
+   * Specialized version of `std::function<void(const onPlaybackStateChangeData&)>`.
+   */
+  using Func_void_onPlaybackStateChangeData = std::function<void(const onPlaybackStateChangeData& /* data */)>;
+  /**
+   * Wrapper class for a `std::function<void(const onPlaybackStateChangeData& / * data * /)>`, this can be used from Swift.
+   */
+  class Func_void_onPlaybackStateChangeData_Wrapper final {
+  public:
+    explicit Func_void_onPlaybackStateChangeData_Wrapper(std::function<void(const onPlaybackStateChangeData& /* data */)>&& func): _function(std::make_unique<std::function<void(const onPlaybackStateChangeData& /* data */)>>(std::move(func))) {}
+    inline void call(onPlaybackStateChangeData data) const noexcept {
+      _function->operator()(data);
+    }
+  private:
+    std::unique_ptr<std::function<void(const onPlaybackStateChangeData& /* data */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_onPlaybackStateChangeData create_Func_void_onPlaybackStateChangeData(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_onPlaybackStateChangeData_Wrapper wrap_Func_void_onPlaybackStateChangeData(Func_void_onPlaybackStateChangeData value) noexcept {
+    return Func_void_onPlaybackStateChangeData_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::function<void(double /* rate */)>
+  /**
+   * Specialized version of `std::function<void(double)>`.
+   */
+  using Func_void_double = std::function<void(double /* rate */)>;
+  /**
+   * Wrapper class for a `std::function<void(double / * rate * /)>`, this can be used from Swift.
+   */
+  class Func_void_double_Wrapper final {
+  public:
+    explicit Func_void_double_Wrapper(std::function<void(double /* rate */)>&& func): _function(std::make_unique<std::function<void(double /* rate */)>>(std::move(func))) {}
+    inline void call(double rate) const noexcept {
+      _function->operator()(rate);
+    }
+  private:
+    std::unique_ptr<std::function<void(double /* rate */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_double create_Func_void_double(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_double_Wrapper wrap_Func_void_double(Func_void_double value) noexcept {
+    return Func_void_double_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::function<void(const onProgressData& /* data */)>
+  /**
+   * Specialized version of `std::function<void(const onProgressData&)>`.
+   */
+  using Func_void_onProgressData = std::function<void(const onProgressData& /* data */)>;
+  /**
+   * Wrapper class for a `std::function<void(const onProgressData& / * data * /)>`, this can be used from Swift.
+   */
+  class Func_void_onProgressData_Wrapper final {
+  public:
+    explicit Func_void_onProgressData_Wrapper(std::function<void(const onProgressData& /* data */)>&& func): _function(std::make_unique<std::function<void(const onProgressData& /* data */)>>(std::move(func))) {}
+    inline void call(onProgressData data) const noexcept {
+      _function->operator()(data);
+    }
+  private:
+    std::unique_ptr<std::function<void(const onProgressData& /* data */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_onProgressData create_Func_void_onProgressData(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_onProgressData_Wrapper wrap_Func_void_onProgressData(Func_void_onProgressData value) noexcept {
+    return Func_void_onProgressData_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::function<void(VideoPlayerStatus /* status */)>
+  /**
+   * Specialized version of `std::function<void(VideoPlayerStatus)>`.
+   */
+  using Func_void_VideoPlayerStatus = std::function<void(VideoPlayerStatus /* status */)>;
+  /**
+   * Wrapper class for a `std::function<void(VideoPlayerStatus / * status * /)>`, this can be used from Swift.
+   */
+  class Func_void_VideoPlayerStatus_Wrapper final {
+  public:
+    explicit Func_void_VideoPlayerStatus_Wrapper(std::function<void(VideoPlayerStatus /* status */)>&& func): _function(std::make_unique<std::function<void(VideoPlayerStatus /* status */)>>(std::move(func))) {}
+    inline void call(int status) const noexcept {
+      _function->operator()(static_cast<VideoPlayerStatus>(status));
+    }
+  private:
+    std::unique_ptr<std::function<void(VideoPlayerStatus /* status */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_VideoPlayerStatus create_Func_void_VideoPlayerStatus(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_VideoPlayerStatus_Wrapper wrap_Func_void_VideoPlayerStatus(Func_void_VideoPlayerStatus value) noexcept {
+    return Func_void_VideoPlayerStatus_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::vector<TimedMetadataObject>
+  /**
+   * Specialized version of `std::vector<TimedMetadataObject>`.
+   */
+  using std__vector_TimedMetadataObject_ = std::vector<TimedMetadataObject>;
+  inline std::vector<TimedMetadataObject> create_std__vector_TimedMetadataObject_(size_t size) noexcept {
+    std::vector<TimedMetadataObject> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::function<void(const TimedMetadata& /* data */)>
+  /**
+   * Specialized version of `std::function<void(const TimedMetadata&)>`.
+   */
+  using Func_void_TimedMetadata = std::function<void(const TimedMetadata& /* data */)>;
+  /**
+   * Wrapper class for a `std::function<void(const TimedMetadata& / * data * /)>`, this can be used from Swift.
+   */
+  class Func_void_TimedMetadata_Wrapper final {
+  public:
+    explicit Func_void_TimedMetadata_Wrapper(std::function<void(const TimedMetadata& /* data */)>&& func): _function(std::make_unique<std::function<void(const TimedMetadata& /* data */)>>(std::move(func))) {}
+    inline void call(TimedMetadata data) const noexcept {
+      _function->operator()(data);
+    }
+  private:
+    std::unique_ptr<std::function<void(const TimedMetadata& /* data */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_TimedMetadata create_Func_void_TimedMetadata(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_TimedMetadata_Wrapper wrap_Func_void_TimedMetadata(Func_void_TimedMetadata value) noexcept {
+    return Func_void_TimedMetadata_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::vector<std::string>
+  /**
+   * Specialized version of `std::vector<std::string>`.
+   */
+  using std__vector_std__string_ = std::vector<std::string>;
+  inline std::vector<std::string> create_std__vector_std__string_(size_t size) noexcept {
+    std::vector<std::string> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::function<void(const std::vector<std::string>& /* data */)>
+  /**
+   * Specialized version of `std::function<void(const std::vector<std::string>&)>`.
+   */
+  using Func_void_std__vector_std__string_ = std::function<void(const std::vector<std::string>& /* data */)>;
+  /**
+   * Wrapper class for a `std::function<void(const std::vector<std::string>& / * data * /)>`, this can be used from Swift.
+   */
+  class Func_void_std__vector_std__string__Wrapper final {
+  public:
+    explicit Func_void_std__vector_std__string__Wrapper(std::function<void(const std::vector<std::string>& /* data */)>&& func): _function(std::make_unique<std::function<void(const std::vector<std::string>& /* data */)>>(std::move(func))) {}
+    inline void call(std::vector<std::string> data) const noexcept {
+      _function->operator()(data);
+    }
+  private:
+    std::unique_ptr<std::function<void(const std::vector<std::string>& /* data */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_std__vector_std__string_ create_Func_void_std__vector_std__string_(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_std__vector_std__string__Wrapper wrap_Func_void_std__vector_std__string_(Func_void_std__vector_std__string_ value) noexcept {
+    return Func_void_std__vector_std__string__Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::function<void(const std::optional<std::variant<nitro::NullType, TextTrack>>& /* track */)>
+  /**
+   * Specialized version of `std::function<void(const std::optional<std::variant<nitro::NullType, TextTrack>>&)>`.
+   */
+  using Func_void_std__optional_std__variant_nitro__NullType__TextTrack__ = std::function<void(const std::optional<std::variant<nitro::NullType, TextTrack>>& /* track */)>;
+  /**
+   * Wrapper class for a `std::function<void(const std::optional<std::variant<nitro::NullType, TextTrack>>& / * track * /)>`, this can be used from Swift.
+   */
+  class Func_void_std__optional_std__variant_nitro__NullType__TextTrack___Wrapper final {
+  public:
+    explicit Func_void_std__optional_std__variant_nitro__NullType__TextTrack___Wrapper(std::function<void(const std::optional<std::variant<nitro::NullType, TextTrack>>& /* track */)>&& func): _function(std::make_unique<std::function<void(const std::optional<std::variant<nitro::NullType, TextTrack>>& /* track */)>>(std::move(func))) {}
+    inline void call(std::optional<std::variant<nitro::NullType, TextTrack>> track) const noexcept {
+      _function->operator()(track);
+    }
+  private:
+    std::unique_ptr<std::function<void(const std::optional<std::variant<nitro::NullType, TextTrack>>& /* track */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_std__optional_std__variant_nitro__NullType__TextTrack__ create_Func_void_std__optional_std__variant_nitro__NullType__TextTrack__(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_std__optional_std__variant_nitro__NullType__TextTrack___Wrapper wrap_Func_void_std__optional_std__variant_nitro__NullType__TextTrack__(Func_void_std__optional_std__variant_nitro__NullType__TextTrack__ value) noexcept {
+    return Func_void_std__optional_std__variant_nitro__NullType__TextTrack___Wrapper(std::move(value));
+  }
+
+  // pragma MARK: std::function<void(const VideoTrackChangeData& /* data */)>
+  /**
+   * Specialized version of `std::function<void(const VideoTrackChangeData&)>`.
+   */
+  using Func_void_VideoTrackChangeData = std::function<void(const VideoTrackChangeData& /* data */)>;
+  /**
+   * Wrapper class for a `std::function<void(const VideoTrackChangeData& / * data * /)>`, this can be used from Swift.
+   */
+  class Func_void_VideoTrackChangeData_Wrapper final {
+  public:
+    explicit Func_void_VideoTrackChangeData_Wrapper(std::function<void(const VideoTrackChangeData& /* data */)>&& func): _function(std::make_unique<std::function<void(const VideoTrackChangeData& /* data */)>>(std::move(func))) {}
+    inline void call(VideoTrackChangeData data) const noexcept {
+      _function->operator()(data);
+    }
+  private:
+    std::unique_ptr<std::function<void(const VideoTrackChangeData& /* data */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_VideoTrackChangeData create_Func_void_VideoTrackChangeData(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_VideoTrackChangeData_Wrapper wrap_Func_void_VideoTrackChangeData(Func_void_VideoTrackChangeData value) noexcept {
+    return Func_void_VideoTrackChangeData_Wrapper(std::move(value));
+  }
+
+  // pragma MARK: std::function<void(const onVolumeChangeData& /* data */)>
+  /**
+   * Specialized version of `std::function<void(const onVolumeChangeData&)>`.
+   */
+  using Func_void_onVolumeChangeData = std::function<void(const onVolumeChangeData& /* data */)>;
+  /**
+   * Wrapper class for a `std::function<void(const onVolumeChangeData& / * data * /)>`, this can be used from Swift.
+   */
+  class Func_void_onVolumeChangeData_Wrapper final {
+  public:
+    explicit Func_void_onVolumeChangeData_Wrapper(std::function<void(const onVolumeChangeData& /* data */)>&& func): _function(std::make_unique<std::function<void(const onVolumeChangeData& /* data */)>>(std::move(func))) {}
+    inline void call(onVolumeChangeData data) const noexcept {
+      _function->operator()(data);
+    }
+  private:
+    std::unique_ptr<std::function<void(const onVolumeChangeData& /* data */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_onVolumeChangeData create_Func_void_onVolumeChangeData(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_onVolumeChangeData_Wrapper wrap_Func_void_onVolumeChangeData(Func_void_onVolumeChangeData value) noexcept {
+    return Func_void_onVolumeChangeData_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::function<void(const AdsResolvedEvent& /* data */)>
+  /**
+   * Specialized version of `std::function<void(const AdsResolvedEvent&)>`.
+   */
+  using Func_void_AdsResolvedEvent = std::function<void(const AdsResolvedEvent& /* data */)>;
+  /**
+   * Wrapper class for a `std::function<void(const AdsResolvedEvent& / * data * /)>`, this can be used from Swift.
+   */
+  class Func_void_AdsResolvedEvent_Wrapper final {
+  public:
+    explicit Func_void_AdsResolvedEvent_Wrapper(std::function<void(const AdsResolvedEvent& /* data */)>&& func): _function(std::make_unique<std::function<void(const AdsResolvedEvent& /* data */)>>(std::move(func))) {}
+    inline void call(AdsResolvedEvent data) const noexcept {
+      _function->operator()(data);
+    }
+  private:
+    std::unique_ptr<std::function<void(const AdsResolvedEvent& /* data */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_AdsResolvedEvent create_Func_void_AdsResolvedEvent(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_AdsResolvedEvent_Wrapper wrap_Func_void_AdsResolvedEvent(Func_void_AdsResolvedEvent value) noexcept {
+    return Func_void_AdsResolvedEvent_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::function<void(const AdBreakEvent& /* data */)>
+  /**
+   * Specialized version of `std::function<void(const AdBreakEvent&)>`.
+   */
+  using Func_void_AdBreakEvent = std::function<void(const AdBreakEvent& /* data */)>;
+  /**
+   * Wrapper class for a `std::function<void(const AdBreakEvent& / * data * /)>`, this can be used from Swift.
+   */
+  class Func_void_AdBreakEvent_Wrapper final {
+  public:
+    explicit Func_void_AdBreakEvent_Wrapper(std::function<void(const AdBreakEvent& /* data */)>&& func): _function(std::make_unique<std::function<void(const AdBreakEvent& /* data */)>>(std::move(func))) {}
+    inline void call(AdBreakEvent data) const noexcept {
+      _function->operator()(data);
+    }
+  private:
+    std::unique_ptr<std::function<void(const AdBreakEvent& /* data */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_AdBreakEvent create_Func_void_AdBreakEvent(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_AdBreakEvent_Wrapper wrap_Func_void_AdBreakEvent(Func_void_AdBreakEvent value) noexcept {
+    return Func_void_AdBreakEvent_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::function<void(const AdProgressInfo& /* data */)>
+  /**
+   * Specialized version of `std::function<void(const AdProgressInfo&)>`.
+   */
+  using Func_void_AdProgressInfo = std::function<void(const AdProgressInfo& /* data */)>;
+  /**
+   * Wrapper class for a `std::function<void(const AdProgressInfo& / * data * /)>`, this can be used from Swift.
+   */
+  class Func_void_AdProgressInfo_Wrapper final {
+  public:
+    explicit Func_void_AdProgressInfo_Wrapper(std::function<void(const AdProgressInfo& /* data */)>&& func): _function(std::make_unique<std::function<void(const AdProgressInfo& /* data */)>>(std::move(func))) {}
+    inline void call(AdProgressInfo data) const noexcept {
+      _function->operator()(data);
+    }
+  private:
+    std::unique_ptr<std::function<void(const AdProgressInfo& /* data */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_AdProgressInfo create_Func_void_AdProgressInfo(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_AdProgressInfo_Wrapper wrap_Func_void_AdProgressInfo(Func_void_AdProgressInfo value) noexcept {
+    return Func_void_AdProgressInfo_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::function<void(const AdInfo& /* data */)>
+  /**
+   * Specialized version of `std::function<void(const AdInfo&)>`.
+   */
+  using Func_void_AdInfo = std::function<void(const AdInfo& /* data */)>;
+  /**
+   * Wrapper class for a `std::function<void(const AdInfo& / * data * /)>`, this can be used from Swift.
+   */
+  class Func_void_AdInfo_Wrapper final {
+  public:
+    explicit Func_void_AdInfo_Wrapper(std::function<void(const AdInfo& /* data */)>&& func): _function(std::make_unique<std::function<void(const AdInfo& /* data */)>>(std::move(func))) {}
+    inline void call(AdInfo data) const noexcept {
+      _function->operator()(data);
+    }
+  private:
+    std::unique_ptr<std::function<void(const AdInfo& /* data */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_AdInfo create_Func_void_AdInfo(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_AdInfo_Wrapper wrap_Func_void_AdInfo(Func_void_AdInfo value) noexcept {
+    return Func_void_AdInfo_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::function<void(const AdErrorEvent& /* data */)>
+  /**
+   * Specialized version of `std::function<void(const AdErrorEvent&)>`.
+   */
+  using Func_void_AdErrorEvent = std::function<void(const AdErrorEvent& /* data */)>;
+  /**
+   * Wrapper class for a `std::function<void(const AdErrorEvent& / * data * /)>`, this can be used from Swift.
+   */
+  class Func_void_AdErrorEvent_Wrapper final {
+  public:
+    explicit Func_void_AdErrorEvent_Wrapper(std::function<void(const AdErrorEvent& /* data */)>&& func): _function(std::make_unique<std::function<void(const AdErrorEvent& /* data */)>>(std::move(func))) {}
+    inline void call(AdErrorEvent data) const noexcept {
+      _function->operator()(data);
+    }
+  private:
+    std::unique_ptr<std::function<void(const AdErrorEvent& /* data */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_AdErrorEvent create_Func_void_AdErrorEvent(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_AdErrorEvent_Wrapper wrap_Func_void_AdErrorEvent(Func_void_AdErrorEvent value) noexcept {
+    return Func_void_AdErrorEvent_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::function<void(VideoAdState /* state */)>
+  /**
+   * Specialized version of `std::function<void(VideoAdState)>`.
+   */
+  using Func_void_VideoAdState = std::function<void(VideoAdState /* state */)>;
+  /**
+   * Wrapper class for a `std::function<void(VideoAdState / * state * /)>`, this can be used from Swift.
+   */
+  class Func_void_VideoAdState_Wrapper final {
+  public:
+    explicit Func_void_VideoAdState_Wrapper(std::function<void(VideoAdState /* state */)>&& func): _function(std::make_unique<std::function<void(VideoAdState /* state */)>>(std::move(func))) {}
+    inline void call(int state) const noexcept {
+      _function->operator()(static_cast<VideoAdState>(state));
+    }
+  private:
+    std::unique_ptr<std::function<void(VideoAdState /* state */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_VideoAdState create_Func_void_VideoAdState(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_VideoAdState_Wrapper wrap_Func_void_VideoAdState(Func_void_VideoAdState value) noexcept {
+    return Func_void_VideoAdState_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: Result<ListenerSubscription>
+  using Result_ListenerSubscription_ = Result<ListenerSubscription>;
+  inline Result_ListenerSubscription_ create_Result_ListenerSubscription_(const ListenerSubscription& value) noexcept {
+    return Result<ListenerSubscription>::withValue(value);
+  }
+  inline Result_ListenerSubscription_ create_Result_ListenerSubscription_(const std::exception_ptr& error) noexcept {
+    return Result<ListenerSubscription>::withError(error);
   }
   
   // pragma MARK: std::vector<NativeExternalSubtitle>
@@ -815,367 +1231,6 @@ namespace margelo::nitro::video::bridge::swift {
   Func_void_VideoInformation create_Func_void_VideoInformation(void* NON_NULL swiftClosureWrapper) noexcept;
   inline Func_void_VideoInformation_Wrapper wrap_Func_void_VideoInformation(Func_void_VideoInformation value) noexcept {
     return Func_void_VideoInformation_Wrapper(std::move(value));
-  }
-  
-  // pragma MARK: std::function<void(const onLoadStartData& /* data */)>
-  /**
-   * Specialized version of `std::function<void(const onLoadStartData&)>`.
-   */
-  using Func_void_onLoadStartData = std::function<void(const onLoadStartData& /* data */)>;
-  /**
-   * Wrapper class for a `std::function<void(const onLoadStartData& / * data * /)>`, this can be used from Swift.
-   */
-  class Func_void_onLoadStartData_Wrapper final {
-  public:
-    explicit Func_void_onLoadStartData_Wrapper(std::function<void(const onLoadStartData& /* data */)>&& func): _function(std::make_unique<std::function<void(const onLoadStartData& /* data */)>>(std::move(func))) {}
-    inline void call(onLoadStartData data) const noexcept {
-      _function->operator()(data);
-    }
-  private:
-    std::unique_ptr<std::function<void(const onLoadStartData& /* data */)>> _function;
-  } SWIFT_NONCOPYABLE;
-  Func_void_onLoadStartData create_Func_void_onLoadStartData(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_onLoadStartData_Wrapper wrap_Func_void_onLoadStartData(Func_void_onLoadStartData value) noexcept {
-    return Func_void_onLoadStartData_Wrapper(std::move(value));
-  }
-  
-  // pragma MARK: std::function<void(const onPlaybackStateChangeData& /* data */)>
-  /**
-   * Specialized version of `std::function<void(const onPlaybackStateChangeData&)>`.
-   */
-  using Func_void_onPlaybackStateChangeData = std::function<void(const onPlaybackStateChangeData& /* data */)>;
-  /**
-   * Wrapper class for a `std::function<void(const onPlaybackStateChangeData& / * data * /)>`, this can be used from Swift.
-   */
-  class Func_void_onPlaybackStateChangeData_Wrapper final {
-  public:
-    explicit Func_void_onPlaybackStateChangeData_Wrapper(std::function<void(const onPlaybackStateChangeData& /* data */)>&& func): _function(std::make_unique<std::function<void(const onPlaybackStateChangeData& /* data */)>>(std::move(func))) {}
-    inline void call(onPlaybackStateChangeData data) const noexcept {
-      _function->operator()(data);
-    }
-  private:
-    std::unique_ptr<std::function<void(const onPlaybackStateChangeData& /* data */)>> _function;
-  } SWIFT_NONCOPYABLE;
-  Func_void_onPlaybackStateChangeData create_Func_void_onPlaybackStateChangeData(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_onPlaybackStateChangeData_Wrapper wrap_Func_void_onPlaybackStateChangeData(Func_void_onPlaybackStateChangeData value) noexcept {
-    return Func_void_onPlaybackStateChangeData_Wrapper(std::move(value));
-  }
-  
-  // pragma MARK: std::function<void(double /* rate */)>
-  /**
-   * Specialized version of `std::function<void(double)>`.
-   */
-  using Func_void_double = std::function<void(double /* rate */)>;
-  /**
-   * Wrapper class for a `std::function<void(double / * rate * /)>`, this can be used from Swift.
-   */
-  class Func_void_double_Wrapper final {
-  public:
-    explicit Func_void_double_Wrapper(std::function<void(double /* rate */)>&& func): _function(std::make_unique<std::function<void(double /* rate */)>>(std::move(func))) {}
-    inline void call(double rate) const noexcept {
-      _function->operator()(rate);
-    }
-  private:
-    std::unique_ptr<std::function<void(double /* rate */)>> _function;
-  } SWIFT_NONCOPYABLE;
-  Func_void_double create_Func_void_double(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_double_Wrapper wrap_Func_void_double(Func_void_double value) noexcept {
-    return Func_void_double_Wrapper(std::move(value));
-  }
-  
-  // pragma MARK: std::function<void(const onProgressData& /* data */)>
-  /**
-   * Specialized version of `std::function<void(const onProgressData&)>`.
-   */
-  using Func_void_onProgressData = std::function<void(const onProgressData& /* data */)>;
-  /**
-   * Wrapper class for a `std::function<void(const onProgressData& / * data * /)>`, this can be used from Swift.
-   */
-  class Func_void_onProgressData_Wrapper final {
-  public:
-    explicit Func_void_onProgressData_Wrapper(std::function<void(const onProgressData& /* data */)>&& func): _function(std::make_unique<std::function<void(const onProgressData& /* data */)>>(std::move(func))) {}
-    inline void call(onProgressData data) const noexcept {
-      _function->operator()(data);
-    }
-  private:
-    std::unique_ptr<std::function<void(const onProgressData& /* data */)>> _function;
-  } SWIFT_NONCOPYABLE;
-  Func_void_onProgressData create_Func_void_onProgressData(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_onProgressData_Wrapper wrap_Func_void_onProgressData(Func_void_onProgressData value) noexcept {
-    return Func_void_onProgressData_Wrapper(std::move(value));
-  }
-  
-  // pragma MARK: std::function<void(VideoPlayerStatus /* status */)>
-  /**
-   * Specialized version of `std::function<void(VideoPlayerStatus)>`.
-   */
-  using Func_void_VideoPlayerStatus = std::function<void(VideoPlayerStatus /* status */)>;
-  /**
-   * Wrapper class for a `std::function<void(VideoPlayerStatus / * status * /)>`, this can be used from Swift.
-   */
-  class Func_void_VideoPlayerStatus_Wrapper final {
-  public:
-    explicit Func_void_VideoPlayerStatus_Wrapper(std::function<void(VideoPlayerStatus /* status */)>&& func): _function(std::make_unique<std::function<void(VideoPlayerStatus /* status */)>>(std::move(func))) {}
-    inline void call(int status) const noexcept {
-      _function->operator()(static_cast<VideoPlayerStatus>(status));
-    }
-  private:
-    std::unique_ptr<std::function<void(VideoPlayerStatus /* status */)>> _function;
-  } SWIFT_NONCOPYABLE;
-  Func_void_VideoPlayerStatus create_Func_void_VideoPlayerStatus(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_VideoPlayerStatus_Wrapper wrap_Func_void_VideoPlayerStatus(Func_void_VideoPlayerStatus value) noexcept {
-    return Func_void_VideoPlayerStatus_Wrapper(std::move(value));
-  }
-  
-  // pragma MARK: std::vector<TimedMetadataObject>
-  /**
-   * Specialized version of `std::vector<TimedMetadataObject>`.
-   */
-  using std__vector_TimedMetadataObject_ = std::vector<TimedMetadataObject>;
-  inline std::vector<TimedMetadataObject> create_std__vector_TimedMetadataObject_(size_t size) noexcept {
-    std::vector<TimedMetadataObject> vector;
-    vector.reserve(size);
-    return vector;
-  }
-  
-  // pragma MARK: std::function<void(const TimedMetadata& /* data */)>
-  /**
-   * Specialized version of `std::function<void(const TimedMetadata&)>`.
-   */
-  using Func_void_TimedMetadata = std::function<void(const TimedMetadata& /* data */)>;
-  /**
-   * Wrapper class for a `std::function<void(const TimedMetadata& / * data * /)>`, this can be used from Swift.
-   */
-  class Func_void_TimedMetadata_Wrapper final {
-  public:
-    explicit Func_void_TimedMetadata_Wrapper(std::function<void(const TimedMetadata& /* data */)>&& func): _function(std::make_unique<std::function<void(const TimedMetadata& /* data */)>>(std::move(func))) {}
-    inline void call(TimedMetadata data) const noexcept {
-      _function->operator()(data);
-    }
-  private:
-    std::unique_ptr<std::function<void(const TimedMetadata& /* data */)>> _function;
-  } SWIFT_NONCOPYABLE;
-  Func_void_TimedMetadata create_Func_void_TimedMetadata(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_TimedMetadata_Wrapper wrap_Func_void_TimedMetadata(Func_void_TimedMetadata value) noexcept {
-    return Func_void_TimedMetadata_Wrapper(std::move(value));
-  }
-  
-  // pragma MARK: std::vector<std::string>
-  /**
-   * Specialized version of `std::vector<std::string>`.
-   */
-  using std__vector_std__string_ = std::vector<std::string>;
-  inline std::vector<std::string> create_std__vector_std__string_(size_t size) noexcept {
-    std::vector<std::string> vector;
-    vector.reserve(size);
-    return vector;
-  }
-  
-  // pragma MARK: std::function<void(const std::vector<std::string>& /* data */)>
-  /**
-   * Specialized version of `std::function<void(const std::vector<std::string>&)>`.
-   */
-  using Func_void_std__vector_std__string_ = std::function<void(const std::vector<std::string>& /* data */)>;
-  /**
-   * Wrapper class for a `std::function<void(const std::vector<std::string>& / * data * /)>`, this can be used from Swift.
-   */
-  class Func_void_std__vector_std__string__Wrapper final {
-  public:
-    explicit Func_void_std__vector_std__string__Wrapper(std::function<void(const std::vector<std::string>& /* data */)>&& func): _function(std::make_unique<std::function<void(const std::vector<std::string>& /* data */)>>(std::move(func))) {}
-    inline void call(std::vector<std::string> data) const noexcept {
-      _function->operator()(data);
-    }
-  private:
-    std::unique_ptr<std::function<void(const std::vector<std::string>& /* data */)>> _function;
-  } SWIFT_NONCOPYABLE;
-  Func_void_std__vector_std__string_ create_Func_void_std__vector_std__string_(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_std__vector_std__string__Wrapper wrap_Func_void_std__vector_std__string_(Func_void_std__vector_std__string_ value) noexcept {
-    return Func_void_std__vector_std__string__Wrapper(std::move(value));
-  }
-  
-  // pragma MARK: std::function<void(const std::optional<std::variant<nitro::NullType, TextTrack>>& /* track */)>
-  /**
-   * Specialized version of `std::function<void(const std::optional<std::variant<nitro::NullType, TextTrack>>&)>`.
-   */
-  using Func_void_std__optional_std__variant_nitro__NullType__TextTrack__ = std::function<void(const std::optional<std::variant<nitro::NullType, TextTrack>>& /* track */)>;
-  /**
-   * Wrapper class for a `std::function<void(const std::optional<std::variant<nitro::NullType, TextTrack>>& / * track * /)>`, this can be used from Swift.
-   */
-  class Func_void_std__optional_std__variant_nitro__NullType__TextTrack___Wrapper final {
-  public:
-    explicit Func_void_std__optional_std__variant_nitro__NullType__TextTrack___Wrapper(std::function<void(const std::optional<std::variant<nitro::NullType, TextTrack>>& /* track */)>&& func): _function(std::make_unique<std::function<void(const std::optional<std::variant<nitro::NullType, TextTrack>>& /* track */)>>(std::move(func))) {}
-    inline void call(std::optional<std::variant<nitro::NullType, TextTrack>> track) const noexcept {
-      _function->operator()(track);
-    }
-  private:
-    std::unique_ptr<std::function<void(const std::optional<std::variant<nitro::NullType, TextTrack>>& /* track */)>> _function;
-  } SWIFT_NONCOPYABLE;
-  Func_void_std__optional_std__variant_nitro__NullType__TextTrack__ create_Func_void_std__optional_std__variant_nitro__NullType__TextTrack__(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_std__optional_std__variant_nitro__NullType__TextTrack___Wrapper wrap_Func_void_std__optional_std__variant_nitro__NullType__TextTrack__(Func_void_std__optional_std__variant_nitro__NullType__TextTrack__ value) noexcept {
-    return Func_void_std__optional_std__variant_nitro__NullType__TextTrack___Wrapper(std::move(value));
-  }
-  
-  // pragma MARK: std::function<void(const onVolumeChangeData& /* data */)>
-  /**
-   * Specialized version of `std::function<void(const onVolumeChangeData&)>`.
-   */
-  using Func_void_onVolumeChangeData = std::function<void(const onVolumeChangeData& /* data */)>;
-  /**
-   * Wrapper class for a `std::function<void(const onVolumeChangeData& / * data * /)>`, this can be used from Swift.
-   */
-  class Func_void_onVolumeChangeData_Wrapper final {
-  public:
-    explicit Func_void_onVolumeChangeData_Wrapper(std::function<void(const onVolumeChangeData& /* data */)>&& func): _function(std::make_unique<std::function<void(const onVolumeChangeData& /* data */)>>(std::move(func))) {}
-    inline void call(onVolumeChangeData data) const noexcept {
-      _function->operator()(data);
-    }
-  private:
-    std::unique_ptr<std::function<void(const onVolumeChangeData& /* data */)>> _function;
-  } SWIFT_NONCOPYABLE;
-  Func_void_onVolumeChangeData create_Func_void_onVolumeChangeData(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_onVolumeChangeData_Wrapper wrap_Func_void_onVolumeChangeData(Func_void_onVolumeChangeData value) noexcept {
-    return Func_void_onVolumeChangeData_Wrapper(std::move(value));
-  }
-  
-  // pragma MARK: std::function<void(const AdsResolvedEvent& /* data */)>
-  /**
-   * Specialized version of `std::function<void(const AdsResolvedEvent&)>`.
-   */
-  using Func_void_AdsResolvedEvent = std::function<void(const AdsResolvedEvent& /* data */)>;
-  /**
-   * Wrapper class for a `std::function<void(const AdsResolvedEvent& / * data * /)>`, this can be used from Swift.
-   */
-  class Func_void_AdsResolvedEvent_Wrapper final {
-  public:
-    explicit Func_void_AdsResolvedEvent_Wrapper(std::function<void(const AdsResolvedEvent& /* data */)>&& func): _function(std::make_unique<std::function<void(const AdsResolvedEvent& /* data */)>>(std::move(func))) {}
-    inline void call(AdsResolvedEvent data) const noexcept {
-      _function->operator()(data);
-    }
-  private:
-    std::unique_ptr<std::function<void(const AdsResolvedEvent& /* data */)>> _function;
-  } SWIFT_NONCOPYABLE;
-  Func_void_AdsResolvedEvent create_Func_void_AdsResolvedEvent(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_AdsResolvedEvent_Wrapper wrap_Func_void_AdsResolvedEvent(Func_void_AdsResolvedEvent value) noexcept {
-    return Func_void_AdsResolvedEvent_Wrapper(std::move(value));
-  }
-  
-  // pragma MARK: std::function<void(const AdBreakEvent& /* data */)>
-  /**
-   * Specialized version of `std::function<void(const AdBreakEvent&)>`.
-   */
-  using Func_void_AdBreakEvent = std::function<void(const AdBreakEvent& /* data */)>;
-  /**
-   * Wrapper class for a `std::function<void(const AdBreakEvent& / * data * /)>`, this can be used from Swift.
-   */
-  class Func_void_AdBreakEvent_Wrapper final {
-  public:
-    explicit Func_void_AdBreakEvent_Wrapper(std::function<void(const AdBreakEvent& /* data */)>&& func): _function(std::make_unique<std::function<void(const AdBreakEvent& /* data */)>>(std::move(func))) {}
-    inline void call(AdBreakEvent data) const noexcept {
-      _function->operator()(data);
-    }
-  private:
-    std::unique_ptr<std::function<void(const AdBreakEvent& /* data */)>> _function;
-  } SWIFT_NONCOPYABLE;
-  Func_void_AdBreakEvent create_Func_void_AdBreakEvent(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_AdBreakEvent_Wrapper wrap_Func_void_AdBreakEvent(Func_void_AdBreakEvent value) noexcept {
-    return Func_void_AdBreakEvent_Wrapper(std::move(value));
-  }
-  
-  // pragma MARK: std::function<void(const AdProgressInfo& /* data */)>
-  /**
-   * Specialized version of `std::function<void(const AdProgressInfo&)>`.
-   */
-  using Func_void_AdProgressInfo = std::function<void(const AdProgressInfo& /* data */)>;
-  /**
-   * Wrapper class for a `std::function<void(const AdProgressInfo& / * data * /)>`, this can be used from Swift.
-   */
-  class Func_void_AdProgressInfo_Wrapper final {
-  public:
-    explicit Func_void_AdProgressInfo_Wrapper(std::function<void(const AdProgressInfo& /* data */)>&& func): _function(std::make_unique<std::function<void(const AdProgressInfo& /* data */)>>(std::move(func))) {}
-    inline void call(AdProgressInfo data) const noexcept {
-      _function->operator()(data);
-    }
-  private:
-    std::unique_ptr<std::function<void(const AdProgressInfo& /* data */)>> _function;
-  } SWIFT_NONCOPYABLE;
-  Func_void_AdProgressInfo create_Func_void_AdProgressInfo(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_AdProgressInfo_Wrapper wrap_Func_void_AdProgressInfo(Func_void_AdProgressInfo value) noexcept {
-    return Func_void_AdProgressInfo_Wrapper(std::move(value));
-  }
-  
-  // pragma MARK: std::function<void(const AdInfo& /* data */)>
-  /**
-   * Specialized version of `std::function<void(const AdInfo&)>`.
-   */
-  using Func_void_AdInfo = std::function<void(const AdInfo& /* data */)>;
-  /**
-   * Wrapper class for a `std::function<void(const AdInfo& / * data * /)>`, this can be used from Swift.
-   */
-  class Func_void_AdInfo_Wrapper final {
-  public:
-    explicit Func_void_AdInfo_Wrapper(std::function<void(const AdInfo& /* data */)>&& func): _function(std::make_unique<std::function<void(const AdInfo& /* data */)>>(std::move(func))) {}
-    inline void call(AdInfo data) const noexcept {
-      _function->operator()(data);
-    }
-  private:
-    std::unique_ptr<std::function<void(const AdInfo& /* data */)>> _function;
-  } SWIFT_NONCOPYABLE;
-  Func_void_AdInfo create_Func_void_AdInfo(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_AdInfo_Wrapper wrap_Func_void_AdInfo(Func_void_AdInfo value) noexcept {
-    return Func_void_AdInfo_Wrapper(std::move(value));
-  }
-  
-  // pragma MARK: std::function<void(const AdErrorEvent& /* data */)>
-  /**
-   * Specialized version of `std::function<void(const AdErrorEvent&)>`.
-   */
-  using Func_void_AdErrorEvent = std::function<void(const AdErrorEvent& /* data */)>;
-  /**
-   * Wrapper class for a `std::function<void(const AdErrorEvent& / * data * /)>`, this can be used from Swift.
-   */
-  class Func_void_AdErrorEvent_Wrapper final {
-  public:
-    explicit Func_void_AdErrorEvent_Wrapper(std::function<void(const AdErrorEvent& /* data */)>&& func): _function(std::make_unique<std::function<void(const AdErrorEvent& /* data */)>>(std::move(func))) {}
-    inline void call(AdErrorEvent data) const noexcept {
-      _function->operator()(data);
-    }
-  private:
-    std::unique_ptr<std::function<void(const AdErrorEvent& /* data */)>> _function;
-  } SWIFT_NONCOPYABLE;
-  Func_void_AdErrorEvent create_Func_void_AdErrorEvent(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_AdErrorEvent_Wrapper wrap_Func_void_AdErrorEvent(Func_void_AdErrorEvent value) noexcept {
-    return Func_void_AdErrorEvent_Wrapper(std::move(value));
-  }
-  
-  // pragma MARK: std::function<void(VideoAdState /* state */)>
-  /**
-   * Specialized version of `std::function<void(VideoAdState)>`.
-   */
-  using Func_void_VideoAdState = std::function<void(VideoAdState /* state */)>;
-  /**
-   * Wrapper class for a `std::function<void(VideoAdState / * state * /)>`, this can be used from Swift.
-   */
-  class Func_void_VideoAdState_Wrapper final {
-  public:
-    explicit Func_void_VideoAdState_Wrapper(std::function<void(VideoAdState /* state */)>&& func): _function(std::make_unique<std::function<void(VideoAdState /* state */)>>(std::move(func))) {}
-    inline void call(int state) const noexcept {
-      _function->operator()(static_cast<VideoAdState>(state));
-    }
-  private:
-    std::unique_ptr<std::function<void(VideoAdState /* state */)>> _function;
-  } SWIFT_NONCOPYABLE;
-  Func_void_VideoAdState create_Func_void_VideoAdState(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_VideoAdState_Wrapper wrap_Func_void_VideoAdState(Func_void_VideoAdState value) noexcept {
-    return Func_void_VideoAdState_Wrapper(std::move(value));
-  }
-  
-  // pragma MARK: Result<ListenerSubscription>
-  using Result_ListenerSubscription_ = Result<ListenerSubscription>;
-  inline Result_ListenerSubscription_ create_Result_ListenerSubscription_(const ListenerSubscription& value) noexcept {
-    return Result<ListenerSubscription>::withValue(value);
-  }
-  inline Result_ListenerSubscription_ create_Result_ListenerSubscription_(const std::exception_ptr& error) noexcept {
-    return Result<ListenerSubscription>::withError(error);
   }
   
   // pragma MARK: Result<std::shared_ptr<Promise<VideoInformation>>>

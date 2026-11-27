@@ -80,12 +80,15 @@ namespace margelo::nitro::video {
     bool getIsPlayingAd() override;
     VideoAdState getAdState() override;
     std::optional<TextTrack> getSelectedTrack() override;
+    std::optional<std::string> getSelectedVideoTrackId() override;
 
   public:
     // Methods
     std::shared_ptr<Promise<void>> replaceSourceAsync(const std::optional<std::variant<nitro::NullType, std::shared_ptr<HybridVideoPlayerSourceSpec>>>& source) override;
     std::vector<TextTrack> getAvailableTextTracks() override;
     void selectTextTrack(const std::optional<std::variant<nitro::NullType, TextTrack>>& textTrack) override;
+    std::vector<VideoTrack> getAvailableVideoTracks() override;
+    void selectVideoTrack(const std::optional<std::string>& trackId) override;
     void release() override;
     std::shared_ptr<Promise<void>> initialize() override;
     std::shared_ptr<Promise<void>> preload() override;

@@ -26,6 +26,8 @@ namespace margelo::nitro::video { enum class IgnoreSilentSwitchMode; }
 namespace margelo::nitro::video { enum class VideoAdState; }
 // Forward declaration of `TextTrack` to properly resolve imports.
 namespace margelo::nitro::video { struct TextTrack; }
+// Forward declaration of `VideoTrack` to properly resolve imports.
+namespace margelo::nitro::video { struct VideoTrack; }
 
 #include <memory>
 #include "HybridVideoPlayerSourceSpec.hpp"
@@ -35,6 +37,7 @@ namespace margelo::nitro::video { struct TextTrack; }
 #include "IgnoreSilentSwitchMode.hpp"
 #include "VideoAdState.hpp"
 #include "TextTrack.hpp"
+#include "VideoTrack.hpp"
 #include <optional>
 #include <string>
 #include <NitroModules/Promise.hpp>
@@ -185,6 +188,10 @@ namespace margelo::nitro::video {
       auto __result = _swiftPart.getSelectedTrack();
       return __result;
     }
+    inline std::optional<std::string> getSelectedVideoTrackId() noexcept override {
+      auto __result = _swiftPart.getSelectedVideoTrackId();
+      return __result;
+    }
 
   public:
     // Methods
@@ -206,6 +213,20 @@ namespace margelo::nitro::video {
     }
     inline void selectTextTrack(const std::optional<std::variant<nitro::NullType, TextTrack>>& textTrack) override {
       auto __result = _swiftPart.selectTextTrack(textTrack);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+    }
+    inline std::vector<VideoTrack> getAvailableVideoTracks() override {
+      auto __result = _swiftPart.getAvailableVideoTracks();
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline void selectVideoTrack(const std::optional<std::string>& trackId) override {
+      auto __result = _swiftPart.selectVideoTrack(trackId);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

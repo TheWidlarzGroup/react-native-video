@@ -282,27 +282,40 @@ open class HybridVideoPlayerSpec_cxx {
       return self.__implementation.isPlaying
     }
   }
-
+  
   public final var isPlayingAd: Bool {
     @inline(__always)
     get {
       return self.__implementation.isPlayingAd
     }
   }
-
+  
   public final var adState: Int32 {
     @inline(__always)
     get {
       return self.__implementation.adState.rawValue
     }
   }
-
+  
   public final var selectedTrack: bridge.std__optional_TextTrack_ {
     @inline(__always)
     get {
       return { () -> bridge.std__optional_TextTrack_ in
         if let __unwrappedValue = self.__implementation.selectedTrack {
           return bridge.create_std__optional_TextTrack_(__unwrappedValue)
+        } else {
+          return .init()
+        }
+      }()
+    }
+  }
+
+  public final var selectedVideoTrackId: bridge.std__optional_std__string_ {
+    @inline(__always)
+    get {
+      return { () -> bridge.std__optional_std__string_ in
+        if let __unwrappedValue = self.__implementation.selectedVideoTrackId {
+          return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
         } else {
           return .init()
         }
@@ -402,6 +415,42 @@ open class HybridVideoPlayerSpec_cxx {
   }
   
   @inline(__always)
+  public final func getAvailableVideoTracks() -> bridge.Result_std__vector_VideoTrack__ {
+    do {
+      let __result = try self.__implementation.getAvailableVideoTracks()
+      let __resultCpp = { () -> bridge.std__vector_VideoTrack_ in
+        var __vector = bridge.create_std__vector_VideoTrack_(__result.count)
+        for __item in __result {
+          __vector.push_back(__item)
+        }
+        return __vector
+      }()
+      return bridge.create_Result_std__vector_VideoTrack__(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__vector_VideoTrack__(__exceptionPtr)
+    }
+  }
+
+  @inline(__always)
+  public final func selectVideoTrack(trackId: bridge.std__optional_std__string_) -> bridge.Result_void_ {
+    do {
+      try self.__implementation.selectVideoTrack(trackId: { () -> String? in
+        if bridge.has_value_std__optional_std__string_(trackId) {
+          let __unwrapped = bridge.get_std__optional_std__string_(trackId)
+          return String(__unwrapped)
+        } else {
+          return nil
+        }
+      }())
+      return bridge.create_Result_void_()
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_void_(__exceptionPtr)
+    }
+  }
+
+  @inline(__always)
   public final func release() -> bridge.Result_void_ {
     do {
       try self.__implementation.release()
@@ -490,7 +539,7 @@ open class HybridVideoPlayerSpec_cxx {
       return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
     }
   }
-
+  
   @inline(__always)
   public final func deactivateAds() -> bridge.Result_void_ {
     do {
@@ -501,7 +550,7 @@ open class HybridVideoPlayerSpec_cxx {
       return bridge.create_Result_void_(__exceptionPtr)
     }
   }
-
+  
   @inline(__always)
   public final func skipAd() -> bridge.Result_void_ {
     do {
@@ -512,7 +561,7 @@ open class HybridVideoPlayerSpec_cxx {
       return bridge.create_Result_void_(__exceptionPtr)
     }
   }
-
+  
   @inline(__always)
   public final func seekBy(time: Double) -> bridge.Result_void_ {
     do {
