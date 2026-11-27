@@ -22,7 +22,10 @@ final class VideoCache {
   static let sizeLimit: Int64 = 100 * 1024 * 1024
 
   private let directory: URL
-  private let lock = NSLock()
+  private let lock = NSRecursiveLock()
+  // One loader per file, shared by every asset of that uri: two loaders would write the same
+  // partial file with two different ideas of what is in it.
+  private var loaders: [String: WeakLoader] = [:]
   // Files a loader is writing or reading right now; trimming leaves them alone.
   private var keysInUse: [String: Int] = [:]
   private static var loaderKey: UInt8 = 0
@@ -54,6 +57,9 @@ final class VideoCache {
     let fileExtension = url.pathExtension.isEmpty ? "mp4" : url.pathExtension.lowercased()
     let completeFile = directory.appendingPathComponent("\(key).\(fileExtension)")
 
+    lock.lock()
+    defer { lock.unlock() }
+
     if FileManager.default.fileExists(atPath: completeFile.path) {
       // The modification date is the "last used" date for trimming.
       try? FileManager.default.setAttributes(
@@ -61,9 +67,10 @@ final class VideoCache {
       return AVURLAsset(url: completeFile)
     }
 
-    guard
-      var components = URLComponents(url: url, resolvingAgainstBaseURL: false),
-      let loader = CachingResourceLoader(
+    // The first asset's headers are used for the whole download.
+    let shared =
+      loaders[key]?.loader
+      ?? CachingResourceLoader(
         url: url,
         headers: headers ?? [:],
         key: key,
@@ -72,10 +79,15 @@ final class VideoCache {
         completeFile: completeFile,
         cache: self
       )
+    guard
+      var components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+      let loader = shared
     else {
       return headers.map { AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": $0]) }
         ?? AVURLAsset(url: url)
     }
+
+    loaders[key] = WeakLoader(loader: loader)
 
     // AVFoundation calls a resource loader only for a scheme it cannot load itself.
     components.scheme = Self.scheme
@@ -135,8 +147,12 @@ final class VideoCache {
   }
 }
 
-/// Answers one asset's loading requests from the cached part of the file and from the network.
-/// Everything runs on `queue`.
+private struct WeakLoader {
+  weak var loader: CachingResourceLoader?
+}
+
+/// Answers the loading requests for one file (from every asset of its uri) from the cached part
+/// of the file and from the network. Everything runs on `queue`.
 private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelegate {
   let queue = DispatchQueue(label: "com.twg.video.cache", qos: .userInitiated)
 
@@ -225,6 +241,11 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
       index = Index()
     } else {
       index = stored ?? Index()
+      // An index that claims more than the file holds would serve bytes that are not there.
+      let size = (try? fileManager.attributesOfItem(atPath: partialFile.path)[.size] as? Int64) ?? 0
+      if let lastByte = index.ranges.map({ $0[1] }).max(), lastByte > size {
+        index.ranges = []
+      }
     }
     guard let handle = try? FileHandle(forUpdating: partialFile) else { return nil }
     fileHandle = handle
