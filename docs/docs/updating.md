@@ -25,7 +25,7 @@ Our agent skill knows the v6→v7 mapping. Install it with `npx skills add TheWi
 
 ### Before you start
 
-*   Read [Not in v7 yet](#not-in-v7-yet) first. Audio and video track selection, subtitle styling, the poster props and start position, trimming and caching are planned before v7 stable. Ads and TV platforms are planned after it, and some v6 props have no replacement. v6 is still maintained, so you can stay on it until the feature you need lands.
+*   Read [Not in v7 yet](#not-in-v7-yet) first. Audio and video track selection, subtitle styling, the poster props and start position, trimming and caching are planned before v7 stable. Ads and TV platforms are planned after it. The remaining v6 props are planned as well, without a date yet. v6 is still maintained, so you can stay on it until the feature you need lands.
 *   v7 needs React Native 0.75 or newer and iOS 15 or newer. See [Installation](./fundamentals/installation.md) for all requirements.
 
 ### 1. Install
@@ -201,9 +201,10 @@ useEvent(player, 'onError', (error) => console.error(error.code, error.message))
 | `onExternalPlaybackChange` | `onExternalPlaybackChange` | `{ isExternalPlaybackActive }` is now a `boolean`. iOS. |
 
 :::info onProgress in v7
-*   **Interval.** `progressUpdateInterval` is gone. The event fires every 250 ms on Android and every 500 ms on iOS. On web it follows the browser's `timeupdate` event.
+*   **Interval.** `progressUpdateInterval` is not available yet. The event fires every 250 ms on Android and every 500 ms on iOS. On web it follows the browser's `timeupdate` event.
 *   **Duration.** `seekableDuration` is gone. Read `player.duration`.
 *   **Buffer.** v6 `playableDuration` was the position the buffer reaches. `bufferDuration` is the number of seconds buffered ahead of the current position, so the v6 value is `currentTime + bufferDuration`. On iOS this holds from the release after `7.0.0-beta.14`; earlier betas report the position the buffer reaches (see [#5028](https://github.com/TheWidlarzGroup/react-native-video/issues/5028)).
+*   **Status and buffering on iOS.** Up to `7.0.0-beta.14` the player did not report status and buffering changes that come from playback stalls. From the next release `onBuffer`, `onStatusChange` and `isBuffering` in `onPlaybackStateChange` fire for them.
 :::
 
 Fullscreen and Picture-in-Picture events are props of `VideoView`:
@@ -224,6 +225,9 @@ See [Player events](./player/events.md) and [VideoView events](./video-view/even
 The methods of `videoRef.current` are divided between the player and a ref to `VideoView`.
 
 ```tsx
+import { useRef } from 'react';
+import { VideoView, type VideoViewRef } from 'react-native-video';
+
 const viewRef = useRef<VideoViewRef>(null);
 
 <VideoView ref={viewRef} player={player} />;
@@ -242,8 +246,8 @@ const viewRef = useRef<VideoViewRef>(null);
 | `enterPictureInPicture()` | `viewRef.current.enterPictureInPicture()` | `canEnterPictureInPicture()` tells you whether it is available. |
 | `exitPictureInPicture()` | `viewRef.current.exitPictureInPicture()` | |
 | `restoreUserInterfaceForPictureInPictureStopCompleted()` | Not needed | |
-| `save()` | Removed | |
-| `nativeHtmlVideoRef` (web) | None | The `<video>` element is not exposed. |
+| `save()` | Not yet | |
+| `nativeHtmlVideoRef` (web) | Not yet | The `<video>` element is not exposed. |
 
 See [VideoView methods](./video-view/methods.md) for the full reference.
 
@@ -271,7 +275,7 @@ Then pass `drm` in the player config. Several fields were renamed:
 | `multiDrm` | `multiSession` | Android. |
 | `certificateUrl`, `contentId` | Same | iOS. |
 | `getLicense(spcBase64, contentId, licenseUrl, loadedLicenseUrl)` | `getLicense({ contentId, licenseUrl, keyUrl, spc })` | iOS. One object argument. Return the CKC as a base64 string. |
-| `base64Certificate`, `localSourceEncryptionKeyScheme` | Removed | |
+| `base64Certificate`, `localSourceEncryptionKeyScheme` | Not yet | |
 
 See [DRM](./player/drm.md) for the full reference.
 
@@ -327,7 +331,7 @@ These are in open pull requests and are planned for after the stable release:
 
 If your app needs ads or TV platforms, stay on v6 for now.
 
-#### No replacement yet
+#### Planned, no date yet
 
 | Area | v6 API | Notes |
 | :--- | :--- | :--- |
@@ -340,8 +344,10 @@ If your app needs ads or TV platforms, stay on v6 for now.
 | Audio output and AirPlay | `audioOutput`, `allowsExternalPlayback`, `onAudioBecomingNoisy` on iOS | |
 | Secure output | `useSecureView`, `ViewType.SURFACE_SECURE` | |
 | Other | `onAspectRatio`, `nativeHtmlVideoRef` | `onLoad` reports the video size. |
+| Decoder info | `VideoDecoderProperties.getWidevineLevel`, `isCodecSupported`, `isHEVCSupported` | |
+| Saving and local encryption | `save()`, `currentPlaybackTime`, `localSourceEncryptionKeyScheme`, `drm.base64Certificate` | |
 | Platforms | visionOS, Windows | |
 
 #### Removed
 
-`save()`, `currentPlaybackTime`, `localSourceEncryptionKeyScheme`, `drm.base64Certificate`, `debug`, `filter` and `filterEnabled` were removed and will not come back in v7. The source fields `isNetwork`, `isAsset`, `isLocalAssetFile`, `mainVer` and `patchVer` are gone as well.
+`debug`, `filter` and `filterEnabled` were removed and will not come back in v7. The source fields `isNetwork`, `isAsset`, `isLocalAssetFile`, `mainVer` and `patchVer` are gone as well.
