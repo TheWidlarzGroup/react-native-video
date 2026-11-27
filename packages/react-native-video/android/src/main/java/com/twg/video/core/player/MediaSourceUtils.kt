@@ -29,14 +29,22 @@ fun buildMediaSource(context: Context, source: HybridVideoPlayerSource, mediaIte
   // 1. Remove query params from uri to avoid getting false extension
   // 2. Get extension from uri
   val type = Util.inferContentType(uri)
-  val dataSourceFactory = PluginsRegistry.shared.overrideMediaDataSourceFactory(
-    source,
-    buildBaseDataSourceFactory(context, source)
-  )
 
   if (!source.config.externalSubtitles.isNullOrEmpty()) {
     return buildExternalSubtitlesMediaSource(context, source)
   }
+
+  // Only progressive files are cached. A cached HLS or DASH playlist would be served stale,
+  // which breaks live streams, and sources with external subtitles take the path above.
+  val useCache = source.config.shouldCache == true &&
+    type == C.CONTENT_TYPE_OTHER &&
+    source.config.drm == null &&
+    !PluginsRegistry.shared.shouldDisableCache(source)
+
+  val dataSourceFactory = PluginsRegistry.shared.overrideMediaDataSourceFactory(
+    source,
+    buildBaseDataSourceFactory(context, source, useCache)
+  )
 
   val mediaSourceFactory: MediaSource.Factory = when (type) {
     C.CONTENT_TYPE_DASH -> {

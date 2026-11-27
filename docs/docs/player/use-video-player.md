@@ -94,6 +94,22 @@ player.muted = true;
 |----------|------|-------------|
 | `onError?` | `(error: VideoRuntimeError) => void` | A callback function that is invoked when a runtime error occurs in the player. You can use this to catch and handle errors gracefully. |
 
+### Caching
+
+Set `shouldCache` on the `VideoConfig` to keep the downloaded file on disk and play it from there next time.
+
+```ts
+const player = useVideoPlayer({
+  source: { uri: 'https://example.com/video.mp4', shouldCache: true },
+});
+```
+
+| Platform | Behaviour |
+|----------|-----------|
+| Android | Progressive files loaded over the network are cached in the app's cache directory (`RNVCache`). The cache is shared by all players and evicts the least recently used files above 100 MB. HLS and DASH streams, DRM content and sources with `externalSubtitles` are played without the cache. |
+| iOS | Not available yet, the option is ignored. |
+| Web | Ignored, the browser's HTTP cache applies. |
+
 ### Buffer Config
 
 You can fine‑tune buffering via `bufferConfig` on the `VideoConfig` you pass to `useVideoPlayer`/`VideoPlayer`. This controls how much data is buffered, live latency targets, and iOS network constraints.
