@@ -100,6 +100,8 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
 
   // Text track selection state
   private var selectedExternalTrackIndex: Int? = null
+  // The text track last reported by onTrackChange, null for none.
+  private var emittedTextTrackId: String? = null
 
   private companion object {
     const val PROGRESS_UPDATE_INTERVAL_MS = 250L
@@ -685,8 +687,15 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
       }
     }
 
+    // A selection applied here, made in the native controls or reset by a new source: reported
+    // once applied.
     override fun onTracksChanged(tracks: Tracks) {
       super.onTracksChanged(tracks)
+      val track = TextTrackUtils.getSelectedTrack(player, source)
+      if (track?.id != emittedTextTrackId) {
+        emittedTextTrackId = track?.id
+        eventEmitter.onTrackChange(track)
+      }
     }
   }
 
@@ -700,8 +709,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
     selectedExternalTrackIndex = TextTrackUtils.selectTextTrack(
       player = player,
       textTrack = textTrack?.asSecondOrNull(),
-      source = source,
-      onTrackChange = { track -> eventEmitter.onTrackChange(track) }
+      source = source
     )
   }
 
