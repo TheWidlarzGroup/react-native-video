@@ -10,6 +10,7 @@ import androidx.media3.common.Metadata
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
+import androidx.media3.common.Timeline
 import androidx.media3.common.Tracks
 import androidx.media3.common.text.CueGroup
 import androidx.media3.common.util.UnstableApi
@@ -93,6 +94,13 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   // Time updates
   private val progressHandler = Handler(Looper.getMainLooper())
   private var progressRunnable: Runnable? = null
+
+  /**
+   * Whether `onLoad` was already emitted for the source the player currently holds. The player
+   * returns to `STATE_READY` after every rebuffer and every seek, and `onLoad` must not follow
+   * it there: it is a once-per-source event, as on iOS and in v6.
+   */
+  private var loadReportedForSource = false
 
   // Listeners
   private val audioFocusChangedListener = OnAudioFocusChangedListener()
@@ -532,6 +540,13 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   }
 
   private val playerListener = object : Player.Listener {
+    override fun onTimelineChanged(timeline: Timeline, reason: Int) {
+      // A media source was set (first source or replaceSourceAsync()): a new load begins.
+      if (reason == Player.TIMELINE_CHANGE_REASON_PLAYLIST_CHANGED) {
+        loadReportedForSource = false
+      }
+    }
+
     override fun onPlaybackStateChanged(playbackState: Int) {
       val isPlayingUpdate = player.isPlaying
       val isBufferingUpdate = playbackState == Player.STATE_BUFFERING
@@ -547,6 +562,8 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
         Player.STATE_IDLE -> {
           status = VideoPlayerStatus.IDLE
           eventEmitter.onBuffer(false)
+          // Stopped or failed: the next prepare() loads the source again.
+          loadReportedForSource = false
         }
         Player.STATE_BUFFERING -> {
           status = VideoPlayerStatus.LOADING
@@ -570,15 +587,18 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
           val height = selectedVideoTrackFormat?.height ?: generalVideoFormat?.height ?: 0
           val rotationDegrees = selectedVideoTrackFormat?.rotationDegrees ?: generalVideoFormat?.rotationDegrees
 
-          eventEmitter.onLoad(
-            onLoadData(
-              currentTime = player.currentPosition / 1000.0,
-              duration = if (player.duration == C.TIME_UNSET) Double.NaN else player.duration / 1000.0,
-              width = width.toDouble(),
-              height = height.toDouble(),
-              orientation = VideoOrientationUtils.fromWHR(width, height, rotationDegrees)
+          if (!loadReportedForSource) {
+            loadReportedForSource = true
+            eventEmitter.onLoad(
+              onLoadData(
+                currentTime = player.currentPosition / 1000.0,
+                duration = if (player.duration == C.TIME_UNSET) Double.NaN else player.duration / 1000.0,
+                width = width.toDouble(),
+                height = height.toDouble(),
+                orientation = VideoOrientationUtils.fromWHR(width, height, rotationDegrees)
+              )
             )
-          )
+          }
           // If player becomes ready and is set to play, start progress updates
           if (player.playWhenReady) {
             startProgressUpdates()
