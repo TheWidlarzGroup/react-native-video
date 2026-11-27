@@ -82,6 +82,8 @@ This hook is recommended for managing event subscriptions in a declarative React
 
 `onLoadStart` / `onLoad` will fire automatically after construction when `initializeOnCreation` (default `true`) is enabled. If you set `initializeOnCreation: false`, these events will not fire until you call `initialize()` or `preload()`. Attach your event handlers before invoking those methods to avoid missing early events.
 
+A listener added while a source is still loading receives `onLoadStart` for that load right away. If your code removes a listener and adds it again during loading (for example in a `useEffect` whose dependencies change), it receives `onLoadStart` for the same load a second time, so deduplicate there if you count load starts. `useEvent` keeps one subscription per player and event and is not affected.
+
 ## Subscribing to Events
 
 You can subscribe to an event by assigning a function to the player instance's corresponding property:
