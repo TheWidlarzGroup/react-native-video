@@ -13,9 +13,11 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.dash.DashMediaSource
 import androidx.media3.exoplayer.drm.DrmSessionManager
 import androidx.media3.exoplayer.hls.HlsMediaSource
+import androidx.media3.exoplayer.source.ClippingMediaSource
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.MergingMediaSource
 import com.margelo.nitro.video.HybridVideoPlayerSource
+import com.margelo.nitro.video.NativeVideoConfig
 import com.twg.video.core.LibraryError
 import com.twg.video.core.SourceError
 import com.twg.video.core.plugins.PluginsRegistry
@@ -109,4 +111,20 @@ fun buildExternalSubtitlesMediaSource(context: Context, source: HybridVideoPlaye
   ).createMediaSource(mediaItemBuilder.build())
 }
 
+// Limits playback to the part of the source between `cropStart` and `cropEnd` (milliseconds).
+// The clipped source reports positions and duration relative to that part.
+@OptIn(UnstableApi::class)
+fun clipMediaSource(mediaSource: MediaSource, config: NativeVideoConfig): MediaSource {
+  val cropStartMs = config.cropStart?.toLong()?.takeIf { it > 0 } ?: 0L
+  val cropEndMs = config.cropEnd?.toLong()?.takeIf { it > cropStartMs }
 
+  if (cropStartMs == 0L && cropEndMs == null) {
+    return mediaSource
+  }
+
+  return ClippingMediaSource(
+    mediaSource,
+    cropStartMs * 1000,
+    cropEndMs?.let { it * 1000 } ?: C.TIME_END_OF_SOURCE
+  )
+}

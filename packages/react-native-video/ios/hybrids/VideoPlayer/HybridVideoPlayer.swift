@@ -234,19 +234,21 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   var currentTime: Double {
     set {
       _eventEmitter?.onSeek(newValue)
+      // Time is counted from `cropStart` when the source is cropped
+      let cropStart = player.currentItem?.cropStartSeconds ?? 0
       player.seek(
-        to: CMTime(seconds: newValue, preferredTimescale: 1000),
+        to: CMTime(seconds: max(0, newValue) + cropStart, preferredTimescale: 1000),
         toleranceBefore: .zero,
         toleranceAfter: .zero
       )
     }
     get {
-      player.currentTime().seconds
+      player.currentItem?.croppedCurrentTime ?? player.currentTime().seconds
     }
   }
 
   var duration: Double {
-    Double(player.currentItem?.duration.seconds ?? Double.nan)
+    player.currentItem?.croppedDuration ?? Double.nan
   }
 
   var rate: Double {
@@ -512,13 +514,11 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       throw PlayerError.notInitialized.error()
     }
 
-    let currentItemTime = currentItem.currentTime()
-
     // Duration is NaN for live streams
     let fixedDurration = duration.isNaN ? Double.infinity : duration
 
     // Clap by <0, duration>
-    let newTime = max(0, min(currentItemTime.seconds + time, fixedDurration))
+    let newTime = max(0, min(currentItem.croppedCurrentTime + time, fixedDurration))
 
     currentTime = newTime
   }
@@ -643,10 +643,14 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     }
     try ensureCurrentLoad(context)
 
-    // Seeking an item that has no player yet sets where its playback starts
-    if let startPosition = source.config.startPosition, startPosition > 0 {
+    playerItem.setCrop(start: source.config.cropStart, end: source.config.cropEnd)
+
+    // Seeking an item that has no player yet sets where its playback starts.
+    // `startPosition` counts from `cropStart`.
+    let startSeconds = playerItem.cropStartSeconds + max(0, source.config.startPosition ?? 0) / 1000
+    if startSeconds > 0 {
       playerItem.seek(
-        to: CMTime(seconds: startPosition / 1000, preferredTimescale: 1000),
+        to: CMTime(seconds: startSeconds, preferredTimescale: 1000),
         toleranceBefore: .zero,
         toleranceAfter: .zero,
         completionHandler: nil

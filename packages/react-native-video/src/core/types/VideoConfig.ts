@@ -65,6 +65,25 @@ export type VideoConfig = {
    */
   startPosition?: number;
   /**
+   * Plays only the part of the source that starts at this position, in milliseconds.
+   * The player treats that part as the whole video: `currentTime` is 0 at `cropStart`
+   * and `duration` is the length of the part. `startPosition` counts from `cropStart`.
+   * A value that is not greater than 0 is ignored.
+   * @platform android, ios
+   * @example
+   * ```ts
+   * cropStart: 36_000, cropEnd: 48_500 // play 12.5 seconds of the video
+   * ```
+   */
+  cropStart?: number;
+  /**
+   * Plays only the part of the source that ends at this position, in milliseconds
+   * from the beginning of the source. Playback ends there and `onEnd` is emitted.
+   * A value that is not greater than `cropStart` (or 0) is ignored.
+   * @platform android, ios
+   */
+  cropEnd?: number;
+  /**
    * when the player is created, this flag will determine if native player should be initialized immediately.
    * If set to true, the player will be initialized as soon as player is created
    * If set to false, the player will need be initialized manually later

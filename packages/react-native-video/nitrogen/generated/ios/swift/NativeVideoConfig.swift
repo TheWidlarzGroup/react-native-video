@@ -18,7 +18,7 @@ public extension NativeVideoConfig {
   /**
    * Create a new instance of `NativeVideoConfig`.
    */
-  init(uri: String, externalSubtitles: [NativeExternalSubtitle]?, drm: NativeDrmParams?, headers: Dictionary<String, String>?, bufferConfig: BufferConfig?, metadata: CustomVideoMetadata?, startPosition: Double?, initializeOnCreation: Bool?) {
+  init(uri: String, externalSubtitles: [NativeExternalSubtitle]?, drm: NativeDrmParams?, headers: Dictionary<String, String>?, bufferConfig: BufferConfig?, metadata: CustomVideoMetadata?, startPosition: Double?, cropStart: Double?, cropEnd: Double?, initializeOnCreation: Bool?) {
     self.init(std.string(uri), { () -> bridge.std__optional_std__vector_NativeExternalSubtitle__ in
       if let __unwrappedValue = externalSubtitles {
         return bridge.create_std__optional_std__vector_NativeExternalSubtitle__({ () -> bridge.std__vector_NativeExternalSubtitle_ in
@@ -63,6 +63,18 @@ public extension NativeVideoConfig {
       }
     }(), { () -> bridge.std__optional_double_ in
       if let __unwrappedValue = startPosition {
+        return bridge.create_std__optional_double_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_double_ in
+      if let __unwrappedValue = cropStart {
+        return bridge.create_std__optional_double_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_double_ in
+      if let __unwrappedValue = cropEnd {
         return bridge.create_std__optional_double_(__unwrappedValue)
       } else {
         return .init()
@@ -133,6 +145,30 @@ public extension NativeVideoConfig {
     return { () -> Double? in
       if bridge.has_value_std__optional_double_(self.__startPosition) {
         let __unwrapped = bridge.get_std__optional_double_(self.__startPosition)
+        return __unwrapped
+      } else {
+        return nil
+      }
+    }()
+  }
+  
+  @inline(__always)
+  var cropStart: Double? {
+    return { () -> Double? in
+      if bridge.has_value_std__optional_double_(self.__cropStart) {
+        let __unwrapped = bridge.get_std__optional_double_(self.__cropStart)
+        return __unwrapped
+      } else {
+        return nil
+      }
+    }()
+  }
+  
+  @inline(__always)
+  var cropEnd: Double? {
+    return { () -> Double? in
+      if bridge.has_value_std__optional_double_(self.__cropEnd) {
+        let __unwrapped = bridge.get_std__optional_double_(self.__cropEnd)
         return __unwrapped
       } else {
         return nil

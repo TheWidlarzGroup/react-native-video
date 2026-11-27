@@ -64,6 +64,15 @@ test('startPosition reaches native unchanged, in milliseconds', () => {
   expect(lastConfig().startPosition).toBeUndefined();
 });
 
+test('cropStart and cropEnd reach native unchanged, in milliseconds', () => {
+  createSource({ uri: 'https://x/a.mp4', cropStart: 2000, cropEnd: 5000 });
+  expect(lastConfig().cropStart).toBe(2000);
+  expect(lastConfig().cropEnd).toBe(5000);
+  createSource({ uri: 'https://x/a.mp4' });
+  expect(lastConfig().cropStart).toBeUndefined();
+  expect(lastConfig().cropEnd).toBeUndefined();
+});
+
 test('a config with a numeric uri resolves the asset and keeps the other fields', () => {
   createSource({ uri: 7, headers: { a: 'b' } });
   expect(lastConfig().uri).toBe('file:///asset.mp4');
