@@ -268,9 +268,7 @@ export const VideoViewOverlayHost = ({
           {overlay()}
         </View>
       ) : null}
-      {hasOverlay ? (
-        <View style={ORIGIN_PROBE} onLayout={trackOrigin} />
-      ) : null}
+      {hasOverlay ? <View style={ORIGIN_PROBE} onLayout={trackOrigin} /> : null}
     </>
   );
 };
