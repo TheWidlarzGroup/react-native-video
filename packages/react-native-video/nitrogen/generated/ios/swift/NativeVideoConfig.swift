@@ -18,7 +18,7 @@ public extension NativeVideoConfig {
   /**
    * Create a new instance of `NativeVideoConfig`.
    */
-  init(uri: String, externalSubtitles: [NativeExternalSubtitle]?, drm: NativeDrmParams?, headers: Dictionary<String, String>?, bufferConfig: BufferConfig?, metadata: CustomVideoMetadata?, initializeOnCreation: Bool?, minLoadRetryCount: Double?, disableDisconnectError: Bool?, type: String?, textTracksAllowChunklessPreparation: Bool?) {
+  init(uri: String, externalSubtitles: [NativeExternalSubtitle]?, drm: NativeDrmParams?, cmcd: NativeCmcdConfiguration?, headers: Dictionary<String, String>?, bufferConfig: BufferConfig?, metadata: CustomVideoMetadata?, initializeOnCreation: Bool?, minLoadRetryCount: Double?, disableDisconnectError: Bool?, type: String?, textTracksAllowChunklessPreparation: Bool?) {
     self.init(std.string(uri), { () -> bridge.std__optional_std__vector_NativeExternalSubtitle__ in
       if let __unwrappedValue = externalSubtitles {
         return bridge.create_std__optional_std__vector_NativeExternalSubtitle__({ () -> bridge.std__vector_NativeExternalSubtitle_ in
@@ -34,6 +34,12 @@ public extension NativeVideoConfig {
     }(), { () -> bridge.std__optional_NativeDrmParams_ in
       if let __unwrappedValue = drm {
         return bridge.create_std__optional_NativeDrmParams_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_NativeCmcdConfiguration_ in
+      if let __unwrappedValue = cmcd {
+        return bridge.create_std__optional_NativeCmcdConfiguration_(__unwrappedValue)
       } else {
         return .init()
       }
@@ -114,6 +120,11 @@ public extension NativeVideoConfig {
   @inline(__always)
   var drm: NativeDrmParams? {
     return self.__drm.value
+  }
+  
+  @inline(__always)
+  var cmcd: NativeCmcdConfiguration? {
+    return self.__cmcd.value
   }
   
   @inline(__always)

@@ -19,6 +19,7 @@ class HybridVideoPlayerSourceFactory: HybridVideoPlayerSourceFactorySpec {
       uri: uri,
       externalSubtitles: nil,
       drm: nil,
+      cmcd: nil,
       headers: nil,
       bufferConfig: nil,
       metadata: nil,

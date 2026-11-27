@@ -156,6 +156,7 @@ These go on the `VideoConfig` next to `uri`. They cover v6 source props that con
 | `disableDisconnectError` | `boolean` | Android | Keep retrying once a second while the device has no connection, instead of reporting an error after `minLoadRetryCount` attempts. Default: `false`. |
 | `type` | `string` | Android | The stream type, as a file extension, for a uri that does not show it: `m3u8` (HLS), `mpd` (DASH) or `ism` (SmoothStreaming). Without it the type is read from the uri. |
 | `textTracksAllowChunklessPreparation` | `boolean` | Android | Whether an HLS stream may be prepared from its playlists alone. Set it to `false` when subtitle or audio renditions without a `CODECS` attribute do not show up. Not applied when `externalSubtitles` is set. Default: `true`. |
+| `cmcd` | `boolean \| CmcdConfiguration` | Android | Send Common Media Client Data (CTA-5004) with the requests of an HLS, DASH or SmoothStreaming stream. `true` sends the standard keys in the `CMCD` query parameter. An object picks the mode (`'query'` or `'header'`) and adds custom keys per group: `request`, `session`, `object`, `status`. Custom keys need a hyphenated prefix, for example `com.example-tenant`. |
 
 ## DRM
 

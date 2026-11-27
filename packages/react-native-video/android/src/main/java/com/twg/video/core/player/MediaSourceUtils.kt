@@ -16,13 +16,17 @@ import androidx.media3.exoplayer.drm.DrmSessionManager
 import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.MergingMediaSource
+import androidx.media3.exoplayer.upstream.CmcdConfiguration
 import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy
 import androidx.media3.exoplayer.upstream.LoadErrorHandlingPolicy
+import com.google.common.collect.ImmutableListMultimap
+import com.margelo.nitro.video.CmcdMode
 import com.margelo.nitro.video.HybridVideoPlayerSource
 import com.twg.video.core.LibraryError
 import com.twg.video.core.SourceError
 import com.twg.video.core.plugins.PluginsRegistry
 import java.io.IOException
+import java.util.UUID
 import kotlin.math.min
 
 @OptIn(UnstableApi::class)
@@ -66,6 +70,7 @@ fun buildMediaSource(context: Context, source: HybridVideoPlayerSource, mediaIte
   }
 
   buildLoadErrorHandlingPolicy(source)?.let { mediaSourceFactory.setLoadErrorHandlingPolicy(it) }
+  buildCmcdConfigurationFactory(source)?.let { mediaSourceFactory.setCmcdConfigurationFactory(it) }
 
   return PluginsRegistry.shared.overrideMediaSourceFactory(
     source,
@@ -100,6 +105,7 @@ fun buildExternalSubtitlesMediaSource(context: Context, source: HybridVideoPlaye
     .setDataSourceFactory(dataSourceFactory)
 
   buildLoadErrorHandlingPolicy(source)?.let { mediaSourceFactory.setLoadErrorHandlingPolicy(it) }
+  buildCmcdConfigurationFactory(source)?.let { mediaSourceFactory.setCmcdConfigurationFactory(it) }
 
   if (source.config.drm != null) {
     if (source.drmManager == null)  {
@@ -167,5 +173,33 @@ class RetryWhileDisconnectedPolicy(private val minLoadRetryCount: Int) :
 
   companion object {
     private const val DISCONNECTED_RETRY_DELAY_MS = 1000L
+  }
+}
+
+/**
+ * The CMCD setup for the source, or null when the app did not ask for CMCD. Media3 adds the
+ * standard keys itself; the custom keys come from JS already formatted as CMCD pairs.
+ */
+@OptIn(UnstableApi::class)
+fun buildCmcdConfigurationFactory(source: HybridVideoPlayerSource): CmcdConfiguration.Factory? {
+  val cmcd = source.config.cmcd ?: return null
+
+  val customData = ImmutableListMultimap.builder<String, String>().apply {
+    cmcd.objectData?.forEach { put(CmcdConfiguration.KEY_CMCD_OBJECT, it) }
+    cmcd.requestData?.forEach { put(CmcdConfiguration.KEY_CMCD_REQUEST, it) }
+    cmcd.sessionData?.forEach { put(CmcdConfiguration.KEY_CMCD_SESSION, it) }
+    cmcd.statusData?.forEach { put(CmcdConfiguration.KEY_CMCD_STATUS, it) }
+  }.build()
+
+  val requestConfig = object : CmcdConfiguration.RequestConfig {
+    override fun getCustomData(): ImmutableListMultimap<String, String> = customData
+  }
+  val mode = when (cmcd.mode) {
+    CmcdMode.HEADER -> CmcdConfiguration.MODE_REQUEST_HEADER
+    CmcdMode.QUERY -> CmcdConfiguration.MODE_QUERY_PARAMETER
+  }
+
+  return CmcdConfiguration.Factory { mediaItem ->
+    CmcdConfiguration(UUID.randomUUID().toString(), mediaItem.mediaId, requestConfig, mode)
   }
 }

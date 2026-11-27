@@ -5,6 +5,7 @@ import type {
   VideoPlayerSourceFactory,
 } from '../../spec/nitro/VideoPlayerSource.nitro';
 import type {
+  CmcdData,
   ExternalSubtitle,
   NativeVideoConfig,
   SubtitleType,
@@ -59,7 +60,7 @@ export const createSourceFromVideoConfig = (
   // on JSON.stringify(source), so mutating a config the caller keeps around (a module
   // constant, a useMemo/useState value) would change that key on the next render and
   // destroy and recreate the player.
-  const { externalSubtitles, drm, ...rest } = config;
+  const { externalSubtitles, drm, cmcd, ...rest } = config;
   const nativeConfig: NativeVideoConfig = {
     ...rest,
     // Set default value for initializeOnCreation (true)
@@ -68,6 +69,11 @@ export const createSourceFromVideoConfig = (
 
   if (externalSubtitles) {
     nativeConfig.externalSubtitles = parseExternalSubtitles(externalSubtitles);
+  }
+
+  const nativeCmcd = parseCmcd(cmcd);
+  if (nativeCmcd) {
+    nativeConfig.cmcd = nativeCmcd;
   }
 
   if (drm) {
@@ -87,6 +93,42 @@ export const createSourceFromVideoConfig = (
   } catch (error) {
     throw tryParseNativeVideoError(error);
   }
+};
+
+/**
+ * Turns the public `cmcd` option into what native expects: `true` means the standard keys
+ * as a query parameter, and custom keys are formatted as CMCD pairs here, because only JS
+ * knows whether a value was a string (quoted) or a number.
+ */
+const parseCmcd = (cmcd: VideoConfig['cmcd']): NativeVideoConfig['cmcd'] => {
+  if (!cmcd) {
+    return undefined;
+  }
+  if (cmcd === true) {
+    return { mode: 'query' };
+  }
+
+  const format = (data?: CmcdData) => {
+    const pairs = Object.entries(data ?? {}).map(([key, value]) =>
+      typeof value === 'number'
+        ? `${key}=${value}`
+        : `${key}="${String(value).replace(/(["\\])/g, '\\$1')}"`
+    );
+    return pairs.length > 0 ? pairs : undefined;
+  };
+
+  const native: NonNullable<NativeVideoConfig['cmcd']> = {
+    mode: cmcd.mode ?? 'query',
+  };
+  const request = format(cmcd.request);
+  const session = format(cmcd.session);
+  const object = format(cmcd.object);
+  const status = format(cmcd.status);
+  if (request) native.requestData = request;
+  if (session) native.sessionData = session;
+  if (object) native.objectData = object;
+  if (status) native.statusData = status;
+  return native;
 };
 
 /**

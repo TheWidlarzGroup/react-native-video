@@ -11,17 +11,21 @@
 #include "NativeVideoConfig.hpp"
 
 #include "BufferConfig.hpp"
+#include "CmcdMode.hpp"
 #include "CustomVideoMetadata.hpp"
 #include "JBufferConfig.hpp"
+#include "JCmcdMode.hpp"
 #include "JCustomVideoMetadata.hpp"
 #include "JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload.hpp"
 #include "JLivePlaybackParams.hpp"
+#include "JNativeCmcdConfiguration.hpp"
 #include "JNativeDrmParams.hpp"
 #include "JNativeExternalSubtitle.hpp"
 #include "JOnGetLicensePayload.hpp"
 #include "JResolution.hpp"
 #include "JSubtitleType.hpp"
 #include "LivePlaybackParams.hpp"
+#include "NativeCmcdConfiguration.hpp"
 #include "NativeDrmParams.hpp"
 #include "NativeExternalSubtitle.hpp"
 #include "OnGetLicensePayload.hpp"
@@ -61,6 +65,8 @@ namespace margelo::nitro::video {
       jni::local_ref<jni::JArrayClass<JNativeExternalSubtitle>> externalSubtitles = this->getFieldValue(fieldExternalSubtitles);
       static const auto fieldDrm = clazz->getField<JNativeDrmParams>("drm");
       jni::local_ref<JNativeDrmParams> drm = this->getFieldValue(fieldDrm);
+      static const auto fieldCmcd = clazz->getField<JNativeCmcdConfiguration>("cmcd");
+      jni::local_ref<JNativeCmcdConfiguration> cmcd = this->getFieldValue(fieldCmcd);
       static const auto fieldHeaders = clazz->getField<jni::JMap<jni::JString, jni::JString>>("headers");
       jni::local_ref<jni::JMap<jni::JString, jni::JString>> headers = this->getFieldValue(fieldHeaders);
       static const auto fieldBufferConfig = clazz->getField<JBufferConfig>("bufferConfig");
@@ -90,6 +96,7 @@ namespace margelo::nitro::video {
           return __vector;
         }()) : std::nullopt,
         drm != nullptr ? std::make_optional(drm->toCpp()) : std::nullopt,
+        cmcd != nullptr ? std::make_optional(cmcd->toCpp()) : std::nullopt,
         headers != nullptr ? std::make_optional([&]() {
           std::unordered_map<std::string, std::string> __map;
           __map.reserve(headers->size());
@@ -114,7 +121,7 @@ namespace margelo::nitro::video {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeVideoConfig::javaobject> fromCpp(const NativeVideoConfig& value) {
-      using JSignature = JNativeVideoConfig(jni::alias_ref<jni::JString>, jni::alias_ref<jni::JArrayClass<JNativeExternalSubtitle>>, jni::alias_ref<JNativeDrmParams>, jni::alias_ref<jni::JMap<jni::JString, jni::JString>>, jni::alias_ref<JBufferConfig>, jni::alias_ref<JCustomVideoMetadata>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JBoolean>);
+      using JSignature = JNativeVideoConfig(jni::alias_ref<jni::JString>, jni::alias_ref<jni::JArrayClass<JNativeExternalSubtitle>>, jni::alias_ref<JNativeDrmParams>, jni::alias_ref<JNativeCmcdConfiguration>, jni::alias_ref<jni::JMap<jni::JString, jni::JString>>, jni::alias_ref<JBufferConfig>, jni::alias_ref<JCustomVideoMetadata>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JBoolean>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
@@ -131,6 +138,7 @@ namespace margelo::nitro::video {
           return __array;
         }() : nullptr,
         value.drm.has_value() ? JNativeDrmParams::fromCpp(value.drm.value()) : nullptr,
+        value.cmcd.has_value() ? JNativeCmcdConfiguration::fromCpp(value.cmcd.value()) : nullptr,
         value.headers.has_value() ? [&]() -> jni::local_ref<jni::JMap<jni::JString, jni::JString>> {
           auto __map = jni::JHashMap<jni::JString, jni::JString>::create(value.headers.value().size());
           for (const auto& __entry : value.headers.value()) {

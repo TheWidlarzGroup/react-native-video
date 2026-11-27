@@ -145,6 +145,32 @@ test('loading options reach native unchanged and are left out when not set', () 
   }
 });
 
+test('cmcd: true means query mode, false and undefined send nothing', () => {
+  createSource({ uri: 'https://x/a.m3u8', cmcd: true });
+  expect(lastConfig().cmcd).toEqual({ mode: 'query' });
+  createSource({ uri: 'https://x/a.m3u8', cmcd: false });
+  expect('cmcd' in lastConfig()).toBe(false);
+  createSource({ uri: 'https://x/a.m3u8' });
+  expect('cmcd' in lastConfig()).toBe(false);
+});
+
+test('cmcd custom keys are formatted as CMCD pairs: strings quoted, numbers bare', () => {
+  createSource({
+    uri: 'https://x/a.m3u8',
+    cmcd: {
+      mode: 'header',
+      session: { 'com.example-tenant': 'acme', 'com.example-tier': 2 },
+      request: { 'com.example-note': 'say "hi"' },
+      object: {},
+    },
+  });
+  expect(lastConfig().cmcd).toEqual({
+    mode: 'header',
+    sessionData: ['com.example-tenant="acme"', 'com.example-tier=2'],
+    requestData: ['com.example-note="say \\"hi\\""'],
+  });
+});
+
 test('does not mutate the caller config', () => {
   // useVideoPlayer keys the player on JSON.stringify(source): if the factory wrote
   // defaults back into a config the caller keeps around (a module constant, a

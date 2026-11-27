@@ -28,6 +28,9 @@ data class NativeVideoConfig(
   val drm: NativeDrmParams?,
   @DoNotStrip
   @Keep
+  val cmcd: NativeCmcdConfiguration?,
+  @DoNotStrip
+  @Keep
   val headers: Map<String, String>?,
   @DoNotStrip
   @Keep
@@ -61,8 +64,8 @@ data class NativeVideoConfig(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(uri: String, externalSubtitles: Array<NativeExternalSubtitle>?, drm: NativeDrmParams?, headers: Map<String, String>?, bufferConfig: BufferConfig?, metadata: CustomVideoMetadata?, initializeOnCreation: Boolean?, minLoadRetryCount: Double?, disableDisconnectError: Boolean?, type: String?, textTracksAllowChunklessPreparation: Boolean?): NativeVideoConfig {
-      return NativeVideoConfig(uri, externalSubtitles, drm, headers, bufferConfig, metadata, initializeOnCreation, minLoadRetryCount, disableDisconnectError, type, textTracksAllowChunklessPreparation)
+    private fun fromCpp(uri: String, externalSubtitles: Array<NativeExternalSubtitle>?, drm: NativeDrmParams?, cmcd: NativeCmcdConfiguration?, headers: Map<String, String>?, bufferConfig: BufferConfig?, metadata: CustomVideoMetadata?, initializeOnCreation: Boolean?, minLoadRetryCount: Double?, disableDisconnectError: Boolean?, type: String?, textTracksAllowChunklessPreparation: Boolean?): NativeVideoConfig {
+      return NativeVideoConfig(uri, externalSubtitles, drm, cmcd, headers, bufferConfig, metadata, initializeOnCreation, minLoadRetryCount, disableDisconnectError, type, textTracksAllowChunklessPreparation)
     }
   }
 }
