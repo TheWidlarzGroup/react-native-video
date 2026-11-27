@@ -1,5 +1,6 @@
 import type { HybridObject } from 'react-native-nitro-modules';
 import type {
+  AudioTrackChangeData,
   BandwidthData,
   onLoadData,
   onLoadStartData,
@@ -211,6 +212,16 @@ export interface VideoPlayerEventEmitter extends HybridObject<{
    */
   addOnVideoTrackChangeListener(
     listener: (data: VideoTrackChangeData) => void
+  ): ListenerSubscription;
+
+  /**
+   * Adds a listener for the `onAudioTrackChange` event.
+   * @see {@link VideoPlayerEvents.onAudioTrackChange}
+   * @param listener - The listener to add.
+   * @returns A subscription object that can be used to remove the listener.
+   */
+  addOnAudioTrackChangeListener(
+    listener: (data: AudioTrackChangeData) => void
   ): ListenerSubscription;
 
   /**
