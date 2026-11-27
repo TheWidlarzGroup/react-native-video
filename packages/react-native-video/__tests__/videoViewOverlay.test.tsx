@@ -114,7 +114,7 @@ test('a different player is covered again', () => {
 test('resize mode: poster.resizeMode, then posterResizeMode, then contain', () => {
   const mode = (props: Record<string, unknown>) => {
     const r = render({ player: fakePlayer(), ...props });
-    return Object.assign({}, ...images(r)[0]!.props.style.flat()).resizeMode;
+    return images(r)[0]!.props.resizeMode;
   };
 
   expect(mode({ poster: 'https://x/p.png' })).toBe('contain');
@@ -177,4 +177,23 @@ test('shutterColor paints the cover, hideShutterView turns it off', () => {
       hideShutterView: true,
     })
   ).toBeUndefined();
+});
+
+test('renders a loader where the bundler does not define __DEV__ (web)', () => {
+  const g = globalThis as any;
+  const previous = g.__DEV__;
+  delete g.__DEV__;
+  try {
+    const renderer = render({
+      player: fakePlayer(),
+      poster: 'https://example.com/poster.png',
+      renderLoader: React.createElement('Loader'),
+    });
+    expect(
+      renderer.root.findAll((node) => (node.type as unknown) === 'Loader')
+    ).toHaveLength(1);
+    expect(images(renderer)).toHaveLength(0);
+  } finally {
+    g.__DEV__ = previous;
+  }
 });

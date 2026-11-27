@@ -45,7 +45,12 @@ const getPosterResizeMode = ({
   return 'contain';
 };
 
+// Web bundlers don't define `__DEV__` unless the app does, so it can't be read directly.
+const isDev = () => typeof __DEV__ !== 'undefined' && __DEV__;
 let didWarnAboutLoaderAndPoster = false;
+
+// Touches go through to the video and its controls.
+const NO_TOUCHES = { pointerEvents: 'none' } as const;
 
 interface VideoViewOverlayComponentProps extends VideoViewOverlayProps {
   player: VideoPlayerBase;
@@ -92,7 +97,7 @@ export const VideoViewOverlay = ({
   // Explicit size: a bundled image otherwise keeps its own width and height.
   const posterStyle: StyleProp<ImageStyle> = [
     StyleSheet.absoluteFill,
-    { width: '100%', height: '100%', resizeMode },
+    { width: '100%', height: '100%' },
     typeof poster === 'object' ? poster.style : undefined,
   ];
 
@@ -100,7 +105,7 @@ export const VideoViewOverlay = ({
 
   if (renderLoader != null) {
     if (
-      __DEV__ &&
+      isDev() &&
       !didWarnAboutLoaderAndPoster &&
       (poster != null || posterResizeMode != null)
     ) {
@@ -116,17 +121,28 @@ export const VideoViewOverlay = ({
         : renderLoader;
   } else if (typeof poster === 'string') {
     content = poster.length > 0 && (
-      <Image source={{ uri: poster }} style={posterStyle} />
+      <Image
+        source={{ uri: poster }}
+        resizeMode={resizeMode}
+        style={posterStyle}
+      />
     );
   } else if (poster?.source != null) {
-    content = <Image {...poster} source={poster.source} style={posterStyle} />;
+    content = (
+      <Image
+        {...poster}
+        source={poster.source}
+        resizeMode={resizeMode}
+        style={posterStyle}
+      />
+    );
   }
 
   return (
     <View
-      pointerEvents="none"
       style={[
         StyleSheet.absoluteFill,
+        NO_TOUCHES,
         !hideShutterView && shutterColor != null
           ? { backgroundColor: shutterColor }
           : undefined,
