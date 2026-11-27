@@ -22,6 +22,7 @@ import androidx.media3.ui.PlayerView
 import com.facebook.react.bridge.ReactApplicationContext
 import com.margelo.nitro.NitroModules
 import com.margelo.nitro.video.HybridVideoPlayer
+import com.margelo.nitro.video.NativeControlsStyles
 import com.margelo.nitro.video.ResizeMode
 import com.margelo.nitro.video.SurfaceType
 import com.margelo.nitro.video.VideoViewEventsEmitter
@@ -37,6 +38,7 @@ import com.twg.video.core.utils.Threading.runOnMainThread
 import com.twg.video.core.extensions.toAspectRatioFrameLayout
 import com.twg.video.core.utils.PictureInPictureUtils
 import com.twg.video.core.utils.PictureInPictureUtils.createDisabledPictureInPictureParams
+import com.twg.video.core.utils.ControlsStylesUtils
 import com.twg.video.core.utils.SmallVideoPlayerOptimizer
 import com.twg.video.R.layout.player_view_surface
 import com.twg.video.R.layout.player_view_texture
@@ -92,6 +94,15 @@ class VideoView @JvmOverloads constructor(
       }
     }
 
+  var controlsStyles: NativeControlsStyles = ControlsStylesUtils.DEFAULT
+    set(value) {
+      if (field == value) return
+      field = value
+      runOnMainThread {
+        applyControlsStyles()
+      }
+    }
+
   var pictureInPictureEnabled: Boolean = false
 
   var surfaceType: SurfaceType = SurfaceType.SURFACE
@@ -105,6 +116,8 @@ class VideoView @JvmOverloads constructor(
         playerView = createPlayerView()
         playerView.player = hybridPlayer?.player
         addView(playerView)
+        setupFullscreenButton()
+        applyControlsStyles()
       }
     }
 
@@ -208,12 +221,31 @@ class VideoView @JvmOverloads constructor(
 
   @SuppressLint("PrivateResource")
   private fun setupFullscreenButton() {
+    // Setting the listener makes PlayerView show the button
     playerView.setFullscreenButtonClickListener { _ ->
       enterFullscreen()
     }
 
-    playerView.findViewById<ImageButton>(androidx.media3.ui.R.id.exo_fullscreen)
-      ?.setImageResource(androidx.media3.ui.R.drawable.exo_ic_fullscreen_enter)
+    playerView.findViewById<ImageButton>(androidx.media3.ui.R.id.exo_fullscreen)?.apply {
+      setImageResource(androidx.media3.ui.R.drawable.exo_ic_fullscreen_enter)
+      if (controlsStyles.hideFullscreen) visibility = View.GONE
+    }
+    // The same button in the compact layout that small players use
+    if (controlsStyles.hideFullscreen) {
+      playerView.findViewById<View>(androidx.media3.ui.R.id.exo_minimal_fullscreen)?.visibility = View.GONE
+    }
+  }
+
+  /**
+   * Applies [controlsStyles] to the current PlayerView. Call it again whenever the PlayerView
+   * is recreated or leaves fullscreen.
+   */
+  fun applyControlsStyles() {
+    ControlsStylesUtils.apply(playerView, controlsStyles)
+    // In fullscreen the button leaves fullscreen and stays visible; the fragment owns it there.
+    if (!isInFullscreen) {
+      setupFullscreenButton()
+    }
   }
 
   fun enterFullscreen() {

@@ -5,6 +5,7 @@ import androidx.media3.common.util.UnstableApi
 import com.facebook.proguard.annotations.DoNotStrip
 import com.twg.video.core.VideoManager
 import com.twg.video.core.VideoViewError
+import com.twg.video.core.utils.ControlsStylesUtils
 import com.twg.video.core.utils.PictureInPictureUtils
 import com.twg.video.core.utils.Threading
 import java.util.UUID
@@ -100,6 +101,12 @@ class HybridVideoViewViewManager(nitroId: Int): HybridVideoViewViewManagerSpec()
     get() = videoView.get()?.surfaceType ?: SurfaceType.SURFACE
     set(value) {
       videoView.get()?.surfaceType = value
+    }
+
+  override var controlsStyles: NativeControlsStyles
+    get() = videoView.get()?.controlsStyles ?: ControlsStylesUtils.DEFAULT
+    set(value) {
+      videoView.get()?.controlsStyles = value
     }
 
   // MARK: - Private helpers
