@@ -464,10 +464,7 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
       index.contentLength = total
     }
     if index.contentType == nil {
-      index.contentType =
-        http.mimeType.flatMap { UTType(mimeType: $0)?.identifier }
-        ?? UTType(filenameExtension: url.pathExtension)?.identifier
-        ?? AVFileType.mp4.rawValue
+      index.contentType = Self.contentType(mimeType: http.mimeType, url: url)
     }
     if let contentLength = index.contentLength {
       fillContentInformation(job.request, contentLength: contentLength)
@@ -524,6 +521,20 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
       advance(job)
       advanceWaitingJobs()
     }
+  }
+
+  /// The type AVFoundation is told. Storage servers often send "application/octet-stream",
+  /// which it cannot open, so a type that is not audio or video falls back to the uri's
+  /// extension and then to MP4.
+  private static func contentType(mimeType: String?, url: URL) -> String {
+    let candidates = [
+      mimeType.flatMap { UTType(mimeType: $0) },
+      UTType(filenameExtension: url.pathExtension),
+    ]
+    for case let type? in candidates where type.conforms(to: .audiovisualContent) {
+      return type.identifier
+    }
+    return AVFileType.mp4.rawValue
   }
 
   // MARK: - What is on disk
