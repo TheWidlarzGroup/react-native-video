@@ -41,6 +41,8 @@
     "scripts": {
         "lint": "yarn eslint .",
         "build": "yarn tsc",
+        "tsc": "tsc -p tsconfig.json && yarn test:types",
+        "test:types": "tsc -p tests/types/tsconfig.json",
         "prepare": "yarn build",
         "xbasic": "yarn --cwd examples/basic",
         "docs": "yarn --cwd docs build",
@@ -48,6 +50,7 @@
         "docs:llms-full": "node scripts/generate-llms-full.js",
         "release": "release-it",
         "test": "echo no test available",
+        "test:web": "yarn build && node --test tests/Video.web.test.mjs",
         "check-ios": "scripts/swift-format.sh && scripts/swift-lint.sh && scripts/clang-format.sh",
         "check-android": "scripts/kotlin-lint.sh",
         "check-all": "yarn check-android; yarn check-ios; yarn lint",
