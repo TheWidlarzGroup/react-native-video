@@ -17,6 +17,7 @@ import type { VideoPlayerStatus } from 'react-native-video';
 // Every marker, in the order EventLogPanel renders them.
 export const MARKER_IDS = [
   'evt-onLoad',
+  'evt-onLoad-repeated', // a second onLoad for the same source (#5268): one load reports once
   'evt-onProgress',
   'evt-progress-gt-2s',
   'evt-onEnded',
@@ -144,10 +145,14 @@ type State = {
   loadingSeen: boolean;
   readySeen: boolean;
   // replaceSourceAsync(source) was requested: only an onLoad/onEnd after it counts as the
-  // replacement loading/ending (Android re-emits onLoad on every re-buffer and replay).
+  // replacement loading/ending (before #5268, Android re-emitted onLoad on every re-buffer,
+  // seek and replay).
   replaceRequested: boolean;
   // The next onProgress tells where the replacement source started (see onLoad).
   reloadPending: boolean;
+  // onLoad events since the current source started loading. replaceSourceAsync(source)
+  // starts a new source, so its onLoad is not a repeat.
+  loadsOfSource: number;
 };
 
 const initialState = (): State => ({
@@ -165,6 +170,7 @@ const initialState = (): State => ({
   readySeen: false,
   replaceRequested: false,
   reloadPending: false,
+  loadsOfSource: 0,
 });
 
 let state = initialState();
@@ -195,6 +201,8 @@ function apply(event: PlayerEvent) {
     case 'onLoad':
       mark('evt-onLoad');
       state.loadCount += 1;
+      state.loadsOfSource += 1;
+      if (state.loadsOfSource > 1) mark('evt-onLoad-repeated');
       if (state.replaceRequested) {
         mark('evt-replacement-loaded');
         state.reloadPending = true;
@@ -334,6 +342,7 @@ function apply(event: PlayerEvent) {
     case 'replaceSource':
       if (event.phase === 'requested' && event.source !== 'null') {
         state.replaceRequested = true;
+        state.loadsOfSource = 0;
       }
       if (event.phase === 'resolved') mark('evt-replace-resolved');
       if (event.phase === 'rejected') mark('evt-replace-rejected');
