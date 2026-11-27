@@ -220,6 +220,8 @@ useEvent(player, 'onAdEvent', ({ type, data }) => {
 
 **`AdProgressInfo`** (`onAdProgress`): `{ currentTime: number, duration: number, adPodIndex: number, totalAdsInPod: number }`
 
+While an ad plays, `player.currentTime` is the position in the content, not in the ad (`0` during a pre-roll), and `onProgress` is not sent. The ad's own position is in `onAdProgress`.
+
 **`AdsResolvedEvent`** (`onAdsResolved`): `{ hasAds: boolean, elapsedMs: number }` — `elapsedMs` is the time between activation and this decision resolving.
 
 **`AdErrorEvent`** (`onAdError`): `{ code: number, message: string, fatal: boolean }`

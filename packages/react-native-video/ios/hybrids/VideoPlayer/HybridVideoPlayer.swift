@@ -296,7 +296,11 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       )
     }
     get {
-      player.currentTime().seconds
+      // No item attached (before the first load, or while a pre-roll ad plays and the gate
+      // withholds the content item) makes the time invalid, which reads as NaN. Report 0,
+      // as Android does.
+      let time = player.currentTime()
+      return time.isNumeric ? time.seconds : 0
     }
   }
 
