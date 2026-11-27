@@ -62,10 +62,11 @@ namespace margelo::nitro::video {
     std::optional<bool> initializeOnCreation     SWIFT_PRIVATE;
     std::optional<double> minLoadRetryCount     SWIFT_PRIVATE;
     std::optional<bool> disableDisconnectError     SWIFT_PRIVATE;
+    std::optional<std::string> type     SWIFT_PRIVATE;
 
   public:
     NativeVideoConfig() = default;
-    explicit NativeVideoConfig(std::string uri, std::optional<std::vector<NativeExternalSubtitle>> externalSubtitles, std::optional<NativeDrmParams> drm, std::optional<std::unordered_map<std::string, std::string>> headers, std::optional<BufferConfig> bufferConfig, std::optional<CustomVideoMetadata> metadata, std::optional<bool> initializeOnCreation, std::optional<double> minLoadRetryCount, std::optional<bool> disableDisconnectError): uri(uri), externalSubtitles(externalSubtitles), drm(drm), headers(headers), bufferConfig(bufferConfig), metadata(metadata), initializeOnCreation(initializeOnCreation), minLoadRetryCount(minLoadRetryCount), disableDisconnectError(disableDisconnectError) {}
+    explicit NativeVideoConfig(std::string uri, std::optional<std::vector<NativeExternalSubtitle>> externalSubtitles, std::optional<NativeDrmParams> drm, std::optional<std::unordered_map<std::string, std::string>> headers, std::optional<BufferConfig> bufferConfig, std::optional<CustomVideoMetadata> metadata, std::optional<bool> initializeOnCreation, std::optional<double> minLoadRetryCount, std::optional<bool> disableDisconnectError, std::optional<std::string> type): uri(uri), externalSubtitles(externalSubtitles), drm(drm), headers(headers), bufferConfig(bufferConfig), metadata(metadata), initializeOnCreation(initializeOnCreation), minLoadRetryCount(minLoadRetryCount), disableDisconnectError(disableDisconnectError), type(type) {}
 
   public:
     // NativeVideoConfig is not equatable because these properties are not equatable: drm
@@ -89,7 +90,8 @@ namespace margelo::nitro {
         JSIConverter<std::optional<margelo::nitro::video::CustomVideoMetadata>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "metadata"))),
         JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "initializeOnCreation"))),
         JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "minLoadRetryCount"))),
-        JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "disableDisconnectError")))
+        JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "disableDisconnectError"))),
+        JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "type")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::video::NativeVideoConfig& arg) {
@@ -103,6 +105,7 @@ namespace margelo::nitro {
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "initializeOnCreation"), JSIConverter<std::optional<bool>>::toJSI(runtime, arg.initializeOnCreation));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "minLoadRetryCount"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.minLoadRetryCount));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "disableDisconnectError"), JSIConverter<std::optional<bool>>::toJSI(runtime, arg.disableDisconnectError));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "type"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.type));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -122,6 +125,7 @@ namespace margelo::nitro {
       if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "initializeOnCreation")))) return false;
       if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "minLoadRetryCount")))) return false;
       if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "disableDisconnectError")))) return false;
+      if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "type")))) return false;
       return true;
     }
   };

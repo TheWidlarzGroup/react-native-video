@@ -24,7 +24,8 @@ class HybridVideoPlayerSourceFactory: HybridVideoPlayerSourceFactorySpec {
       metadata: nil,
       initializeOnCreation: true,
       minLoadRetryCount: nil,
-      disableDisconnectError: nil
+      disableDisconnectError: nil,
+      type: nil
     )
     return try HybridVideoPlayerSource(config: config)
   }

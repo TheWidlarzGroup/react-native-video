@@ -73,6 +73,8 @@ namespace margelo::nitro::video {
       jni::local_ref<jni::JDouble> minLoadRetryCount = this->getFieldValue(fieldMinLoadRetryCount);
       static const auto fieldDisableDisconnectError = clazz->getField<jni::JBoolean>("disableDisconnectError");
       jni::local_ref<jni::JBoolean> disableDisconnectError = this->getFieldValue(fieldDisableDisconnectError);
+      static const auto fieldType = clazz->getField<jni::JString>("type");
+      jni::local_ref<jni::JString> type = this->getFieldValue(fieldType);
       return NativeVideoConfig(
         uri->toStdString(),
         externalSubtitles != nullptr ? std::make_optional([&]() {
@@ -98,7 +100,8 @@ namespace margelo::nitro::video {
         metadata != nullptr ? std::make_optional(metadata->toCpp()) : std::nullopt,
         initializeOnCreation != nullptr ? std::make_optional(static_cast<bool>(initializeOnCreation->value())) : std::nullopt,
         minLoadRetryCount != nullptr ? std::make_optional(minLoadRetryCount->value()) : std::nullopt,
-        disableDisconnectError != nullptr ? std::make_optional(static_cast<bool>(disableDisconnectError->value())) : std::nullopt
+        disableDisconnectError != nullptr ? std::make_optional(static_cast<bool>(disableDisconnectError->value())) : std::nullopt,
+        type != nullptr ? std::make_optional(type->toStdString()) : std::nullopt
       );
     }
 
@@ -108,7 +111,7 @@ namespace margelo::nitro::video {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeVideoConfig::javaobject> fromCpp(const NativeVideoConfig& value) {
-      using JSignature = JNativeVideoConfig(jni::alias_ref<jni::JString>, jni::alias_ref<jni::JArrayClass<JNativeExternalSubtitle>>, jni::alias_ref<JNativeDrmParams>, jni::alias_ref<jni::JMap<jni::JString, jni::JString>>, jni::alias_ref<JBufferConfig>, jni::alias_ref<JCustomVideoMetadata>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JBoolean>);
+      using JSignature = JNativeVideoConfig(jni::alias_ref<jni::JString>, jni::alias_ref<jni::JArrayClass<JNativeExternalSubtitle>>, jni::alias_ref<JNativeDrmParams>, jni::alias_ref<jni::JMap<jni::JString, jni::JString>>, jni::alias_ref<JBufferConfig>, jni::alias_ref<JCustomVideoMetadata>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JString>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
@@ -136,7 +139,8 @@ namespace margelo::nitro::video {
         value.metadata.has_value() ? JCustomVideoMetadata::fromCpp(value.metadata.value()) : nullptr,
         value.initializeOnCreation.has_value() ? jni::JBoolean::valueOf(value.initializeOnCreation.value()) : nullptr,
         value.minLoadRetryCount.has_value() ? jni::JDouble::valueOf(value.minLoadRetryCount.value()) : nullptr,
-        value.disableDisconnectError.has_value() ? jni::JBoolean::valueOf(value.disableDisconnectError.value()) : nullptr
+        value.disableDisconnectError.has_value() ? jni::JBoolean::valueOf(value.disableDisconnectError.value()) : nullptr,
+        value.type.has_value() ? jni::make_jstring(value.type.value()) : nullptr
       );
     }
   };

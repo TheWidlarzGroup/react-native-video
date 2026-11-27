@@ -30,10 +30,9 @@ import kotlin.math.min
 fun buildMediaSource(context: Context, source: HybridVideoPlayerSource, mediaItem: MediaItem): MediaSource {
   val uri = source.uri.toUri()
 
-  // Explanation:
-  // 1. Remove query params from uri to avoid getting false extension
-  // 2. Get extension from uri
-  val type = Util.inferContentType(uri)
+  // `config.type` wins; without it the type is read from the uri (query params are ignored,
+  // so they can't give a false extension).
+  val type = contentTypeOverride(source.config) ?: Util.inferContentType(uri)
   val dataSourceFactory = PluginsRegistry.shared.overrideMediaDataSourceFactory(
     source,
     buildBaseDataSourceFactory(context, source)
@@ -83,6 +82,8 @@ fun buildExternalSubtitlesMediaSource(context: Context, source: HybridVideoPlaye
   val mediaItemBuilderWithSubtitles = MediaItem.Builder()
     .setUri(source.uri.toUri())
     .setSubtitleConfigurations(getSubtitlesConfiguration(source.config))
+
+  overriddenMimeType(source.config)?.let { mediaItemBuilderWithSubtitles.setMimeType(it) }
 
   source.config.metadata?.let { metadata ->
     mediaItemBuilderWithSubtitles.setMediaMetadata(getCustomMetadata(metadata))

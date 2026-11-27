@@ -76,6 +76,17 @@ export type VideoConfig = {
    * @platform android
    */
   disableDisconnectError?: boolean;
+  /**
+   * The stream type, as a file extension, for a uri that does not show it: `'m3u8'` (HLS),
+   * `'mpd'` (DASH) or `'ism'` (SmoothStreaming). Any other value means a single media file.
+   * Without it the type is read from the uri.
+   * @example
+   * ```ts
+   * { uri: 'https://example.com/live/stream?id=42', type: 'm3u8' }
+   * ```
+   * @platform android
+   */
+  type?: string;
 };
 
 // @internal

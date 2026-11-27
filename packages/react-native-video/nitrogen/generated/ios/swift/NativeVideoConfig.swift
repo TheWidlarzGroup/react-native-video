@@ -18,7 +18,7 @@ public extension NativeVideoConfig {
   /**
    * Create a new instance of `NativeVideoConfig`.
    */
-  init(uri: String, externalSubtitles: [NativeExternalSubtitle]?, drm: NativeDrmParams?, headers: Dictionary<String, String>?, bufferConfig: BufferConfig?, metadata: CustomVideoMetadata?, initializeOnCreation: Bool?, minLoadRetryCount: Double?, disableDisconnectError: Bool?) {
+  init(uri: String, externalSubtitles: [NativeExternalSubtitle]?, drm: NativeDrmParams?, headers: Dictionary<String, String>?, bufferConfig: BufferConfig?, metadata: CustomVideoMetadata?, initializeOnCreation: Bool?, minLoadRetryCount: Double?, disableDisconnectError: Bool?, type: String?) {
     self.init(std.string(uri), { () -> bridge.std__optional_std__vector_NativeExternalSubtitle__ in
       if let __unwrappedValue = externalSubtitles {
         return bridge.create_std__optional_std__vector_NativeExternalSubtitle__({ () -> bridge.std__vector_NativeExternalSubtitle_ in
@@ -76,6 +76,12 @@ public extension NativeVideoConfig {
     }(), { () -> bridge.std__optional_bool_ in
       if let __unwrappedValue = disableDisconnectError {
         return bridge.create_std__optional_bool_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_std__string_ in
+      if let __unwrappedValue = type {
+        return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
       } else {
         return .init()
       }
@@ -164,6 +170,18 @@ public extension NativeVideoConfig {
       if bridge.has_value_std__optional_bool_(self.__disableDisconnectError) {
         let __unwrapped = bridge.get_std__optional_bool_(self.__disableDisconnectError)
         return __unwrapped
+      } else {
+        return nil
+      }
+    }()
+  }
+  
+  @inline(__always)
+  var type: String? {
+    return { () -> String? in
+      if bridge.has_value_std__optional_std__string_(self.__type) {
+        let __unwrapped = bridge.get_std__optional_std__string_(self.__type)
+        return String(__unwrapped)
       } else {
         return nil
       }
