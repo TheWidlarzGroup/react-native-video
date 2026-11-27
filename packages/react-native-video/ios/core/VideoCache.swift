@@ -244,6 +244,10 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
   private var jobs: [Job] = []
   private var isComplete = false
   private var unsavedBytes = 0
+  // A file that was cached in part is checked against the server before any of it is used:
+  // the player must not get the first bytes of one version and the rest of another.
+  private var needsValidation = false
+  private var validationTask: URLSessionDataTask?
   // The uri turned out to be an HLS or DASH manifest: every request goes to the network as
   // if there were no cache.
   private var isStream = false
@@ -303,6 +307,7 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
 
     super.init()
     cache.retain(key: key)
+    needsValidation = index.validator != nil && !index.ranges.isEmpty
   }
 
   deinit {
@@ -333,7 +338,11 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
       ? nil : dataRequest.requestedOffset + Int64(dataRequest.requestedLength)
     let job = Job(request: loadingRequest, position: start, end: end)
     jobs.append(job)
-    advance(job)
+    if needsValidation {
+      validate()
+    } else {
+      advance(job)
+    }
     return true
   }
 
@@ -343,6 +352,30 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
   ) {
     guard let job = jobs.first(where: { $0.request === loadingRequest }) else { return }
     finish(job, error: nil, respond: false)
+  }
+
+  /// Asks the server for one byte to learn which version of the file it has now.
+  private func validate() {
+    guard validationTask == nil else { return }
+    var request = URLRequest(url: url)
+    request.setValue("identity", forHTTPHeaderField: "Accept-Encoding")
+    headers.forEach { request.setValue($1, forHTTPHeaderField: $0) }
+    request.setValue("bytes=0-0", forHTTPHeaderField: "Range")
+    request.cachePolicy = .reloadIgnoringLocalCacheData
+    let task = networkSession().dataTask(with: request)
+    validationTask = task
+    task.resume()
+  }
+
+  /// `validator` is nil when the server could not be asked (offline): the cached part is used.
+  private func finishValidation(validator: String?) {
+    guard needsValidation else { return }
+    if let validator, validator != index.validator {
+      discardCachedBytes()
+    }
+    needsValidation = false
+    validationTask = nil
+    for job in jobs { advance(job) }
   }
 
   private func redirect(_ request: AVAssetResourceLoadingRequest, to target: URL) {
@@ -359,7 +392,9 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
   /// Moves a job forward: bytes that are on disk are answered from there, the first missing
   /// stretch is fetched from the network.
   private func advance(_ job: Job) {
-    guard jobs.contains(where: { $0 === job }), job.task == nil, !job.isScheduled else { return }
+    guard jobs.contains(where: { $0 === job }), job.task == nil, !job.isScheduled,
+      !needsValidation
+    else { return }
 
     var chunksLeft = Self.chunksPerSlice
     while true {
@@ -486,6 +521,19 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
     _ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse,
     completionHandler: @escaping (URLSession.ResponseDisposition) -> Void
   ) {
+    if dataTask === validationTask {
+      completionHandler(.cancel)
+      let http = response as? HTTPURLResponse
+      let isAnswer = http.map { $0.statusCode == 206 || $0.statusCode == 200 } ?? false
+      // A server that sends no validator at all cannot be compared: an empty one differs
+      // from the stored one, so the cached part is dropped.
+      finishValidation(
+        validator: isAnswer
+          ? http?.value(forHTTPHeaderField: "ETag")
+            ?? http?.value(forHTTPHeaderField: "Last-Modified") ?? ""
+          : nil)
+      return
+    }
     guard let job = jobs.first(where: { $0.task === dataTask }),
       let http = response as? HTTPURLResponse
     else {
@@ -601,6 +649,10 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
   }
 
   func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+    if task === validationTask {
+      finishValidation(validator: nil)
+      return
+    }
     guard let job = jobs.first(where: { $0.task === task }) else { return }
     job.task = nil
     completeFileIfWhole()
