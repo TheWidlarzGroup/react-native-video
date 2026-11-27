@@ -1,0 +1,125 @@
+# Compiles the library for iOS with Xcode 16, the oldest Xcode apps still build with.
+# The E2E gate builds on macos-26 only, and #5147 merged with a Swift expression that
+# Xcode 26 accepts and Xcode 16.1 rejects ("type of expression is ambiguous"). Nothing
+# caught it until someone built master on an older Mac.
+#
+# Build only, no simulator and no Maestro: the E2E gate already runs the app. The macOS
+# job starts only when the pull request touches what the iOS build compiles, so a
+# docs-only or Android-only pull request does not spend a macOS slot (5 per account,
+# see e2e.yml).
+name: ios-xcode16
+
+# No path filter here: a workflow skipped by a path filter leaves a required check
+# Pending forever, a job skipped by `if:` reports Success (same rule as e2e.yml).
+on:
+  pull_request:
+  push:
+    branches: [master]
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+  workflow_dispatch:
+
+concurrency:
+  group: ios-xcode16-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  # Present on the macos-15 image next to 16.0, 16.2, 16.3 and 16.4 (the default).
+  XCODE_APP: /Applications/Xcode_16.1.app
+  RN_VERSION: '0.77'
+
+jobs:
+  changes:
+    name: changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      ios: ${{ steps.diff.outputs.ios }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Does this change touch the iOS build?
+        id: diff
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          # Pushes to master and manual runs always build.
+          if [ "$EVENT" != "pull_request" ]; then
+            echo "ios=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          CHANGED=$(git diff --name-only "$(git merge-base "$BASE_SHA" "$HEAD_SHA")" "$HEAD_SHA")
+          if echo "$CHANGED" | grep -qE '^(packages/[^/]+/ios/|packages/[^/]+/cpp/|packages/[^/]+/nitrogen/generated/(ios|shared)/|packages/[^/]+/[^/]+\.podspec$|test-app/ios/|test-app/app\.json$|test-app/rnv-e2e-plugin\.mjs$|\.github/workflows/ios-xcode16\.yml$)'; then
+            echo "ios=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ios=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  build:
+    name: build
+    needs: changes
+    if: needs.changes.outputs.ios == 'true'
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Select Xcode 16.1
+        run: |
+          set -euo pipefail
+          if [ ! -d "$XCODE_APP" ]; then
+            echo "::error::${XCODE_APP} is not on this runner image" >&2
+            ls /Applications | grep -i xcode >&2
+            exit 1
+          fi
+          sudo xcode-select -s "$XCODE_APP"
+          xcodebuild -version
+          swift --version
+
+      # Also builds dist/main.ios.jsbundle, which pod install embeds as a resource.
+      - uses: ./.github/actions/e2e-setup
+        with:
+          rn-version: ${{ env.RN_VERSION }}
+          platform: ios
+
+      # Own cache namespace: a Pods tree or DerivedData built by another Xcode does not
+      # compile under this one, and the E2E legs on macos-15 use the image's default Xcode.
+      - name: Cache Pods
+        uses: actions/cache@v6
+        with:
+          path: test-app/ios/Pods
+          key: pods-xcode16.1-rn${{ env.RN_VERSION }}-${{ hashFiles('test-app/ios/Podfile.lock') }}
+          restore-keys: pods-xcode16.1-rn${{ env.RN_VERSION }}-
+
+      - name: Install pods
+        run: |
+          set -euo pipefail
+          cd test-app
+          bundle install
+          bundle exec pod install --project-directory=ios
+
+      - name: Cache DerivedData
+        uses: actions/cache@v6
+        with:
+          path: build
+          key: deriveddata-xcode16.1-rn${{ env.RN_VERSION }}-${{ hashFiles('test-app/ios/Podfile.lock', 'test-app/ios/Podfile', 'test-app/app.json', 'test-app/rnv-e2e-plugin.mjs', 'packages/react-native-video/ios/**', 'packages/react-native-video/nitrogen/generated/ios/**', 'packages/react-native-video/nitrogen/generated/shared/**', 'packages/react-native-video/cpp/**') }}
+          restore-keys: deriveddata-xcode16.1-rn${{ env.RN_VERSION }}-
+
+      # A generic destination: nothing is installed or run, so no simulator has to boot.
+      # pipefail: without it xcbeautify's exit code would mask a failed xcodebuild.
+      - name: Build for simulator with Xcode 16.1
+        run: |
+          set -euo pipefail
+          xcodebuild -workspace test-app/ios/RNVideoE2E.xcworkspace \
+            -scheme RNVideoE2E -configuration Debug -sdk iphonesimulator \
+            -derivedDataPath build \
+            -destination "generic/platform=iOS Simulator" \
+            build | xcbeautify --quiet
