@@ -1,0 +1,55 @@
+# onReadyToDisplay is emitted once per source, once its first frame is drawn (#5282).
+# Before the fix, Android emitted it with every transition to the ready state: after each
+# seek and each rebuffer, before anything was drawn. iOS emits it from the view, once per
+# source. Two seeks after the clip has ended (forward, then back) must not produce a second
+# one; evt-onReadyToDisplay-repeated is set by a second onReadyToDisplay for the same source
+# (eventLog.ts).
+#
+# The seeks follow smoke-seek.yaml: first tap on an idle (ended) player through press.yaml,
+# the second as a bare tap, deferred on iOS to the next end.
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4
+- extendedWaitUntil:
+    visible:
+      id: "evt-onReadyToDisplay"
+    timeout: 20000            # generous: emulator software decoder cold start
+- runFlow: ../shared/wait-for-end.yaml
+- runFlow:
+    file: ../shared/press.yaml
+    env:
+      BUTTON: btn-seek-5
+      NTH: 1
+- runFlow:
+    file: ../shared/press.yaml
+    env:
+      BUTTON: btn-play
+      NTH: 1
+- extendedWaitUntil:
+    visible:
+      id: "evt-seek-fwd-landed"
+    timeout: 5000
+- tapOn:
+    id: "btn-seek-1"
+- tapOn:
+    id: "btn-play"
+- extendedWaitUntil:
+    visible:
+      id: "evt-seek-back-landed"
+    timeout: 15000            # iOS: the seek-1 tap is deferred until the clip ends (~3 s from 5 s)
+# A pause, not an expectation: give a repeated event time to show up before asserting it
+# did not.
+- extendedWaitUntil:
+    visible:
+      id: "evt-onReadyToDisplay-repeated"
+    timeout: 3000
+    optional: true
+- assertNotVisible:
+    id: "evt-onReadyToDisplay-repeated"
+- assertNotVisible:
+    id: "evt-onError"

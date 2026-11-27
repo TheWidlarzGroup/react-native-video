@@ -20,6 +20,8 @@ export const MARKER_IDS = [
   'evt-onProgress',
   'evt-progress-gt-2s',
   'evt-onEnded',
+  'evt-onReadyToDisplay',
+  'evt-onReadyToDisplay-repeated', // a second onReadyToDisplay for the same source (#5282)
   'evt-onError', // onError itself, never the error status
   'evt-onError-repeated', // a second onError in one scenario: one failure must report once
   'evt-status-error', // onStatusChange('error')
@@ -67,6 +69,7 @@ export type PlayerEvent =
   | { type: 'onLoad'; duration: number }
   | { type: 'onProgress'; currentTime: number }
   | { type: 'onEnd' }
+  | { type: 'onReadyToDisplay' }
   | { type: 'onError'; code: string }
   | { type: 'onStatusChange'; status: VideoPlayerStatus }
   | { type: 'onPlaybackStateChange'; isPlaying: boolean }
@@ -148,6 +151,9 @@ type State = {
   replaceRequested: boolean;
   // The next onProgress tells where the replacement source started (see onLoad).
   reloadPending: boolean;
+  // onReadyToDisplay events since the current source started loading; a replacement source
+  // (replaceSourceAsync) starts its own count.
+  readyToDisplayOfSource: number;
 };
 
 const initialState = (): State => ({
@@ -165,6 +171,7 @@ const initialState = (): State => ({
   readySeen: false,
   replaceRequested: false,
   reloadPending: false,
+  readyToDisplayOfSource: 0,
 });
 
 let state = initialState();
@@ -239,6 +246,14 @@ function apply(event: PlayerEvent) {
       state.lastProgress = t;
       return;
     }
+
+    case 'onReadyToDisplay':
+      mark('evt-onReadyToDisplay');
+      state.readyToDisplayOfSource += 1;
+      if (state.readyToDisplayOfSource > 1)
+        mark('evt-onReadyToDisplay-repeated');
+      append(`onReadyToDisplay (#${state.readyToDisplayOfSource})`);
+      return;
 
     case 'onEnd':
       mark('evt-onEnded');
@@ -333,6 +348,7 @@ function apply(event: PlayerEvent) {
 
     case 'replaceSource':
       if (event.phase === 'requested' && event.source !== 'null') {
+        state.readyToDisplayOfSource = 0;
         state.replaceRequested = true;
       }
       if (event.phase === 'resolved') mark('evt-replace-resolved');

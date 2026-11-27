@@ -160,6 +160,23 @@ describe('handle', () => {
     ]);
   });
 
+  test('onReadyToDisplay marks; a second one for the same source is a repeat', () => {
+    feed({ type: 'onReadyToDisplay' });
+    expect(markers()).toEqual(['evt-onReadyToDisplay']);
+    feed({ type: 'onReadyToDisplay' });
+    expect(markers()).toContain('evt-onReadyToDisplay-repeated');
+    expect(lines()).toEqual(['onReadyToDisplay (#1)', 'onReadyToDisplay (#2)']);
+  });
+
+  test('the onReadyToDisplay of a replacement source is not a repeat', () => {
+    feed(
+      { type: 'onReadyToDisplay' },
+      { type: 'replaceSource', phase: 'requested', source: 'hls' },
+      { type: 'onReadyToDisplay' }
+    );
+    expect(markers()).not.toContain('evt-onReadyToDisplay-repeated');
+  });
+
   test('onProgress marks progress past the threshold, exclusive', () => {
     feed({ type: 'onProgress', currentTime: PROGRESS_MARKER_SECONDS });
     expect(markers()).toEqual(['evt-onProgress']);

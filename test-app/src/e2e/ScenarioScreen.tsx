@@ -229,6 +229,9 @@ function logPlayerEvents(player: VideoPlayer) {
     eventLog.handle({ type: 'onProgress', currentTime })
   );
   player.addEventListener('onEnd', () => eventLog.handle({ type: 'onEnd' }));
+  player.addEventListener('onReadyToDisplay', () =>
+    eventLog.handle({ type: 'onReadyToDisplay' })
+  );
   player.addEventListener('onError', (error) =>
     eventLog.handle({ type: 'onError', code: error.code })
   );
