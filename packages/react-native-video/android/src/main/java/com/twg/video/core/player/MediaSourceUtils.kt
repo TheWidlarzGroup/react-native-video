@@ -213,6 +213,8 @@ fun buildCmcdConfigurationFactory(source: HybridVideoPlayerSource): CmcdConfigur
   }
 
   return CmcdConfiguration.Factory { mediaItem ->
-    CmcdConfiguration(UUID.randomUUID().toString(), mediaItem.mediaId, requestConfig, mode)
+    // A MediaItem without an id has an empty mediaId: send no cid rather than cid=""
+    val contentId = mediaItem.mediaId.ifEmpty { null }
+    CmcdConfiguration(UUID.randomUUID().toString(), contentId, requestConfig, mode)
   }
 }

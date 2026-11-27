@@ -54,7 +54,12 @@ class BufferingStrategyLoadControl(
     when (strategy) {
       BufferingStrategy.DISABLEBUFFERING ->
         if (parameters.bufferedDurationUs >= neededForPlaybackUs) return false
-      BufferingStrategy.DEPENDINGONMEMORY -> if (isShortOnMemory(parameters)) return false
+      // Never stop below what playback needs to start or resume: Media3 fails with
+      // "Playback stuck buffering and not loading" when loading stops there.
+      BufferingStrategy.DEPENDINGONMEMORY ->
+        if (parameters.bufferedDurationUs >= neededForPlaybackUs && isShortOnMemory(parameters)) {
+          return false
+        }
       BufferingStrategy.DEFAULT -> Unit
     }
     return super.shouldContinueLoading(parameters)
