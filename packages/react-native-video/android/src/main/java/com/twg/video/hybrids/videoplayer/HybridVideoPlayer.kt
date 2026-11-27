@@ -116,6 +116,13 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   // resolved again by language/label/channels after the track set changes and ids shift.
   private var requestedAudioTrack: AudioTrack? = null
   private var lastAudioTrackChangeSignature: String? = null
+  // A pick that switches tracks lands asynchronously: ExoPlayer re-runs selection and reports the
+  // result through onTracksChanged. While a switch is on its way, audioSwitchFromId is the track
+  // that was playing when it was asked for, so the event goes out once, with the new track.
+  private var audioSwitchPending = false
+  private var audioSwitchFromId: String? = null
+  // The track ExoPlayer picks on its own for this source, seen while no pick is in force.
+  private var defaultAudioTrackId: String? = null
 
   private companion object {
     const val PROGRESS_UPDATE_INTERVAL_MS = 250L
@@ -725,7 +732,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
       reapplyRequestedVideoTrack()
       emitVideoTrackChange()
       reapplyRequestedAudioTrack()
-      emitAudioTrackChange()
+      reportAudioTracksChanged()
     }
   }
 
@@ -818,13 +825,14 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
     AudioTrackUtils.getAvailableAudioTracks(player)
 
   override fun selectAudioTrack(trackId: String?) {
+    val playingId = AudioTrackUtils.getSelectedAudioTrack(player)?.id
+    val applied = AudioTrackUtils.selectAudioTrack(player, trackId)
     requestedAudioTrack = if (trackId == null) {
-      AudioTrackUtils.selectAudioTrack(player, null)
       null
     } else {
       // Remember the request even when it doesn't resolve yet: a pick made before the tracks are
       // known is applied by onTracksChanged as soon as they are.
-      AudioTrackUtils.selectAudioTrack(player, trackId)
+      applied
         ?: AudioTrackUtils.getAvailableAudioTracks(player).firstOrNull { it.id == trackId }
         ?: AudioTrack(
           id = trackId,
@@ -834,7 +842,50 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
           channels = null,
         )
     }
-    emitAudioTrackChange(force = true)
+
+    // Where this call moves playback: the picked track, or ExoPlayer's own choice when the pick is
+    // cleared. Null when that is not known (the id doesn't resolve yet, no default seen so far).
+    val targetId = if (trackId == null) {
+      defaultAudioTrackId?.takeIf { id ->
+        AudioTrackUtils.getAvailableAudioTracks(player).any { it.id == id }
+      }
+    } else {
+      applied?.id
+    }
+
+    if (playingId != null && targetId != null && targetId != playingId) {
+      // A real switch is on its way. Reporting now would describe the outgoing track (its
+      // `selected` flag is still set), and onTracksChanged would then send a second event with
+      // the new one. Let that callback send the only event.
+      audioSwitchPending = true
+      audioSwitchFromId = playingId
+    } else {
+      // Nothing will change (the same track again, or a pick that can't be applied yet), so no
+      // callback follows: acknowledge the call here.
+      audioSwitchPending = false
+      audioSwitchFromId = null
+      emitAudioTrackChange(force = true)
+    }
+  }
+
+  /**
+   * The audio part of onTracksChanged: sends onAudioTrackChange when the tracks or the selection
+   * changed, and finishes a switch started by [selectAudioTrack].
+   */
+  private fun reportAudioTracksChanged() {
+    val playingId = AudioTrackUtils.getSelectedAudioTrack(player)?.id
+    if (audioSwitchPending) {
+      // onTracksChanged fires for unrelated reasons too: wait for the one that carries the switch.
+      if (playingId == audioSwitchFromId) return
+      audioSwitchPending = false
+      audioSwitchFromId = null
+      emitAudioTrackChange(force = true)
+    } else {
+      emitAudioTrackChange()
+    }
+    if (requestedAudioTrack == null && playingId != null) {
+      defaultAudioTrackId = playingId
+    }
   }
 
   /**
@@ -879,8 +930,8 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   }
 
   /**
-   * Emits onAudioTrackChange. Unless [force]d (a direct selectAudioTrack call, which always wants
-   * an ack), it stays quiet while the available set and the selection are both unchanged -
+   * Emits onAudioTrackChange. Unless [force]d (the answer to a selectAudioTrack call, which is
+   * always sent), it stays quiet while the available set and the selection are both unchanged -
    * onTracksChanged fires for unrelated reasons too.
    */
   private fun emitAudioTrackChange(force: Boolean = false) {
@@ -894,10 +945,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
       AudioTrackChangeData(
         availableTracks = available,
         // Deliberately the same expression as selectedAudioTrackId, so the property and the event
-        // can never disagree. An override lands asynchronously (ExoPlayer re-runs selection and
-        // fires onTracksChanged), so between an explicit call and that callback the `selected`
-        // flags still describe the outgoing track - the pick is the honest answer to "what is
-        // selected", and the flags stay available for "what is playing right now".
+        // can never disagree.
         selectedTrackId = requestedAudioTrack?.id ?: actualId,
       )
     )
