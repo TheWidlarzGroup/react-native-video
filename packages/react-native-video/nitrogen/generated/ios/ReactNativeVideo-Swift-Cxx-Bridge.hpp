@@ -1172,7 +1172,7 @@ namespace margelo::nitro::video::bridge::swift {
   inline SubtitleEdgeType get_std__optional_SubtitleEdgeType_(const std::optional<SubtitleEdgeType>& optional) noexcept {
     return optional.value();
   }
-
+  
   // pragma MARK: std::shared_ptr<HybridVideoViewViewManagerSpec>
   /**
    * Specialized version of `std::shared_ptr<HybridVideoViewViewManagerSpec>`.
