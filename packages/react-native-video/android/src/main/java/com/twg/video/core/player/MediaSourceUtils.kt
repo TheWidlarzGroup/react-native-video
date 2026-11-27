@@ -15,6 +15,8 @@ import androidx.media3.exoplayer.drm.DrmSessionManager
 import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.MergingMediaSource
+import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy
+import androidx.media3.exoplayer.upstream.LoadErrorHandlingPolicy
 import com.margelo.nitro.video.HybridVideoPlayerSource
 import com.twg.video.core.LibraryError
 import com.twg.video.core.SourceError
@@ -59,6 +61,8 @@ fun buildMediaSource(context: Context, source: HybridVideoPlayerSource, mediaIte
     mediaSourceFactory.setDrmSessionManagerProvider { drmSessionManager }
   }
 
+  buildLoadErrorHandlingPolicy(source)?.let { mediaSourceFactory.setLoadErrorHandlingPolicy(it) }
+
   return PluginsRegistry.shared.overrideMediaSourceFactory(
     source,
     mediaSourceFactory,
@@ -89,6 +93,8 @@ fun buildExternalSubtitlesMediaSource(context: Context, source: HybridVideoPlaye
   val mediaSourceFactory = DefaultMediaSourceFactory(context)
     .setDataSourceFactory(dataSourceFactory)
 
+  buildLoadErrorHandlingPolicy(source)?.let { mediaSourceFactory.setLoadErrorHandlingPolicy(it) }
+
   if (source.config.drm != null) {
     if (source.drmManager == null)  {
       throw LibraryError.DRMPluginNotFound
@@ -109,4 +115,11 @@ fun buildExternalSubtitlesMediaSource(context: Context, source: HybridVideoPlaye
   ).createMediaSource(mediaItemBuilder.build())
 }
 
-
+/**
+ * The retry policy for the source, or null to keep the Media3 default (3 retries).
+ */
+@OptIn(UnstableApi::class)
+fun buildLoadErrorHandlingPolicy(source: HybridVideoPlayerSource): LoadErrorHandlingPolicy? {
+  val minLoadRetryCount = source.config.minLoadRetryCount?.toInt()?.coerceAtLeast(0) ?: return null
+  return DefaultLoadErrorHandlingPolicy(minLoadRetryCount)
+}

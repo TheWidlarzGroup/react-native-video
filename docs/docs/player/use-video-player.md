@@ -145,6 +145,14 @@ Properties below are Apple platforms‑only
 | `preferredMaximumResolutionForExpensiveNetworks` | `{ width: number; height: number }` | Preferred maximum resolution on expensive networks. |
 | `livePlayback.targetOffsetMs` | `number` | Target live offset (ms) the player will try to maintain. |
 
+### Loading Options
+
+These go on the `VideoConfig` next to `uri`. They cover v6 source props that control how the media is loaded.
+
+| Property | Type | Platform | Description |
+|----------|------|----------|-------------|
+| `minLoadRetryCount` | `number` | Android | How many times a failed load (manifest, segment or media file) is retried before the player reports an error. Default: 3. |
+
 ## DRM
 
 Protected content is supported via a plugin. See the full DRM guide: [DRM](./drm.md).

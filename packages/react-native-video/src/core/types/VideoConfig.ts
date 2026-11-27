@@ -61,6 +61,13 @@ export type VideoConfig = {
    * @default true
    */
   initializeOnCreation?: boolean;
+  /**
+   * How many times a failed load (manifest, segment, media file) is retried before the
+   * player reports an error.
+   * @default 3
+   * @platform android
+   */
+  minLoadRetryCount?: number;
 };
 
 // @internal

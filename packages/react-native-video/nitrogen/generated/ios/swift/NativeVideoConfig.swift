@@ -18,7 +18,7 @@ public extension NativeVideoConfig {
   /**
    * Create a new instance of `NativeVideoConfig`.
    */
-  init(uri: String, externalSubtitles: [NativeExternalSubtitle]?, drm: NativeDrmParams?, headers: Dictionary<String, String>?, bufferConfig: BufferConfig?, metadata: CustomVideoMetadata?, initializeOnCreation: Bool?) {
+  init(uri: String, externalSubtitles: [NativeExternalSubtitle]?, drm: NativeDrmParams?, headers: Dictionary<String, String>?, bufferConfig: BufferConfig?, metadata: CustomVideoMetadata?, initializeOnCreation: Bool?, minLoadRetryCount: Double?) {
     self.init(std.string(uri), { () -> bridge.std__optional_std__vector_NativeExternalSubtitle__ in
       if let __unwrappedValue = externalSubtitles {
         return bridge.create_std__optional_std__vector_NativeExternalSubtitle__({ () -> bridge.std__vector_NativeExternalSubtitle_ in
@@ -64,6 +64,12 @@ public extension NativeVideoConfig {
     }(), { () -> bridge.std__optional_bool_ in
       if let __unwrappedValue = initializeOnCreation {
         return bridge.create_std__optional_bool_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_double_ in
+      if let __unwrappedValue = minLoadRetryCount {
+        return bridge.create_std__optional_double_(__unwrappedValue)
       } else {
         return .init()
       }
@@ -127,6 +133,18 @@ public extension NativeVideoConfig {
     return { () -> Bool? in
       if bridge.has_value_std__optional_bool_(self.__initializeOnCreation) {
         let __unwrapped = bridge.get_std__optional_bool_(self.__initializeOnCreation)
+        return __unwrapped
+      } else {
+        return nil
+      }
+    }()
+  }
+  
+  @inline(__always)
+  var minLoadRetryCount: Double? {
+    return { () -> Double? in
+      if bridge.has_value_std__optional_double_(self.__minLoadRetryCount) {
+        let __unwrapped = bridge.get_std__optional_double_(self.__minLoadRetryCount)
         return __unwrapped
       } else {
         return nil
