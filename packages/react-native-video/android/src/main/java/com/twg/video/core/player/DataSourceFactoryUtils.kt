@@ -26,7 +26,11 @@ fun buildBaseDataSourceFactory(
     val httpDataSourceFactory = buildHttpDataSourceFactory(context, source)
     DefaultDataSource.Factory(
       context,
-      if (useCache) VideoCache.wrap(context, httpDataSourceFactory) else httpDataSourceFactory
+      if (useCache) {
+        VideoCache.wrap(context, httpDataSourceFactory, source.config.headers)
+      } else {
+        httpDataSourceFactory
+      }
     )
   } else {
     DefaultDataSource.Factory(context)

@@ -69,6 +69,9 @@ export type VideoConfig = {
    * The cache is shared by all players, lives in the app's cache directory and evicts the least
    * recently used files above 100 MB.
    *
+   * A cached file is identified by the `uri` and the `headers` of the source, so changing a
+   * header (for example a refreshed `Authorization` token) starts a new file.
+   *
    * @platform android, ios
    * @default false
    */

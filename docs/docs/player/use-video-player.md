@@ -110,6 +110,8 @@ const player = useVideoPlayer({
 | iOS | The same rules and the same 100 MB limit, in `Library/Caches/RNVCache`. While a file is not complete, the player's requests go to the network and every byte that passes is kept, so a file is downloaded once. A file that was only partly played is finished the next time it plays. No extra pods or build flags. |
 | Web | Ignored, the browser's HTTP cache applies. |
 
+On Android and iOS a cached file is identified by the source `uri` together with its `headers`. Two sources with the same `uri` and different headers are cached as two files, so a file downloaded with one `Authorization` header is never played for another one. This also means that a refreshed token starts a new file; the old one is evicted when the cache is over its limit.
+
 ### Buffer Config
 
 You can fine‑tune buffering via `bufferConfig` on the `VideoConfig` you pass to `useVideoPlayer`/`VideoPlayer`. This controls how much data is buffered, live latency targets, and iOS network constraints.
