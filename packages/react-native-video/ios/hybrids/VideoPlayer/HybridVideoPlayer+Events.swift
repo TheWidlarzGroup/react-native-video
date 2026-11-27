@@ -61,7 +61,7 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
   }
 
   func onPlaybackBufferEmpty() {
-    guard !hasFailed else { return }
+    guard !hasFailed, !isRedrawingTextCue else { return }
     isCurrentlyBuffering = true
     status = .loading
     updateAndEmitPlaybackState()

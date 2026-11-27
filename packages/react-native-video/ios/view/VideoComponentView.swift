@@ -116,19 +116,17 @@ import UIKit
     guard !player.isPlaying else { return }
 
     // A `textStyleRules` update alone is only picked up on the *next* cue transition, not applied
-    // to a cue that's already on screen (including a paused frame). Re-asserting the current
-    // selection (without changing which option is selected) forces AVKit to redraw the
-    // currently-displayed cue with the new style immediately, with no visible seek/jump.
+    // to a cue that's already on screen (including a paused frame).
     if let group = currentItem.asset.mediaSelectionGroup(forMediaCharacteristic: .legible),
-      let selectedOption = currentItem.currentMediaSelection.selectedMediaOption(in: group) {
-      currentItem.select(nil, in: group)
-      currentItem.select(selectedOption, in: group)
-    } else if let textTrack = currentItem.tracks.first(where: { $0.assetTrack?.mediaType == .text }) {
-      // No selection group (e.g. an external subtitle on a plain MP4, added as an always-on
-      // composition track rather than a selectable legible option) - toggling the player item
-      // track's own `isEnabled` forces AVFoundation to redraw it with the current style.
-      textTrack.isEnabled = false
-      textTrack.isEnabled = true
+      currentItem.currentMediaSelection.selectedMediaOption(in: group) != nil {
+      player.redrawPausedTextCue()
+    } else {
+      // No selection group (external subtitles on a plain MP4 are composition tracks): toggling
+      // a track's `isEnabled` redraws it. Only the enabled ones, so the selection stays as it is.
+      for track in currentItem.tracks where track.assetTrack?.mediaType == .text && track.isEnabled {
+        track.isEnabled = false
+        track.isEnabled = true
+      }
     }
   }
 
