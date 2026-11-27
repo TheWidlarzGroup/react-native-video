@@ -21,6 +21,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.PlayerView
 import com.facebook.react.bridge.ReactApplicationContext
 import com.margelo.nitro.NitroModules
+import com.margelo.nitro.video.FullscreenOrientation
 import com.margelo.nitro.video.HybridVideoPlayer
 import com.margelo.nitro.video.ResizeMode
 import com.margelo.nitro.video.SurfaceType
@@ -107,6 +108,10 @@ class VideoView @JvmOverloads constructor(
         addView(playerView)
       }
     }
+
+  // Read when fullscreen opens; a change made while fullscreen is open applies the next time.
+  var fullscreenOrientation: FullscreenOrientation = FullscreenOrientation.ALL
+  var fullscreenAutorotate: Boolean = true
 
   var resizeMode: ResizeMode = ResizeMode.NONE
     set(value) {

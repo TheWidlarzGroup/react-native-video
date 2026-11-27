@@ -19,6 +19,7 @@ import androidx.annotation.OptIn
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.media3.common.util.UnstableApi
+import com.twg.video.core.utils.FullscreenOrientationLock
 import com.twg.video.core.utils.PictureInPictureUtils.createPictureInPictureParams
 import com.twg.video.core.utils.SmallVideoPlayerOptimizer
 import com.twg.video.view.VideoView
@@ -35,6 +36,8 @@ class FullscreenVideoFragment(private val videoView: VideoView) : Fragment() {
 
   // The window's system bars before fullscreen, restored on exit (saved once, onResume hides again)
   private var barsBeforeFullscreen: SystemBarsState? = null
+
+  private var orientationLock: FullscreenOrientationLock? = null
 
   // Back press callback to handle back navigation
   private val backPressCallback = object : OnBackPressedCallback(true) {
@@ -123,6 +126,10 @@ class FullscreenVideoFragment(private val videoView: VideoView) : Fragment() {
 
     // Hide all root content views
     val currentActivity = requireActivity()
+
+    orientationLock = FullscreenOrientationLock(currentActivity).also {
+      it.apply(videoView.fullscreenOrientation, videoView.fullscreenAutorotate)
+    }
     val rootContent = currentActivity.window.decorView.findViewById<ViewGroup>(android.R.id.content)
     rootContentViews = (0 until rootContent.childCount)
       .map { rootContent.getChildAt(it) }
@@ -232,6 +239,9 @@ class FullscreenVideoFragment(private val videoView: VideoView) : Fragment() {
   fun exitFullscreen() {
     // Remove back press callback since we're exiting
     backPressCallback.remove()
+
+    orientationLock?.release()
+    orientationLock = null
 
     restoreSystemUI()
 

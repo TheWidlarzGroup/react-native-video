@@ -18,8 +18,8 @@ keywords: [VideoView props, player, controls, resizeMode, surfaceType, picture-i
 | `resizeMode` | `'contain' \| 'cover' \| 'stretch' \| 'none'` | No | `'none'` | How the video should be resized to fit the view. |
 | `keepScreenAwake` | `boolean` | No | `true` | Whether to keep the device screen awake while the video view is mounted. |
 | `surfaceType` | `'surface' \| 'texture'` | No (Android only) | `'surface'` | (Android) Underlying native view type. `'surface'` uses a SurfaceView (better performance, no transforms/overlap), `'texture'` uses a TextureView (supports animations, transforms, overlapping UI) at a small performance cost. Ignored on iOS. |
-| `fullscreenOrientation` | `'all' \| 'landscape' \| 'portrait'` | No (iOS only) | `'all'` | (iOS) Orientation of native fullscreen. `'landscape'` and `'portrait'` open fullscreen in that orientation, whichever way the device is held. The app has to support the orientation. No effect on an iPad app that supports multitasking. |
-| `fullscreenAutorotate` | `boolean` | No (iOS only) | `true` | (iOS) With `true`, fullscreen opens in `fullscreenOrientation` and follows the device once the user has turned it there. With `false`, fullscreen stays locked to `fullscreenOrientation`. Ignored when `fullscreenOrientation` is `'all'`. |
+| `fullscreenOrientation` | `'all' \| 'landscape' \| 'portrait'` | No (iOS, Android) | `'all'` | Orientation of native fullscreen. `'landscape'` and `'portrait'` open fullscreen in that orientation, whichever way the device is held. On iOS the app has to support the orientation, and the prop has no effect on an iPad app that supports multitasking. On Android the activity is turned while fullscreen is open. |
+| `fullscreenAutorotate` | `boolean` | No (iOS, Android) | `true` | With `true`, fullscreen opens in `fullscreenOrientation` and follows the device once the user has turned it there. With `false`, fullscreen stays locked to `fullscreenOrientation`. Ignored when `fullscreenOrientation` is `'all'`. |
 
 ## Android: Choosing a surface type
 

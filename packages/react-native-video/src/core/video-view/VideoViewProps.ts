@@ -58,11 +58,13 @@ export interface VideoViewProps extends Partial<VideoViewEvents>, ViewProps {
    * - 'landscape': fullscreen opens in landscape
    * - 'portrait': fullscreen opens in portrait
    *
-   * The app has to support the orientation (`UISupportedInterfaceOrientations`).
-   * It has no effect on iPad when the app supports multitasking (Split View).
+   * On iOS the app has to support the orientation (`UISupportedInterfaceOrientations`),
+   * and the prop has no effect on iPad when the app supports multitasking (Split View).
+   * On Android the activity is turned for the time fullscreen is open, and the value
+   * is read when fullscreen opens.
    *
    * @default 'all'
-   * @platform ios
+   * @platform ios, android
    */
   fullscreenOrientation?: FullscreenOrientation;
 
@@ -73,7 +75,7 @@ export interface VideoViewProps extends Partial<VideoViewEvents>, ViewProps {
    * Ignored when `fullscreenOrientation` is 'all'.
    *
    * @default true
-   * @platform ios
+   * @platform ios, android
    */
   fullscreenAutorotate?: boolean;
 }
