@@ -19,6 +19,10 @@ export const MARKER_IDS = [
   'evt-onLoad',
   'evt-onProgress',
   'evt-progress-gt-2s',
+  // PROGRESS_SPARSE_GAPS consecutive onProgress events at least PROGRESS_SPARSE_MIN_GAP_SECONDS
+  // of playback apart: only a progressUpdateInterval near 1 s produces it (#5281). The
+  // defaults (250 ms on Android, 500 ms on iOS) never do.
+  'evt-progress-sparse',
   'evt-onEnded',
   'evt-onError', // onError itself, never the error status
   'evt-onError-repeated', // a second onError in one scenario: one failure must report once
@@ -109,6 +113,9 @@ export type PlayerEvent =
 // Renditions in the hls-quality fixture (e2e/fixtures/generate.sh).
 export const VIDEO_TRACK_COUNT = 3;
 export const PROGRESS_MARKER_SECONDS = 2;
+export const PROGRESS_SPARSE_MIN_GAP_SECONDS = 0.8;
+export const PROGRESS_SPARSE_MAX_GAP_SECONDS = 2;
+export const PROGRESS_SPARSE_GAPS = 3;
 export const SEEK_FORWARD_LANDED_SECONDS = 4;
 export const SEEK_BACK_LANDED_SECONDS = 2;
 export const VOLUME_LOW_THRESHOLD = 0.35;
@@ -154,6 +161,8 @@ type State = {
   replaceRequested: boolean;
   // The next onProgress tells where the replacement source started (see onLoad).
   reloadPending: boolean;
+  // Consecutive onProgress gaps of at least PROGRESS_SPARSE_MIN_GAP_SECONDS.
+  sparseGaps: number;
 };
 
 const initialState = (): State => ({
@@ -171,6 +180,7 @@ const initialState = (): State => ({
   readySeen: false,
   replaceRequested: false,
   reloadPending: false,
+  sparseGaps: 0,
 });
 
 let state = initialState();
@@ -219,6 +229,23 @@ function apply(event: PlayerEvent) {
       const t = event.currentTime;
       // derived markers: assert text, not numbers
       if (t > PROGRESS_MARKER_SECONDS) mark('evt-progress-gt-2s');
+      // How far apart progress events are, in playback time. A seek or a jump (a loop
+      // restart, a gap of more than two intervals) is not a gap: it restarts the count.
+      const gap =
+        state.lastProgress === null || state.seekPending
+          ? null
+          : t - state.lastProgress;
+      if (
+        gap !== null &&
+        gap >= PROGRESS_SPARSE_MIN_GAP_SECONDS &&
+        gap <= PROGRESS_SPARSE_MAX_GAP_SECONDS
+      ) {
+        state.sparseGaps += 1;
+        if (state.sparseGaps >= PROGRESS_SPARSE_GAPS)
+          mark('evt-progress-sparse');
+      } else {
+        state.sparseGaps = 0;
+      }
       // A replaced source must start from its beginning: the first progress after its
       // onLoad proves it, the way the seek markers prove where a seek landed.
       if (state.reloadPending) {

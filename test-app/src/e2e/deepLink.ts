@@ -3,6 +3,7 @@ export const SCENARIO_NAMES = [
   'mp4',
   'mp4-preload', // same clip, started with preload() instead of initialize()+play()
   'mp4-release-mid-playback', // same clip; replaceSourceAsync(null) once progress > 2 s
+  'mp4-progress-1s', // same clip; progressUpdateInterval = 1000 before the load
   'mp4-fullscreen-rotate', // same clip; enterFullscreen() on landscape, exitFullscreen() on portrait
   'hls',
   'error-404',
