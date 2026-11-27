@@ -27,6 +27,7 @@ Our agent skill knows the v6→v7 mapping. Install it with `npx skills add TheWi
 
 *   Read [Not in v7 yet](#not-in-v7-yet) first. Audio track selection, subtitle styling, the poster props, start position and trimming, caching, the loading and buffering options and `controlsStyles` are in open pull requests. Ads and TV platforms are planned after v7 stable. A few v6 props are removed for good. v6 is still maintained, so you can stay on it until the feature you need lands.
 *   v7 needs React Native 0.75 or newer and iOS 15 or newer. See [Installation](./fundamentals/installation.md) for all requirements.
+*   Time values keep the units of v6. Positions and lengths are in seconds: `player.currentTime`, `player.duration`, `seekTo()`, `seekBy()`, and the times in `onProgress`, `onLoad` and `onSeek`. Options are in milliseconds: `bufferConfig`, and `startPosition`, `cropStart` and `cropEnd` once [#5266](https://github.com/TheWidlarzGroup/react-native-video/pull/5266) lands. The one exception is `preferredForwardBufferDuration`, which was in seconds in v6 and is `bufferConfig.preferredForwardBufferDurationMs` in v7.
 
 ### 1. Install
 
