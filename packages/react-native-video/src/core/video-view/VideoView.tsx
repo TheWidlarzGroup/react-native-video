@@ -14,6 +14,7 @@ import {
 } from '../types/VideoError';
 import type { VideoPlayer } from '../VideoPlayer';
 import { NativeVideoView } from './NativeVideoView';
+import { hasShownFirstFrame, trackFirstFrame } from './firstFrame';
 import {
   hasVideoViewOverlay,
   VideoViewOverlay,
@@ -52,18 +53,12 @@ const updateProps = (manager: VideoViewViewManager, props: VideoViewProps) => {
   manager.surfaceType = props.surfaceType ?? 'surface';
 };
 
-const isPlayerLoaded = (player: VideoViewProps['player']) => {
-  try {
-    return player.status === 'readyToPlay';
-  } catch {
-    return false;
-  }
-};
-
-// Android reports "ready to display" once per loaded source, so a view that mounts
-// with an already loaded player gets no event. iOS reports it for every view.
+// Android reports "ready to display" once per source, whichever view draws the first
+// frame, so a view that mounts later gets no event: it is covered only while the source
+// has not shown a frame yet. The player's status can't tell, since a stall or the end
+// makes it "loading" or "idle" after the frame. iOS reports it for every view.
 const isReadyToDisplay = (player: VideoViewProps['player']) =>
-  Platform.OS === 'android' && isPlayerLoaded(player);
+  Platform.OS === 'android' && hasShownFirstFrame(player);
 
 /**
  * VideoView is a component that allows you to display a video from a {@link VideoPlayer}.
@@ -99,6 +94,9 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
     },
     ref
   ) => {
+    // Before the native view exists, so the player's first frame is never missed.
+    trackFirstFrame(player);
+
     const nitroId = React.useMemo(() => nitroIdCounter++, []);
     const nitroViewManager = React.useRef<VideoViewViewManager | null>(null);
     const [managerGeneration, setManagerGeneration] = React.useState(0);
@@ -354,10 +352,10 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
         renderOverlay={(addedToMountedView) => (
           <VideoViewOverlay
             player={player}
-            // A view that was already on screen reports nothing more for a loaded
-            // source, on any platform, so a loaded player means it shows a frame.
+            // A view that was already on screen reports nothing more for a source that
+            // has shown its first frame, on any platform.
             isReadyToDisplay={
-              addedToMountedView ? isPlayerLoaded : isReadyToDisplay
+              addedToMountedView ? hasShownFirstFrame : isReadyToDisplay
             }
             {...overlayProps}
           />
