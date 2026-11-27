@@ -43,6 +43,8 @@ export interface VideoViewProps extends Partial<VideoViewEvents>, ViewProps {
    * The type of underlying native view. Defaults to 'surface'.
    * - 'surface': Uses a SurfaceView on Android. More performant, but cannot be animated or transformed.
    * - 'texture': Uses a TextureView on Android. Less performant, but can be animated and transformed.
+   * - 'secureSurface': Uses a secure SurfaceView on Android. The video is left out of screenshots,
+   *   screen recordings and non-secure displays (v6 `useSecureView`).
    *
    * Only applicable on Android
    *
