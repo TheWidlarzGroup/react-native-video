@@ -623,3 +623,18 @@ describe('fullscreen', () => {
     expect(lines()).toEqual(['exitFullscreen() threw: boom']);
   });
 });
+
+describe('loader', () => {
+  test('a loader that mounts and unmounts marks shown, then hidden', () => {
+    feed({ type: 'loader', shown: true });
+    expect(markers()).toEqual(['evt-loader-shown']);
+    feed({ type: 'loader', shown: false });
+    expect(markers()).toContain('evt-loader-hidden');
+    expect(lines()).toEqual(['loader shown', 'loader hidden']);
+  });
+
+  test('hidden is only marked after the loader was shown', () => {
+    feed({ type: 'loader', shown: false });
+    expect(markers()).not.toContain('evt-loader-hidden');
+  });
+});

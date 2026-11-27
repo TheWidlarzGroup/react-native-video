@@ -220,6 +220,19 @@ const CONTROLS: Control[] = [
   },
 ];
 
+/**
+ * The renderLoader of mp4-loader. VideoView mounts it while the source loads and unmounts
+ * it once the video is ready to display; both moments go to the event log, so the flow does
+ * not depend on catching the loader on screen.
+ */
+function LoaderProbe() {
+  useEffect(() => {
+    eventLog.handle({ type: 'loader', shown: true });
+    return () => eventLog.handle({ type: 'loader', shown: false });
+  }, []);
+  return <View testID="video-loader" style={styles.loader} />;
+}
+
 // Marker derivation lives in eventLog.handle(); this only maps payloads.
 function logPlayerEvents(player: VideoPlayer) {
   player.addEventListener('onLoad', ({ duration }) =>
@@ -291,6 +304,7 @@ export function ScenarioScreen({ scenario }: { scenario: ScenarioName }) {
         // icon, and only a shown controller makes that touch the view hierarchy.
         controls={scenario === 'mp4-fullscreen-rotate'}
         onFullscreenChange={onFullscreenChange}
+        renderLoader={scenario === 'mp4-loader' ? <LoaderProbe /> : undefined}
       />
       <View style={styles.controls}>
         {CONTROLS.map(({ id, title, press }) => (
@@ -315,4 +329,5 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
   video: { width: '100%', aspectRatio: 16 / 9 },
   controls: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  loader: { flex: 1, backgroundColor: '#202020' },
 });

@@ -24,6 +24,10 @@ export const MARKER_IDS = [
   'evt-onError-repeated', // a second onError in one scenario: one failure must report once
   'evt-status-error', // onStatusChange('error')
   'evt-onPlaybackStateChanged',
+  // VideoView's renderLoader (#5264): the loader mounted, and later unmounted because the
+  // video was ready to display (smoke-loader.yaml).
+  'evt-loader-shown',
+  'evt-loader-hidden',
   'evt-playing', // isPlaying seen true at least once
   'evt-paused', // isPlaying seen false after having been true (real pause, not initial state)
   'evt-resumed', // isPlaying seen true again after evt-paused
@@ -75,6 +79,8 @@ export type PlayerEvent =
   | { type: 'onPlaybackRateChange'; rate: number }
   // VideoView's onFullscreenChange (a view event, not a player event).
   | { type: 'onFullscreenChange'; fullscreen: boolean }
+  // The renderLoader element mounted (shown) or unmounted (hidden) inside VideoView.
+  | { type: 'loader'; shown: boolean }
   // A VideoView ref call that threw. Caught in the scenario, so the screen stays up and
   // the flow can assert on it instead of on a red screen.
   | {
@@ -256,6 +262,15 @@ function apply(event: PlayerEvent) {
         event.fullscreen ? 'evt-fullscreen-entered' : 'evt-fullscreen-exited'
       );
       append(`fullscreen:${event.fullscreen}`);
+      return;
+
+    case 'loader':
+      if (event.shown) {
+        mark('evt-loader-shown');
+      } else if (state.markers.has('evt-loader-shown')) {
+        mark('evt-loader-hidden');
+      }
+      append(`loader ${event.shown ? 'shown' : 'hidden'}`);
       return;
 
     case 'fullscreenCallFailed':
