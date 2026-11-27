@@ -28,8 +28,10 @@ object SubtitleStyleUtils {
    */
   fun apply(subtitleView: SubtitleView, style: SubtitleStyle) {
     subtitleView.setStyle(toCaptionStyle(style))
+    // ignorePadding: bottomPadding is applied as real padding below and must not shrink the text.
     subtitleView.setFractionalTextSize(
-      SubtitleView.DEFAULT_TEXT_SIZE_FRACTION * (style.fontScale?.toFloat() ?: 1f)
+      SubtitleView.DEFAULT_TEXT_SIZE_FRACTION * (style.fontScale?.toFloat() ?: 1f),
+      true
     )
 
     val fraction = style.bottomPadding?.toFloat() ?: SubtitleView.DEFAULT_BOTTOM_PADDING_FRACTION
