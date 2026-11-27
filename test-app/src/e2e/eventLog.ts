@@ -23,6 +23,9 @@ export const MARKER_IDS = [
   'evt-onError', // onError itself, never the error status
   'evt-onError-repeated', // a second onError in one scenario: one failure must report once
   'evt-status-error', // onStatusChange('error')
+  // error-503-retry (#5275): after onError the fixture server reports exactly
+  // RETRIED_ONCE_REQUESTS requests, the first one and minLoadRetryCount: 1 retry.
+  'evt-retried-once',
   'evt-onPlaybackStateChanged',
   'evt-playing', // isPlaying seen true at least once
   'evt-paused', // isPlaying seen false after having been true (real pause, not initial state)
@@ -68,6 +71,8 @@ export type PlayerEvent =
   | { type: 'onProgress'; currentTime: number }
   | { type: 'onEnd' }
   | { type: 'onError'; code: string }
+  // How many requests the fixture server saw for the scenario's source (error-503-retry).
+  | { type: 'requestCount'; count: number }
   | { type: 'onStatusChange'; status: VideoPlayerStatus }
   | { type: 'onPlaybackStateChange'; isPlaying: boolean }
   | { type: 'onSeek'; seekTime: number }
@@ -103,6 +108,7 @@ export type PlayerEvent =
 // Renditions in the hls-quality fixture (e2e/fixtures/generate.sh).
 export const VIDEO_TRACK_COUNT = 3;
 export const PROGRESS_MARKER_SECONDS = 2;
+export const RETRIED_ONCE_REQUESTS = 2;
 export const SEEK_FORWARD_LANDED_SECONDS = 4;
 export const SEEK_BACK_LANDED_SECONDS = 2;
 export const VOLUME_LOW_THRESHOLD = 0.35;
@@ -269,6 +275,11 @@ function apply(event: PlayerEvent) {
       if (state.errorCount > 1) mark('evt-onError-repeated');
       state.errorCode = event.code;
       append(`onError code=${event.code}`);
+      return;
+
+    case 'requestCount':
+      if (event.count === RETRIED_ONCE_REQUESTS) mark('evt-retried-once');
+      append(`requests: ${event.count}`);
       return;
 
     case 'onStatusChange':

@@ -17,7 +17,7 @@ import {
 import { eventLog, PROGRESS_MARKER_SECONDS } from './eventLog';
 import { EventLogPanel } from './EventLogPanel';
 import type { ScenarioName } from './deepLink';
-import { SCENARIO_SOURCES } from './fixtures';
+import { FIXTURE_BASE, RETRY_TOKEN, SCENARIO_SOURCES } from './fixtures';
 
 /**
  * replaceSourceAsync() is awaited here and, for a new source, followed by play() from
@@ -83,6 +83,20 @@ function reportStatusAfterRelease(player: VideoPlayer) {
  */
 function startScenario(scenario: ScenarioName, player: VideoPlayer) {
   eventLog.handle({ type: 'initialStatus', status: player.status });
+
+  // The player has given up by the time it reports the error: count its requests then.
+  if (scenario === 'error-503-retry') {
+    player.addEventListener('onError', () => {
+      fetch(`${FIXTURE_BASE}/__requests?token=${RETRY_TOKEN}`)
+        .then((res) => res.json())
+        .then(({ count }: { count: number }) =>
+          eventLog.handle({ type: 'requestCount', count })
+        )
+        .catch((error) =>
+          eventLog.log(`request count failed: ${String(error)}`)
+        );
+    });
+  }
 
   if (scenario === 'mp4-release-mid-playback') {
     let released = false;

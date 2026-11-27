@@ -29,6 +29,10 @@ function sniffType(file) {
   return head.toString('latin1') === '#EXTM3U' ? TYPES['.m3u8'] : 'application/octet-stream';
 }
 
+// Requests seen per `?token=`, for flows that count how often the player asked
+// (`GET /__requests?token=<t>` answers `{ "count": n }`; smoke-retry-count.yaml).
+const requestCounts = new Map();
+
 const LOOPBACK = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1']);
 
 // The one route that is not a file: iOS flows open their deep link through here (see
@@ -57,7 +61,22 @@ async function handleOpenLink(req, res) {
 
 const server = createServer((req, res) => {
   try {
-    const path = decodeURIComponent(new URL(req.url, 'http://x').pathname);
+    const url = new URL(req.url, 'http://x');
+    const path = decodeURIComponent(url.pathname);
+    const token = url.searchParams.get('token');
+
+    if (path === '/__requests') {
+      res
+        .writeHead(token ? 200 : 400, { 'Content-Type': 'application/json' })
+        .end(JSON.stringify(token ? { count: requestCounts.get(token) ?? 0 } : { error: 'expected ?token=<t>' }));
+      return;
+    }
+    if (token) requestCounts.set(token, (requestCounts.get(token) ?? 0) + 1);
+    // A server that is temporarily unavailable (503), which players retry, unlike a 404.
+    if (path.startsWith('/__unavailable/')) {
+      res.writeHead(503).end();
+      return;
+    }
 
     if (path === '/__open-link') {
       handleOpenLink(req, res).catch((err) => {

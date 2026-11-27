@@ -7,6 +7,7 @@ export const SCENARIO_NAMES = [
   'hls',
   'hls-type', // the same HLS VOD behind a uri without an extension, with type: 'm3u8'
   'error-404',
+  'error-503-retry', // a source that answers 503, with minLoadRetryCount: 1 and a request counter
   'broken-manifest',
   'error-mid-playback',
   'video-tracks',
