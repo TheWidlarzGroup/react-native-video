@@ -25,7 +25,7 @@ Our agent skill knows the v6→v7 mapping. Install it with `npx skills add TheWi
 
 ### Before you start
 
-*   Read [Not in v7 yet](#not-in-v7-yet) first. Audio and video track selection, subtitle styling, the poster props and start position, trimming and caching are planned before v7 stable. Ads and TV platforms are planned after it. The remaining v6 props are planned as well, without a date yet. v6 is still maintained, so you can stay on it until the feature you need lands.
+*   Read [Not in v7 yet](#not-in-v7-yet) first. Audio track selection, subtitle styling, the poster props, start position and trimming, caching, the loading and buffering options and `controlsStyles` are in open pull requests. Ads and TV platforms are planned after v7 stable. A few v6 props are removed for good. v6 is still maintained, so you can stay on it until the feature you need lands.
 *   v7 needs React Native 0.75 or newer and iOS 15 or newer. See [Installation](./fundamentals/installation.md) for all requirements.
 
 ### 1. Install
@@ -127,6 +127,7 @@ Set them in the setup callback of `useVideoPlayer`, or at any later time.
 | `showNotificationControls` | `player.showNotificationControls` | |
 | `disableAudioSessionManagement` | `player.disableAudioSessionManagement` | iOS. The exported `setAudioSessionManagementDisabled(true)` turns it off globally. |
 | `selectedTextTrack` | `player.selectTextTrack(track)` | Pick the track from `player.getAvailableTextTracks()`. Pass `null` to turn subtitles off. |
+| `selectedVideoTrack` | `player.selectVideoTrack(trackId)` | From the release after `7.0.0-beta.14`. Pick the id from `player.getAvailableVideoTracks()`. Pass `undefined` for automatic quality. `onVideoTrackChange` reports what is playing. See [Video quality](./player/video-quality.md). |
 | `reportBandwidth` | Not needed | `onBandwidthUpdate` is always emitted. |
 
 See [Player](./player/player.md) for the full reference.
@@ -151,7 +152,8 @@ The first argument of `useVideoPlayer` is a URL, a `require()` asset or a config
 | :--- | :--- |
 | `minBufferMs`, `maxBufferMs`, `bufferForPlaybackMs`, `bufferForPlaybackAfterRebufferMs`, `backBufferDurationMs` | Same names. Android. |
 | `live` | `livePlayback`, with the same five fields. |
-| `maxHeapAllocationPercent`, `minBackBufferMemoryReservePercent`, `minBufferMemoryReservePercent`, `initialBitrate`, `cacheSizeMB` | Not available. |
+| `bufferingStrategy`, `maxHeapAllocationPercent`, `minBufferMemoryReservePercent` | Same names, in an open pull request ([#5275](https://github.com/TheWidlarzGroup/react-native-video/pull/5275)). Android. |
+| `minBackBufferMemoryReservePercent`, `initialBitrate`, `cacheSizeMB` | Not available. |
 
 #### View props are on `VideoView`
 
@@ -300,25 +302,34 @@ Without Expo, the v6 Podfile flags `$RNVideoUseGoogleIMA` and `$RNVideoUseVideoC
 
 This is the state of `7.0.0-beta.14`. v7 runs on iOS, Android and web.
 
-#### Planned before v7 stable
+#### In open pull requests
 
-These are in open pull requests:
+These v6 features are in open pull requests and are planned before v7 stable:
 
-| Feature | v6 API | Pull request |
-| :--- | :--- | :--- |
-| Audio track selection | `selectedAudioTrack`, `onAudioTracks` | [#5148](https://github.com/TheWidlarzGroup/react-native-video/pull/5148) |
-| Video track and quality selection | `selectedVideoTrack`, `onVideoTracks` | [#5147](https://github.com/TheWidlarzGroup/react-native-video/pull/5147) |
-| Subtitle styling | `subtitleStyle` | [#5149](https://github.com/TheWidlarzGroup/react-native-video/pull/5149) |
+| Feature | v6 API | v7 API | Pull request |
+| :--- | :--- | :--- | :--- |
+| Audio track selection | `selectedAudioTrack`, `onAudioTracks` | `player.selectAudioTrack(trackId)` with ids from `player.getAvailableAudioTracks()`, `onAudioTrackChange` | [#5148](https://github.com/TheWidlarzGroup/react-native-video/pull/5148) |
+| Subtitle styling | `subtitleStyle` | `subtitleStyle` on `VideoView` | [#5149](https://github.com/TheWidlarzGroup/react-native-video/pull/5149) |
+| Poster and loading state | `poster`, `posterResizeMode`, `renderLoader`, `shutterColor`, `hideShutterView` | Same names, on `VideoView` | [#5264](https://github.com/TheWidlarzGroup/react-native-video/pull/5264) |
+| Start position and trimming | `source.startPosition`, `source.cropStart`, `source.cropEnd` | `startPosition`, `cropStart`, `cropEnd` in the config, in milliseconds as in v6 | [#5266](https://github.com/TheWidlarzGroup/react-native-video/pull/5266) |
+| Caching | `source.shouldCache` | `shouldCache` in the config. Progressive files only (no HLS or DASH), on Android and iOS, up to 100 MB | [#5267](https://github.com/TheWidlarzGroup/react-native-video/pull/5267) |
+| Loading and buffering | `minLoadRetryCount`, `disableDisconnectError`, `source.type`, `source.textTracksAllowChunklessPreparation`, `source.cmcd`, `bufferConfig.bufferingStrategy`, `automaticallyWaitsToMinimizeStalling` | Same names. `automaticallyWaitsToMinimizeStalling` moves to `bufferConfig` | [#5275](https://github.com/TheWidlarzGroup/react-native-video/pull/5275) |
+| Native controls on Android | `controlsStyles` | `controlsStyles` on `VideoView` | [#5272](https://github.com/TheWidlarzGroup/react-native-video/pull/5272) |
 
-On web you can already read and select audio and video tracks through [`WebVideoPlayer`](./fundamentals/web-support.mdx).
+On web you can already read and select audio tracks through [`WebVideoPlayer`](./fundamentals/web-support.mdx).
 
-These are planned as well:
+Until the poster props land, render your own image or loader above `VideoView` and hide it when `onReadyToDisplay` fires.
 
-| Area | v6 API | Until then |
-| :--- | :--- | :--- |
-| Poster and loading state | `poster`, `posterResizeMode`, `renderLoader`, `shutterColor`, `hideShutterView` | Render your own image or loader above `VideoView` and hide it when `onReadyToDisplay` fires. |
-| Start position and trimming | `source.startPosition`, `source.cropStart`, `source.cropEnd` | |
-| Caching on iOS | `source.shouldCache` | |
+#### Being worked on
+
+These have no pull request yet, but work on them has started:
+
+| Area | v6 API |
+| :--- | :--- |
+| Fullscreen orientation | `fullscreenAutorotate`, `fullscreenOrientation` |
+| Progress interval and web video element | `progressUpdateInterval`, `nativeHtmlVideoRef` |
+| Audio output and secure output | `audioOutput`, `allowsExternalPlayback`, `useSecureView`, `ViewType.SURFACE_SECURE` |
+| Content start time | `contentStartTime` (Android, DASH with server-side ads) |
 
 #### Planned after v7 stable
 
@@ -335,19 +346,23 @@ If your app needs ads or TV platforms, stay on v6 for now.
 
 | Area | v6 API | Notes |
 | :--- | :--- | :--- |
-| Content start time | `contentStartTime` | |
-| Progress and seeking | `progressUpdateInterval`, the `tolerance` argument of `seek`, `seekableDuration` in `onProgress`, `isSeeking` in `onPlaybackStateChanged` | The progress interval is fixed. |
-| Buffering and network | `bufferingStrategy`, `minLoadRetryCount`, `disableDisconnectError`, `automaticallyWaitsToMinimizeStalling`, `source.cmcd`, `source.textTracksAllowChunklessPreparation` | [#5027](https://github.com/TheWidlarzGroup/react-native-video/pull/5027) proposes that iOS starts playback without waiting to minimize stalling. |
-| Stream types | `source.type`, RTSP and SmoothStreaming on Android | You cannot set the stream type by hand. |
-| Controls and fullscreen | `controlsStyles`, `fullscreenAutorotate`, `fullscreenOrientation`, `onControlsVisibilityChange` | `onControlsVisibleChange` is in the types but is not emitted yet. |
-| Chapters | `chapters` | Available as a separate plugin. See [Chapters](./video-view/chapters.md). |
-| Audio output and AirPlay | `audioOutput`, `allowsExternalPlayback`, `onAudioBecomingNoisy` on iOS | |
-| Secure output | `useSecureView`, `ViewType.SURFACE_SECURE` | |
-| Other | `onAspectRatio`, `nativeHtmlVideoRef` | `onLoad` reports the video size. |
+| Seeking | the `tolerance` argument of `seek`, `seekableDuration` in `onProgress`, `isSeeking` in `onPlaybackStateChanged` | Read `player.duration` instead of `seekableDuration`. |
+| Stream types | RTSP and SmoothStreaming on Android | |
+| Controls | `onControlsVisibilityChange` | `onControlsVisibleChange` is in the types but is not emitted yet. |
+| Audio | `onAudioBecomingNoisy` on iOS | |
 | Decoder info | `VideoDecoderProperties.getWidevineLevel`, `isCodecSupported`, `isHEVCSupported` | |
 | Saving and local encryption | `save()`, `currentPlaybackTime`, `localSourceEncryptionKeyScheme`, `drm.base64Certificate` | |
-| Platforms | visionOS, Windows | |
 
 #### Removed
 
-`debug`, `filter` and `filterEnabled` were removed and will not come back in v7. The source fields `isNetwork`, `isAsset`, `isLocalAssetFile`, `mainVer` and `patchVer` are gone as well.
+These will not come back in v7:
+
+| v6 API | Why | Instead |
+| :--- | :--- | :--- |
+| `debug`, `filter`, `filterEnabled` | Removed | |
+| `chapters` | It worked on tvOS only in v6 | The [Chapters](./video-view/chapters.md) plugin |
+| `onRestoreUserInterfaceForPictureInPictureStop`, `restoreUserInterfaceForPictureInPictureStopCompleted()` | Not needed | v7 restores the interface natively |
+| `onAspectRatio` | Not needed | `onLoad` reports `width`, `height` and `orientation` |
+| visionOS and Windows | Not supported in v7 | Stay on v6 |
+
+The source fields `isNetwork`, `isAsset`, `isLocalAssetFile`, `mainVer` and `patchVer` are gone as well.
