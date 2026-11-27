@@ -638,6 +638,20 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
 
     var tracks: [TextTrack] = []
 
+    if let sideloaded = currentItem.sideloadedTextTracks {
+      for (index, track) in sideloaded.tracks.enumerated() {
+        tracks.append(
+          TextTrack(
+            id: "external-\(index)",
+            label: track.label,
+            language: track.language,
+            selected: index == sideloaded.selectedIndex
+          )
+        )
+      }
+      return tracks
+    }
+
     if let mediaSelection = currentItem.asset.mediaSelectionGroup(
       forMediaCharacteristic: .legible
     ) {
@@ -679,6 +693,11 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   func selectTextTrack(textTrack: Variant_NullType_TextTrack?) throws {
     guard let currentItem = player.currentItem else {
       throw PlayerError.notInitialized.error()
+    }
+
+    if let sideloaded = currentItem.sideloadedTextTracks {
+      selectSideloadedTextTrack(textTrack, in: sideloaded, of: currentItem)
+      return
     }
 
     guard
@@ -745,9 +764,45 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     _eventEmitter?.onTrackChange(track.map { .second($0) })
   }
 
+  private func selectSideloadedTextTrack(
+    _ textTrack: Variant_NullType_TextTrack?,
+    in sideloaded: SideloadedTextTracks,
+    of item: AVPlayerItem
+  ) {
+    if case .second(let track) = textTrack, !track.id.isEmpty {
+      guard
+        track.id.hasPrefix("external-"),
+        let index = Int(track.id.dropFirst("external-".count)),
+        sideloaded.tracks.indices.contains(index)
+      else {
+        return
+      }
+      sideloaded.selectedIndex = index
+    } else {
+      sideloaded.selectedIndex = nil
+    }
+
+    selectedExternalTrackIndex = sideloaded.selectedIndex
+    sideloaded.apply(to: item)
+    emitSelectedTextTrackIfChanged()
+  }
+
   var selectedTrack: TextTrack? {
     guard let currentItem = player.currentItem else {
       return nil
+    }
+
+    if let sideloaded = currentItem.sideloadedTextTracks {
+      guard let index = sideloaded.selectedIndex else {
+        return nil
+      }
+      let track = sideloaded.tracks[index]
+      return TextTrack(
+        id: "external-\(index)",
+        label: track.label,
+        language: track.language,
+        selected: true
+      )
     }
 
     guard

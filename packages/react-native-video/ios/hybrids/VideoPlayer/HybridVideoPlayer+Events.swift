@@ -146,6 +146,8 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
     case .readyToPlay:
       guard let playerItem else { return }
 
+      playerItem.sideloadedTextTracks?.apply(to: playerItem)
+
       let height = playerItem.presentationSize.height
       let width = playerItem.presentationSize.width
       let orientation: VideoOrientation =
