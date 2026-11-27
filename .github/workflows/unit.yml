@@ -51,11 +51,13 @@ jobs:
         run: bun run test
       # The generated Nitro files are committed. A spec change without a regeneration, or
       # a spec nitrogen cannot generate, shows up here as a failed run or a dirty tree.
+      # `git status` also lists generated files that are new and were never committed.
       - name: Generated Nitro specs are up to date
         working-directory: packages/react-native-video
         run: |
           bun run specs
           git diff --exit-code -- nitrogen
+          test -z "$(git status --porcelain -- nitrogen)" || { git status --porcelain -- nitrogen; exit 1; }
 
   react-19:
     name: library tests and typecheck (react 19)
