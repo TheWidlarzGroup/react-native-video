@@ -53,7 +53,7 @@ abstract class HybridVideoViewViewManagerSpec: HybridObject() {
   @get:Keep
   @set:DoNotStrip
   @set:Keep
-  abstract var resizeMode: ResizeMode
+  abstract var resizeMode: VideoResizeMode
   
   @get:DoNotStrip
   @get:Keep

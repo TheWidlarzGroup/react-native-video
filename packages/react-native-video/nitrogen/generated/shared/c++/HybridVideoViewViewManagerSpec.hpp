@@ -15,8 +15,8 @@
 
 // Forward declaration of `HybridVideoPlayerSpec` to properly resolve imports.
 namespace margelo::nitro::video { class HybridVideoPlayerSpec; }
-// Forward declaration of `ResizeMode` to properly resolve imports.
-namespace margelo::nitro::video { enum class ResizeMode; }
+// Forward declaration of `VideoResizeMode` to properly resolve imports.
+namespace margelo::nitro::video { enum class VideoResizeMode; }
 // Forward declaration of `SurfaceType` to properly resolve imports.
 namespace margelo::nitro::video { enum class SurfaceType; }
 // Forward declaration of `ListenerSubscription` to properly resolve imports.
@@ -25,7 +25,7 @@ namespace margelo::nitro::video { struct ListenerSubscription; }
 #include <memory>
 #include "HybridVideoPlayerSpec.hpp"
 #include <optional>
-#include "ResizeMode.hpp"
+#include "VideoResizeMode.hpp"
 #include "SurfaceType.hpp"
 #include "ListenerSubscription.hpp"
 #include <functional>
@@ -65,8 +65,8 @@ namespace margelo::nitro::video {
       virtual void setPictureInPicture(bool pictureInPicture) = 0;
       virtual bool getAutoEnterPictureInPicture() = 0;
       virtual void setAutoEnterPictureInPicture(bool autoEnterPictureInPicture) = 0;
-      virtual ResizeMode getResizeMode() = 0;
-      virtual void setResizeMode(ResizeMode resizeMode) = 0;
+      virtual VideoResizeMode getResizeMode() = 0;
+      virtual void setResizeMode(VideoResizeMode resizeMode) = 0;
       virtual bool getKeepScreenAwake() = 0;
       virtual void setKeepScreenAwake(bool keepScreenAwake) = 0;
       virtual SurfaceType getSurfaceType() = 0;

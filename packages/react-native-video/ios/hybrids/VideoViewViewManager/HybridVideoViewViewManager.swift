@@ -131,7 +131,7 @@ class HybridVideoViewViewManager: HybridVideoViewViewManagerSpec {
     }
   }
   
-  var resizeMode: ResizeMode {
+  var resizeMode: VideoResizeMode {
     get {
       guard let view else {
         print(DEALOCATED_WARNING)

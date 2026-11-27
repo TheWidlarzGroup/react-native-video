@@ -14,7 +14,7 @@ public protocol HybridVideoViewViewManagerSpec_protocol: HybridObject {
   var controls: Bool { get set }
   var pictureInPicture: Bool { get set }
   var autoEnterPictureInPicture: Bool { get set }
-  var resizeMode: ResizeMode { get set }
+  var resizeMode: VideoResizeMode { get set }
   var keepScreenAwake: Bool { get set }
   var surfaceType: SurfaceType { get set }
 

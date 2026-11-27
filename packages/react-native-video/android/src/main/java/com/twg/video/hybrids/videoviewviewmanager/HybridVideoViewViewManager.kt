@@ -84,8 +84,8 @@ class HybridVideoViewViewManager(nitroId: Int): HybridVideoViewViewManagerSpec()
       videoView.get()?.useController = value
     }
 
-  override var resizeMode: ResizeMode
-    get() = videoView.get()?.resizeMode ?: ResizeMode.NONE
+  override var resizeMode: VideoResizeMode
+    get() = videoView.get()?.resizeMode ?: VideoResizeMode.NONE
     set(value) {
       videoView.get()?.resizeMode = value
     }

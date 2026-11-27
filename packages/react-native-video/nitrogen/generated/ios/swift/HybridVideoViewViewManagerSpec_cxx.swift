@@ -192,7 +192,7 @@ open class HybridVideoViewViewManagerSpec_cxx {
     }
     @inline(__always)
     set {
-      self.__implementation.resizeMode = margelo.nitro.video.ResizeMode(rawValue: newValue)!
+      self.__implementation.resizeMode = margelo.nitro.video.VideoResizeMode(rawValue: newValue)!
     }
   }
   

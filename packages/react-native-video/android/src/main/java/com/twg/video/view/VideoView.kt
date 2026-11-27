@@ -22,7 +22,7 @@ import androidx.media3.ui.PlayerView
 import com.facebook.react.bridge.ReactApplicationContext
 import com.margelo.nitro.NitroModules
 import com.margelo.nitro.video.HybridVideoPlayer
-import com.margelo.nitro.video.ResizeMode
+import com.margelo.nitro.video.VideoResizeMode
 import com.margelo.nitro.video.SurfaceType
 import com.margelo.nitro.video.VideoViewEventsEmitter
 import com.twg.video.core.LibraryError
@@ -108,7 +108,7 @@ class VideoView @JvmOverloads constructor(
       }
     }
 
-  var resizeMode: ResizeMode = ResizeMode.NONE
+  var resizeMode: VideoResizeMode = VideoResizeMode.NONE
     set(value) {
       field = value
       runOnMainThread {

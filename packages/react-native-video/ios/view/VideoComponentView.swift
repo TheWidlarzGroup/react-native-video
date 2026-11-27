@@ -83,7 +83,7 @@ import UIKit
     }
   }
 
-  public var resizeMode: ResizeMode = .none {
+  public var resizeMode: VideoResizeMode = .none {
     didSet {
       DispatchQueue.main.async { [weak self] in
         guard let self = self, let playerViewController = self.playerViewController else { return }
