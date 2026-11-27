@@ -4,6 +4,7 @@ export const SCENARIO_NAMES = [
   'mp4-preload', // same clip, started with preload() instead of initialize()+play()
   'mp4-release-mid-playback', // same clip; replaceSourceAsync(null) once progress > 2 s
   'mp4-fullscreen-rotate', // same clip; enterFullscreen() on landscape, exitFullscreen() on portrait
+  'mp4-controls-styles', // same clip; native controls with the seek bar, position and duration hidden
   'hls',
   'error-404',
   'broken-manifest',

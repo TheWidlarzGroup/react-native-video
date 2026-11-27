@@ -289,7 +289,16 @@ export function ScenarioScreen({ scenario }: { scenario: ScenarioName }) {
         resizeMode="contain"
         // #5152 needs the native controls: exitFullscreen() resets the fullscreen button
         // icon, and only a shown controller makes that touch the view hierarchy.
-        controls={scenario === 'mp4-fullscreen-rotate'}
+        controls={
+          scenario === 'mp4-fullscreen-rotate' ||
+          scenario === 'mp4-controls-styles'
+        }
+        // Android only (#5272): smoke-controls-styles.yaml checks the native controls.
+        controlsStyles={
+          scenario === 'mp4-controls-styles'
+            ? { hideSeekBar: true, hidePosition: true, hideDuration: true }
+            : undefined
+        }
         onFullscreenChange={onFullscreenChange}
       />
       <View style={styles.controls}>

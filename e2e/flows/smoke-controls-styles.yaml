@@ -1,0 +1,34 @@
+# controlsStyles on VideoView (#5272, Android only): the native controls of the
+# mp4-controls-styles scenario hide the seek bar, the position and the duration. Media3 shows
+# its controller when playback ends, so after the clip's end the play/pause button must be on
+# screen (proof the controller is shown) and the three hidden elements must not. The ids are
+# Media3's (androidx.media3.ui). iOS ignores controlsStyles and only plays the clip.
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4-controls-styles
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 20000            # generous: emulator software decoder cold start
+- runFlow: ../shared/wait-for-end.yaml
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: ".*exo_play_pause"
+          timeout: 10000
+      - assertNotVisible:
+          id: ".*exo_progress"
+      - assertNotVisible:
+          id: ".*exo_position"
+      - assertNotVisible:
+          id: ".*exo_duration"
+- assertNotVisible:
+    id: "evt-onError"
