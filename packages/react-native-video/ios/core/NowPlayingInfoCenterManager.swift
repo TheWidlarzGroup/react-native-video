@@ -166,9 +166,13 @@ class NowPlayingInfoCenterManager {
         guard let self, let player = self.currentPlayer else {
           return .commandFailed
         }
-        let newTime =
+        // A cropped source must not be left through its start
+        let cropStart = CMTime(
+          seconds: player.currentItem?.cropStartSeconds ?? 0, preferredTimescale: 1000)
+        let newTime = CMTimeMaximum(
           player.currentTime()
-          - CMTime(seconds: self.SEEK_INTERVAL_SECONDS, preferredTimescale: .max)
+            - CMTime(seconds: self.SEEK_INTERVAL_SECONDS, preferredTimescale: .max),
+          cropStart)
         player.seek(to: newTime)
         return .success
       }
