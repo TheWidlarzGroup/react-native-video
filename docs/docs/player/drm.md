@@ -2,7 +2,7 @@
 title: DRM — Widevine & FairPlay Content Protection
 sidebar_position: 4
 sidebar_label: DRM
-description: Set up DRM-protected video playback with Widevine (Android) and FairPlay (iOS/visionOS) using the official React Native Video DRM plugin.
+description: Set up DRM-protected video playback with Widevine (Android) and FairPlay (iOS) using the official React Native Video DRM plugin.
 keywords: [DRM, digital rights management, Widevine, FairPlay, content protection, encrypted video, react native video]
 ---
 
@@ -15,7 +15,7 @@ DRM is a set of access control technologies that are used to protect copyrighted
 If you are working with copyrighted content and want to prevent unauthorized access or distribution, you will need DRM. It is especially important for streaming services, e-learning platforms, and any application that delivers premium content that you want to protect from piracy.
 
 ### What next?
-This page explains how to play DRM‑protected content with React Native Video using the official DRM plugin. It covers installing and enabling the plugin, configuring sources with DRM, and platform‑specific notes for Android (Widevine) and iOS/visionOS (FairPlay).
+This page explains how to play DRM‑protected content with React Native Video using the official DRM plugin. It covers installing and enabling the plugin, configuring sources with DRM, and platform‑specific notes for Android (Widevine) and iOS (FairPlay).
 
 ## Install and enable the DRM plugin
 
@@ -42,7 +42,7 @@ The plugin autolinks on both Android and iOS. Nitro Modules are required because
 
 ## Quick start
 
-You pass DRM configuration via `VideoConfig.drm` when creating a player or using the `useVideoPlayer` hook. If `drm.type` is omitted, the default is inferred per platform (`widevine` on Android, `fairplay` on iOS/visionOS).
+You pass DRM configuration via `VideoConfig.drm` when creating a player or using the `useVideoPlayer` hook. If `drm.type` is omitted, the default is inferred per platform (`widevine` on Android, `fairplay` on iOS).
 
 ```tsx
 import { VideoView, useVideoPlayer } from 'react-native-video';
@@ -74,15 +74,15 @@ All properties are optional unless marked otherwise for a platform. The table be
 
 | Property | Type | Platform | Required | Notes |
 |---|---:|---|:---:|---|
-| `type` | `'widevine' \| 'fairplay'` | Android, iOS, visionOS | No (defaulted) | Default inferred per platform when `drm` is present and `type` omitted (Android → `widevine`, iOS/visionOS → `fairplay`). |
-| `licenseUrl` | `string` | Android, iOS, visionOS | Android: Yes; iOS/visionOS: Yes for default/custom flows | URL of the license (CKC) service. Required for license acquisition. |
+| `type` | `'widevine' \| 'fairplay'` | Android, iOS | No (defaulted) | Default inferred per platform when `drm` is present and `type` omitted (Android → `widevine`, iOS → `fairplay`). |
+| `licenseUrl` | `string` | Android, iOS | Android: Yes; iOS: Yes for default/custom flows | URL of the license (CKC) service. Required for license acquisition. |
 | `licenseHeaders` | ``Record<string, string>`` | Android | No | Extra headers sent with the Widevine license request. (On iOS, use `source.headers` for license requests.) |
 | `multiSession` | `boolean` | Android | No | Whether to allow multiple Widevine sessions. |
-| `certificateUrl` | `string` | iOS, visionOS | Yes (for FairPlay) | URL to fetch the FairPlay application certificate (used to create the SPC). |
-| `contentId` | `string` | iOS, visionOS | No | If omitted, derived from the `skd://` key URL. Used when creating the SPC. |
-| `getLicense` | ``(payload) => Promise<string>`` | iOS, visionOS | No | Optional hook for custom FairPlay license logic; must resolve to a base64‑encoded CKC string. |
+| `certificateUrl` | `string` | iOS | Yes (for FairPlay) | URL to fetch the FairPlay application certificate (used to create the SPC). |
+| `contentId` | `string` | iOS | No | If omitted, derived from the `skd://` key URL. Used when creating the SPC. |
+| `getLicense` | ``(payload) => Promise<string>`` | iOS | No | Optional hook for custom FairPlay license logic; must resolve to a base64‑encoded CKC string. |
 
-Payload shape passed to `getLicense` (iOS/visionOS):
+Payload shape passed to `getLicense` (iOS):
 
 | Field | Type | Description |
 |---|---:|---|
@@ -115,7 +115,7 @@ useVideoPlayer({
 });
 ```
 
-## iOS and visionOS: FairPlay
+## iOS: FairPlay
 
 Two ways to get the CKC (license):
 
@@ -197,6 +197,6 @@ If you are looking for implementing offline playback with DRM, make sure to chec
 
 ## Notes and defaults
 
-- If `drm` is provided without `type`, the library sets a platform default: Android → Widevine, iOS/visionOS → FairPlay.
+- If `drm` is provided without `type`, the library sets a platform default: Android → Widevine, iOS → FairPlay.
 - For custom DRM systems or advanced pipelines, you can implement your own plugin. See the Plugin Interface docs.
 
