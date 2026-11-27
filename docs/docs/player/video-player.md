@@ -54,7 +54,7 @@ The `VideoPlayer` class offers a comprehensive set of methods and properties to 
 | `replaceSourceAsync(source: VideoSource \| VideoConfig \| null)` | Replaces the current video source with a new one. Pass `null` to release the current source without replacing it. |
 | `initialize()` | Manually initialize the underlying native player item when `initializeOnCreation` was set to `false`. No-op if already initialized. |
 | `preload()` | Ensures the media source is set and prepared (buffering started) without starting playback. If not yet initialized it will initialize first. |
-| `release()` | Releases the player's native resources. The player is no longer usable after calling this method. **Note:** If you intend to reuse the player instance with a different source, use `replaceSourceAsync(null)` to clear resources instead of `release()`. |
+| `release()` | Releases the player's native resources. The player is no longer usable after calling this method. **Note:** on iOS and Android `replaceSourceAsync(null)` releases the native player the same way; to play another video, call `replaceSourceAsync(newSource)` on a live player or create a new one. |
 
 ### Properties
 
@@ -204,24 +204,16 @@ By default, the player initializes automatically after construction. If you need
     1.  The current native player resources associated with the old source are released (similar to `release()` but specifically for the source).
     2.  A new native player instance (or reconfigured existing one) is prepared for the `newSource`.
     3.  The loading lifecycle events (`onLoadStart`, `onLoad`, etc.) will fire for the new source.
--   `replaceSourceAsync(null)`: This effectively unloads the current video and releases its associated resources without loading a new one. This is useful for freeing up memory if the player is temporarily not needed but might be used again later.
+-   `replaceSourceAsync(null)`: Unloads the current video and releases its resources without loading a new one. On iOS and Android this releases the native player, exactly like `release()`: a later `replaceSourceAsync(newSource)` rejects with `player/cancelled` (also reported to `onError`), and no native events are delivered. On web it only unloads the media, and the player can load a new source later.
 
 ### Releasing Resources
 
-There are two main ways to release resources:
+-   `replaceSourceAsync(newSource)` is the way to switch videos on one player: the old source's resources are released and the new one loads.
+-   `release()` frees the native player; the instance is unusable afterwards. `useVideoPlayer` calls it for you on unmount, so call it yourself only on players you created with `new VideoPlayer(...)`.
+-   `replaceSourceAsync(null)` releases the native player too (iOS and Android). It differs from `release()` only in that the JS object keeps answering (`status` reads `idle`) instead of throwing. There is no way to "park" a player without a source and load into it later: create a new one when it is needed again.
 
-1.  **`replaceSourceAsync(null)`**: This is a less destructive way to free resources related *only* to the current video source.
-    -   The `VideoPlayer` instance itself remains usable.
-    -   You can later call `replaceSourceAsync(newSource)` to load and play a new video.
-
-2.  **`release()`**: This is a destructive operation.
-   
 :::danger
 After calling `release()`, the player instance becomes unusable. Any subsequent calls to its methods or property access will result in errors.
-:::
-
-:::tip
-It is recommended to use `replaceSourceAsync(null)` when you want to free resources related to the current video source. You should call `release()` only when you are 100% sure that you don't need the player instance anymore. Anyway garbage collector will release the player instance when it is no longer needed.
 :::
 
 ### Error Handling

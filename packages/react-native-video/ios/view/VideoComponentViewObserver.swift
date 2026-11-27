@@ -202,12 +202,19 @@ class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
   }
 
   func playerViewControllerDidStopPictureInPicture(_: AVPlayerViewController) {
+    view?.isPictureInPictureActive = false
     delegate?.onPictureInPictureChange(false)
     reassertAdContainer()
   }
   
   func playerViewControllerWillStartPictureInPicture(_: AVPlayerViewController) {
+    view?.isPictureInPictureActive = true
+    VideoManager.shared.pictureInPictureWillStart(view: view)
     delegate?.willEnterPictureInPicture()
+  }
+
+  func playerViewController(_: AVPlayerViewController, failedToStartPictureInPictureWithError _: Error) {
+    view?.isPictureInPictureActive = false
   }
   
   func playerViewControllerWillStopPictureInPicture(_: AVPlayerViewController) {
@@ -223,10 +230,13 @@ class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
   }
   
   func playerViewController(
-    _: AVPlayerViewController,
+    _ playerViewController: AVPlayerViewController,
     willEndFullScreenPresentationWithAnimationCoordinator coordinator: UIViewControllerTransitionCoordinator
   ) {
     delegate?.willExitFullscreen()
+    // AVKit pauses the player when native fullscreen is dismissed; resume it, as v6 does.
+    let player = playerViewController.player
+    let wasPlaying = player?.timeControlStatus == .playing
 
     coordinator.animate(alongsideTransition: nil) { [weak self] context in
       guard let self = self else { return }
@@ -246,6 +256,9 @@ class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
       self.orientationHandler.stop()
       self.delegate?.onFullscreenChange(false)
       self.reassertAdContainer()
+      if wasPlaying {
+        player?.play()
+      }
     }
   }
   

@@ -122,6 +122,12 @@ class VideoPlaybackServiceConnection(
     }
     if (!bound) {
       state = ConnectionState.Disconnected
+      Log.e(
+        TAG,
+        "Could not bind to VideoPlaybackService - is it declared in AndroidManifest.xml? " +
+          "Without it background playback is not kept alive and notification controls do not " +
+          "appear (see \"Register the playback service\" in the configuration docs)"
+      )
     }
   }
 

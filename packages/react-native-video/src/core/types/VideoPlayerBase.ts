@@ -195,7 +195,9 @@ export interface VideoPlayerBase {
   /**
    * Replace the current source of the player.
    * @param source - The new source of the video.
-   * @note If you want to clear the source, you can pass null.
+   * @note Passing null unloads the source. On iOS and Android this releases the native player
+   * like {@link release}: a later load rejects with `player/cancelled` (also reported to `onError`)
+   * and no native events are delivered. On web the player can load a new source afterwards.
    * see {@link VideoPlayerSourceBase}
    */
   replaceSourceAsync(

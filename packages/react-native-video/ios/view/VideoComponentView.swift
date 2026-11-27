@@ -69,6 +69,8 @@ import UIKit
     }
   }
 
+  var isPictureInPictureActive = false
+
   public var autoEnterPictureInPicture: Bool = false {
     didSet {
       DispatchQueue.main.async { [weak self] in
