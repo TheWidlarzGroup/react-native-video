@@ -8,6 +8,8 @@ import {
   SEEK_BACK_LANDED_SECONDS,
   SEEK_FORWARD_LANDED_SECONDS,
   START_POSITION_LANDED_SECONDS,
+  CROP_DURATION_SECONDS,
+  PAST_DURATION_TOLERANCE_SECONDS,
   STATUS_ERROR_CODE,
   VOLUME_LOW_THRESHOLD,
   FIXTURE_DURATION_SECONDS,
@@ -683,5 +685,40 @@ describe('start position', () => {
       { type: 'onProgress', currentTime: START_POSITION_LANDED_SECONDS + 1 }
     );
     expect(markers()).not.toContain('evt-started-at-position');
+  });
+});
+
+describe('crop', () => {
+  test('an onLoad with the length of the cropped part marks evt-duration-crop', () => {
+    feed({ type: 'onLoad', duration: CROP_DURATION_SECONDS + 0.2 });
+    expect(markers()).toContain('evt-duration-crop');
+  });
+
+  test('the whole 8 s clip is not the cropped part', () => {
+    feed({ type: 'onLoad', duration: FIXTURE_DURATION_SECONDS });
+    expect(markers()).not.toContain('evt-duration-crop');
+  });
+
+  test('progress past the reported duration marks evt-progress-past-duration', () => {
+    feed(
+      { type: 'onLoad', duration: CROP_DURATION_SECONDS },
+      { type: 'onProgress', currentTime: CROP_DURATION_SECONDS }
+    );
+    expect(markers()).not.toContain('evt-progress-past-duration');
+    feed({
+      type: 'onProgress',
+      currentTime:
+        CROP_DURATION_SECONDS + PAST_DURATION_TOLERANCE_SECONDS + 0.1,
+    });
+    expect(markers()).toContain('evt-progress-past-duration');
+  });
+
+  test('progress before any onLoad, or with an unknown duration, is not judged', () => {
+    feed({ type: 'onProgress', currentTime: 100 });
+    feed(
+      { type: 'onLoad', duration: NaN },
+      { type: 'onProgress', currentTime: 100 }
+    );
+    expect(markers()).not.toContain('evt-progress-past-duration');
   });
 });

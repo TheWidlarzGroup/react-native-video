@@ -4,6 +4,7 @@ export const SCENARIO_NAMES = [
   'mp4-preload', // same clip, started with preload() instead of initialize()+play()
   'mp4-release-mid-playback', // same clip; replaceSourceAsync(null) once progress > 2 s
   'mp4-start-position', // same clip, with startPosition: 5000 on the source
+  'mp4-crop', // same clip, cropStart: 2000 and cropEnd: 5000 (plays 3 s of it)
   'mp4-fullscreen-rotate', // same clip; enterFullscreen() on landscape, exitFullscreen() on portrait
   'hls',
   'error-404',

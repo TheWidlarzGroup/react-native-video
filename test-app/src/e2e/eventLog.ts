@@ -31,6 +31,10 @@ export const MARKER_IDS = [
   'evt-seek-fwd-landed', // first onProgress after an onSeek reports currentTime > 4s
   'evt-seek-back-landed', // first onProgress after an onSeek reports currentTime < 2s
   'evt-started-at-position', // the scenario's FIRST onProgress reports currentTime > 4s
+  // mp4-crop (smoke-crop.yaml): onLoad reports the length of the cropped part, and
+  // progress never goes past the length onLoad reported.
+  'evt-duration-crop',
+  'evt-progress-past-duration',
   'evt-muted',
   'evt-unmuted', // muted:false after evt-muted (real unmute, not the initial default)
   'evt-volume-low', // onVolumeChange volume <= 0.35 while not muted
@@ -114,6 +118,11 @@ export const SEEK_FORWARD_LANDED_SECONDS = 4;
 export const SEEK_BACK_LANDED_SECONDS = 2;
 // The mp4-start-position source starts at 5 s; natural playback starts near 0.
 export const START_POSITION_LANDED_SECONDS = 4;
+// mp4-crop plays 2 s to 5 s of the 8 s clip.
+export const CROP_DURATION_SECONDS = 3;
+export const CROP_DURATION_TOLERANCE_SECONDS = 0.5;
+// Progress may run a little past the reported duration before onEnd; more is a bug.
+export const PAST_DURATION_TOLERANCE_SECONDS = 0.5;
 export const VOLUME_LOW_THRESHOLD = 0.35;
 export const LOOP_VERIFIED_END_COUNT = 3;
 // A loop wrap-around: progress was near the end of the 8 s clip and is now near its
@@ -157,6 +166,8 @@ type State = {
   replaceRequested: boolean;
   // The next onProgress tells where the replacement source started (see onLoad).
   reloadPending: boolean;
+  // The duration the last onLoad reported, NaN before it.
+  loadedDuration: number;
 };
 
 const initialState = (): State => ({
@@ -174,6 +185,7 @@ const initialState = (): State => ({
   readySeen: false,
   replaceRequested: false,
   reloadPending: false,
+  loadedDuration: NaN,
 });
 
 let state = initialState();
@@ -204,6 +216,13 @@ function apply(event: PlayerEvent) {
     case 'onLoad':
       mark('evt-onLoad');
       state.loadCount += 1;
+      state.loadedDuration = event.duration;
+      if (
+        Math.abs(event.duration - CROP_DURATION_SECONDS) <=
+        CROP_DURATION_TOLERANCE_SECONDS
+      ) {
+        mark('evt-duration-crop');
+      }
       if (state.replaceRequested) {
         mark('evt-replacement-loaded');
         state.reloadPending = true;
@@ -222,6 +241,12 @@ function apply(event: PlayerEvent) {
       const t = event.currentTime;
       // derived markers: assert text, not numbers
       if (t > PROGRESS_MARKER_SECONDS) mark('evt-progress-gt-2s');
+      if (
+        Number.isFinite(state.loadedDuration) &&
+        t > state.loadedDuration + PAST_DURATION_TOLERANCE_SECONDS
+      ) {
+        mark('evt-progress-past-duration');
+      }
       // Where playback started: only the first progress of the scenario can tell, so
       // natural playback can never satisfy it (smoke-start-position.yaml).
       if (state.lastProgress === null && t > START_POSITION_LANDED_SECONDS) {
