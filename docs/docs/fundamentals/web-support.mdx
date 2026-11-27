@@ -96,7 +96,7 @@ See the [WebVideoPlayer](../api-reference/interfaces/WebVideoPlayer) API referen
 `nativeHtmlVideoElement` returns the underlying `HTMLVideoElement` (v6 `nativeHtmlVideoRef.current`). It exists as soon as the player is created.
 
 ```tsx
-const player = useVideoPlayer(source) as WebVideoPlayer;
+const player = useVideoPlayer(source) as unknown as WebVideoPlayer;
 player.nativeHtmlVideoElement.setAttribute('crossorigin', 'anonymous');
 ```
 
