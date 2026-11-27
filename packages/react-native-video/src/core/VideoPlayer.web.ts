@@ -359,11 +359,11 @@ class VideoPlayer extends VideoPlayerEvents implements WebVideoPlayer {
   getAvailableVideoTracks(): VideoTrack[] {
     return getTracks(this._media.video, 'videoTracks');
   }
-  selectVideoTrack(t: VideoTrack | null): void {
-    selectTrack(this._media.video, 'videoTracks', t?.id ?? null);
+  selectVideoTrack(trackId?: string): void {
+    selectTrack(this._media.video, 'videoTracks', trackId ?? null);
   }
-  get selectedVideoTrack(): VideoTrack | undefined {
-    return this.getAvailableVideoTracks().find((x) => x.selected);
+  get selectedVideoTrackId(): string | undefined {
+    return this.getAvailableVideoTracks().find((x) => x.selected)?.id;
   }
 }
 

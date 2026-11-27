@@ -1,0 +1,45 @@
+# Video quality selection on a multi-rendition HLS stream (360p / 180p / 90p): pin the
+# lowest rendition, then return to automatic selection. Both go through onVideoTrackChange
+# (markers derived in eventLog.ts): evt-video-tracks-listed needs all three renditions,
+# evt-video-track-pinned needs the lowest one reported as the pinned selection, and
+# evt-video-track-auto only fires after it, so none passes without a real selection change.
+# Asserts on the selection the player reports, which is the same on both platforms; what
+# actually renders can differ (Android locks the rendition, iOS only caps it).
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: video-tracks
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 40000            # HLS: first load is the slow one
+- extendedWaitUntil:
+    visible:
+      id: "evt-video-tracks-listed"
+    timeout: 15000
+# Interact only on an idle player (see smoke-mute-volume.yaml).
+- runFlow: ../shared/wait-for-end.yaml
+- runFlow:
+    file: ../shared/press.yaml
+    env:
+      BUTTON: btn-quality-low
+      NTH: 1
+- extendedWaitUntil:
+    visible:
+      id: "evt-video-track-pinned"
+    timeout: 8000
+- runFlow:
+    file: ../shared/press.yaml
+    env:
+      BUTTON: btn-quality-auto
+      NTH: 1
+- extendedWaitUntil:
+    visible:
+      id: "evt-video-track-auto"
+    timeout: 8000
+- assertNotVisible:
+    id: "evt-onError"

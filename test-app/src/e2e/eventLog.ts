@@ -35,6 +35,9 @@ export const MARKER_IDS = [
   'evt-volume-low', // onVolumeChange volume <= 0.35 while not muted
   'evt-rate-2x',
   'evt-rate-0-5x',
+  'evt-video-tracks-listed', // onVideoTrackChange lists all three renditions
+  'evt-video-track-pinned', // ...then reports the lowest rendition as the pinned selection
+  'evt-video-track-auto', // ...then reports no pinned selection again (automatic)
   'evt-audio-alt-selected', // onAudioTrackChange reports the Spanish track selected (2 tracks listed)
   'evt-audio-default-restored', // ...then the English (default) track selected again
   // An unassisted loop restart: see LOOP_VERIFIED_END_COUNT and the wrap-around rule in
@@ -94,10 +97,17 @@ export type PlayerEvent =
       source: 'hls' | 'null';
     }
   | {
+      type: 'onVideoTrackChange';
+      tracks: readonly { id: string; height?: number }[];
+      selectedTrackId?: string;
+    }
+  | {
       type: 'onAudioTrackChange';
       tracks: readonly { language?: string; selected: boolean }[];
     };
 
+// Renditions in the hls-quality fixture (e2e/fixtures/generate.sh).
+export const VIDEO_TRACK_COUNT = 3;
 export const PROGRESS_MARKER_SECONDS = 2;
 export const SEEK_FORWARD_LANDED_SECONDS = 4;
 export const SEEK_BACK_LANDED_SECONDS = 2;
@@ -340,6 +350,36 @@ function apply(event: PlayerEvent) {
       if (event.status === 'idle') mark('evt-idle-after-release');
       append(`statusAfterRelease:${event.status}`);
       return;
+
+    case 'onVideoTrackChange': {
+      // The fixture has three renditions; "lowest" is the one with the smallest height.
+      if (event.tracks.length === VIDEO_TRACK_COUNT)
+        mark('evt-video-tracks-listed');
+      const lowest = event.tracks.reduce<
+        { id: string; height?: number } | undefined
+      >(
+        (min, track) =>
+          min === undefined ||
+          (track.height ?? Infinity) < (min.height ?? Infinity)
+            ? track
+            : min,
+        undefined
+      );
+      if (
+        event.selectedTrackId !== undefined &&
+        event.tracks.length === VIDEO_TRACK_COUNT &&
+        event.selectedTrackId === lowest?.id
+      ) {
+        mark('evt-video-track-pinned');
+      } else if (
+        event.selectedTrackId === undefined &&
+        state.markers.has('evt-video-track-pinned')
+      ) {
+        mark('evt-video-track-auto');
+      }
+      append(`onVideoTrackChange selected=${event.selectedTrackId ?? 'auto'}`);
+      return;
+    }
 
     case 'onAudioTrackChange': {
       // The fixture's two renditions are told apart by language (en default, es alternate).

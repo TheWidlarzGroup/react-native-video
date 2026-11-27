@@ -174,6 +174,11 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
         .init(currentTime, duration, height, width, orientation)
       )
 
+      // AVFoundation ignores preferredPeakBitRate/preferredMaximumResolution
+      // written before the item is ready to play, so a quality pin made earlier
+      // - or carried over from the previous source - is (re)written here.
+      applyVideoQualityCapsIfReady()
+
       // Media selection groups only exist once the asset is loaded, so this is
       // both where an audio pick made earlier gets replayed and where the
       // available audio renditions are first published.
@@ -226,6 +231,11 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
     _eventEmitter?.onBandwidthUpdate(
       .init(bitrate: bitrate, width: nil, height: nil)
     )
+
+    // Same access-log entry, second consumer: on iOS a quality selection is a
+    // cap rather than a hard lock, so what is actually being rendered has to be
+    // derived rather than assumed.
+    updateActiveVideoTrack(indicatedBitrate: bitrate)
   }
 
   func onPlayerItemChange(player _: AVPlayer, playerItem: AVPlayerItem?) {

@@ -119,6 +119,10 @@ class HybridVideoPlayerEventEmitter: HybridVideoPlayerEventEmitterSpec {
     addListener(eventName: "onTrackChange", listener: listener)
   }
 
+  func addOnVideoTrackChangeListener(listener: @escaping (VideoTrackChangeData) -> Void) throws -> ListenerSubscription {
+    addListener(eventName: "onVideoTrackChange", listener: listener)
+  }
+
   func addOnAudioTrackChangeListener(listener: @escaping (AudioTrackChangeData) -> Void) throws -> ListenerSubscription {
     addListener(eventName: "onAudioTrackChange", listener: listener)
   }
@@ -207,6 +211,10 @@ class HybridVideoPlayerEventEmitter: HybridVideoPlayerEventEmitterSpec {
 
   func onTrackChange(_ track: Variant_NullType_TextTrack?) {
     emitEvent(eventName: "onTrackChange") { (callback: (Variant_NullType_TextTrack?) throws -> Void) in try callback(track) }
+  }
+
+  func onVideoTrackChange(_ data: VideoTrackChangeData) {
+    emitEvent(eventName: "onVideoTrackChange") { (callback: (VideoTrackChangeData) throws -> Void) in try callback(data) }
   }
 
   func onAudioTrackChange(_ data: AudioTrackChangeData) {

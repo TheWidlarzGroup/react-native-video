@@ -103,6 +103,9 @@ class HybridVideoPlayerEventEmitter : HybridVideoPlayerEventEmitterSpec() {
   override fun addOnTrackChangeListener(listener: (Variant_NullType_TextTrack?) -> Unit) =
     addListener("onTrackChange", listener)
 
+  override fun addOnVideoTrackChangeListener(listener: (VideoTrackChangeData) -> Unit) =
+    addListener("onVideoTrackChange", listener)
+
   override fun addOnAudioTrackChangeListener(listener: (AudioTrackChangeData) -> Unit) =
     addListener("onAudioTrackChange", listener)
 
@@ -176,6 +179,9 @@ class HybridVideoPlayerEventEmitter : HybridVideoPlayerEventEmitterSpec() {
     }
     emitEvent<(Variant_NullType_TextTrack?) -> Unit>("onTrackChange") { it(param) }
   }
+
+  fun onVideoTrackChange(data: VideoTrackChangeData) =
+    emitEvent<(VideoTrackChangeData) -> Unit>("onVideoTrackChange") { it(data) }
 
   fun onAudioTrackChange(data: AudioTrackChangeData) =
     emitEvent<(AudioTrackChangeData) -> Unit>("onAudioTrackChange") { it(data) }

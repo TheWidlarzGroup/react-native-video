@@ -31,6 +31,22 @@ useVideoPlayer({
 
 > iOS supports only `.vtt` external subtitles. Embedded tracks (in the HLS/DASH manifest) work via `getAvailableTextTracks()` on both platforms.
 
+## Video quality (track) selection
+
+Real selection on native (Android/iOS) — pin a specific HLS rendition, or go back to automatic adaptive selection:
+
+```tsx
+const tracks = player.getAvailableVideoTracks(); // VideoTrack[]
+player.selectVideoTrack(tracks[0].id);           // or call with no argument for automatic
+const requestedId = player.selectedVideoTrackId; // what was requested
+```
+
+`VideoTrack = { id, label, language?, selected, width?, height?, bitrate? }`.
+
+React to changes via `onVideoTrackChange` → `{ availableTracks, selectedTrackId?, activeTrackId? }` (see `events.md`).
+
+**Platforms enforce a pin differently**: Android is a hard track-selection override (selected == active, always). iOS has no rendition-selection API, so a pin is enforced as a resolution/bitrate cap — the player may still adapt within or below the cap, and `activeTrackId` (not `selectedVideoTrackId`) is what reports the rendition actually rendering.
+
 ## Audio track selection
 
 Real, exact selection on native (Android/iOS), not an approximation — the same mechanism as text tracks, just for alternate audio renditions (dubs, commentary, described video):
@@ -48,15 +64,3 @@ React to changes via `onAudioTrackChange` → `{ availableTracks: AudioTrack[], 
 There's no separate "requested vs. actually playing" split: the selection *is* what plays on both platforms.
 
 Track ids are only valid for the source they came from (on iOS they are positional): don't reuse an id an app saved earlier on a different source; re-resolve it from `getAvailableAudioTracks()` by `language`/`label`.
-
-## Video track (quality) selection
-
-Video **quality/track selection** is a **web** capability (experimental — Safari-leaning). On native, the player handles **text** and **audio** track selection (above), but not yet video quality/rendition selection. Cast to `WebVideoPlayer` for `getAvailableVideoTracks()/selectVideoTrack()` on web:
-
-```tsx
-import type { WebVideoPlayer } from 'react-native-video';
-const web = player as WebVideoPlayer;
-web.selectVideoTrack(web.getAvailableVideoTracks()[0]);
-```
-
-The `VideoTrack` type (`{ id, label, language?, selected }`) is exported for use with this web API.
