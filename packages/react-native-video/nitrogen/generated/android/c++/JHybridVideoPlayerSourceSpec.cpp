@@ -25,6 +25,8 @@ namespace margelo::nitro::video { enum class CmcdMode; }
 namespace margelo::nitro::video { struct BufferConfig; }
 // Forward declaration of `LivePlaybackParams` to properly resolve imports.
 namespace margelo::nitro::video { struct LivePlaybackParams; }
+// Forward declaration of `BufferingStrategy` to properly resolve imports.
+namespace margelo::nitro::video { enum class BufferingStrategy; }
 // Forward declaration of `Resolution` to properly resolve imports.
 namespace margelo::nitro::video { struct Resolution; }
 // Forward declaration of `CustomVideoMetadata` to properly resolve imports.
@@ -61,6 +63,8 @@ namespace margelo::nitro::video { enum class VideoOrientation; }
 #include "JBufferConfig.hpp"
 #include "LivePlaybackParams.hpp"
 #include "JLivePlaybackParams.hpp"
+#include "BufferingStrategy.hpp"
+#include "JBufferingStrategy.hpp"
 #include "Resolution.hpp"
 #include "JResolution.hpp"
 #include "CustomVideoMetadata.hpp"

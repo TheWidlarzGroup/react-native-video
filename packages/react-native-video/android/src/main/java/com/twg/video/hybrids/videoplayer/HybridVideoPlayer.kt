@@ -1,5 +1,7 @@
 package com.margelo.nitro.video
 
+import android.app.ActivityManager
+import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -15,6 +17,7 @@ import androidx.media3.common.text.CueGroup
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.DecoderReuseEvaluation
 import androidx.media3.exoplayer.DefaultLoadControl
+import androidx.media3.exoplayer.LoadControl
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.analytics.AnalyticsListener
@@ -30,6 +33,7 @@ import com.twg.video.core.LibraryError
 import com.twg.video.core.PlayerError
 import com.twg.video.core.VideoManager
 import com.twg.video.core.extensions.updateService
+import com.twg.video.core.player.BufferingStrategyLoadControl
 import com.twg.video.core.player.OnAudioFocusChangedListener
 import com.twg.video.core.recivers.AudioBecomingNoisyReceiver
 import com.twg.video.core.services.playback.VideoPlaybackService
@@ -237,22 +241,47 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
     allocator = DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE)
 
     // Create a LoadControl with the allocator
-    val loadControl = DefaultLoadControl.Builder()
-      .setAllocator(allocator!!)
-      .setBufferDurationsMs(
-        bufferConfig?.minBufferMs?.toInt() ?: DEFAULT_MIN_BUFFER_DURATION_MS, // minBufferMs
-        bufferConfig?.maxBufferMs?.toInt() ?: DEFAULT_MAX_BUFFER_DURATION_MS, // maxBufferMs
-        bufferConfig?.bufferForPlaybackMs?.toInt()
-          ?: DEFAULT_BUFFER_FOR_PLAYBACK_DURATION_MS, // bufferForPlaybackMs
-        bufferConfig?.bufferForPlaybackAfterRebufferMs?.toInt()
-          ?: DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_DURATION_MS // bufferForPlaybackAfterRebufferMs
+    val minBufferMs = bufferConfig?.minBufferMs?.toInt() ?: DEFAULT_MIN_BUFFER_DURATION_MS
+    val maxBufferMs = bufferConfig?.maxBufferMs?.toInt() ?: DEFAULT_MAX_BUFFER_DURATION_MS
+    val bufferForPlaybackMs = bufferConfig?.bufferForPlaybackMs?.toInt()
+      ?: DEFAULT_BUFFER_FOR_PLAYBACK_DURATION_MS
+    val bufferForPlaybackAfterRebufferMs = bufferConfig?.bufferForPlaybackAfterRebufferMs?.toInt()
+      ?: DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_DURATION_MS
+    val backBufferDurationMs = bufferConfig?.backBufferDurationMs?.toInt()
+      ?: DEFAULT_BACK_BUFFER_DURATION_MS
+    val bufferingStrategy = bufferConfig?.bufferingStrategy ?: BufferingStrategy.DEFAULT
+
+    val loadControl: LoadControl = if (bufferingStrategy == BufferingStrategy.DEFAULT) {
+      DefaultLoadControl.Builder()
+        .setAllocator(allocator!!)
+        .setBufferDurationsMs(
+          minBufferMs,
+          maxBufferMs,
+          bufferForPlaybackMs,
+          bufferForPlaybackAfterRebufferMs
+        )
+        .setBackBuffer(
+          backBufferDurationMs,
+          false // retainBackBufferFromKeyframe
+        )
+        .build()
+    } else {
+      val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+      BufferingStrategyLoadControl(
+        bufferAllocator = allocator!!,
+        minBufferMs = minBufferMs,
+        maxBufferMs = maxBufferMs,
+        bufferForPlaybackMs = bufferForPlaybackMs,
+        bufferForPlaybackAfterRebufferMs = bufferForPlaybackAfterRebufferMs,
+        backBufferDurationMs = backBufferDurationMs,
+        strategy = bufferingStrategy,
+        maxHeapAllocationPercent = bufferConfig?.maxHeapAllocationPercent
+          ?: BufferingStrategyLoadControl.DEFAULT_MAX_HEAP_ALLOCATION_PERCENT,
+        minBufferMemoryReservePercent = bufferConfig?.minBufferMemoryReservePercent
+          ?: BufferingStrategyLoadControl.DEFAULT_MIN_BUFFER_MEMORY_RESERVE_PERCENT,
+        memoryClassMb = activityManager.memoryClass
       )
-      .setBackBuffer(
-        bufferConfig?.backBufferDurationMs?.toInt()
-          ?: DEFAULT_BACK_BUFFER_DURATION_MS, // backBufferDurationMs,
-        false // retainBackBufferFromKeyframe
-      )
-      .build()
+    }
 
     val renderersFactory = DefaultRenderersFactory(context)
       .forceEnableMediaCodecAsynchronousQueueing()

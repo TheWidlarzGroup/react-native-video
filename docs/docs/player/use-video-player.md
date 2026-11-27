@@ -127,6 +127,9 @@ Properties below are Android‑only
 | `bufferForPlaybackMs` | `number` | Media that must be buffered before playback can start or resume after user action (ms). Default: 1000. |
 | `bufferForPlaybackAfterRebufferMs` | `number` | Media that must be buffered to resume after a rebuffer (ms). Default: 2000. |
 | `backBufferDurationMs` | `number` | Duration kept behind the current position to allow instant rewind without rebuffer (ms). |
+| `bufferingStrategy` | `'default' \| 'disableBuffering' \| 'dependingOnMemory'` | How the player decides whether to keep loading ahead. `disableBuffering` loads only what playback needs to start or resume (the `bufferForPlayback…` durations) and nothing ahead of that, so expect more rebuffering. `dependingOnMemory` behaves like `default` but pauses loading while the app is short on memory. Default: `'default'`. |
+| `maxHeapAllocationPercent` | `number` | With `dependingOnMemory`: the share (0 to 1) of the app's heap the buffer may take before loading pauses. Default: 1. |
+| `minBufferMemoryReservePercent` | `number` | With `dependingOnMemory`: the share (0 to 1) of the app's heap to keep free; loading pauses when less is free and more than 2 seconds are buffered. Default: 0. |
 | `livePlayback.minPlaybackSpeed` | `number` | Minimum playback speed used to maintain target live offset. |
 | `livePlayback.maxPlaybackSpeed` | `number` | Maximum playback speed used to catch up to target live offset. |
 | `livePlayback.minOffsetMs` | `number` | Minimum allowed live offset (ms). |

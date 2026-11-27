@@ -11,9 +11,11 @@
 #include "NativeVideoConfig.hpp"
 
 #include "BufferConfig.hpp"
+#include "BufferingStrategy.hpp"
 #include "CmcdMode.hpp"
 #include "CustomVideoMetadata.hpp"
 #include "JBufferConfig.hpp"
+#include "JBufferingStrategy.hpp"
 #include "JCmcdMode.hpp"
 #include "JCustomVideoMetadata.hpp"
 #include "JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload.hpp"

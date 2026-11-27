@@ -171,6 +171,22 @@ test('cmcd custom keys are formatted as CMCD pairs: strings quoted, numbers bare
   });
 });
 
+test('the buffering strategy and its memory limits reach native inside bufferConfig', () => {
+  createSource({
+    uri: 'https://x/a.mp4',
+    bufferConfig: {
+      bufferingStrategy: 'dependingOnMemory',
+      maxHeapAllocationPercent: 0.5,
+      minBufferMemoryReservePercent: 0.1,
+    },
+  });
+  expect(lastConfig().bufferConfig).toEqual({
+    bufferingStrategy: 'dependingOnMemory',
+    maxHeapAllocationPercent: 0.5,
+    minBufferMemoryReservePercent: 0.1,
+  });
+});
+
 test('does not mutate the caller config', () => {
   // useVideoPlayer keys the player on JSON.stringify(source): if the factory wrote
   // defaults back into a config the caller keeps around (a module constant, a

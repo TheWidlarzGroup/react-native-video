@@ -12,6 +12,8 @@
 namespace margelo::nitro::video { struct BandwidthData; }
 // Forward declaration of `BufferConfig` to properly resolve imports.
 namespace margelo::nitro::video { struct BufferConfig; }
+// Forward declaration of `BufferingStrategy` to properly resolve imports.
+namespace margelo::nitro::video { enum class BufferingStrategy; }
 // Forward declaration of `CmcdMode` to properly resolve imports.
 namespace margelo::nitro::video { enum class CmcdMode; }
 // Forward declaration of `CustomVideoMetadata` to properly resolve imports.
@@ -96,6 +98,7 @@ namespace ReactNativeVideo { class HybridVideoViewViewManagerSpec_cxx; }
 // Include C++ defined types
 #include "BandwidthData.hpp"
 #include "BufferConfig.hpp"
+#include "BufferingStrategy.hpp"
 #include "CmcdMode.hpp"
 #include "CustomVideoMetadata.hpp"
 #include "HybridVideoPlayerEventEmitterSpec.hpp"
@@ -1016,6 +1019,21 @@ namespace margelo::nitro::video::bridge::swift {
     return optional.has_value();
   }
   inline LivePlaybackParams get_std__optional_LivePlaybackParams_(const std::optional<LivePlaybackParams>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::optional<BufferingStrategy>
+  /**
+   * Specialized version of `std::optional<BufferingStrategy>`.
+   */
+  using std__optional_BufferingStrategy_ = std::optional<BufferingStrategy>;
+  inline std::optional<BufferingStrategy> create_std__optional_BufferingStrategy_(const BufferingStrategy& value) noexcept {
+    return std::optional<BufferingStrategy>(value);
+  }
+  inline bool has_value_std__optional_BufferingStrategy_(const std::optional<BufferingStrategy>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline BufferingStrategy get_std__optional_BufferingStrategy_(const std::optional<BufferingStrategy>& optional) noexcept {
     return optional.value();
   }
   

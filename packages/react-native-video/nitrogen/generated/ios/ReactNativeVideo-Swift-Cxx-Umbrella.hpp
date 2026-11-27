@@ -12,6 +12,8 @@
 namespace margelo::nitro::video { struct BandwidthData; }
 // Forward declaration of `BufferConfig` to properly resolve imports.
 namespace margelo::nitro::video { struct BufferConfig; }
+// Forward declaration of `BufferingStrategy` to properly resolve imports.
+namespace margelo::nitro::video { enum class BufferingStrategy; }
 // Forward declaration of `CmcdMode` to properly resolve imports.
 namespace margelo::nitro::video { enum class CmcdMode; }
 // Forward declaration of `CustomVideoMetadata` to properly resolve imports.
@@ -88,6 +90,7 @@ namespace margelo::nitro::video { struct onVolumeChangeData; }
 // Include C++ defined types
 #include "BandwidthData.hpp"
 #include "BufferConfig.hpp"
+#include "BufferingStrategy.hpp"
 #include "CmcdMode.hpp"
 #include "CustomVideoMetadata.hpp"
 #include "HybridVideoPlayerEventEmitterSpec.hpp"
