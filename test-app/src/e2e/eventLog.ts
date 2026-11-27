@@ -53,6 +53,10 @@ export const MARKER_IDS = [
   'evt-reloaded-from-start', // first onProgress after that onLoad is < RELOAD_START_SECONDS
   'evt-ended-after-replace', // onEnd after replaceSourceAsync(source) was requested
   'evt-idle-after-release', // player.status read as 'idle' once replaceSourceAsync(null) resolved
+  // VideoView ref calls made from JS (smoke-fullscreen-rotate): onFullscreenChange(true/false).
+  'evt-fullscreen-entered',
+  'evt-fullscreen-exited',
+  'evt-fullscreen-call-failed', // enterFullscreen()/exitFullscreen() threw (#5152)
 ] as const;
 
 export type MarkerId = (typeof MARKER_IDS)[number];
@@ -69,6 +73,15 @@ export type PlayerEvent =
   | { type: 'onSeek'; seekTime: number }
   | { type: 'onVolumeChange'; muted: boolean; volume: number }
   | { type: 'onPlaybackRateChange'; rate: number }
+  // VideoView's onFullscreenChange (a view event, not a player event).
+  | { type: 'onFullscreenChange'; fullscreen: boolean }
+  // A VideoView ref call that threw. Caught in the scenario, so the screen stays up and
+  // the flow can assert on it instead of on a red screen.
+  | {
+      type: 'fullscreenCallFailed';
+      call: 'enterFullscreen' | 'exitFullscreen';
+      message: string;
+    }
   // player.status read synchronously in the setup callback, before any load starts.
   | { type: 'initialStatus'; status: VideoPlayerStatus }
   // player.status read after replaceSourceAsync(null) resolved and native teardown ran.
@@ -236,6 +249,18 @@ function apply(event: PlayerEvent) {
       if (state.replaceRequested) mark('evt-ended-after-replace');
       if (state.endCount >= LOOP_VERIFIED_END_COUNT) mark('evt-loop-verified');
       append(`onEnded (#${state.endCount})`);
+      return;
+
+    case 'onFullscreenChange':
+      mark(
+        event.fullscreen ? 'evt-fullscreen-entered' : 'evt-fullscreen-exited'
+      );
+      append(`fullscreen:${event.fullscreen}`);
+      return;
+
+    case 'fullscreenCallFailed':
+      mark('evt-fullscreen-call-failed');
+      append(`${event.call}() threw: ${event.message}`);
       return;
 
     case 'onError':

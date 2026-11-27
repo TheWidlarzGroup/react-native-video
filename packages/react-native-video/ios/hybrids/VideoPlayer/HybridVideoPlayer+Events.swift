@@ -19,7 +19,9 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
 
     if loop {
       currentTime = 0
-      try? play()
+      if player.rate == 0 {
+        try? play()
+      }
     }
   }
 
@@ -33,6 +35,13 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
     // intent, so a video paused inside PiP isn't auto-resumed on return.
     if rate == 0, reason == .setRateCalled {
       wasPlayingInBackground = false
+      wasInterruptedWhilePlaying = false
+    }
+    if rate == 0, reason == .audioSessionInterrupted {
+      wasInterruptedWhilePlaying = true
+    }
+    if rate != 0 {
+      wasInterruptedWhilePlaying = false
     }
   }
 
@@ -112,7 +121,9 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
     // Keep the audio session in sync with playback: starting/stopping changes whether we hold
     // the session and the mix mode (mix-with-others vs interrupt), which is otherwise only
     // recomputed on prop/lifecycle changes — not on play/pause.
-    VideoManager.shared.requestAudioSessionUpdate()
+    if status != .paused {
+      VideoManager.shared.requestAudioSessionUpdate()
+    }
   }
 
   func onPlayerStatusChanged(status: AVPlayer.Status) {
@@ -145,6 +156,8 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
 
     case .readyToPlay:
       guard let playerItem else { return }
+
+      playerItem.sideloadedTextTracks?.apply(to: playerItem)
 
       let height = playerItem.presentationSize.height
       let width = playerItem.presentationSize.width
@@ -183,6 +196,10 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
     _eventEmitter?.onTextTrackDataChanged(texts.map { $0.string })
   }
 
+  func onMediaSelectionChanged() {
+    emitSelectedTextTrackIfChanged()
+  }
+
   func onTimedMetadataChanged(timedMetadata: [AVMetadataItem]) {
     var metadata: [TimedMetadataObject] = []
     for item in timedMetadata {
@@ -209,6 +226,8 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
   }
 
   func onPlayerItemChange(player _: AVPlayer, playerItem: AVPlayerItem?) {
+    // The new item starts with its own selection.
+    emitSelectedTextTrackIfChanged()
     guard showNotificationControls, let playerItem else { return }
     DispatchQueue.main.async {
       NowPlayingInfoCenterManager.shared.updateStaticInfo(ifCurrentItem: playerItem)

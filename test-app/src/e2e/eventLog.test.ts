@@ -600,3 +600,26 @@ describe('video track markers', () => {
     expect(markers()).toEqual([]);
   });
 });
+
+describe('fullscreen', () => {
+  test('onFullscreenChange marks entered and exited', () => {
+    feed(
+      { type: 'onFullscreenChange', fullscreen: true },
+      { type: 'onFullscreenChange', fullscreen: false }
+    );
+    expect(markers()).toEqual([
+      'evt-fullscreen-entered',
+      'evt-fullscreen-exited',
+    ]);
+  });
+
+  test('a ref call that threw marks evt-fullscreen-call-failed and logs the message', () => {
+    feed({
+      type: 'fullscreenCallFailed',
+      call: 'exitFullscreen',
+      message: 'boom',
+    });
+    expect(markers()).toEqual(['evt-fullscreen-call-failed']);
+    expect(lines()).toEqual(['exitFullscreen() threw: boom']);
+  });
+});

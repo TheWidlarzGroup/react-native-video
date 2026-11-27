@@ -2,6 +2,48 @@ import AVFoundation
 import ObjectiveC
 
 private var HLSSubtitleInjectorAssociatedKey: UInt8 = 0
+private var SideloadedTextTracksAssociatedKey: UInt8 = 0
+
+/// External subtitles added to a composition (non-HLS sources). A composition has no legible
+/// media selection group, so these are listed and switched through the item's tracks.
+final class SideloadedTextTracks {
+  struct Track {
+    let trackID: CMPersistentTrackID
+    let label: String
+    let language: String
+  }
+
+  let tracks: [Track]
+  var selectedIndex: Int?
+
+  init(tracks: [Track]) {
+    self.tracks = tracks
+    self.selectedIndex = tracks.isEmpty ? nil : 0
+  }
+
+  func apply(to item: AVPlayerItem) {
+    for (index, track) in tracks.enumerated() {
+      item.tracks.first { $0.assetTrack?.trackID == track.trackID }?.isEnabled =
+        index == selectedIndex
+    }
+  }
+}
+
+extension AVPlayerItem {
+  var sideloadedTextTracks: SideloadedTextTracks? {
+    get {
+      objc_getAssociatedObject(self, &SideloadedTextTracksAssociatedKey) as? SideloadedTextTracks
+    }
+    set {
+      objc_setAssociatedObject(
+        self,
+        &SideloadedTextTracksAssociatedKey,
+        newValue,
+        .OBJC_ASSOCIATION_RETAIN_NONATOMIC
+      )
+    }
+  }
+}
 
 enum ExternalSubtitlesUtils {
   static func isSubtitleTypeSupported(subtitle: NativeExternalSubtitle) -> Bool {
@@ -56,6 +98,8 @@ enum ExternalSubtitlesUtils {
       }
     }
 
+    var sideloaded: [SideloadedTextTracks.Track] = []
+
     for (subtitle, subtitleAsset) in subtitles {
       let track: AVAssetTrack? = try await subtitleAsset.loadTracks(withMediaType: .text).first
 
@@ -77,13 +121,24 @@ enum ExternalSubtitlesUtils {
 
         compSubtitleTrack.languageCode = subtitle.language
         compSubtitleTrack.isEnabled = true
+        sideloaded.append(
+          .init(
+            trackID: compSubtitleTrack.trackID,
+            label: subtitle.label,
+            language: subtitle.language
+          )
+        )
       } catch {
         print("[ReactNativeVideo] Error inserting subtitle track: \(error.localizedDescription)")
         continue
       }
     }
 
-    return await AVPlayerItem(asset: composition)
+    let playerItem = await AVPlayerItem(asset: composition)
+    if !sideloaded.isEmpty {
+      playerItem.sideloadedTextTracks = SideloadedTextTracks(tracks: sideloaded)
+    }
+    return playerItem
   }
 
   static func modifyStreamManifestWithExternalSubtitles(

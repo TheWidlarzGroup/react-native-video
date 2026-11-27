@@ -262,7 +262,12 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     }
   }
 
-  var loop: Bool = false
+  var loop: Bool = false {
+    didSet {
+      // A player that stops at the end cannot be started again from the background
+      player.actionAtItemEnd = loop ? .none : .pause
+    }
+  }
 
   var mixAudioMode: MixAudioMode = .auto {
     didSet {
@@ -292,12 +297,16 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
 
   var wasAutoPaused: Bool = false
 
+  var wasInterruptedWhilePlaying: Bool = false
+
   /// Whether the player was playing when backgrounded — used to resume it on
   /// return if the system paused background playback.
   var wasPlayingInBackground: Bool = false
 
   // Text track selection state
   private var selectedExternalTrackIndex: Int? = nil
+  // The text track last reported by onTrackChange, nil for none.
+  private var emittedTextTrackId: String? = nil
 
   // MARK: - Video track (quality) selection state
   //
@@ -685,6 +694,20 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
 
     var tracks: [TextTrack] = []
 
+    if let sideloaded = currentItem.sideloadedTextTracks {
+      for (index, track) in sideloaded.tracks.enumerated() {
+        tracks.append(
+          TextTrack(
+            id: "external-\(index)",
+            label: track.label,
+            language: track.language,
+            selected: index == sideloaded.selectedIndex
+          )
+        )
+      }
+      return tracks
+    }
+
     if let mediaSelection = currentItem.asset.mediaSelectionGroup(
       forMediaCharacteristic: .legible
     ) {
@@ -728,6 +751,11 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       throw PlayerError.notInitialized.error()
     }
 
+    if let sideloaded = currentItem.sideloadedTextTracks {
+      selectSideloadedTextTrack(textTrack, in: sideloaded, of: currentItem)
+      return
+    }
+
     guard
       let mediaSelection = currentItem.asset.mediaSelectionGroup(
         forMediaCharacteristic: .legible
@@ -740,7 +768,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     guard let textTrack = textTrack else {
       currentItem.select(nil, in: mediaSelection)
       selectedExternalTrackIndex = nil
-      _eventEmitter?.onTrackChange(nil)
+      emitSelectedTextTrackIfChanged()
       return
     }
 
@@ -748,14 +776,14 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     case .first(_):
       currentItem.select(nil, in: mediaSelection)
       selectedExternalTrackIndex = nil
-      _eventEmitter?.onTrackChange(nil)
+      emitSelectedTextTrackIfChanged()
       return
     case .second(let textTrack):
       // If textTrack id is empty, deselect any selected track
       if textTrack.id.isEmpty {
         currentItem.select(nil, in: mediaSelection)
         selectedExternalTrackIndex = nil
-        _eventEmitter?.onTrackChange(nil)
+        emitSelectedTextTrackIfChanged()
         return
       }
 
@@ -767,7 +795,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
           let option = mediaSelection.options[trackIndex]
           currentItem.select(option, in: mediaSelection)
           selectedExternalTrackIndex = trackIndex
-          _eventEmitter?.onTrackChange(.second(textTrack))
+          emitSelectedTextTrackIfChanged()
         }
       } else if textTrack.id.hasPrefix("builtin-") {
         for option in mediaSelection.options {
@@ -776,7 +804,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
           if optionId == textTrack.id {
             currentItem.select(option, in: mediaSelection)
             selectedExternalTrackIndex = nil
-            _eventEmitter?.onTrackChange(.second(textTrack))
+            emitSelectedTextTrackIfChanged()
             return
           }
         }
@@ -784,9 +812,53 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     }
   }
 
+  // Reports a selection change once, made here or in the native controls (they post it as well).
+  func emitSelectedTextTrackIfChanged() {
+    let track = selectedTrack
+    guard track?.id != emittedTextTrackId else { return }
+    emittedTextTrackId = track?.id
+    _eventEmitter?.onTrackChange(track.map { .second($0) })
+  }
+
+  private func selectSideloadedTextTrack(
+    _ textTrack: Variant_NullType_TextTrack?,
+    in sideloaded: SideloadedTextTracks,
+    of item: AVPlayerItem
+  ) {
+    if case .second(let track) = textTrack, !track.id.isEmpty {
+      guard
+        track.id.hasPrefix("external-"),
+        let index = Int(track.id.dropFirst("external-".count)),
+        sideloaded.tracks.indices.contains(index)
+      else {
+        return
+      }
+      sideloaded.selectedIndex = index
+    } else {
+      sideloaded.selectedIndex = nil
+    }
+
+    selectedExternalTrackIndex = sideloaded.selectedIndex
+    sideloaded.apply(to: item)
+    emitSelectedTextTrackIfChanged()
+  }
+
   var selectedTrack: TextTrack? {
     guard let currentItem = player.currentItem else {
       return nil
+    }
+
+    if let sideloaded = currentItem.sideloadedTextTracks {
+      guard let index = sideloaded.selectedIndex else {
+        return nil
+      }
+      let track = sideloaded.tracks[index]
+      return TextTrack(
+        id: "external-\(index)",
+        label: track.label,
+        language: track.language,
+        selected: true
+      )
     }
 
     guard
@@ -809,9 +881,15 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       return nil
     }
 
+    // Same rule as getAvailableTextTracks(), so the id matches the one in the list
+    let name =
+      selectedOption.commonMetadata.first(where: { $0.commonKey == .commonKeyTitle })?
+      .stringValue
+      ?? selectedOption.displayName
+
     let isExternal =
       source.config.externalSubtitles?.contains { subtitle in
-        selectedOption.displayName.contains(subtitle.label)
+        name.contains(subtitle.label)
       } ?? false
 
     let trackId =
