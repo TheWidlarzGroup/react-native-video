@@ -166,19 +166,23 @@ final class VideoCache {
         at: directory, includingPropertiesForKeys: keys)
     else { return }
 
-    var entries: [(url: URL, size: Int64, date: Date)] = files.compactMap { file in
-      guard let values = try? file.resourceValues(forKeys: Set(keys)) else { return nil }
-      return (file, Int64(values.fileSize ?? 0), values.contentModificationDate ?? .distantPast)
+    // A partial file and its index belong together: they are counted and deleted as one.
+    var entries: [String: (urls: [URL], size: Int64, date: Date)] = [:]
+    for file in files {
+      guard let values = try? file.resourceValues(forKeys: Set(keys)) else { continue }
+      let key = file.deletingPathExtension().lastPathComponent
+      var entry = entries[key] ?? ([], 0, .distantPast)
+      entry.urls.append(file)
+      entry.size += Int64(values.fileSize ?? 0)
+      entry.date = max(entry.date, values.contentModificationDate ?? .distantPast)
+      entries[key] = entry
     }
-    var total = entries.reduce(0) { $0 + $1.size }
-    entries.sort { $0.date < $1.date }
+    var total = entries.values.reduce(0) { $0 + $1.size }
 
-    for entry in entries where total > Self.sizeLimit {
-      let key = entry.url.deletingPathExtension().lastPathComponent
-      if inUse.contains(key) { continue }
-      if (try? FileManager.default.removeItem(at: entry.url)) != nil {
-        total -= entry.size
-      }
+    for (key, entry) in entries.sorted(by: { $0.value.date < $1.value.date })
+    where total > Self.sizeLimit && !inUse.contains(key) {
+      entry.urls.forEach { try? FileManager.default.removeItem(at: $0) }
+      total -= entry.size
     }
   }
 }
@@ -314,6 +318,7 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
     session?.invalidateAndCancel()
     try? fileHandle.close()
     cache.release(key: key)
+    cache.trimSoon()
   }
 
   // MARK: - AVAssetResourceLoaderDelegate
@@ -619,6 +624,8 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
       if unsavedBytes >= Self.saveInterval {
         unsavedBytes = 0
         saveIndex()
+        // The file that is growing cannot be deleted, older ones can.
+        cache.trimSoon()
       }
     } catch {
       // The disk is full or the file is gone: keep playing, stop caching this stretch.
