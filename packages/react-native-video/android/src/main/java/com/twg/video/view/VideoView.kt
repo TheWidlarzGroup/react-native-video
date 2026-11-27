@@ -203,7 +203,19 @@ class VideoView @JvmOverloads constructor(
     // https://github.com/facebook/react-native/blob/d19afc73f5048f81656d0b4424232ce6d69a6368/ReactAndroid/src/main/java/com/facebook/react/views/toolbar/ReactToolbar.java#L166
     // This fix issue where exoplayer views where wrong sizes
     // Without it, controls, PictureInPicture, content fills, etc. don't work
-    post(layoutRunnable)
+    //
+    // The pass goes to the front of the main queue and replaces a pending one. PlayerView asks
+    // for it when the video size arrives, and a plain post() ran it behind the messages already
+    // queued (first frame rendered, state changes), so the first frames were drawn with the old
+    // bounds: stretched over the whole view before snapping to the video's aspect ratio (#4925).
+    removeCallbacks(layoutRunnable)
+    val mainHandler = handler
+    if (mainHandler != null) {
+      mainHandler.postAtFrontOfQueue(layoutRunnable)
+    } else {
+      // Not attached yet: View.post keeps the runnable until the view gets a handler.
+      post(layoutRunnable)
+    }
   }
 
   @SuppressLint("PrivateResource")
