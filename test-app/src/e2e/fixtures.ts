@@ -13,6 +13,10 @@ export const FIXTURE_BASE = Platform.select({
   default: 'http://localhost:8090',
 });
 
+// mp4-cache: a token per app launch, so the fixture server can cut off exactly this source
+// (`/__go-offline?token=`), and a fresh launch (cleared app data, empty cache) starts online.
+export const CACHE_TOKEN = Math.random().toString(36).slice(2);
+
 // Every scenario starts its own load after attaching listeners (see ScenarioScreen).
 const fixture = (path: string): VideoConfig => ({
   uri: `${FIXTURE_BASE}/${path}`,
@@ -23,6 +27,10 @@ export const SCENARIO_SOURCES: Record<ScenarioName, VideoConfig> = {
   'mp4': fixture('short.mp4'), // 8 s, testsrc + sine audio
   'mp4-preload': fixture('short.mp4'),
   'mp4-release-mid-playback': fixture('short.mp4'),
+  'mp4-cache': {
+    ...fixture(`short.mp4?token=${CACHE_TOKEN}`),
+    shouldCache: true,
+  },
   'mp4-fullscreen-rotate': fixture('short.mp4'),
   'hls': fixture('hls/index.m3u8'), // ~8 s VOD, 2 s segments
   'error-404': fixture('does-not-exist.mp4'),

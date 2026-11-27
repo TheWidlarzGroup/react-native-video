@@ -17,7 +17,7 @@ import {
 import { eventLog, PROGRESS_MARKER_SECONDS } from './eventLog';
 import { EventLogPanel } from './EventLogPanel';
 import type { ScenarioName } from './deepLink';
-import { SCENARIO_SOURCES } from './fixtures';
+import { CACHE_TOKEN, FIXTURE_BASE, SCENARIO_SOURCES } from './fixtures';
 
 /**
  * replaceSourceAsync() is awaited here and, for a new source, followed by play() from
@@ -27,12 +27,18 @@ import { SCENARIO_SOURCES } from './fixtures';
  * second `then` argument, so a failure of the play() that follows is never logged as the
  * replacement rejecting.
  */
-function replaceSource(player: VideoPlayer, target: 'hls' | 'null') {
+function replaceSource(player: VideoPlayer, target: 'hls' | 'null' | 'cache') {
   const report = (phase: 'requested' | 'resolved' | 'rejected') =>
     eventLog.handle({ type: 'replaceSource', phase, source: target });
   report('requested');
   player
-    .replaceSourceAsync(target === 'null' ? null : SCENARIO_SOURCES.hls)
+    .replaceSourceAsync(
+      target === 'null'
+        ? null
+        : target === 'cache'
+          ? SCENARIO_SOURCES['mp4-cache']
+          : SCENARIO_SOURCES.hls
+    )
     .then(
       () => {
         report('resolved');
@@ -217,6 +223,20 @@ const CONTROLS: Control[] = [
     id: 'btn-replace-hls',
     title: 'replace hls',
     press: (p) => replaceSource(p, 'hls'),
+  },
+  {
+    // mp4-cache: cut the source off at the fixture server, then load it again. It can only
+    // play from the disk cache now.
+    id: 'btn-cache-replay',
+    title: 'replay offline',
+    press: (p) => {
+      fetch(`${FIXTURE_BASE}/__go-offline?token=${CACHE_TOKEN}`)
+        .then((res) => {
+          eventLog.log(`go-offline: ${res.status}`);
+          replaceSource(p, 'cache');
+        })
+        .catch((error) => eventLog.log(`go-offline failed: ${String(error)}`));
+    },
   },
 ];
 

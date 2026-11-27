@@ -92,7 +92,8 @@ export type PlayerEvent =
   | {
       type: 'replaceSource';
       phase: 'requested' | 'resolved' | 'rejected';
-      source: 'hls' | 'null';
+      // 'cache': the mp4-cache source again, with the fixture server cut off.
+      source: 'hls' | 'null' | 'cache';
     }
   | {
       type: 'onVideoTrackChange';
