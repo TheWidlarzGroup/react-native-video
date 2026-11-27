@@ -49,6 +49,7 @@ export const MARKER_IDS = [
   'evt-duration-fixture', // onLoad duration within FIXTURE_DURATION_SECONDS +- tolerance
   'evt-replace-resolved', // replaceSourceAsync() resolved
   'evt-replace-rejected', // replaceSourceAsync() rejected
+  'evt-replacement-load-started', // onLoadStart after replaceSourceAsync(source) was requested
   'evt-replacement-loaded', // onLoad after replaceSourceAsync(source) was requested
   'evt-reloaded-from-start', // first onProgress after that onLoad is < RELOAD_START_SECONDS
   'evt-ended-after-replace', // onEnd after replaceSourceAsync(source) was requested
@@ -64,6 +65,7 @@ export type MarkerId = (typeof MARKER_IDS)[number];
 export type LogEntry = { readonly id: number; readonly text: string };
 
 export type PlayerEvent =
+  | { type: 'onLoadStart' }
   | { type: 'onLoad'; duration: number }
   | { type: 'onProgress'; currentTime: number }
   | { type: 'onEnd' }
@@ -192,6 +194,10 @@ function append(line: string) {
 
 function apply(event: PlayerEvent) {
   switch (event.type) {
+    case 'onLoadStart':
+      if (state.replaceRequested) mark('evt-replacement-load-started');
+      append('onLoadStart');
+      return;
     case 'onLoad':
       mark('evt-onLoad');
       state.loadCount += 1;

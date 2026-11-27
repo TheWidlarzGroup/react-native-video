@@ -222,6 +222,9 @@ const CONTROLS: Control[] = [
 
 // Marker derivation lives in eventLog.handle(); this only maps payloads.
 function logPlayerEvents(player: VideoPlayer) {
+  player.addEventListener('onLoadStart', () =>
+    eventLog.handle({ type: 'onLoadStart' })
+  );
   player.addEventListener('onLoad', ({ duration }) =>
     eventLog.handle({ type: 'onLoad', duration })
   );

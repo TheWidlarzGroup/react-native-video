@@ -450,6 +450,16 @@ describe('lifecycle (ported from #4743)', () => {
     expect(markers()).toContain('evt-duration-fixture');
   });
 
+  test('an onLoadStart counts as the replacement starting only after a replacement was requested', () => {
+    // The first source's own onLoadStart is not a replacement.
+    feed({ type: 'onLoadStart' });
+    expect(markers()).not.toContain('evt-replacement-load-started');
+    replaceRequested();
+    feed({ type: 'onLoadStart' });
+    expect(markers()).toContain('evt-replacement-load-started');
+    expect(lines()).toContain('onLoadStart');
+  });
+
   test('an onLoad counts as the replacement only after a replacement was requested', () => {
     // Android re-emits onLoad after a re-buffer or a replay: not a replacement.
     feed({ type: 'onLoad', duration: 8 }, { type: 'onLoad', duration: 8 });
