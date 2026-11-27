@@ -20,6 +20,10 @@ namespace margelo::nitro::video { struct AdInfo; }
 namespace margelo::nitro::video { struct AdProgressInfo; }
 // Forward declaration of `AdsResolvedEvent` to properly resolve imports.
 namespace margelo::nitro::video { struct AdsResolvedEvent; }
+// Forward declaration of `AudioTrackChangeData` to properly resolve imports.
+namespace margelo::nitro::video { struct AudioTrackChangeData; }
+// Forward declaration of `AudioTrack` to properly resolve imports.
+namespace margelo::nitro::video { struct AudioTrack; }
 // Forward declaration of `BandwidthData` to properly resolve imports.
 namespace margelo::nitro::video { struct BandwidthData; }
 // Forward declaration of `BufferConfig` to properly resolve imports.
@@ -104,6 +108,8 @@ namespace margelo::nitro::video { struct onVolumeChangeData; }
 #include "AdInfo.hpp"
 #include "AdProgressInfo.hpp"
 #include "AdsResolvedEvent.hpp"
+#include "AudioTrack.hpp"
+#include "AudioTrackChangeData.hpp"
 #include "BandwidthData.hpp"
 #include "BufferConfig.hpp"
 #include "CustomVideoMetadata.hpp"

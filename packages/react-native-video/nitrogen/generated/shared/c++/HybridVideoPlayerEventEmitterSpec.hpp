@@ -33,6 +33,8 @@ namespace margelo::nitro::video { struct TimedMetadata; }
 namespace margelo::nitro::video { struct TextTrack; }
 // Forward declaration of `VideoTrackChangeData` to properly resolve imports.
 namespace margelo::nitro::video { struct VideoTrackChangeData; }
+// Forward declaration of `AudioTrackChangeData` to properly resolve imports.
+namespace margelo::nitro::video { struct AudioTrackChangeData; }
 // Forward declaration of `onVolumeChangeData` to properly resolve imports.
 namespace margelo::nitro::video { struct onVolumeChangeData; }
 // Forward declaration of `AdsResolvedEvent` to properly resolve imports.
@@ -64,6 +66,7 @@ namespace margelo::nitro::video { enum class VideoAdState; }
 #include <variant>
 #include <optional>
 #include "VideoTrackChangeData.hpp"
+#include "AudioTrackChangeData.hpp"
 #include "onVolumeChangeData.hpp"
 #include "AdsResolvedEvent.hpp"
 #include "AdBreakEvent.hpp"
@@ -123,6 +126,7 @@ namespace margelo::nitro::video {
       virtual ListenerSubscription addOnTextTrackDataChangedListener(const std::function<void(const std::vector<std::string>& /* data */)>& listener) = 0;
       virtual ListenerSubscription addOnTrackChangeListener(const std::function<void(const std::optional<std::variant<nitro::NullType, TextTrack>>& /* track */)>& listener) = 0;
       virtual ListenerSubscription addOnVideoTrackChangeListener(const std::function<void(const VideoTrackChangeData& /* data */)>& listener) = 0;
+      virtual ListenerSubscription addOnAudioTrackChangeListener(const std::function<void(const AudioTrackChangeData& /* data */)>& listener) = 0;
       virtual ListenerSubscription addOnVolumeChangeListener(const std::function<void(const onVolumeChangeData& /* data */)>& listener) = 0;
       virtual ListenerSubscription addOnAdsResolvedListener(const std::function<void(const AdsResolvedEvent& /* data */)>& listener) = 0;
       virtual ListenerSubscription addOnAdBreakStartListener(const std::function<void(const AdBreakEvent& /* data */)>& listener) = 0;

@@ -30,13 +30,12 @@ public protocol HybridVideoPlayerSpec_protocol: HybridObject {
   var adState: VideoAdState { get }
   var selectedTrack: TextTrack? { get }
   var selectedVideoTrackId: String? { get }
+  var selectedAudioTrackId: String? { get }
 
   // Methods
   func replaceSourceAsync(source: Variant_NullType__any_HybridVideoPlayerSourceSpec_?) throws -> Promise<Void>
   func getAvailableTextTracks() throws -> [TextTrack]
   func selectTextTrack(textTrack: Variant_NullType_TextTrack?) throws -> Void
-  func getAvailableVideoTracks() throws -> [VideoTrack]
-  func selectVideoTrack(trackId: String?) throws -> Void
   func release() throws -> Void
   func initialize() throws -> Promise<Void>
   func preload() throws -> Promise<Void>
@@ -47,6 +46,10 @@ public protocol HybridVideoPlayerSpec_protocol: HybridObject {
   func skipAd() throws -> Void
   func seekBy(time: Double) throws -> Void
   func seekTo(time: Double) throws -> Void
+  func getAvailableVideoTracks() throws -> [VideoTrack]
+  func selectVideoTrack(trackId: String?) throws -> Void
+  func getAvailableAudioTracks() throws -> [AudioTrack]
+  func selectAudioTrack(trackId: String?) throws -> Void
 }
 
 public extension HybridVideoPlayerSpec_protocol {

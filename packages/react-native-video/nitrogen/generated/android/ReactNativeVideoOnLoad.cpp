@@ -32,6 +32,7 @@
 #include "JFunc_void_std__vector_std__string_.hpp"
 #include "JFunc_void_std__optional_std__variant_nitro__NullType__TextTrack__.hpp"
 #include "JFunc_void_VideoTrackChangeData.hpp"
+#include "JFunc_void_AudioTrackChangeData.hpp"
 #include "JFunc_void_onVolumeChangeData.hpp"
 #include "JFunc_void_AdsResolvedEvent.hpp"
 #include "JFunc_void_AdBreakEvent.hpp"
@@ -101,6 +102,7 @@ void registerAllNatives() {
   margelo::nitro::video::JFunc_void_std__vector_std__string__cxx::registerNatives();
   margelo::nitro::video::JFunc_void_std__optional_std__variant_nitro__NullType__TextTrack___cxx::registerNatives();
   margelo::nitro::video::JFunc_void_VideoTrackChangeData_cxx::registerNatives();
+  margelo::nitro::video::JFunc_void_AudioTrackChangeData_cxx::registerNatives();
   margelo::nitro::video::JFunc_void_onVolumeChangeData_cxx::registerNatives();
   margelo::nitro::video::JFunc_void_AdsResolvedEvent_cxx::registerNatives();
   margelo::nitro::video::JFunc_void_AdBreakEvent_cxx::registerNatives();

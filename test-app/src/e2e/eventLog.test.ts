@@ -601,6 +601,49 @@ describe('video track markers', () => {
   });
 });
 
+describe('audio track markers', () => {
+  const en = { language: 'en' };
+  const es = { language: 'es' };
+
+  test('the alternate track is marked once it is selected out of two, then the default restore', () => {
+    feed({
+      type: 'onAudioTrackChange',
+      tracks: [
+        { ...en, selected: false },
+        { ...es, selected: true },
+      ],
+    });
+    expect(markers()).toEqual(['evt-audio-alt-selected']);
+    feed({
+      type: 'onAudioTrackChange',
+      tracks: [
+        { ...en, selected: true },
+        { ...es, selected: false },
+      ],
+    });
+    expect(markers()).toEqual([
+      'evt-audio-alt-selected',
+      'evt-audio-default-restored',
+    ]);
+  });
+
+  test('the default track alone never sets either marker (not a real restore)', () => {
+    feed({
+      type: 'onAudioTrackChange',
+      tracks: [
+        { ...en, selected: true },
+        { ...es, selected: false },
+      ],
+    });
+    expect(markers()).toEqual([]);
+  });
+
+  test('a single listed track does not count as the alternate being selected', () => {
+    feed({ type: 'onAudioTrackChange', tracks: [{ ...es, selected: true }] });
+    expect(markers()).toEqual([]);
+  });
+});
+
 describe('fullscreen', () => {
   test('onFullscreenChange marks entered and exited', () => {
     feed(

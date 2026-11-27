@@ -1,4 +1,5 @@
 import type {
+  AudioTrackChangeData,
   BandwidthData,
   onLoadData,
   onLoadStartData,
@@ -78,6 +79,9 @@ export interface VideoPlayerEventEmitterBase {
   ): ListenerSubscription;
   addOnVideoTrackChangeListener(
     listener: (data: VideoTrackChangeData) => void
+  ): ListenerSubscription;
+  addOnAudioTrackChangeListener(
+    listener: (data: AudioTrackChangeData) => void
   ): ListenerSubscription;
   addOnVolumeChangeListener(
     listener: (data: onVolumeChangeData) => void
