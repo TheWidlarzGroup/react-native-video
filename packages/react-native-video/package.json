@@ -46,7 +46,7 @@
     "!**/.*"
   ],
   "scripts": {
-    "typecheck": "tsc && bun run typecheck:test",
+    "typecheck": "tsc && bun run typecheck:test && bun run typecheck:web",
     "typecheck:test": "tsc -p tsconfig.test.json --noEmit",
     "test": "bun test __tests__",
     "typecheck:web": "tsc -p tsconfig.web.json",
