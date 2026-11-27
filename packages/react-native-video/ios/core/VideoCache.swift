@@ -57,7 +57,7 @@ final class VideoCache {
   }
 
   func asset(for url: URL, headers: [String: String]?) -> AVURLAsset {
-    let key = Self.key(for: url)
+    let key = Self.key(for: url, headers: headers ?? [:])
     // The cached file is played by its name, so a uri without a media extension (".php",
     // none) is stored as MP4.
     let pathExtension = url.pathExtension.lowercased()
@@ -85,7 +85,6 @@ final class VideoCache {
       return asset
     }
 
-    // The first asset's headers are used for the whole download.
     let shared =
       loaders[key]?.loader
       ?? CachingResourceLoader(
@@ -129,8 +128,12 @@ final class VideoCache {
     return components.url ?? url
   }
 
-  private static func key(for url: URL) -> String {
-    SHA256.hash(data: Data(url.absoluteString.utf8)).map { String(format: "%02x", $0) }.joined()
+  /// The headers are part of the key: a file fetched with one Authorization header must not
+  /// be played for a source with another one. A refreshed token therefore starts a new file.
+  private static func key(for url: URL, headers: [String: String]) -> String {
+    let headerLines = headers.map { "\($0.key.lowercased()):\($0.value)" }.sorted()
+    let text = ([url.absoluteString] + headerLines).joined(separator: "\n")
+    return SHA256.hash(data: Data(text.utf8)).map { String(format: "%02x", $0) }.joined()
   }
 
   fileprivate func retain(key: String) {
