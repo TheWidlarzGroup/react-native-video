@@ -112,7 +112,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   private var lastVideoTrackChangeSignature: String? = null
 
   private companion object {
-    const val PROGRESS_UPDATE_INTERVAL_MS = 250L
+    const val DEFAULT_PROGRESS_UPDATE_INTERVAL_MS = 250L
     private const val TAG = "HybridVideoPlayer"
     private const val DEFAULT_MIN_BUFFER_DURATION_MS = 5000
     private const val DEFAULT_MAX_BUFFER_DURATION_MS = 10000
@@ -221,6 +221,17 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
     }
 
   override var playWhenInactive: Boolean = false
+
+  // Read on the main thread by the progress runnable, written from JS.
+  @Volatile
+  private var progressUpdateIntervalMs: Long = DEFAULT_PROGRESS_UPDATE_INTERVAL_MS
+
+  override var progressUpdateInterval: Double
+    get() = progressUpdateIntervalMs.toDouble()
+    set(value) {
+      if (value.isNaN() || value.isInfinite() || value < 1.0) return
+      progressUpdateIntervalMs = value.toLong()
+    }
 
   override var isPlaying: Boolean by mainThreadProperty(
     get = { player.isPlaying == true }
@@ -489,7 +500,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
               bufferDuration = playableDurationFromNow
             )
           )
-          progressHandler.postDelayed(this, PROGRESS_UPDATE_INTERVAL_MS)
+          progressHandler.postDelayed(this, progressUpdateIntervalMs)
         }
       }
     }

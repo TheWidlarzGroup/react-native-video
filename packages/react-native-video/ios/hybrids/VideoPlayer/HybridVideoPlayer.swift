@@ -289,6 +289,17 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
 
   var playWhenInactive: Bool = false
 
+  // iOS default: 500 ms, as before this option existed. Android uses 250 ms.
+  var progressUpdateInterval: Double = VideoPlayerObserver.defaultProgressUpdateInterval {
+    didSet {
+      guard progressUpdateInterval.isFinite, progressUpdateInterval > 0 else {
+        progressUpdateInterval = oldValue
+        return
+      }
+      playerObserver?.progressUpdateInterval = progressUpdateInterval
+    }
+  }
+
   var disableAudioSessionManagement: Bool = false {
     didSet {
       VideoManager.shared.requestAudioSessionUpdate()

@@ -165,6 +165,12 @@ namespace margelo::nitro::video {
     inline void setPlayWhenInactive(bool playWhenInactive) noexcept override {
       _swiftPart.setPlayWhenInactive(std::forward<decltype(playWhenInactive)>(playWhenInactive));
     }
+    inline double getProgressUpdateInterval() noexcept override {
+      return _swiftPart.getProgressUpdateInterval();
+    }
+    inline void setProgressUpdateInterval(double progressUpdateInterval) noexcept override {
+      _swiftPart.setProgressUpdateInterval(std::forward<decltype(progressUpdateInterval)>(progressUpdateInterval));
+    }
     inline bool getDisableAudioSessionManagement() noexcept override {
       return _swiftPart.getDisableAudioSessionManagement();
     }

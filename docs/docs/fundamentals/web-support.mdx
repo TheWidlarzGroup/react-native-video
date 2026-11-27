@@ -91,6 +91,17 @@ Web support uses the same API as native - `useVideoPlayer` for creating a player
 
 See the [WebVideoPlayer](../api-reference/interfaces/WebVideoPlayer) API reference for web-specific methods.
 
+### Access to the `<video>` element
+
+`nativeHtmlVideoElement` returns the underlying `HTMLVideoElement` (v6 `nativeHtmlVideoRef.current`). It exists as soon as the player is created.
+
+```tsx
+const player = useVideoPlayer(source) as WebVideoPlayer;
+player.nativeHtmlVideoElement.setAttribute('crossorigin', 'anonymous');
+```
+
+Prefer the player's own API for playback state: changes made on the element bypass the player.
+
 ## Known limitations
 
 - `mixAudioMode`, `ignoreSilentSwitchMode`, `playInBackground`, `playWhenInactive` are no-ops on web

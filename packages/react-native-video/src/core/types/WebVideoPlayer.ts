@@ -22,4 +22,12 @@ export interface WebVideoPlayer extends VideoPlayerBase {
   getAvailableAudioTracks(): AudioTrack[];
   selectAudioTrack(track: AudioTrack | null): void;
   readonly selectedAudioTrack?: AudioTrack;
+
+  /**
+   * The underlying `<video>` element (v6 `nativeHtmlVideoRef.current`).
+   * Use it for browser APIs the player does not wrap. Changing playback
+   * state through it bypasses the player, so prefer the player's own API
+   * where one exists.
+   */
+  readonly nativeHtmlVideoElement: HTMLVideoElement;
 }
