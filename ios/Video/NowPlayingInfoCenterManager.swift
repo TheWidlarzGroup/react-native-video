@@ -9,7 +9,7 @@ class NowPlayingInfoCenterManager {
     private weak var currentPlayer: AVPlayer?
     private var players = NSHashTable<AVPlayer>.weakObjects()
 
-    private var observers: [Int: NSKeyValueObservation] = [:]
+    private var observers: [ObjectIdentifier: NSKeyValueObservation] = [:]
     private var playbackObserver: Any?
 
     private var playTarget: Any?
@@ -47,11 +47,12 @@ class NowPlayingInfoCenterManager {
             receivingRemoveControlEvents = true
         }
 
-        if let oldObserver = observers[player.hashValue] {
+        let playerId = ObjectIdentifier(player)
+        if let oldObserver = observers[playerId] {
             oldObserver.invalidate()
         }
 
-        observers[player.hashValue] = observePlayers(player: player)
+        observers[playerId] = observePlayers(player: player)
         players.add(player)
 
         if currentPlayer == nil {
@@ -64,30 +65,33 @@ class NowPlayingInfoCenterManager {
             return
         }
 
-        if let observer = observers[player.hashValue] {
+        let playerId = ObjectIdentifier(player)
+        if let observer = observers[playerId] {
             observer.invalidate()
         }
 
-        observers.removeValue(forKey: player.hashValue)
+        observers.removeValue(forKey: playerId)
+        let wasCurrentPlayer = currentPlayer === player
+        if wasCurrentPlayer {
+            clearCurrentPlayer()
+        }
         players.remove(player)
 
-        if currentPlayer == player {
-            currentPlayer = nil
-            updateNowPlayingInfo()
-        }
-
-        if players.allObjects.isEmpty {
+        let remainingPlayers = players.allObjects
+        if remainingPlayers.isEmpty {
             cleanup()
+        } else if wasCurrentPlayer {
+            setCurrentPlayer(
+                player: remainingPlayers.first(where: { $0.rate != 0 }) ?? remainingPlayers[0]
+            )
         }
     }
 
     func cleanup() {
+        clearCurrentPlayer()
+        observers.values.forEach { $0.invalidate() }
         observers.removeAll()
         players.removeAllObjects()
-
-        if let playbackObserver {
-            currentPlayer?.removeTimeObserver(playbackObserver)
-        }
 
         invalidateCommandTargets()
 
@@ -100,10 +104,7 @@ class NowPlayingInfoCenterManager {
             return
         }
 
-        if let playbackObserver {
-            currentPlayer?.removeTimeObserver(playbackObserver)
-        }
-
+        clearCurrentPlayer()
         currentPlayer = player
         registerCommandTargets()
 
@@ -115,6 +116,14 @@ class NowPlayingInfoCenterManager {
                 self?.updateNowPlayingInfo()
             }
         )
+    }
+
+    private func clearCurrentPlayer() {
+        if let playbackObserver {
+            currentPlayer?.removeTimeObserver(playbackObserver)
+        }
+        playbackObserver = nil
+        currentPlayer = nil
     }
 
     private func registerCommandTargets() {
