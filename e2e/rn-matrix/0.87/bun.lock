@@ -127,7 +127,7 @@
       "name": "react-native-video",
       "version": "7.0.0-beta.11",
       "dependencies": {
-        "@videojs/react": "^10.0.0-beta.11",
+        "@videojs/react": "10.0.0-beta.11",
       },
       "devDependencies": {
         "@expo/config-plugins": "^10.0.2",

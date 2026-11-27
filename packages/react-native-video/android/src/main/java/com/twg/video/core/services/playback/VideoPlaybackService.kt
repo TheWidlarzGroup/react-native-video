@@ -5,6 +5,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
@@ -12,6 +13,7 @@ import android.util.Log
 import androidx.annotation.MainThread
 import androidx.annotation.OptIn
 import androidx.core.app.NotificationCompat
+import androidx.core.app.ServiceCompat
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
@@ -35,13 +37,23 @@ class VideoPlaybackService : MediaSessionService() {
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
     // A foreground start has a strict promotion deadline. Register-before-start means a valid
     // request already has a session; stale requests are promoted and removed in the same callback.
-    try {
-      if (!isForeground && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        startForeground(PLACEHOLDER_NOTIFICATION_ID, createPlaceholderNotification())
+    // Media3 moves the service out of the foreground on its own, so the system's state decides
+    // whether this start still needs a promotion, not a flag left from an earlier start.
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !isInForeground()) {
+      try {
+        ServiceCompat.startForeground(
+          this,
+          PLACEHOLDER_NOTIFICATION_ID,
+          createPlaceholderNotification(),
+          ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+        )
         isForeground = true
+      } catch (e: Exception) {
+        // Staying alive unpromoted would end in ForegroundServiceDidNotStartInTimeException.
+        Log.e(TAG, "Failed to start foreground service", e)
+        stopSelf(startId)
+        return START_NOT_STICKY
       }
-    } catch (_: Exception) {
-      Log.e(TAG, "Failed to start foreground service!")
     }
 
     if (mediaSessionsList.isEmpty()) {
@@ -93,6 +105,13 @@ class VideoPlaybackService : MediaSessionService() {
     cleanupService()
     super.onDestroy()
   }
+
+  private fun isInForeground(): Boolean =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+      foregroundServiceType != ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE
+    } else {
+      isForeground
+    }
 
   @MainThread
   private fun stopIfNoPlayers() {

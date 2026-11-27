@@ -41,11 +41,15 @@ class HybridVideoViewViewManager(nitroId: Int): HybridVideoViewViewManagerSpec()
   }
 
   override fun enterFullscreen() {
-    videoView.get()?.enterFullscreen()
+    Threading.runOnMainThread {
+      videoView.get()?.enterFullscreen()
+    }
   }
 
   override fun exitFullscreen() {
-    videoView.get()?.exitFullscreen()
+    Threading.runOnMainThread {
+      videoView.get()?.exitFullscreen()
+    }
   }
 
   override fun enterPictureInPicture() {

@@ -1,10 +1,17 @@
-import React from 'react';
-import { Button, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import {
+  Button,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 // v7 API only — never <Video>, never v6 props (see e2e/CONTEXT.md)
 import {
   useVideoPlayer,
   VideoView,
   type VideoPlayer,
+  type VideoViewRef,
 } from 'react-native-video';
 import { eventLog, PROGRESS_MARKER_SECONDS } from './eventLog';
 import { EventLogPanel } from './EventLogPanel';
@@ -93,6 +100,43 @@ function startScenario(scenario: ScenarioName, player: VideoPlayer) {
   load.catch(() => {
     // Surfaced by the onError listener.
   });
+}
+
+/**
+ * mp4-fullscreen-rotate: the app pattern from #5152. Turning the device to landscape calls
+ * enterFullscreen() through the VideoView ref, turning it back to portrait calls
+ * exitFullscreen(), both from JS. On Android both ran on the JS thread, and the exit
+ * touched the view hierarchy and threw CalledFromWrongThreadException (a red screen in
+ * debug, a crash in release) from the second rotation on. The calls are caught and
+ * reported as evt-fullscreen-call-failed, so the flow can assert on it.
+ */
+function useFullscreenFollowsRotation(
+  enabled: boolean,
+  view: React.RefObject<VideoViewRef | null>
+) {
+  const { width, height } = useWindowDimensions();
+  const entered = useRef(false);
+  useEffect(() => {
+    if (!enabled) return;
+    const call = (name: 'enterFullscreen' | 'exitFullscreen') => {
+      try {
+        view.current?.[name]();
+      } catch (e) {
+        eventLog.handle({
+          type: 'fullscreenCallFailed',
+          call: name,
+          message: e instanceof Error ? e.message : String(e),
+        });
+      }
+    };
+    if (width > height) {
+      entered.current = true;
+      call('enterFullscreen');
+    } else if (entered.current) {
+      entered.current = false;
+      call('exitFullscreen');
+    }
+  }, [enabled, view, width, height]);
 }
 
 type Control = {
@@ -195,6 +239,7 @@ function logPlayerEvents(player: VideoPlayer) {
  * ("Test app gotchas") for why neither may happen later.
  */
 export function ScenarioScreen({ scenario }: { scenario: ScenarioName }) {
+  const viewRef = useRef<VideoViewRef>(null);
   const player = useVideoPlayer(SCENARIO_SOURCES[scenario], (p) => {
     eventLog.reset();
     eventLog.log(`scenario:${scenario}`);
@@ -202,10 +247,24 @@ export function ScenarioScreen({ scenario }: { scenario: ScenarioName }) {
     startScenario(scenario, p);
   });
 
+  useFullscreenFollowsRotation(scenario === 'mp4-fullscreen-rotate', viewRef);
+
+  const onFullscreenChange = (fullscreen: boolean) =>
+    eventLog.handle({ type: 'onFullscreenChange', fullscreen });
+
   return (
     <View style={styles.screen} testID={`scenario-${scenario}`}>
       <Text>scenario:{scenario}</Text>
-      <VideoView player={player} style={styles.video} resizeMode="contain" />
+      <VideoView
+        ref={viewRef}
+        player={player}
+        style={styles.video}
+        resizeMode="contain"
+        // #5152 needs the native controls: exitFullscreen() resets the fullscreen button
+        // icon, and only a shown controller makes that touch the view hierarchy.
+        controls={scenario === 'mp4-fullscreen-rotate'}
+        onFullscreenChange={onFullscreenChange}
+      />
       <View style={styles.controls}>
         {CONTROLS.map(({ id, title, press }) => (
           <Button

@@ -67,7 +67,7 @@ player.muted = true;
 | `replaceSourceAsync(source: VideoSource \| VideoConfig \| null)` | Replaces the current video source with a new one. Pass `null` to release the current source without replacing it. |
 | `initialize()` | Manually initialize the underlying native player item when `initializeOnCreation` was set to `false`. No-op if already initialized. |
 | `preload()` | Ensures the media source is set and prepared (buffering started) without starting playback. If not yet initialized it will initialize first. |
-| `release()` | Releases the player's native resources. The player is no longer usable after calling this method. **Note:** If you intend to reuse the player instance with a different source, use `replaceSourceAsync(null)` to clear resources instead of `release()`. |
+| `release()` | Releases the player's native resources. The player is no longer usable after calling this method. **Note:** on iOS and Android `replaceSourceAsync(null)` releases the native player the same way; to play another video, call `replaceSourceAsync(newSource)` on a live player or create a new one. |
 
 ### Properties
 

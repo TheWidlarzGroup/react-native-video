@@ -5,8 +5,11 @@ import NitroModules
 class HLSManifestParser {
 
   /// Downloads manifest content from the given URL
-  static func downloadManifest(from url: URL) async throws -> String {
-    let (data, response) = try await URLSession.shared.data(from: url)
+  static func downloadManifest(from url: URL, headers: [String: String] = [:]) async throws
+    -> String
+  {
+    let (data, response) = try await URLSession.shared.data(
+      for: URLRequest(url: url, headers: headers))
 
     guard let httpResponse = response as? HTTPURLResponse,
       200...299 ~= httpResponse.statusCode
@@ -167,4 +170,11 @@ struct HLSStreamInfo {
   var width: Int?
   var height: Int?
   var bandwidth: Int?
+}
+
+extension URLRequest {
+  init(url: URL, headers: [String: String]) {
+    self.init(url: url)
+    headers.forEach { setValue($0.value, forHTTPHeaderField: $0.key) }
+  }
 }

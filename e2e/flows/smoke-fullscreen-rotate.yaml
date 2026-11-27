@@ -1,0 +1,50 @@
+# The app pattern from #5152: an app that follows the device rotation calls
+# enterFullscreen() on landscape and exitFullscreen() on portrait, both from JS through the
+# VideoView ref (scenario mp4-fullscreen-rotate, native controls shown). On Android the
+# exit touched the view hierarchy from the JS thread and threw
+# CalledFromWrongThreadException from the second rotation on; the first one passed. The
+# scenario catches the throw and marks evt-fullscreen-call-failed.
+#
+# The rotation and the assertions run on Android only: the bug and the fix are in the
+# Android view manager, and on iOS the fullscreen view doesn't close on rotation yet.
+# The scenario screen is covered while fullscreen is shown, so each turn waits for it to
+# disappear and to come back.
+appId: ${APP_ID}
+tags: [smoke]
+onFlowComplete:
+  - runFlow: ../shared/portrait.yaml
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4-fullscreen-rotate
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "evt-playing"
+          timeout: 25000
+      - repeat:
+          times: 3
+          commands:
+            - setOrientation: LANDSCAPE_LEFT
+            - extendedWaitUntil:
+                notVisible:
+                  id: "scenario-mp4-fullscreen-rotate"
+                timeout: 10000
+            - setOrientation: PORTRAIT
+            - extendedWaitUntil:
+                visible:
+                  id: "scenario-mp4-fullscreen-rotate"
+                timeout: 10000
+      - assertVisible:
+          id: "evt-fullscreen-entered"
+      - assertVisible:
+          id: "evt-fullscreen-exited"
+      - assertNotVisible:
+          id: "evt-fullscreen-call-failed"
+      - assertNotVisible:
+          id: "evt-onError"
