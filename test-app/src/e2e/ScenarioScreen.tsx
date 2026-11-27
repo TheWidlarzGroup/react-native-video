@@ -227,10 +227,19 @@ const CONTROLS: Control[] = [
  */
 function LoaderProbe() {
   useEffect(() => {
-    eventLog.handle({ type: 'loader', shown: true });
-    return () => eventLog.handle({ type: 'loader', shown: false });
+    eventLog.handle({ type: 'loader', shown: true, at: Date.now() });
+    return () =>
+      eventLog.handle({ type: 'loader', shown: false, at: Date.now() });
   }, []);
-  return <View testID="video-loader" style={styles.loader} />;
+  // The label makes the loader an element of the view hierarchy (an empty view may be
+  // left out of it), so the flow's last check can see that nothing of it is left.
+  return (
+    <View testID="video-loader" style={styles.loader}>
+      <Text testID="video-loader-label" style={styles.loaderLabel}>
+        loading
+      </Text>
+    </View>
+  );
 }
 
 // Marker derivation lives in eventLog.handle(); this only maps payloads.
@@ -329,5 +338,11 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
   video: { width: '100%', aspectRatio: 16 / 9 },
   controls: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  loader: { flex: 1, backgroundColor: '#202020' },
+  loader: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#202020',
+  },
+  loaderLabel: { color: '#ffffff' },
 });

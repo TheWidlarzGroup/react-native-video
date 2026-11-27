@@ -12,6 +12,8 @@ import {
   FIXTURE_DURATION_SECONDS,
   FIXTURE_DURATION_TOLERANCE_SECONDS,
   RELOAD_START_SECONDS,
+  LOADER_HELD_MIN_MS,
+  LOADER_SOURCE_HOLD_MS,
   type MarkerId,
   type PlayerEvent,
 } from './eventLog';
@@ -625,16 +627,50 @@ describe('fullscreen', () => {
 });
 
 describe('loader', () => {
-  test('a loader that mounts and unmounts marks shown, then hidden', () => {
-    feed({ type: 'loader', shown: true });
-    expect(markers()).toEqual(['evt-loader-shown']);
-    feed({ type: 'loader', shown: false });
+  test('a loader that covers the held load marks shown, before-load, hidden and held', () => {
+    feed({ type: 'loader', shown: true, at: 1000 });
+    expect(markers()).toEqual(['evt-loader-before-load', 'evt-loader-shown']);
+    feed(
+      { type: 'onLoad', duration: 8 },
+      { type: 'loader', shown: false, at: 1000 + LOADER_SOURCE_HOLD_MS + 300 }
+    );
     expect(markers()).toContain('evt-loader-hidden');
-    expect(lines()).toEqual(['loader shown', 'loader hidden']);
+    expect(markers()).toContain('evt-loader-held');
+    expect(lines()).toEqual([
+      'loader shown',
+      'onLoad duration=8 (#1)',
+      `loader hidden after ${LOADER_SOURCE_HOLD_MS + 300} ms`,
+    ]);
+  });
+
+  test('a loader taken off right after it mounted is hidden but not held', () => {
+    feed(
+      { type: 'loader', shown: true, at: 1000 },
+      { type: 'loader', shown: false, at: 1000 + LOADER_HELD_MIN_MS - 1 }
+    );
+    expect(markers()).toContain('evt-loader-hidden');
+    expect(markers()).not.toContain('evt-loader-held');
+  });
+
+  test('a loader that first mounts after onLoad or progress is not before-load', () => {
+    feed(
+      { type: 'onLoad', duration: 8 },
+      { type: 'loader', shown: true, at: 1 }
+    );
+    expect(markers()).toContain('evt-loader-shown');
+    expect(markers()).not.toContain('evt-loader-before-load');
+
+    eventLog.reset();
+    feed(
+      { type: 'onProgress', currentTime: 0.2 },
+      { type: 'loader', shown: true, at: 1 }
+    );
+    expect(markers()).not.toContain('evt-loader-before-load');
   });
 
   test('hidden is only marked after the loader was shown', () => {
-    feed({ type: 'loader', shown: false });
+    feed({ type: 'loader', shown: false, at: 5000 });
     expect(markers()).not.toContain('evt-loader-hidden');
+    expect(markers()).not.toContain('evt-loader-held');
   });
 });

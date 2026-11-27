@@ -28,6 +28,8 @@ export const MARKER_IDS = [
   // video was ready to display (smoke-loader.yaml).
   'evt-loader-shown',
   'evt-loader-hidden',
+  'evt-loader-before-load', // the loader was up before onLoad and before any progress
+  'evt-loader-held', // it stayed up for at least LOADER_HELD_MIN_MS of the held load
   'evt-playing', // isPlaying seen true at least once
   'evt-paused', // isPlaying seen false after having been true (real pause, not initial state)
   'evt-resumed', // isPlaying seen true again after evt-paused
@@ -79,8 +81,10 @@ export type PlayerEvent =
   | { type: 'onPlaybackRateChange'; rate: number }
   // VideoView's onFullscreenChange (a view event, not a player event).
   | { type: 'onFullscreenChange'; fullscreen: boolean }
-  // The renderLoader element mounted (shown) or unmounted (hidden) inside VideoView.
-  | { type: 'loader'; shown: boolean }
+  // The renderLoader element mounted (shown) or unmounted (hidden) inside VideoView. `at`
+  // is a millisecond clock reading, so the time it stayed up is part of the event sequence
+  // and handle() stays a pure function of it.
+  | { type: 'loader'; shown: boolean; at: number }
   // A VideoView ref call that threw. Caught in the scenario, so the screen stays up and
   // the flow can assert on it instead of on a red screen.
   | {
@@ -124,6 +128,11 @@ export const FIXTURE_DURATION_SECONDS = 8;
 export const FIXTURE_DURATION_TOLERANCE_SECONDS = 1;
 // A replacement source must start near 0; its own rule, independent of the seek rules.
 export const RELOAD_START_SECONDS = 2;
+// mp4-loader's clip is held by the fixture server for LOADER_SOURCE_HOLD_MS (fixtures.ts).
+// A loader that covered the load stayed up for most of that time; one taken off right
+// after it mounted did not.
+export const LOADER_SOURCE_HOLD_MS = 4000;
+export const LOADER_HELD_MIN_MS = 2500;
 // Set when the player reports an error status without a code (see handle).
 export const STATUS_ERROR_CODE = 'status/error';
 
@@ -146,6 +155,8 @@ type State = {
   seekPending: boolean;
   lastProgress: number | null;
   loadCount: number;
+  // When the loader element mounted, or null while it is not up.
+  loaderShownAt: number | null;
   // Status order: only the first readyToPlay is judged against an earlier loading.
   loadingSeen: boolean;
   readySeen: boolean;
@@ -167,6 +178,7 @@ const initialState = (): State => ({
   seekPending: false,
   lastProgress: null,
   loadCount: 0,
+  loaderShownAt: null,
   loadingSeen: false,
   readySeen: false,
   replaceRequested: false,
@@ -264,14 +276,28 @@ function apply(event: PlayerEvent) {
       append(`fullscreen:${event.fullscreen}`);
       return;
 
-    case 'loader':
+    case 'loader': {
       if (event.shown) {
         mark('evt-loader-shown');
-      } else if (state.markers.has('evt-loader-shown')) {
-        mark('evt-loader-hidden');
+        state.loaderShownAt = event.at;
+        if (state.loadCount === 0 && !state.markers.has('evt-onProgress')) {
+          mark('evt-loader-before-load');
+        }
+        append('loader shown');
+        return;
       }
-      append(`loader ${event.shown ? 'shown' : 'hidden'}`);
+      // A removal with no mount before it says nothing about the loader.
+      if (state.loaderShownAt === null) {
+        append('loader hidden');
+        return;
+      }
+      const shownMs = event.at - state.loaderShownAt;
+      state.loaderShownAt = null;
+      mark('evt-loader-hidden');
+      if (shownMs >= LOADER_HELD_MIN_MS) mark('evt-loader-held');
+      append(`loader hidden after ${shownMs} ms`);
       return;
+    }
 
     case 'fullscreenCallFailed':
       mark('evt-fullscreen-call-failed');

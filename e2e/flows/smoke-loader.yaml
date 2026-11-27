@@ -1,7 +1,14 @@
 # VideoView's renderLoader (#5264) covers the video from the start of the load until the
-# video is ready to display. The loader is a probe that logs its own mount and unmount
-# (LoaderProbe in ScenarioScreen.tsx), so the flow does not depend on catching it on screen:
-# evt-loader-shown, then evt-loader-hidden, while the clip plays.
+# video is ready to display. The fixture server holds the clip's requests for 4 s
+# (`?hold=&holdId=`, see fixtures.ts), so the loader has a load to cover. The loader is a
+# probe that logs its own mount and unmount with a clock reading (LoaderProbe in
+# ScenarioScreen.tsx), so the flow does not depend on catching it on screen:
+# - evt-loader-shown and evt-loader-before-load: it was up before onLoad and any progress;
+# - evt-loader-hidden: the view took it off; evt-loader-held: not before 2.5 s of the 4 s
+#   hold had passed;
+# - at the end nothing of it (its label) is left over the playing video.
+# A loader that never shows fails the first wait, one dropped at once fails evt-loader-held,
+# and one left over a playing video fails the hidden wait and the last checks.
 #
 # The loader coming back after replaceSourceAsync() is not checked here: on Android it needs
 # onLoadStart on a replacement (#5271).
@@ -17,15 +24,19 @@ tags: [smoke]
     visible:
       id: "evt-loader-shown"
     timeout: 10000
+- assertVisible:
+    id: "evt-loader-before-load"
 - extendedWaitUntil:
     visible:
       id: "evt-loader-hidden"
-    timeout: 20000            # generous: emulator software decoder cold start
+    timeout: 30000            # the 4 s hold plus an emulator decoder's cold start
+- assertVisible:
+    id: "evt-loader-held"
 - extendedWaitUntil:
     visible:
       id: "evt-progress-gt-2s"
     timeout: 15000
 - assertNotVisible:
-    id: "video-loader"
+    id: "video-loader-label"
 - assertNotVisible:
     id: "evt-onError"
