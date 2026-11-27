@@ -172,7 +172,12 @@ interface VideoViewOverlayHostProps {
     style?: StyleProp<ViewStyle>;
     onLayout?: (event: LayoutChangeEvent) => void;
   }) => React.ReactElement;
-  renderOverlay: () => React.ReactElement;
+  /**
+   * `addedToMountedView` is true when the overlay appears on a video view that was
+   * already on screen, so that view may be showing a frame and will not report
+   * "ready to display" again.
+   */
+  renderOverlay: (addedToMountedView: boolean) => React.ReactElement;
 }
 
 /**
@@ -200,6 +205,19 @@ export const VideoViewOverlayHost = ({
   const latest = React.useRef({ hasOverlay, onLayout });
   latest.current = { hasOverlay, onLayout };
 
+  const isVideoMounted = React.useRef(false);
+  React.useEffect(() => {
+    isVideoMounted.current = true;
+  }, []);
+  // Decided when the overlay appears and kept until it goes away.
+  const addedToMountedView = React.useRef<boolean | null>(null);
+  if (!hasOverlay) {
+    addedToMountedView.current = null;
+  } else if (addedToMountedView.current == null) {
+    addedToMountedView.current = isVideoMounted.current;
+  }
+  const overlay = () => renderOverlay(addedToMountedView.current === true);
+
   const trackFrame = React.useCallback((event: LayoutChangeEvent) => {
     frame.current = event.nativeEvent.layout;
     // Views that never get an overlay only remember the frame, they don't re-render.
@@ -213,7 +231,7 @@ export const VideoViewOverlayHost = ({
     return (
       <View style={style} onLayout={onLayout}>
         {renderVideo({ style: StyleSheet.absoluteFill, onLayout: undefined })}
-        {hasOverlay ? renderOverlay() : null}
+        {hasOverlay ? overlay() : null}
       </View>
     );
   }
@@ -225,7 +243,7 @@ export const VideoViewOverlayHost = ({
       {renderVideo({ style, onLayout: trackFrame })}
       {hasOverlay && frame.current != null ? (
         <View style={[SIBLING_COVER, { left: x, top: y, width, height }]}>
-          {renderOverlay()}
+          {overlay()}
         </View>
       ) : null}
     </>

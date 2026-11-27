@@ -52,19 +52,18 @@ const updateProps = (manager: VideoViewViewManager, props: VideoViewProps) => {
   manager.surfaceType = props.surfaceType ?? 'surface';
 };
 
-// Android reports "ready to display" once per loaded source, so a view that mounts
-// with an already loaded player gets no event. iOS reports it for every view.
-const isReadyToDisplay = (player: VideoViewProps['player']) => {
-  if (Platform.OS !== 'android') {
-    return false;
-  }
-
+const isPlayerLoaded = (player: VideoViewProps['player']) => {
   try {
     return player.status === 'readyToPlay';
   } catch {
     return false;
   }
 };
+
+// Android reports "ready to display" once per loaded source, so a view that mounts
+// with an already loaded player gets no event. iOS reports it for every view.
+const isReadyToDisplay = (player: VideoViewProps['player']) =>
+  Platform.OS === 'android' && isPlayerLoaded(player);
 
 /**
  * VideoView is a component that allows you to display a video from a {@link VideoPlayer}.
@@ -352,10 +351,14 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
             {...layoutProps}
           />
         )}
-        renderOverlay={() => (
+        renderOverlay={(addedToMountedView) => (
           <VideoViewOverlay
             player={player}
-            isReadyToDisplay={isReadyToDisplay}
+            // A view that was already on screen reports nothing more for a loaded
+            // source, on any platform, so a loaded player means it shows a frame.
+            isReadyToDisplay={
+              addedToMountedView ? isPlayerLoaded : isReadyToDisplay
+            }
             {...overlayProps}
           />
         )}

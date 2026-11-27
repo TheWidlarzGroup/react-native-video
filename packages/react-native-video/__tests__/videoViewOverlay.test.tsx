@@ -222,7 +222,8 @@ function host(props: {
     ...props,
     renderVideo: (layoutProps: Record<string, unknown>) =>
       React.createElement(FakeVideo, layoutProps),
-    renderOverlay: () => React.createElement('Overlay'),
+    renderOverlay: (addedToMountedView: boolean) =>
+      React.createElement('Overlay', { addedToMountedView }),
   } as any);
 }
 
@@ -327,4 +328,26 @@ test("the app's onLayout reports the view's own frame in both trees", () => {
   expect(
     (wrapped.toJSON() as TestRenderer.ReactTestRendererJSON).props.onLayout
   ).toBe(onLayout);
+});
+
+test('the overlay is told whether the video view was already on screen', () => {
+  const flag = (r: TestRenderer.ReactTestRenderer) =>
+    one(r, 'Overlay')[0]!.props.addedToMountedView;
+
+  // Mounted together with the video: the view will still report "ready to display".
+  const wrapped = mountHost({ hasOverlay: true });
+  expect(flag(wrapped)).toBe(false);
+  act(() => wrapped.update(host({ hasOverlay: true })));
+  expect(flag(wrapped)).toBe(false);
+  // Taken away and set again on the same view: that view reports nothing more.
+  act(() => wrapped.update(host({ hasOverlay: false })));
+  act(() => wrapped.update(host({ hasOverlay: true })));
+  expect(flag(wrapped)).toBe(true);
+
+  const alone = mountHost({ hasOverlay: false });
+  act(() =>
+    one(alone, 'NativeVideo')[0]!.props.onLayout(layoutEvent(0, 0, 1, 1))
+  );
+  act(() => alone.update(host({ hasOverlay: true })));
+  expect(flag(alone)).toBe(true);
 });
