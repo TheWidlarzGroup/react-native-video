@@ -35,6 +35,17 @@ public protocol HybridVideoPlayerEventEmitterSpec_protocol: HybridObject {
   func addOnVideoTrackChangeListener(listener: @escaping (_ data: VideoTrackChangeData) -> Void) throws -> ListenerSubscription
   func addOnAudioTrackChangeListener(listener: @escaping (_ data: AudioTrackChangeData) -> Void) throws -> ListenerSubscription
   func addOnVolumeChangeListener(listener: @escaping (_ data: onVolumeChangeData) -> Void) throws -> ListenerSubscription
+  func addOnAdsResolvedListener(listener: @escaping (_ data: AdsResolvedEvent) -> Void) throws -> ListenerSubscription
+  func addOnAdBreakStartListener(listener: @escaping (_ data: AdBreakEvent) -> Void) throws -> ListenerSubscription
+  func addOnAdBreakEndListener(listener: @escaping (_ data: AdBreakEvent) -> Void) throws -> ListenerSubscription
+  func addOnAdProgressListener(listener: @escaping (_ data: AdProgressInfo) -> Void) throws -> ListenerSubscription
+  func addOnAdStartListener(listener: @escaping (_ data: AdInfo) -> Void) throws -> ListenerSubscription
+  func addOnAdCompleteListener(listener: @escaping (_ data: AdInfo) -> Void) throws -> ListenerSubscription
+  func addOnAdSkippedListener(listener: @escaping (_ data: AdInfo) -> Void) throws -> ListenerSubscription
+  func addOnAdClickedListener(listener: @escaping () -> Void) throws -> ListenerSubscription
+  func addOnAdErrorListener(listener: @escaping (_ data: AdErrorEvent) -> Void) throws -> ListenerSubscription
+  func addOnAllAdsCompletedListener(listener: @escaping () -> Void) throws -> ListenerSubscription
+  func addOnAdStateChangeListener(listener: @escaping (_ state: VideoAdState) -> Void) throws -> ListenerSubscription
   func clearAllListeners() throws -> Void
 }
 

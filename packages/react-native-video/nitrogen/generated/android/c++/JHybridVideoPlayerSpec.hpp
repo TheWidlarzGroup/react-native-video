@@ -77,6 +77,8 @@ namespace margelo::nitro::video {
     bool getDisableAudioSessionManagement() override;
     void setDisableAudioSessionManagement(bool disableAudioSessionManagement) override;
     bool getIsPlaying() override;
+    bool getIsPlayingAd() override;
+    VideoAdState getAdState() override;
     std::optional<TextTrack> getSelectedTrack() override;
     std::optional<std::string> getSelectedVideoTrackId() override;
     std::optional<std::string> getSelectedAudioTrackId() override;
@@ -91,6 +93,9 @@ namespace margelo::nitro::video {
     std::shared_ptr<Promise<void>> preload() override;
     void play() override;
     void pause() override;
+    std::shared_ptr<Promise<void>> activateAds() override;
+    void deactivateAds() override;
+    void skipAd() override;
     void seekBy(double time) override;
     void seekTo(double time) override;
     std::vector<VideoTrack> getAvailableVideoTracks() override;

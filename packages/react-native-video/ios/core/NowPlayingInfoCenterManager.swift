@@ -140,7 +140,7 @@ class NowPlayingInfoCenterManager {
         }
 
         if player.rate == 0 {
-          player.play()
+          NowPlayingInfoCenterManager.requestPlay(for: player)
         }
         return .success
       }
@@ -153,7 +153,7 @@ class NowPlayingInfoCenterManager {
         }
 
         if player.rate != 0 {
-          player.pause()
+          NowPlayingInfoCenterManager.requestPause(for: player)
           VideoManager.shared.clearBackgroundResumeIntent(for: player)
         }
         return .success
@@ -211,14 +211,38 @@ class NowPlayingInfoCenterManager {
         }
 
         if player.rate == 0 {
-          player.play()
+          NowPlayingInfoCenterManager.requestPlay(for: player)
         } else {
-          player.pause()
+          NowPlayingInfoCenterManager.requestPause(for: player)
           VideoManager.shared.clearBackgroundResumeIntent(for: player)
         }
         return .success
       }
     }
+  }
+
+  // MARK: - Ad-gated playback funnel
+  //
+  // Remote commands only hold a raw AVPlayer, but they must not drive it
+  // directly: an ad break may be on screen (content is paused underneath it and
+  // the gate is withholding the content item), and `HybridVideoPlayer` is the
+  // only thing that knows how to translate "play"/"pause" in that situation.
+  // Fall back to the raw player only when no hybrid player owns it.
+
+  private static func requestPlay(for avPlayer: AVPlayer) {
+    guard let player = VideoManager.shared.player(for: avPlayer) else {
+      avPlayer.play()
+      return
+    }
+    try? player.play()
+  }
+
+  private static func requestPause(for avPlayer: AVPlayer) {
+    guard let player = VideoManager.shared.player(for: avPlayer) else {
+      avPlayer.pause()
+      return
+    }
+    try? player.pause()
   }
 
   private func invalidateCommandTargets() {

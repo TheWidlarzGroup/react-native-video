@@ -8,6 +8,18 @@
 #pragma once
 
 // Forward declarations of C++ defined types
+// Forward declaration of `AdBreakEvent` to properly resolve imports.
+namespace margelo::nitro::video { struct AdBreakEvent; }
+// Forward declaration of `AdBreakKind` to properly resolve imports.
+namespace margelo::nitro::video { enum class AdBreakKind; }
+// Forward declaration of `AdErrorEvent` to properly resolve imports.
+namespace margelo::nitro::video { struct AdErrorEvent; }
+// Forward declaration of `AdInfo` to properly resolve imports.
+namespace margelo::nitro::video { struct AdInfo; }
+// Forward declaration of `AdProgressInfo` to properly resolve imports.
+namespace margelo::nitro::video { struct AdProgressInfo; }
+// Forward declaration of `AdsResolvedEvent` to properly resolve imports.
+namespace margelo::nitro::video { struct AdsResolvedEvent; }
 // Forward declaration of `AudioTrackChangeData` to properly resolve imports.
 namespace margelo::nitro::video { struct AudioTrackChangeData; }
 // Forward declaration of `AudioTrack` to properly resolve imports.
@@ -56,6 +68,10 @@ namespace margelo::nitro::video { struct TextTrack; }
 namespace margelo::nitro::video { struct TimedMetadataObject; }
 // Forward declaration of `TimedMetadata` to properly resolve imports.
 namespace margelo::nitro::video { struct TimedMetadata; }
+// Forward declaration of `VideoAdState` to properly resolve imports.
+namespace margelo::nitro::video { enum class VideoAdState; }
+// Forward declaration of `VideoAdsConfig` to properly resolve imports.
+namespace margelo::nitro::video { struct VideoAdsConfig; }
 // Forward declaration of `VideoInformation` to properly resolve imports.
 namespace margelo::nitro::video { struct VideoInformation; }
 // Forward declaration of `VideoOrientation` to properly resolve imports.
@@ -94,6 +110,12 @@ namespace ReactNativeVideo { class HybridVideoViewViewManagerFactorySpec_cxx; }
 namespace ReactNativeVideo { class HybridVideoViewViewManagerSpec_cxx; }
 
 // Include C++ defined types
+#include "AdBreakEvent.hpp"
+#include "AdBreakKind.hpp"
+#include "AdErrorEvent.hpp"
+#include "AdInfo.hpp"
+#include "AdProgressInfo.hpp"
+#include "AdsResolvedEvent.hpp"
 #include "AudioTrack.hpp"
 #include "AudioTrackChangeData.hpp"
 #include "BandwidthData.hpp"
@@ -118,6 +140,8 @@ namespace ReactNativeVideo { class HybridVideoViewViewManagerSpec_cxx; }
 #include "TextTrack.hpp"
 #include "TimedMetadata.hpp"
 #include "TimedMetadataObject.hpp"
+#include "VideoAdState.hpp"
+#include "VideoAdsConfig.hpp"
 #include "VideoInformation.hpp"
 #include "VideoOrientation.hpp"
 #include "VideoPlayerStatus.hpp"
@@ -805,6 +829,138 @@ namespace margelo::nitro::video::bridge::swift {
     return Func_void_onVolumeChangeData_Wrapper(std::move(value));
   }
   
+  // pragma MARK: std::function<void(const AdsResolvedEvent& /* data */)>
+  /**
+   * Specialized version of `std::function<void(const AdsResolvedEvent&)>`.
+   */
+  using Func_void_AdsResolvedEvent = std::function<void(const AdsResolvedEvent& /* data */)>;
+  /**
+   * Wrapper class for a `std::function<void(const AdsResolvedEvent& / * data * /)>`, this can be used from Swift.
+   */
+  class Func_void_AdsResolvedEvent_Wrapper final {
+  public:
+    explicit Func_void_AdsResolvedEvent_Wrapper(std::function<void(const AdsResolvedEvent& /* data */)>&& func): _function(std::make_unique<std::function<void(const AdsResolvedEvent& /* data */)>>(std::move(func))) {}
+    inline void call(AdsResolvedEvent data) const noexcept {
+      _function->operator()(data);
+    }
+  private:
+    std::unique_ptr<std::function<void(const AdsResolvedEvent& /* data */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_AdsResolvedEvent create_Func_void_AdsResolvedEvent(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_AdsResolvedEvent_Wrapper wrap_Func_void_AdsResolvedEvent(Func_void_AdsResolvedEvent value) noexcept {
+    return Func_void_AdsResolvedEvent_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::function<void(const AdBreakEvent& /* data */)>
+  /**
+   * Specialized version of `std::function<void(const AdBreakEvent&)>`.
+   */
+  using Func_void_AdBreakEvent = std::function<void(const AdBreakEvent& /* data */)>;
+  /**
+   * Wrapper class for a `std::function<void(const AdBreakEvent& / * data * /)>`, this can be used from Swift.
+   */
+  class Func_void_AdBreakEvent_Wrapper final {
+  public:
+    explicit Func_void_AdBreakEvent_Wrapper(std::function<void(const AdBreakEvent& /* data */)>&& func): _function(std::make_unique<std::function<void(const AdBreakEvent& /* data */)>>(std::move(func))) {}
+    inline void call(AdBreakEvent data) const noexcept {
+      _function->operator()(data);
+    }
+  private:
+    std::unique_ptr<std::function<void(const AdBreakEvent& /* data */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_AdBreakEvent create_Func_void_AdBreakEvent(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_AdBreakEvent_Wrapper wrap_Func_void_AdBreakEvent(Func_void_AdBreakEvent value) noexcept {
+    return Func_void_AdBreakEvent_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::function<void(const AdProgressInfo& /* data */)>
+  /**
+   * Specialized version of `std::function<void(const AdProgressInfo&)>`.
+   */
+  using Func_void_AdProgressInfo = std::function<void(const AdProgressInfo& /* data */)>;
+  /**
+   * Wrapper class for a `std::function<void(const AdProgressInfo& / * data * /)>`, this can be used from Swift.
+   */
+  class Func_void_AdProgressInfo_Wrapper final {
+  public:
+    explicit Func_void_AdProgressInfo_Wrapper(std::function<void(const AdProgressInfo& /* data */)>&& func): _function(std::make_unique<std::function<void(const AdProgressInfo& /* data */)>>(std::move(func))) {}
+    inline void call(AdProgressInfo data) const noexcept {
+      _function->operator()(data);
+    }
+  private:
+    std::unique_ptr<std::function<void(const AdProgressInfo& /* data */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_AdProgressInfo create_Func_void_AdProgressInfo(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_AdProgressInfo_Wrapper wrap_Func_void_AdProgressInfo(Func_void_AdProgressInfo value) noexcept {
+    return Func_void_AdProgressInfo_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::function<void(const AdInfo& /* data */)>
+  /**
+   * Specialized version of `std::function<void(const AdInfo&)>`.
+   */
+  using Func_void_AdInfo = std::function<void(const AdInfo& /* data */)>;
+  /**
+   * Wrapper class for a `std::function<void(const AdInfo& / * data * /)>`, this can be used from Swift.
+   */
+  class Func_void_AdInfo_Wrapper final {
+  public:
+    explicit Func_void_AdInfo_Wrapper(std::function<void(const AdInfo& /* data */)>&& func): _function(std::make_unique<std::function<void(const AdInfo& /* data */)>>(std::move(func))) {}
+    inline void call(AdInfo data) const noexcept {
+      _function->operator()(data);
+    }
+  private:
+    std::unique_ptr<std::function<void(const AdInfo& /* data */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_AdInfo create_Func_void_AdInfo(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_AdInfo_Wrapper wrap_Func_void_AdInfo(Func_void_AdInfo value) noexcept {
+    return Func_void_AdInfo_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::function<void(const AdErrorEvent& /* data */)>
+  /**
+   * Specialized version of `std::function<void(const AdErrorEvent&)>`.
+   */
+  using Func_void_AdErrorEvent = std::function<void(const AdErrorEvent& /* data */)>;
+  /**
+   * Wrapper class for a `std::function<void(const AdErrorEvent& / * data * /)>`, this can be used from Swift.
+   */
+  class Func_void_AdErrorEvent_Wrapper final {
+  public:
+    explicit Func_void_AdErrorEvent_Wrapper(std::function<void(const AdErrorEvent& /* data */)>&& func): _function(std::make_unique<std::function<void(const AdErrorEvent& /* data */)>>(std::move(func))) {}
+    inline void call(AdErrorEvent data) const noexcept {
+      _function->operator()(data);
+    }
+  private:
+    std::unique_ptr<std::function<void(const AdErrorEvent& /* data */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_AdErrorEvent create_Func_void_AdErrorEvent(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_AdErrorEvent_Wrapper wrap_Func_void_AdErrorEvent(Func_void_AdErrorEvent value) noexcept {
+    return Func_void_AdErrorEvent_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::function<void(VideoAdState /* state */)>
+  /**
+   * Specialized version of `std::function<void(VideoAdState)>`.
+   */
+  using Func_void_VideoAdState = std::function<void(VideoAdState /* state */)>;
+  /**
+   * Wrapper class for a `std::function<void(VideoAdState / * state * /)>`, this can be used from Swift.
+   */
+  class Func_void_VideoAdState_Wrapper final {
+  public:
+    explicit Func_void_VideoAdState_Wrapper(std::function<void(VideoAdState /* state */)>&& func): _function(std::make_unique<std::function<void(VideoAdState /* state */)>>(std::move(func))) {}
+    inline void call(int state) const noexcept {
+      _function->operator()(static_cast<VideoAdState>(state));
+    }
+  private:
+    std::unique_ptr<std::function<void(VideoAdState /* state */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_VideoAdState create_Func_void_VideoAdState(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_VideoAdState_Wrapper wrap_Func_void_VideoAdState(Func_void_VideoAdState value) noexcept {
+    return Func_void_VideoAdState_Wrapper(std::move(value));
+  }
+  
   // pragma MARK: Result<ListenerSubscription>
   using Result_ListenerSubscription_ = Result<ListenerSubscription>;
   inline Result_ListenerSubscription_ create_Result_ListenerSubscription_(const ListenerSubscription& value) noexcept {
@@ -1073,6 +1229,21 @@ namespace margelo::nitro::video::bridge::swift {
     return optional.has_value();
   }
   inline CustomVideoMetadata get_std__optional_CustomVideoMetadata_(const std::optional<CustomVideoMetadata>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::optional<VideoAdsConfig>
+  /**
+   * Specialized version of `std::optional<VideoAdsConfig>`.
+   */
+  using std__optional_VideoAdsConfig_ = std::optional<VideoAdsConfig>;
+  inline std::optional<VideoAdsConfig> create_std__optional_VideoAdsConfig_(const VideoAdsConfig& value) noexcept {
+    return std::optional<VideoAdsConfig>(value);
+  }
+  inline bool has_value_std__optional_VideoAdsConfig_(const std::optional<VideoAdsConfig>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline VideoAdsConfig get_std__optional_VideoAdsConfig_(const std::optional<VideoAdsConfig>& optional) noexcept {
     return optional.value();
   }
   

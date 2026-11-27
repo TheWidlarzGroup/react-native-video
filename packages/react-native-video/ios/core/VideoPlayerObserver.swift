@@ -134,8 +134,12 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
     let interval = CMTime(seconds: 0.5, preferredTimescale: 600)
     playerProgressPeriodicObserver = player.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] _ in
       guard let self, let player = self.player, let delegate = self.delegate else { return }
-      
-      delegate.onProgressUpdate(currentTime: player.currentTime().seconds, bufferDuration: player.currentItem?.getbufferDuration() ?? 0)
+      // No progress without an attached item (for example while a pre-roll ad plays): the
+      // time is invalid there and would be sent as NaN.
+      let time = player.currentTime()
+      guard time.isNumeric else { return }
+
+      delegate.onProgressUpdate(currentTime: time.seconds, bufferDuration: player.currentItem?.getbufferDuration() ?? 0)
     }
   }
   

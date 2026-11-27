@@ -33,8 +33,16 @@ object PictureInPictureUtils {
     // via VideoManager. Must set explicitly (also false): setPictureInPictureParams
     // merges, so omitting it would leave a previously-enabled value in place.
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+      // Ad gate, auto-enter path. setAutoEnterEnabled is system-driven: the OS can put the
+      // activity into PiP on a home-button/gesture without ever calling
+      // VideoManager.requestPictureInPicture, so the explicit-request gate cannot see it.
+      // Suppress it outright while an ad is active; VideoManager.onAdActivityEnded refreshes
+      // these params once the break ends, which restores it.
+      val player = videoView.hybridPlayer
+      val adActive = player?.isAdActive == true
+
       builder.setAutoEnterEnabled(
-        videoView.autoEnterPictureInPicture && videoView.hybridPlayer?.player?.playWhenReady == true
+        videoView.autoEnterPictureInPicture && !adActive && player?.player?.playWhenReady == true
       )
     }
 

@@ -8,6 +8,18 @@
 #pragma once
 
 // Forward declarations of C++ defined types
+// Forward declaration of `AdBreakEvent` to properly resolve imports.
+namespace margelo::nitro::video { struct AdBreakEvent; }
+// Forward declaration of `AdBreakKind` to properly resolve imports.
+namespace margelo::nitro::video { enum class AdBreakKind; }
+// Forward declaration of `AdErrorEvent` to properly resolve imports.
+namespace margelo::nitro::video { struct AdErrorEvent; }
+// Forward declaration of `AdInfo` to properly resolve imports.
+namespace margelo::nitro::video { struct AdInfo; }
+// Forward declaration of `AdProgressInfo` to properly resolve imports.
+namespace margelo::nitro::video { struct AdProgressInfo; }
+// Forward declaration of `AdsResolvedEvent` to properly resolve imports.
+namespace margelo::nitro::video { struct AdsResolvedEvent; }
 // Forward declaration of `AudioTrackChangeData` to properly resolve imports.
 namespace margelo::nitro::video { struct AudioTrackChangeData; }
 // Forward declaration of `AudioTrack` to properly resolve imports.
@@ -64,6 +76,10 @@ namespace margelo::nitro::video { struct TextTrack; }
 namespace margelo::nitro::video { struct TimedMetadataObject; }
 // Forward declaration of `TimedMetadata` to properly resolve imports.
 namespace margelo::nitro::video { struct TimedMetadata; }
+// Forward declaration of `VideoAdState` to properly resolve imports.
+namespace margelo::nitro::video { enum class VideoAdState; }
+// Forward declaration of `VideoAdsConfig` to properly resolve imports.
+namespace margelo::nitro::video { struct VideoAdsConfig; }
 // Forward declaration of `VideoInformation` to properly resolve imports.
 namespace margelo::nitro::video { struct VideoInformation; }
 // Forward declaration of `VideoOrientation` to properly resolve imports.
@@ -86,6 +102,12 @@ namespace margelo::nitro::video { struct onProgressData; }
 namespace margelo::nitro::video { struct onVolumeChangeData; }
 
 // Include C++ defined types
+#include "AdBreakEvent.hpp"
+#include "AdBreakKind.hpp"
+#include "AdErrorEvent.hpp"
+#include "AdInfo.hpp"
+#include "AdProgressInfo.hpp"
+#include "AdsResolvedEvent.hpp"
 #include "AudioTrack.hpp"
 #include "AudioTrackChangeData.hpp"
 #include "BandwidthData.hpp"
@@ -114,6 +136,8 @@ namespace margelo::nitro::video { struct onVolumeChangeData; }
 #include "TextTrack.hpp"
 #include "TimedMetadata.hpp"
 #include "TimedMetadataObject.hpp"
+#include "VideoAdState.hpp"
+#include "VideoAdsConfig.hpp"
 #include "VideoInformation.hpp"
 #include "VideoOrientation.hpp"
 #include "VideoPlayerStatus.hpp"

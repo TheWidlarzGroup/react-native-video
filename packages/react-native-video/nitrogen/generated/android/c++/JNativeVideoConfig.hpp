@@ -21,12 +21,14 @@
 #include "JOnGetLicensePayload.hpp"
 #include "JResolution.hpp"
 #include "JSubtitleType.hpp"
+#include "JVideoAdsConfig.hpp"
 #include "LivePlaybackParams.hpp"
 #include "NativeDrmParams.hpp"
 #include "NativeExternalSubtitle.hpp"
 #include "OnGetLicensePayload.hpp"
 #include "Resolution.hpp"
 #include "SubtitleType.hpp"
+#include "VideoAdsConfig.hpp"
 #include <NitroModules/JNICallable.hpp>
 #include <NitroModules/JPromise.hpp>
 #include <NitroModules/Promise.hpp>
@@ -69,6 +71,8 @@ namespace margelo::nitro::video {
       jni::local_ref<JCustomVideoMetadata> metadata = this->getFieldValue(fieldMetadata);
       static const auto fieldInitializeOnCreation = clazz->getField<jni::JBoolean>("initializeOnCreation");
       jni::local_ref<jni::JBoolean> initializeOnCreation = this->getFieldValue(fieldInitializeOnCreation);
+      static const auto fieldAds = clazz->getField<JVideoAdsConfig>("ads");
+      jni::local_ref<JVideoAdsConfig> ads = this->getFieldValue(fieldAds);
       return NativeVideoConfig(
         uri->toStdString(),
         externalSubtitles != nullptr ? std::make_optional([&]() {
@@ -92,7 +96,8 @@ namespace margelo::nitro::video {
         }()) : std::nullopt,
         bufferConfig != nullptr ? std::make_optional(bufferConfig->toCpp()) : std::nullopt,
         metadata != nullptr ? std::make_optional(metadata->toCpp()) : std::nullopt,
-        initializeOnCreation != nullptr ? std::make_optional(static_cast<bool>(initializeOnCreation->value())) : std::nullopt
+        initializeOnCreation != nullptr ? std::make_optional(static_cast<bool>(initializeOnCreation->value())) : std::nullopt,
+        ads != nullptr ? std::make_optional(ads->toCpp()) : std::nullopt
       );
     }
 
@@ -102,7 +107,7 @@ namespace margelo::nitro::video {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeVideoConfig::javaobject> fromCpp(const NativeVideoConfig& value) {
-      using JSignature = JNativeVideoConfig(jni::alias_ref<jni::JString>, jni::alias_ref<jni::JArrayClass<JNativeExternalSubtitle>>, jni::alias_ref<JNativeDrmParams>, jni::alias_ref<jni::JMap<jni::JString, jni::JString>>, jni::alias_ref<JBufferConfig>, jni::alias_ref<JCustomVideoMetadata>, jni::alias_ref<jni::JBoolean>);
+      using JSignature = JNativeVideoConfig(jni::alias_ref<jni::JString>, jni::alias_ref<jni::JArrayClass<JNativeExternalSubtitle>>, jni::alias_ref<JNativeDrmParams>, jni::alias_ref<jni::JMap<jni::JString, jni::JString>>, jni::alias_ref<JBufferConfig>, jni::alias_ref<JCustomVideoMetadata>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<JVideoAdsConfig>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
@@ -128,7 +133,8 @@ namespace margelo::nitro::video {
         }() : nullptr,
         value.bufferConfig.has_value() ? JBufferConfig::fromCpp(value.bufferConfig.value()) : nullptr,
         value.metadata.has_value() ? JCustomVideoMetadata::fromCpp(value.metadata.value()) : nullptr,
-        value.initializeOnCreation.has_value() ? jni::JBoolean::valueOf(value.initializeOnCreation.value()) : nullptr
+        value.initializeOnCreation.has_value() ? jni::JBoolean::valueOf(value.initializeOnCreation.value()) : nullptr,
+        value.ads.has_value() ? JVideoAdsConfig::fromCpp(value.ads.value()) : nullptr
       );
     }
   };

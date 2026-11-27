@@ -34,6 +34,12 @@
 #include "JFunc_void_VideoTrackChangeData.hpp"
 #include "JFunc_void_AudioTrackChangeData.hpp"
 #include "JFunc_void_onVolumeChangeData.hpp"
+#include "JFunc_void_AdsResolvedEvent.hpp"
+#include "JFunc_void_AdBreakEvent.hpp"
+#include "JFunc_void_AdProgressInfo.hpp"
+#include "JFunc_void_AdInfo.hpp"
+#include "JFunc_void_AdErrorEvent.hpp"
+#include "JFunc_void_VideoAdState.hpp"
 #include "JHybridVideoPlayerSourceSpec.hpp"
 #include "JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload.hpp"
 #include "JHybridVideoPlayerSourceFactorySpec.hpp"
@@ -98,6 +104,12 @@ void registerAllNatives() {
   margelo::nitro::video::JFunc_void_VideoTrackChangeData_cxx::registerNatives();
   margelo::nitro::video::JFunc_void_AudioTrackChangeData_cxx::registerNatives();
   margelo::nitro::video::JFunc_void_onVolumeChangeData_cxx::registerNatives();
+  margelo::nitro::video::JFunc_void_AdsResolvedEvent_cxx::registerNatives();
+  margelo::nitro::video::JFunc_void_AdBreakEvent_cxx::registerNatives();
+  margelo::nitro::video::JFunc_void_AdProgressInfo_cxx::registerNatives();
+  margelo::nitro::video::JFunc_void_AdInfo_cxx::registerNatives();
+  margelo::nitro::video::JFunc_void_AdErrorEvent_cxx::registerNatives();
+  margelo::nitro::video::JFunc_void_VideoAdState_cxx::registerNatives();
   margelo::nitro::video::JHybridVideoPlayerSourceSpec::CxxPart::registerNatives();
   margelo::nitro::video::JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload_cxx::registerNatives();
   margelo::nitro::video::JHybridVideoPlayerSourceFactorySpec::CxxPart::registerNatives();

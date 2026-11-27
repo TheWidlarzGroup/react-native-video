@@ -41,6 +41,8 @@ namespace margelo::nitro::video {
       prototype.registerHybridGetter("disableAudioSessionManagement", &HybridVideoPlayerSpec::getDisableAudioSessionManagement);
       prototype.registerHybridSetter("disableAudioSessionManagement", &HybridVideoPlayerSpec::setDisableAudioSessionManagement);
       prototype.registerHybridGetter("isPlaying", &HybridVideoPlayerSpec::getIsPlaying);
+      prototype.registerHybridGetter("isPlayingAd", &HybridVideoPlayerSpec::getIsPlayingAd);
+      prototype.registerHybridGetter("adState", &HybridVideoPlayerSpec::getAdState);
       prototype.registerHybridGetter("selectedTrack", &HybridVideoPlayerSpec::getSelectedTrack);
       prototype.registerHybridGetter("selectedVideoTrackId", &HybridVideoPlayerSpec::getSelectedVideoTrackId);
       prototype.registerHybridGetter("selectedAudioTrackId", &HybridVideoPlayerSpec::getSelectedAudioTrackId);
@@ -52,6 +54,9 @@ namespace margelo::nitro::video {
       prototype.registerHybridMethod("preload", &HybridVideoPlayerSpec::preload);
       prototype.registerHybridMethod("play", &HybridVideoPlayerSpec::play);
       prototype.registerHybridMethod("pause", &HybridVideoPlayerSpec::pause);
+      prototype.registerHybridMethod("activateAds", &HybridVideoPlayerSpec::activateAds);
+      prototype.registerHybridMethod("deactivateAds", &HybridVideoPlayerSpec::deactivateAds);
+      prototype.registerHybridMethod("skipAd", &HybridVideoPlayerSpec::skipAd);
       prototype.registerHybridMethod("seekBy", &HybridVideoPlayerSpec::seekBy);
       prototype.registerHybridMethod("seekTo", &HybridVideoPlayerSpec::seekTo);
       prototype.registerHybridMethod("getAvailableVideoTracks", &HybridVideoPlayerSpec::getAvailableVideoTracks);

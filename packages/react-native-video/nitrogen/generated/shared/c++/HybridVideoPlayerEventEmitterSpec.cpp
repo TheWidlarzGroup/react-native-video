@@ -36,6 +36,17 @@ namespace margelo::nitro::video {
       prototype.registerHybridMethod("addOnVideoTrackChangeListener", &HybridVideoPlayerEventEmitterSpec::addOnVideoTrackChangeListener);
       prototype.registerHybridMethod("addOnAudioTrackChangeListener", &HybridVideoPlayerEventEmitterSpec::addOnAudioTrackChangeListener);
       prototype.registerHybridMethod("addOnVolumeChangeListener", &HybridVideoPlayerEventEmitterSpec::addOnVolumeChangeListener);
+      prototype.registerHybridMethod("addOnAdsResolvedListener", &HybridVideoPlayerEventEmitterSpec::addOnAdsResolvedListener);
+      prototype.registerHybridMethod("addOnAdBreakStartListener", &HybridVideoPlayerEventEmitterSpec::addOnAdBreakStartListener);
+      prototype.registerHybridMethod("addOnAdBreakEndListener", &HybridVideoPlayerEventEmitterSpec::addOnAdBreakEndListener);
+      prototype.registerHybridMethod("addOnAdProgressListener", &HybridVideoPlayerEventEmitterSpec::addOnAdProgressListener);
+      prototype.registerHybridMethod("addOnAdStartListener", &HybridVideoPlayerEventEmitterSpec::addOnAdStartListener);
+      prototype.registerHybridMethod("addOnAdCompleteListener", &HybridVideoPlayerEventEmitterSpec::addOnAdCompleteListener);
+      prototype.registerHybridMethod("addOnAdSkippedListener", &HybridVideoPlayerEventEmitterSpec::addOnAdSkippedListener);
+      prototype.registerHybridMethod("addOnAdClickedListener", &HybridVideoPlayerEventEmitterSpec::addOnAdClickedListener);
+      prototype.registerHybridMethod("addOnAdErrorListener", &HybridVideoPlayerEventEmitterSpec::addOnAdErrorListener);
+      prototype.registerHybridMethod("addOnAllAdsCompletedListener", &HybridVideoPlayerEventEmitterSpec::addOnAllAdsCompletedListener);
+      prototype.registerHybridMethod("addOnAdStateChangeListener", &HybridVideoPlayerEventEmitterSpec::addOnAdStateChangeListener);
       prototype.registerHybridMethod("clearAllListeners", &HybridVideoPlayerEventEmitterSpec::clearAllListeners);
     });
   }

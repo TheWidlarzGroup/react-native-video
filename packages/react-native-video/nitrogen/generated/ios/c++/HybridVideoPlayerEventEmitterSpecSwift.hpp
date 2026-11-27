@@ -48,6 +48,20 @@ namespace margelo::nitro::video { struct AudioTrackChangeData; }
 namespace margelo::nitro::video { struct AudioTrack; }
 // Forward declaration of `onVolumeChangeData` to properly resolve imports.
 namespace margelo::nitro::video { struct onVolumeChangeData; }
+// Forward declaration of `AdsResolvedEvent` to properly resolve imports.
+namespace margelo::nitro::video { struct AdsResolvedEvent; }
+// Forward declaration of `AdBreakEvent` to properly resolve imports.
+namespace margelo::nitro::video { struct AdBreakEvent; }
+// Forward declaration of `AdBreakKind` to properly resolve imports.
+namespace margelo::nitro::video { enum class AdBreakKind; }
+// Forward declaration of `AdProgressInfo` to properly resolve imports.
+namespace margelo::nitro::video { struct AdProgressInfo; }
+// Forward declaration of `AdInfo` to properly resolve imports.
+namespace margelo::nitro::video { struct AdInfo; }
+// Forward declaration of `AdErrorEvent` to properly resolve imports.
+namespace margelo::nitro::video { struct AdErrorEvent; }
+// Forward declaration of `VideoAdState` to properly resolve imports.
+namespace margelo::nitro::video { enum class VideoAdState; }
 
 #include "ListenerSubscription.hpp"
 #include <functional>
@@ -74,6 +88,13 @@ namespace margelo::nitro::video { struct onVolumeChangeData; }
 #include "AudioTrackChangeData.hpp"
 #include "AudioTrack.hpp"
 #include "onVolumeChangeData.hpp"
+#include "AdsResolvedEvent.hpp"
+#include "AdBreakEvent.hpp"
+#include "AdBreakKind.hpp"
+#include "AdProgressInfo.hpp"
+#include "AdInfo.hpp"
+#include "AdErrorEvent.hpp"
+#include "VideoAdState.hpp"
 
 #include "ReactNativeVideo-Swift-Cxx-Umbrella.hpp"
 
@@ -295,6 +316,94 @@ namespace margelo::nitro::video {
     }
     inline ListenerSubscription addOnVolumeChangeListener(const std::function<void(const onVolumeChangeData& /* data */)>& listener) override {
       auto __result = _swiftPart.addOnVolumeChangeListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline ListenerSubscription addOnAdsResolvedListener(const std::function<void(const AdsResolvedEvent& /* data */)>& listener) override {
+      auto __result = _swiftPart.addOnAdsResolvedListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline ListenerSubscription addOnAdBreakStartListener(const std::function<void(const AdBreakEvent& /* data */)>& listener) override {
+      auto __result = _swiftPart.addOnAdBreakStartListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline ListenerSubscription addOnAdBreakEndListener(const std::function<void(const AdBreakEvent& /* data */)>& listener) override {
+      auto __result = _swiftPart.addOnAdBreakEndListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline ListenerSubscription addOnAdProgressListener(const std::function<void(const AdProgressInfo& /* data */)>& listener) override {
+      auto __result = _swiftPart.addOnAdProgressListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline ListenerSubscription addOnAdStartListener(const std::function<void(const AdInfo& /* data */)>& listener) override {
+      auto __result = _swiftPart.addOnAdStartListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline ListenerSubscription addOnAdCompleteListener(const std::function<void(const AdInfo& /* data */)>& listener) override {
+      auto __result = _swiftPart.addOnAdCompleteListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline ListenerSubscription addOnAdSkippedListener(const std::function<void(const AdInfo& /* data */)>& listener) override {
+      auto __result = _swiftPart.addOnAdSkippedListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline ListenerSubscription addOnAdClickedListener(const std::function<void()>& listener) override {
+      auto __result = _swiftPart.addOnAdClickedListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline ListenerSubscription addOnAdErrorListener(const std::function<void(const AdErrorEvent& /* data */)>& listener) override {
+      auto __result = _swiftPart.addOnAdErrorListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline ListenerSubscription addOnAllAdsCompletedListener(const std::function<void()>& listener) override {
+      auto __result = _swiftPart.addOnAllAdsCompletedListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline ListenerSubscription addOnAdStateChangeListener(const std::function<void(VideoAdState /* state */)>& listener) override {
+      auto __result = _swiftPart.addOnAdStateChangeListener(listener);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

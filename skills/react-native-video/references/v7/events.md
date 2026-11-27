@@ -35,6 +35,7 @@ const sub = player.addEventListener('onEnd', () => {});
 | `onAudioBecomingNoisy` | — | Android. |
 | `onAudioFocusChange` | `hasAudioFocus: boolean` | Android. |
 | `onExternalPlaybackChange` | `active: boolean` | iOS (AirPlay). |
+| `onAdEvent` | `{ type, data }` | One listener for all ad events (needs the platform ads flag). See `ads.md`. The individual `onAd*` events (`onAdsResolved`, `onAdBreakStart/End`, `onAdProgress`, `onAdStart/Complete/Skipped/Clicked`, `onAdError`, `onAllAdsCompleted`, `onAdStateChange`) also exist. |
 
 ## View events (on `<VideoView>` or its ref)
 

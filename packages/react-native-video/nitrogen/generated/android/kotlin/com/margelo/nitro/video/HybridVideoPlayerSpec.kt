@@ -115,6 +115,14 @@ abstract class HybridVideoPlayerSpec: HybridObject() {
   
   @get:DoNotStrip
   @get:Keep
+  abstract val isPlayingAd: Boolean
+  
+  @get:DoNotStrip
+  @get:Keep
+  abstract val adState: VideoAdState
+  
+  @get:DoNotStrip
+  @get:Keep
   abstract val selectedTrack: TextTrack?
   
   @get:DoNotStrip
@@ -157,6 +165,18 @@ abstract class HybridVideoPlayerSpec: HybridObject() {
   @DoNotStrip
   @Keep
   abstract fun pause(): Unit
+  
+  @DoNotStrip
+  @Keep
+  abstract fun activateAds(): Promise<Unit>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun deactivateAds(): Unit
+  
+  @DoNotStrip
+  @Keep
+  abstract fun skipAd(): Unit
   
   @DoNotStrip
   @Keep

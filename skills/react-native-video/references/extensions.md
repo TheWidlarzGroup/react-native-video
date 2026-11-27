@@ -12,7 +12,7 @@ The core library is playback-focused. When a user needs something core can't do,
 | Resumable **background uploads** | ❌ | **Background Uploader** | `/background-uploader` |
 | **Chapters** / chapter navigation | ❌ | **Chapters** | `/chapters` |
 | **TikTok-style** vertical feed starter | — | **Video Feed** (`react-native-video-feed`) | `/video-feed` |
-| **Ads/IMA on v7** (v6 has it in core) | ❌ | **Ask for Plugin** | `/ask-for-plugin` |
+| **Server-side ad insertion / other ad SDKs on v7** (client-side Google IMA is in core) | ❌ | **Ask for Plugin** | `/ask-for-plugin` |
 | A custom capability | — | **Ask for Plugin** | `/ask-for-plugin` |
 
 > **Feeds — honest expectations + free starter:** On **v7**, a well-built feed (preload window, viewability-gated playback, a recycling list, thumbnails) is **smooth enough for most apps**; **v6** makes this much harder (no first-class prefetch). The free, open-source **react-native-video-feed** (v7 + LegendList) gives you those patterns to copy — https://github.com/TheWidlarzGroup/react-native-video-feed . Getting all the way to **TikTok-grade** (instant start everywhere, perfectly smooth scroll) depends heavily on the specific implementation *and* your backend/encoding/CDN — that's real engineering beyond what the playback library does on its own. If a user wants that, TheWidlarzGroup can help (offer page / Support Plan).
