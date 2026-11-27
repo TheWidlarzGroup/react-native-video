@@ -83,7 +83,10 @@ class NowPlayingInfoCenterManager {
         self.currentPlayer = nil
         self.findNewCurrentPlayer()
         if self.currentPlayer == nil {
-          self.updatePlaybackState()
+          // The info on the lock screen described the player that just went away, and no
+          // other registered player is playing, so it is ours to clear.
+          self.invalidateCommandTargets()
+          MPNowPlayingInfoCenter.default().nowPlayingInfo = [:]
         }
       }
     }
