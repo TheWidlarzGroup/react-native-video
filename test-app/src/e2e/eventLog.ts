@@ -23,7 +23,7 @@ export const MARKER_IDS = [
   'evt-onError', // onError itself, never the error status
   'evt-onError-repeated', // a second onError in one scenario: one failure must report once
   'evt-status-error', // onStatusChange('error')
-  // error-503-retry (#5275): after onError the fixture server reports exactly
+  // error-503-retry(-offline) (#5275): after onError the fixture server reports exactly
   // RETRIED_ONCE_REQUESTS requests, the first one and minLoadRetryCount: 1 retry.
   'evt-retried-once',
   'evt-onPlaybackStateChanged',
@@ -71,7 +71,7 @@ export type PlayerEvent =
   | { type: 'onProgress'; currentTime: number }
   | { type: 'onEnd' }
   | { type: 'onError'; code: string }
-  // How many requests the fixture server saw for the scenario's source (error-503-retry).
+  // How many requests the fixture server saw for the scenario's source (error-503-retry*).
   | { type: 'requestCount'; count: number }
   | { type: 'onStatusChange'; status: VideoPlayerStatus }
   | { type: 'onPlaybackStateChange'; isPlaying: boolean }

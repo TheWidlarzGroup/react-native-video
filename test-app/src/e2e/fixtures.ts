@@ -13,7 +13,7 @@ export const FIXTURE_BASE = Platform.select({
   default: 'http://localhost:8090',
 });
 
-// error-503-retry: a token per app launch, so the fixture server can count this source's
+// error-503-retry(-offline): a token per app launch, so the fixture server can count this source's
 // requests (`/__requests?token=`).
 export const RETRY_TOKEN = Math.random().toString(36).slice(2);
 
@@ -34,6 +34,13 @@ export const SCENARIO_SOURCES: Record<ScenarioName, VideoConfig> = {
   'error-503-retry': {
     ...fixture(`__unavailable/short.mp4?token=${RETRY_TOKEN}`), // 503, which is retried
     minLoadRetryCount: 1,
+  },
+  // disableDisconnectError retries without end only while there is no connection (Android;
+  // other platforms ignore it). A server that answers is not a lost connection.
+  'error-503-retry-offline': {
+    ...fixture(`__unavailable/short.mp4?token=${RETRY_TOKEN}`),
+    minLoadRetryCount: 1,
+    disableDisconnectError: true,
   },
   'broken-manifest': fixture('broken/index.m3u8'),
   'error-mid-playback': fixture('missing-segment/index.m3u8'), // 2 segments, then a 404

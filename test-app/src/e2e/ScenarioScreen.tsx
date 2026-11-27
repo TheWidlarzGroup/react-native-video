@@ -85,7 +85,10 @@ function startScenario(scenario: ScenarioName, player: VideoPlayer) {
   eventLog.handle({ type: 'initialStatus', status: player.status });
 
   // The player has given up by the time it reports the error: count its requests then.
-  if (scenario === 'error-503-retry') {
+  if (
+    scenario === 'error-503-retry' ||
+    scenario === 'error-503-retry-offline'
+  ) {
     player.addEventListener('onError', () => {
       fetch(`${FIXTURE_BASE}/__requests?token=${RETRY_TOKEN}`)
         .then((res) => res.json())
