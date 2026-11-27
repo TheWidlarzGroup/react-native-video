@@ -252,6 +252,9 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
     _eventEmitter?.onPlaybackStateChange(
       .init(isPlaying: isPlaying, isBuffering: isCurrentlyBuffering)
     )
-    _eventEmitter?.onBuffer(isCurrentlyBuffering)
+    if lastReportedBuffering != isCurrentlyBuffering {
+      lastReportedBuffering = isCurrentlyBuffering
+      _eventEmitter?.onBuffer(isCurrentlyBuffering)
+    }
   }
 }
