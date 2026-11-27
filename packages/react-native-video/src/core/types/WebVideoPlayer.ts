@@ -18,7 +18,7 @@ import type { VideoPlayerBase } from './VideoPlayerBase';
  * const videoTracks = player.getAvailableVideoTracks();
  * ```
  */
-export interface WebVideoPlayer extends VideoPlayerBase {
+export type WebVideoPlayer = VideoPlayerBase & {
   /**
    * The underlying `<video>` element (v6 `nativeHtmlVideoRef.current`).
    * Use it for browser APIs the player does not wrap. Changing playback
@@ -26,4 +26,4 @@ export interface WebVideoPlayer extends VideoPlayerBase {
    * where one exists.
    */
   readonly nativeHtmlVideoElement: HTMLVideoElement;
-}
+};
