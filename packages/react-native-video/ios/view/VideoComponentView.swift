@@ -201,6 +201,10 @@ import UIKit
     if newSuperview == nil {
       PluginsRegistry.shared.notifyVideoViewDestroyed(view: self)
 
+      #if os(iOS)
+      exitFullscreenBeforeUnmount()
+      #endif
+
       // We want to disable this when view is about to unmount
       if keepScreenAwake {
         keepScreenAwake = false
@@ -225,6 +229,29 @@ import UIKit
       subview.frame = playerView?.bounds ?? .zero
     }
   }
+
+  #if os(iOS)
+  /// The view is leaving the hierarchy while its player is fullscreen. AVKit keeps its fullscreen
+  /// presentation alive on its own, so without this it stays on top of the app (a black screen
+  /// once the item is gone) and every later `enterFullscreen()`, from any view, is ignored until
+  /// the app restarts.
+  private func exitFullscreenBeforeUnmount() {
+    guard let playerViewController, let observer,
+      observer.isFullscreen || observer.isFullscreenTransitioning
+    else { return }
+    let player = playerViewController.player
+    let wasPlaying = player.map { $0.timeControlStatus != .paused } ?? false
+    // AVKit pauses the player when it leaves native fullscreen. After a normal exit the observer
+    // resumes it, but this view and its observer are going away, so resume it here once the
+    // dismissal is done. In v7 the player outlives the view, and an unmount outside fullscreen
+    // does not pause it either.
+    playerViewController.exitFullscreen(animated: false) {
+      if wasPlaying {
+        player?.play()
+      }
+    }
+  }
+  #endif
 
   public func enterFullscreen() throws {
     guard let playerViewController else {
