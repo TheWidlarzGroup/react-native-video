@@ -171,6 +171,12 @@ namespace margelo::nitro::video {
     inline void setDisableAudioSessionManagement(bool disableAudioSessionManagement) noexcept override {
       _swiftPart.setDisableAudioSessionManagement(std::forward<decltype(disableAudioSessionManagement)>(disableAudioSessionManagement));
     }
+    inline bool getAllowsExternalPlayback() noexcept override {
+      return _swiftPart.getAllowsExternalPlayback();
+    }
+    inline void setAllowsExternalPlayback(bool allowsExternalPlayback) noexcept override {
+      _swiftPart.setAllowsExternalPlayback(std::forward<decltype(allowsExternalPlayback)>(allowsExternalPlayback));
+    }
     inline bool getIsPlaying() noexcept override {
       return _swiftPart.isPlaying();
     }

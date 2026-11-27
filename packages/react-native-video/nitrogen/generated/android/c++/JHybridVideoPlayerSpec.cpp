@@ -198,6 +198,15 @@ namespace margelo::nitro::video {
     static const auto method = _javaPart->javaClassStatic()->getMethod<void(jboolean /* disableAudioSessionManagement */)>("setDisableAudioSessionManagement");
     method(_javaPart, disableAudioSessionManagement);
   }
+  bool JHybridVideoPlayerSpec::getAllowsExternalPlayback() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jboolean()>("getAllowsExternalPlayback");
+    auto __result = method(_javaPart);
+    return static_cast<bool>(__result);
+  }
+  void JHybridVideoPlayerSpec::setAllowsExternalPlayback(bool allowsExternalPlayback) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jboolean /* allowsExternalPlayback */)>("setAllowsExternalPlayback");
+    method(_javaPart, allowsExternalPlayback);
+  }
   bool JHybridVideoPlayerSpec::getIsPlaying() {
     static const auto method = _javaPart->javaClassStatic()->getMethod<jboolean()>("isPlaying");
     auto __result = method(_javaPart);

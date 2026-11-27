@@ -276,6 +276,17 @@ open class HybridVideoPlayerSpec_cxx {
     }
   }
   
+  public final var allowsExternalPlayback: Bool {
+    @inline(__always)
+    get {
+      return self.__implementation.allowsExternalPlayback
+    }
+    @inline(__always)
+    set {
+      self.__implementation.allowsExternalPlayback = newValue
+    }
+  }
+  
   public final var isPlaying: Bool {
     @inline(__always)
     get {

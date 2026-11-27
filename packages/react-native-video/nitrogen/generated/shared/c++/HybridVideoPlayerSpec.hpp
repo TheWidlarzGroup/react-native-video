@@ -96,6 +96,8 @@ namespace margelo::nitro::video {
       virtual void setPlayWhenInactive(bool playWhenInactive) = 0;
       virtual bool getDisableAudioSessionManagement() = 0;
       virtual void setDisableAudioSessionManagement(bool disableAudioSessionManagement) = 0;
+      virtual bool getAllowsExternalPlayback() = 0;
+      virtual void setAllowsExternalPlayback(bool allowsExternalPlayback) = 0;
       virtual bool getIsPlaying() = 0;
       virtual std::optional<TextTrack> getSelectedTrack() = 0;
       virtual std::optional<std::string> getSelectedVideoTrackId() = 0;

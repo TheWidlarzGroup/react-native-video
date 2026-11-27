@@ -295,6 +295,15 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     }
   }
 
+  var allowsExternalPlayback: Bool {
+    get {
+      return player.allowsExternalPlayback
+    }
+    set {
+      player.allowsExternalPlayback = newValue
+    }
+  }
+
   var wasAutoPaused: Bool = false
 
   var wasInterruptedWhilePlaying: Bool = false

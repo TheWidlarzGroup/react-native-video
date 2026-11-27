@@ -76,6 +76,8 @@ namespace margelo::nitro::video {
     void setPlayWhenInactive(bool playWhenInactive) override;
     bool getDisableAudioSessionManagement() override;
     void setDisableAudioSessionManagement(bool disableAudioSessionManagement) override;
+    bool getAllowsExternalPlayback() override;
+    void setAllowsExternalPlayback(bool allowsExternalPlayback) override;
     bool getIsPlaying() override;
     std::optional<TextTrack> getSelectedTrack() override;
     std::optional<std::string> getSelectedVideoTrackId() override;

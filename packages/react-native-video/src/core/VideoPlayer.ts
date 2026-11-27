@@ -274,6 +274,21 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     this.player.disableAudioSessionManagement = value;
   }
 
+  // Allows External Playback
+  get allowsExternalPlayback(): boolean {
+    return this.player.allowsExternalPlayback;
+  }
+
+  set allowsExternalPlayback(value: boolean) {
+    if (__DEV__ && !['ios'].includes(Platform.OS)) {
+      console.warn(
+        'allowsExternalPlayback is not supported on this platform, it wont have any effect'
+      );
+    }
+
+    this.player.allowsExternalPlayback = value;
+  }
+
   // Is Playing
   get isPlaying(): boolean {
     return this.player.isPlaying;

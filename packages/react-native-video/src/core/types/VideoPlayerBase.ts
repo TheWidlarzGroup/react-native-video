@@ -114,6 +114,17 @@ export interface VideoPlayerBase {
   disableAudioSessionManagement: boolean;
 
   /**
+   * Whether the player may switch to external playback, such as AirPlay video.
+   *
+   * - `true` - the video can be sent to an AirPlay device (default).
+   * - `false` - the video stays on the device. AirPlay can still carry the audio.
+   *
+   * @default true
+   * @platform iOS
+   */
+  allowsExternalPlayback: boolean;
+
+  /**
    * Whether the player is playing.
    * @note This is a read-only property.
    * @note To pause/resume the player, you need to use {@link play} and {@link pause} methods.
