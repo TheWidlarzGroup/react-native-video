@@ -69,7 +69,7 @@ export type VideoConfig = {
    * The cache is shared by all players, lives in the app's cache directory and evicts the least
    * recently used files above 100 MB.
    *
-   * @platform android
+   * @platform android, ios
    * @default false
    */
   shouldCache?: boolean;

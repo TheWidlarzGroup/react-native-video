@@ -107,7 +107,7 @@ const player = useVideoPlayer({
 | Platform | Behaviour |
 |----------|-----------|
 | Android | Progressive files loaded over the network are cached in the app's cache directory (`RNVCache`). The cache is shared by all players and evicts the least recently used files above 100 MB. HLS and DASH streams, DRM content and sources with `externalSubtitles` are played without the cache. |
-| iOS | Not available yet, the option is ignored. |
+| iOS | The same rules and the same 100 MB limit, in `Library/Caches/RNVCache`. While a file is not complete, the player's requests go to the network and every byte that passes is kept, so a file is downloaded once. A file that was only partly played is finished the next time it plays. No extra pods or build flags. |
 | Web | Ignored, the browser's HTTP cache applies. |
 
 ### Buffer Config
