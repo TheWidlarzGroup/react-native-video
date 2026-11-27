@@ -18,7 +18,8 @@ import UniformTypeIdentifiers
 final class VideoCache {
   static let shared = VideoCache()
 
-  static let scheme = "rnv-cache"
+  // "rnv-cache-http" / "rnv-cache-https": the uri's own scheme stays readable.
+  static let schemePrefix = "rnv-cache-"
   static let sizeLimit: Int64 = 100 * 1024 * 1024
 
   private let directory: URL
@@ -90,12 +91,22 @@ final class VideoCache {
     loaders[key] = WeakLoader(loader: loader)
 
     // AVFoundation calls a resource loader only for a scheme it cannot load itself.
-    components.scheme = Self.scheme
+    components.scheme = Self.schemePrefix + (url.scheme?.lowercased() ?? "https")
     let asset = AVURLAsset(url: components.url ?? url)
     asset.resourceLoader.setDelegate(loader, queue: loader.queue)
     // The resource loader keeps its delegate weakly; the asset owns it.
     objc_setAssociatedObject(asset, &Self.loaderKey, loader, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
     return asset
+  }
+
+  /// The uri the app gave for an asset that goes through the cache; other urls are returned
+  /// as they are.
+  static func originalURL(for url: URL) -> URL {
+    guard let scheme = url.scheme, scheme.hasPrefix(schemePrefix),
+      var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+    else { return url }
+    components.scheme = String(scheme.dropFirst(schemePrefix.count))
+    return components.url ?? url
   }
 
   private static func key(for url: URL) -> String {
