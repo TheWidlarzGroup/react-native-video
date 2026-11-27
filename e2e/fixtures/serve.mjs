@@ -2,7 +2,7 @@
 // would fetch a package from the network before every CI job, which is a flake source
 // unrelated to the library under test.
 import { createServer } from 'node:http';
-import { createReadStream, statSync } from 'node:fs';
+import { closeSync, createReadStream, openSync, readSync, statSync } from 'node:fs';
 import { join, normalize, extname, resolve } from 'node:path';
 import { openLink, scenarioLink, simulatorDevice } from './open-link.mjs';
 
@@ -15,6 +15,19 @@ const TYPES = {
   '.ts': 'video/mp2t',
   '.m3u8': 'application/vnd.apple.mpegurl',
 };
+
+// A file without a known extension (hls-noext/stream) is typed by its first bytes, the way a
+// CDN serves a playlist behind a uri that does not show it.
+function sniffType(file) {
+  const head = Buffer.alloc(7);
+  const fd = openSync(file, 'r');
+  try {
+    readSync(fd, head, 0, head.length, 0);
+  } finally {
+    closeSync(fd);
+  }
+  return head.toString('latin1') === '#EXTM3U' ? TYPES['.m3u8'] : 'application/octet-stream';
+}
 
 const LOOPBACK = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1']);
 
@@ -70,7 +83,7 @@ const server = createServer((req, res) => {
       return;
     }
 
-    const type = TYPES[extname(file)] ?? 'application/octet-stream';
+    const type = TYPES[extname(file)] ?? sniffType(file);
     const range = req.headers.range;
 
     // AVPlayer and ExoPlayer both request byte ranges; without this, playback stalls.

@@ -5,6 +5,7 @@ export const SCENARIO_NAMES = [
   'mp4-release-mid-playback', // same clip; replaceSourceAsync(null) once progress > 2 s
   'mp4-fullscreen-rotate', // same clip; enterFullscreen() on landscape, exitFullscreen() on portrait
   'hls',
+  'hls-type', // the same HLS VOD behind a uri without an extension, with type: 'm3u8'
   'error-404',
   'broken-manifest',
   'error-mid-playback',

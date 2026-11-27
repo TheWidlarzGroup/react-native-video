@@ -25,6 +25,7 @@ export const SCENARIO_SOURCES: Record<ScenarioName, VideoConfig> = {
   'mp4-release-mid-playback': fixture('short.mp4'),
   'mp4-fullscreen-rotate': fixture('short.mp4'),
   'hls': fixture('hls/index.m3u8'), // ~8 s VOD, 2 s segments
+  'hls-type': { ...fixture('hls-noext/stream'), type: 'm3u8' },
   'error-404': fixture('does-not-exist.mp4'),
   'broken-manifest': fixture('broken/index.m3u8'),
   'error-mid-playback': fixture('missing-segment/index.m3u8'), // 2 segments, then a 404

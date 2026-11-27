@@ -52,6 +52,12 @@ test('serves the HLS manifest from a subdirectory', async () => {
   expect(res.headers.get('content-type')).toBe('application/vnd.apple.mpegurl');
 });
 
+test('serves a playlist without an extension as HLS, by its first bytes', async () => {
+  const res = await fetch(`${BASE}/hls-noext/stream`);
+  expect(res.status).toBe(200);
+  expect(res.headers.get('content-type')).toBe('application/vnd.apple.mpegurl');
+});
+
 test('honours Range requests', async () => {
   const res = await fetch(`${BASE}/short.mp4`, { headers: { Range: 'bytes=0-99' } });
   expect(res.status).toBe(206);
