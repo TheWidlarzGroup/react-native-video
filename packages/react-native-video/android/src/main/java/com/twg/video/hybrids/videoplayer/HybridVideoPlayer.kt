@@ -279,7 +279,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
 
     player.addListener(playerListener)
     player.addAnalyticsListener(analyticsListener)
-    player.setMediaSource(hybridSource.mediaSource)
+    setMediaSource(hybridSource)
     ensureNotReleased()
 
     // Emit onLoadStart
@@ -320,6 +320,17 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
         maxBitRate?.let { setMaxVideoBitrate(it.toInt()) }
       }
       .build()
+  }
+
+  // Sets the source on the player, starting at `startPosition` (milliseconds) when it is given
+  private fun setMediaSource(hybridSource: HybridVideoPlayerSource) {
+    val startPositionMs = hybridSource.config.startPosition?.toLong() ?: 0L
+
+    if (startPositionMs > 0) {
+      player.setMediaSource(hybridSource.mediaSource, startPositionMs)
+    } else {
+      player.setMediaSource(hybridSource.mediaSource)
+    }
   }
 
   private fun ensureNotReleased() {
@@ -391,7 +402,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
         oldSource?.sourceLoader?.cancel()
 
         this.source = source
-        player.setMediaSource(hybridSource.mediaSource)
+        setMediaSource(hybridSource)
         ensureNotReleased()
 
         player.prepare()

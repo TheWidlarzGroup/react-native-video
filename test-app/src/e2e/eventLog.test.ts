@@ -7,6 +7,7 @@ import {
   PROGRESS_MARKER_SECONDS,
   SEEK_BACK_LANDED_SECONDS,
   SEEK_FORWARD_LANDED_SECONDS,
+  START_POSITION_LANDED_SECONDS,
   STATUS_ERROR_CODE,
   VOLUME_LOW_THRESHOLD,
   FIXTURE_DURATION_SECONDS,
@@ -621,5 +622,23 @@ describe('fullscreen', () => {
     });
     expect(markers()).toEqual(['evt-fullscreen-call-failed']);
     expect(lines()).toEqual(['exitFullscreen() threw: boom']);
+  });
+});
+
+describe('start position', () => {
+  test('only the first progress of the scenario tells where playback started', () => {
+    feed({
+      type: 'onProgress',
+      currentTime: START_POSITION_LANDED_SECONDS + 1,
+    });
+    expect(markers()).toContain('evt-started-at-position');
+  });
+
+  test('playback that started at 0 never satisfies it, however far it gets', () => {
+    feed(
+      { type: 'onProgress', currentTime: 0.1 },
+      { type: 'onProgress', currentTime: START_POSITION_LANDED_SECONDS + 1 }
+    );
+    expect(markers()).not.toContain('evt-started-at-position');
   });
 });

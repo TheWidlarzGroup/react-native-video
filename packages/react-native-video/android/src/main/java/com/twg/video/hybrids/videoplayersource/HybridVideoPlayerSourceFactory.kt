@@ -43,6 +43,7 @@ class HybridVideoPlayerSourceFactory: HybridVideoPlayerSourceFactorySpec() {
       headers = null,
       bufferConfig = null,
       metadata = null,
+      startPosition = null,
       initializeOnCreation = true
     )
 

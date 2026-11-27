@@ -643,6 +643,16 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     }
     try ensureCurrentLoad(context)
 
+    // Seeking an item that has no player yet sets where its playback starts
+    if let startPosition = source.config.startPosition, startPosition > 0 {
+      playerItem.seek(
+        to: CMTime(seconds: startPosition / 1000, preferredTimescale: 1000),
+        toleranceBefore: .zero,
+        toleranceAfter: .zero,
+        completionHandler: nil
+      )
+    }
+
     if let metadata = source.config.metadata {
       let title = metadata.title
       let artist = metadata.artist

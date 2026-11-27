@@ -34,6 +34,7 @@ const player = useVideoPlayer(
 | `bufferConfig` | `BufferConfig` | Buffer tuning — see `../shared/streaming-sources.md`. |
 | `metadata` | `{ title?; subtitle?; description?; artist?; imageUri? }` | Lock-screen / notification info. |
 | `externalSubtitles` | `{ uri; label; type?; language? }[]` | Sidecar subs (iOS: `.vtt` only). |
+| `startPosition` | `number` (**milliseconds**) | Start playback of this source at that position (v6 `source.startPosition`). Ignored when not > 0. |
 | `initializeOnCreation` | `boolean` (default `true`) | If `false`, call `player.initialize()` yourself. |
 
 ## `useVideoPlayer` (hook) vs `new VideoPlayer` (class)

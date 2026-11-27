@@ -30,6 +30,7 @@ export const MARKER_IDS = [
   'evt-onSeek',
   'evt-seek-fwd-landed', // first onProgress after an onSeek reports currentTime > 4s
   'evt-seek-back-landed', // first onProgress after an onSeek reports currentTime < 2s
+  'evt-started-at-position', // the scenario's FIRST onProgress reports currentTime > 4s
   'evt-muted',
   'evt-unmuted', // muted:false after evt-muted (real unmute, not the initial default)
   'evt-volume-low', // onVolumeChange volume <= 0.35 while not muted
@@ -105,6 +106,8 @@ export const VIDEO_TRACK_COUNT = 3;
 export const PROGRESS_MARKER_SECONDS = 2;
 export const SEEK_FORWARD_LANDED_SECONDS = 4;
 export const SEEK_BACK_LANDED_SECONDS = 2;
+// The mp4-start-position source starts at 5 s; natural playback starts near 0.
+export const START_POSITION_LANDED_SECONDS = 4;
 export const VOLUME_LOW_THRESHOLD = 0.35;
 export const LOOP_VERIFIED_END_COUNT = 3;
 // A loop wrap-around: progress was near the end of the 8 s clip and is now near its
@@ -213,6 +216,11 @@ function apply(event: PlayerEvent) {
       const t = event.currentTime;
       // derived markers: assert text, not numbers
       if (t > PROGRESS_MARKER_SECONDS) mark('evt-progress-gt-2s');
+      // Where playback started: only the first progress of the scenario can tell, so
+      // natural playback can never satisfy it (smoke-start-position.yaml).
+      if (state.lastProgress === null && t > START_POSITION_LANDED_SECONDS) {
+        mark('evt-started-at-position');
+      }
       // A replaced source must start from its beginning: the first progress after its
       // onLoad proves it, the way the seek markers prove where a seek landed.
       if (state.reloadPending) {

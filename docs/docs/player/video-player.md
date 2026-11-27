@@ -81,6 +81,21 @@ The `VideoPlayer` class offers a comprehensive set of methods and properties to 
 |----------|------|-------------|
 | `onError?` | `(error: VideoRuntimeError) => void` | A callback function that is invoked when a runtime error occurs in the player. You can use this to catch and handle errors gracefully. |
 
+### Start Position
+
+Set `startPosition` (in **milliseconds**) on the `VideoConfig` to start playback of that source at a given position instead of at the beginning. It is applied whenever the source is loaded: on creation, by `initialize()` / `preload()`, and by `replaceSourceAsync()`. A value that is not greater than `0` is ignored.
+
+```typescript
+const player = new VideoPlayer({
+  uri: 'https://example.com/video.mp4',
+  startPosition: 30_000, // start 30 seconds in
+});
+```
+
+:::note
+`startPosition` uses milliseconds, like in v6, while `currentTime`, `seekTo()` and `seekBy()` use seconds. No `onSeek` event is emitted for it on iOS and Android. For live streams the position is relative to the start of the seekable window, so prefer `bufferConfig.livePlayback` there.
+:::
+
 ### Buffer Config
 
 You can fine‑tune buffering via `bufferConfig` on the `VideoConfig` you pass to `useVideoPlayer`/`VideoPlayer`. This controls how much data is buffered, live latency targets, and iOS network constraints.

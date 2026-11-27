@@ -55,6 +55,16 @@ export type VideoConfig = {
    */
   externalSubtitles?: ExternalSubtitle[];
   /**
+   * The position, in milliseconds, at which playback of this source starts.
+   * It is applied when the source is loaded (on creation, `initialize()`, `preload()` or `replaceSourceAsync()`).
+   * A value that is not greater than 0 is ignored.
+   * @example
+   * ```ts
+   * startPosition: 30_000 // start 30 seconds in
+   * ```
+   */
+  startPosition?: number;
+  /**
    * when the player is created, this flag will determine if native player should be initialized immediately.
    * If set to true, the player will be initialized as soon as player is created
    * If set to false, the player will need be initialized manually later

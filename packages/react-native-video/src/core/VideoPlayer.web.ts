@@ -324,6 +324,20 @@ class VideoPlayer extends VideoPlayerEvents implements WebVideoPlayer {
     this._source = source as NativeVideoConfig;
     this._media.loadSource(source.uri);
 
+    const startPosition = source.startPosition;
+    if (startPosition !== undefined && startPosition > 0) {
+      video.addEventListener(
+        'loadedmetadata',
+        () => {
+          // Skip if the source was replaced before this one loaded
+          if (this._source === source) {
+            video.currentTime = startPosition / 1000;
+          }
+        },
+        { once: true }
+      );
+    }
+
     if (this.mediaSession?.enabled) {
       this.mediaSession.updateMediaSession(source.metadata);
     }
