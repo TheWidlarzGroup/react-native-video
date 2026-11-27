@@ -6,6 +6,7 @@ on:
       - master
     paths:
       - '.github/workflows/check-js.yml'
+      - '.github/actions/setup-node/**'
       - 'src/**'
       - '*.json'
       - '*.js'
@@ -16,6 +17,7 @@ on:
   pull_request:
     paths:
       - '.github/workflows/check-js.yml'
+      - '.github/actions/setup-node/**'
       - 'src/**'
       - '*.json'
       - '*.js'
