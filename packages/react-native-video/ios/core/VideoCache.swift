@@ -109,7 +109,12 @@ final class VideoCache {
 
     // AVFoundation calls a resource loader only for a scheme it cannot load itself.
     components.scheme = Self.schemePrefix + (url.scheme?.lowercased() ?? "https")
-    let asset = AVURLAsset(url: components.url ?? url)
+    // The headers go on the asset too: what the loader hands back to the player (the playlists
+    // and segments of a stream behind a uri without an extension) is loaded by AVFoundation,
+    // and it only sends the app's headers when the asset carries them.
+    let asset = AVURLAsset(
+      url: components.url ?? url,
+      options: headers.map { ["AVURLAssetHTTPHeaderFieldsKey": $0] as [String: Any] })
     asset.resourceLoader.setDelegate(loader, queue: loader.queue)
     // The resource loader keeps its delegate weakly; the asset owns it.
     objc_setAssociatedObject(asset, &Self.loaderKey, loader, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
