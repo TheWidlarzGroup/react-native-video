@@ -34,6 +34,7 @@ import com.twg.video.core.player.OnAudioFocusChangedListener
 import com.twg.video.core.recivers.AudioBecomingNoisyReceiver
 import com.twg.video.core.services.playback.VideoPlaybackService
 import com.twg.video.core.services.playback.VideoPlaybackServiceConnection
+import com.twg.video.core.utils.AudioTrackUtils
 import com.twg.video.core.utils.TextTrackUtils
 import com.twg.video.core.utils.Threading.mainThreadProperty
 import com.twg.video.core.utils.Threading.runOnMainThread
@@ -111,8 +112,29 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   private var requestedVideoTrack: VideoTrack? = null
   private var lastVideoTrackChangeSignature: String? = null
 
+  // Audio track selection state. The whole AudioTrack is kept, not just its id, so the pick can be
+  // resolved again by language/label/channels after the track set changes and ids shift.
+  private var requestedAudioTrack: AudioTrack? = null
+  private var lastAudioTrackChangeSignature: String? = null
+  // A pick that switches tracks lands asynchronously: ExoPlayer re-runs selection and reports the
+  // result through onTracksChanged. While a switch is on its way, audioSwitchFromId is the track
+  // that was playing when it was asked for, so the event goes out once, with the new track.
+  private var audioSwitchPending = false
+  private var audioSwitchFromId: String? = null
+  // The track ExoPlayer picks on its own for this source, seen while no pick is in force.
+  private var defaultAudioTrackId: String? = null
+  // Fallback for a pick that is cleared while the default isn't known (see selectAudioTrack): if
+  // the selection turns out not to change, no onTracksChanged follows, so acknowledge it here.
+  private val audioSwitchAckRunnable = Runnable {
+    if (!audioSwitchPending || releaseStarted.get()) return@Runnable
+    audioSwitchPending = false
+    audioSwitchFromId = null
+    emitAudioTrackChange(force = true)
+  }
+
   private companion object {
     const val DEFAULT_PROGRESS_UPDATE_INTERVAL_MS = 250L
+    const val AUDIO_SWITCH_ACK_TIMEOUT_MS = 300L
     private const val TAG = "HybridVideoPlayer"
     private const val DEFAULT_MIN_BUFFER_DURATION_MS = 5000
     private const val DEFAULT_MAX_BUFFER_DURATION_MS = 10000
@@ -402,6 +424,12 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
         oldSource?.sourceLoader?.cancel()
 
         this.source = source
+        // Audio selection state describes the old source: its default track id and any switch
+        // still waiting for onTracksChanged mean nothing for the new one.
+        defaultAudioTrackId = null
+        audioSwitchPending = false
+        audioSwitchFromId = null
+        progressHandler.removeCallbacks(audioSwitchAckRunnable)
         player.setMediaSource(hybridSource.mediaSource)
         ensureNotReleased()
 
@@ -729,6 +757,8 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
       }
       reapplyRequestedVideoTrack()
       emitVideoTrackChange()
+      reapplyRequestedAudioTrack()
+      reportAudioTracksChanged()
     }
   }
 
@@ -811,6 +841,149 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
         availableTracks = available,
         selectedTrackId = requestedVideoTrack?.id,
         activeTrackId = activeId,
+      )
+    )
+  }
+
+  // MARK: - Audio Track Management
+
+  override fun getAvailableAudioTracks(): Array<AudioTrack> =
+    AudioTrackUtils.getAvailableAudioTracks(player)
+
+  override fun selectAudioTrack(trackId: String?) {
+    val playingId = AudioTrackUtils.getSelectedAudioTrack(player)?.id
+    val hadPick = requestedAudioTrack != null
+    progressHandler.removeCallbacks(audioSwitchAckRunnable)
+    val applied = AudioTrackUtils.selectAudioTrack(player, trackId)
+    requestedAudioTrack = if (trackId == null) {
+      null
+    } else {
+      // Remember the request even when it doesn't resolve yet: a pick made before the tracks are
+      // known is applied by onTracksChanged as soon as they are.
+      applied
+        ?: AudioTrackUtils.getAvailableAudioTracks(player).firstOrNull { it.id == trackId }
+        ?: AudioTrack(
+          id = trackId,
+          label = trackId,
+          language = null,
+          selected = false,
+          channels = null,
+        )
+    }
+
+    // Where this call moves playback: the picked track, or ExoPlayer's own choice when the pick is
+    // cleared. Null when that is not known (the id doesn't resolve yet, no default seen so far).
+    val targetId = if (trackId == null) {
+      defaultAudioTrackId?.takeIf { id ->
+        AudioTrackUtils.getAvailableAudioTracks(player).any { it.id == id }
+      }
+    } else {
+      applied?.id
+    }
+
+    // Clearing a pick whose replacement isn't known (the default was never seen for this source,
+    // e.g. the pick followed a source change): it may or may not move playback.
+    val outcomeUnknown = trackId == null && targetId == null && hadPick && playingId != null
+
+    if (outcomeUnknown || (playingId != null && targetId != null && targetId != playingId)) {
+      // A switch is on its way. Reporting now would describe the outgoing track (its
+      // `selected` flag is still set), and onTracksChanged would then send a second event with
+      // the new one. Let that callback send the only event.
+      audioSwitchPending = true
+      audioSwitchFromId = playingId
+      // If it turns out nothing changes, no callback follows: acknowledge after a short delay.
+      if (outcomeUnknown) {
+        progressHandler.postDelayed(audioSwitchAckRunnable, AUDIO_SWITCH_ACK_TIMEOUT_MS)
+      }
+    } else {
+      // Nothing will change (the same track again, or a pick that can't be applied yet), so no
+      // callback follows: acknowledge the call here.
+      audioSwitchPending = false
+      audioSwitchFromId = null
+      emitAudioTrackChange(force = true)
+    }
+  }
+
+  /**
+   * The audio part of onTracksChanged: sends onAudioTrackChange when the tracks or the selection
+   * changed, and finishes a switch started by [selectAudioTrack].
+   */
+  private fun reportAudioTracksChanged() {
+    val playingId = AudioTrackUtils.getSelectedAudioTrack(player)?.id
+    if (audioSwitchPending) {
+      // onTracksChanged fires for unrelated reasons too: wait for the one that carries the switch.
+      if (playingId == audioSwitchFromId) return
+      audioSwitchPending = false
+      audioSwitchFromId = null
+      progressHandler.removeCallbacks(audioSwitchAckRunnable)
+      emitAudioTrackChange(force = true)
+    } else {
+      emitAudioTrackChange()
+    }
+    if (requestedAudioTrack == null && playingId != null) {
+      defaultAudioTrackId = playingId
+    }
+  }
+
+  /**
+   * The track the user picked, or - while they haven't picked one - the one ExoPlayer chose.
+   *
+   * There is no separate "requested" vs "active" id in the event payload, because audio
+   * selection is exact: whatever is selected *is* what's playing. So this reports the real
+   * selection rather than only an explicit request, and is never null while audio exists.
+   */
+  override val selectedAudioTrackId: String?
+    get() = requestedAudioTrack?.id ?: AudioTrackUtils.getSelectedAudioTrack(player)?.id
+
+  /**
+   * Re-asserts the user's audio pick against the current track set.
+   *
+   * ExoPlayer silently drops a [androidx.media3.common.TrackSelectionOverride] whose media track
+   * group is gone, which is exactly what a track change means (e.g. a new source). Without this
+   * hook an audio pick would quietly decay back to the default language on the next source.
+   *
+   * Reloading the *same* content doesn't need this: Media3's TrackGroup equality is id + formats,
+   * so the old override still matches the new groups. (Verified: that pick survives with this hook
+   * disabled.) The hook matters when the groups really differ, e.g. the next episode with the same
+   * language set.
+   */
+  private fun reapplyRequestedAudioTrack() {
+    val desired = requestedAudioTrack ?: return
+    val available = AudioTrackUtils.getAvailableAudioTracks(player)
+    // No tracks yet (mid source transition, or a pick made before load): keep the pick for later.
+    if (available.isEmpty()) return
+    val match = AudioTrackUtils.findEquivalent(available, desired)
+    if (match == null) {
+      // The new content has nothing equivalent. Drop the pick instead of letting
+      // selectedAudioTrackId keep reporting an id that doesn't exist in the current track list.
+      // Its stale override targets a group that's gone, so ExoPlayer ignores it anyway.
+      requestedAudioTrack = null
+      AudioTrackUtils.selectAudioTrack(player, null)
+      return
+    }
+    requestedAudioTrack = match
+    // Cheap when it's already in force: ExoPlayer no-ops on unchanged track selection parameters.
+    AudioTrackUtils.selectAudioTrack(player, match.id)
+  }
+
+  /**
+   * Emits onAudioTrackChange. Unless [force]d (the answer to a selectAudioTrack call, which is
+   * always sent), it stays quiet while the available set and the selection are both unchanged -
+   * onTracksChanged fires for unrelated reasons too.
+   */
+  private fun emitAudioTrackChange(force: Boolean = false) {
+    val available = AudioTrackUtils.getAvailableAudioTracks(player)
+    val actualId = available.firstOrNull { it.selected }?.id
+    val signature =
+      "${available.joinToString("|") { it.id }}#$actualId#${requestedAudioTrack?.id}"
+    if (!force && signature == lastAudioTrackChangeSignature) return
+    lastAudioTrackChangeSignature = signature
+    eventEmitter.onAudioTrackChange(
+      AudioTrackChangeData(
+        availableTracks = available,
+        // Deliberately the same expression as selectedAudioTrackId, so the property and the event
+        // can never disagree.
+        selectedTrackId = requestedAudioTrack?.id ?: actualId,
       )
     )
   }

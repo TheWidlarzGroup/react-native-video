@@ -1,14 +1,13 @@
-import type { AudioTrack } from './AudioTrack';
 import type { VideoPlayerBase } from './VideoPlayerBase';
 
 /**
- * Extended VideoPlayer interface with web-only methods.
- * Use this type when you need access to audio track APIs on web.
- * (Video track selection is on {@link VideoPlayerBase} - it's a native/web
- * shared API, not web-only.)
+ * The VideoPlayer type on web.
+ * Audio and video track selection are on {@link VideoPlayerBase} - they are
+ * native/web shared APIs, not web-only - so this type only adds access to the
+ * `<video>` element.
  *
- * @experimental Audio tracks have ~16% browser support (Safari only, behind flags in Chrome/Firefox).
- * These methods return empty arrays on unsupported browsers.
+ * @experimental Audio/video tracks have ~16% browser support (Safari only, behind flags in Chrome/Firefox).
+ * The track methods return empty arrays on unsupported browsers.
  *
  * @example
  * ```ts
@@ -16,13 +15,10 @@ import type { VideoPlayerBase } from './VideoPlayerBase';
  *
  * const player = useVideoPlayer(source) as WebVideoPlayer;
  * const audioTracks = player.getAvailableAudioTracks();
+ * const videoTracks = player.getAvailableVideoTracks();
  * ```
  */
 export interface WebVideoPlayer extends VideoPlayerBase {
-  getAvailableAudioTracks(): AudioTrack[];
-  selectAudioTrack(track: AudioTrack | null): void;
-  readonly selectedAudioTrack?: AudioTrack;
-
   /**
    * The underlying `<video>` element (v6 `nativeHtmlVideoRef.current`).
    * Use it for browser APIs the player does not wrap. Changing playback
