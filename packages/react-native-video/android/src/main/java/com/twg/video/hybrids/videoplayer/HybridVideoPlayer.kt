@@ -469,6 +469,12 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
 
       player.removeListener(playerListener)
       player.removeAnalyticsListener(analyticsListener)
+      // Unbind the view before releasing. The released player stays in memory until JS
+      // collects this hybrid object, and its image renderer would keep the last PlayerView
+      // and with it the whole VideoView alive (about 40 views per player). A released player
+      // no longer processes the message that clears the image output, so it must go first.
+      currentPlayerView?.get()?.player = null
+      currentPlayerView = null
       player.release() // Release player
 
       // Clean Listeners
