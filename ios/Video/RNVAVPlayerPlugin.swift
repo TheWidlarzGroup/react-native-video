@@ -18,7 +18,9 @@ open class RNVAVPlayerPlugin: RNVPlugin {
      * Only one plugin can provide DRM manager at a time
      * @return: DRMManagerSpec type if plugin wants to handle DRM, nil otherwise
      */
-    open func getDRMManager() -> DRMManagerSpec? { nil }
+    open func getDRMManager() -> DRMManagerSpec? {
+        nil
+    }
 
     /**
      * Function called when a new AVPlayer instance is created
@@ -42,7 +44,9 @@ open class RNVAVPlayerPlugin: RNVPlugin {
      * @param asset: The AVAsset prepared by the player
      * @return: OverridePlayerAssetResult if you want to override, or nil if you don't
      */
-    open func overridePlayerAsset(source _: VideoSource, asset _: AVAsset) async -> OverridePlayerAssetResult? { nil }
+    open func overridePlayerAsset(source _: VideoSource, asset _: AVAsset) async -> OverridePlayerAssetResult? {
+        nil
+    }
 
     // MARK: - RNVPlugin methods
 

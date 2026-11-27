@@ -4,7 +4,8 @@ import React
 @objc(RCTVideoManager)
 class RCTVideoManager: RCTViewManager {
     override func view() -> UIView {
-        return RCTVideo(eventDispatcher: (RCTBridge.current().eventDispatcher() as! RCTEventDispatcher))
+        let eventDispatcher = bridge?.eventDispatcher() as? RCTEventDispatcher
+        return RCTVideo(eventDispatcher: eventDispatcher)
     }
 
     func methodQueue() -> DispatchQueue {

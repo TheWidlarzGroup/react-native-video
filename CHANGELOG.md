@@ -1,4 +1,47 @@
+# Changelog
 
+## [6.19.2](https://github.com/moskalakamil/react-native-video/compare/v6.19.1...v6.19.2) (2026-04-28)
+
+
+### Bug Fixes
+
+* replace `absoluteFillObject` with `absoluteFill` ([#4880](https://github.com/moskalakamil/react-native-video/issues/4880)) ([ae7ff4f](https://github.com/moskalakamil/react-native-video/commit/ae7ff4fa07ce9234575664a541bbd2f557ff051c))
+
+## [6.19.1](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.19.0...v6.19.1) (2026-03-15)
+
+
+### Bug Fixes
+
+* **ios:** IMA ad container resizing on orientation change ([#4771](https://github.com/TheWidlarzGroup/react-native-video/issues/4771)) ([fc936c4](https://github.com/TheWidlarzGroup/react-native-video/commit/fc936c49ef3c2734173442042b7d5038aeaef301))
+* RCTVideoManager crash in bridgeless mode RN0.84 ([#4855](https://github.com/TheWidlarzGroup/react-native-video/issues/4855)) ([92b0a0e](https://github.com/TheWidlarzGroup/react-native-video/commit/92b0a0e416c7f313120a811cd2dc972f87b1c82f))
+
+# [6.19.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.18.0...v6.19.0) (2026-01-19)
+
+
+### Bug Fixes
+
+* **android:** correct videoTrack type definitions to match Android implementation ([#4778](https://github.com/TheWidlarzGroup/react-native-video/issues/4778)) ([commit](https://github.com/TheWidlarzGroup/react-native-video/commit/f38717778515b06c462fe75dcd94d2cce5ba3f95))
+
+
+### Features
+
+* **BREAKING CHANGE:** add DAI support ([#4816](https://github.com/TheWidlarzGroup/react-native-video/issues/4816)) ([commit](https://github.com/TheWidlarzGroup/react-native-video/commit/88ac1ae1dcdc907415f806bd64bd3d0a92ccd7d1))
+
+# [6.18.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.17.0...v6.18.0) (2025-11-18)
+
+
+### Bug Fixes
+
+* **android:** prevent duplicate `onVideoEnd` callback on prop changes ([#4762](https://github.com/TheWidlarzGroup/react-native-video/issues/4762)) ([05cd597](https://github.com/TheWidlarzGroup/react-native-video/commit/05cd5972c21ebcacf3cd5952e92f121a84b5c9a9))
+* **ci:** update ios device for builds ([#4757](https://github.com/TheWidlarzGroup/react-native-video/issues/4757)) ([a9f7524](https://github.com/TheWidlarzGroup/react-native-video/commit/a9f752435f3d94abfdb37ef5dc9c444038e3ad6a))
+* entering PiP mode when controls are true ([#4776](https://github.com/TheWidlarzGroup/react-native-video/issues/4776)) ([ba65ab1](https://github.com/TheWidlarzGroup/react-native-video/commit/ba65ab123321713e537fc7ccb1ac3ed5676f1677))
+* **iOS:** use top-most presented view controller for fullscreen presentation on iOS ([#4753](https://github.com/TheWidlarzGroup/react-native-video/issues/4753)) ([5d75b48](https://github.com/TheWidlarzGroup/react-native-video/commit/5d75b482952a9cd3e5f59237e302137857739d4e))
+* prevent `audiovisualBackgroundPlaybackPolicy` crash ([#4763](https://github.com/TheWidlarzGroup/react-native-video/issues/4763)) ([fbb260e](https://github.com/TheWidlarzGroup/react-native-video/commit/fbb260e9164194a55d2b26404aea000e924e2f04))
+
+
+### Features
+
+* **ios:** add PublicAudioSessionManager for audio session management ([#4747](https://github.com/TheWidlarzGroup/react-native-video/issues/4747)) ([f2afd16](https://github.com/TheWidlarzGroup/react-native-video/commit/f2afd16d0bc7fc72e0b4d8400d74342244158674))
 
 # [6.17.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.16.1...v6.17.0) (2025-10-06)
 
@@ -729,7 +772,7 @@
 * add release-it ([#3342](https://github.com/react-native-video/react-native-video/issues/3342)) ([da27089](https://github.com/react-native-video/react-native-video/commit/da270891fbce485bb132825a336638f2af98408d))
 * **ios:** add onBandwidthUpdate event ([#3331](https://github.com/react-native-video/react-native-video/issues/3331)) ([9054db3](https://github.com/react-native-video/react-native-video/commit/9054db35d7d5e4e6d54739fc9349576c03522d7c))
 
-## Changelog
+#
 
 ## Next
 - Android, iOS: add onVolumeChange event #3322

@@ -38,11 +38,11 @@ enum RCTVideoAssetsUtils {
 
 // MARK: - RCTVideoUtils
 
-/*!
+/** !
  * Collection of pure functions
  */
 enum RCTVideoUtils {
-    /*!
+    /** !
      * Calculates and returns the playable duration of the current player item using its loaded time ranges.
      *
      * \returns The playable duration of the current player item in seconds.
@@ -195,7 +195,7 @@ enum RCTVideoUtils {
         return textTracks
     }
 
-    // UNUSED
+    /// UNUSED
     static func getCurrentTime(playerItem: AVPlayerItem?) -> Float {
         return Float(CMTimeGetSeconds(playerItem?.currentTime() ?? .zero))
     }
@@ -310,7 +310,7 @@ enum RCTVideoUtils {
         return validTextTracks
     }
 
-    /*
+    /**
      * Create an useless/almost empty VTT file in the list with available tracks.
      * This track gets selected when you give type: "disabled" as the selectedTextTrack
      * This is needed because there is a bug where sideloaded texttracks cannot be disabled in the AVPlayer. Loading this VTT file instead solves that problem.

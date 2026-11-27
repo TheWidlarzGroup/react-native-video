@@ -3,9 +3,9 @@ import AVFoundation
 // MARK: - OverridePlayerAssetType
 
 public enum OverridePlayerAssetType {
-    // Return partially modified asset, that will go through the default prepare process
+    /// Return partially modified asset, that will go through the default prepare process
     case partial
-    // Return fully modified asset, that will skip the default prepare process
+    /// Return fully modified asset, that will skip the default prepare process
     case full
 }
 
