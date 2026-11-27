@@ -148,6 +148,10 @@ import UIKit
       }
 
       // Remove previous controller if any
+      if self.playerViewController != nil {
+        // What was tracked described the old controller (#4774).
+        self.observer?.resetFullscreenState()
+      }
       self.playerViewController?.willMove(toParent: nil)
       self.playerViewController?.view.removeFromSuperview()
       self.playerViewController?.removeFromParent()
@@ -239,6 +243,8 @@ import UIKit
     guard let playerViewController, let observer,
       observer.isFullscreen || observer.isFullscreenTransitioning
     else { return }
+    // Nothing queued may run after the view is gone.
+    observer.resetFullscreenState(keepingFullscreen: true)
     let player = playerViewController.player
     let wasPlaying = player.map { $0.timeControlStatus != .paused } ?? false
     // AVKit pauses the player when it leaves native fullscreen. After a normal exit the observer
@@ -254,31 +260,54 @@ import UIKit
   #endif
 
   public func enterFullscreen() throws {
-    guard let playerViewController else {
+    guard playerViewController != nil else {
       throw VideoViewError.viewIsDeallocated.error()
     }
 
     DispatchQueue.main.async { [weak self] in
-      // Ignore the call while already fullscreen or mid-transition (#4774)
-      if let observer = self?.observer, observer.isFullscreen || observer.isFullscreenTransitioning {
-        return
-      }
-      playerViewController.enterFullscreen(animated: true)
+      self?.requestFullscreen(true)
     }
   }
 
   public func exitFullscreen() throws {
-    guard let playerViewController else {
+    guard playerViewController != nil else {
       throw VideoViewError.viewIsDeallocated.error()
     }
 
     DispatchQueue.main.async { [weak self] in
-      // Ignore the call while inline or mid-transition (#4774)
-      if let observer = self?.observer, !observer.isFullscreen || observer.isFullscreenTransitioning {
-        return
-      }
+      self?.requestFullscreen(false)
+    }
+  }
+
+  /// AVKit asserts when a fullscreen transition is requested while another one is running
+  /// (#4774). A request made in that window is remembered and applied when the transition
+  /// ends, so `enterFullscreen()` followed by `exitFullscreen()` ends inline instead of being
+  /// dropped. Only the last request counts. Main thread only.
+  private func requestFullscreen(_ target: Bool) {
+    guard let playerViewController, let observer else { return }
+
+    if observer.isFullscreenBusy {
+      observer.queuedFullscreenTarget = target
+      return
+    }
+    observer.queuedFullscreenTarget = nil
+    guard observer.isFullscreen != target else { return }
+
+    observer.fullscreenRequestWillStart()
+    if target {
+      playerViewController.enterFullscreen(animated: true)
+    } else {
       playerViewController.exitFullscreen(animated: true)
     }
+  }
+
+  /// Called by the observer when a transition has ended, was cancelled, or never started.
+  func applyQueuedFullscreenRequest() {
+    guard let observer, !observer.isFullscreenBusy,
+      let target = observer.queuedFullscreenTarget
+    else { return }
+    observer.queuedFullscreenTarget = nil
+    requestFullscreen(target)
   }
 
   public func startPictureInPicture() throws {
