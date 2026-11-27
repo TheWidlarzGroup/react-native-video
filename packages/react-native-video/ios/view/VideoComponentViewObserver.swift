@@ -107,11 +107,18 @@ class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
   }
   
   func playerViewControllerDidStopPictureInPicture(_: AVPlayerViewController) {
+    view?.isPictureInPictureActive = false
     delegate?.onPictureInPictureChange(false)
   }
   
   func playerViewControllerWillStartPictureInPicture(_: AVPlayerViewController) {
+    view?.isPictureInPictureActive = true
+    VideoManager.shared.pictureInPictureWillStart(view: view)
     delegate?.willEnterPictureInPicture()
+  }
+
+  func playerViewController(_: AVPlayerViewController, failedToStartPictureInPictureWithError _: Error) {
+    view?.isPictureInPictureActive = false
   }
   
   func playerViewControllerWillStopPictureInPicture(_: AVPlayerViewController) {
