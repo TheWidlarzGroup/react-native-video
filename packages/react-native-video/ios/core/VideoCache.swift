@@ -29,7 +29,9 @@ final class VideoCache {
   private var loaders: [String: WeakLoader] = [:]
   // Files a loader is writing or reading right now; trimming leaves them alone.
   private var keysInUse: [String: Int] = [:]
+  private let trimQueue = DispatchQueue(label: "com.twg.video.cache.trim", qos: .utility)
   private static var loaderKey: UInt8 = 0
+  private static var useKey: UInt8 = 0
 
   private init() {
     let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
@@ -65,7 +67,11 @@ final class VideoCache {
       // The modification date is the "last used" date for trimming.
       try? FileManager.default.setAttributes(
         [.modificationDate: Date()], ofItemAtPath: completeFile.path)
-      return AVURLAsset(url: completeFile)
+      let asset = AVURLAsset(url: completeFile)
+      // Trimming leaves the file alone for as long as this asset lives.
+      objc_setAssociatedObject(
+        asset, &Self.useKey, KeyUse(cache: self, key: key), .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+      return asset
     }
 
     // The first asset's headers are used for the whole download.
@@ -89,6 +95,9 @@ final class VideoCache {
     }
 
     loaders[key] = WeakLoader(loader: loader)
+    // Partial files count too: a feed of videos that are never watched to the end must not
+    // grow without limit.
+    trimSoon()
 
     // AVFoundation calls a resource loader only for a scheme it cannot load itself.
     components.scheme = Self.schemePrefix + (url.scheme?.lowercased() ?? "https")
@@ -129,11 +138,16 @@ final class VideoCache {
     lock.unlock()
   }
 
-  /// Deletes the least recently used files until the cache fits in `sizeLimit`.
-  fileprivate func trim() {
+  fileprivate func trimSoon() {
+    trimQueue.async { [weak self] in self?.trim() }
+  }
+
+  /// Deletes the least recently used files until the cache fits in `sizeLimit`. Holds the lock,
+  /// so that no asset is created for a file while it is being deleted.
+  private func trim() {
     lock.lock()
+    defer { lock.unlock() }
     let inUse = Set(keysInUse.keys)
-    lock.unlock()
 
     let keys: [URLResourceKey] = [.fileSizeKey, .contentModificationDateKey]
     guard
@@ -547,7 +561,23 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
     guard (try? FileManager.default.moveItem(at: partialFile, to: completeFile)) != nil else { return }
     isComplete = true
     try? FileManager.default.removeItem(at: indexFile)
-    cache.trim()
+    cache.trimSoon()
+  }
+}
+
+/// Marks a cached file as in use for as long as the object lives.
+private final class KeyUse {
+  private unowned let cache: VideoCache
+  private let key: String
+
+  init(cache: VideoCache, key: String) {
+    self.cache = cache
+    self.key = key
+    cache.retain(key: key)
+  }
+
+  deinit {
+    cache.release(key: key)
   }
 }
 
