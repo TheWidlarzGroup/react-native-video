@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Platform, StyleSheet, View } from 'react-native';
 import { NitroModules } from 'react-native-nitro-modules';
 import type { ListenerSubscription } from '../../spec/nitro/VideoPlayerEventEmitter.nitro';
 import type {
@@ -13,6 +14,7 @@ import {
 } from '../types/VideoError';
 import type { VideoPlayer } from '../VideoPlayer';
 import { NativeVideoView } from './NativeVideoView';
+import { hasVideoViewOverlay, VideoViewOverlay } from './VideoViewOverlay';
 import type { VideoViewProps, VideoViewRef } from './VideoViewProps';
 
 let nitroIdCounter = 1;
@@ -46,6 +48,20 @@ const updateProps = (manager: VideoViewViewManager, props: VideoViewProps) => {
   manager.surfaceType = props.surfaceType ?? 'surface';
 };
 
+// Android reports "ready to display" once per loaded source, so a view that mounts
+// with an already loaded player gets no event. iOS reports it for every view.
+const isReadyToDisplay = (player: VideoViewProps['player']) => {
+  if (Platform.OS !== 'android') {
+    return false;
+  }
+
+  try {
+    return player.status === 'readyToPlay';
+  } catch {
+    return false;
+  }
+};
+
 /**
  * VideoView is a component that allows you to display a video from a {@link VideoPlayer}.
  *
@@ -71,6 +87,11 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
       willExitFullscreen,
       willEnterPictureInPicture,
       willExitPictureInPicture,
+      poster,
+      posterResizeMode,
+      renderLoader,
+      shutterColor,
+      hideShutterView,
       ...props
     },
     ref
@@ -306,12 +327,40 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
       managerGeneration,
     ]);
 
+    const overlayProps = {
+      poster,
+      posterResizeMode,
+      renderLoader,
+      shutterColor,
+      hideShutterView,
+    };
+
+    if (!hasVideoViewOverlay(overlayProps)) {
+      return (
+        <NativeVideoView
+          nitroId={nitroId}
+          onNitroIdChange={onNitroIdChange}
+          {...props}
+        />
+      );
+    }
+
+    // The overlay needs a parent to sit in, so the native view fills a wrapper
+    // that takes the style. Views without an overlay keep the single native view.
     return (
-      <NativeVideoView
-        nitroId={nitroId}
-        onNitroIdChange={onNitroIdChange}
-        {...props}
-      />
+      <View style={props.style}>
+        <NativeVideoView
+          nitroId={nitroId}
+          onNitroIdChange={onNitroIdChange}
+          {...props}
+          style={StyleSheet.absoluteFill}
+        />
+        <VideoViewOverlay
+          player={player}
+          isReadyToDisplay={isReadyToDisplay}
+          {...overlayProps}
+        />
+      </View>
     );
   }
 );

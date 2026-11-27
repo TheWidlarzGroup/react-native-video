@@ -18,6 +18,43 @@ keywords: [VideoView props, player, controls, resizeMode, surfaceType, picture-i
 | `resizeMode` | `'contain' \| 'cover' \| 'stretch' \| 'none'` | No | `'none'` | How the video should be resized to fit the view. |
 | `keepScreenAwake` | `boolean` | No | `true` | Whether to keep the device screen awake while the video view is mounted. |
 | `surfaceType` | `'surface' \| 'texture'` | No (Android only) | `'surface'` | (Android) Underlying native view type. `'surface'` uses a SurfaceView (better performance, no transforms/overlap), `'texture'` uses a TextureView (supports animations, transforms, overlapping UI) at a small performance cost. Ignored on iOS. |
+| `poster` | `string \| VideoPoster` | No | - | An image shown over the video from the moment a source starts loading until the video is ready to display. Pass an image URL, or `Image` props with a `source`. See [Poster, loader and shutter](#poster-loader-and-shutter). |
+| `posterResizeMode` | `'contain' \| 'cover' \| 'stretch' \| 'center' \| 'repeat' \| 'none'` | No | `'contain'` | How the poster is resized to fit the view. `poster.resizeMode` wins when both are set. |
+| `renderLoader` | `ReactNode \| (props) => ReactNode` | No | - | A custom view shown instead of the poster while the video loads. When set, `poster` is ignored. |
+| `shutterColor` | `ColorValue` | No | - | The color that covers the video area until the video is ready to display. It sits under the poster or loader. |
+| `hideShutterView` | `boolean` | No | `false` | Turns the shutter off, so `shutterColor` is ignored. |
+
+## Poster, loader and shutter
+
+`poster`, `renderLoader` and `shutterColor` cover the video from the moment a source starts loading until the player reports [`onReadyToDisplay`](../player/events.md). They come back when the player loads another source. For audio-only sources the cover stays, so a poster works as artwork.
+
+```tsx
+// An image URL
+<VideoView player={player} poster="https://example.com/poster.jpg" posterResizeMode="cover" />
+
+// A bundled image with Image props, on a black shutter
+<VideoView
+  player={player}
+  poster={{ source: require('./poster.png'), resizeMode: 'contain' }}
+  shutterColor="black"
+/>
+
+// Your own loader
+<VideoView
+  player={player}
+  renderLoader={
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <ActivityIndicator />
+    </View>
+  }
+/>
+```
+
+`renderLoader` also takes a function. It receives `{ style, resizeMode }`: a style that fills the video view and the resolved poster resize mode.
+
+:::note
+The cover is a React Native view drawn above the video, and it doesn't receive touches. When one of these props is set, `VideoView` renders the native view inside a wrapper `View` that takes the `style`. Adding or removing the last of these props on a mounted view remounts the native view.
+:::
 
 ## Android: Choosing a surface type
 
