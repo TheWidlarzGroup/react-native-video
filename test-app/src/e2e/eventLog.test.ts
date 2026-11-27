@@ -450,6 +450,38 @@ describe('lifecycle (ported from #4743)', () => {
     expect(markers()).toContain('evt-duration-fixture');
   });
 
+  test('the replacement start is in order when it comes before the replacement onLoad', () => {
+    feed({ type: 'onLoadStart' }, { type: 'onLoad', duration: 8 });
+    replaceRequested();
+    feed({ type: 'onLoadStart' }, { type: 'onLoad', duration: 8 });
+    expect(markers()).toContain('evt-replacement-start-before-load');
+    expect(markers()).not.toContain('evt-replacement-load-start-repeated');
+  });
+
+  test('a replacement start that comes after its onLoad, or never, is not in order', () => {
+    replaceRequested();
+    feed({ type: 'onLoad', duration: 8 }, { type: 'onLoadStart' });
+    expect(markers()).toContain('evt-replacement-load-started');
+    expect(markers()).not.toContain('evt-replacement-start-before-load');
+    // A later onLoad (Android re-emits it on a re-buffer) must not repair the order.
+    feed({ type: 'onLoad', duration: 8 });
+    expect(markers()).not.toContain('evt-replacement-start-before-load');
+
+    eventLog.reset();
+    replaceRequested();
+    feed({ type: 'onLoad', duration: 8 });
+    expect(markers()).not.toContain('evt-replacement-start-before-load');
+  });
+
+  test('a second onLoadStart for one replacement is reported as repeated', () => {
+    feed({ type: 'onLoadStart' });
+    replaceRequested();
+    feed({ type: 'onLoadStart' });
+    expect(markers()).not.toContain('evt-replacement-load-start-repeated');
+    feed({ type: 'onLoadStart' });
+    expect(markers()).toContain('evt-replacement-load-start-repeated');
+  });
+
   test('an onLoadStart counts as the replacement starting only after a replacement was requested', () => {
     // The first source's own onLoadStart is not a replacement.
     feed({ type: 'onLoadStart' });

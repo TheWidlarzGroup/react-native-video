@@ -40,6 +40,8 @@ tags: [smoke]
     visible:
       id: "evt-replacement-loaded"
     timeout: 20000
+- assertVisible:
+    id: "evt-replacement-start-before-load"   # the start was reported before the load, not after
 - extendedWaitUntil:
     visible:
       id: "evt-reloaded-from-start"
@@ -48,6 +50,8 @@ tags: [smoke]
     visible:
       id: "evt-ended-after-replace"
     timeout: 25000            # the HLS clip is ~8 s
+- assertNotVisible:
+    id: "evt-replacement-load-start-repeated"   # one replacement, one onLoadStart
 - assertNotVisible:
     id: "evt-replace-rejected"
 - assertNotVisible:

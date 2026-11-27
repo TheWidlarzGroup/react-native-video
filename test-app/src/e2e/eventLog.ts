@@ -50,6 +50,8 @@ export const MARKER_IDS = [
   'evt-replace-resolved', // replaceSourceAsync() resolved
   'evt-replace-rejected', // replaceSourceAsync() rejected
   'evt-replacement-load-started', // onLoadStart after replaceSourceAsync(source) was requested
+  'evt-replacement-start-before-load', // ...and it came before the replacement's first onLoad
+  'evt-replacement-load-start-repeated', // a second onLoadStart for the one replacement
   'evt-replacement-loaded', // onLoad after replaceSourceAsync(source) was requested
   'evt-reloaded-from-start', // first onProgress after that onLoad is < RELOAD_START_SECONDS
   'evt-ended-after-replace', // onEnd after replaceSourceAsync(source) was requested
@@ -148,6 +150,8 @@ type State = {
   // replaceSourceAsync(source) was requested: only an onLoad/onEnd after it counts as the
   // replacement loading/ending (Android re-emits onLoad on every re-buffer and replay).
   replaceRequested: boolean;
+  // onLoadStart events since that request.
+  replacementLoadStarts: number;
   // The next onProgress tells where the replacement source started (see onLoad).
   reloadPending: boolean;
 };
@@ -166,6 +170,7 @@ const initialState = (): State => ({
   loadingSeen: false,
   readySeen: false,
   replaceRequested: false,
+  replacementLoadStarts: 0,
   reloadPending: false,
 });
 
@@ -195,13 +200,29 @@ function append(line: string) {
 function apply(event: PlayerEvent) {
   switch (event.type) {
     case 'onLoadStart':
-      if (state.replaceRequested) mark('evt-replacement-load-started');
+      if (state.replaceRequested) {
+        mark('evt-replacement-load-started');
+        state.replacementLoadStarts += 1;
+        // One replacement is one load: a second start means it was reported twice.
+        if (state.replacementLoadStarts > 1) {
+          mark('evt-replacement-load-start-repeated');
+        }
+      }
       append('onLoadStart');
       return;
     case 'onLoad':
       mark('evt-onLoad');
       state.loadCount += 1;
       if (state.replaceRequested) {
+        // Order, judged once, on the replacement's first onLoad (Android re-emits onLoad
+        // on a re-buffer): a start reported only after it is too late for an app that
+        // shows a loader on onLoadStart and hides it on onLoad.
+        if (
+          !state.markers.has('evt-replacement-loaded') &&
+          state.replacementLoadStarts > 0
+        ) {
+          mark('evt-replacement-start-before-load');
+        }
         mark('evt-replacement-loaded');
         state.reloadPending = true;
       }
