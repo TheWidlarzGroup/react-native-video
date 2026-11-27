@@ -114,6 +114,37 @@ test('external subtitles get default type and language', () => {
   ]);
 });
 
+test('loading options reach native unchanged and are left out when not set', () => {
+  createSource({
+    uri: 'https://x/live',
+    type: 'm3u8',
+    minLoadRetryCount: 5,
+    disableDisconnectError: true,
+    textTracksAllowChunklessPreparation: false,
+    bufferConfig: { automaticallyWaitsToMinimizeStalling: false },
+  });
+  const config = lastConfig();
+  expect(config.type).toBe('m3u8');
+  expect(config.minLoadRetryCount).toBe(5);
+  expect(config.disableDisconnectError).toBe(true);
+  expect(config.textTracksAllowChunklessPreparation).toBe(false);
+  expect(config.bufferConfig).toEqual({
+    automaticallyWaitsToMinimizeStalling: false,
+  });
+
+  createSource({ uri: 'https://x/a.mp4' });
+  const plain = lastConfig();
+  for (const key of [
+    'type',
+    'minLoadRetryCount',
+    'disableDisconnectError',
+    'textTracksAllowChunklessPreparation',
+    'bufferConfig',
+  ]) {
+    expect(key in plain).toBe(false);
+  }
+});
+
 test('does not mutate the caller config', () => {
   // useVideoPlayer keys the player on JSON.stringify(source): if the factory wrote
   // defaults back into a config the caller keeps around (a module constant, a
