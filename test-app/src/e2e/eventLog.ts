@@ -174,6 +174,10 @@ const initialState = (): State => ({
 });
 
 let state = initialState();
+// Bumped by every reset(), i.e. once per scenario. A player keeps emitting for a moment
+// after its screen is gone (its release is asynchronous); bound to an old session, its
+// events are dropped instead of landing in the next scenario's log (see forSession).
+let session = 0;
 // Never reset, so a key stays unique even across scenarios and after old entries drop off.
 let nextEntryId = 0;
 const listeners = new Set<() => void>();
@@ -426,7 +430,21 @@ export const eventLog = {
   },
   reset() {
     state = initialState();
+    session += 1;
     emit();
+  },
+  /**
+   * A handle() bound to the current scenario. ScenarioScreen attaches the player's listeners
+   * through it, so a player whose scenario has been left can no longer change the log that
+   * the next scenario's screen renders.
+   */
+  forSession(): (event: PlayerEvent) => void {
+    const own = session;
+    return (event) => {
+      if (own !== session) return;
+      apply(event);
+      emit();
+    };
   },
   getMarkers: (): ReadonlySet<MarkerId> => state.markers,
   getEntries: (): readonly LogEntry[] => state.entries,

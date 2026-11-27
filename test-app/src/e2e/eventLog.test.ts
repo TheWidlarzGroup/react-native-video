@@ -666,3 +666,21 @@ describe('fullscreen', () => {
     expect(lines()).toEqual(['exitFullscreen() threw: boom']);
   });
 });
+
+describe('session', () => {
+  test('a handler bound to the current scenario applies its events', () => {
+    const handle = eventLog.forSession();
+    handle({ type: 'onEnd' });
+    expect(markers()).toEqual(['evt-onEnded']);
+  });
+
+  test("after a reset, the previous scenario's handler changes nothing", () => {
+    const previous = eventLog.forSession();
+    eventLog.reset(); // the next scenario starts
+    const current = eventLog.forSession();
+    previous({ type: 'onError', code: 'player/playback-failed' });
+    expect(markers()).toEqual([]);
+    current({ type: 'onEnd' });
+    expect(markers()).toEqual(['evt-onEnded']);
+  });
+});
