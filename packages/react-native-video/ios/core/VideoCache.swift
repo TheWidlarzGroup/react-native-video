@@ -35,13 +35,17 @@ final class VideoCache {
 
   /// Only progressive files loaded over the network are cached. A cached HLS playlist would be
   /// served stale, which breaks live streams. DRM and external subtitles use their own loaders.
-  static func canCache(url: URL, config: NativeVideoConfig) -> Bool {
+  ///
+  /// `declaredType` is the stream type the app gave for a uri that does not show it; it wins
+  /// over the uri's extension.
+  static func canCache(url: URL, config: NativeVideoConfig, declaredType: String? = nil) -> Bool {
     guard config.shouldCache == true else { return false }
     guard let scheme = url.scheme?.lowercased(), scheme == "http" || scheme == "https" else {
       return false
     }
     guard config.drm == nil, config.externalSubtitles?.isEmpty != false else { return false }
-    let fileExtension = url.pathExtension.lowercased()
+    let declared = declaredType?.trimmingCharacters(in: CharacterSet(charactersIn: ". ")) ?? ""
+    let fileExtension = (declared.isEmpty ? url.pathExtension : declared).lowercased()
     return fileExtension != "m3u8" && fileExtension != "mpd"
   }
 
@@ -156,6 +160,8 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
     var fetchEnd: Int64?
     // Waiting for bytes that another job's task is already downloading.
     var isWaiting = false
+    // The next slice of cached bytes is queued behind whatever the player sent meanwhile.
+    var isScheduled = false
 
     init(request: AVAssetResourceLoadingRequest, position: Int64, end: Int64?) {
       self.request = request
@@ -165,6 +171,8 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
   }
 
   private static let chunkSize = 256 * 1024
+  // Cached bytes answered in one go before the queue gets to run other work (a cancel).
+  private static let chunksPerSlice = 4
   private static let waitWindow: Int64 = 1024 * 1024
 
   private let url: URL
@@ -254,9 +262,27 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
   /// Moves a job forward: bytes that are on disk are answered from there, the first missing
   /// stretch is fetched from the network.
   private func advance(_ job: Job) {
-    guard jobs.contains(where: { $0 === job }), job.task == nil else { return }
+    guard jobs.contains(where: { $0 === job }), job.task == nil, !job.isScheduled else { return }
 
+    var chunksLeft = Self.chunksPerSlice
     while true {
+      // The player drops most of its requests after a few bytes (and all of them on a seek).
+      // Its cancel arrives on this queue, so a long cached stretch is answered in slices:
+      // otherwise megabytes go to a request nobody reads, and the hole behind them is
+      // fetched from the network for nothing.
+      if job.request.isCancelled {
+        finish(job, error: nil, respond: false)
+        return
+      }
+      if chunksLeft == 0 {
+        job.isScheduled = true
+        queue.async { [weak self] in
+          job.isScheduled = false
+          self?.advance(job)
+        }
+        return
+      }
+
       if let contentLength = index.contentLength {
         fillContentInformation(job.request, contentLength: contentLength)
       }
@@ -290,6 +316,7 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
         }
         job.request.dataRequest?.respond(with: data)
         job.position += Int64(data.count)
+        chunksLeft -= 1
       } catch {
         finish(job, error: error)
         return
