@@ -16,6 +16,8 @@
         private var daiAdContainerView: UIView?
         /** Picture-in-Picture proxy for DAI - stored to ensure proper Picture-in-Picture support */
         private var pipProxy: IMAPictureInPictureProxy?
+        /** Set by releaseAds(). An ad request that completes afterwards is destroyed instead of started. */
+        private var isReleased = false
 
         init(video: RCTVideo!, isPictureInPictureActive: @escaping () -> Bool) {
             _video = video
@@ -32,6 +34,7 @@
             }
             adsLoader = IMAAdsLoader(settings: settings)
             adsLoader.delegate = self
+            isReleased = false
         }
 
         func setupDaiLoader() {
@@ -44,6 +47,7 @@
             }
             adsLoader = IMAAdsLoader(settings: settings)
             adsLoader.delegate = self
+            isReleased = false
         }
 
         func requestAds() {
@@ -144,6 +148,7 @@
         }
 
         func releaseAds() {
+            isReleased = true
             // CSAI
             if let adsManager {
                 // Destroy AdsManager may be delayed for a few milliseconds
@@ -152,6 +157,7 @@
                 adsManager.volume = 0
                 adsManager.pause()
                 adsManager.destroy()
+                self.adsManager = nil
             }
 
             // DAI
@@ -176,6 +182,12 @@
         // MARK: - IMAAdsLoaderDelegate
 
         func adsLoader(_: IMAAdsLoader, adsLoadedWith adsLoadedData: IMAAdsLoadedData) {
+            // The view was removed while the ad request was in flight: don't start an ad nobody can see (#4866).
+            if isReleased {
+                adsLoadedData.adsManager?.destroy()
+                adsLoadedData.streamManager?.destroy()
+                return
+            }
             guard let _video else { return }
 
             // Check if this is a stream manager (DAI) or ads manager (CSAI)

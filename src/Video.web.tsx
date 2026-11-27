@@ -54,6 +54,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       rate,
       repeat,
       controls,
+      resizeMode = 'none',
       showNotificationControls = false,
       poster,
       fullscreen,
@@ -114,14 +115,16 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       if (!nativeRef.current) {
         return;
       }
-      nativeRef.current.play();
+      nativeRef.current.play().catch((error) => {
+        console.warn('Could not resume video playback', error);
+      });
     }, []);
 
     const setVolume = useCallback((vol: number) => {
       if (!nativeRef.current) {
         return;
       }
-      nativeRef.current.volume = Math.max(0, Math.min(vol, 100)) / 100;
+      nativeRef.current.volume = Math.max(0, Math.min(vol, 1));
     }, []);
 
     const getCurrentPosition = useCallback(async () => {
@@ -160,7 +163,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
               navigationUI: 'hide',
             });
             if (orientation === 'all' || !orientation || autorotate) {
-              screen.orientation.unlock();
+              screen.orientation?.unlock?.();
             } else {
               await screen.orientation.lock(orientation);
             }
@@ -168,7 +171,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
             if (document.fullscreenElement) {
               await document.exitFullscreen();
             }
-            screen.orientation.unlock();
+            screen.orientation?.unlock?.();
           }
         } catch (e) {
           // Changing fullscreen status without a button click is not allowed so it throws.
@@ -201,25 +204,25 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       [setFullScreen],
     );
 
-    const enterPictureInPicture = useCallback(() => {
+    const enterPictureInPicture = useCallback(async () => {
       try {
         if (!nativeRef.current) {
           console.error('Video Component is not mounted');
         } else {
-          nativeRef.current.requestPictureInPicture();
+          await nativeRef.current.requestPictureInPicture();
         }
       } catch (e) {
         console.error(e);
       }
     }, []);
 
-    const exitPictureInPicture = useCallback(() => {
+    const exitPictureInPicture = useCallback(async () => {
       if (
         nativeRef.current &&
         nativeRef.current === document.pictureInPictureElement
       ) {
         try {
-          document.exitPictureInPicture();
+          await document.exitPictureInPicture();
         } catch (e) {
           console.error(e);
         }
@@ -280,7 +283,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     playbackStateRef.current = onPlaybackStateChanged;
     useEffect(() => {
       // Not sure about how to do this but we want to wait for nativeRef to be initialized
-      setTimeout(() => {
+      const timeout = setTimeout(() => {
         if (!nativeRef.current) {
           return;
         }
@@ -293,6 +296,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           isSeeking: isSeeking.current,
         });
       }, 500);
+      return () => clearTimeout(timeout);
     }, []);
 
     useEffect(() => {
@@ -430,7 +434,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           onVolumeChange?.({volume: nativeRef.current.volume});
         }}
         onEnded={onEnd}
-        style={[videoStyle, style]}
+        style={[videoStyle, videoResizeModeStyles[resizeMode], style]}
       />
     );
   },
@@ -443,6 +447,16 @@ const videoStyle = {
   width: '100%',
   height: '100%',
 } satisfies React.CSSProperties;
+
+const videoResizeModeStyles = {
+  contain: {objectFit: 'contain'},
+  cover: {objectFit: 'cover'},
+  none: {objectFit: 'contain'},
+  stretch: {objectFit: 'fill'},
+} satisfies Record<
+  NonNullable<ReactVideoProps['resizeMode']>,
+  React.CSSProperties
+>;
 
 const useMediaSession = (
   metadata: VideoMetadata | undefined,
