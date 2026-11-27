@@ -39,53 +39,49 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     let context: LoadContext
   }
 
+  // The helpers below run on the JS thread. They only touch state that `sourceLoader`
+  // guards with its lock, so they must not wait for the main thread: it is busy installing
+  // the previous item exactly when JS creates or re-sources a player (#4820). Everything
+  // that needs the main thread (`commitPlayerItem`, `releaseOnMainThread`) is dispatched.
   private func beginLoad() throws -> LoadContext {
-    try runOnMainThreadSync {
-      var source: (any HybridVideoPlayerSourceSpec)?
-      guard let token = try sourceLoader.begin(onBegin: {
-        source = storedSource
-      }), let source else { throw CancellationError() }
-      return LoadContext(source: source, token: token)
-    }
+    var source: (any HybridVideoPlayerSourceSpec)?
+    guard let token = try sourceLoader.begin(onBegin: {
+      source = storedSource
+    }), let source else { throw CancellationError() }
+    return LoadContext(source: source, token: token)
   }
 
   private func beginLoadIfPlayerItemMissing() throws -> LoadContext? {
-    try runOnMainThreadSync {
-      var source: (any HybridVideoPlayerSourceSpec)?
-      guard let token = try sourceLoader.begin(
-        if: { storedPlayerItem == nil },
-        onBegin: { source = storedSource }
-      ) else { return nil }
-      guard let source else { throw CancellationError() }
-      return LoadContext(source: source, token: token)
-    }
+    var source: (any HybridVideoPlayerSourceSpec)?
+    guard let token = try sourceLoader.begin(
+      if: { storedPlayerItem == nil },
+      onBegin: { source = storedSource }
+    ) else { return nil }
+    guard let source else { throw CancellationError() }
+    return LoadContext(source: source, token: token)
   }
 
   private func beginPreloadIfNeeded() throws -> LoadContext? {
-    try runOnMainThreadSync {
-      var source: (any HybridVideoPlayerSourceSpec)?
-      guard let token = try sourceLoader.begin(
-        if: { storedStatus == .idle },
-        onBegin: { source = storedSource }
-      ) else { return nil }
-      guard let source else { throw CancellationError() }
-      return LoadContext(source: source, token: token)
-    }
+    var source: (any HybridVideoPlayerSourceSpec)?
+    guard let token = try sourceLoader.begin(
+      if: { storedStatus == .idle },
+      onBegin: { source = storedSource }
+    ) else { return nil }
+    guard let source else { throw CancellationError() }
+    return LoadContext(source: source, token: token)
   }
 
   private func replaceSourceAndBeginLoad(
     with newSource: any HybridVideoPlayerSourceSpec
   ) throws -> LoadContext {
-    try runOnMainThreadSync {
-      var previousSource: (any HybridVideoPlayerSourceSpec)?
-      guard let token = try sourceLoader.begin(onBegin: {
-        previousSource = storedSource
-        storedSource = newSource
-      }), let previousSource else { throw CancellationError() }
-      let context = LoadContext(source: newSource, token: token)
-      releaseAssetIfNotUsedByCurrentLoad(for: previousSource)
-      return context
-    }
+    var previousSource: (any HybridVideoPlayerSourceSpec)?
+    guard let token = try sourceLoader.begin(onBegin: {
+      previousSource = storedSource
+      storedSource = newSource
+    }), let previousSource else { throw CancellationError() }
+    let context = LoadContext(source: newSource, token: token)
+    releaseAssetIfNotUsedByCurrentLoad(for: previousSource)
+    return context
   }
 
   private func ensureCurrentLoad(_ context: LoadContext) throws {
@@ -105,9 +101,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   }
 
   private func close() -> (any HybridVideoPlayerSourceSpec)? {
-    runOnMainThreadSync {
-      sourceLoader.close(update: { storedSource })
-    }
+    sourceLoader.close(update: { storedSource })
   }
 
   init(source: (any HybridVideoPlayerSourceSpec)) throws {
@@ -151,12 +145,10 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   var source: any HybridVideoPlayerSourceSpec {
     get { sourceLoader.withState { storedSource } }
     set {
-      let releasedSource = runOnMainThreadSync {
-        sourceLoader.cancel {
-          let releasedSource = storedSource
-          storedSource = newValue
-          return releasedSource
-        }
+      let releasedSource = sourceLoader.cancel {
+        let releasedSource = storedSource
+        storedSource = newValue
+        return releasedSource
       }
       withExtendedLifetime(releasedSource) {}
     }
