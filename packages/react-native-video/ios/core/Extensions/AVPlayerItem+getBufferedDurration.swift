@@ -10,22 +10,23 @@ import AVFoundation
 
 extension AVPlayerItem {
   
-  // Duration that can be played using only the buffer (seconds)
+  // Seconds buffered ahead of the current position
   func getbufferDuration() -> Double {
+    let position = currentTime()
     var effectiveTimeRange: CMTimeRange?
     
     for value in loadedTimeRanges {
       let timeRange: CMTimeRange = value.timeRangeValue
-      if CMTimeRangeContainsTime(timeRange, time: currentTime()) {
+      if CMTimeRangeContainsTime(timeRange, time: position) {
         effectiveTimeRange = timeRange
         break
       }
     }
     
     if let effectiveTimeRange {
-      let playableDuration: Float64 = CMTimeGetSeconds(CMTimeRangeGetEnd(effectiveTimeRange))
-      if playableDuration > 0 {
-        return playableDuration
+      let bufferedAhead: Float64 = CMTimeGetSeconds(CMTimeRangeGetEnd(effectiveTimeRange)) - CMTimeGetSeconds(position)
+      if bufferedAhead > 0 {
+        return bufferedAhead
       }
     }
     
