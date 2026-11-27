@@ -74,12 +74,18 @@ React to changes via `onVideoTrackChange` → `{ availableTracks, selectedTrackI
 
 ## Audio track selection
 
-Audio **track selection** is a **web** capability (experimental — Safari-leaning). On native, the player handles **text** and **video quality** track selection (above), but not yet alternate audio tracks. Cast to `WebVideoPlayer` for `getAvailableAudioTracks()/selectAudioTrack()` on web:
+Real, exact selection on native (Android/iOS), not an approximation — the same mechanism as text tracks, just for alternate audio renditions (dubs, commentary, described video):
 
 ```tsx
-import type { WebVideoPlayer } from 'react-native-video';
-const web = player as WebVideoPlayer;
-web.selectAudioTrack(web.getAvailableAudioTracks()[0]);
+const tracks = player.getAvailableAudioTracks(); // AudioTrack[]
+player.selectAudioTrack(tracks[0].id);           // or call with no argument for the default track
+const currentId = player.selectedAudioTrackId;   // the active track's id (the default track when none was picked); undefined only before tracks are known
 ```
 
-The `AudioTrack` type (`{ id, label, language?, selected }`) is exported for use with this web API.
+`AudioTrack = { id, label, language?, selected, channels? }` — `channels` is only ever populated for the track actually being rendered.
+
+React to changes via `onAudioTrackChange` → `{ availableTracks: AudioTrack[], selectedTrackId?: string }` (see `events.md`).
+
+There's no separate "requested vs. actually playing" split: the selection *is* what plays on both platforms.
+
+Track ids are only valid for the source they came from (on iOS they are positional): don't reuse an id an app saved earlier on a different source; re-resolve it from `getAvailableAudioTracks()` by `language`/`label`.
