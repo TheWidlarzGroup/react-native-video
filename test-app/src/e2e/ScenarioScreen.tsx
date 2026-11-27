@@ -206,6 +206,19 @@ const CONTROLS: Control[] = [
     press: (p) => p.selectVideoTrack(),
   },
   {
+    id: 'btn-audio-es',
+    title: 'audio es',
+    press: (p) => {
+      const es = p.getAvailableAudioTracks().find((t) => t.language === 'es');
+      if (es) p.selectAudioTrack(es.id);
+    },
+  },
+  {
+    id: 'btn-audio-auto',
+    title: 'audio auto',
+    press: (p) => p.selectAudioTrack(),
+  },
+  {
     id: 'btn-loop-on',
     title: 'loop',
     press: (p) => {
@@ -255,6 +268,9 @@ function logPlayerEvents(player: VideoPlayer) {
         tracks: availableTracks,
         selectedTrackId,
       })
+  );
+  player.addEventListener('onAudioTrackChange', ({ availableTracks }) =>
+    eventLog.handle({ type: 'onAudioTrackChange', tracks: availableTracks })
   );
 }
 
