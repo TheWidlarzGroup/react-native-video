@@ -44,7 +44,7 @@ export function Player() {
 
 - **`getAvailableAudioTracks(): AudioTrack[]`** — all alternate audio tracks for the current source. Empty until the source's manifest/asset has loaded — subscribe to `onAudioTrackChange` to know when this becomes populated.
 - **`selectAudioTrack(trackId?: string): void`** — select a track by id, or call with no argument (`undefined`) to go back to the default track. Safe to call before the source has loaded; the selection is latched and applied once tracks are known.
-- **`selectedAudioTrackId: string | undefined`** (read-only) — the id of the currently selected track, or `undefined` while the default track is active.
+- **`selectedAudioTrackId: string | undefined`** (read-only) — the id of the currently selected track. When no track was picked, or after `selectAudioTrack()` with no argument, this is the id of the track the player chose by default, so a track menu can always mark the active entry. It is `undefined` only while no audio track is known yet (before the source has loaded).
 
 ```ts
 interface AudioTrack {
@@ -75,6 +75,8 @@ useEvent(player, 'onAudioTrackChange', (data) => {
 | `onAudioTrackChange` | `(data: AudioTrackChangeData) => void` | Fired when the set of available audio tracks changes (e.g. once the source's manifest has loaded) or when the selected track changes. |
 
 `AudioTrackChangeData`: `{ availableTracks: AudioTrack[], selectedTrackId?: string }`
+
+`selectedTrackId` is the same value as `player.selectedAudioTrackId`: the picked track, or the player's default track when none was picked.
 
 ## Platform notes
 

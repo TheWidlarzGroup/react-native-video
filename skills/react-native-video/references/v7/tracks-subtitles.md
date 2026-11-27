@@ -54,7 +54,7 @@ Real, exact selection on native (Android/iOS), not an approximation — the same
 ```tsx
 const tracks = player.getAvailableAudioTracks(); // AudioTrack[]
 player.selectAudioTrack(tracks[0].id);           // or call with no argument for the default track
-const currentId = player.selectedAudioTrackId;   // string | undefined
+const currentId = player.selectedAudioTrackId;   // the active track's id (the default track when none was picked); undefined only before tracks are known
 ```
 
 `AudioTrack = { id, label, language?, selected, channels? }` — `channels` is only ever populated for the track actually being rendered.

@@ -207,7 +207,11 @@ export interface VideoTrackChangeData {
 export interface AudioTrackChangeData {
   /** Every audio track currently known for this source. */
   availableTracks: AudioTrack[];
-  /** The id the user picked via `selectAudioTrack`, or undefined for the default track. */
+  /**
+   * The id of the selected audio track: the one picked via `selectAudioTrack`
+   * or, when none was picked, the player's default track. Undefined only while
+   * no audio track is known yet. Same value as `player.selectedAudioTrackId`.
+   */
   selectedTrackId?: string;
 }
 

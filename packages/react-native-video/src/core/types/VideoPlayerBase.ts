@@ -243,8 +243,11 @@ export interface VideoPlayerBase {
   selectAudioTrack(trackId?: string): void;
 
   /**
-   * The id passed to the last {@link selectAudioTrack} call, or undefined
-   * when the default track is active.
+   * The id of the audio track that is selected right now: the one passed to
+   * the last {@link selectAudioTrack} call or, when none was picked (or after
+   * `selectAudioTrack()` with no id), the track the player chose by default.
+   * `undefined` only while no audio track is known yet, e.g. before the
+   * source has loaded.
    */
   readonly selectedAudioTrackId?: string;
 
