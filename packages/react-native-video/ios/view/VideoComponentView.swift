@@ -213,6 +213,10 @@ import UIKit
     if newSuperview == nil {
       PluginsRegistry.shared.notifyVideoViewDestroyed(view: self)
 
+      #if os(tvOS)
+      dismissFullscreenBeforeUnmount()
+      #endif
+
       // We want to disable this when view is about to unmount
       if keepScreenAwake {
         keepScreenAwake = false
@@ -304,7 +308,29 @@ import UIKit
     delegate?.willExitFullscreen()
   }
 
-  func didDismissFullscreen() {
+  /// The view is leaving the hierarchy while its player is presented fullscreen. Nothing else
+  /// dismisses the presented controller, so it would stay on screen and keep playing after
+  /// the screen that owns it is gone.
+  private func dismissFullscreenBeforeUnmount() {
+    guard fullscreenParent != nil, let playerViewController else { return }
+
+    if !fullscreenTransitionInProgress {
+      delegate?.willExitFullscreen()
+    }
+    fullscreenTransitionInProgress = true
+    // The element that had focus goes away with this screen, so focus is not pulled back to it.
+    fullscreenFocusView = nil
+    // Best effort: when React unmounts the component, its JS listeners are removed before the
+    // native view leaves the hierarchy, so these two events only reach a view that was detached
+    // without being unmounted.
+    delegate?.onFullscreenChange(false)
+
+    playerViewController.dismiss(animated: false) { [weak self] in
+      self?.didDismissFullscreen(notify: false)
+    }
+  }
+
+  func didDismissFullscreen(notify: Bool = true) {
     guard let parent = fullscreenParent, let playerViewController, let playerView else { return }
     fullscreenParent = nil
     fullscreenTransitionInProgress = false
@@ -320,7 +346,9 @@ import UIKit
       focusSystem.updateFocusIfNeeded()
     }
     fullscreenFocusView = nil
-    delegate?.onFullscreenChange(false)
+    if notify {
+      delegate?.onFullscreenChange(false)
+    }
   }
   #endif
 
