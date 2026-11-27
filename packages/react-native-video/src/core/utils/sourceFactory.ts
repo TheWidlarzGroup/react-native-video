@@ -109,11 +109,16 @@ const parseCmcd = (cmcd: VideoConfig['cmcd']): NativeVideoConfig['cmcd'] => {
   }
 
   const format = (data?: CmcdData) => {
-    const pairs = Object.entries(data ?? {}).map(([key, value]) =>
-      typeof value === 'number'
-        ? `${key}=${value}`
-        : `${key}="${String(value).replace(/(["\\])/g, '\\$1')}"`
-    );
+    const pairs = Object.entries(data ?? {})
+      // CMCD has no way to write NaN or Infinity, so a key with such a value is left out.
+      .filter(
+        ([, value]) => typeof value !== 'number' || Number.isFinite(value)
+      )
+      .map(([key, value]) =>
+        typeof value === 'number'
+          ? `${key}=${value}`
+          : `${key}="${String(value).replace(/(["\\])/g, '\\$1')}"`
+      );
     return pairs.length > 0 ? pairs : undefined;
   };
 

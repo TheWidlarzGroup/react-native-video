@@ -347,6 +347,40 @@ test('cmcd: string values are quoted and escaped, numbers are written as they ar
   });
 });
 
+test('cmcd: a number that is not finite is left out', () => {
+  createSource({
+    uri: 'https://x/a.m3u8',
+    cmcd: {
+      request: { 'com.example-nan': NaN, 'com.example-kept': 7 },
+      session: {
+        'com.example-inf': Infinity,
+        'com.example-neg-inf': -Infinity,
+        'com.example-negative': -3,
+        'com.example-zero': 0,
+      },
+    },
+  });
+  expect(lastConfig().cmcd).toEqual({
+    mode: 'query',
+    requestData: ['com.example-kept=7'],
+    sessionData: ['com.example-negative=-3', 'com.example-zero=0'],
+  });
+});
+
+test('cmcd: a group with only non-finite numbers is not sent, the string "NaN" stays', () => {
+  createSource({
+    uri: 'https://x/a.m3u8',
+    cmcd: {
+      object: { 'com.example-nan': NaN, 'com.example-inf': Infinity },
+      status: { 'com.example-text': 'NaN' },
+    },
+  });
+  expect(lastConfig().cmcd).toEqual({
+    mode: 'query',
+    statusData: ['com.example-text="NaN"'],
+  });
+});
+
 test('cmcd: the public object never reaches native, also next to drm and subtitles', () => {
   platform.OS = 'android';
   const session = { 'com.example-tenant': 'acme' } as const;
