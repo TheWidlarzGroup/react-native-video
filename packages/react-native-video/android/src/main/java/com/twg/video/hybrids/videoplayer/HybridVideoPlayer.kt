@@ -102,6 +102,12 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
    */
   private var loadReportedForSource = false
 
+  /**
+   * Whether `onReadyToDisplay` was already emitted for the current source. Like `onLoad`, it
+   * describes the first frame of a source, not every return to `STATE_READY`.
+   */
+  private var readyToDisplayReportedForSource = false
+
   // Listeners
   private val audioFocusChangedListener = OnAudioFocusChangedListener()
   private val audioBecomingNoisyReceiver = AudioBecomingNoisyReceiver()
@@ -544,6 +550,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
       // A media source was set (first source or replaceSourceAsync()): a new load begins.
       if (reason == Player.TIMELINE_CHANGE_REASON_PLAYLIST_CHANGED) {
         loadReportedForSource = false
+        readyToDisplayReportedForSource = false
       }
     }
 
@@ -564,6 +571,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
           eventEmitter.onBuffer(false)
           // Stopped or failed: the next prepare() loads the source again.
           loadReportedForSource = false
+          readyToDisplayReportedForSource = false
         }
         Player.STATE_BUFFERING -> {
           status = VideoPlayerStatus.LOADING
@@ -604,7 +612,10 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
             startProgressUpdates()
           }
 
-          eventEmitter.onReadyToDisplay()
+          if (!readyToDisplayReportedForSource) {
+            readyToDisplayReportedForSource = true
+            eventEmitter.onReadyToDisplay()
+          }
         }
         Player.STATE_ENDED -> {
           status = VideoPlayerStatus.IDLE // Or a specific 'COMPLETED' status if you add one
