@@ -60,7 +60,8 @@ test(`inline callback across re-renders (${stable ? 'stable' : 'legacy'})`, () =
   act(() => {
     r.update(React.createElement(Harness, { player, label: 'c', seen }));
   });
-  expect(player.adds).toBe(stable ? 1 : 3);
+  // One subscription on every React version: a re-render must not add a listener.
+  expect(player.adds).toBe(1);
   expect(player.count('onProgress')).toBe(1);
   player.emit('onProgress', { currentTime: 5 });
   expect(seen).toEqual(['c:5']);
