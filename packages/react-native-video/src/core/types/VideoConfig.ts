@@ -68,6 +68,14 @@ export type VideoConfig = {
    * @platform android
    */
   minLoadRetryCount?: number;
+  /**
+   * Keep retrying once a second while the device has no connection, instead of reporting
+   * an error after `minLoadRetryCount` attempts. Playback continues when the connection
+   * is back.
+   * @default false
+   * @platform android
+   */
+  disableDisconnectError?: boolean;
 };
 
 // @internal

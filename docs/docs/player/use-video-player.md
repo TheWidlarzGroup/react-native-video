@@ -152,6 +152,7 @@ These go on the `VideoConfig` next to `uri`. They cover v6 source props that con
 | Property | Type | Platform | Description |
 |----------|------|----------|-------------|
 | `minLoadRetryCount` | `number` | Android | How many times a failed load (manifest, segment or media file) is retried before the player reports an error. Default: 3. |
+| `disableDisconnectError` | `boolean` | Android | Keep retrying once a second while the device has no connection, instead of reporting an error after `minLoadRetryCount` attempts. Default: `false`. |
 
 ## DRM
 

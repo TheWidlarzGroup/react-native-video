@@ -44,7 +44,8 @@ class HybridVideoPlayerSourceFactory: HybridVideoPlayerSourceFactorySpec() {
       bufferConfig = null,
       metadata = null,
       initializeOnCreation = true,
-      minLoadRetryCount = null
+      minLoadRetryCount = null,
+      disableDisconnectError = null
     )
 
     return HybridVideoPlayerSource(config)

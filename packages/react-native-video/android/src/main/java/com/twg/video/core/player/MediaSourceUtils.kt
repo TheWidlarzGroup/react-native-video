@@ -10,6 +10,7 @@ import androidx.core.net.toUri
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.HttpDataSource
 import androidx.media3.exoplayer.dash.DashMediaSource
 import androidx.media3.exoplayer.drm.DrmSessionManager
 import androidx.media3.exoplayer.hls.HlsMediaSource
@@ -21,6 +22,8 @@ import com.margelo.nitro.video.HybridVideoPlayerSource
 import com.twg.video.core.LibraryError
 import com.twg.video.core.SourceError
 import com.twg.video.core.plugins.PluginsRegistry
+import java.io.IOException
+import kotlin.math.min
 
 @OptIn(UnstableApi::class)
 @Throws(SourceError::class)
@@ -120,6 +123,46 @@ fun buildExternalSubtitlesMediaSource(context: Context, source: HybridVideoPlaye
  */
 @OptIn(UnstableApi::class)
 fun buildLoadErrorHandlingPolicy(source: HybridVideoPlayerSource): LoadErrorHandlingPolicy? {
-  val minLoadRetryCount = source.config.minLoadRetryCount?.toInt()?.coerceAtLeast(0) ?: return null
-  return DefaultLoadErrorHandlingPolicy(minLoadRetryCount)
+  val minLoadRetryCount = source.config.minLoadRetryCount?.toInt()?.coerceAtLeast(0)
+  val keepRetryingOffline = source.config.disableDisconnectError == true
+
+  if (keepRetryingOffline) {
+    return RetryWhileDisconnectedPolicy(minLoadRetryCount ?: DefaultLoadErrorHandlingPolicy.DEFAULT_MIN_LOADABLE_RETRY_COUNT)
+  }
+  return minLoadRetryCount?.let { DefaultLoadErrorHandlingPolicy(it) }
+}
+
+/**
+ * Retries a load that failed because the connection could not be opened for as long as it
+ * takes, once a second. Every other failure is retried `minLoadRetryCount` times, then reported.
+ */
+@OptIn(UnstableApi::class)
+class RetryWhileDisconnectedPolicy(private val minLoadRetryCount: Int) :
+  DefaultLoadErrorHandlingPolicy(minLoadRetryCount) {
+
+  override fun getRetryDelayMsFor(loadErrorInfo: LoadErrorHandlingPolicy.LoadErrorInfo): Long {
+    return when {
+      isDisconnect(loadErrorInfo.exception) -> DISCONNECTED_RETRY_DELAY_MS
+      loadErrorInfo.errorCount < minLoadRetryCount ->
+        min((loadErrorInfo.errorCount - 1) * 1000L, 5000L)
+      else -> C.TIME_UNSET
+    }
+  }
+
+  // The delay above decides when to stop, so the loader must not stop on its own count.
+  override fun getMinimumLoadableRetryCount(dataType: Int): Int = Int.MAX_VALUE
+
+  private fun isDisconnect(exception: IOException): Boolean {
+    // A server answer (4xx, 5xx, wrong content type) is not a lost connection.
+    if (exception is HttpDataSource.InvalidResponseCodeException ||
+      exception is HttpDataSource.InvalidContentTypeException
+    ) {
+      return false
+    }
+    return exception is HttpDataSource.HttpDataSourceException
+  }
+
+  companion object {
+    private const val DISCONNECTED_RETRY_DELAY_MS = 1000L
+  }
 }
