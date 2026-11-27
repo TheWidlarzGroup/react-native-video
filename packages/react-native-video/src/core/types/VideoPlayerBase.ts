@@ -27,8 +27,8 @@ export interface VideoPlayerBase {
   readonly status: VideoPlayerStatus;
 
   /**
-   * The current time of the video in seconds (1.0 = 1 sec).
-   * Returns NaN if the current time is not available.
+   * The duration of the video in seconds (1.0 = 1 sec).
+   * Returns NaN if the duration is not available.
    */
   readonly duration: number;
 
@@ -39,8 +39,8 @@ export interface VideoPlayerBase {
   volume: number;
 
   /**
-   * The duration of the video in seconds (1.0 = 1 sec).
-   * Returns NaN if the duration is not available.
+   * The current time of the video in seconds (1.0 = 1 sec).
+   * Returns NaN if the current time is not available.
    */
   currentTime: number;
 
