@@ -231,7 +231,11 @@ import UIKit
       throw VideoViewError.viewIsDeallocated.error()
     }
 
-    DispatchQueue.main.async {
+    DispatchQueue.main.async { [weak self] in
+      // Ignore the call while already fullscreen or mid-transition (#4774)
+      if let observer = self?.observer, observer.isFullscreen || observer.isFullscreenTransitioning {
+        return
+      }
       playerViewController.enterFullscreen(animated: true)
     }
   }
@@ -241,7 +245,11 @@ import UIKit
       throw VideoViewError.viewIsDeallocated.error()
     }
 
-    DispatchQueue.main.async {
+    DispatchQueue.main.async { [weak self] in
+      // Ignore the call while inline or mid-transition (#4774)
+      if let observer = self?.observer, !observer.isFullscreen || observer.isFullscreenTransitioning {
+        return
+      }
       playerViewController.exitFullscreen(animated: true)
     }
   }

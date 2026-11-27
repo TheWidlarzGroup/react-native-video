@@ -73,6 +73,11 @@ class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
   
   // playerViewController observers
   var onReadyToDisplayObserver: NSKeyValueObservation?
+
+  // Fullscreen state, tracked from the delegate callbacks. AVKit asserts when a fullscreen
+  // transition is requested while another one is still running (#4774).
+  private(set) var isFullscreen = false
+  private(set) var isFullscreenTransitioning = false
   
   init(view: VideoComponentView) {
     self.view = view
@@ -138,13 +143,15 @@ class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
     willEndFullScreenPresentationWithAnimationCoordinator coordinator: UIViewControllerTransitionCoordinator
   ) {
     delegate?.willExitFullscreen()
+    isFullscreenTransitioning = true
     // AVKit pauses the player when native fullscreen is dismissed; resume it, as v6 does.
     let player = playerViewController.player
     let wasPlaying = player?.timeControlStatus == .playing
 
     coordinator.animate(alongsideTransition: nil) { [weak self] context in
       guard let self = self else { return }
-        
+      self.isFullscreenTransitioning = false
+
       if context.isCancelled {
         // iOS bug: window.isUserInteractionEnabled is left as false after cancelled fullscreen dismiss
         if let window = self.playerViewController?.view.window, !window.isUserInteractionEnabled {
@@ -156,6 +163,7 @@ class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
         return
       }
 
+      self.isFullscreen = false
       self.delegate?.onFullscreenChange(false)
       if wasPlaying {
         player?.play()
@@ -168,9 +176,11 @@ class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
     willBeginFullScreenPresentationWithAnimationCoordinator coordinator: UIViewControllerTransitionCoordinator
   ) {
     delegate?.willEnterFullscreen()
+    isFullscreenTransitioning = true
 
     coordinator.animate(alongsideTransition: nil) { [weak self] context in
       guard let self = self else { return }
+      self.isFullscreenTransitioning = false
 
       if context.isCancelled {
         // iOS bug: window.isUserInteractionEnabled is left as false after cancelled fullscreen transition
@@ -183,6 +193,7 @@ class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
         return
       }
 
+      self.isFullscreen = true
       self.delegate?.onFullscreenChange(true)
     }
   }
