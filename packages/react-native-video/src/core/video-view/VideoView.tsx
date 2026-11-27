@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { Platform } from 'react-native';
 import { NitroModules } from 'react-native-nitro-modules';
 import type { ListenerSubscription } from '../../spec/nitro/VideoPlayerEventEmitter.nitro';
 import type {
@@ -14,7 +14,11 @@ import {
 } from '../types/VideoError';
 import type { VideoPlayer } from '../VideoPlayer';
 import { NativeVideoView } from './NativeVideoView';
-import { hasVideoViewOverlay, VideoViewOverlay } from './VideoViewOverlay';
+import {
+  hasVideoViewOverlay,
+  VideoViewOverlay,
+  VideoViewOverlayHost,
+} from './VideoViewOverlay';
 import type { VideoViewProps, VideoViewRef } from './VideoViewProps';
 
 let nitroIdCounter = 1;
@@ -335,32 +339,27 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
       hideShutterView,
     };
 
-    if (!hasVideoViewOverlay(overlayProps)) {
-      return (
-        <NativeVideoView
-          nitroId={nitroId}
-          onNitroIdChange={onNitroIdChange}
-          {...props}
-        />
-      );
-    }
-
-    // The overlay needs a parent to sit in, so the native view fills a wrapper
-    // that takes the style. Views without an overlay keep the single native view.
     return (
-      <View style={props.style}>
-        <NativeVideoView
-          nitroId={nitroId}
-          onNitroIdChange={onNitroIdChange}
-          {...props}
-          style={StyleSheet.absoluteFill}
-        />
-        <VideoViewOverlay
-          player={player}
-          isReadyToDisplay={isReadyToDisplay}
-          {...overlayProps}
-        />
-      </View>
+      <VideoViewOverlayHost
+        style={props.style}
+        onLayout={props.onLayout}
+        hasOverlay={hasVideoViewOverlay(overlayProps)}
+        renderVideo={(layoutProps) => (
+          <NativeVideoView
+            nitroId={nitroId}
+            onNitroIdChange={onNitroIdChange}
+            {...props}
+            {...layoutProps}
+          />
+        )}
+        renderOverlay={() => (
+          <VideoViewOverlay
+            player={player}
+            isReadyToDisplay={isReadyToDisplay}
+            {...overlayProps}
+          />
+        )}
+      />
     );
   }
 );

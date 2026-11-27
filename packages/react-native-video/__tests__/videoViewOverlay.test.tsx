@@ -7,7 +7,7 @@ import type { AllPlayerEvents } from '../src/core/types/Events';
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 (globalThis as any).__DEV__ = false;
 
-const { VideoViewOverlay, hasVideoViewOverlay } =
+const { VideoViewOverlay, VideoViewOverlayHost, hasVideoViewOverlay } =
   await import('../src/core/video-view/VideoViewOverlay');
 
 function fakePlayer() {
@@ -196,4 +196,135 @@ test('renders a loader where the bundler does not define __DEV__ (web)', () => {
   } finally {
     g.__DEV__ = previous;
   }
+});
+
+// --- VideoViewOverlayHost: the native video view must never be recreated ---
+
+let videoMounts = 0;
+let videoUnmounts = 0;
+
+function FakeVideo(props: Record<string, unknown>) {
+  React.useEffect(() => {
+    videoMounts++;
+    return () => {
+      videoUnmounts++;
+    };
+  }, []);
+  return React.createElement('NativeVideo', props);
+}
+
+function host(props: {
+  hasOverlay: boolean;
+  style?: unknown;
+  onLayout?: (event: any) => void;
+}) {
+  return React.createElement(VideoViewOverlayHost, {
+    ...props,
+    renderVideo: (layoutProps: Record<string, unknown>) =>
+      React.createElement(FakeVideo, layoutProps),
+    renderOverlay: () => React.createElement('Overlay'),
+  } as any);
+}
+
+const layoutEvent = (x: number, y: number, width: number, height: number) => ({
+  nativeEvent: { layout: { x, y, width, height } },
+});
+
+const one = (r: TestRenderer.ReactTestRenderer, type: string) =>
+  r.root.findAll((node) => (node.type as unknown) === type);
+
+function mountHost(props: Parameters<typeof host>[0]) {
+  videoMounts = 0;
+  videoUnmounts = 0;
+  let renderer!: TestRenderer.ReactTestRenderer;
+  act(() => {
+    renderer = TestRenderer.create(host(props));
+  });
+  return renderer;
+}
+
+test('a view without overlay props renders the video alone, with the app style', () => {
+  const style = { width: 320, height: 180 };
+  const r = mountHost({ hasOverlay: false, style });
+
+  const tree = r.toJSON() as TestRenderer.ReactTestRendererJSON;
+  expect(tree.type).toBe('NativeVideo');
+  expect(tree.props.style).toBe(style);
+  expect(one(r, 'View')).toHaveLength(0);
+  expect(one(r, 'Overlay')).toHaveLength(0);
+});
+
+test('overlay props that arrive after mount do not recreate the video view', () => {
+  const style = { width: 320, height: 180 };
+  const r = mountHost({ hasOverlay: false, style });
+  const video = one(r, 'NativeVideo')[0]!;
+
+  act(() => video.props.onLayout(layoutEvent(10, 20, 320, 180)));
+  act(() => r.update(host({ hasOverlay: true, style })));
+
+  expect(videoMounts).toBe(1);
+  expect(videoUnmounts).toBe(0);
+  // The video keeps the app style, and the overlay sits over its measured frame.
+  expect(one(r, 'NativeVideo')[0]!.props.style).toBe(style);
+  expect(one(r, 'Overlay')).toHaveLength(1);
+  const cover = one(r, 'View')[0]!;
+  expect(cover.props.style[0].position).toBe('absolute');
+  expect(cover.props.style[1]).toEqual({
+    left: 10,
+    top: 20,
+    width: 320,
+    height: 180,
+  });
+
+  // It follows the video when the layout changes, and goes away with the props.
+  act(() =>
+    one(r, 'NativeVideo')[0]!.props.onLayout(layoutEvent(0, 0, 400, 225))
+  );
+  expect(one(r, 'View')[0]!.props.style[1]).toEqual({
+    left: 0,
+    top: 0,
+    width: 400,
+    height: 225,
+  });
+  act(() => r.update(host({ hasOverlay: false, style })));
+  expect(one(r, 'Overlay')).toHaveLength(0);
+  expect(videoMounts).toBe(1);
+  expect(videoUnmounts).toBe(0);
+});
+
+test('a view mounted with overlay props keeps its wrapper when they go away', () => {
+  const style = { flex: 1 };
+  const r = mountHost({ hasOverlay: true, style });
+
+  const wrapper = r.toJSON() as TestRenderer.ReactTestRendererJSON;
+  expect(wrapper.type).toBe('View');
+  expect(wrapper.props.style).toBe(style);
+  expect(one(r, 'Overlay')).toHaveLength(1);
+  expect(one(r, 'NativeVideo')[0]!.props.onLayout).toBeUndefined();
+
+  act(() => r.update(host({ hasOverlay: false, style })));
+  expect((r.toJSON() as TestRenderer.ReactTestRendererJSON).type).toBe('View');
+  expect(one(r, 'Overlay')).toHaveLength(0);
+
+  act(() => r.update(host({ hasOverlay: true, style })));
+  expect(one(r, 'Overlay')).toHaveLength(1);
+  expect(videoMounts).toBe(1);
+  expect(videoUnmounts).toBe(0);
+});
+
+test("the app's onLayout reports the view's own frame in both trees", () => {
+  const seen: unknown[] = [];
+  const onLayout = (event: any) => seen.push(event.nativeEvent.layout);
+
+  const alone = mountHost({ hasOverlay: false, onLayout });
+  act(() =>
+    one(alone, 'NativeVideo')[0]!.props.onLayout(layoutEvent(5, 6, 7, 8))
+  );
+  expect(seen).toEqual([{ x: 5, y: 6, width: 7, height: 8 }]);
+
+  // With a wrapper the app's handler is on the wrapper, which has the app's position.
+  const wrapped = mountHost({ hasOverlay: true, onLayout });
+  expect(
+    (wrapped.toJSON() as TestRenderer.ReactTestRendererJSON).props.onLayout
+  ).toBe(onLayout);
 });

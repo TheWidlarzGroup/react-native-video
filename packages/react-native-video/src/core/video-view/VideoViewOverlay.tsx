@@ -5,7 +5,10 @@ import {
   View,
   type ImageResizeMode,
   type ImageStyle,
+  type LayoutChangeEvent,
+  type LayoutRectangle,
   type StyleProp,
+  type ViewStyle,
 } from 'react-native';
 import { useEvent } from '../hooks/useEvent';
 import type { VideoPlayerBase } from '../types/VideoPlayerBase';
@@ -51,6 +54,8 @@ let didWarnAboutLoaderAndPoster = false;
 
 // Touches go through to the video and its controls.
 const NO_TOUCHES = { pointerEvents: 'none' } as const;
+// The overlay as a sibling of the video view, placed over the video's frame.
+const SIBLING_COVER = { position: 'absolute', pointerEvents: 'none' } as const;
 
 interface VideoViewOverlayComponentProps extends VideoViewOverlayProps {
   player: VideoPlayerBase;
@@ -150,5 +155,79 @@ export const VideoViewOverlay = ({
     >
       {content}
     </View>
+  );
+};
+
+interface VideoViewOverlayHostProps {
+  /** The style and `onLayout` the app passed to `VideoView`. */
+  style?: StyleProp<ViewStyle>;
+  onLayout?: (event: LayoutChangeEvent) => void;
+  /** Whether an overlay would be drawn for the current props. */
+  hasOverlay: boolean;
+  /**
+   * Renders the native video view with the layout props it must use
+   * (they replace the app's `style` and `onLayout`).
+   */
+  renderVideo: (layoutProps: {
+    style?: StyleProp<ViewStyle>;
+    onLayout?: (event: LayoutChangeEvent) => void;
+  }) => React.ReactElement;
+  renderOverlay: () => React.ReactElement;
+}
+
+/**
+ * Puts the overlay over the native video view without ever recreating that view.
+ *
+ * React recreates a native view when the element above it changes type, so the tree
+ * is chosen once, on mount, and kept:
+ * - The view mounted with overlay props: a wrapper takes the app's style, the video and
+ *   the overlay fill it. The wrapper stays when the props go away.
+ * - The view mounted without them: the video is rendered alone, exactly as before these
+ *   props existed. If overlay props show up later (a poster URL that arrives from an API),
+ *   the overlay is added as a sibling and placed over the video's measured frame.
+ */
+export const VideoViewOverlayHost = ({
+  style,
+  onLayout,
+  hasOverlay,
+  renderVideo,
+  renderOverlay,
+}: VideoViewOverlayHostProps) => {
+  const [isWrapped] = React.useState(hasOverlay);
+  const frame = React.useRef<LayoutRectangle | null>(null);
+  const [, setFrameVersion] = React.useState(0);
+
+  const latest = React.useRef({ hasOverlay, onLayout });
+  latest.current = { hasOverlay, onLayout };
+
+  const trackFrame = React.useCallback((event: LayoutChangeEvent) => {
+    frame.current = event.nativeEvent.layout;
+    // Views that never get an overlay only remember the frame, they don't re-render.
+    if (latest.current.hasOverlay) {
+      setFrameVersion((version) => version + 1);
+    }
+    latest.current.onLayout?.(event);
+  }, []);
+
+  if (isWrapped) {
+    return (
+      <View style={style} onLayout={onLayout}>
+        {renderVideo({ style: StyleSheet.absoluteFill, onLayout: undefined })}
+        {hasOverlay ? renderOverlay() : null}
+      </View>
+    );
+  }
+
+  const { x, y, width, height } = frame.current ?? {};
+
+  return (
+    <>
+      {renderVideo({ style, onLayout: trackFrame })}
+      {hasOverlay && frame.current != null ? (
+        <View style={[SIBLING_COVER, { left: x, top: y, width, height }]}>
+          {renderOverlay()}
+        </View>
+      ) : null}
+    </>
   );
 };
