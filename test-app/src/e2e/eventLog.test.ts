@@ -222,6 +222,22 @@ describe('handle', () => {
     expect(markers()).toContain('evt-onLoad-repeated');
   });
 
+  test('onBuffer(false) twice in a row marks evt-onBuffer-false-repeated', () => {
+    feed(
+      { type: 'onBuffer', buffering: true },
+      { type: 'onBuffer', buffering: false }
+    );
+    expect(markers()).not.toContain('evt-onBuffer-false-repeated');
+    feed({ type: 'onBuffer', buffering: false });
+    expect(markers()).toContain('evt-onBuffer-false-repeated');
+    expect(markers()).not.toContain('evt-onBuffer-true-repeated');
+  });
+
+  test('the first onBuffer(false) is not a repeat', () => {
+    feed({ type: 'onBuffer', buffering: false });
+    expect(markers()).not.toContain('evt-onBuffer-false-repeated');
+  });
+
   test('onProgress marks progress past the threshold, exclusive', () => {
     feed({ type: 'onProgress', currentTime: PROGRESS_MARKER_SECONDS });
     expect(markers()).toEqual(['evt-onProgress']);

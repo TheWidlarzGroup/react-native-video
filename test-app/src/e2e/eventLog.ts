@@ -39,6 +39,10 @@ export const MARKER_IDS = [
   // same state up to seven times at start. A repeated false is not counted: Android reports
   // the ready state and then the end of the clip with false.
   'evt-onBuffer-true-repeated',
+  // onBuffer(false) twice in a row. Not asserted by a flow yet: Android still reports the
+  // ready state and the end of the clip with false. The marker is here so the same flow can
+  // assert it once Android reports changes only.
+  'evt-onBuffer-false-repeated',
   // VideoView's renderLoader (#5264): the loader mounted, and later unmounted because the
   // video was ready to display (smoke-loader.yaml).
   'evt-loader-shown',
@@ -529,6 +533,8 @@ function apply(event: PlayerEvent) {
       if (event.buffering) {
         mark('evt-onBuffer');
         if (state.lastBuffering === true) mark('evt-onBuffer-true-repeated');
+      } else if (state.lastBuffering === false) {
+        mark('evt-onBuffer-false-repeated');
       }
       state.lastBuffering = event.buffering;
       append(`onBuffer ${event.buffering}`);
