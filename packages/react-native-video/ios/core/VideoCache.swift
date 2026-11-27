@@ -57,7 +57,11 @@ final class VideoCache {
 
   func asset(for url: URL, headers: [String: String]?) -> AVURLAsset {
     let key = Self.key(for: url)
-    let fileExtension = url.pathExtension.isEmpty ? "mp4" : url.pathExtension.lowercased()
+    // The cached file is played by its name, so a uri without a media extension (".php",
+    // none) is stored as MP4.
+    let pathExtension = url.pathExtension.lowercased()
+    let isMedia = UTType(filenameExtension: pathExtension)?.conforms(to: .audiovisualContent) == true
+    let fileExtension = isMedia ? pathExtension : "mp4"
     let completeFile = directory.appendingPathComponent("\(key).\(fileExtension)")
 
     lock.lock()
@@ -186,6 +190,8 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
     var contentType: String?
     // ETag or Last-Modified of the file the cached bytes came from.
     var validator: String?
+    // false once the server answered a range request with the whole file.
+    var acceptsRanges: Bool?
     // Half-open byte ranges [start, end) that are on disk, sorted and merged.
     var ranges: [[Int64]] = []
   }
@@ -215,6 +221,9 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
   // Cached bytes answered in one go before the queue gets to run other work (a cancel).
   private static let chunksPerSlice = 4
   private static let waitWindow: Int64 = 1024 * 1024
+  // The index is written after this many new bytes, so that an app that is killed in the
+  // middle of a long download keeps most of it.
+  private static let saveInterval = 2 * 1024 * 1024
 
   private let url: URL
   private let headers: [String: String]
@@ -227,6 +236,7 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
   private var index: Index
   private var jobs: [Job] = []
   private var isComplete = false
+  private var unsavedBytes = 0
   // The uri turned out to be an HLS or DASH manifest: every request goes to the network as
   // if there were no cache.
   private var isStream = false
@@ -459,7 +469,7 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
   private func fillContentInformation(_ request: AVAssetResourceLoadingRequest, contentLength: Int64) {
     guard let information = request.contentInformationRequest else { return }
     information.contentLength = contentLength
-    information.isByteRangeAccessSupported = true
+    information.isByteRangeAccessSupported = index.acceptsRanges ?? true
     information.contentType = index.contentType
   }
 
@@ -516,6 +526,7 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
     if http.statusCode == 200 {
       // The server ignored the range and sends the whole file from the first byte.
       job.taskOffset = 0
+      index.acceptsRanges = false
       if http.expectedContentLength > 0 { index.contentLength = http.expectedContentLength }
     } else {
       // "bytes 100-199/1000"
@@ -549,6 +560,11 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
       try fileHandle.write(contentsOf: data)
       addRange(offset, offset + Int64(data.count))
       completeFileIfWhole()
+      unsavedBytes += data.count
+      if unsavedBytes >= Self.saveInterval {
+        unsavedBytes = 0
+        saveIndex()
+      }
     } catch {
       // The disk is full or the file is gone: keep playing, stop caching this stretch.
     }
