@@ -140,8 +140,11 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
     }
 
   // Player Properties
+  // `contentPosition` / `contentDuration` equal `currentPosition` / `duration` whenever no ad is
+  // playing. During an ad they keep describing the content (where it will resume), so JS never
+  // sees the ad's own 0..N s clock as the video's time. iOS behaves the same way.
   override var currentTime: Double by mainThreadProperty(
-    get = { player.currentPosition.toDouble() / 1000.0 },
+    get = { player.contentPosition.toDouble() / 1000.0 },
     set = { value -> runOnMainThread { player.seekTo((value * 1000).toLong()) } }
   )
 
@@ -158,7 +161,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
 
   override val duration: Double by mainThreadProperty(
     get = {
-      val duration = player.duration
+      val duration = player.contentDuration
       return@mainThreadProperty if (duration == C.TIME_UNSET) Double.NaN else duration.toDouble() / 1000.0
     }
   )
@@ -255,6 +258,12 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   private val pendingActivationPromises = mutableListOf<Promise<Unit>>()
 
   private var adStateBacking: VideoAdState = VideoAdState.IDLE
+
+  /**
+   * True when the player became ready while an ad was playing, so `onLoad` for the content
+   * was held back. It is emitted once the content itself is on screen.
+   */
+  private var contentLoadPending = false
 
   /** The ad config of the current source, or `null` when this source has no usable ad tag. */
   private val adsConfig: VideoAdsConfig?
@@ -815,6 +824,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   @MainThread
   private fun teardownAdsSessionForSourceChange() {
     adsGeneration.incrementAndGet()
+    contentLoadPending = false
     cancelAdsWatchdog()
     VideoManager.cancelPendingPictureInPicture(this)
 
@@ -930,22 +940,53 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
     // 1 MiB by default
     get() = allocator?.totalBytesAllocated?.toLong() ?: (1024L * 1024L)
 
+  @MainThread
+  private fun emitOnLoad() {
+    val generalVideoFormat = player.videoFormat
+    val currentTracks = player.currentTracks
+
+    val selectedVideoTrackGroup = currentTracks.groups.find { group -> group.type == C.TRACK_TYPE_VIDEO && group.isSelected }
+    val selectedVideoTrackFormat = if (selectedVideoTrackGroup != null && selectedVideoTrackGroup.length > 0) {
+      selectedVideoTrackGroup.getTrackFormat(0)
+    } else {
+      null
+    }
+
+    val width = selectedVideoTrackFormat?.width ?: generalVideoFormat?.width ?: 0
+    val height = selectedVideoTrackFormat?.height ?: generalVideoFormat?.height ?: 0
+    val rotationDegrees = selectedVideoTrackFormat?.rotationDegrees ?: generalVideoFormat?.rotationDegrees
+
+    eventEmitter.onLoad(
+      onLoadData(
+        currentTime = player.currentPosition / 1000.0,
+        duration = if (player.duration == C.TIME_UNSET) Double.NaN else player.duration / 1000.0,
+        width = width.toDouble(),
+        height = height.toDouble(),
+        orientation = VideoOrientationUtils.fromWHR(width, height, rotationDegrees)
+      )
+    )
+  }
+
   private fun startProgressUpdates() {
     stopProgressUpdates() // Ensure no multiple runnables
     progressRunnable = object : Runnable {
       override fun run() {
         if (player.playbackState != Player.STATE_IDLE && player.playbackState != Player.STATE_ENDED) {
-          val currentTimeSeconds = player.currentPosition / 1000.0
-          val bufferedDurationSeconds = player.bufferedPosition / 1000.0
-          // bufferDuration is the time from current time that is buffered.
-          val playableDurationFromNow = max(0.0, bufferedDurationSeconds - currentTimeSeconds)
+          // onProgress describes the content. While an ad plays the player's position is the
+          // ad's, so nothing is reported (ad progress has its own event, onAdProgress).
+          if (!player.isPlayingAd) {
+            val currentTimeSeconds = player.currentPosition / 1000.0
+            val bufferedDurationSeconds = player.bufferedPosition / 1000.0
+            // bufferDuration is the time from current time that is buffered.
+            val playableDurationFromNow = max(0.0, bufferedDurationSeconds - currentTimeSeconds)
 
-          eventEmitter.onProgress(
-            onProgressData(
-              currentTime = currentTimeSeconds,
-              bufferDuration = playableDurationFromNow
+            eventEmitter.onProgress(
+              onProgressData(
+                currentTime = currentTimeSeconds,
+                bufferDuration = playableDurationFromNow
+              )
             )
-          )
+          }
           progressHandler.postDelayed(this, PROGRESS_UPDATE_INTERVAL_MS)
         }
       }
@@ -1006,29 +1047,14 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
           status = VideoPlayerStatus.READYTOPLAY
           eventEmitter.onBuffer(false)
 
-          val generalVideoFormat = player.videoFormat
-          val currentTracks = player.currentTracks
-
-          val selectedVideoTrackGroup = currentTracks.groups.find { group -> group.type == C.TRACK_TYPE_VIDEO && group.isSelected }
-          val selectedVideoTrackFormat = if (selectedVideoTrackGroup != null && selectedVideoTrackGroup.length > 0) {
-            selectedVideoTrackGroup.getTrackFormat(0)
+          // onLoad describes the content. If an ad is what became ready, hold it back until
+          // the content is on screen; otherwise it would carry the ad's duration and size.
+          if (player.isPlayingAd) {
+            contentLoadPending = true
           } else {
-            null
+            contentLoadPending = false
+            emitOnLoad()
           }
-
-          val width = selectedVideoTrackFormat?.width ?: generalVideoFormat?.width ?: 0
-          val height = selectedVideoTrackFormat?.height ?: generalVideoFormat?.height ?: 0
-          val rotationDegrees = selectedVideoTrackFormat?.rotationDegrees ?: generalVideoFormat?.rotationDegrees
-
-          eventEmitter.onLoad(
-            onLoadData(
-              currentTime = player.currentPosition / 1000.0,
-              duration = if (player.duration == C.TIME_UNSET) Double.NaN else player.duration / 1000.0,
-              width = width.toDouble(),
-              height = height.toDouble(),
-              orientation = VideoOrientationUtils.fromWHR(width, height, rotationDegrees)
-            )
-          )
           // If player becomes ready and is set to play, start progress updates
           if (player.playWhenReady) {
             startProgressUpdates()
@@ -1107,6 +1133,16 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
       if (reason == Player.DISCONTINUITY_REASON_SEEK || reason == Player.DISCONTINUITY_REASON_SEEK_ADJUSTMENT) {
         eventEmitter.onSeek(newPosition.positionMs / 1000.0)
       }
+      // The new position is inside an ad: the content's time did not change, report nothing.
+      if (newPosition.adGroupIndex != C.INDEX_UNSET) return
+
+      // Back on the content after an ad that swallowed onLoad: emit it now, if the content is
+      // already ready. If it is still buffering, STATE_READY emits it.
+      if (contentLoadPending && player.playbackState == Player.STATE_READY) {
+        contentLoadPending = false
+        emitOnLoad()
+      }
+
       // Update progress immediately after a discontinuity if needed by your logic
        val currentTimeSeconds = newPosition.positionMs / 1000.0
        val bufferedDurationSeconds = player.bufferedPosition / 1000.0
