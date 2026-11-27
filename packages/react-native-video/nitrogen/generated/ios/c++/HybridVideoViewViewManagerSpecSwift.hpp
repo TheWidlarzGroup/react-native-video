@@ -18,6 +18,8 @@ namespace margelo::nitro::video { class HybridVideoPlayerSpec; }
 namespace margelo::nitro::video { enum class ResizeMode; }
 // Forward declaration of `SurfaceType` to properly resolve imports.
 namespace margelo::nitro::video { enum class SurfaceType; }
+// Forward declaration of `FullscreenOrientation` to properly resolve imports.
+namespace margelo::nitro::video { enum class FullscreenOrientation; }
 // Forward declaration of `ListenerSubscription` to properly resolve imports.
 namespace margelo::nitro::video { struct ListenerSubscription; }
 
@@ -26,6 +28,7 @@ namespace margelo::nitro::video { struct ListenerSubscription; }
 #include <optional>
 #include "ResizeMode.hpp"
 #include "SurfaceType.hpp"
+#include "FullscreenOrientation.hpp"
 #include "ListenerSubscription.hpp"
 #include <functional>
 
@@ -119,6 +122,19 @@ namespace margelo::nitro::video {
     }
     inline void setSurfaceType(SurfaceType surfaceType) noexcept override {
       _swiftPart.setSurfaceType(static_cast<int>(surfaceType));
+    }
+    inline FullscreenOrientation getFullscreenOrientation() noexcept override {
+      auto __result = _swiftPart.getFullscreenOrientation();
+      return static_cast<FullscreenOrientation>(__result);
+    }
+    inline void setFullscreenOrientation(FullscreenOrientation fullscreenOrientation) noexcept override {
+      _swiftPart.setFullscreenOrientation(static_cast<int>(fullscreenOrientation));
+    }
+    inline bool getFullscreenAutorotate() noexcept override {
+      return _swiftPart.getFullscreenAutorotate();
+    }
+    inline void setFullscreenAutorotate(bool fullscreenAutorotate) noexcept override {
+      _swiftPart.setFullscreenAutorotate(std::forward<decltype(fullscreenAutorotate)>(fullscreenAutorotate));
     }
 
   public:

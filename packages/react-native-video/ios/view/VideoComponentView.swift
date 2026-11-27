@@ -92,6 +92,24 @@ import UIKit
     }
   }
 
+  public var fullscreenOrientation: FullscreenOrientation = .all {
+    didSet {
+      DispatchQueue.main.async { [weak self] in
+        guard let self = self else { return }
+        (self.playerViewController as? VideoPlayerViewController)?.fullscreenOrientation = self.fullscreenOrientation
+      }
+    }
+  }
+
+  public var fullscreenAutorotate: Bool = true {
+    didSet {
+      DispatchQueue.main.async { [weak self] in
+        guard let self = self else { return }
+        (self.playerViewController as? VideoPlayerViewController)?.fullscreenAutorotate = self.fullscreenAutorotate
+      }
+    }
+  }
+
   @objc public var nitroId: NSNumber = -1 {
     didSet {
       VideoComponentView.globalViewsMap.setObject(self, forKey: nitroId)
@@ -152,7 +170,9 @@ import UIKit
       self.playerViewController?.view.removeFromSuperview()
       self.playerViewController?.removeFromParent()
 
-      let controller = AVPlayerViewController()
+      let controller = VideoPlayerViewController()
+      controller.fullscreenOrientation = self.fullscreenOrientation
+      controller.fullscreenAutorotate = self.fullscreenAutorotate
       controller.player = player
       controller.showsPlaybackControls = controls
       controller.videoGravity = self.resizeMode.toVideoGravity()

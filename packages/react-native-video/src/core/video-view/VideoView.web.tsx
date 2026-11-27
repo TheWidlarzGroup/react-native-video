@@ -96,6 +96,8 @@ const VideoView = forwardRef<VideoViewRef, VideoViewProps>(
       pictureInPicture: _pip = false,
       autoEnterPictureInPicture: _autoPip = false,
       keepScreenAwake: _keepAwake = true,
+      fullscreenOrientation: _fullscreenOrientation,
+      fullscreenAutorotate: _fullscreenAutorotate,
       ...props
     },
     ref

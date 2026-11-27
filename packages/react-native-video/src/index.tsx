@@ -3,6 +3,7 @@ export { useVideoPlayer } from './core/hooks/useVideoPlayer';
 export type * from './core/types/Events';
 export type { IgnoreSilentSwitchMode } from './core/types/IgnoreSilentSwitchMode';
 export type { MixAudioMode } from './core/types/MixAudioMode';
+export type { FullscreenOrientation } from './core/types/FullscreenOrientation';
 export type { ResizeMode } from './core/types/ResizeMode';
 export type { AudioTrack } from './core/types/AudioTrack';
 export type { TextTrack } from './core/types/TextTrack';

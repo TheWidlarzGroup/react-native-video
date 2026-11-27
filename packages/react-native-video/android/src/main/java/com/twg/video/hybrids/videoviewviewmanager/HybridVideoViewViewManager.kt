@@ -102,6 +102,11 @@ class HybridVideoViewViewManager(nitroId: Int): HybridVideoViewViewManagerSpec()
       videoView.get()?.surfaceType = value
     }
 
+  // iOS only: on Android fullscreen follows the activity orientation.
+  override var fullscreenOrientation: FullscreenOrientation = FullscreenOrientation.ALL
+
+  override var fullscreenAutorotate: Boolean = true
+
   // MARK: - Private helpers
 
   private fun <T> addListener(eventName: String, listener: T): ListenerSubscription {

@@ -13,6 +13,8 @@ namespace margelo::nitro::video { class HybridVideoPlayerSpec; }
 namespace margelo::nitro::video { enum class ResizeMode; }
 // Forward declaration of `SurfaceType` to properly resolve imports.
 namespace margelo::nitro::video { enum class SurfaceType; }
+// Forward declaration of `FullscreenOrientation` to properly resolve imports.
+namespace margelo::nitro::video { enum class FullscreenOrientation; }
 // Forward declaration of `ListenerSubscription` to properly resolve imports.
 namespace margelo::nitro::video { struct ListenerSubscription; }
 
@@ -24,6 +26,8 @@ namespace margelo::nitro::video { struct ListenerSubscription; }
 #include "JResizeMode.hpp"
 #include "SurfaceType.hpp"
 #include "JSurfaceType.hpp"
+#include "FullscreenOrientation.hpp"
+#include "JFullscreenOrientation.hpp"
 #include "ListenerSubscription.hpp"
 #include "JListenerSubscription.hpp"
 #include <functional>
@@ -123,6 +127,24 @@ namespace margelo::nitro::video {
   void JHybridVideoViewViewManagerSpec::setSurfaceType(SurfaceType surfaceType) {
     static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JSurfaceType> /* surfaceType */)>("setSurfaceType");
     method(_javaPart, JSurfaceType::fromCpp(surfaceType));
+  }
+  FullscreenOrientation JHybridVideoViewViewManagerSpec::getFullscreenOrientation() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JFullscreenOrientation>()>("getFullscreenOrientation");
+    auto __result = method(_javaPart);
+    return __result->toCpp();
+  }
+  void JHybridVideoViewViewManagerSpec::setFullscreenOrientation(FullscreenOrientation fullscreenOrientation) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JFullscreenOrientation> /* fullscreenOrientation */)>("setFullscreenOrientation");
+    method(_javaPart, JFullscreenOrientation::fromCpp(fullscreenOrientation));
+  }
+  bool JHybridVideoViewViewManagerSpec::getFullscreenAutorotate() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jboolean()>("getFullscreenAutorotate");
+    auto __result = method(_javaPart);
+    return static_cast<bool>(__result);
+  }
+  void JHybridVideoViewViewManagerSpec::setFullscreenAutorotate(bool fullscreenAutorotate) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jboolean /* fullscreenAutorotate */)>("setFullscreenAutorotate");
+    method(_javaPart, fullscreenAutorotate);
   }
 
   // Methods

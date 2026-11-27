@@ -64,6 +64,10 @@ namespace margelo::nitro::video {
     void setKeepScreenAwake(bool keepScreenAwake) override;
     SurfaceType getSurfaceType() override;
     void setSurfaceType(SurfaceType surfaceType) override;
+    FullscreenOrientation getFullscreenOrientation() override;
+    void setFullscreenOrientation(FullscreenOrientation fullscreenOrientation) override;
+    bool getFullscreenAutorotate() override;
+    void setFullscreenAutorotate(bool fullscreenAutorotate) override;
 
   public:
     // Methods

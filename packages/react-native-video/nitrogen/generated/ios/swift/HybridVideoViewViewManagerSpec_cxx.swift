@@ -217,6 +217,28 @@ open class HybridVideoViewViewManagerSpec_cxx {
       self.__implementation.surfaceType = margelo.nitro.video.SurfaceType(rawValue: newValue)!
     }
   }
+  
+  public final var fullscreenOrientation: Int32 {
+    @inline(__always)
+    get {
+      return self.__implementation.fullscreenOrientation.rawValue
+    }
+    @inline(__always)
+    set {
+      self.__implementation.fullscreenOrientation = margelo.nitro.video.FullscreenOrientation(rawValue: newValue)!
+    }
+  }
+  
+  public final var fullscreenAutorotate: Bool {
+    @inline(__always)
+    get {
+      return self.__implementation.fullscreenAutorotate
+    }
+    @inline(__always)
+    set {
+      self.__implementation.fullscreenAutorotate = newValue
+    }
+  }
 
   // Methods
   @inline(__always)

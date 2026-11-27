@@ -131,6 +131,44 @@ class HybridVideoViewViewManager: HybridVideoViewViewManagerSpec {
     }
   }
   
+  var fullscreenOrientation: FullscreenOrientation {
+    get {
+      guard let view else {
+        print(DEALOCATED_WARNING)
+        return .all
+      }
+
+      return view.fullscreenOrientation
+    }
+    set {
+      guard let view else {
+        print(DEALOCATED_WARNING)
+        return
+      }
+
+      view.fullscreenOrientation = newValue
+    }
+  }
+
+  var fullscreenAutorotate: Bool {
+    get {
+      guard let view else {
+        print(DEALOCATED_WARNING)
+        return true
+      }
+
+      return view.fullscreenAutorotate
+    }
+    set {
+      guard let view else {
+        print(DEALOCATED_WARNING)
+        return
+      }
+
+      view.fullscreenAutorotate = newValue
+    }
+  }
+
   var resizeMode: ResizeMode {
     get {
       guard let view else {
