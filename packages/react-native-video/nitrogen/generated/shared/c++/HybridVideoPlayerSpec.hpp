@@ -23,6 +23,8 @@ namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 namespace margelo::nitro::video { enum class MixAudioMode; }
 // Forward declaration of `IgnoreSilentSwitchMode` to properly resolve imports.
 namespace margelo::nitro::video { enum class IgnoreSilentSwitchMode; }
+// Forward declaration of `AudioOutput` to properly resolve imports.
+namespace margelo::nitro::video { enum class AudioOutput; }
 // Forward declaration of `TextTrack` to properly resolve imports.
 namespace margelo::nitro::video { struct TextTrack; }
 // Forward declaration of `VideoTrack` to properly resolve imports.
@@ -34,6 +36,7 @@ namespace margelo::nitro::video { struct VideoTrack; }
 #include "VideoPlayerStatus.hpp"
 #include "MixAudioMode.hpp"
 #include "IgnoreSilentSwitchMode.hpp"
+#include "AudioOutput.hpp"
 #include "TextTrack.hpp"
 #include "VideoTrack.hpp"
 #include <string>
@@ -98,6 +101,8 @@ namespace margelo::nitro::video {
       virtual void setDisableAudioSessionManagement(bool disableAudioSessionManagement) = 0;
       virtual bool getAllowsExternalPlayback() = 0;
       virtual void setAllowsExternalPlayback(bool allowsExternalPlayback) = 0;
+      virtual AudioOutput getAudioOutput() = 0;
+      virtual void setAudioOutput(AudioOutput audioOutput) = 0;
       virtual bool getIsPlaying() = 0;
       virtual std::optional<TextTrack> getSelectedTrack() = 0;
       virtual std::optional<std::string> getSelectedVideoTrackId() = 0;

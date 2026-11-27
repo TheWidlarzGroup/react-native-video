@@ -117,6 +117,12 @@ abstract class HybridVideoPlayerSpec: HybridObject() {
   
   @get:DoNotStrip
   @get:Keep
+  @set:DoNotStrip
+  @set:Keep
+  abstract var audioOutput: AudioOutput
+  
+  @get:DoNotStrip
+  @get:Keep
   abstract val isPlaying: Boolean
   
   @get:DoNotStrip

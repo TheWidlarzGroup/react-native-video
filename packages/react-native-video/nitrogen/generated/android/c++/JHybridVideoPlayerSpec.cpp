@@ -17,6 +17,8 @@ namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 namespace margelo::nitro::video { enum class MixAudioMode; }
 // Forward declaration of `IgnoreSilentSwitchMode` to properly resolve imports.
 namespace margelo::nitro::video { enum class IgnoreSilentSwitchMode; }
+// Forward declaration of `AudioOutput` to properly resolve imports.
+namespace margelo::nitro::video { enum class AudioOutput; }
 // Forward declaration of `TextTrack` to properly resolve imports.
 namespace margelo::nitro::video { struct TextTrack; }
 // Forward declaration of `VideoTrack` to properly resolve imports.
@@ -33,6 +35,8 @@ namespace margelo::nitro::video { struct VideoTrack; }
 #include "JMixAudioMode.hpp"
 #include "IgnoreSilentSwitchMode.hpp"
 #include "JIgnoreSilentSwitchMode.hpp"
+#include "AudioOutput.hpp"
+#include "JAudioOutput.hpp"
 #include "TextTrack.hpp"
 #include <optional>
 #include "JTextTrack.hpp"
@@ -206,6 +210,15 @@ namespace margelo::nitro::video {
   void JHybridVideoPlayerSpec::setAllowsExternalPlayback(bool allowsExternalPlayback) {
     static const auto method = _javaPart->javaClassStatic()->getMethod<void(jboolean /* allowsExternalPlayback */)>("setAllowsExternalPlayback");
     method(_javaPart, allowsExternalPlayback);
+  }
+  AudioOutput JHybridVideoPlayerSpec::getAudioOutput() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JAudioOutput>()>("getAudioOutput");
+    auto __result = method(_javaPart);
+    return __result->toCpp();
+  }
+  void JHybridVideoPlayerSpec::setAudioOutput(AudioOutput audioOutput) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JAudioOutput> /* audioOutput */)>("setAudioOutput");
+    method(_javaPart, JAudioOutput::fromCpp(audioOutput));
   }
   bool JHybridVideoPlayerSpec::getIsPlaying() {
     static const auto method = _javaPart->javaClassStatic()->getMethod<jboolean()>("isPlaying");

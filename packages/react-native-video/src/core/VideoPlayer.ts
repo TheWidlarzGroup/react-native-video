@@ -3,6 +3,7 @@ import { NitroModules } from 'react-native-nitro-modules';
 import type { VideoPlayer as VideoPlayerImpl } from '../spec/nitro/VideoPlayer.nitro';
 import type { VideoPlayerSource } from '../spec/nitro/VideoPlayerSource.nitro';
 import type { IgnoreSilentSwitchMode } from './types/IgnoreSilentSwitchMode';
+import type { AudioOutput } from './types/AudioOutput';
 import type { MixAudioMode } from './types/MixAudioMode';
 import type { TextTrack } from './types/TextTrack';
 import type { VideoTrack } from './types/VideoTrack';
@@ -287,6 +288,15 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     }
 
     this.player.allowsExternalPlayback = value;
+  }
+
+  // Audio Output
+  get audioOutput(): AudioOutput {
+    return this.player.audioOutput;
+  }
+
+  set audioOutput(value: AudioOutput) {
+    this.player.audioOutput = value;
   }
 
   // Is Playing

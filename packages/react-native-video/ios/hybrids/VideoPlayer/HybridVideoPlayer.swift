@@ -304,6 +304,12 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     }
   }
 
+  var audioOutput: AudioOutput = .speaker {
+    didSet {
+      VideoManager.shared.requestAudioSessionUpdate()
+    }
+  }
+
   var wasAutoPaused: Bool = false
 
   var wasInterruptedWhilePlaying: Bool = false

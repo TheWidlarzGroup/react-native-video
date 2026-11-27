@@ -2,6 +2,7 @@ export { useEvent } from './core/hooks/useEvent';
 export { useVideoPlayer } from './core/hooks/useVideoPlayer';
 export type * from './core/types/Events';
 export type { IgnoreSilentSwitchMode } from './core/types/IgnoreSilentSwitchMode';
+export type { AudioOutput } from './core/types/AudioOutput';
 export type { MixAudioMode } from './core/types/MixAudioMode';
 export type { ResizeMode } from './core/types/ResizeMode';
 export type { AudioTrack } from './core/types/AudioTrack';
