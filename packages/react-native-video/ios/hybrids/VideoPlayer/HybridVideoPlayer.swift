@@ -308,6 +308,57 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   // The text track last reported by onTrackChange, nil for none.
   private var emittedTextTrackId: String? = nil
 
+  // MARK: - Video track (quality) selection state
+  //
+  // Main-thread-only, like the ad gate state above. Quality selection is a pure
+  // imperative call on the live player: nothing here touches `source` or
+  // `bufferConfig`, so a quality pick can never make JS recreate the player.
+
+  /// The id the user pinned through `selectVideoTrack`, or nil for automatic.
+  /// Deliberately outlives the `AVPlayerItem` it was applied to - it is a
+  /// request about the source, and every source replacement builds a new item.
+  private var requestedVideoTrackId: String?
+
+  /// The current source's rendition ladder, best first. Empty for non-HLS
+  /// sources, and until the master playlist has been fetched.
+  private var cachedVideoRenditions: [VideoRendition] = []
+
+  /// Which URL `cachedVideoRenditions` describes. Fetching the master playlist
+  /// is a real extra HTTP request (AVPlayer fetches it too but exposes none of
+  /// it), so it is done once per source.
+  private var cachedVideoRenditionsURL: URL?
+  /// The headers that fetch was made with, so replacing a source with the same
+  /// URL but different headers (e.g. a refreshed token) fetches again.
+  private var cachedVideoRenditionsHeaders: [String: String] = [:]
+  private var videoRenditionLoadTask: Task<Void, Never>?
+
+  /// The rendition actually on screen, nearest-matched from the access log.
+  private var activeVideoTrackId: String?
+
+  /// True while caps written by a pin are still on the item. Returning to Auto
+  /// needs to know it has something to undo, by which point
+  /// `requestedVideoTrackId` is already nil.
+  private var hasPinnedVideoQuality = false
+
+  private var videoQualityRecheckWorkItem: DispatchWorkItem?
+
+  // MARK: - Audio track selection state
+  //
+  // Main-thread-only. Alternate audio renditions are a real AVFoundation media
+  // selection group, exactly like text tracks, so a pick is an exact switch
+  // rather than a hint to an ABR algorithm. There is nothing to approximate,
+  // hence no requested/active split and no recheck timer.
+
+  /// The id the user asked for through `selectAudioTrack`, or nil for
+  /// automatic. Kept only because a call can legitimately arrive before the
+  /// asset's media selection groups exist (nothing to select in yet), in which
+  /// case it is replayed from the `.readyToPlay` hook.
+  private var requestedAudioTrackId: String?
+
+  /// Dedupe key for `onAudioTrackChange`. The emission points below fire more
+  /// often than the track set actually changes.
+  private var lastEmittedAudioTrackSignature: String?
+
   var isCurrentlyBuffering: Bool = false
 
   var isPlaying: Bool {
@@ -371,6 +422,20 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   }
 
   private func releaseOnMainThread() {
+    videoRenditionLoadTask?.cancel()
+    videoRenditionLoadTask = nil
+    videoQualityRecheckWorkItem?.cancel()
+    videoQualityRecheckWorkItem = nil
+    cachedVideoRenditions = []
+    cachedVideoRenditionsURL = nil
+    cachedVideoRenditionsHeaders = [:]
+    activeVideoTrackId = nil
+    requestedVideoTrackId = nil
+    hasPinnedVideoQuality = false
+
+    requestedAudioTrackId = nil
+    lastEmittedAudioTrackSignature = nil
+
     playerObserver?.invalidatePlayerItemObservers()
     playerObserver?.invalidatePlayerObservers()
     playerObserver = nil
@@ -392,6 +457,10 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       if let bufferConfig = loadedPlayerItem.context.source.config.bufferConfig {
         loadedPlayerItem.item.setBufferConfig(config: bufferConfig)
       }
+
+      // Off-main manifest fetch for the quality ladder.
+      self.beginVideoRenditionLoad(for: loadedPlayerItem.context.source)
+
       self.player.replaceCurrentItem(with: loadedPlayerItem.item)
     }
   }
@@ -854,6 +923,427 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       language: selectedOption.locale?.identifier,
       selected: true
     )
+  }
+
+  // MARK: - Video Track (Quality) Management
+  //
+  // AVFoundation has no concept of "play this exact HLS variant". The closest it
+  // offers is a set of caps on the AVPlayerItem that constrain which variants
+  // its ABR algorithm may choose. Everything below is built on that, which is
+  // why the reported state distinguishes what was *requested*
+  // (`selectedTrackId`) from what is actually *playing* (`activeTrackId`).
+
+  func getAvailableVideoTracks() throws -> [VideoTrack] {
+    runOnMainThreadSync { videoTracksSnapshot() }
+  }
+
+  var selectedVideoTrackId: String? {
+    runOnMainThreadSync { requestedVideoTrackId }
+  }
+
+  func selectVideoTrack(trackId: String?) throws {
+    runOnMainThreadSync {
+      requestedVideoTrackId = trackId
+      // Applied right now if the item is already ready; otherwise the
+      // `.readyToPlay` hook in HybridVideoPlayer+Events.swift picks it up, since
+      // AVFoundation ignores these properties before then.
+      applyVideoQualityCaps()
+      emitVideoTrackChange()
+    }
+  }
+
+  private func videoTracksSnapshot() -> [VideoTrack] {
+    cachedVideoRenditions.map { $0.videoTrack(selected: $0.id == requestedVideoTrackId) }
+  }
+
+  private func emitVideoTrackChange() {
+    _eventEmitter?.onVideoTrackChange(
+      VideoTrackChangeData(
+        availableTracks: videoTracksSnapshot(),
+        selectedTrackId: requestedVideoTrackId,
+        activeTrackId: activeVideoTrackId
+      )
+    )
+  }
+
+  /// Fetches and caches the rendition ladder for a newly committed source.
+  /// Main thread only.
+  private func beginVideoRenditionLoad(for source: any HybridVideoPlayerSourceSpec) {
+    guard let url = (source as? NativeVideoPlayerSourceSpec)?.url else { return }
+    let headers = source.config.headers ?? [:]
+    guard cachedVideoRenditionsURL != url || cachedVideoRenditionsHeaders != headers else { return }
+
+    videoRenditionLoadTask?.cancel()
+    cachedVideoRenditionsURL = url
+    cachedVideoRenditionsHeaders = headers
+    cachedVideoRenditions = []
+    activeVideoTrackId = nil
+
+    guard url.pathExtension == "m3u8" else {
+      // Progressive sources have a single rendition, so there is nothing to
+      // choose from and any pin carried over from a previous source is void.
+      requestedVideoTrackId = nil
+      applyVideoQualityCaps()
+      emitVideoTrackChange()
+      return
+    }
+
+    videoRenditionLoadTask = Task.detached(priority: .utility) { [weak self] in
+      var renditions: [VideoRendition] = []
+      do {
+        renditions = try await VideoTrackUtils.loadRenditions(from: url, headers: headers)
+      } catch {
+        // Playback is unaffected, but the quality list stays empty - say why
+        // (e.g. a 403 from a gated playlist) instead of failing silently.
+        print("[RNV] Could not load HLS renditions from \(url.absoluteString): \(error)")
+      }
+      guard !Task.isCancelled else { return }
+
+      await MainActor.run {
+        guard let self, self.cachedVideoRenditionsURL == url,
+          self.cachedVideoRenditionsHeaders == headers
+        else { return }
+        self.cachedVideoRenditions = renditions
+        // A pin names a rung of a specific ladder. If the new source has no such
+        // rung, fall back to automatic rather than keep reporting a selection
+        // that cannot be honoured.
+        if let requested = self.requestedVideoTrackId,
+          !renditions.contains(where: { $0.id == requested })
+        {
+          self.requestedVideoTrackId = nil
+        }
+        self.applyVideoQualityCaps()
+        self.emitVideoTrackChange()
+      }
+    }
+  }
+
+  /// Hook for the `.readyToPlay` transition and for source replacement: a pin
+  /// outlives the item it was written to, so every new item has to have it
+  /// written again.
+  func applyVideoQualityCapsIfReady() {
+    runOnMainThreadSync { applyVideoQualityCaps() }
+  }
+
+  /// Main thread only.
+  private func applyVideoQualityCaps() {
+    // Deliberately the library's own committed content item, not
+    // `player.currentItem`: during an ad break the content item may not be
+    // attached at all, and capping whatever the player happens to be holding
+    // would write these properties onto the wrong item.
+    guard let item = playerItem else { return }
+    // On iOS 13+ these properties are ignored when set before the item is ready
+    // to play, and silently so - nothing reports the write was dropped.
+    guard item.status == .readyToPlay else { return }
+
+    videoQualityRecheckWorkItem?.cancel()
+    videoQualityRecheckWorkItem = nil
+
+    guard
+      let requestedVideoTrackId,
+      let index = cachedVideoRenditions.firstIndex(where: { $0.id == requestedVideoTrackId })
+    else {
+      guard hasPinnedVideoQuality else { return }
+      hasPinnedVideoQuality = false
+      clearVideoQualityCaps(on: item)
+      return
+    }
+
+    let rendition = cachedVideoRenditions[index]
+
+    // Deliberately not the rendition's own bitrate. AVFoundation does not
+    // document whether it compares `<` or `<=` against the cap, and an exact cap
+    // cannot separate the same-resolution/different-bitrate rendition pairs real
+    // ladders contain. The midpoint to the next-higher rendition admits this one
+    // and excludes the next. The top rendition has no next, so it gets headroom.
+    let cap: Double =
+      index == 0
+      ? Double(rendition.bitrate) * 1.5
+      : (Double(rendition.bitrate) + Double(cachedVideoRenditions[index - 1].bitrate)) / 2.0
+    let size = CGSize(width: rendition.width, height: rendition.height)
+
+    hasPinnedVideoQuality = true
+
+    // Two-step write. Setting these once is not reliable; zeroing first and
+    // writing the real values on a later runloop turn is.
+    zeroVideoQualityCaps(on: item)
+
+    DispatchQueue.main.async { [weak self, weak item] in
+      guard let self, let item else { return }
+      guard self.requestedVideoTrackId == rendition.id else { return }
+      self.writeVideoQualityCaps(cap: cap, size: size, on: item)
+      self.armVideoQualityRecheck(for: rendition, cap: cap, size: size)
+    }
+  }
+
+  private func zeroVideoQualityCaps(on item: AVPlayerItem) {
+    // Apple's documented "no limit" sentinels.
+    item.preferredPeakBitRate = 0
+    item.preferredPeakBitRateForExpensiveNetworks = 0
+    item.preferredMaximumResolution = .zero
+    item.preferredMaximumResolutionForExpensiveNetworks = .zero
+  }
+
+  private func clearVideoQualityCaps(on item: AVPlayerItem) {
+    zeroVideoQualityCaps(on: item)
+
+    // Auto must not silently defeat Data Saver: whatever caps the app configured
+    // through `bufferConfig` go straight back on.
+    if let bufferConfig = source.config.bufferConfig {
+      item.setBufferConfig(config: bufferConfig)
+    }
+  }
+
+  private func writeVideoQualityCaps(cap: Double, size: CGSize, on item: AVPlayerItem) {
+    item.preferredPeakBitRate = cap
+    item.preferredMaximumResolution = size
+    // The `ForExpensiveNetworks` variants take precedence over the base ones on
+    // cellular. Without them a manual pick would be silently overridden by Data
+    // Saver's cellular cap, and a manual pick is supposed to win outright.
+    item.preferredPeakBitRateForExpensiveNetworks = cap
+    item.preferredMaximumResolutionForExpensiveNetworks = size
+  }
+
+  /// One-shot re-application. AVFoundation is unreliable specifically when the
+  /// cap is *raised* - it will happily stay on the low variant it already has.
+  /// A seek would force the switch but re-buffers and stalls, which defeats the
+  /// point of a seamless quality change, so this only writes the caps once more
+  /// and otherwise lets `activeTrackId` report the truth.
+  private func armVideoQualityRecheck(for rendition: VideoRendition, cap: Double, size: CGSize) {
+    videoQualityRecheckWorkItem?.cancel()
+
+    let work = DispatchWorkItem { [weak self] in
+      guard let self else { return }
+      self.videoQualityRecheckWorkItem = nil
+      guard self.requestedVideoTrackId == rendition.id,
+        let item = self.playerItem,
+        let indicated = item.accessLog()?.events.last?.indicatedBitrate,
+        let actual = VideoTrackUtils.nearestRendition(to: indicated, in: self.cachedVideoRenditions),
+        actual.id != rendition.id
+      else { return }
+
+      self.writeVideoQualityCaps(cap: cap, size: size, on: item)
+    }
+
+    videoQualityRecheckWorkItem = work
+    DispatchQueue.main.asyncAfter(deadline: .now() + 4.0, execute: work)
+  }
+
+  /// Parallel hop off the access log that already feeds `onBandwidthUpdate`.
+  /// Only emits when the mapped rendition actually changes - the access log
+  /// fires often, and re-emitting an unchanged ladder on every entry would be
+  /// pure noise on the JS side.
+  func updateActiveVideoTrack(indicatedBitrate: Double) {
+    runOnMainThreadSync {
+      guard !cachedVideoRenditions.isEmpty else { return }
+      guard
+        let match = VideoTrackUtils.nearestRendition(
+          to: indicatedBitrate,
+          in: cachedVideoRenditions
+        ), match.id != activeVideoTrackId
+      else { return }
+
+      activeVideoTrackId = match.id
+      emitVideoTrackChange()
+    }
+  }
+
+  // MARK: - Audio Track Management
+  //
+  // The text-track code above is the template, not a rough guide: alternate
+  // audio renditions live in exactly the same construct (an
+  // `AVMediaSelectionGroup`), differing only in media characteristic
+  // (`.audible` instead of `.legible`). `AVPlayerItem.select(_:in:)` switches
+  // the rendition outright and takes effect on the next few sample buffers -
+  // this is a real selection, not a preference the player may ignore.
+
+  func getAvailableAudioTracks() throws -> [AudioTrack] {
+    runOnMainThreadSync { audioTracksSnapshot() }
+  }
+
+  var selectedAudioTrackId: String? {
+    // Deliberately the item's *actual* current selection rather than the
+    // latched request: the selection is exact, so there is a real answer to
+    // report, and under automatic selection AVFoundation still picks a concrete
+    // option (system language / accessibility settings) that callers want to
+    // see reflected in their menu.
+    runOnMainThreadSync { currentAudioTrackId() ?? requestedAudioTrackId }
+  }
+
+  func selectAudioTrack(trackId: String?) throws {
+    runOnMainThreadSync {
+      requestedAudioTrackId = trackId
+      // Takes effect immediately when the asset's media selection groups are
+      // already loaded, which is the normal case; otherwise it is replayed by
+      // `applyAudioTrackSelectionIfReady()` from the `.readyToPlay` hook in
+      // HybridVideoPlayer+Events.swift.
+      applyAudioTrackSelection()
+      emitAudioTrackChange(force: true)
+    }
+  }
+
+  /// The committed content item and its audible selection group, or nil when
+  /// either does not exist yet.
+  ///
+  /// Prefers the library's own committed item over `player.currentItem`, so the
+  /// selection always targets the item this player loaded for the current
+  /// source rather than whatever the `AVPlayer` happens to be holding.
+  /// Main thread only.
+  private func audioSelectionContext() -> (item: AVPlayerItem, group: AVMediaSelectionGroup)? {
+    guard let item = playerItem ?? player.currentItem else { return nil }
+    guard
+      let group = item.asset.mediaSelectionGroup(forMediaCharacteristic: .audible)
+    else { return nil }
+    return (item, group)
+  }
+
+  /// Positional, like the video-track ids and for the same reason: nothing on
+  /// `AVMediaSelectionOption` is both stable and unique (two English options -
+  /// stereo and 5.1, or original and described - share a display name and a
+  /// language tag). The index disambiguates; the rest keeps the id readable and
+  /// lets a stale id from another source be recognised as unresolvable.
+  private func audioTrackId(for option: AVMediaSelectionOption, at index: Int) -> String {
+    let language = option.extendedLanguageTag ?? option.locale?.identifier ?? "unknown"
+    return "audio-\(index)-\(option.displayName)-\(language)"
+  }
+
+  /// Main thread only.
+  private func audioTracksSnapshot() -> [AudioTrack] {
+    guard let (item, group) = audioSelectionContext() else { return [] }
+
+    let selectedOption = item.currentMediaSelection.selectedMediaOption(in: group)
+
+    return group.options.enumerated().map { index, option in
+      AudioTrack(
+        id: audioTrackId(for: option, at: index),
+        label: option.displayName,
+        language: option.extendedLanguageTag ?? option.locale?.identifier,
+        selected: option == selectedOption,
+        channels: audioChannelCount(for: option, selectedOption: selectedOption, in: item)
+      )
+    }
+  }
+
+  /// Best effort, and deliberately only for the option actually being rendered.
+  ///
+  /// `AVMediaSelectionOption` carries no channel count of its own - for HLS the
+  /// `CHANNELS` attribute of `#EXT-X-MEDIA` is not surfaced by AVFoundation at
+  /// all - so the only public source is the format description of the audio
+  /// track the player has loaded, which by definition describes the *selected*
+  /// option. Reporting that same count against the other options would be a
+  /// guess, so they get nil (the field is optional for exactly this reason).
+  /// Main thread only.
+  private func audioChannelCount(
+    for option: AVMediaSelectionOption,
+    selectedOption: AVMediaSelectionOption?,
+    in item: AVPlayerItem
+  ) -> Double? {
+    guard option == selectedOption else { return nil }
+
+    let audioTracks = item.tracks
+      .compactMap { $0.assetTrack }
+      .filter { $0.mediaType == .audio }
+    guard audioTracks.count == 1 else { return nil }
+
+    for case let formatDescription as CMFormatDescription in audioTracks[0].formatDescriptions {
+      guard
+        let asbd = CMAudioFormatDescriptionGetStreamBasicDescription(formatDescription)
+      else { continue }
+      let channels = asbd.pointee.mChannelsPerFrame
+      if channels > 0 { return Double(channels) }
+    }
+
+    return nil
+  }
+
+  /// Main thread only.
+  private func currentAudioTrackId() -> String? {
+    guard let (item, group) = audioSelectionContext() else { return nil }
+    guard
+      let selectedOption = item.currentMediaSelection.selectedMediaOption(in: group),
+      let index = group.options.firstIndex(of: selectedOption)
+    else { return nil }
+    return audioTrackId(for: selectedOption, at: index)
+  }
+
+  /// Writes `requestedAudioTrackId` onto the committed content item.
+  ///
+  /// Returns false only when media selection *is* available and the request
+  /// names no option in it - i.e. the id belongs to a different source.
+  /// Main thread only.
+  @discardableResult
+  private func applyAudioTrackSelection() -> Bool {
+    guard let (item, group) = audioSelectionContext() else { return true }
+
+    guard let requestedAudioTrackId else {
+      // Automatic. Deliberately *not* `select(nil, in: group)`: for an audible
+      // group that means "no audio at all", and it is silently ignored unless
+      // the group sets `allowsEmptySelection` (audible groups generally do
+      // not). `selectMediaOptionAutomatically` is the real "back to default"
+      // call - it hands the choice back to AVFoundation's media selection
+      // criteria (system language, accessibility preferences).
+      item.selectMediaOptionAutomatically(in: group)
+      return true
+    }
+
+    for (index, option) in group.options.enumerated()
+    where audioTrackId(for: option, at: index) == requestedAudioTrackId {
+      item.select(option, in: group)
+      return true
+    }
+
+    return false
+  }
+
+  /// Hook for the `.readyToPlay` transition: media selection groups do not
+  /// exist before the asset is loaded, so a selection made earlier - or carried
+  /// over from the previous source - has to be written again here, and this is
+  /// also where the available set is first published.
+  func applyAudioTrackSelectionIfReady() {
+    runOnMainThreadSync {
+      if !applyAudioTrackSelection() {
+        // The group is known and has no such option: the id named a rendition
+        // of a different source. Drop it rather than keep reporting a selection
+        // that cannot be honoured.
+        requestedAudioTrackId = nil
+        applyAudioTrackSelection()
+      }
+      emitAudioTrackChange()
+    }
+  }
+
+  /// Main thread only. `force` is for an explicit `selectAudioTrack` call,
+  /// which must always be acknowledged even if it changed nothing.
+  private func emitAudioTrackChange(force: Bool = false) {
+    let tracks = audioTracksSnapshot()
+    let selectedTrackId = currentAudioTrackId() ?? requestedAudioTrackId
+
+    let signature =
+      tracks
+      .map { track -> String in
+        let channels: String = track.channels.map { "\($0)" } ?? "-"
+        return "\(track.id)|\(track.selected)|\(channels)"
+      }
+      .joined(separator: ",") + "#" + (selectedTrackId ?? "-")
+
+    guard force || signature != lastEmittedAudioTrackSignature else { return }
+    lastEmittedAudioTrackSignature = signature
+
+    _eventEmitter?.onAudioTrackChange(
+      AudioTrackChangeData(
+        availableTracks: tracks,
+        selectedTrackId: selectedTrackId
+      )
+    )
+  }
+
+  /// Second, deduped emission point. At `.readyToPlay` the asset's media
+  /// selection groups exist but `AVPlayerItem.tracks` is often still empty, so
+  /// the first snapshot has no channel count. Re-checking once playback is
+  /// actually able to proceed fills it in, and the signature check makes the
+  /// call free when nothing changed.
+  func refreshAudioTracksIfChanged() {
+    runOnMainThreadSync { emitAudioTrackChange() }
   }
 
   // MARK: - Memory Management

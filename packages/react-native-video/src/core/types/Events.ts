@@ -1,4 +1,6 @@
+import type { AudioTrack } from './AudioTrack';
 import type { TextTrack } from './TextTrack';
+import type { VideoTrack } from './VideoTrack';
 import type { VideoRuntimeError } from './VideoError';
 import type { VideoOrientation } from './VideoOrientation';
 import type { VideoPlayerSourceBase } from './VideoPlayerSourceBase';
@@ -88,6 +90,20 @@ export interface VideoPlayerEvents {
    */
   onTrackChange: (track: TextTrack | null) => void;
   /**
+   * Called when the set of available video renditions changes (e.g. once the
+   * source's manifest has loaded), when the selected rendition changes, or -
+   * on iOS only, since selection there is a cap rather than a hard lock -
+   * when the actually-playing rendition changes under adaptive bitrate.
+   */
+  onVideoTrackChange: (data: VideoTrackChangeData) => void;
+  /**
+   * Called when the set of available audio tracks changes (e.g. once the
+   * source's manifest has loaded), or when the selected track changes.
+   * Audio selection is exact on both platforms - there's no separate
+   * "actually playing" signal to reconcile.
+   */
+  onAudioTrackChange: (data: AudioTrackChangeData) => void;
+  /**
    * Called when the volume of the player changes.
    */
   onVolumeChange: (data: onVolumeChangeData) => void;
@@ -171,6 +187,32 @@ export interface onLoadData {
    * The orientation of the video.
    */
   orientation: VideoOrientation;
+}
+
+export interface VideoTrackChangeData {
+  /** Every rendition currently known for this source, best first. */
+  availableTracks: VideoTrack[];
+  /** The id the user pinned via `selectVideoTrack`, or undefined for automatic. */
+  selectedTrackId?: string;
+  /**
+   * The rendition actually being rendered right now. On Android this always
+   * matches `selectedTrackId` (a hard lock). On iOS this is derived from the
+   * player's access log and may differ from `selectedTrackId` - selection
+   * there is a cap, not a guarantee - and is meaningful even under automatic
+   * selection (no `selectedTrackId`).
+   */
+  activeTrackId?: string;
+}
+
+export interface AudioTrackChangeData {
+  /** Every audio track currently known for this source. */
+  availableTracks: AudioTrack[];
+  /**
+   * The id of the selected audio track: the one picked via `selectAudioTrack`
+   * or, when none was picked, the player's default track. Undefined only while
+   * no audio track is known yet. Same value as `player.selectedAudioTrackId`.
+   */
+  selectedTrackId?: string;
 }
 
 export type SourceType = 'local' | 'network';
@@ -267,6 +309,8 @@ export const ALL_PLAYER_EVENTS: (keyof AllPlayerEvents)[] =
     'onTimedMetadata',
     'onTextTrackDataChanged',
     'onTrackChange',
+    'onVideoTrackChange',
+    'onAudioTrackChange',
     'onVolumeChange',
     'onStatusChange'
   );

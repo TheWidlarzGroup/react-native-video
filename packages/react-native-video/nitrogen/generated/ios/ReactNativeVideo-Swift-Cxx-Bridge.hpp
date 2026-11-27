@@ -8,6 +8,10 @@
 #pragma once
 
 // Forward declarations of C++ defined types
+// Forward declaration of `AudioTrackChangeData` to properly resolve imports.
+namespace margelo::nitro::video { struct AudioTrackChangeData; }
+// Forward declaration of `AudioTrack` to properly resolve imports.
+namespace margelo::nitro::video { struct AudioTrack; }
 // Forward declaration of `BandwidthData` to properly resolve imports.
 namespace margelo::nitro::video { struct BandwidthData; }
 // Forward declaration of `BufferConfig` to properly resolve imports.
@@ -36,6 +40,8 @@ namespace margelo::nitro::video { struct LivePlaybackParams; }
 namespace margelo::nitro::video { struct NativeDrmParams; }
 // Forward declaration of `NativeExternalSubtitle` to properly resolve imports.
 namespace margelo::nitro::video { struct NativeExternalSubtitle; }
+// Forward declaration of `NativeVideoConfig` to properly resolve imports.
+namespace margelo::nitro::video { struct NativeVideoConfig; }
 // Forward declaration of `OnGetLicensePayload` to properly resolve imports.
 namespace margelo::nitro::video { struct OnGetLicensePayload; }
 // Forward declaration of `Resolution` to properly resolve imports.
@@ -56,6 +62,10 @@ namespace margelo::nitro::video { struct VideoInformation; }
 namespace margelo::nitro::video { enum class VideoOrientation; }
 // Forward declaration of `VideoPlayerStatus` to properly resolve imports.
 namespace margelo::nitro::video { enum class VideoPlayerStatus; }
+// Forward declaration of `VideoTrackChangeData` to properly resolve imports.
+namespace margelo::nitro::video { struct VideoTrackChangeData; }
+// Forward declaration of `VideoTrack` to properly resolve imports.
+namespace margelo::nitro::video { struct VideoTrack; }
 // Forward declaration of `onLoadData` to properly resolve imports.
 namespace margelo::nitro::video { struct onLoadData; }
 // Forward declaration of `onLoadStartData` to properly resolve imports.
@@ -84,6 +94,8 @@ namespace ReactNativeVideo { class HybridVideoViewViewManagerFactorySpec_cxx; }
 namespace ReactNativeVideo { class HybridVideoViewViewManagerSpec_cxx; }
 
 // Include C++ defined types
+#include "AudioTrack.hpp"
+#include "AudioTrackChangeData.hpp"
 #include "BandwidthData.hpp"
 #include "BufferConfig.hpp"
 #include "CustomVideoMetadata.hpp"
@@ -98,6 +110,7 @@ namespace ReactNativeVideo { class HybridVideoViewViewManagerSpec_cxx; }
 #include "LivePlaybackParams.hpp"
 #include "NativeDrmParams.hpp"
 #include "NativeExternalSubtitle.hpp"
+#include "NativeVideoConfig.hpp"
 #include "OnGetLicensePayload.hpp"
 #include "Resolution.hpp"
 #include "SourceType.hpp"
@@ -108,6 +121,8 @@ namespace ReactNativeVideo { class HybridVideoViewViewManagerSpec_cxx; }
 #include "VideoInformation.hpp"
 #include "VideoOrientation.hpp"
 #include "VideoPlayerStatus.hpp"
+#include "VideoTrack.hpp"
+#include "VideoTrackChangeData.hpp"
 #include "onLoadData.hpp"
 #include "onLoadStartData.hpp"
 #include "onPlaybackStateChangeData.hpp"
@@ -341,6 +356,28 @@ namespace margelo::nitro::video::bridge::swift {
     return optional.value();
   }
   
+  // pragma MARK: std::vector<VideoTrack>
+  /**
+   * Specialized version of `std::vector<VideoTrack>`.
+   */
+  using std__vector_VideoTrack_ = std::vector<VideoTrack>;
+  inline std::vector<VideoTrack> create_std__vector_VideoTrack_(size_t size) noexcept {
+    std::vector<VideoTrack> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::vector<AudioTrack>
+  /**
+   * Specialized version of `std::vector<AudioTrack>`.
+   */
+  using std__vector_AudioTrack_ = std::vector<AudioTrack>;
+  inline std::vector<AudioTrack> create_std__vector_AudioTrack_(size_t size) noexcept {
+    std::vector<AudioTrack> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
   // pragma MARK: std::shared_ptr<HybridVideoPlayerSpec>
   /**
    * Specialized version of `std::shared_ptr<HybridVideoPlayerSpec>`.
@@ -370,7 +407,20 @@ namespace margelo::nitro::video::bridge::swift {
   inline Result_std__vector_TextTrack__ create_Result_std__vector_TextTrack__(const std::exception_ptr& error) noexcept {
     return Result<std::vector<TextTrack>>::withError(error);
   }
-  
+
+  // pragma MARK: Result<std::vector<VideoTrack>>
+  // Hand-added for the same reason as Result<std::vector<TextTrack>> above -
+  // only reachable through VideoPlayer's spec, which nitrogen cannot generate,
+  // so it never emits this instantiation. Needed by
+  // HybridVideoPlayerSpec_cxx.swift's getAvailableVideoTracks().
+  using Result_std__vector_VideoTrack__ = Result<std::vector<VideoTrack>>;
+  inline Result_std__vector_VideoTrack__ create_Result_std__vector_VideoTrack__(const std::vector<VideoTrack>& value) noexcept {
+    return Result<std::vector<VideoTrack>>::withValue(value);
+  }
+  inline Result_std__vector_VideoTrack__ create_Result_std__vector_VideoTrack__(const std::exception_ptr& error) noexcept {
+    return Result<std::vector<VideoTrack>>::withError(error);
+  }
+
   // pragma MARK: Result<void>
   using Result_void_ = Result<void>;
   inline Result_void_ create_Result_void_() noexcept {
@@ -378,6 +428,15 @@ namespace margelo::nitro::video::bridge::swift {
   }
   inline Result_void_ create_Result_void_(const std::exception_ptr& error) noexcept {
     return Result<void>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::vector<AudioTrack>>
+  using Result_std__vector_AudioTrack__ = Result<std::vector<AudioTrack>>;
+  inline Result_std__vector_AudioTrack__ create_Result_std__vector_AudioTrack__(const std::vector<AudioTrack>& value) noexcept {
+    return Result<std::vector<AudioTrack>>::withValue(value);
+  }
+  inline Result_std__vector_AudioTrack__ create_Result_std__vector_AudioTrack__(const std::exception_ptr& error) noexcept {
+    return Result<std::vector<AudioTrack>>::withError(error);
   }
   
   // pragma MARK: std::shared_ptr<HybridVideoPlayerFactorySpec>
@@ -678,6 +737,50 @@ namespace margelo::nitro::video::bridge::swift {
   Func_void_std__optional_std__variant_nitro__NullType__TextTrack__ create_Func_void_std__optional_std__variant_nitro__NullType__TextTrack__(void* NON_NULL swiftClosureWrapper) noexcept;
   inline Func_void_std__optional_std__variant_nitro__NullType__TextTrack___Wrapper wrap_Func_void_std__optional_std__variant_nitro__NullType__TextTrack__(Func_void_std__optional_std__variant_nitro__NullType__TextTrack__ value) noexcept {
     return Func_void_std__optional_std__variant_nitro__NullType__TextTrack___Wrapper(std::move(value));
+  }
+
+  // pragma MARK: std::function<void(const VideoTrackChangeData& /* data */)>
+  /**
+   * Specialized version of `std::function<void(const VideoTrackChangeData&)>`.
+   */
+  using Func_void_VideoTrackChangeData = std::function<void(const VideoTrackChangeData& /* data */)>;
+  /**
+   * Wrapper class for a `std::function<void(const VideoTrackChangeData& / * data * /)>`, this can be used from Swift.
+   */
+  class Func_void_VideoTrackChangeData_Wrapper final {
+  public:
+    explicit Func_void_VideoTrackChangeData_Wrapper(std::function<void(const VideoTrackChangeData& /* data */)>&& func): _function(std::make_unique<std::function<void(const VideoTrackChangeData& /* data */)>>(std::move(func))) {}
+    inline void call(VideoTrackChangeData data) const noexcept {
+      _function->operator()(data);
+    }
+  private:
+    std::unique_ptr<std::function<void(const VideoTrackChangeData& /* data */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_VideoTrackChangeData create_Func_void_VideoTrackChangeData(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_VideoTrackChangeData_Wrapper wrap_Func_void_VideoTrackChangeData(Func_void_VideoTrackChangeData value) noexcept {
+    return Func_void_VideoTrackChangeData_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::function<void(const AudioTrackChangeData& /* data */)>
+  /**
+   * Specialized version of `std::function<void(const AudioTrackChangeData&)>`.
+   */
+  using Func_void_AudioTrackChangeData = std::function<void(const AudioTrackChangeData& /* data */)>;
+  /**
+   * Wrapper class for a `std::function<void(const AudioTrackChangeData& / * data * /)>`, this can be used from Swift.
+   */
+  class Func_void_AudioTrackChangeData_Wrapper final {
+  public:
+    explicit Func_void_AudioTrackChangeData_Wrapper(std::function<void(const AudioTrackChangeData& /* data */)>&& func): _function(std::make_unique<std::function<void(const AudioTrackChangeData& /* data */)>>(std::move(func))) {}
+    inline void call(AudioTrackChangeData data) const noexcept {
+      _function->operator()(data);
+    }
+  private:
+    std::unique_ptr<std::function<void(const AudioTrackChangeData& /* data */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_AudioTrackChangeData create_Func_void_AudioTrackChangeData(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_AudioTrackChangeData_Wrapper wrap_Func_void_AudioTrackChangeData(Func_void_AudioTrackChangeData value) noexcept {
+    return Func_void_AudioTrackChangeData_Wrapper(std::move(value));
   }
   
   // pragma MARK: std::function<void(const onVolumeChangeData& /* data */)>

@@ -555,6 +555,95 @@ describe('lifecycle (ported from #4743)', () => {
   });
 });
 
+describe('video track markers', () => {
+  const tracks = [
+    { id: 'hi', height: 360 },
+    { id: 'mid', height: 180 },
+    { id: 'low', height: 90 },
+  ];
+
+  test('listing, pinning the lowest rendition, then clearing the pin sets the markers in order', () => {
+    feed({ type: 'onVideoTrackChange', tracks });
+    expect(markers()).toEqual(['evt-video-tracks-listed']);
+
+    feed({ type: 'onVideoTrackChange', tracks, selectedTrackId: 'low' });
+    expect(markers()).toEqual([
+      'evt-video-track-pinned',
+      'evt-video-tracks-listed',
+    ]);
+
+    feed({ type: 'onVideoTrackChange', tracks });
+    expect(markers()).toEqual([
+      'evt-video-track-auto',
+      'evt-video-track-pinned',
+      'evt-video-tracks-listed',
+    ]);
+  });
+
+  test('pinning a rendition other than the lowest does not count as pinned', () => {
+    feed({ type: 'onVideoTrackChange', tracks, selectedTrackId: 'mid' });
+    expect(markers()).toEqual(['evt-video-tracks-listed']);
+  });
+
+  test('automatic selection alone is not a restore: it needs a pin first', () => {
+    feed({ type: 'onVideoTrackChange', tracks });
+    feed({ type: 'onVideoTrackChange', tracks });
+    expect(markers()).toEqual(['evt-video-tracks-listed']);
+  });
+
+  test('a partial rendition list is not the full ladder', () => {
+    feed({
+      type: 'onVideoTrackChange',
+      tracks: tracks.slice(1),
+      selectedTrackId: 'low',
+    });
+    expect(markers()).toEqual([]);
+  });
+});
+
+describe('audio track markers', () => {
+  const en = { language: 'en' };
+  const es = { language: 'es' };
+
+  test('the alternate track is marked once it is selected out of two, then the default restore', () => {
+    feed({
+      type: 'onAudioTrackChange',
+      tracks: [
+        { ...en, selected: false },
+        { ...es, selected: true },
+      ],
+    });
+    expect(markers()).toEqual(['evt-audio-alt-selected']);
+    feed({
+      type: 'onAudioTrackChange',
+      tracks: [
+        { ...en, selected: true },
+        { ...es, selected: false },
+      ],
+    });
+    expect(markers()).toEqual([
+      'evt-audio-alt-selected',
+      'evt-audio-default-restored',
+    ]);
+  });
+
+  test('the default track alone never sets either marker (not a real restore)', () => {
+    feed({
+      type: 'onAudioTrackChange',
+      tracks: [
+        { ...en, selected: true },
+        { ...es, selected: false },
+      ],
+    });
+    expect(markers()).toEqual([]);
+  });
+
+  test('a single listed track does not count as the alternate being selected', () => {
+    feed({ type: 'onAudioTrackChange', tracks: [{ ...es, selected: true }] });
+    expect(markers()).toEqual([]);
+  });
+});
+
 describe('fullscreen', () => {
   test('onFullscreenChange marks entered and exited', () => {
     feed(

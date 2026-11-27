@@ -80,6 +80,11 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
       status = .readytoplay
     }
     updateAndEmitPlaybackState()
+
+    // By this point `AVPlayerItem.tracks` is populated, which is the only
+    // public source of an audio channel count. Deduped, so this is a no-op
+    // unless the snapshot actually changed since `.readyToPlay`.
+    refreshAudioTracksIfChanged()
   }
 
   func onExternalPlaybackActiveChanged(isActive: Bool) {
@@ -169,6 +174,16 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
         .init(currentTime, duration, height, width, orientation)
       )
 
+      // AVFoundation ignores preferredPeakBitRate/preferredMaximumResolution
+      // written before the item is ready to play, so a quality pin made earlier
+      // - or carried over from the previous source - is (re)written here.
+      applyVideoQualityCapsIfReady()
+
+      // Media selection groups only exist once the asset is loaded, so this is
+      // both where an audio pick made earlier gets replayed and where the
+      // available audio renditions are first published.
+      applyAudioTrackSelectionIfReady()
+
       if playerItem.isPlaybackLikelyToKeepUp
         && !playerItem.isPlaybackBufferEmpty
       {
@@ -193,6 +208,9 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
 
   func onMediaSelectionChanged() {
     emitSelectedTextTrackIfChanged()
+    // Deduped like the other emission points, so this only fires when the snapshot
+    // really changed, e.g. once an automatic selection has actually been applied.
+    refreshAudioTracksIfChanged()
   }
 
   func onTimedMetadataChanged(timedMetadata: [AVMetadataItem]) {
@@ -213,6 +231,11 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
     _eventEmitter?.onBandwidthUpdate(
       .init(bitrate: bitrate, width: nil, height: nil)
     )
+
+    // Same access-log entry, second consumer: on iOS a quality selection is a
+    // cap rather than a hard lock, so what is actually being rendered has to be
+    // derived rather than assumed.
+    updateActiveVideoTrack(indicatedBitrate: bitrate)
   }
 
   func onPlayerItemChange(player _: AVPlayer, playerItem: AVPlayerItem?) {

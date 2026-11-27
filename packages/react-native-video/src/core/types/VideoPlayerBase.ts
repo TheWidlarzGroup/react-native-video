@@ -1,8 +1,10 @@
 import type { ListenerSubscription } from './EventEmitter';
 import type { AllPlayerEvents } from './Events';
+import type { AudioTrack } from './AudioTrack';
 import type { IgnoreSilentSwitchMode } from './IgnoreSilentSwitchMode';
 import type { MixAudioMode } from './MixAudioMode';
 import type { TextTrack } from './TextTrack';
+import type { VideoTrack } from './VideoTrack';
 import type { VideoPlayerSourceBase } from './VideoPlayerSourceBase';
 import type { VideoPlayerStatus } from './VideoPlayerStatus';
 
@@ -186,6 +188,68 @@ export interface VideoPlayerBase {
    * @returns The currently selected text track, or undefined if none is selected
    */
   readonly selectedTrack?: TextTrack;
+
+  /**
+   * All video renditions available for the current source, best first.
+   * Empty until the source's manifest has loaded - subscribe to
+   * `onVideoTrackChange` to know when this becomes populated (or changes,
+   * e.g. after a source replacement).
+   */
+  getAvailableVideoTracks(): VideoTrack[];
+
+  /**
+   * Pin playback to a specific video rendition, or pass `undefined` for
+   * automatic (adaptive) selection.
+   *
+   * @param trackId - id from {@link getAvailableVideoTracks}, or `undefined` for auto.
+   * @note Android enforces this as a hard track-selection override - the chosen
+   *       rendition plays, full stop. iOS has no rendition-selection API in
+   *       AVFoundation, so it is enforced as a resolution/peak-bitrate cap on
+   *       the player item: the chosen rendition becomes the highest eligible
+   *       one, but AVPlayer may still adapt downwards under bandwidth
+   *       pressure. Use `onVideoTrackChange`'s `activeTrackId` to see what is
+   *       actually playing, which may differ from `selectedVideoTrackId` on iOS.
+   * @note Safe to call before the source is loaded; the selection is latched
+   *       and applied once renditions are known.
+   */
+  selectVideoTrack(trackId?: string): void;
+
+  /**
+   * The id passed to the last {@link selectVideoTrack} call, or undefined
+   * when automatic (adaptive) selection is active.
+   */
+  readonly selectedVideoTrackId?: string;
+
+  /**
+   * All alternate audio tracks available for the current source (e.g.
+   * different languages or commentary tracks). Empty until the source's
+   * manifest has loaded - subscribe to `onAudioTrackChange` to know when
+   * this becomes populated.
+   */
+  getAvailableAudioTracks(): AudioTrack[];
+
+  /**
+   * Select an audio track, or pass `undefined` for the default track.
+   *
+   * @param trackId - id from {@link getAvailableAudioTracks}, or `undefined` for default.
+   * @note Unlike {@link selectVideoTrack}, this is a real, exact selection on
+   *       both platforms - not an approximation - since alternate audio tracks
+   *       have a genuine native selection API (AVFoundation media selection
+   *       groups on iOS, Media3 track overrides on Android), the same
+   *       mechanism {@link selectTextTrack} already uses.
+   * @note Safe to call before the source is loaded; the selection is latched
+   *       and applied once tracks are known.
+   */
+  selectAudioTrack(trackId?: string): void;
+
+  /**
+   * The id of the audio track that is selected right now: the one passed to
+   * the last {@link selectAudioTrack} call or, when none was picked (or after
+   * `selectAudioTrack()` with no id), the track the player chose by default.
+   * `undefined` only while no audio track is known yet, e.g. before the
+   * source has loaded.
+   */
+  readonly selectedAudioTrackId?: string;
 
   /**
    * Whether to show notification controls (lock screen / control center).

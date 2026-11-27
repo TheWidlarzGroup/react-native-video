@@ -1,13 +1,13 @@
-import type { AudioTrack } from './AudioTrack';
-import type { VideoTrack } from './VideoTrack';
 import type { VideoPlayerBase } from './VideoPlayerBase';
 
 /**
- * Extended VideoPlayer interface with web-only methods.
- * Use this type when you need access to audio/video track APIs on web.
+ * The VideoPlayer type on web.
+ * Audio and video track selection are on {@link VideoPlayerBase} - they are
+ * native/web shared APIs, not web-only - so this type adds nothing to it. It
+ * is kept so existing `as WebVideoPlayer` casts keep compiling.
  *
  * @experimental Audio/video tracks have ~16% browser support (Safari only, behind flags in Chrome/Firefox).
- * These methods return empty arrays on unsupported browsers.
+ * The track methods return empty arrays on unsupported browsers.
  *
  * @example
  * ```ts
@@ -15,14 +15,7 @@ import type { VideoPlayerBase } from './VideoPlayerBase';
  *
  * const player = useVideoPlayer(source) as WebVideoPlayer;
  * const audioTracks = player.getAvailableAudioTracks();
+ * const videoTracks = player.getAvailableVideoTracks();
  * ```
  */
-export interface WebVideoPlayer extends VideoPlayerBase {
-  getAvailableAudioTracks(): AudioTrack[];
-  selectAudioTrack(track: AudioTrack | null): void;
-  readonly selectedAudioTrack?: AudioTrack;
-
-  getAvailableVideoTracks(): VideoTrack[];
-  selectVideoTrack(track: VideoTrack | null): void;
-  readonly selectedVideoTrack?: VideoTrack;
-}
+export type WebVideoPlayer = VideoPlayerBase;
