@@ -54,7 +54,7 @@ The web platform may offer additional features not available on native. To acces
 ```tsx
 import { useVideoPlayer, type WebVideoPlayer } from 'react-native-video';
 
-const player = useVideoPlayer(source) as WebVideoPlayer;
+const player = useVideoPlayer(source) as unknown as WebVideoPlayer;
 ```
 
 This is optional - the standard `useVideoPlayer` works perfectly on web. The cast simply gives you typed access to extra capabilities when building web-specific features.

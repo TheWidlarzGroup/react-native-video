@@ -49,7 +49,6 @@ import { VideoView, useVideoPlayer } from 'react-native-video';
 
 export function Player() {
   const player = useVideoPlayer({
-    source: {
     uri: 'https://example.com/manifest.mpd', // or HLS .m3u8 for FairPlay
     // On iOS these headers are also used for the default license request
     headers: { Authorization: 'Bearer <token>' },
@@ -57,7 +56,6 @@ export function Player() {
       // type: 'widevine' | 'fairplay'  // optional; inferred by platform
       licenseUrl: 'https://license.example.com/widevine',
     },
-  },
   });
 
   return <VideoView player={player} />;

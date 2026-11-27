@@ -20,9 +20,7 @@ To use the `VideoPlayer`, you first need to create an instance of it with a vide
 import { useVideoPlayer } from 'react-native-video';
 
 const player = useVideoPlayer({
-  source: {
-    uri: 'https://www.w3schools.com/html/mov_bbb.mp4',
-  },
+  uri: 'https://www.w3schools.com/html/mov_bbb.mp4',
 });
 ```
 
@@ -45,7 +43,7 @@ const playerWithSource = new VideoPlayer({ uri: 'https://example.com/video.mp4' 
 
 // Using a VideoConfig object
 const playerWithConfig = new VideoPlayer({
-  source: { uri: 'https://example.com/video.mp4' },
+  uri: 'https://example.com/video.mp4',
   // other configurations
 });
 ```
