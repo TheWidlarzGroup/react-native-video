@@ -137,9 +137,7 @@ final class VideoCache {
 
 /// Answers one asset's loading requests from the cached part of the file and from the network.
 /// Everything runs on `queue`.
-private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelegate,
-  URLSessionDataDelegate
-{
+private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelegate {
   let queue = DispatchQueue(label: "com.twg.video.cache", qos: .userInitiated)
 
   private struct Index: Codable {
@@ -186,12 +184,22 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
   private var index: Index
   private var jobs: [Job] = []
   private var isComplete = false
-  private lazy var session: URLSession = {
+  // Created with the first network request. A session keeps its delegate alive until it is
+  // invalidated, so the delegate is a proxy that holds this loader weakly: the loader goes
+  // away with its asset and invalidates the session then.
+  private var session: URLSession?
+
+  private func networkSession() -> URLSession {
+    if let session { return session }
     let operationQueue = OperationQueue()
     operationQueue.underlyingQueue = queue
     operationQueue.maxConcurrentOperationCount = 1
-    return URLSession(configuration: .ephemeral, delegate: self, delegateQueue: operationQueue)
-  }()
+    let created = URLSession(
+      configuration: .ephemeral, delegate: SessionDelegate(loader: self),
+      delegateQueue: operationQueue)
+    session = created
+    return created
+  }
 
   init?(
     url: URL, headers: [String: String], key: String, partialFile: URL, indexFile: URL,
@@ -226,7 +234,7 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
   }
 
   deinit {
-    session.invalidateAndCancel()
+    session?.invalidateAndCancel()
     try? fileHandle.close()
     cache.release(key: key)
   }
@@ -349,7 +357,7 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
       end.map { "bytes=\(start)-\($0 - 1)" } ?? "bytes=\(start)-", forHTTPHeaderField: "Range")
     request.cachePolicy = .reloadIgnoringLocalCacheData
 
-    let task = session.dataTask(with: request)
+    let task = networkSession().dataTask(with: request)
     job.task = task
     job.taskOffset = start
     job.fetchStart = start
@@ -381,7 +389,7 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
     information.contentType = index.contentType
   }
 
-  // MARK: - URLSessionDataDelegate
+  // MARK: - Network answers (forwarded by SessionDelegate)
 
   func urlSession(
     _ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse,
@@ -508,5 +516,34 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
     isComplete = true
     try? FileManager.default.removeItem(at: indexFile)
     cache.trim()
+  }
+}
+
+/// The session's delegate. It forwards to the loader without keeping it alive.
+private final class SessionDelegate: NSObject, URLSessionDataDelegate {
+  private weak var loader: CachingResourceLoader?
+
+  init(loader: CachingResourceLoader) {
+    self.loader = loader
+  }
+
+  func urlSession(
+    _ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse,
+    completionHandler: @escaping (URLSession.ResponseDisposition) -> Void
+  ) {
+    guard let loader else {
+      completionHandler(.cancel)
+      return
+    }
+    loader.urlSession(
+      session, dataTask: dataTask, didReceive: response, completionHandler: completionHandler)
+  }
+
+  func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
+    loader?.urlSession(session, dataTask: dataTask, didReceive: data)
+  }
+
+  func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+    loader?.urlSession(session, task: task, didCompleteWithError: error)
   }
 }
