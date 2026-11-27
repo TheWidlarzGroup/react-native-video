@@ -123,9 +123,18 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   private var audioSwitchFromId: String? = null
   // The track ExoPlayer picks on its own for this source, seen while no pick is in force.
   private var defaultAudioTrackId: String? = null
+  // Fallback for a pick that is cleared while the default isn't known (see selectAudioTrack): if
+  // the selection turns out not to change, no onTracksChanged follows, so acknowledge it here.
+  private val audioSwitchAckRunnable = Runnable {
+    if (!audioSwitchPending || releaseStarted.get()) return@Runnable
+    audioSwitchPending = false
+    audioSwitchFromId = null
+    emitAudioTrackChange(force = true)
+  }
 
   private companion object {
     const val PROGRESS_UPDATE_INTERVAL_MS = 250L
+    const val AUDIO_SWITCH_ACK_TIMEOUT_MS = 300L
     private const val TAG = "HybridVideoPlayer"
     private const val DEFAULT_MIN_BUFFER_DURATION_MS = 5000
     private const val DEFAULT_MAX_BUFFER_DURATION_MS = 10000
@@ -404,6 +413,12 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
         oldSource?.sourceLoader?.cancel()
 
         this.source = source
+        // Audio selection state describes the old source: its default track id and any switch
+        // still waiting for onTracksChanged mean nothing for the new one.
+        defaultAudioTrackId = null
+        audioSwitchPending = false
+        audioSwitchFromId = null
+        progressHandler.removeCallbacks(audioSwitchAckRunnable)
         player.setMediaSource(hybridSource.mediaSource)
         ensureNotReleased()
 
@@ -826,6 +841,8 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
 
   override fun selectAudioTrack(trackId: String?) {
     val playingId = AudioTrackUtils.getSelectedAudioTrack(player)?.id
+    val hadPick = requestedAudioTrack != null
+    progressHandler.removeCallbacks(audioSwitchAckRunnable)
     val applied = AudioTrackUtils.selectAudioTrack(player, trackId)
     requestedAudioTrack = if (trackId == null) {
       null
@@ -853,12 +870,20 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
       applied?.id
     }
 
-    if (playingId != null && targetId != null && targetId != playingId) {
-      // A real switch is on its way. Reporting now would describe the outgoing track (its
+    // Clearing a pick whose replacement isn't known (the default was never seen for this source,
+    // e.g. the pick followed a source change): it may or may not move playback.
+    val outcomeUnknown = trackId == null && targetId == null && hadPick && playingId != null
+
+    if (outcomeUnknown || (playingId != null && targetId != null && targetId != playingId)) {
+      // A switch is on its way. Reporting now would describe the outgoing track (its
       // `selected` flag is still set), and onTracksChanged would then send a second event with
       // the new one. Let that callback send the only event.
       audioSwitchPending = true
       audioSwitchFromId = playingId
+      // If it turns out nothing changes, no callback follows: acknowledge after a short delay.
+      if (outcomeUnknown) {
+        progressHandler.postDelayed(audioSwitchAckRunnable, AUDIO_SWITCH_ACK_TIMEOUT_MS)
+      }
     } else {
       // Nothing will change (the same track again, or a pick that can't be applied yet), so no
       // callback follows: acknowledge the call here.
@@ -879,6 +904,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
       if (playingId == audioSwitchFromId) return
       audioSwitchPending = false
       audioSwitchFromId = null
+      progressHandler.removeCallbacks(audioSwitchAckRunnable)
       emitAudioTrackChange(force = true)
     } else {
       emitAudioTrackChange()
