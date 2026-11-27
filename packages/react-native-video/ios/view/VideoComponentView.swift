@@ -241,21 +241,50 @@ import UIKit
   /// the app restarts.
   private func exitFullscreenBeforeUnmount() {
     guard let playerViewController, let observer,
-      observer.isFullscreen || observer.isFullscreenTransitioning
+      observer.isFullscreen || observer.isFullscreenBusy
     else { return }
-    // Nothing queued may run after the view is gone.
-    observer.resetFullscreenState(keepingFullscreen: true)
     let player = playerViewController.player
     let wasPlaying = player.map { $0.timeControlStatus != .paused } ?? false
     // AVKit pauses the player when it leaves native fullscreen. After a normal exit the observer
     // resumes it, but this view and its observer are going away, so resume it here once the
     // dismissal is done. In v7 the player outlives the view, and an unmount outside fullscreen
     // does not pause it either.
-    playerViewController.exitFullscreen(animated: false) {
-      if wasPlaying {
-        player?.play()
+    let exitFullscreen = {
+      playerViewController.exitFullscreen(animated: false) {
+        if wasPlaying {
+          player?.play()
+        }
       }
     }
+
+    // Nothing queued may run after the view is gone.
+    observer.queuedFullscreenTarget = nil
+
+    if observer.isFullscreenBusy {
+      // Unmounted while entering (or right after asking to enter). AVKit ignores an exit in the
+      // middle of a transition and then finishes presenting fullscreen over an app whose view is
+      // gone, which covers the app and blocks every later enterFullscreen(). Exit once the
+      // transition is over instead.
+      observer.runAfterFullscreenTransition { observer in
+        guard observer.isFullscreen || playerViewController.presentedViewController != nil
+        else { return }
+        exitFullscreen()
+        // AVKit does not leave fullscreen for a controller whose inline view is no longer in a
+        // window, which is the case now. Dismiss what it presented if it is still up.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+          guard let presented = playerViewController.presentedViewController else { return }
+          presented.presentingViewController?.dismiss(animated: false) {
+            if wasPlaying {
+              player?.play()
+            }
+          }
+        }
+      }
+      return
+    }
+
+    observer.resetFullscreenState(keepingFullscreen: true)
+    exitFullscreen()
   }
   #endif
 

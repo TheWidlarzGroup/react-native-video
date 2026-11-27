@@ -120,8 +120,31 @@ class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
     isFullscreenTransitioning = false
     // Not from inside the coordinator's completion: AVKit is still unwinding the transition.
     DispatchQueue.main.async { [weak self] in
+      self?.runPendingAfterFullscreenTransition()
       self?.view?.applyQueuedFullscreenRequest()
     }
+  }
+
+  // Runs once when the transition that is running (or requested) now has ended, also after the
+  // view that started it is gone. The closure holds this observer, the delegate of the fullscreen
+  // controller, so the end of the transition is still reported to it.
+  private var afterFullscreenTransition: (() -> Void)?
+
+  /// `action` gets this observer, with `isFullscreen` already set by the finished transition.
+  /// If no transition starts or ends, it runs after a timeout instead.
+  func runAfterFullscreenTransition(_ action: @escaping (VideoComponentViewObserver) -> Void) {
+    afterFullscreenTransition = { action(self) }
+    DispatchQueue.main.asyncAfter(
+      deadline: .now() + Self.fullscreenRequestTimeoutSeconds + 1.5
+    ) { [weak self] in
+      self?.runPendingAfterFullscreenTransition()
+    }
+  }
+
+  private func runPendingAfterFullscreenTransition() {
+    let action = afterFullscreenTransition
+    afterFullscreenTransition = nil
+    action?()
   }
 
   /// The controller was replaced or the view is going away: nothing tracked here describes
