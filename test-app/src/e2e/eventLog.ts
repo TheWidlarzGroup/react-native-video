@@ -24,6 +24,11 @@ export const MARKER_IDS = [
   'evt-onError-repeated', // a second onError in one scenario: one failure must report once
   'evt-status-error', // onStatusChange('error')
   'evt-onPlaybackStateChanged',
+  'evt-onBuffer', // onBuffer(true) seen at least once
+  // onBuffer(true) twice in a row without onBuffer(false) between (#5269): iOS reported the
+  // same state up to seven times at start. A repeated false is not counted: Android reports
+  // the ready state and then the end of the clip with false.
+  'evt-onBuffer-true-repeated',
   'evt-playing', // isPlaying seen true at least once
   'evt-paused', // isPlaying seen false after having been true (real pause, not initial state)
   'evt-resumed', // isPlaying seen true again after evt-paused
@@ -70,6 +75,7 @@ export type PlayerEvent =
   | { type: 'onError'; code: string }
   | { type: 'onStatusChange'; status: VideoPlayerStatus }
   | { type: 'onPlaybackStateChange'; isPlaying: boolean }
+  | { type: 'onBuffer'; buffering: boolean }
   | { type: 'onSeek'; seekTime: number }
   | { type: 'onVolumeChange'; muted: boolean; volume: number }
   | { type: 'onPlaybackRateChange'; rate: number }
@@ -148,6 +154,8 @@ type State = {
   replaceRequested: boolean;
   // The next onProgress tells where the replacement source started (see onLoad).
   reloadPending: boolean;
+  // The value of the last onBuffer, null before the first one.
+  lastBuffering: boolean | null;
 };
 
 const initialState = (): State => ({
@@ -165,6 +173,7 @@ const initialState = (): State => ({
   readySeen: false,
   replaceRequested: false,
   reloadPending: false,
+  lastBuffering: null,
 });
 
 let state = initialState();
@@ -299,6 +308,15 @@ function apply(event: PlayerEvent) {
         mark('evt-paused');
       }
       append(`playbackState isPlaying=${event.isPlaying}`);
+      return;
+
+    case 'onBuffer':
+      if (event.buffering) {
+        mark('evt-onBuffer');
+        if (state.lastBuffering === true) mark('evt-onBuffer-true-repeated');
+      }
+      state.lastBuffering = event.buffering;
+      append(`onBuffer ${event.buffering}`);
       return;
 
     case 'onSeek':
