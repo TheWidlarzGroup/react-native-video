@@ -50,6 +50,7 @@ namespace margelo::nitro::video { struct onVolumeChangeData; }
 #include "JFunc_void_BandwidthData.hpp"
 #include "JBandwidthData.hpp"
 #include <optional>
+#include <string>
 #include "JFunc_void_std__string.hpp"
 #include "onLoadData.hpp"
 #include "JFunc_void_onLoadData.hpp"
@@ -80,7 +81,6 @@ namespace margelo::nitro::video { struct onVolumeChangeData; }
 #include "TimedMetadataObject.hpp"
 #include <vector>
 #include "JTimedMetadataObject.hpp"
-#include <string>
 #include "JFunc_void_std__vector_std__string_.hpp"
 #include <NitroModules/Null.hpp>
 #include "TextTrack.hpp"

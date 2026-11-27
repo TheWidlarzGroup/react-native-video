@@ -493,6 +493,28 @@ namespace margelo::nitro::video::bridge::swift {
     return Func_void_BandwidthData_Wrapper(std::move(value));
   }
   
+  // pragma MARK: std::function<void(const std::string& /* error */)>
+  /**
+   * Specialized version of `std::function<void(const std::string&)>`.
+   */
+  using Func_void_std__string = std::function<void(const std::string& /* error */)>;
+  /**
+   * Wrapper class for a `std::function<void(const std::string& / * error * /)>`, this can be used from Swift.
+   */
+  class Func_void_std__string_Wrapper final {
+  public:
+    explicit Func_void_std__string_Wrapper(std::function<void(const std::string& /* error */)>&& func): _function(std::make_unique<std::function<void(const std::string& /* error */)>>(std::move(func))) {}
+    inline void call(std::string error) const noexcept {
+      _function->operator()(error);
+    }
+  private:
+    std::unique_ptr<std::function<void(const std::string& /* error */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_std__string create_Func_void_std__string(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_std__string_Wrapper wrap_Func_void_std__string(Func_void_std__string value) noexcept {
+    return Func_void_std__string_Wrapper(std::move(value));
+  }
+  
   // pragma MARK: std::function<void(const onLoadData& /* data */)>
   /**
    * Specialized version of `std::function<void(const onLoadData&)>`.
@@ -857,28 +879,6 @@ namespace margelo::nitro::video::bridge::swift {
   }
   inline PromiseHolder<std::string> wrap_std__shared_ptr_Promise_std__string__(std::shared_ptr<Promise<std::string>> promise) noexcept {
     return PromiseHolder<std::string>(std::move(promise));
-  }
-  
-  // pragma MARK: std::function<void(const std::string& /* result */)>
-  /**
-   * Specialized version of `std::function<void(const std::string&)>`.
-   */
-  using Func_void_std__string = std::function<void(const std::string& /* result */)>;
-  /**
-   * Wrapper class for a `std::function<void(const std::string& / * result * /)>`, this can be used from Swift.
-   */
-  class Func_void_std__string_Wrapper final {
-  public:
-    explicit Func_void_std__string_Wrapper(std::function<void(const std::string& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::string& /* result */)>>(std::move(func))) {}
-    inline void call(std::string result) const noexcept {
-      _function->operator()(result);
-    }
-  private:
-    std::unique_ptr<std::function<void(const std::string& /* result */)>> _function;
-  } SWIFT_NONCOPYABLE;
-  Func_void_std__string create_Func_void_std__string(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_std__string_Wrapper wrap_Func_void_std__string(Func_void_std__string value) noexcept {
-    return Func_void_std__string_Wrapper(std::move(value));
   }
   
   // pragma MARK: std::function<std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(const OnGetLicensePayload& /* payload */)>

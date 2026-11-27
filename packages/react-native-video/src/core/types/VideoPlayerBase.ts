@@ -9,7 +9,13 @@ import type { VideoPlayerStatus } from './VideoPlayerStatus';
 
 import type { VideoConfig, VideoSource } from './VideoConfig';
 
-export interface VideoPlayerBase {
+/**
+ * Every member of {@link VideoPlayerBase} that the native (Nitro) spec can express.
+ * The Nitro spec extends this interface instead of {@link VideoPlayerBase}: nitrogen cannot
+ * generate a method with a type parameter (`addEventListener<Event>`), and one such member
+ * makes it drop the whole `VideoPlayer` HybridObject.
+ */
+export interface VideoPlayerSpecBase {
   /**
    * The source of the video.
    * Source is immutable. To change the source, you need to call {@link replaceSourceAsync} method.
@@ -228,7 +234,9 @@ export interface VideoPlayerBase {
    * Releases the player's resources. After calling this, the player is no longer usable.
    */
   release(): void;
+}
 
+export interface VideoPlayerBase extends VideoPlayerSpecBase {
   addEventListener<Event extends keyof AllPlayerEvents>(
     event: Event,
     callback: AllPlayerEvents[Event]

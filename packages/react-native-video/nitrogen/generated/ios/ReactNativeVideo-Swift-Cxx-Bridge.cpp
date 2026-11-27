@@ -116,6 +116,14 @@ namespace margelo::nitro::video::bridge::swift {
     };
   }
   
+  // pragma MARK: std::function<void(const std::string& /* error */)>
+  Func_void_std__string create_Func_void_std__string(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = ReactNativeVideo::Func_void_std__string::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const std::string& error) mutable -> void {
+      swiftClosure.call(error);
+    };
+  }
+  
   // pragma MARK: std::function<void(const onLoadData& /* data */)>
   Func_void_onLoadData create_Func_void_onLoadData(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = ReactNativeVideo::Func_void_onLoadData::fromUnsafe(swiftClosureWrapper);
@@ -201,14 +209,6 @@ namespace margelo::nitro::video::bridge::swift {
     auto swiftClosure = ReactNativeVideo::Func_void_onVolumeChangeData::fromUnsafe(swiftClosureWrapper);
     return [swiftClosure = std::move(swiftClosure)](const onVolumeChangeData& data) mutable -> void {
       swiftClosure.call(data);
-    };
-  }
-  
-  // pragma MARK: std::function<void(const std::string& /* result */)>
-  Func_void_std__string create_Func_void_std__string(void* NON_NULL swiftClosureWrapper) noexcept {
-    auto swiftClosure = ReactNativeVideo::Func_void_std__string::fromUnsafe(swiftClosureWrapper);
-    return [swiftClosure = std::move(swiftClosure)](const std::string& result) mutable -> void {
-      swiftClosure.call(result);
     };
   }
   

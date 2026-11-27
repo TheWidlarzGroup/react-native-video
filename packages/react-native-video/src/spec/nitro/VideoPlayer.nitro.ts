@@ -1,6 +1,6 @@
 import type { HybridObject } from 'react-native-nitro-modules';
 import type { TextTrack } from '../../core/types/TextTrack';
-import type { VideoPlayerBase } from '../../core/types/VideoPlayerBase';
+import type { VideoPlayerSpecBase } from '../../core/types/VideoPlayerBase';
 import type { VideoPlayerEventEmitter } from './VideoPlayerEventEmitter.nitro';
 import type { VideoPlayerSource } from './VideoPlayerSource.nitro';
 
@@ -26,7 +26,9 @@ import type { VideoPlayerSource } from './VideoPlayerSource.nitro';
  * (e.g. onLoadStartData's bridged source type) that nobody asked to change.
  */
 export interface VideoPlayer
-  extends HybridObject<{ ios: 'swift'; android: 'kotlin' }>, VideoPlayerBase {
+  extends
+    HybridObject<{ ios: 'swift'; android: 'kotlin' }>,
+    VideoPlayerSpecBase {
   // Override with (hybrid) VideoPlayerSource
   readonly source: VideoPlayerSource;
 
