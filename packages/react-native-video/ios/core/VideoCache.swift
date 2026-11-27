@@ -227,6 +227,9 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
   private var index: Index
   private var jobs: [Job] = []
   private var isComplete = false
+  // The uri turned out to be an HLS or DASH manifest: every request goes to the network as
+  // if there were no cache.
+  private var isStream = false
   // Created with the first network request. A session keeps its delegate alive until it is
   // invalidated, so the delegate is a proxy that holds this loader weakly: the loader goes
   // away with its asset and invalidates the session then.
@@ -299,6 +302,14 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
   ) -> Bool {
     guard let dataRequest = loadingRequest.dataRequest else { return false }
 
+    // Only the file itself is cached. Anything else the player resolves against the private
+    // scheme (the playlists and segments of a stream) is loaded the usual way.
+    let requested = loadingRequest.request.url.map { VideoCache.originalURL(for: $0) }
+    if isStream || (requested != nil && requested?.absoluteString != url.absoluteString) {
+      redirect(loadingRequest, to: requested ?? url)
+      return true
+    }
+
     let start = dataRequest.currentOffset != 0 ? dataRequest.currentOffset : dataRequest.requestedOffset
     let end: Int64? =
       dataRequest.requestsAllDataToEndOfResource
@@ -315,6 +326,15 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
   ) {
     guard let job = jobs.first(where: { $0.request === loadingRequest }) else { return }
     finish(job, error: nil, respond: false)
+  }
+
+  private func redirect(_ request: AVAssetResourceLoadingRequest, to target: URL) {
+    var redirect = URLRequest(url: target)
+    headers.forEach { redirect.setValue($1, forHTTPHeaderField: $0) }
+    request.redirect = redirect
+    request.response = HTTPURLResponse(
+      url: target, statusCode: 302, httpVersion: nil, headerFields: nil)
+    request.finishLoading()
   }
 
   // MARK: - Serving a request
@@ -462,6 +482,25 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
       return
     }
 
+    let mimeType = http.mimeType?.lowercased() ?? ""
+    if mimeType.contains("mpegurl") || mimeType.contains("dash+xml") {
+      // A manifest behind a uri without an extension. A cached manifest would be served
+      // stale, and its segments are other files: hand the whole source back to the player.
+      completionHandler(.cancel)
+      isStream = true
+      for other in jobs {
+        other.task?.cancel()
+        other.task = nil
+        if !other.request.isFinished, !other.request.isCancelled { redirect(other.request, to: url) }
+      }
+      jobs.removeAll()
+      // Nothing of a stream is kept, not even an empty file.
+      index = Index()
+      try? FileManager.default.removeItem(at: partialFile)
+      try? FileManager.default.removeItem(at: indexFile)
+      return
+    }
+
     // The file changed on the server since part of it was cached: the cached part is
     // worthless, and requests that already got bytes of the old file cannot be continued.
     let validator =
@@ -590,7 +629,7 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
   }
 
   private func saveIndex() {
-    guard !isComplete, let data = try? JSONEncoder().encode(index) else { return }
+    guard !isComplete, !isStream, let data = try? JSONEncoder().encode(index) else { return }
     try? data.write(to: indexFile, options: .atomic)
   }
 
