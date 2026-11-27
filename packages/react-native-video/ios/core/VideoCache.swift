@@ -323,6 +323,8 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
 
   deinit {
     session?.invalidateAndCancel()
+    // Nothing else can touch the loader any more; up to `saveInterval` bytes are not yet listed.
+    saveIndex()
     try? fileHandle.close()
     cache.release(key: key)
     cache.trimSoon()
@@ -339,7 +341,7 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
     // Only the file itself is cached. Anything else the player resolves against the private
     // scheme (the playlists and segments of a stream) is loaded the usual way.
     let requested = loadingRequest.request.url.map { VideoCache.originalURL(for: $0) }
-    if isStream || (requested != nil && requested?.absoluteString != url.absoluteString) {
+    if isStream || (requested != nil && !Self.isSameResource(requested, url)) {
       redirect(loadingRequest, to: requested ?? url)
       return true
     }
@@ -558,20 +560,8 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
 
     let mimeType = http.mimeType?.lowercased() ?? ""
     if mimeType.contains("mpegurl") || mimeType.contains("dash+xml") {
-      // A manifest behind a uri without an extension. A cached manifest would be served
-      // stale, and its segments are other files: hand the whole source back to the player.
       completionHandler(.cancel)
-      isStream = true
-      for other in jobs {
-        other.task?.cancel()
-        other.task = nil
-        if !other.request.isFinished, !other.request.isCancelled { redirect(other.request, to: url) }
-      }
-      jobs.removeAll()
-      // Nothing of a stream is kept, not even an empty file.
-      index = Index()
-      try? FileManager.default.removeItem(at: partialFile)
-      try? FileManager.default.removeItem(at: indexFile)
+      becomeStream()
       return
     }
 
@@ -614,6 +604,11 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
   func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
     guard let job = jobs.first(where: { $0.task === dataTask }) else { return }
     let offset = job.taskOffset
+    // A manifest that the server sends as text or as octet-stream is known by its first bytes.
+    if offset == 0, Self.looksLikeManifest(data) {
+      becomeStream()
+      return
+    }
     job.taskOffset += Int64(data.count)
 
     do {
@@ -672,6 +667,41 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
       advance(job)
       advanceWaitingJobs()
     }
+  }
+
+  /// A manifest behind a uri without an extension. A cached manifest would be served stale,
+  /// and its segments are other files: the whole source is handed back to the player.
+  private func becomeStream() {
+    isStream = true
+    for other in jobs {
+      other.task?.cancel()
+      other.task = nil
+      if !other.request.isFinished, !other.request.isCancelled { redirect(other.request, to: url) }
+    }
+    jobs.removeAll()
+    // Nothing of a stream is kept, not even an empty file.
+    index = Index()
+    try? FileManager.default.removeItem(at: partialFile)
+    try? FileManager.default.removeItem(at: indexFile)
+  }
+
+  /// "#EXTM3U" (HLS) or the start of an XML document (DASH). The player's first request is
+  /// for two bytes, so two have to be enough; no audio or video container starts like this.
+  private static func looksLikeManifest(_ data: Data) -> Bool {
+    let head = Array(data.prefix(7))
+    guard head.count >= 2 else { return false }
+    return Array("#EXTM3U".utf8).starts(with: head) || (head[0] == 0x3C && (head[1] == 0x3F || head[1] == 0x4D))
+  }
+
+  /// Same url, whatever the player did to the fragment.
+  private static func isSameResource(_ a: URL?, _ b: URL) -> Bool {
+    func normalized(_ url: URL) -> String {
+      var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+      components?.fragment = nil
+      return components?.string ?? url.absoluteString
+    }
+    guard let a else { return false }
+    return normalized(a) == normalized(b)
   }
 
   /// The type AVFoundation is told. Storage servers often send "application/octet-stream",
