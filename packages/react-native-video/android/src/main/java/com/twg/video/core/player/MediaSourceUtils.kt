@@ -26,8 +26,10 @@ import com.twg.video.core.LibraryError
 import com.twg.video.core.SourceError
 import com.twg.video.core.plugins.PluginsRegistry
 import java.io.IOException
+import java.security.cert.CertPathValidatorException
+import java.security.cert.CertificateException
 import java.util.UUID
-import kotlin.math.min
+import javax.net.ssl.SSLPeerUnverifiedException
 
 @OptIn(UnstableApi::class)
 @Throws(SourceError::class)
@@ -143,7 +145,8 @@ fun buildLoadErrorHandlingPolicy(source: HybridVideoPlayerSource): LoadErrorHand
 
 /**
  * Retries a load that failed because the connection could not be opened for as long as it
- * takes, once a second. Every other failure is retried `minLoadRetryCount` times, then reported.
+ * takes, once a second. Every other failure is handled as without the option: retried
+ * `minLoadRetryCount` times with the default delays, or reported at once when it cannot succeed.
  */
 @OptIn(UnstableApi::class)
 class RetryWhileDisconnectedPolicy(private val minLoadRetryCount: Int) :
@@ -152,8 +155,10 @@ class RetryWhileDisconnectedPolicy(private val minLoadRetryCount: Int) :
   override fun getRetryDelayMsFor(loadErrorInfo: LoadErrorHandlingPolicy.LoadErrorInfo): Long {
     return when {
       isDisconnect(loadErrorInfo.exception) -> DISCONNECTED_RETRY_DELAY_MS
-      loadErrorInfo.errorCount < minLoadRetryCount ->
-        min((loadErrorInfo.errorCount - 1) * 1000L, 5000L)
+      // `<=` as in DefaultLoadErrorHandlingPolicy: the first error has errorCount 1, so this
+      // gives `minLoadRetryCount` retries, the same number as without the option. The default
+      // policy also keeps failures that cannot succeed (a parse error, a missing file) fatal.
+      loadErrorInfo.errorCount <= minLoadRetryCount -> super.getRetryDelayMsFor(loadErrorInfo)
       else -> C.TIME_UNSET
     }
   }
@@ -162,17 +167,25 @@ class RetryWhileDisconnectedPolicy(private val minLoadRetryCount: Int) :
   override fun getMinimumLoadableRetryCount(dataType: Int): Int = Int.MAX_VALUE
 
   private fun isDisconnect(exception: IOException): Boolean {
-    // A server answer (4xx, 5xx, wrong content type) is not a lost connection.
-    if (exception is HttpDataSource.InvalidResponseCodeException ||
-      exception is HttpDataSource.InvalidContentTypeException
+    // A server answer (4xx, 5xx, wrong content type) is not a lost connection, and neither is
+    // a request the device will never send (cleartext http without permission) or a server
+    // whose certificate is not trusted. Retried forever, those would buffer without an error.
+    if (exception !is HttpDataSource.HttpDataSourceException ||
+      exception is HttpDataSource.InvalidResponseCodeException ||
+      exception is HttpDataSource.InvalidContentTypeException ||
+      exception is HttpDataSource.CleartextNotPermittedException
     ) {
       return false
     }
-    return exception is HttpDataSource.HttpDataSourceException
+    return generateSequence(exception.cause) { it.cause }.take(MAX_CAUSE_DEPTH).none {
+      it is CertificateException || it is CertPathValidatorException ||
+        it is SSLPeerUnverifiedException
+    }
   }
 
   companion object {
     private const val DISCONNECTED_RETRY_DELAY_MS = 1000L
+    private const val MAX_CAUSE_DEPTH = 10
   }
 }
 
