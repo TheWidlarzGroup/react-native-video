@@ -186,7 +186,7 @@ export interface VideoPlayerBase {
    * Get the currently selected text track.
    * @returns The currently selected text track, or undefined if none is selected
    */
-  readonly selectedTrack?: TextTrack;
+  readonly selectedTrack?: TextTrack | undefined;
 
   /**
    * All video renditions available for the current source, best first.
@@ -217,7 +217,7 @@ export interface VideoPlayerBase {
    * The id passed to the last {@link selectVideoTrack} call, or undefined
    * when automatic (adaptive) selection is active.
    */
-  readonly selectedVideoTrackId?: string;
+  readonly selectedVideoTrackId?: string | undefined;
 
   /**
    * Whether to show notification controls (lock screen / control center).
