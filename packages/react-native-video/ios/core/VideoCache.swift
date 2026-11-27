@@ -21,7 +21,6 @@ final class VideoCache {
   // "rnv-cache-http" / "rnv-cache-https": the uri's own scheme stays readable.
   static let schemePrefix = "rnv-cache-"
   static let sizeLimit: Int64 = 100 * 1024 * 1024
-  private static let lastUsedGranularity: TimeInterval = 3600
 
   private let directory: URL
   private let lock = NSRecursiveLock()
@@ -69,15 +68,11 @@ final class VideoCache {
     defer { lock.unlock() }
 
     if FileManager.default.fileExists(atPath: completeFile.path) {
-      // The modification date is the "last used" date for trimming. It is moved at most once
-      // an hour: AVFoundation keeps a file it has played open, and after a change of the date
-      // it opens the file again and keeps both, one more descriptor with every play.
-      let attributes = try? FileManager.default.attributesOfItem(atPath: completeFile.path)
-      let lastUsed = attributes?[.modificationDate] as? Date ?? .distantPast
-      if Date().timeIntervalSince(lastUsed) > Self.lastUsedGranularity {
-        try? FileManager.default.setAttributes(
-          [.modificationDate: Date()], ofItemAtPath: completeFile.path)
-      }
+      // The "last used" date for trimming is the date of an empty marker file. The video file
+      // itself is left alone: AVFoundation keeps a file it has played open, and after a change
+      // of its date it opens the file again and keeps both, one more descriptor with every play.
+      FileManager.default.createFile(
+        atPath: directory.appendingPathComponent("\(key).used").path, contents: nil)
       let asset = AVURLAsset(url: completeFile)
       // Trimming leaves the file alone for as long as this asset lives.
       objc_setAssociatedObject(
