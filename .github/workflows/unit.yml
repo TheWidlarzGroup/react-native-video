@@ -49,6 +49,13 @@ jobs:
         run: bun typecheck
       - name: Unit tests
         run: bun run test
+      # The generated Nitro files are committed. A spec change without a regeneration, or
+      # a spec nitrogen cannot generate, shows up here as a failed run or a dirty tree.
+      - name: Generated Nitro specs are up to date
+        working-directory: packages/react-native-video
+        run: |
+          bun run specs
+          git diff --exit-code -- nitrogen
 
   react-19:
     name: library tests and typecheck (react 19)
