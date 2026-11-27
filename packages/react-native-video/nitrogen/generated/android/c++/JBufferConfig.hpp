@@ -57,6 +57,8 @@ namespace margelo::nitro::video {
       jni::local_ref<jni::JDouble> preferredPeakBitRateForExpensiveNetworks = this->getFieldValue(fieldPreferredPeakBitRateForExpensiveNetworks);
       static const auto fieldPreferredMaximumResolutionForExpensiveNetworks = clazz->getField<JResolution>("preferredMaximumResolutionForExpensiveNetworks");
       jni::local_ref<JResolution> preferredMaximumResolutionForExpensiveNetworks = this->getFieldValue(fieldPreferredMaximumResolutionForExpensiveNetworks);
+      static const auto fieldAutomaticallyWaitsToMinimizeStalling = clazz->getField<jni::JBoolean>("automaticallyWaitsToMinimizeStalling");
+      jni::local_ref<jni::JBoolean> automaticallyWaitsToMinimizeStalling = this->getFieldValue(fieldAutomaticallyWaitsToMinimizeStalling);
       return BufferConfig(
         livePlayback != nullptr ? std::make_optional(livePlayback->toCpp()) : std::nullopt,
         minBufferMs != nullptr ? std::make_optional(minBufferMs->value()) : std::nullopt,
@@ -68,7 +70,8 @@ namespace margelo::nitro::video {
         preferredPeakBitRate != nullptr ? std::make_optional(preferredPeakBitRate->value()) : std::nullopt,
         preferredMaximumResolution != nullptr ? std::make_optional(preferredMaximumResolution->toCpp()) : std::nullopt,
         preferredPeakBitRateForExpensiveNetworks != nullptr ? std::make_optional(preferredPeakBitRateForExpensiveNetworks->value()) : std::nullopt,
-        preferredMaximumResolutionForExpensiveNetworks != nullptr ? std::make_optional(preferredMaximumResolutionForExpensiveNetworks->toCpp()) : std::nullopt
+        preferredMaximumResolutionForExpensiveNetworks != nullptr ? std::make_optional(preferredMaximumResolutionForExpensiveNetworks->toCpp()) : std::nullopt,
+        automaticallyWaitsToMinimizeStalling != nullptr ? std::make_optional(static_cast<bool>(automaticallyWaitsToMinimizeStalling->value())) : std::nullopt
       );
     }
 
@@ -78,7 +81,7 @@ namespace margelo::nitro::video {
      */
     [[maybe_unused]]
     static jni::local_ref<JBufferConfig::javaobject> fromCpp(const BufferConfig& value) {
-      using JSignature = JBufferConfig(jni::alias_ref<JLivePlaybackParams>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<JResolution>, jni::alias_ref<jni::JDouble>, jni::alias_ref<JResolution>);
+      using JSignature = JBufferConfig(jni::alias_ref<JLivePlaybackParams>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<JResolution>, jni::alias_ref<jni::JDouble>, jni::alias_ref<JResolution>, jni::alias_ref<jni::JBoolean>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
@@ -93,7 +96,8 @@ namespace margelo::nitro::video {
         value.preferredPeakBitRate.has_value() ? jni::JDouble::valueOf(value.preferredPeakBitRate.value()) : nullptr,
         value.preferredMaximumResolution.has_value() ? JResolution::fromCpp(value.preferredMaximumResolution.value()) : nullptr,
         value.preferredPeakBitRateForExpensiveNetworks.has_value() ? jni::JDouble::valueOf(value.preferredPeakBitRateForExpensiveNetworks.value()) : nullptr,
-        value.preferredMaximumResolutionForExpensiveNetworks.has_value() ? JResolution::fromCpp(value.preferredMaximumResolutionForExpensiveNetworks.value()) : nullptr
+        value.preferredMaximumResolutionForExpensiveNetworks.has_value() ? JResolution::fromCpp(value.preferredMaximumResolutionForExpensiveNetworks.value()) : nullptr,
+        value.automaticallyWaitsToMinimizeStalling.has_value() ? jni::JBoolean::valueOf(value.automaticallyWaitsToMinimizeStalling.value()) : nullptr
       );
     }
   };

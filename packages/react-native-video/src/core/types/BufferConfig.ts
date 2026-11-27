@@ -104,4 +104,13 @@ export interface BufferConfig {
    * @platform ios, visionOS, tvOS
    */
   preferredMaximumResolutionForExpensiveNetworks?: Resolution;
+
+  /**
+   * Whether the player may delay playback to avoid stalling. With `false`, playback starts
+   * as soon as `play()` is called and may stall while the buffer fills, which helps
+   * low-latency streams and playback kept in sync with other devices.
+   * @default true
+   * @platform ios
+   */
+  automaticallyWaitsToMinimizeStalling?: boolean;
 }

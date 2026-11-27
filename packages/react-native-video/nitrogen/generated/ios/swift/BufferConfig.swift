@@ -18,7 +18,7 @@ public extension BufferConfig {
   /**
    * Create a new instance of `BufferConfig`.
    */
-  init(livePlayback: LivePlaybackParams?, minBufferMs: Double?, maxBufferMs: Double?, bufferForPlaybackMs: Double?, bufferForPlaybackAfterRebufferMs: Double?, backBufferDurationMs: Double?, preferredForwardBufferDurationMs: Double?, preferredPeakBitRate: Double?, preferredMaximumResolution: Resolution?, preferredPeakBitRateForExpensiveNetworks: Double?, preferredMaximumResolutionForExpensiveNetworks: Resolution?) {
+  init(livePlayback: LivePlaybackParams?, minBufferMs: Double?, maxBufferMs: Double?, bufferForPlaybackMs: Double?, bufferForPlaybackAfterRebufferMs: Double?, backBufferDurationMs: Double?, preferredForwardBufferDurationMs: Double?, preferredPeakBitRate: Double?, preferredMaximumResolution: Resolution?, preferredPeakBitRateForExpensiveNetworks: Double?, preferredMaximumResolutionForExpensiveNetworks: Resolution?, automaticallyWaitsToMinimizeStalling: Bool?) {
     self.init({ () -> bridge.std__optional_LivePlaybackParams_ in
       if let __unwrappedValue = livePlayback {
         return bridge.create_std__optional_LivePlaybackParams_(__unwrappedValue)
@@ -82,6 +82,12 @@ public extension BufferConfig {
     }(), { () -> bridge.std__optional_Resolution_ in
       if let __unwrappedValue = preferredMaximumResolutionForExpensiveNetworks {
         return bridge.create_std__optional_Resolution_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_bool_ in
+      if let __unwrappedValue = automaticallyWaitsToMinimizeStalling {
+        return bridge.create_std__optional_bool_(__unwrappedValue)
       } else {
         return .init()
       }
@@ -197,5 +203,17 @@ public extension BufferConfig {
   @inline(__always)
   var preferredMaximumResolutionForExpensiveNetworks: Resolution? {
     return self.__preferredMaximumResolutionForExpensiveNetworks.value
+  }
+  
+  @inline(__always)
+  var automaticallyWaitsToMinimizeStalling: Bool? {
+    return { () -> Bool? in
+      if bridge.has_value_std__optional_bool_(self.__automaticallyWaitsToMinimizeStalling) {
+        let __unwrapped = bridge.get_std__optional_bool_(self.__automaticallyWaitsToMinimizeStalling)
+        return __unwrapped
+      } else {
+        return nil
+      }
+    }()
   }
 }

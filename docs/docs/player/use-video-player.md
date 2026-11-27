@@ -143,6 +143,7 @@ Properties below are Apple platforms‑only
 | `preferredMaximumResolution` | `{ width: number; height: number }` | Preferred maximum video resolution. Android: applied as `maxVideoSize`. |
 | `preferredPeakBitRateForExpensiveNetworks` | `number` | Bandwidth limit for expensive networks (e.g., cellular), in bits per second. |
 | `preferredMaximumResolutionForExpensiveNetworks` | `{ width: number; height: number }` | Preferred maximum resolution on expensive networks. |
+| `automaticallyWaitsToMinimizeStalling` | `boolean` | Whether the player may delay playback to avoid stalling. With `false`, playback starts as soon as `play()` is called and may stall while the buffer fills. iOS only. Default: `true`. |
 | `livePlayback.targetOffsetMs` | `number` | Target live offset (ms) the player will try to maintain. |
 
 ### Loading Options

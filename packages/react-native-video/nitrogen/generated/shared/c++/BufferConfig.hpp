@@ -55,10 +55,11 @@ namespace margelo::nitro::video {
     std::optional<Resolution> preferredMaximumResolution     SWIFT_PRIVATE;
     std::optional<double> preferredPeakBitRateForExpensiveNetworks     SWIFT_PRIVATE;
     std::optional<Resolution> preferredMaximumResolutionForExpensiveNetworks     SWIFT_PRIVATE;
+    std::optional<bool> automaticallyWaitsToMinimizeStalling     SWIFT_PRIVATE;
 
   public:
     BufferConfig() = default;
-    explicit BufferConfig(std::optional<LivePlaybackParams> livePlayback, std::optional<double> minBufferMs, std::optional<double> maxBufferMs, std::optional<double> bufferForPlaybackMs, std::optional<double> bufferForPlaybackAfterRebufferMs, std::optional<double> backBufferDurationMs, std::optional<double> preferredForwardBufferDurationMs, std::optional<double> preferredPeakBitRate, std::optional<Resolution> preferredMaximumResolution, std::optional<double> preferredPeakBitRateForExpensiveNetworks, std::optional<Resolution> preferredMaximumResolutionForExpensiveNetworks): livePlayback(livePlayback), minBufferMs(minBufferMs), maxBufferMs(maxBufferMs), bufferForPlaybackMs(bufferForPlaybackMs), bufferForPlaybackAfterRebufferMs(bufferForPlaybackAfterRebufferMs), backBufferDurationMs(backBufferDurationMs), preferredForwardBufferDurationMs(preferredForwardBufferDurationMs), preferredPeakBitRate(preferredPeakBitRate), preferredMaximumResolution(preferredMaximumResolution), preferredPeakBitRateForExpensiveNetworks(preferredPeakBitRateForExpensiveNetworks), preferredMaximumResolutionForExpensiveNetworks(preferredMaximumResolutionForExpensiveNetworks) {}
+    explicit BufferConfig(std::optional<LivePlaybackParams> livePlayback, std::optional<double> minBufferMs, std::optional<double> maxBufferMs, std::optional<double> bufferForPlaybackMs, std::optional<double> bufferForPlaybackAfterRebufferMs, std::optional<double> backBufferDurationMs, std::optional<double> preferredForwardBufferDurationMs, std::optional<double> preferredPeakBitRate, std::optional<Resolution> preferredMaximumResolution, std::optional<double> preferredPeakBitRateForExpensiveNetworks, std::optional<Resolution> preferredMaximumResolutionForExpensiveNetworks, std::optional<bool> automaticallyWaitsToMinimizeStalling): livePlayback(livePlayback), minBufferMs(minBufferMs), maxBufferMs(maxBufferMs), bufferForPlaybackMs(bufferForPlaybackMs), bufferForPlaybackAfterRebufferMs(bufferForPlaybackAfterRebufferMs), backBufferDurationMs(backBufferDurationMs), preferredForwardBufferDurationMs(preferredForwardBufferDurationMs), preferredPeakBitRate(preferredPeakBitRate), preferredMaximumResolution(preferredMaximumResolution), preferredPeakBitRateForExpensiveNetworks(preferredPeakBitRateForExpensiveNetworks), preferredMaximumResolutionForExpensiveNetworks(preferredMaximumResolutionForExpensiveNetworks), automaticallyWaitsToMinimizeStalling(automaticallyWaitsToMinimizeStalling) {}
 
   public:
     friend bool operator==(const BufferConfig& lhs, const BufferConfig& rhs) = default;
@@ -84,7 +85,8 @@ namespace margelo::nitro {
         JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "preferredPeakBitRate"))),
         JSIConverter<std::optional<margelo::nitro::video::Resolution>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "preferredMaximumResolution"))),
         JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "preferredPeakBitRateForExpensiveNetworks"))),
-        JSIConverter<std::optional<margelo::nitro::video::Resolution>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "preferredMaximumResolutionForExpensiveNetworks")))
+        JSIConverter<std::optional<margelo::nitro::video::Resolution>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "preferredMaximumResolutionForExpensiveNetworks"))),
+        JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "automaticallyWaitsToMinimizeStalling")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::video::BufferConfig& arg) {
@@ -100,6 +102,7 @@ namespace margelo::nitro {
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "preferredMaximumResolution"), JSIConverter<std::optional<margelo::nitro::video::Resolution>>::toJSI(runtime, arg.preferredMaximumResolution));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "preferredPeakBitRateForExpensiveNetworks"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.preferredPeakBitRateForExpensiveNetworks));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "preferredMaximumResolutionForExpensiveNetworks"), JSIConverter<std::optional<margelo::nitro::video::Resolution>>::toJSI(runtime, arg.preferredMaximumResolutionForExpensiveNetworks));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "automaticallyWaitsToMinimizeStalling"), JSIConverter<std::optional<bool>>::toJSI(runtime, arg.automaticallyWaitsToMinimizeStalling));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -121,6 +124,7 @@ namespace margelo::nitro {
       if (!JSIConverter<std::optional<margelo::nitro::video::Resolution>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "preferredMaximumResolution")))) return false;
       if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "preferredPeakBitRateForExpensiveNetworks")))) return false;
       if (!JSIConverter<std::optional<margelo::nitro::video::Resolution>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "preferredMaximumResolutionForExpensiveNetworks")))) return false;
+      if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "automaticallyWaitsToMinimizeStalling")))) return false;
       return true;
     }
   };
