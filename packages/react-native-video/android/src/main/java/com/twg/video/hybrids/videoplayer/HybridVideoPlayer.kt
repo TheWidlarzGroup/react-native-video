@@ -223,8 +223,8 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
 
   override var mixAudioMode: MixAudioMode = MixAudioMode.AUTO
     set(value) {
-      VideoManager.audioFocusManager.requestAudioFocusUpdate()
       field = value
+      VideoManager.audioFocusManager.requestAudioFocusUpdate()
     }
 
   // iOS only property
@@ -641,6 +641,9 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
       }
       // Keep the activity's auto-enter-PiP flag in sync with the last-played video.
       VideoManager.refreshPictureInPictureParams()
+      // Request focus when playback starts and release it when it stops, so another app's
+      // playback pauses or ducks this player.
+      VideoManager.audioFocusManager.requestAudioFocusUpdate()
     }
 
     override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
