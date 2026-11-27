@@ -1,0 +1,77 @@
+name: tvOS build
+
+# Compiles the library for tvOS. Nothing else in CI builds this platform, and v6 once lost
+# its tvOS build to an iOS-only API without anyone noticing (#4508).
+# Path-filtered, so it must never become a required check (see lint-workflows.yml).
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/tvos-build.yml"
+      - "packages/react-native-video/ios/**"
+      - "packages/react-native-video/nitrogen/generated/ios/**"
+      - "packages/react-native-video/nitrogen/generated/shared/**"
+      - "packages/react-native-video/ReactNativeVideo.podspec"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tvos-build-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # react-native core has no tvOS target, so the build needs an app made from the
+  # react-native-tvos template. Bump these two together with the supported versions.
+  RN_TVOS_TEMPLATE: "@react-native-tvos/template-tv@0.83.0-0"
+  NITRO_VERSION: "0.35.0"
+
+jobs:
+  build:
+    name: tvOS simulator build
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Create a react-native-tvos app
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP"
+          npx --yes @react-native-community/cli@latest init TVTest \
+            --template "$RN_TVOS_TEMPLATE" --skip-install --skip-git-init
+          cd TVTest
+          npm install --no-audit --no-fund
+          npm install --no-audit --no-fund "react-native-nitro-modules@$NITRO_VERSION"
+
+      - name: Install this checkout's react-native-video into the app
+        run: |
+          set -euo pipefail
+          DEST="$RUNNER_TEMP/TVTest/node_modules/react-native-video"
+          rm -rf "$DEST"
+          mkdir -p "$DEST"
+          cp -R packages/react-native-video/. "$DEST/"
+          rm -rf "$DEST/node_modules"
+          # Autolinking only looks at packages the app declares.
+          npm --prefix "$RUNNER_TEMP/TVTest" pkg set "dependencies.react-native-video=*"
+
+      - name: pod install
+        working-directory: ${{ runner.temp }}/TVTest/ios
+        run: |
+          set -euo pipefail
+          pod install
+          # Without tvOS in the podspec, autolinking skips the library and the build
+          # below would pass without compiling a single file of it.
+          grep -q "ReactNativeVideo" Podfile.lock || {
+            echo "::error::ReactNativeVideo was not autolinked for tvOS"
+            exit 1
+          }
+
+      - name: Build for the tvOS simulator
+        working-directory: ${{ runner.temp }}/TVTest/ios
+        run: |
+          set -euo pipefail
+          xcodebuild -workspace TVTest.xcworkspace -scheme TVTest -configuration Debug \
+            -sdk appletvsimulator -destination 'generic/platform=tvOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO build | tail -n 40

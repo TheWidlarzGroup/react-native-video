@@ -8,6 +8,8 @@ These live on the **`VideoView`** (props + imperative ref), not the player.
 <VideoView player={player} controls />   // controls defaults to false
 ```
 
+Android TV uses Media3's native D-pad controls when focused. On tvOS, enable `controls` and use the `VideoView` ref's `enterFullscreen()` for AVKit's interactive controls; inline transport controls are not supported. Exiting fullscreen restores the previous focus. Completed native tvOS seeks emit `onSeek` once.
+
 ## Picture-in-Picture
 
 Props:
