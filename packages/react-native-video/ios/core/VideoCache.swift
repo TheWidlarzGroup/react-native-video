@@ -57,15 +57,17 @@ final class VideoCache {
 
   func asset(for url: URL, headers: [String: String]?) -> AVURLAsset {
     let key = Self.key(for: url, headers: headers ?? [:])
-    // The cached file is played by its name, so a uri without a media extension (".php",
-    // none) is stored as MP4.
-    let pathExtension = url.pathExtension.lowercased()
-    let isMedia = UTType(filenameExtension: pathExtension)?.conforms(to: .audiovisualContent) == true
-    let fileExtension = isMedia ? pathExtension : "mp4"
-    let completeFile = directory.appendingPathComponent("\(key).\(fileExtension)")
-
     lock.lock()
     defer { lock.unlock() }
+
+    // The cached file is played by its name. A uri without a media extension (".php", none)
+    // gets the extension of the type the server reported once the file is complete.
+    let pathExtension = url.pathExtension.lowercased()
+    let isMedia = UTType(filenameExtension: pathExtension)?.conforms(to: .audiovisualContent) == true
+    let completeFile =
+      isMedia
+      ? directory.appendingPathComponent("\(key).\(pathExtension)")
+      : existingCompleteFile(key: key) ?? directory.appendingPathComponent("\(key).mp4")
 
     if FileManager.default.fileExists(atPath: completeFile.path) {
       // The "last used" date for trimming is the date of an empty marker file. The video file
@@ -89,6 +91,7 @@ final class VideoCache {
         partialFile: directory.appendingPathComponent("\(key).partial"),
         indexFile: directory.appendingPathComponent("\(key).index"),
         completeFile: completeFile,
+        namesFileByType: !isMedia,
         cache: self
       )
     guard
@@ -111,6 +114,15 @@ final class VideoCache {
     // The resource loader keeps its delegate weakly; the asset owns it.
     objc_setAssociatedObject(asset, &Self.loaderKey, loader, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
     return asset
+  }
+
+  private func existingCompleteFile(key: String) -> URL? {
+    let working: Set<String> = ["partial", "index", "used"]
+    let files = try? FileManager.default.contentsOfDirectory(
+      at: directory, includingPropertiesForKeys: nil)
+    return files?.first {
+      $0.deletingPathExtension().lastPathComponent == key && !working.contains($0.pathExtension)
+    }
   }
 
   /// The uri the app gave for an asset that goes through the cache; other urls are returned
@@ -239,7 +251,8 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
   private let key: String
   private let partialFile: URL
   private let indexFile: URL
-  private let completeFile: URL
+  private var completeFile: URL
+  private let namesFileByType: Bool
   private unowned let cache: VideoCache
   private let fileHandle: FileHandle
   private var index: Index
@@ -280,7 +293,7 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
 
   init?(
     url: URL, headers: [String: String], key: String, partialFile: URL, indexFile: URL,
-    completeFile: URL, cache: VideoCache
+    completeFile: URL, namesFileByType: Bool, cache: VideoCache
   ) {
     self.url = url
     self.headers = headers
@@ -288,6 +301,7 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
     self.partialFile = partialFile
     self.indexFile = indexFile
     self.completeFile = completeFile
+    self.namesFileByType = namesFileByType
     self.cache = cache
 
     let fileManager = FileManager.default
@@ -772,6 +786,11 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
     else { return }
 
     try? fileHandle.synchronize()
+    if namesFileByType,
+      let byType = index.contentType.flatMap({ UTType($0)?.preferredFilenameExtension })
+    {
+      completeFile = completeFile.deletingPathExtension().appendingPathExtension(byType)
+    }
     try? FileManager.default.removeItem(at: completeFile)
     guard (try? FileManager.default.moveItem(at: partialFile, to: completeFile)) != nil else { return }
     isComplete = true
