@@ -235,8 +235,12 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
     let operationQueue = OperationQueue()
     operationQueue.underlyingQueue = queue
     operationQueue.maxConcurrentOperationCount = 1
+    // The default configuration sends the app's cookies, as AVURLAsset does without the cache.
+    let configuration = URLSessionConfiguration.default
+    configuration.urlCache = nil
+    configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
     let created = URLSession(
-      configuration: .ephemeral, delegate: SessionDelegate(loader: self),
+      configuration: configuration, delegate: SessionDelegate(loader: self),
       delegateQueue: operationQueue)
     session = created
     return created
@@ -398,6 +402,8 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
 
   private func fetch(_ job: Job, from start: Int64, to end: Int64?) {
     var request = URLRequest(url: url)
+    // A compressed answer would be written at offsets that count the compressed bytes.
+    request.setValue("identity", forHTTPHeaderField: "Accept-Encoding")
     headers.forEach { request.setValue($1, forHTTPHeaderField: $0) }
     request.setValue(
       end.map { "bytes=\(start)-\($0 - 1)" } ?? "bytes=\(start)-", forHTTPHeaderField: "Range")
