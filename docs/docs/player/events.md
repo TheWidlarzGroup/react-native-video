@@ -58,7 +58,7 @@ The `VideoPlayer` class, through `VideoPlayerEvents`, supports the following eve
 | `onPlaybackRateChange`     | (rate: number) => void                               | Fired when the playback rate changes.                                                       |
 | `onPlaybackStateChange`    | (data: [onPlaybackStateChangeData](../api-reference/interfaces/onPlaybackStateChangeData.md)) => void            | Fired when the playback state changes (e.g., playing, paused, stopped).                     |
 | `onProgress`               | (data: [onProgressData](../api-reference/interfaces/onProgressData.md)) => void                       | Fired periodically during playback with the current time.                                   |
-| `onReadyToDisplay`         | () => void                                           | Fired when the player is ready to display the first frame of the video.                     |
+| `onReadyToDisplay`         | () => void                                           | Fired once per source, after `onLoad`, when the first frame of the video has been drawn in a view. A source without video, such as audio only, does not fire it.                     |
 | `onSeek`                   | (seekTime: number) => void                           | Fired when a seek operation has completed.                                                  |
 | `onStatusChange`           | (status: [VideoPlayerStatus](../api-reference/type-aliases/VideoPlayerStatus.md)) => void                  | Fired when the player status changes (detailed status updates).                             |
 | `onTextTrackDataChanged`   | (texts: string[]) => void                            | Fired when text track data (e.g., subtitles) changes.                                       |
