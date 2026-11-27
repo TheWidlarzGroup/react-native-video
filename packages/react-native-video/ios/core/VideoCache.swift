@@ -251,6 +251,10 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
   // A file that was cached in part is checked against the server before any of it is used:
   // the player must not get the first bytes of one version and the rest of another.
   private var needsValidation = false
+  // The server reported two versions of the file during one session (a changed file, or
+  // servers behind a load balancer that disagree). Nothing is cached any more: every request
+  // goes to the network and the player gets what it would get without the cache.
+  private var isPassthrough = false
   private var validationTask: URLSessionDataTask?
   // The uri turned out to be an HLS or DASH manifest: every request goes to the network as
   // if there were no cache.
@@ -462,7 +466,8 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
   }
 
   private func isBeingFetched(_ position: Int64, by job: Job) -> Bool {
-    jobs.contains { other in
+    if isPassthrough { return false }
+    return jobs.contains { other in
       // Only when that download is about to reach the position: a request for the end of
       // the file (the index of many MP4 files) must not wait for the whole file.
       other !== job && other.task != nil && position >= other.taskOffset
@@ -532,11 +537,7 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
       let isAnswer = http.map { $0.statusCode == 206 || $0.statusCode == 200 } ?? false
       // A server that sends no validator at all cannot be compared: an empty one differs
       // from the stored one, so the cached part is dropped.
-      finishValidation(
-        validator: isAnswer
-          ? http?.value(forHTTPHeaderField: "ETag")
-            ?? http?.value(forHTTPHeaderField: "Last-Modified") ?? ""
-          : nil)
+      finishValidation(validator: isAnswer ? http.flatMap { Self.version(of: $0) } ?? "" : nil)
       return
     }
     guard let job = jobs.first(where: { $0.task === dataTask }),
@@ -571,17 +572,14 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
       return
     }
 
-    // The file changed on the server since part of it was cached: the cached part is
-    // worthless, and requests that already got bytes of the old file cannot be continued.
-    let validator =
-      http.value(forHTTPHeaderField: "ETag") ?? http.value(forHTTPHeaderField: "Last-Modified")
-    if let validator, let known = index.validator, known != validator {
-      completionHandler(.cancel)
-      discardCachedBytes()
-      for other in jobs { finish(other, error: URLError(.resourceUnavailable)) }
-      return
+    // Another version than the one that is cached, in the middle of a session. Failing the
+    // requests would turn a source that plays without the cache into an error, so the cache
+    // steps aside instead.
+    let version = Self.version(of: http)
+    if let version, let known = index.validator, known != version {
+      stopCaching()
     }
-    if let validator { index.validator = validator }
+    if let version, !isPassthrough { index.validator = version }
 
     if http.statusCode == 200 {
       // The server ignored the range and sends the whole file from the first byte.
@@ -616,6 +614,7 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
     job.taskOffset += Int64(data.count)
 
     do {
+      if isPassthrough { throw CocoaError(.featureUnsupported) }
       try fileHandle.seek(toOffset: UInt64(offset))
       try fileHandle.write(contentsOf: data)
       addRange(offset, offset + Int64(data.count))
@@ -628,7 +627,7 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
         cache.trimSoon()
       }
     } catch {
-      // The disk is full or the file is gone: keep playing, stop caching this stretch.
+      // The disk is full, the file is gone or nothing is cached any more: keep playing.
     }
 
     // With a 200 answer the body starts at byte 0, before what the player asked for.
@@ -704,21 +703,43 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
     index.ranges = merged
   }
 
+  /// What the server says about the file's version. Last-Modified comes first: servers behind
+  /// one address often build ETags from something local (an inode), while the date is the
+  /// same on all of them. A weak ETag counts like a strong one.
+  private static func version(of http: HTTPURLResponse) -> String? {
+    if let modified = http.value(forHTTPHeaderField: "Last-Modified") { return "modified:\(modified)" }
+    guard let etag = http.value(forHTTPHeaderField: "ETag") else { return nil }
+    return "etag:\(etag.hasPrefix("W/") ? String(etag.dropFirst(2)) : etag)"
+  }
+
   private func discardCachedBytes() {
+    // A complete file has been moved to its final name and may be playing elsewhere.
+    guard !isComplete else { return }
     index = Index()
     try? fileHandle.truncate(atOffset: 0)
     saveIndex()
   }
 
+  private func stopCaching() {
+    guard !isComplete, !isPassthrough else { return }
+    isPassthrough = true
+    // Requests that are being answered keep their type; the length comes from the new answer.
+    index.ranges = []
+    index.contentLength = nil
+    index.validator = nil
+    try? FileManager.default.removeItem(at: partialFile)
+    try? FileManager.default.removeItem(at: indexFile)
+  }
+
   private func saveIndex() {
-    guard !isComplete, !isStream, let data = try? JSONEncoder().encode(index) else { return }
+    guard !isComplete, !isStream, !isPassthrough, let data = try? JSONEncoder().encode(index) else { return }
     try? data.write(to: indexFile, options: .atomic)
   }
 
   /// Once every byte is on disk the partial file becomes the cached file. The open file handle
   /// follows the rename, so this loader keeps serving its asset from it.
   private func completeFileIfWhole() {
-    guard !isComplete, let contentLength = index.contentLength, contentLength > 0,
+    guard !isComplete, !isPassthrough, let contentLength = index.contentLength, contentLength > 0,
       index.ranges.count == 1, index.ranges[0][0] == 0, index.ranges[0][1] >= contentLength
     else { return }
 
