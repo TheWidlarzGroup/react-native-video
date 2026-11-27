@@ -92,6 +92,8 @@ namespace margelo::nitro::video { struct onVolumeChangeData; }
 #include "VideoTrackChangeData.hpp"
 #include "JFunc_void_VideoTrackChangeData.hpp"
 #include "JVideoTrackChangeData.hpp"
+#include "VideoTrack.hpp"
+#include "JVideoTrack.hpp"
 #include "onVolumeChangeData.hpp"
 #include "JFunc_void_onVolumeChangeData.hpp"
 #include "JonVolumeChangeData.hpp"

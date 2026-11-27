@@ -34,13 +34,13 @@ namespace margelo::nitro::video { struct VideoTrack; }
 #include "MixAudioMode.hpp"
 #include "IgnoreSilentSwitchMode.hpp"
 #include "TextTrack.hpp"
-#include "VideoTrack.hpp"
 #include <optional>
 #include <string>
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/Null.hpp>
 #include <variant>
 #include <vector>
+#include "VideoTrack.hpp"
 
 #include "ReactNativeVideo-Swift-Cxx-Umbrella.hpp"
 
@@ -207,20 +207,6 @@ namespace margelo::nitro::video {
         std::rethrow_exception(__result.error());
       }
     }
-    inline std::vector<VideoTrack> getAvailableVideoTracks() override {
-      auto __result = _swiftPart.getAvailableVideoTracks();
-      if (__result.hasError()) [[unlikely]] {
-        std::rethrow_exception(__result.error());
-      }
-      auto __value = std::move(__result.value());
-      return __value;
-    }
-    inline void selectVideoTrack(const std::optional<std::string>& trackId) override {
-      auto __result = _swiftPart.selectVideoTrack(trackId);
-      if (__result.hasError()) [[unlikely]] {
-        std::rethrow_exception(__result.error());
-      }
-    }
     inline void release() override {
       auto __result = _swiftPart.release();
       if (__result.hasError()) [[unlikely]] {
@@ -263,6 +249,20 @@ namespace margelo::nitro::video {
     }
     inline void seekTo(double time) override {
       auto __result = _swiftPart.seekTo(std::forward<decltype(time)>(time));
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+    }
+    inline std::vector<VideoTrack> getAvailableVideoTracks() override {
+      auto __result = _swiftPart.getAvailableVideoTracks();
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline void selectVideoTrack(const std::optional<std::string>& trackId) override {
+      auto __result = _swiftPart.selectVideoTrack(trackId);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

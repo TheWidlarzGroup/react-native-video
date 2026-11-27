@@ -85,8 +85,6 @@ namespace margelo::nitro::video {
     std::shared_ptr<Promise<void>> replaceSourceAsync(const std::optional<std::variant<nitro::NullType, std::shared_ptr<HybridVideoPlayerSourceSpec>>>& source) override;
     std::vector<TextTrack> getAvailableTextTracks() override;
     void selectTextTrack(const std::optional<std::variant<nitro::NullType, TextTrack>>& textTrack) override;
-    std::vector<VideoTrack> getAvailableVideoTracks() override;
-    void selectVideoTrack(const std::optional<std::string>& trackId) override;
     void release() override;
     std::shared_ptr<Promise<void>> initialize() override;
     std::shared_ptr<Promise<void>> preload() override;
@@ -94,6 +92,8 @@ namespace margelo::nitro::video {
     void pause() override;
     void seekBy(double time) override;
     void seekTo(double time) override;
+    std::vector<VideoTrack> getAvailableVideoTracks() override;
+    void selectVideoTrack(const std::optional<std::string>& trackId) override;
 
   private:
     jni::global_ref<JHybridVideoPlayerSpec::JavaPart> _javaPart;

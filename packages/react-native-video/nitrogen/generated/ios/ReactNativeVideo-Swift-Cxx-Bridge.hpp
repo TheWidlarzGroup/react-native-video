@@ -36,8 +36,6 @@ namespace margelo::nitro::video { struct LivePlaybackParams; }
 namespace margelo::nitro::video { struct NativeDrmParams; }
 // Forward declaration of `NativeExternalSubtitle` to properly resolve imports.
 namespace margelo::nitro::video { struct NativeExternalSubtitle; }
-// Forward declaration of `NativeVideoConfig` to properly resolve imports.
-namespace margelo::nitro::video { struct NativeVideoConfig; }
 // Forward declaration of `OnGetLicensePayload` to properly resolve imports.
 namespace margelo::nitro::video { struct OnGetLicensePayload; }
 // Forward declaration of `Resolution` to properly resolve imports.
@@ -104,7 +102,6 @@ namespace ReactNativeVideo { class HybridVideoViewViewManagerSpec_cxx; }
 #include "LivePlaybackParams.hpp"
 #include "NativeDrmParams.hpp"
 #include "NativeExternalSubtitle.hpp"
-#include "NativeVideoConfig.hpp"
 #include "OnGetLicensePayload.hpp"
 #include "Resolution.hpp"
 #include "SourceType.hpp"
@@ -350,6 +347,21 @@ namespace margelo::nitro::video::bridge::swift {
     return optional.value();
   }
   
+  // pragma MARK: std::optional<double>
+  /**
+   * Specialized version of `std::optional<double>`.
+   */
+  using std__optional_double_ = std::optional<double>;
+  inline std::optional<double> create_std__optional_double_(const double& value) noexcept {
+    return std::optional<double>(value);
+  }
+  inline bool has_value_std__optional_double_(const std::optional<double>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline double get_std__optional_double_(const std::optional<double>& optional) noexcept {
+    return optional.value();
+  }
+  
   // pragma MARK: std::vector<VideoTrack>
   /**
    * Specialized version of `std::vector<VideoTrack>`.
@@ -360,7 +372,7 @@ namespace margelo::nitro::video::bridge::swift {
     vector.reserve(size);
     return vector;
   }
-
+  
   // pragma MARK: std::shared_ptr<HybridVideoPlayerSpec>
   /**
    * Specialized version of `std::shared_ptr<HybridVideoPlayerSpec>`.
@@ -390,20 +402,7 @@ namespace margelo::nitro::video::bridge::swift {
   inline Result_std__vector_TextTrack__ create_Result_std__vector_TextTrack__(const std::exception_ptr& error) noexcept {
     return Result<std::vector<TextTrack>>::withError(error);
   }
-
-  // pragma MARK: Result<std::vector<VideoTrack>>
-  // Hand-added for the same reason as Result<std::vector<TextTrack>> above -
-  // only reachable through VideoPlayer's spec, which nitrogen cannot generate,
-  // so it never emits this instantiation. Needed by
-  // HybridVideoPlayerSpec_cxx.swift's getAvailableVideoTracks().
-  using Result_std__vector_VideoTrack__ = Result<std::vector<VideoTrack>>;
-  inline Result_std__vector_VideoTrack__ create_Result_std__vector_VideoTrack__(const std::vector<VideoTrack>& value) noexcept {
-    return Result<std::vector<VideoTrack>>::withValue(value);
-  }
-  inline Result_std__vector_VideoTrack__ create_Result_std__vector_VideoTrack__(const std::exception_ptr& error) noexcept {
-    return Result<std::vector<VideoTrack>>::withError(error);
-  }
-
+  
   // pragma MARK: Result<void>
   using Result_void_ = Result<void>;
   inline Result_void_ create_Result_void_() noexcept {
@@ -411,6 +410,15 @@ namespace margelo::nitro::video::bridge::swift {
   }
   inline Result_void_ create_Result_void_(const std::exception_ptr& error) noexcept {
     return Result<void>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::vector<VideoTrack>>
+  using Result_std__vector_VideoTrack__ = Result<std::vector<VideoTrack>>;
+  inline Result_std__vector_VideoTrack__ create_Result_std__vector_VideoTrack__(const std::vector<VideoTrack>& value) noexcept {
+    return Result<std::vector<VideoTrack>>::withValue(value);
+  }
+  inline Result_std__vector_VideoTrack__ create_Result_std__vector_VideoTrack__(const std::exception_ptr& error) noexcept {
+    return Result<std::vector<VideoTrack>>::withError(error);
   }
   
   // pragma MARK: std::shared_ptr<HybridVideoPlayerFactorySpec>
@@ -454,21 +462,6 @@ namespace margelo::nitro::video::bridge::swift {
   Func_void_bool create_Func_void_bool(void* NON_NULL swiftClosureWrapper) noexcept;
   inline Func_void_bool_Wrapper wrap_Func_void_bool(Func_void_bool value) noexcept {
     return Func_void_bool_Wrapper(std::move(value));
-  }
-  
-  // pragma MARK: std::optional<double>
-  /**
-   * Specialized version of `std::optional<double>`.
-   */
-  using std__optional_double_ = std::optional<double>;
-  inline std::optional<double> create_std__optional_double_(const double& value) noexcept {
-    return std::optional<double>(value);
-  }
-  inline bool has_value_std__optional_double_(const std::optional<double>& optional) noexcept {
-    return optional.has_value();
-  }
-  inline double get_std__optional_double_(const std::optional<double>& optional) noexcept {
-    return optional.value();
   }
   
   // pragma MARK: std::function<void(const BandwidthData& /* data */)>
@@ -734,7 +727,7 @@ namespace margelo::nitro::video::bridge::swift {
   inline Func_void_std__optional_std__variant_nitro__NullType__TextTrack___Wrapper wrap_Func_void_std__optional_std__variant_nitro__NullType__TextTrack__(Func_void_std__optional_std__variant_nitro__NullType__TextTrack__ value) noexcept {
     return Func_void_std__optional_std__variant_nitro__NullType__TextTrack___Wrapper(std::move(value));
   }
-
+  
   // pragma MARK: std::function<void(const VideoTrackChangeData& /* data */)>
   /**
    * Specialized version of `std::function<void(const VideoTrackChangeData&)>`.
@@ -756,7 +749,7 @@ namespace margelo::nitro::video::bridge::swift {
   inline Func_void_VideoTrackChangeData_Wrapper wrap_Func_void_VideoTrackChangeData(Func_void_VideoTrackChangeData value) noexcept {
     return Func_void_VideoTrackChangeData_Wrapper(std::move(value));
   }
-
+  
   // pragma MARK: std::function<void(const onVolumeChangeData& /* data */)>
   /**
    * Specialized version of `std::function<void(const onVolumeChangeData&)>`.
