@@ -39,6 +39,8 @@ export const MARKER_IDS = [
   'evt-video-tracks-listed', // onVideoTrackChange lists all three renditions
   'evt-video-track-pinned', // ...then reports the lowest rendition as the pinned selection
   'evt-video-track-auto', // ...then reports no pinned selection again (automatic)
+  'evt-audio-alt-selected', // onAudioTrackChange reports the Spanish track selected (2 tracks listed)
+  'evt-audio-default-restored', // ...then the English (default) track selected again
   // An unassisted loop restart: see LOOP_VERIFIED_END_COUNT and the wrap-around rule in
   // handle('onProgress') — AVPlayer reports each loop as onEnd, ExoPlayer wraps silently,
   // so both are covered (see smoke-loop.yaml).
@@ -99,6 +101,10 @@ export type PlayerEvent =
       type: 'onVideoTrackChange';
       tracks: readonly { id: string; height?: number }[];
       selectedTrackId?: string;
+    }
+  | {
+      type: 'onAudioTrackChange';
+      tracks: readonly { language?: string; selected: boolean }[];
     };
 
 // Renditions in the hls-quality fixture (e2e/fixtures/generate.sh).
@@ -380,6 +386,21 @@ function apply(event: PlayerEvent) {
         mark('evt-video-track-auto');
       }
       append(`onVideoTrackChange selected=${event.selectedTrackId ?? 'auto'}`);
+      return;
+    }
+
+    case 'onAudioTrackChange': {
+      // The fixture's two renditions are told apart by language (en default, es alternate).
+      const selected = event.tracks.find((track) => track.selected)?.language;
+      if (event.tracks.length === 2 && selected === 'es') {
+        mark('evt-audio-alt-selected');
+      } else if (
+        state.markers.has('evt-audio-alt-selected') &&
+        selected === 'en'
+      ) {
+        mark('evt-audio-default-restored');
+      }
+      append(`onAudioTrackChange selected=${selected ?? 'none'}`);
       return;
     }
 

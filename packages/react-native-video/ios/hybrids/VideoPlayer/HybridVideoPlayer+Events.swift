@@ -82,6 +82,11 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
       status = .readytoplay
     }
     updateAndEmitPlaybackState()
+
+    // By this point `AVPlayerItem.tracks` is populated, which is the only
+    // public source of an audio channel count. Deduped, so this is a no-op
+    // unless the snapshot actually changed since `.readyToPlay`.
+    refreshAudioTracksIfChanged()
   }
 
   func onExternalPlaybackActiveChanged(isActive: Bool) {
@@ -176,6 +181,11 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
       // - or carried over from the previous source - is (re)written here.
       applyVideoQualityCapsIfReady()
 
+      // Media selection groups only exist once the asset is loaded, so this is
+      // both where an audio pick made earlier gets replayed and where the
+      // available audio renditions are first published.
+      applyAudioTrackSelectionIfReady()
+
       if playerItem.isPlaybackLikelyToKeepUp
         && !playerItem.isPlaybackBufferEmpty
       {
@@ -200,6 +210,9 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
 
   func onMediaSelectionChanged() {
     emitSelectedTextTrackIfChanged()
+    // Deduped like the other emission points, so this only fires when the snapshot
+    // really changed, e.g. once an automatic selection has actually been applied.
+    refreshAudioTracksIfChanged()
   }
 
   func onTimedMetadataChanged(timedMetadata: [AVMetadataItem]) {

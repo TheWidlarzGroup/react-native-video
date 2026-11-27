@@ -128,8 +128,8 @@ enum VideoTrackUtils {
     in renditions: [VideoRendition]
   ) -> VideoRendition? {
     guard bitrate.isFinite, bitrate > 0 else { return nil }
-    return renditions.min {
-      abs(Double($0.bitrate) - bitrate) < abs(Double($1.bitrate) - bitrate)
+    return renditions.min { (lhs: VideoRendition, rhs: VideoRendition) -> Bool in
+      (Double(lhs.bitrate) - bitrate).magnitude < (Double(rhs.bitrate) - bitrate).magnitude
     }
   }
 }
