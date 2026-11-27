@@ -26,6 +26,7 @@ import com.twg.video.core.LibraryError
 import com.twg.video.core.SourceError
 import com.twg.video.core.plugins.PluginsRegistry
 import java.io.IOException
+import java.net.UnknownServiceException
 import java.security.cert.CertPathValidatorException
 import java.security.cert.CertificateException
 import java.util.UUID
@@ -170,6 +171,9 @@ class RetryWhileDisconnectedPolicy(private val minLoadRetryCount: Int) :
     // A server answer (4xx, 5xx, wrong content type) is not a lost connection, and neither is
     // a request the device will never send (cleartext http without permission) or a server
     // whose certificate is not trusted. Retried forever, those would buffer without an error.
+    // OkHttp refuses cleartext with UnknownServiceException, and the OkHttp data source wraps
+    // it in an IOException, so Media3 does not turn it into CleartextNotPermittedException:
+    // the cause chain is checked too.
     if (exception !is HttpDataSource.HttpDataSourceException ||
       exception is HttpDataSource.InvalidResponseCodeException ||
       exception is HttpDataSource.InvalidContentTypeException ||
@@ -179,7 +183,7 @@ class RetryWhileDisconnectedPolicy(private val minLoadRetryCount: Int) :
     }
     return generateSequence(exception.cause) { it.cause }.take(MAX_CAUSE_DEPTH).none {
       it is CertificateException || it is CertPathValidatorException ||
-        it is SSLPeerUnverifiedException
+        it is SSLPeerUnverifiedException || it is UnknownServiceException
     }
   }
 
