@@ -67,6 +67,10 @@ class HybridVideoPlayerEventEmitter: HybridVideoPlayerEventEmitterSpec {
     addListener(eventName: "onEnd", listener: listener)
   }
 
+  func addOnErrorListener(listener: @escaping (String) -> Void) throws -> ListenerSubscription {
+    addListener(eventName: "onError", listener: listener)
+  }
+
   func addOnExternalPlaybackChangeListener(listener: @escaping (Bool) -> Void) throws -> ListenerSubscription {
     addListener(eventName: "onExternalPlaybackChange", listener: listener)
   }
@@ -147,6 +151,10 @@ class HybridVideoPlayerEventEmitter: HybridVideoPlayerEventEmitterSpec {
 
   func onEnd() {
     emitEvent(eventName: "onEnd") { (callback: () throws -> Void) in try callback() }
+  }
+
+  func onError(_ error: String) {
+    emitEvent(eventName: "onError") { (callback: (String) throws -> Void) in try callback(error) }
   }
 
   func onExternalPlaybackChange(_ isExternalPlaybackActive: Bool) {

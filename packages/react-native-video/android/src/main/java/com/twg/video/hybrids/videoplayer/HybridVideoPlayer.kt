@@ -100,6 +100,8 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
 
   // Text track selection state
   private var selectedExternalTrackIndex: Int? = null
+  // The text track last reported by onTrackChange, null for none.
+  private var emittedTextTrackId: String? = null
 
   private companion object {
     const val PROGRESS_UPDATE_INTERVAL_MS = 250L
@@ -167,6 +169,8 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
       return@mainThreadProperty playerVolume == 0.0
     },
     set = { value ->
+      if (value == muted) return@mainThreadProperty
+
       if (value) {
         userVolume = volume
         player.volume = 0f
@@ -263,6 +267,8 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
 
     loadedWithSource = true
 
+    applyVideoQualityConstraints()
+
     player.addListener(playerListener)
     player.addAnalyticsListener(analyticsListener)
     player.setMediaSource(hybridSource.mediaSource)
@@ -275,6 +281,37 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
     status = VideoPlayerStatus.LOADING
     ensureNotReleased()
     startProgressUpdates()
+  }
+
+  /**
+   * Applies `bufferConfig.preferredMaximumResolution` and
+   * `preferredPeakBitRate` to the player's track selection.
+   *
+   * Both options were previously iOS-only in practice: they are applied to the
+   * `AVPlayerItem` in `AVPlayerItem+setBufferConfig.swift`, while Android read
+   * only the buffering fields off the same config and silently ignored these
+   * two. ExoPlayer expresses the same constraints through
+   * `TrackSelectionParameters`, which this file's sibling `TextTrackUtils`
+   * already uses for text-track selection.
+   *
+   * Called from `initializePlayer`, which every caller runs inside
+   * `runOnMainThreadSync` — `trackSelectionParameters` must be set on the
+   * player's application thread.
+   */
+  private fun applyVideoQualityConstraints() {
+    val config = bufferConfig ?: return
+    val maxResolution = config.preferredMaximumResolution
+    val maxBitRate = config.preferredPeakBitRate
+
+    if (maxResolution == null && maxBitRate == null) return
+
+    player.trackSelectionParameters = player.trackSelectionParameters
+      .buildUpon()
+      .apply {
+        maxResolution?.let { setMaxVideoSize(it.width.toInt(), it.height.toInt()) }
+        maxBitRate?.let { setMaxVideoBitrate(it.toInt()) }
+      }
+      .build()
   }
 
   private fun ensureNotReleased() {
@@ -571,7 +608,13 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
     }
 
     override fun onPlayerError(error: PlaybackException) {
+      // Emit onError only on the transition into ERROR, so one failure is reported once.
+      // Load promises reject instead and never set the error status here.
+      val wasError = status == VideoPlayerStatus.ERROR
       status = VideoPlayerStatus.ERROR
+      if (!wasError) {
+        eventEmitter.onError(PlayerError.PlaybackFailed(error.errorCodeName, error.message).message!!)
+      }
       stopProgressUpdates()
     }
 
@@ -644,8 +687,15 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
       }
     }
 
+    // A selection applied here, made in the native controls or reset by a new source: reported
+    // once applied.
     override fun onTracksChanged(tracks: Tracks) {
       super.onTracksChanged(tracks)
+      val track = TextTrackUtils.getSelectedTrack(player, source)
+      if (track?.id != emittedTextTrackId) {
+        emittedTextTrackId = track?.id
+        eventEmitter.onTrackChange(track)
+      }
     }
   }
 
@@ -659,8 +709,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
     selectedExternalTrackIndex = TextTrackUtils.selectTextTrack(
       player = player,
       textTrack = textTrack?.asSecondOrNull(),
-      source = source,
-      onTrackChange = { track -> eventEmitter.onTrackChange(track) }
+      source = source
     )
   }
 

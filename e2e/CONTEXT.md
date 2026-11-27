@@ -137,11 +137,19 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
   how the two-root problem above was found.
 - **`useSyncExternalStore` bails out on same-reference snapshots.** Every mutation in
   `eventLog.ts` produces a new `Set`/array; mutating in place never re-renders.
-- **`onError` only fires from a rejected JS promise or a caught synchronous throw.** A
-  source that resolves `initialize()` optimistically and fails later (a 404, on both
-  platforms) only surfaces via `onStatusChange('error')` (#5083). The test app maps both
-  onto `evt-onError`, so the error flows pass with the bug open; the fix for #5083 should
-  split the marker and assert `onError` itself.
+- **`onError` and the error status are separate markers.** `evt-onError` is set only by
+  `onError`, `evt-status-error` only by `onStatusChange('error')`, and `evt-onError-repeated`
+  by a second `onError` in one scenario. An async failure (a 404, on both platforms)
+  reports both events, but `onError` only once (#5083); the error flows assert all three.
+  `smoke-error-mid-playback.yaml` does the same for a failure after `onLoad`: its HLS
+  fixture (`missing-segment/`) has two real segments and then a 404. It asserts on
+  Android only. On iOS (Simulator, iOS 26.5) AVPlayer handles this source in one of two
+  ways. Usually it does not fail the item: `AVPlayerItem.status` stays `.readyToPlay`, no
+  `AVPlayerItemFailedToPlayToEndTime` is posted, the 404 only shows up as an
+  `AVPlayerItemNewErrorLogEntry` (CoreMediaErrorDomain -12938), and playback ends after
+  the second segment with `onEnd`. The library reports item and player failures, not
+  error-log entries, so there is no `onError`. Sometimes (seen on the first launch after
+  an install) the item fails before `onLoad`, with one `onError`.
 - **`initializeOnCreation: true` (the default) defers the `useVideoPlayer` setup callback**
   until the native load reaches `onLoadStart`/`onStatusChange`; a source that fails
   immediately never gets there, so no listener is ever attached. Every scenario source sets
@@ -149,6 +157,26 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
   `player.initialize()` explicitly. Because setup then runs synchronously during the first
   render, the event log is reset at the top of setup, not in an effect (an effect would
   run after the first events and wipe them).
+- **A released player reports nothing.** Both native players detach every emitter
+  listener while releasing (`replaceSourceAsync(null)` releases), before they set the
+  idle status, and Android already reports `idle` at the natural end of a clip. So the
+  release scenario does not listen for idle: it calls `replaceSourceAsync(null)` from JS
+  during playback and then reads `player.status` (`evt-idle-after-release`), which is
+  what the #4743 test did. The other lifecycle markers are anchored the same way:
+  `evt-ready-after-loading` judges only the first `readyToPlay`, and the replacement
+  markers (`evt-replacement-loaded`, `evt-reloaded-from-start`, `evt-ended-after-replace`)
+  only count events after `replaceSourceAsync(source)` was requested, because Android
+  re-emits `onLoad` on every re-buffer and replay.
+- **iOS sometimes never reports `readyToPlay`** while a clip plays (issue #5155): the
+  status stays `loading` from the item assignment to `onEnded`. `smoke-status-order.yaml`
+  asserts the idle → loading → readyToPlay order and is quarantined (`tags: [flaky]`) until
+  the issue is fixed; the happy path asserts only `evt-initial-idle` and the duration.
+  `smoke-preload.yaml` also waits for `evt-ready-after-loading` and has not shown this
+  (no `play()`, so the status comes through the paused path); if it does, quarantine it too.
+- **`replaceSourceAsync(null)` releases the native player** on iOS and Android, like
+  `release()` (the docs said otherwise until #5154; web keeps the player loadable).
+  `smoke-release-source.yaml` therefore asserts the promise, the idle status and the
+  stopped playback, and loads nothing afterwards: a released player cannot.
 - **`onError` is JS-only and un-buffered.** Register listeners with
   `player.addEventListener(...)` inside the setup callback, not via `useEvent` in the
   component body, or a fast local failure is lost.

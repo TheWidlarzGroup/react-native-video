@@ -3,7 +3,7 @@
 # Requires ffmpeg. Commit the outputs (small, ~hundreds of KB) so CI doesn't need ffmpeg.
 set -euo pipefail
 cd "$(dirname "$0")"
-mkdir -p media/hls media/broken
+mkdir -p media/hls media/broken media/missing-segment
 
 # 8 s mp4: synthetic test pattern + 440 Hz sine, baseline-friendly settings
 ffmpeg -y \
@@ -28,6 +28,25 @@ cat > media/broken/index.m3u8 <<'EOF'
 #EXT-X-TARGETDURATION:not-a-number
 #EXTINF:2.0,
 missing-segment.ts
+EOF
+
+# Valid manifest whose last two segments do not exist (failure during playback): the
+# first two segments load and play, then the next request gets a 404.
+cat > media/missing-segment/index.m3u8 <<'EOF'
+#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-TARGETDURATION:2
+#EXT-X-MEDIA-SEQUENCE:0
+#EXT-X-PLAYLIST-TYPE:VOD
+#EXTINF:2.000000,
+../hls/seg_000.ts
+#EXTINF:2.000000,
+../hls/seg_001.ts
+#EXTINF:2.000000,
+does-not-exist_002.ts
+#EXTINF:2.000000,
+does-not-exist_003.ts
+#EXT-X-ENDLIST
 EOF
 
 echo "Fixtures written to $(pwd)/media"

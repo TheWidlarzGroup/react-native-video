@@ -85,6 +85,9 @@ RN 0.82 passes on Android in the PR gate; its iOS rows run in nightly only.
   `--include-tags=flaky` at the floor RN version (Android API 36, iOS 26). Maestro refuses
   a tag filter that matches nothing, so the plan only schedules these legs when the tag
   is actually in use.
+  Currently in use: `smoke-status-order.yaml` (iOS sometimes never reports
+  `readyToPlay`, #5155), so nightly runs 15 + 2 jobs. `scripts/e2e/matrix-plan.test.mjs`
+  lists every quarantined flow with its issue and fails when the two drift.
 
 The whole plan (rows, tag selections, artifact names, flaky detection) is computed by
 `scripts/e2e/matrix-plan.mjs`, which has unit tests; the workflow only calls it.

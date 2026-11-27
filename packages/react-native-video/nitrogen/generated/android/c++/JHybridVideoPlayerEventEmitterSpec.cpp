@@ -46,6 +46,7 @@ namespace margelo::nitro::video { struct onVolumeChangeData; }
 #include "JFunc_void_BandwidthData.hpp"
 #include "JBandwidthData.hpp"
 #include <optional>
+#include "JFunc_void_std__string.hpp"
 #include "onLoadData.hpp"
 #include "JFunc_void_onLoadData.hpp"
 #include "JonLoadData.hpp"
@@ -149,6 +150,11 @@ namespace margelo::nitro::video {
   ListenerSubscription JHybridVideoPlayerEventEmitterSpec::addOnEndListener(const std::function<void()>& listener) {
     static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void::javaobject> /* listener */)>("addOnEndListener_cxx");
     auto __result = method(_javaPart, JFunc_void_cxx::fromCpp(listener));
+    return __result->toCpp();
+  }
+  ListenerSubscription JHybridVideoPlayerEventEmitterSpec::addOnErrorListener(const std::function<void(const std::string& /* error */)>& listener) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JListenerSubscription>(jni::alias_ref<JFunc_void_std__string::javaobject> /* listener */)>("addOnErrorListener_cxx");
+    auto __result = method(_javaPart, JFunc_void_std__string_cxx::fromCpp(listener));
     return __result->toCpp();
   }
   ListenerSubscription JHybridVideoPlayerEventEmitterSpec::addOnExternalPlaybackChangeListener(const std::function<void(bool /* externalPlaybackActive */)>& listener) {

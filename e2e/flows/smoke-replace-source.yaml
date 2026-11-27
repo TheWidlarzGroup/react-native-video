@@ -1,0 +1,49 @@
+# replaceSourceAsync(new source) on a player that has played a clip through: the new
+# source loads (a second onLoad), starts from its beginning and plays to its own end.
+# Ported from #4743 ("should replace source with a new video"), with the assertions that
+# test could not make: it only checked that `player.source` was defined.
+#
+# btn-replace-hls awaits replaceSourceAsync(hls) and then calls play() from JS, so the
+# flow needs one tap on an idle player (ScenarioScreen). The replacement markers only
+# count events after the replacement was requested (Android re-emits onLoad on every
+# re-buffer and replay), and evt-reloaded-from-start is derived from the FIRST onProgress
+# after the replacement's onLoad (< 2 s), so the 8 s position the first clip ended at can
+# never satisfy it.
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 20000
+- runFlow: ../shared/wait-for-end.yaml
+- runFlow:
+    file: ../shared/press.yaml
+    env:
+      BUTTON: btn-replace-hls
+      NTH: 1
+- extendedWaitUntil:
+    visible:
+      id: "evt-replace-resolved"
+    timeout: 20000            # HLS: manifest + first segments from the fixture server
+- extendedWaitUntil:
+    visible:
+      id: "evt-replacement-loaded"
+    timeout: 20000
+- extendedWaitUntil:
+    visible:
+      id: "evt-reloaded-from-start"
+    timeout: 10000
+- extendedWaitUntil:
+    visible:
+      id: "evt-ended-after-replace"
+    timeout: 25000            # the HLS clip is ~8 s
+- assertNotVisible:
+    id: "evt-replace-rejected"
+- assertNotVisible:
+    id: "evt-onError"

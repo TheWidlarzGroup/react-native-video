@@ -1,9 +1,13 @@
 // Kept free of react-native imports so bun can unit-test it (deepLink.test.ts).
 export const SCENARIO_NAMES = [
   'mp4',
+  'mp4-preload', // same clip, started with preload() instead of initialize()+play()
+  'mp4-release-mid-playback', // same clip; replaceSourceAsync(null) once progress > 2 s
+  'mp4-fullscreen-rotate', // same clip; enterFullscreen() on landscape, exitFullscreen() on portrait
   'hls',
   'error-404',
   'broken-manifest',
+  'error-mid-playback',
 ] as const;
 
 export type ScenarioName = (typeof SCENARIO_NAMES)[number];

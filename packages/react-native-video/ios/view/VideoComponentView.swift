@@ -75,6 +75,8 @@ import UIKit
     }
   }
 
+  var isPictureInPictureActive = false
+
   public var autoEnterPictureInPicture: Bool = false {
     didSet {
       #if !os(tvOS)

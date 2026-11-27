@@ -80,14 +80,18 @@ export interface BufferConfig {
    * The desired limit, in bits per second, of network bandwidth used for loading the current item.
    *
    * You can use {@linkcode preferredPeakBitRateForExpensiveNetworks} to set a different bit rate when on an expensive network (e.g. cellular).
-   * @platform ios, visionOS, tvOS
+   *
+   * On Android this is applied as `TrackSelectionParameters.maxVideoBitrate`.
+   * @platform android, ios, visionOS, tvOS
    */
   preferredPeakBitRate?: number;
   /**
    * The preferred maximum resolution of the video.
    *
    * You can use {@linkcode preferredMaximumResolutionForExpensiveNetworks} to set a different resolution when on an expensive network (e.g. cellular).
-   * @platform ios, visionOS, tvOS
+   *
+   * On Android this is applied as `TrackSelectionParameters.maxVideoSize`.
+   * @platform android, ios, visionOS, tvOS
    */
   preferredMaximumResolution?: Resolution;
   /**
