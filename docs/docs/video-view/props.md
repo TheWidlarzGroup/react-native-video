@@ -53,7 +53,9 @@ keywords: [VideoView props, player, controls, resizeMode, surfaceType, picture-i
 `renderLoader` also takes a function. It receives `{ style, resizeMode }`: a style that fills the video view and the resolved poster resize mode.
 
 :::note
-The cover is a React Native view drawn above the video, and it doesn't receive touches. When one of these props is set, `VideoView` renders the native view inside a wrapper `View` that takes the `style`. Adding or removing the last of these props on a mounted view remounts the native view.
+The cover is a React Native view drawn above the video, and it doesn't receive touches. Adding or removing these props on a mounted view never recreates the native view.
+
+When a view is mounted with one of these props, `VideoView` renders the native view inside a wrapper `View` that takes the `style` and `onLayout`. When they are first set after the view is mounted (a poster URL that arrives later), the cover is placed over the video's measured frame instead, so it follows layout changes but not transforms or opacity set in `style`. Set `shutterColor` or `poster` on the first render if you animate the view.
 :::
 
 ## Android: Choosing a surface type
