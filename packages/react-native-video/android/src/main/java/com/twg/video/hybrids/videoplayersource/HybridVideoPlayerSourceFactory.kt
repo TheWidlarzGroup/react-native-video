@@ -46,7 +46,8 @@ class HybridVideoPlayerSourceFactory: HybridVideoPlayerSourceFactorySpec() {
       initializeOnCreation = true,
       minLoadRetryCount = null,
       disableDisconnectError = null,
-      type = null
+      type = null,
+      textTracksAllowChunklessPreparation = null
     )
 
     return HybridVideoPlayerSource(config)

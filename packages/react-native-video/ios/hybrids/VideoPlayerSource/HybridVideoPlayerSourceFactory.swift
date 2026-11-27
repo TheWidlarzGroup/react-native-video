@@ -25,7 +25,8 @@ class HybridVideoPlayerSourceFactory: HybridVideoPlayerSourceFactorySpec {
       initializeOnCreation: true,
       minLoadRetryCount: nil,
       disableDisconnectError: nil,
-      type: nil
+      type: nil,
+      textTracksAllowChunklessPreparation: nil
     )
     return try HybridVideoPlayerSource(config: config)
   }

@@ -87,6 +87,14 @@ export type VideoConfig = {
    * @platform android
    */
   type?: string;
+  /**
+   * Whether an HLS stream may be prepared from its playlists alone, without downloading
+   * media chunks first. Set it to `false` when a stream lists subtitle or audio renditions
+   * without a `CODECS` attribute and those tracks do not show up.
+   * @default true
+   * @platform android
+   */
+  textTracksAllowChunklessPreparation?: boolean;
 };
 
 // @internal

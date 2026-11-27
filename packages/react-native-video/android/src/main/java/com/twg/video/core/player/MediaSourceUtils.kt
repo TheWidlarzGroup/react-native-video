@@ -47,7 +47,9 @@ fun buildMediaSource(context: Context, source: HybridVideoPlayerSource, mediaIte
       DashMediaSource.Factory(dataSourceFactory)
     }
     C.CONTENT_TYPE_HLS -> {
-      HlsMediaSource.Factory(dataSourceFactory)
+      HlsMediaSource.Factory(dataSourceFactory).apply {
+        source.config.textTracksAllowChunklessPreparation?.let { setAllowChunklessPreparation(it) }
+      }
     }
     C.CONTENT_TYPE_OTHER -> {
       DefaultMediaSourceFactory(context)
