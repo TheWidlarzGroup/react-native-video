@@ -21,6 +21,8 @@ namespace margelo::nitro::video { enum class IgnoreSilentSwitchMode; }
 namespace margelo::nitro::video { struct TextTrack; }
 // Forward declaration of `VideoTrack` to properly resolve imports.
 namespace margelo::nitro::video { struct VideoTrack; }
+// Forward declaration of `AudioTrack` to properly resolve imports.
+namespace margelo::nitro::video { struct AudioTrack; }
 
 #include <memory>
 #include "HybridVideoPlayerSourceSpec.hpp"
@@ -43,6 +45,8 @@ namespace margelo::nitro::video { struct VideoTrack; }
 #include <vector>
 #include "VideoTrack.hpp"
 #include "JVideoTrack.hpp"
+#include "AudioTrack.hpp"
+#include "JAudioTrack.hpp"
 #include <NitroModules/Null.hpp>
 #include <variant>
 #include "JVariant_NullType_HybridVideoPlayerSourceSpec.hpp"
@@ -213,6 +217,11 @@ namespace margelo::nitro::video {
     auto __result = method(_javaPart);
     return __result != nullptr ? std::make_optional(__result->toStdString()) : std::nullopt;
   }
+  std::optional<std::string> JHybridVideoPlayerSpec::getSelectedAudioTrackId() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<jni::JString>()>("getSelectedAudioTrackId");
+    auto __result = method(_javaPart);
+    return __result != nullptr ? std::make_optional(__result->toStdString()) : std::nullopt;
+  }
 
   // Methods
   std::shared_ptr<Promise<void>> JHybridVideoPlayerSpec::replaceSourceAsync(const std::optional<std::variant<nitro::NullType, std::shared_ptr<HybridVideoPlayerSourceSpec>>>& source) {
@@ -314,6 +323,24 @@ namespace margelo::nitro::video {
   }
   void JHybridVideoPlayerSpec::selectVideoTrack(const std::optional<std::string>& trackId) {
     static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<jni::JString> /* trackId */)>("selectVideoTrack");
+    method(_javaPart, trackId.has_value() ? jni::make_jstring(trackId.value()) : nullptr);
+  }
+  std::vector<AudioTrack> JHybridVideoPlayerSpec::getAvailableAudioTracks() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<jni::JArrayClass<JAudioTrack>>()>("getAvailableAudioTracks");
+    auto __result = method(_javaPart);
+    return [&]() {
+      size_t __size = __result->size();
+      std::vector<AudioTrack> __vector;
+      __vector.reserve(__size);
+      for (size_t __i = 0; __i < __size; __i++) {
+        auto __element = __result->getElement(__i);
+        __vector.push_back(__element->toCpp());
+      }
+      return __vector;
+    }();
+  }
+  void JHybridVideoPlayerSpec::selectAudioTrack(const std::optional<std::string>& trackId) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<jni::JString> /* trackId */)>("selectAudioTrack");
     method(_javaPart, trackId.has_value() ? jni::make_jstring(trackId.value()) : nullptr);
   }
 

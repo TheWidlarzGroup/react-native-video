@@ -27,6 +27,8 @@ namespace margelo::nitro::video { enum class IgnoreSilentSwitchMode; }
 namespace margelo::nitro::video { struct TextTrack; }
 // Forward declaration of `VideoTrack` to properly resolve imports.
 namespace margelo::nitro::video { struct VideoTrack; }
+// Forward declaration of `AudioTrack` to properly resolve imports.
+namespace margelo::nitro::video { struct AudioTrack; }
 
 #include <memory>
 #include "HybridVideoPlayerSourceSpec.hpp"
@@ -42,6 +44,7 @@ namespace margelo::nitro::video { struct VideoTrack; }
 #include <variant>
 #include <vector>
 #include "VideoTrack.hpp"
+#include "AudioTrack.hpp"
 
 namespace margelo::nitro::video {
 
@@ -99,6 +102,7 @@ namespace margelo::nitro::video {
       virtual bool getIsPlaying() = 0;
       virtual std::optional<TextTrack> getSelectedTrack() = 0;
       virtual std::optional<std::string> getSelectedVideoTrackId() = 0;
+      virtual std::optional<std::string> getSelectedAudioTrackId() = 0;
 
     public:
       // Methods
@@ -114,6 +118,8 @@ namespace margelo::nitro::video {
       virtual void seekTo(double time) = 0;
       virtual std::vector<VideoTrack> getAvailableVideoTracks() = 0;
       virtual void selectVideoTrack(const std::optional<std::string>& trackId) = 0;
+      virtual std::vector<AudioTrack> getAvailableAudioTracks() = 0;
+      virtual void selectAudioTrack(const std::optional<std::string>& trackId) = 0;
 
     protected:
       // Hybrid Setup
