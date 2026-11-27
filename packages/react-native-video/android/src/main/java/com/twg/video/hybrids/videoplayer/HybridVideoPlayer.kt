@@ -564,6 +564,10 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
       val isPlayingUpdate = player.isPlaying
       val isBufferingUpdate = playbackState == Player.STATE_BUFFERING
 
+      // The focus follows the source too: it is taken when a playing player starts loading and
+      // given up when playback ends or the player goes idle.
+      VideoManager.audioFocusManager.requestAudioFocusUpdate()
+
       eventEmitter.onPlaybackStateChange(
         onPlaybackStateChangeData(
           isPlaying = isPlayingUpdate,
@@ -641,9 +645,6 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
       }
       // Keep the activity's auto-enter-PiP flag in sync with the last-played video.
       VideoManager.refreshPictureInPictureParams()
-      // Request focus when playback starts and release it when it stops, so another app's
-      // playback pauses or ducks this player.
-      VideoManager.audioFocusManager.requestAudioFocusUpdate()
     }
 
     override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
@@ -656,6 +657,9 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
 
       // playWhenReady can change without isPlaying (pause while buffering), so refresh here too.
       VideoManager.refreshPictureInPictureParams()
+      // Request audio focus when the player is asked to play and release it on pause, so another
+      // app's playback pauses or ducks this player. Buffering keeps the focus.
+      VideoManager.audioFocusManager.requestAudioFocusUpdate()
     }
 
     override fun onPlayerError(error: PlaybackException) {
