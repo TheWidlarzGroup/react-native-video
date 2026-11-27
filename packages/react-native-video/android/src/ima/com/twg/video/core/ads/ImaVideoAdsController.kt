@@ -128,6 +128,12 @@ class ImaVideoAdsController(
   }
 
   @MainThread
+  override fun onAdGroupExitedByPlayer() {
+    if (released || !host.isCurrentGeneration(generation)) return
+    closeAdBreak(host.adEventEmitter)
+  }
+
+  @MainThread
   override fun detachPlayer() {
     if (released) return
     adsLoader.setPlayer(null)

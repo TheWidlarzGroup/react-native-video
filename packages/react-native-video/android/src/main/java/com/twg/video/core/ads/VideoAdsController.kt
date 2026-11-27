@@ -74,6 +74,14 @@ interface VideoAdsController {
   fun skipAd()
 
   /** Detaches the player (`setPlayer(null)`). Must run before `player.release()`. */
+  /**
+   * The player left an ad group and is back on the content, but the ads SDK never said the
+   * break ended. IMA stops dispatching ad events once its ad container leaves the window
+   * (the `VideoView` unmounted mid-ad), while ExoPlayer plays the ad out and moves on. Close
+   * the break so `adState` and `onAdBreakEnd` don't stay stuck on the ad.
+   */
+  fun onAdGroupExitedByPlayer()
+
   fun detachPlayer()
 
   /** Releases the ad loader. Must run after `player.release()`. */

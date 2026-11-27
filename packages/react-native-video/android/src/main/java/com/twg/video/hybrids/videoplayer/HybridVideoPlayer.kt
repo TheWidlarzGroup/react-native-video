@@ -112,6 +112,12 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
 
   private companion object {
     const val PROGRESS_UPDATE_INTERVAL_MS = 250L
+
+    /**
+     * How long the ads SDK gets to report the end of an ad break after the player has already
+     * moved back to the content, before the break is closed on its behalf.
+     */
+    private const val AD_BREAK_END_BACKSTOP_MS = 1000L
     const val DEFAULT_AD_REQUEST_TIMEOUT_MS = 8000L
     const val MIN_AD_REQUEST_TIMEOUT_MS = 1000L
     private const val TAG = "HybridVideoPlayer"
@@ -967,6 +973,29 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
     )
   }
 
+  /**
+   * The player is back on the content after an ad. Normally the ads SDK has just reported the
+   * end of the break; if it stays silent (see [VideoAdsController.onAdGroupExitedByPlayer]),
+   * close the break here so `adState` cannot stay on `playing` forever.
+   */
+  @MainThread
+  private fun scheduleAdBreakEndBackstop() {
+    val generation = adsGeneration.get()
+    progressHandler.postDelayed({
+      if (releaseStarted.get() || adsGeneration.get() != generation) return@postDelayed
+      if (adStateBacking != VideoAdState.PLAYING || player.isPlayingAd) return@postDelayed
+
+      Log.w(TAG, "Ad break ended in the player but the ads SDK did not report it - closing it")
+      val controller = adsController
+      if (controller != null) {
+        controller.onAdGroupExitedByPlayer()
+      } else {
+        applyAdState(VideoAdState.CONTENT)
+        VideoManager.onAdActivityEnded(this)
+      }
+    }, AD_BREAK_END_BACKSTOP_MS)
+  }
+
   private fun startProgressUpdates() {
     stopProgressUpdates() // Ensure no multiple runnables
     progressRunnable = object : Runnable {
@@ -1135,6 +1164,10 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
       }
       // The new position is inside an ad: the content's time did not change, report nothing.
       if (newPosition.adGroupIndex != C.INDEX_UNSET) return
+
+      if (oldPosition.adGroupIndex != C.INDEX_UNSET) {
+        scheduleAdBreakEndBackstop()
+      }
 
       // Back on the content after an ad that swallowed onLoad: emit it now, if the content is
       // already ready. If it is still buffering, STATE_READY emits it.
