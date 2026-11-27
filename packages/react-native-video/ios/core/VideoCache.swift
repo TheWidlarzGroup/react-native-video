@@ -184,6 +184,8 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
   private struct Index: Codable {
     var contentLength: Int64?
     var contentType: String?
+    // ETag or Last-Modified of the file the cached bytes came from.
+    var validator: String?
     // Half-open byte ranges [start, end) that are on disk, sorted and merged.
     var ranges: [[Int64]] = []
   }
@@ -460,14 +462,34 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
       return
     }
 
+    // The file changed on the server since part of it was cached: the cached part is
+    // worthless, and requests that already got bytes of the old file cannot be continued.
+    let validator =
+      http.value(forHTTPHeaderField: "ETag") ?? http.value(forHTTPHeaderField: "Last-Modified")
+    if let validator, let known = index.validator, known != validator {
+      completionHandler(.cancel)
+      discardCachedBytes()
+      for other in jobs { finish(other, error: URLError(.resourceUnavailable)) }
+      return
+    }
+    if let validator { index.validator = validator }
+
     if http.statusCode == 200 {
       // The server ignored the range and sends the whole file from the first byte.
       job.taskOffset = 0
       if http.expectedContentLength > 0 { index.contentLength = http.expectedContentLength }
-    } else if let total = http.value(forHTTPHeaderField: "Content-Range")?
-      .split(separator: "/").last.flatMap({ Int64($0) })
-    {
-      index.contentLength = total
+    } else {
+      // "bytes 100-199/1000"
+      let contentRange = http.value(forHTTPHeaderField: "Content-Range") ?? ""
+      let parts = contentRange.split(whereSeparator: { " -/".contains($0) })
+      if parts.count >= 2, let start = Int64(parts[1]), start != job.fetchStart {
+        // Bytes for another offset would be written in the wrong place.
+        completionHandler(.cancel)
+        job.task = nil
+        finish(job, error: URLError(.badServerResponse))
+        return
+      }
+      if let total = parts.last.flatMap({ Int64($0) }) { index.contentLength = total }
     }
     if index.contentType == nil {
       index.contentType = Self.contentType(mimeType: http.mimeType, url: url)
@@ -559,6 +581,12 @@ private final class CachingResourceLoader: NSObject, AVAssetResourceLoaderDelega
       }
     }
     index.ranges = merged
+  }
+
+  private func discardCachedBytes() {
+    index = Index()
+    try? fileHandle.truncate(atOffset: 0)
+    saveIndex()
   }
 
   private func saveIndex() {
