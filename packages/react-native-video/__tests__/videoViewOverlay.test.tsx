@@ -198,6 +198,126 @@ test('renders a loader where the bundler does not define __DEV__ (web)', () => {
   }
 });
 
+test('an object poster passes its Image props through and keeps the fill style first', () => {
+  const r = render({
+    player: fakePlayer(),
+    poster: {
+      source: { uri: 'https://x/p.png' },
+      blurRadius: 4,
+      testID: 'poster',
+      style: { opacity: 0.5 },
+    },
+  });
+  const image = images(r)[0]!;
+  expect(image.props.source).toEqual({ uri: 'https://x/p.png' });
+  expect(image.props.blurRadius).toBe(4);
+  expect(image.props.testID).toBe('poster');
+  // The app's style comes last, so it can adjust the image but the fill is the base.
+  const style = image.props.style;
+  expect(style[0].position).toBe('absolute');
+  expect(style[1]).toEqual({ width: '100%', height: '100%' });
+  expect(style[2]).toEqual({ opacity: 0.5 });
+});
+
+test('an empty poster with a shutter color draws the cover without an image', () => {
+  const r = render({ player: fakePlayer(), poster: '', shutterColor: 'black' });
+  const cover = r.toJSON() as TestRenderer.ReactTestRendererJSON;
+  expect(cover.type).toBe('View');
+  expect(cover.children).toBeNull();
+  expect(images(r)).toHaveLength(0);
+});
+
+test('the cover never takes touches', () => {
+  const r = render({ player: fakePlayer(), poster: 'https://x/p.png' });
+  const cover = r.toJSON() as TestRenderer.ReactTestRendererJSON;
+  expect(
+    Object.assign({}, ...cover.props.style.filter(Boolean)).pointerEvents
+  ).toBe('none');
+});
+
+test('a null renderLoader falls back to the poster', () => {
+  const r = render({
+    player: fakePlayer(),
+    poster: 'https://x/p.png',
+    renderLoader: null,
+  });
+  expect(images(r)).toHaveLength(1);
+});
+
+test('renderLoader with a poster warns once in development and never in production', () => {
+  const g = globalThis as any;
+  const previousDev = g.__DEV__;
+  const previousWarn = console.warn;
+  const warnings: unknown[] = [];
+  console.warn = (message: unknown) => warnings.push(message);
+  const props = () => ({
+    player: fakePlayer(),
+    poster: 'https://x/p.png',
+    renderLoader: React.createElement('Loader'),
+  });
+  try {
+    g.__DEV__ = false;
+    render(props());
+    expect(warnings).toHaveLength(0);
+
+    g.__DEV__ = true;
+    render(props());
+    render(props());
+    expect(warnings).toHaveLength(1);
+    expect(String(warnings[0])).toContain('renderLoader');
+
+    // A loader on its own is not worth a warning.
+    render({
+      player: fakePlayer(),
+      renderLoader: React.createElement('Loader'),
+    });
+    expect(warnings).toHaveLength(1);
+  } finally {
+    g.__DEV__ = previousDev;
+    console.warn = previousWarn;
+  }
+});
+
+test('the overlay listeners are removed on unmount and move with the player', () => {
+  const counted = () => {
+    const base = fakePlayer();
+    let live = 0;
+    const add = base.addEventListener.bind(base);
+    return Object.assign(base, {
+      live: () => live,
+      addEventListener(event: any, cb: any) {
+        const subscription = add(event, cb);
+        live++;
+        return {
+          remove: () => {
+            live--;
+            subscription.remove();
+          },
+        };
+      },
+    });
+  };
+  const first = counted();
+  const second = counted();
+  const r = render({ player: first, poster: 'https://x/p.png' });
+  expect(first.live()).toBe(2);
+
+  act(() => {
+    r.update(
+      React.createElement(VideoViewOverlay, {
+        isReadyToDisplay,
+        player: second,
+        poster: 'https://x/p.png',
+      } as any)
+    );
+  });
+  expect(first.live()).toBe(0);
+  expect(second.live()).toBe(2);
+
+  act(() => r.unmount());
+  expect(second.live()).toBe(0);
+});
+
 // --- VideoViewOverlayHost: the native video view must never be recreated ---
 
 let videoMounts = 0;
