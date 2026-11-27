@@ -13,6 +13,7 @@ protocol VideoPlayerObserverDelegate: AnyObject {
   func onPlayerItemChange(player: AVPlayer, playerItem: AVPlayerItem?)
   func onPlayerItemWillChange(hasNewPlayerItem: Bool)
   func onTextTrackDataChanged(texts: [NSAttributedString])
+  func onMediaSelectionChanged()
   func onTimedMetadataChanged(timedMetadata: [AVMetadataItem])
   func onRateChanged(rate: Float, reason: AVPlayer.RateDidChangeReason?)
   func onPlaybackBufferEmpty()
@@ -24,7 +25,6 @@ protocol VideoPlayerObserverDelegate: AnyObject {
   func onPlayerItemStatusChanged(status: AVPlayerItem.Status)
   func onBandwidthUpdate(bitrate: Double)
   func onProgressUpdate(currentTime: Double, bufferDuration: Double)
-  func onMediaSelectionChanged()
 }
 
 extension VideoPlayerObserverDelegate {
@@ -32,6 +32,7 @@ extension VideoPlayerObserverDelegate {
   func onPlayerItemChange(player: AVPlayer, playerItem: AVPlayerItem?) {}
   func onPlayerItemWillChange(hasNewPlayerItem: Bool) {}
   func onTextTrackDataChanged(texts: [NSAttributedString]) {}
+  func onMediaSelectionChanged() {}
   func onTimedMetadataChanged(timedMetadata: [AVMetadataItem]) {}
   func onRateChanged(rate: Float, reason: AVPlayer.RateDidChangeReason?) {}
   func onPlaybackBufferEmpty() {}
@@ -43,7 +44,6 @@ extension VideoPlayerObserverDelegate {
   func onPlayerItemStatusChanged(status: AVPlayerItem.Status) {}
   func onBandwidthUpdate(bitrate: Double) {}
   func onProgressUpdate(currentTime: Double, bufferDuration: Double) {}
-  func onMediaSelectionChanged() {}
 }
 
 class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVPlayerItemLegibleOutputPushDelegate {
@@ -70,7 +70,7 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
   var playerItemStatusObserver: NSKeyValueObservation?
   var playerItemAccessLogObserver: NSObjectProtocol?
   var playerItemMediaSelectionObserver: NSObjectProtocol?
-
+  
   var metadataOutput: AVPlayerItemMetadataOutput?
   var legibleOutput: AVPlayerItemLegibleOutput?
   
@@ -111,9 +111,9 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
       self.delegate?.onRateChanged(rate: player.rate, reason: reason)
     }
 
-    playerTimeControlStatusObserver = player.observe(\.timeControlStatus, options: [.new]) { [weak self] _, change in
-      guard let status = change.newValue else { return }
-      self?.delegate?.onTimeControlStatusChanged(status: status)
+    // change.newValue is always nil for enum key paths, so read the player (#5140)
+    playerTimeControlStatusObserver = player.observe(\.timeControlStatus, options: [.new]) { [weak self] player, _ in
+      self?.delegate?.onTimeControlStatusChanged(status: player.timeControlStatus)
     }
     
     playerExternalPlaybackActiveObserver = player.observe(\.isExternalPlaybackActive, options: [.new]) { [weak self] _, change in
@@ -126,9 +126,8 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
       self?.delegate?.onVolumeChanged(volume: volume)
     }
     
-    playerStatusObserver = player.observe(\.status, options: [.new]) { [weak self] _, change in
-      guard let status = change.newValue else { return }
-      self?.delegate?.onPlayerStatusChanged(status: status)
+    playerStatusObserver = player.observe(\.status, options: [.new]) { [weak self] player, _ in
+      self?.delegate?.onPlayerStatusChanged(status: player.status)
     }
     
     // 500ms interval TODO: Make this configurable
@@ -160,6 +159,7 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
     // `selectMediaOptionAutomatically` is applied asynchronously by AVFoundation, so
     // `currentMediaSelection` can still be stale right after the call returns. This is
     // the signal that a media selection group actually changed its option.
+    // Also posted for a selection made in the native controls.
     playerItemMediaSelectionObserver = NotificationCenter.default.addObserver(
       forName: AVPlayerItem.mediaSelectionDidChangeNotification,
       object: playerItem,
