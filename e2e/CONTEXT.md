@@ -177,16 +177,19 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
   markers (`evt-replacement-loaded`, `evt-reloaded-from-start`, `evt-ended-after-replace`)
   only count events after `replaceSourceAsync(source)` was requested, because Android
   re-emits `onLoad` on every re-buffer and replay.
-- **iOS sometimes never reported `readyToPlay`** while a clip played (issue #5155). On the
-  CI simulators (iOS 26.4 runtime) the library's `timeControlStatus` KVO observer never
-  fires, in passing runs too (no paused/waiting/playing callback in the event log), although
-  AVPlayer logs every change in `device.log`; on the 26.2 and 27.0 runtimes locally it always
-  fires. Why is not known. Without it, `readyToPlay` came only from the item-ready and
+- **iOS sometimes never reported `readyToPlay`** while a clip played (issue #5155). Until
+  #5252 the library's `timeControlStatus` KVO observer delivered nothing: its handler read
+  `change.newValue`, which Swift KVO leaves nil for this enum key path, and returned. The
+  callbacks did arrive. It looked like a CI-only problem (iOS 26.4) because the CI runs
+  examined were built before #5252 and the local runs after it; the nightly of 2026-11-28,
+  the first built with #5252, shows the observer reporting every change that AVPlayer logs
+  in `device.log`. Without it, `readyToPlay` came only from the item-ready and
   likely-to-keep-up callbacks, which skip it while AVPlayer is still waiting to play, so a
   run whose playback started a moment after the item was ready stayed `loading` to the
-  end. The progress tick now sets `readyToPlay` when AVPlayer plays a ready item, and a
-  Debug build logs `[ReactNativeVideo] status caught up` in `device.log` when it had to.
-  `smoke-status-order.yaml` asserts the idle → loading → readyToPlay order.
+  end. Since #5298 the progress tick also sets `readyToPlay` when AVPlayer plays a ready
+  item, as a safety net, and a Debug build logs `[ReactNativeVideo] status caught up` in
+  `device.log` when it had to; such a line now points to a new gap. `smoke-status-order.yaml`
+  asserts the idle → loading → readyToPlay order.
 - **`replaceSourceAsync(null)` releases the native player** on iOS and Android, like
   `release()` (the docs said otherwise until #5154; web keeps the player loadable).
   `smoke-release-source.yaml` therefore asserts the promise, the idle status and the
