@@ -73,6 +73,41 @@ EOF
 mkdir -p media/hls-noext
 sed 's#^seg_#../hls/seg_#' media/hls/index.m3u8 > media/hls-noext/stream
 
+# The same HLS VOD with a WebVTT subtitle rendition (onTextTrackDataChanged): three 1 s cues
+# with gaps between them, so each one appears and goes away. The ffmpeg segments start at
+# 1.4 s (MPEG-TS 126000), hence the timestamp map.
+mkdir -p media/hls-subs
+cat > media/hls-subs/index.m3u8 <<'EOF2'
+#EXTM3U
+#EXT-X-VERSION:4
+#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="subs",NAME="English",LANGUAGE="en",DEFAULT=YES,AUTOSELECT=YES,FORCED=NO,URI="sub_en.m3u8"
+#EXT-X-STREAM-INF:BANDWIDTH=800000,RESOLUTION=640x360,CODECS="avc1.42c01e,mp4a.40.2",SUBTITLES="subs"
+../hls/index.m3u8
+EOF2
+cat > media/hls-subs/sub_en.m3u8 <<'EOF2'
+#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-TARGETDURATION:8
+#EXT-X-MEDIA-SEQUENCE:0
+#EXT-X-PLAYLIST-TYPE:VOD
+#EXTINF:8.000000,
+sub_en.vtt
+#EXT-X-ENDLIST
+EOF2
+cat > media/hls-subs/sub_en.vtt <<'EOF2'
+WEBVTT
+X-TIMESTAMP-MAP=MPEGTS:126000,LOCAL:00:00:00.000
+
+00:00.500 --> 00:01.500
+Cue A, half to one and a half
+
+00:03.000 --> 00:04.000
+Cue B, three to four
+
+00:05.500 --> 00:06.500
+Cue C, five and a half to six and a half
+EOF2
+
 # Multi-rendition HLS VOD (video quality selection): three video renditions of the same clip
 # (640x360, 320x180, 160x90), 2 s segments, each with its own copy of the audio.
 ffmpeg -y \

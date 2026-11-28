@@ -67,6 +67,11 @@ export const MARKER_IDS = [
   'evt-audio-alt-selected', // onAudioTrackChange reports the Spanish track selected (2 tracks listed)
   'evt-audio-default-restored', // ...then the English (default) track selected again
   'evt-audio-tracks-after-replace', // onAudioTrackChange lists both tracks after replaceSourceAsync() was requested (#5291)
+  // onTextTrackDataChanged (subtitles scenario): text when a cue appears, [] when it goes away.
+  'evt-text-shown', // a subtitle with text
+  'evt-text-cleared', // [] after it, when the cue ended
+  'evt-text-cleared-after-off', // [] after the scenario turned the text track off during a cue
+  'evt-text-cleared-unpaired', // a [] that did not follow text (the first event, or a second [])
   // An unassisted loop restart: see LOOP_VERIFIED_END_COUNT and the wrap-around rule in
   // handle('onProgress') — AVPlayer reports each loop as onEnd, ExoPlayer wraps silently,
   // so both are covered (see smoke-loop.yaml).
@@ -160,7 +165,10 @@ export type PlayerEvent =
   | {
       type: 'onAudioTrackChange';
       tracks: readonly { language?: string; selected: boolean }[];
-    };
+    }
+  | { type: 'onTextTrackDataChanged'; texts: readonly string[] }
+  // The scenario called selectTextTrack(null) while a subtitle was shown.
+  | { type: 'textTrackOff' };
 
 // Renditions in the hls-quality fixture (e2e/fixtures/generate.sh).
 export const VIDEO_TRACK_COUNT = 3;
@@ -245,6 +253,10 @@ type State = {
   loadsOfSource: number;
   // The duration the last onLoad reported, NaN before it.
   loadedDuration: number;
+  // Whether the last onTextTrackDataChanged had text, null before the first one.
+  textShown: boolean | null;
+  // selectTextTrack(null) was called: the next [] is the one turning it off caused.
+  textOffRequested: boolean;
 };
 
 const initialState = (): State => ({
@@ -269,6 +281,8 @@ const initialState = (): State => ({
   sparseGaps: 0,
   loadsOfSource: 0,
   loadedDuration: NaN,
+  textShown: null,
+  textOffRequested: false,
 });
 
 let state = initialState();
@@ -649,6 +663,27 @@ function apply(event: PlayerEvent) {
       append(`onAudioTrackChange selected=${selected ?? 'none'}`);
       return;
     }
+
+    case 'onTextTrackDataChanged': {
+      if (event.texts.length > 0) {
+        mark('evt-text-shown');
+      } else if (state.textShown !== true) {
+        // Only a subtitle that was shown has anything to clear.
+        mark('evt-text-cleared-unpaired');
+      } else if (state.textOffRequested) {
+        mark('evt-text-cleared-after-off');
+      } else {
+        mark('evt-text-cleared');
+      }
+      state.textShown = event.texts.length > 0;
+      append(`onTextTrackDataChanged ${JSON.stringify(event.texts)}`);
+      return;
+    }
+
+    case 'textTrackOff':
+      state.textOffRequested = true;
+      append('textTrackOff');
+      return;
 
     default:
       // A new PlayerEvent type fails to compile here until it is handled.

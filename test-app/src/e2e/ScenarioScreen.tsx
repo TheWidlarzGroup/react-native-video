@@ -126,6 +126,9 @@ function reportStatusSettled(player: VideoPlayer, after: 'end' | 'error') {
   }, STATUS_SETTLE_MS);
 }
 
+// subtitles: how far into the second cue (1 s long) the scenario turns the track off.
+const TEXT_OFF_DELAY_MS = 300;
+
 /**
  * How a scenario starts its load once every listener is attached. The preload scenario
  * only prepares the source, so a flow can assert that nothing plays until btn-play. The
@@ -166,6 +169,29 @@ function startScenario(scenario: ScenarioName, player: VideoPlayer) {
         released = true;
         replaceSource(player, 'null');
       }
+    });
+  }
+
+  if (scenario === 'subtitles') {
+    // Select the subtitle track as soon as it is listed (on iOS the manifest's default is
+    // only provisional when playback starts at once), and turn it off TEXT_OFF_DELAY_MS
+    // into the second cue, from JS, so no tap has to land during playback.
+    let selected = false;
+    let turnedOff = false;
+    player.addEventListener('onProgress', () => {
+      if (selected) return;
+      const track = player.getAvailableTextTracks()[0];
+      if (!track) return;
+      selected = true;
+      player.selectTextTrack(track);
+    });
+    player.addEventListener('onTextTrackDataChanged', (texts) => {
+      if (turnedOff || !texts.some((text) => text.startsWith('Cue B'))) return;
+      turnedOff = true;
+      setTimeout(() => {
+        eventLog.handle({ type: 'textTrackOff' });
+        player.selectTextTrack(null);
+      }, TEXT_OFF_DELAY_MS);
     });
   }
 
@@ -525,6 +551,9 @@ function logPlayerEvents(player: VideoPlayer) {
   );
   player.addEventListener('onAudioTrackChange', ({ availableTracks }) =>
     handle({ type: 'onAudioTrackChange', tracks: availableTracks })
+  );
+  player.addEventListener('onTextTrackDataChanged', (texts) =>
+    handle({ type: 'onTextTrackDataChanged', texts })
   );
 }
 
