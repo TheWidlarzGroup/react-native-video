@@ -109,6 +109,35 @@ class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
       deadline: .now() + Self.fullscreenRequestTimeoutSeconds, execute: timeout)
   }
 
+  /// The value last sent as `onFullscreenChange`, so that a state change is reported once
+  /// even if both the delegate and the exit request's completion handler see it.
+  private var reportedFullscreen = false
+
+  private func reportFullscreen(_ value: Bool) {
+    isFullscreen = value
+    guard reportedFullscreen != value else { return }
+    reportedFullscreen = value
+    delegate?.onFullscreenChange(value)
+  }
+
+  /// Called when an exit requested with `exitFullscreen()` has completed. The delegate
+  /// normally reports the exit before this runs. If AVKit left fullscreen without calling it,
+  /// the state is corrected here, or `isFullscreen` would stay true and the next
+  /// `enterFullscreen()` would be dropped as "already fullscreen".
+  func fullscreenExitRequestDidComplete() {
+    guard isFullscreen, !isFullscreenTransitioning else { return }
+    fullscreenRequestTimeout?.cancel()
+    fullscreenRequestTimeout = nil
+    isFullscreenRequestPending = false
+    // As the delegate does on a normal exit: give the orientation back (fullscreenOrientation).
+    (playerViewController as? VideoPlayerViewController)?.fullscreenDidEnd()
+    reportFullscreen(false)
+    DispatchQueue.main.async { [weak self] in
+      self?.runPendingAfterFullscreenTransition()
+      self?.view?.applyQueuedFullscreenRequest()
+    }
+  }
+
   private func fullscreenTransitionDidStart() {
     isFullscreenRequestPending = false
     fullscreenRequestTimeout?.cancel()
@@ -157,6 +186,8 @@ class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
     queuedFullscreenTarget = nil
     if !keepingFullscreen {
       isFullscreen = false
+      // Nothing is sent here, as before: the next real change must still be reported.
+      reportedFullscreen = false
     }
   }
   
@@ -253,9 +284,8 @@ class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
         return
       }
 
-      self.isFullscreen = false
       fullscreenController?.fullscreenDidEnd()
-      self.delegate?.onFullscreenChange(false)
+      self.reportFullscreen(false)
       if wasPlaying {
         player?.play()
       }
@@ -288,8 +318,7 @@ class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
         return
       }
 
-      self.isFullscreen = true
-      self.delegate?.onFullscreenChange(true)
+      self.reportFullscreen(true)
     }
   }
 }
