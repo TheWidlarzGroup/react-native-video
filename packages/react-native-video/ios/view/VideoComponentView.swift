@@ -110,6 +110,32 @@ import UIKit
 
   deinit {
     VideoManager.shared.unregister(view: self)
+    detachPlayerViewController()
+  }
+
+  /// The controller is a child of the nearest view controller. Without this, that parent keeps
+  /// it, and the `AVPlayer` it holds, for as long as the screen lives: one controller and one
+  /// player for every `VideoView` that was ever mounted there.
+  private func detachPlayerViewController() {
+    guard let controller = playerViewController else { return }
+
+    // Picture in picture and native fullscreen are run by this controller and may outlive the
+    // view. Leave it in place for them.
+    if isPictureInPictureActive || controller.presentedViewController != nil {
+      return
+    }
+
+    let detach = {
+      controller.willMove(toParent: nil)
+      controller.view.removeFromSuperview()
+      controller.removeFromParent()
+    }
+
+    if Thread.isMainThread {
+      detach()
+    } else {
+      DispatchQueue.main.async(execute: detach)
+    }
   }
 
   @objc public required init?(coder: NSCoder) {
