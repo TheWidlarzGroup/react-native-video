@@ -84,6 +84,9 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       }), let previousSource else { throw CancellationError() }
       let context = LoadContext(source: newSource, token: token)
       releaseAssetIfNotUsedByCurrentLoad(for: previousSource)
+      // The next onAudioTrackChange describes the new source. Without this, a source with the
+      // same audio tracks (the next episode, say) has the same signature and gets no event.
+      lastEmittedAudioTrackSignature = nil
       return context
     }
   }
@@ -298,6 +301,17 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   }
 
   var playWhenInactive: Bool = false
+
+  // iOS default: 500 ms, as before this option existed. Android uses 250 ms.
+  var progressUpdateInterval: Double = VideoPlayerObserver.defaultProgressUpdateInterval {
+    didSet {
+      guard progressUpdateInterval.isFinite, progressUpdateInterval > 0 else {
+        progressUpdateInterval = oldValue
+        return
+      }
+      playerObserver?.progressUpdateInterval = progressUpdateInterval
+    }
+  }
 
   var disableAudioSessionManagement: Bool = false {
     didSet {

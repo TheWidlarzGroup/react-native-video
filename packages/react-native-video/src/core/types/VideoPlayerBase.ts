@@ -10,7 +10,13 @@ import type { VideoPlayerStatus } from './VideoPlayerStatus';
 
 import type { VideoConfig, VideoSource } from './VideoConfig';
 
-export interface VideoPlayerBase {
+/**
+ * Every member of {@link VideoPlayerBase} that the native (Nitro) spec can express.
+ * The Nitro spec extends this interface instead of {@link VideoPlayerBase}: nitrogen cannot
+ * generate a method with a type parameter (`addEventListener<Event>`), and one such member
+ * makes it drop the whole `VideoPlayer` HybridObject.
+ */
+export interface VideoPlayerSpecBase {
   /**
    * The source of the video.
    * Source is immutable. To change the source, you need to call {@link replaceSourceAsync} method.
@@ -28,8 +34,8 @@ export interface VideoPlayerBase {
   readonly status: VideoPlayerStatus;
 
   /**
-   * The current time of the video in seconds (1.0 = 1 sec).
-   * Returns NaN if the current time is not available.
+   * The duration of the video in seconds (1.0 = 1 sec).
+   * Returns NaN if the duration is not available.
    */
   readonly duration: number;
 
@@ -40,8 +46,8 @@ export interface VideoPlayerBase {
   volume: number;
 
   /**
-   * The duration of the video in seconds (1.0 = 1 sec).
-   * Returns NaN if the duration is not available.
+   * The current time of the video in seconds (1.0 = 1 sec).
+   * Returns NaN if the current time is not available.
    */
   currentTime: number;
 
@@ -103,6 +109,22 @@ export interface VideoPlayerBase {
    * @note This is only supported on iOS.
    */
   playWhenInactive: boolean;
+
+  /**
+   * The interval, in milliseconds, between two `onProgress` events while the
+   * video is playing.
+   *
+   * Values that are not a finite number greater than 0 are ignored.
+   *
+   * Reading it returns the interval in effect, so before anything is set it
+   * reports the platform default.
+   *
+   * @note on web the browser decides how often `timeupdate` fires (about 4
+   * times per second), so an interval below ~250 ms cannot be reached there.
+   *
+   * @default 250 on Android and web, 500 on iOS
+   */
+  progressUpdateInterval: number;
 
   /**
    * Disables the internal audio session management for this player.
@@ -187,7 +209,7 @@ export interface VideoPlayerBase {
    * Get the currently selected text track.
    * @returns The currently selected text track, or undefined if none is selected
    */
-  readonly selectedTrack?: TextTrack;
+  readonly selectedTrack?: TextTrack | undefined;
 
   /**
    * All video renditions available for the current source, best first.
@@ -218,7 +240,7 @@ export interface VideoPlayerBase {
    * The id passed to the last {@link selectVideoTrack} call, or undefined
    * when automatic (adaptive) selection is active.
    */
-  readonly selectedVideoTrackId?: string;
+  readonly selectedVideoTrackId?: string | undefined;
 
   /**
    * All alternate audio tracks available for the current source (e.g.
@@ -260,7 +282,9 @@ export interface VideoPlayerBase {
    * Releases the player's resources. After calling this, the player is no longer usable.
    */
   release(): void;
+}
 
+export interface VideoPlayerBase extends VideoPlayerSpecBase {
   addEventListener<Event extends keyof AllPlayerEvents>(
     event: Event,
     callback: AllPlayerEvents[Event]

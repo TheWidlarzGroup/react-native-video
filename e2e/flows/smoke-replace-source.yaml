@@ -1,5 +1,6 @@
 # replaceSourceAsync(new source) on a player that has played a clip through: the new
-# source loads (a second onLoad), starts from its beginning and plays to its own end.
+# source reports onLoadStart, loads (a second onLoad), starts from its beginning and plays
+# to its own end.
 # Ported from #4743 ("should replace source with a new video"), with the assertions that
 # test could not make: it only checked that `player.source` was defined.
 #
@@ -33,8 +34,14 @@ tags: [smoke]
     timeout: 20000            # HLS: manifest + first segments from the fixture server
 - extendedWaitUntil:
     visible:
+      id: "evt-replacement-load-started"   # onLoadStart for the new source, on every platform
+    timeout: 20000
+- extendedWaitUntil:
+    visible:
       id: "evt-replacement-loaded"
     timeout: 20000
+- assertVisible:
+    id: "evt-replacement-start-before-load"   # the start was reported before the load, not after
 - extendedWaitUntil:
     visible:
       id: "evt-reloaded-from-start"
@@ -43,6 +50,8 @@ tags: [smoke]
     visible:
       id: "evt-ended-after-replace"
     timeout: 25000            # the HLS clip is ~8 s
+- assertNotVisible:
+    id: "evt-replacement-load-start-repeated"   # one replacement, one onLoadStart
 - assertNotVisible:
     id: "evt-replace-rejected"
 - assertNotVisible:
