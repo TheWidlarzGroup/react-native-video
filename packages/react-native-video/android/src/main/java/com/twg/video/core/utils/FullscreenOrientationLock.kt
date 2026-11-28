@@ -10,7 +10,8 @@ import com.margelo.nitro.video.FullscreenOrientation
  * Holds the activity in the orientation requested for fullscreen and gives it back on release.
  *
  * With autorotate the orientation is held until the user has turned the device to it. After that
- * the activity gets its own orientation setting back, so fullscreen follows the device.
+ * fullscreen follows the device, also in an activity locked to one orientation, and the activity
+ * gets its own setting back on release.
  */
 class FullscreenOrientationLock(private val activity: Activity) {
   private var orientationBefore: Int? = null
@@ -53,7 +54,9 @@ class FullscreenOrientationLock(private val activity: Activity) {
         if (!isSystemAutoRotateOn()) return
 
         stopListening()
-        orientationBefore?.let { activity.requestedOrientation = it }
+        // Not the activity's own setting: an activity locked to portrait would turn fullscreen
+        // back to portrait while the device is held in landscape.
+        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_USER
       }
     }
     if (newListener.canDetectOrientation()) {
