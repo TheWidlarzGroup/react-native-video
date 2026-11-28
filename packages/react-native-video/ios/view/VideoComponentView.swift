@@ -163,6 +163,11 @@ import UIKit
       // We manage this manually in NowPlayingInfoCenterManager
       controller.updatesNowPlayingInfoCenter = false
 
+      // The PiP props usually arrive before this controller exists (it is created
+      // asynchronously), and their didSet has nothing to apply them to then.
+      controller.allowsPictureInPicturePlayback = self.allowsPictureInPicturePlayback
+      controller.canStartPictureInPictureAutomaticallyFromInline = self.autoEnterPictureInPicture
+
       if #available(iOS 16.0, *) {
         if let initialSpeed = controller.speeds.first(where: { $0.rate == player.rate }) {
           controller.selectSpeed(initialSpeed)
