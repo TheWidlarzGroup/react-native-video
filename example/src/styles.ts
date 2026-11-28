@@ -204,6 +204,21 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 14,
   },
+  hint: {
+    fontSize: 12,
+    color: '#888',
+    marginTop: 6,
+  },
+  loader: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#1a1a1a',
+  },
+  loaderText: {
+    color: '#ffffff',
+    marginTop: 8,
+    fontSize: 12,
+  },
   eventLog: {
     backgroundColor: '#f8f9fa',
     borderRadius: 8,
