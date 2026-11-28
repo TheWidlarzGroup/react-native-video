@@ -1,6 +1,8 @@
 export type LibraryError =
   | 'library/deallocated'
-  | 'library/application-context-not-found';
+  | 'library/application-context-not-found'
+  /** A source with `drm` was loaded, but no DRM plugin (such as `@react-native-video/drm`) is enabled. */
+  | 'library/drm-plugin-not-found';
 
 /**
  * Errors reported by the player.
@@ -15,6 +17,8 @@ export type PlayerError =
   | 'player/not-initialized'
   | 'player/asset-not-initialized'
   | 'player/invalid-source'
+  /** iOS: the `uri` of an entry in `externalSubtitles` is not a valid URL. */
+  | 'player/invalid-track-url'
   | 'player/playback-failed'
   /**
    * The load did not run to completion: a newer `initialize()`/`preload()`/

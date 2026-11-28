@@ -42,6 +42,10 @@ namespace margelo::nitro::video { struct TextTrack; }
 namespace margelo::nitro::video { struct VideoTrackChangeData; }
 // Forward declaration of `VideoTrack` to properly resolve imports.
 namespace margelo::nitro::video { struct VideoTrack; }
+// Forward declaration of `AudioTrackChangeData` to properly resolve imports.
+namespace margelo::nitro::video { struct AudioTrackChangeData; }
+// Forward declaration of `AudioTrack` to properly resolve imports.
+namespace margelo::nitro::video { struct AudioTrack; }
 // Forward declaration of `onVolumeChangeData` to properly resolve imports.
 namespace margelo::nitro::video { struct onVolumeChangeData; }
 
@@ -49,6 +53,7 @@ namespace margelo::nitro::video { struct onVolumeChangeData; }
 #include <functional>
 #include "BandwidthData.hpp"
 #include <optional>
+#include <string>
 #include "onLoadData.hpp"
 #include "VideoOrientation.hpp"
 #include "onLoadStartData.hpp"
@@ -61,12 +66,13 @@ namespace margelo::nitro::video { struct onVolumeChangeData; }
 #include "TimedMetadata.hpp"
 #include "TimedMetadataObject.hpp"
 #include <vector>
-#include <string>
 #include <NitroModules/Null.hpp>
 #include "TextTrack.hpp"
 #include <variant>
 #include "VideoTrackChangeData.hpp"
 #include "VideoTrack.hpp"
+#include "AudioTrackChangeData.hpp"
+#include "AudioTrack.hpp"
 #include "onVolumeChangeData.hpp"
 
 #include "ReactNativeVideo-Swift-Cxx-Umbrella.hpp"
@@ -273,6 +279,14 @@ namespace margelo::nitro::video {
     }
     inline ListenerSubscription addOnVideoTrackChangeListener(const std::function<void(const VideoTrackChangeData& /* data */)>& listener) override {
       auto __result = _swiftPart.addOnVideoTrackChangeListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline ListenerSubscription addOnAudioTrackChangeListener(const std::function<void(const AudioTrackChangeData& /* data */)>& listener) override {
+      auto __result = _swiftPart.addOnAudioTrackChangeListener(listener);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

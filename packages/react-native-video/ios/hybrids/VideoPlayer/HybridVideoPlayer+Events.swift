@@ -68,9 +68,34 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
   }
 
   func onProgressUpdate(currentTime: Double, bufferDuration: Double) {
+    // Safety net for #5155: the status must not depend on one KVO callback. A player that
+    // AVFoundation reports as playing a ready item is ready to play, so catch up here.
+    if reconcileStatusWhilePlaying() {
+      updateAndEmitPlaybackState()
+    }
+
+    // The observer reports the item's own time; a cropped source counts from `cropStart`
+    let cropStart = player.currentItem?.cropStartSeconds ?? 0
     _eventEmitter?.onProgress(
-      .init(currentTime: currentTime, bufferDuration: bufferDuration)
+      .init(currentTime: max(0, currentTime - cropStart), bufferDuration: bufferDuration)
     )
+  }
+
+  /// Returns true when the status or the buffering flag had to be corrected.
+  private func reconcileStatusWhilePlaying() -> Bool {
+    guard !hasFailed,
+      playerItem?.status == .readyToPlay,
+      player.timeControlStatus == .playing,
+      status != .readytoplay || isCurrentlyBuffering
+    else { return false }
+
+    #if DEBUG
+      // Means the timeControlStatus observer missed a change (#5155); shows up in e2e device.log
+      NSLog("[ReactNativeVideo] status caught up to readyToPlay from the progress tick")
+    #endif
+    isCurrentlyBuffering = false
+    status = .readytoplay
+    return true
   }
 
   func onPlaybackLikelyToKeepUp() {
@@ -80,6 +105,11 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
       status = .readytoplay
     }
     updateAndEmitPlaybackState()
+
+    // By this point `AVPlayerItem.tracks` is populated, which is the only
+    // public source of an audio channel count. Deduped, so this is a no-op
+    // unless the snapshot actually changed since `.readyToPlay`.
+    refreshAudioTracksIfChanged()
   }
 
   func onExternalPlaybackActiveChanged(isActive: Bool) {
@@ -109,7 +139,10 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
 
     case .paused:
       isCurrentlyBuffering = false
-      self.status = .readytoplay
+      // AVPlayer also reports paused when an item is assigned, long before it can play
+      if playerItem?.status == .readyToPlay {
+        self.status = .readytoplay
+      }
       break
 
     @unknown default:
@@ -174,6 +207,11 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
       // - or carried over from the previous source - is (re)written here.
       applyVideoQualityCapsIfReady()
 
+      // Media selection groups only exist once the asset is loaded, so this is
+      // both where an audio pick made earlier gets replayed and where the
+      // available audio renditions are first published.
+      applyAudioTrackSelectionIfReady()
+
       if playerItem.isPlaybackLikelyToKeepUp
         && !playerItem.isPlaybackBufferEmpty
       {
@@ -198,6 +236,9 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
 
   func onMediaSelectionChanged() {
     emitSelectedTextTrackIfChanged()
+    // Deduped like the other emission points, so this only fires when the snapshot
+    // really changed, e.g. once an automatic selection has actually been applied.
+    refreshAudioTracksIfChanged()
   }
 
   func onTimedMetadataChanged(timedMetadata: [AVMetadataItem]) {

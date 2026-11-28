@@ -140,7 +140,8 @@ describe('flaky tag detection', () => {
     // Quarantine is a deliberate, reviewed state (CONTEXT.md, zero-retries rule): a flow
     // joins this list together with the issue that tracks it, and leaves it when the tag
     // is dropped. e2e/CI_MATRIX_DESIGN.md counts the quarantine legs these produce.
-    const QUARANTINED = { 'smoke-status-order.yaml': '#5155' };
+    // Empty since smoke-status-order.yaml left quarantine with the fix for #5155.
+    const QUARANTINED = {};
     expect(detectFlakyFlows(FLOWS_DIR)).toEqual(Object.keys(QUARANTINED));
     for (const [flow, issue] of Object.entries(QUARANTINED)) {
       expect(readFileSync(join(FLOWS_DIR, flow), 'utf8')).toContain(issue);

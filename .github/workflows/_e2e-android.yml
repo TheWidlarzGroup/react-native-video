@@ -132,15 +132,21 @@ jobs:
         working-directory: test-app/android
         run: |
           set -euo pipefail
-          for attempt in 1 2; do
+          # Maven Central answers a burst of requests with 429 and keeps doing so for
+          # longer than half a minute: on bf43ee15 two attempts 30 s apart both failed on
+          # the same gson POM, before Gradle compiled anything. Three attempts, waiting
+          # 60 s and then 180 s, only when the log shows a transport status.
+          WAITS=(60 180)
+          for attempt in 1 2 3; do
             if ./gradlew assembleDebug --build-cache --no-daemon -PreactNativeArchitectures=x86_64 2>&1 | tee "gradle-attempt-${attempt}.log"; then
               exit 0
             fi
-            if [ "$attempt" -eq 2 ] || ! grep -qE 'Received status code (403|429|5[0-9]{2}) from server' "gradle-attempt-${attempt}.log"; then
+            if [ "$attempt" -eq 3 ] || ! grep -qE 'Received status code (403|429|5[0-9]{2}) from server' "gradle-attempt-${attempt}.log"; then
               exit 1
             fi
-            echo "dependency download failed (attempt ${attempt}/2), retrying in 30 s" >&2
-            sleep 30
+            WAIT=${WAITS[$((attempt - 1))]}
+            echo "dependency download failed (attempt ${attempt}/3), retrying in ${WAIT} s" >&2
+            sleep "$WAIT"
           done
           exit 1
 
@@ -166,7 +172,14 @@ jobs:
       # ANR dialog covering the app after the resume, and Maestro treats everything
       # under a system dialog as invisible. A cold boot costs about two minutes and has
       # not produced one.
+      # A boot that never comes up fails this step before the first flow (27.11: "could
+      # not connect to TCP port 5554" 27 s in, 1 of the 19 failed maestro jobs that night).
+      # android-run-flows.sh leaves a marker as its first action, so a failure without it
+      # is a failed boot, and only then the emulator is booted once more. A failure with
+      # the marker is the flows' result and stands: flows are never run twice.
       - name: Run flows on emulator
+        id: emu
+        continue-on-error: true
         uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
         env:
           # Passed through the environment so a tags value cannot break out of the
@@ -179,37 +192,44 @@ jobs:
           force-avd-creation: false
           disable-animations: true
           emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
-          # The action runs EVERY LINE of this script as its own `/usr/bin/sh -c`, and
-          # stops at the first line that exits non-zero. So: one command per line, no
-          # backslash continuations (the continuation would become a separate command
-          # and `\` the flow path), and no `set -e`, which would only apply to its own
-          # line.
-          #
-          # hide_error_dialogs suppresses app crash/ANR dialogs. System-process ANRs
-          # (the launcher, "Quickstep isn't responding") are not covered by it and have
-          # shown up right after a cold boot on a busy runner, with the dialog then
-          # covering every flow; scripts/e2e/android-settle.sh waits for the guest load
-          # to drop and dismisses any such dialog before Maestro starts. (Do not wait
-          # for init.svc.bootanim == stopped: with -no-boot-anim that service never
-          # runs.)
-          # The emulator dies with this step, so the post-mortem (a screenshot and the
-          # accessibility hierarchy of the app's default screen, i.e. what Maestro
-          # matches `id:` against) has to happen here, after Maestro, before the final
-          # line turns a Maestro failure back into a step failure.
-          script: |
-            adb shell settings put global hide_error_dialogs 1
-            adb install -r test-app/android/app/build/outputs/apk/debug/app-debug.apk
-            bash scripts/e2e/android-settle.sh 120
-            adb logcat -c
-            adb logcat > logcat.txt &
-            maestro test -e APP_ID=${{ env.APP_ID }} $TAGS --format junit --output e2e-report.xml --debug-output "$PWD/maestro-debug" --flatten-debug-output e2e/flows/ || touch maestro-failed
-            mkdir -p post-mortem
-            adb shell am start -W -n ${{ env.APP_ID }}/com.microsoft.reacttestapp.MainActivity > post-mortem/am-start.txt 2>&1 || true
-            sleep 6
-            adb exec-out screencap -p > post-mortem/default-screen.png || true
-            adb shell uiautomator dump /sdcard/hierarchy.xml > /dev/null 2>&1 && adb pull /sdcard/hierarchy.xml post-mortem/hierarchy.xml || true
-            adb shell dumpsys activity activities > post-mortem/activities.txt 2>&1 || true
-            test ! -f maestro-failed
+          # One line: the action runs every line of `script` as its own `/usr/bin/sh -c`.
+          # The script (settle, Maestro, post-mortem) is explained in its header.
+          script: bash scripts/e2e/android-run-flows.sh
+
+      - name: Did the emulator boot?
+        id: booted
+        if: steps.emu.outcome == 'failure'
+        run: |
+          if [ -f "$RUNNER_TEMP/emulator-booted" ]; then
+            echo "booted=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "booted=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::the emulator did not boot; booting it once more (flows are never run twice)"
+          fi
+
+      - name: Run flows on emulator (second boot)
+        if: steps.emu.outcome == 'failure' && steps.booted.outputs.booted == 'false'
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
+        env:
+          # Passed through the environment so a tags value cannot break out of the
+          # command line via `${{ }}` text substitution.
+          TAGS: ${{ inputs.tags }}
+        with:
+          api-level: ${{ inputs.api-level }}
+          arch: x86_64
+          profile: pixel_6
+          force-avd-creation: false
+          disable-animations: true
+          emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          # One line: the action runs every line of `script` as its own `/usr/bin/sh -c`.
+          # The script (settle, Maestro, post-mortem) is explained in its header.
+          script: bash scripts/e2e/android-run-flows.sh
+
+      - name: Fail the leg when its flows failed
+        if: steps.emu.outcome == 'failure' && steps.booted.outputs.booted == 'true'
+        run: |
+          echo "::error::flows failed on the emulator (see the job summary and the artifacts)" >&2
+          exit 1
 
       - name: Job summary
         if: always()

@@ -84,6 +84,9 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       }), let previousSource else { throw CancellationError() }
       let context = LoadContext(source: newSource, token: token)
       releaseAssetIfNotUsedByCurrentLoad(for: previousSource)
+      // The next onAudioTrackChange describes the new source. Without this, a source with the
+      // same audio tracks (the next episode, say) has the same signature and gets no event.
+      lastEmittedAudioTrackSignature = nil
       return context
     }
   }
@@ -233,20 +236,30 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
 
   var currentTime: Double {
     set {
-      _eventEmitter?.onSeek(newValue)
+      // Time is counted from `cropStart` when the source is cropped, and a seek past
+      // `cropEnd` stops at `cropEnd`, as on Android.
+      var target = max(0, newValue)
+      if let item = player.currentItem, item.forwardPlaybackEndTime.isNumeric {
+        let croppedDuration = item.croppedDuration
+        if croppedDuration.isFinite {
+          target = min(target, croppedDuration)
+        }
+      }
+      _eventEmitter?.onSeek(target)
+      let cropStart = player.currentItem?.cropStartSeconds ?? 0
       player.seek(
-        to: CMTime(seconds: newValue, preferredTimescale: 1000),
+        to: CMTime(seconds: target + cropStart, preferredTimescale: 1000),
         toleranceBefore: .zero,
         toleranceAfter: .zero
       )
     }
     get {
-      player.currentTime().seconds
+      player.currentItem?.croppedCurrentTime ?? player.currentTime().seconds
     }
   }
 
   var duration: Double {
-    Double(player.currentItem?.duration.seconds ?? Double.nan)
+    player.currentItem?.croppedDuration ?? Double.nan
   }
 
   var rate: Double {
@@ -289,7 +302,33 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
 
   var playWhenInactive: Bool = false
 
+  // iOS default: 500 ms, as before this option existed. Android uses 250 ms.
+  var progressUpdateInterval: Double = VideoPlayerObserver.defaultProgressUpdateInterval {
+    didSet {
+      guard progressUpdateInterval.isFinite, progressUpdateInterval > 0 else {
+        progressUpdateInterval = oldValue
+        return
+      }
+      playerObserver?.progressUpdateInterval = progressUpdateInterval
+    }
+  }
+
   var disableAudioSessionManagement: Bool = false {
+    didSet {
+      VideoManager.shared.requestAudioSessionUpdate()
+    }
+  }
+
+  var allowsExternalPlayback: Bool {
+    get {
+      return player.allowsExternalPlayback
+    }
+    set {
+      player.allowsExternalPlayback = newValue
+    }
+  }
+
+  var audioOutput: AudioOutput = .speaker {
     didSet {
       VideoManager.shared.requestAudioSessionUpdate()
     }
@@ -341,6 +380,23 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   private var hasPinnedVideoQuality = false
 
   private var videoQualityRecheckWorkItem: DispatchWorkItem?
+
+  // MARK: - Audio track selection state
+  //
+  // Main-thread-only. Alternate audio renditions are a real AVFoundation media
+  // selection group, exactly like text tracks, so a pick is an exact switch
+  // rather than a hint to an ABR algorithm. There is nothing to approximate,
+  // hence no requested/active split and no recheck timer.
+
+  /// The id the user asked for through `selectAudioTrack`, or nil for
+  /// automatic. Kept only because a call can legitimately arrive before the
+  /// asset's media selection groups exist (nothing to select in yet), in which
+  /// case it is replayed from the `.readyToPlay` hook.
+  private var requestedAudioTrackId: String?
+
+  /// Dedupe key for `onAudioTrackChange`. The emission points below fire more
+  /// often than the track set actually changes.
+  private var lastEmittedAudioTrackSignature: String?
 
   var isCurrentlyBuffering: Bool = false
 
@@ -415,6 +471,9 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     activeVideoTrackId = nil
     requestedVideoTrackId = nil
     hasPinnedVideoQuality = false
+
+    requestedAudioTrackId = nil
+    lastEmittedAudioTrackSignature = nil
 
     playerObserver?.invalidatePlayerItemObservers()
     playerObserver?.invalidatePlayerObservers()
@@ -512,13 +571,11 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       throw PlayerError.notInitialized.error()
     }
 
-    let currentItemTime = currentItem.currentTime()
-
     // Duration is NaN for live streams
     let fixedDurration = duration.isNaN ? Double.infinity : duration
 
     // Clap by <0, duration>
-    let newTime = max(0, min(currentItemTime.seconds + time, fixedDurration))
+    let newTime = max(0, min(currentItem.croppedCurrentTime + time, fixedDurration))
 
     currentTime = newTime
   }
@@ -642,6 +699,20 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       playerItem = AVPlayerItem(asset: asset)
     }
     try ensureCurrentLoad(context)
+
+    playerItem.setCrop(start: source.config.cropStart, end: source.config.cropEnd)
+
+    // Seeking an item that has no player yet sets where its playback starts.
+    // `startPosition` counts from `cropStart`.
+    let startSeconds = playerItem.cropStartSeconds + max(0, source.config.startPosition ?? 0) / 1000
+    if startSeconds > 0 {
+      playerItem.seek(
+        to: CMTime(seconds: startSeconds, preferredTimescale: 1000),
+        toleranceBefore: .zero,
+        toleranceAfter: .zero,
+        completionHandler: nil
+      )
+    }
 
     if let metadata = source.config.metadata {
       let title = metadata.title
@@ -1126,6 +1197,204 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       activeVideoTrackId = match.id
       emitVideoTrackChange()
     }
+  }
+
+  // MARK: - Audio Track Management
+  //
+  // The text-track code above is the template, not a rough guide: alternate
+  // audio renditions live in exactly the same construct (an
+  // `AVMediaSelectionGroup`), differing only in media characteristic
+  // (`.audible` instead of `.legible`). `AVPlayerItem.select(_:in:)` switches
+  // the rendition outright and takes effect on the next few sample buffers -
+  // this is a real selection, not a preference the player may ignore.
+
+  func getAvailableAudioTracks() throws -> [AudioTrack] {
+    runOnMainThreadSync { audioTracksSnapshot() }
+  }
+
+  var selectedAudioTrackId: String? {
+    // Deliberately the item's *actual* current selection rather than the
+    // latched request: the selection is exact, so there is a real answer to
+    // report, and under automatic selection AVFoundation still picks a concrete
+    // option (system language / accessibility settings) that callers want to
+    // see reflected in their menu.
+    runOnMainThreadSync { currentAudioTrackId() ?? requestedAudioTrackId }
+  }
+
+  func selectAudioTrack(trackId: String?) throws {
+    runOnMainThreadSync {
+      requestedAudioTrackId = trackId
+      // Takes effect immediately when the asset's media selection groups are
+      // already loaded, which is the normal case; otherwise it is replayed by
+      // `applyAudioTrackSelectionIfReady()` from the `.readyToPlay` hook in
+      // HybridVideoPlayer+Events.swift.
+      applyAudioTrackSelection()
+      emitAudioTrackChange(force: true)
+    }
+  }
+
+  /// The committed content item and its audible selection group, or nil when
+  /// either does not exist yet.
+  ///
+  /// Prefers the library's own committed item over `player.currentItem`, so the
+  /// selection always targets the item this player loaded for the current
+  /// source rather than whatever the `AVPlayer` happens to be holding.
+  /// Main thread only.
+  private func audioSelectionContext() -> (item: AVPlayerItem, group: AVMediaSelectionGroup)? {
+    guard let item = playerItem ?? player.currentItem else { return nil }
+    guard
+      let group = item.asset.mediaSelectionGroup(forMediaCharacteristic: .audible)
+    else { return nil }
+    return (item, group)
+  }
+
+  /// Positional, like the video-track ids and for the same reason: nothing on
+  /// `AVMediaSelectionOption` is both stable and unique (two English options -
+  /// stereo and 5.1, or original and described - share a display name and a
+  /// language tag). The index disambiguates; the rest keeps the id readable and
+  /// lets a stale id from another source be recognised as unresolvable.
+  private func audioTrackId(for option: AVMediaSelectionOption, at index: Int) -> String {
+    let language = option.extendedLanguageTag ?? option.locale?.identifier ?? "unknown"
+    return "audio-\(index)-\(option.displayName)-\(language)"
+  }
+
+  /// Main thread only.
+  private func audioTracksSnapshot() -> [AudioTrack] {
+    guard let (item, group) = audioSelectionContext() else { return [] }
+
+    let selectedOption = item.currentMediaSelection.selectedMediaOption(in: group)
+
+    return group.options.enumerated().map { index, option in
+      AudioTrack(
+        id: audioTrackId(for: option, at: index),
+        label: option.displayName,
+        language: option.extendedLanguageTag ?? option.locale?.identifier,
+        selected: option == selectedOption,
+        channels: audioChannelCount(for: option, selectedOption: selectedOption, in: item)
+      )
+    }
+  }
+
+  /// Best effort, and deliberately only for the option actually being rendered.
+  ///
+  /// `AVMediaSelectionOption` carries no channel count of its own - for HLS the
+  /// `CHANNELS` attribute of `#EXT-X-MEDIA` is not surfaced by AVFoundation at
+  /// all - so the only public source is the format description of the audio
+  /// track the player has loaded, which by definition describes the *selected*
+  /// option. Reporting that same count against the other options would be a
+  /// guess, so they get nil (the field is optional for exactly this reason).
+  /// Main thread only.
+  private func audioChannelCount(
+    for option: AVMediaSelectionOption,
+    selectedOption: AVMediaSelectionOption?,
+    in item: AVPlayerItem
+  ) -> Double? {
+    guard option == selectedOption else { return nil }
+
+    let audioTracks = item.tracks
+      .compactMap { $0.assetTrack }
+      .filter { $0.mediaType == .audio }
+    guard audioTracks.count == 1 else { return nil }
+
+    for case let formatDescription as CMFormatDescription in audioTracks[0].formatDescriptions {
+      guard
+        let asbd = CMAudioFormatDescriptionGetStreamBasicDescription(formatDescription)
+      else { continue }
+      let channels = asbd.pointee.mChannelsPerFrame
+      if channels > 0 { return Double(channels) }
+    }
+
+    return nil
+  }
+
+  /// Main thread only.
+  private func currentAudioTrackId() -> String? {
+    guard let (item, group) = audioSelectionContext() else { return nil }
+    guard
+      let selectedOption = item.currentMediaSelection.selectedMediaOption(in: group),
+      let index = group.options.firstIndex(of: selectedOption)
+    else { return nil }
+    return audioTrackId(for: selectedOption, at: index)
+  }
+
+  /// Writes `requestedAudioTrackId` onto the committed content item.
+  ///
+  /// Returns false only when media selection *is* available and the request
+  /// names no option in it - i.e. the id belongs to a different source.
+  /// Main thread only.
+  @discardableResult
+  private func applyAudioTrackSelection() -> Bool {
+    guard let (item, group) = audioSelectionContext() else { return true }
+
+    guard let requestedAudioTrackId else {
+      // Automatic. Deliberately *not* `select(nil, in: group)`: for an audible
+      // group that means "no audio at all", and it is silently ignored unless
+      // the group sets `allowsEmptySelection` (audible groups generally do
+      // not). `selectMediaOptionAutomatically` is the real "back to default"
+      // call - it hands the choice back to AVFoundation's media selection
+      // criteria (system language, accessibility preferences).
+      item.selectMediaOptionAutomatically(in: group)
+      return true
+    }
+
+    for (index, option) in group.options.enumerated()
+    where audioTrackId(for: option, at: index) == requestedAudioTrackId {
+      item.select(option, in: group)
+      return true
+    }
+
+    return false
+  }
+
+  /// Hook for the `.readyToPlay` transition: media selection groups do not
+  /// exist before the asset is loaded, so a selection made earlier - or carried
+  /// over from the previous source - has to be written again here, and this is
+  /// also where the available set is first published.
+  func applyAudioTrackSelectionIfReady() {
+    runOnMainThreadSync {
+      if !applyAudioTrackSelection() {
+        // The group is known and has no such option: the id named a rendition
+        // of a different source. Drop it rather than keep reporting a selection
+        // that cannot be honoured.
+        requestedAudioTrackId = nil
+        applyAudioTrackSelection()
+      }
+      emitAudioTrackChange()
+    }
+  }
+
+  /// Main thread only. `force` is for an explicit `selectAudioTrack` call,
+  /// which must always be acknowledged even if it changed nothing.
+  private func emitAudioTrackChange(force: Bool = false) {
+    let tracks = audioTracksSnapshot()
+    let selectedTrackId = currentAudioTrackId() ?? requestedAudioTrackId
+
+    let signature =
+      tracks
+      .map { track -> String in
+        let channels: String = track.channels.map { "\($0)" } ?? "-"
+        return "\(track.id)|\(track.selected)|\(channels)"
+      }
+      .joined(separator: ",") + "#" + (selectedTrackId ?? "-")
+
+    guard force || signature != lastEmittedAudioTrackSignature else { return }
+    lastEmittedAudioTrackSignature = signature
+
+    _eventEmitter?.onAudioTrackChange(
+      AudioTrackChangeData(
+        availableTracks: tracks,
+        selectedTrackId: selectedTrackId
+      )
+    )
+  }
+
+  /// Second, deduped emission point. At `.readyToPlay` the asset's media
+  /// selection groups exist but `AVPlayerItem.tracks` is often still empty, so
+  /// the first snapshot has no channel count. Re-checking once playback is
+  /// actually able to proceed fills it in, and the signature check makes the
+  /// call free when nothing changed.
+  func refreshAudioTracksIfChanged() {
+    runOnMainThreadSync { emitAudioTrackChange() }
   }
 
   // MARK: - Memory Management

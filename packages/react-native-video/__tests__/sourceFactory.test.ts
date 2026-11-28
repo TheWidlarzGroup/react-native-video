@@ -57,6 +57,22 @@ test('initializeOnCreation defaults to true and an explicit false is kept', () =
   expect(lastConfig().initializeOnCreation).toBe(false);
 });
 
+test('startPosition reaches native unchanged, in milliseconds', () => {
+  createSource({ uri: 'https://x/a.mp4', startPosition: 5000 });
+  expect(lastConfig().startPosition).toBe(5000);
+  createSource({ uri: 'https://x/a.mp4' });
+  expect(lastConfig().startPosition).toBeUndefined();
+});
+
+test('cropStart and cropEnd reach native unchanged, in milliseconds', () => {
+  createSource({ uri: 'https://x/a.mp4', cropStart: 2000, cropEnd: 5000 });
+  expect(lastConfig().cropStart).toBe(2000);
+  expect(lastConfig().cropEnd).toBe(5000);
+  createSource({ uri: 'https://x/a.mp4' });
+  expect(lastConfig().cropStart).toBeUndefined();
+  expect(lastConfig().cropEnd).toBeUndefined();
+});
+
 test('shouldCache is passed through and stays unset by default', () => {
   createSource({ uri: 'https://x/a.mp4' });
   expect(lastConfig().shouldCache).toBeUndefined();
