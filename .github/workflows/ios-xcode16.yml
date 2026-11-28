@@ -77,7 +77,7 @@ jobs:
           set -euo pipefail
           if [ ! -d "$XCODE_APP" ]; then
             echo "::error::${XCODE_APP} is not on this runner image" >&2
-            ls /Applications | grep -i xcode >&2
+            printf 'available: %s\n' /Applications/Xcode*.app >&2
             exit 1
           fi
           sudo xcode-select -s "$XCODE_APP"
