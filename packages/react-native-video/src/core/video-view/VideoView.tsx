@@ -6,6 +6,7 @@ import type {
   VideoViewViewManager,
   VideoViewViewManagerFactory,
 } from '../../spec/nitro/VideoViewViewManager.nitro';
+import { resolveControlsStyles } from '../types/ControlsStyles';
 import { type VideoViewEvents } from '../types/Events';
 import {
   tryParseNativeVideoError,
@@ -51,6 +52,7 @@ const updateProps = (manager: VideoViewViewManager, props: VideoViewProps) => {
   manager.resizeMode = props.resizeMode ?? 'none';
   manager.keepScreenAwake = props.keepScreenAwake ?? true;
   manager.surfaceType = props.surfaceType ?? 'surface';
+  manager.controlsStyles = resolveControlsStyles(props.controlsStyles);
 };
 
 // Android reports "ready to display" once per source, whichever view draws the first

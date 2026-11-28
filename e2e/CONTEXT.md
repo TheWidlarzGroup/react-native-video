@@ -58,7 +58,10 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
   other one is `e2e/shared/press.yaml`, which re-sends a tap only when the app never
   rendered the `pressed-<testID>-<n>` marker: it is set synchronously in `onPress`, so it
   proves delivery and nothing else, and a missing marker is a plain assertion failure,
-  which Maestro's `retry` does catch. What the app then shows is never retried.
+  which Maestro's `retry` does catch. What the app then shows is never retried. The
+  Android emulator's boot is the third: when it never comes up, `_e2e-android.yml` boots
+  it once more; a leg whose emulator booted keeps its flows' result, whatever it is
+  (`scripts/e2e/android-run-flows.sh` marks the boot before anything else).
 - **Android: Maestro's first driver connection can die at start-up** (nightly 2026-09-22,
   RN 0.87 / API 36: `DeviceServerDiedException ... UNAVAILABLE` on the first flow's first
   command, 3 s after the driver came up; the other nine flows passed). No mitigation yet.

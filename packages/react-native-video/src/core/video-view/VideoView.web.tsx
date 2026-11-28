@@ -106,6 +106,7 @@ const VideoView = forwardRef<VideoViewRef, VideoViewProps>(
       renderLoader,
       shutterColor,
       hideShutterView,
+      controlsStyles: _controlsStyles,
       ...props
     },
     ref

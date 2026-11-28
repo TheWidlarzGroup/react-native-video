@@ -76,6 +76,7 @@ Extends RN `ViewProps`, plus:
 | `renderLoader` | `ReactNode \| (props) => ReactNode` | — | Custom view instead of the poster while loading. |
 | `shutterColor` | `ColorValue` | — | Color covering the video area until the first frame, under the poster or loader. |
 | `hideShutterView` | `boolean` | `false` | Turns `shutterColor` off. |
+| `controlsStyles` | `ControlsStyles` | - | Android only: hide single native controls (`hideSeekBar`, `hideForward`, `hideFullscreen`, ...) and pick the system bars hidden in fullscreen |
 
 For a placeholder use `poster` (or `renderLoader` for a custom view); it hides on `onReadyToDisplay` and returns when a new source starts loading. Don't overlay your own `<Image>`. For audio-only sources the poster stays visible. See `pip-fullscreen-controls.md` for the imperative ref (`enterFullscreen`, `enterPictureInPicture`, …) and `events.md` for view events.
 
