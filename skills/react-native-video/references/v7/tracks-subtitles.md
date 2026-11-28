@@ -31,14 +31,36 @@ useVideoPlayer({
 
 > iOS supports only `.vtt` external subtitles. Embedded tracks (in the HLS/DASH manifest) work via `getAvailableTextTracks()` on both platforms.
 
-## Audio / video track selection
+## Video quality (track) selection
 
-Audio/video **track selection** is a **web** capability (experimental — Safari-leaning). On native, the player handles **text** track selection (above). Cast to `WebVideoPlayer` for `getAvailableAudioTracks()/selectAudioTrack()` and `getAvailableVideoTracks()/selectVideoTrack()`:
+Real selection on native (Android/iOS) — pin a specific HLS rendition, or go back to automatic adaptive selection:
 
 ```tsx
-import type { WebVideoPlayer } from 'react-native-video';
-const web = player as WebVideoPlayer;
-web.selectVideoTrack(web.getAvailableVideoTracks()[0]);
+const tracks = player.getAvailableVideoTracks(); // VideoTrack[]
+player.selectVideoTrack(tracks[0].id);           // or call with no argument for automatic
+const requestedId = player.selectedVideoTrackId; // what was requested
 ```
 
-The `AudioTrack` / `VideoTrack` types (`{ id, label, language?, selected }`) are exported for use with these web APIs.
+`VideoTrack = { id, label, language?, selected, width?, height?, bitrate? }`.
+
+React to changes via `onVideoTrackChange` → `{ availableTracks, selectedTrackId?, activeTrackId? }` (see `events.md`).
+
+**Platforms enforce a pin differently**: Android is a hard track-selection override (selected == active, always). iOS has no rendition-selection API, so a pin is enforced as a resolution/bitrate cap — the player may still adapt within or below the cap, and `activeTrackId` (not `selectedVideoTrackId`) is what reports the rendition actually rendering.
+
+## Audio track selection
+
+Real, exact selection on native (Android/iOS), not an approximation — the same mechanism as text tracks, just for alternate audio renditions (dubs, commentary, described video):
+
+```tsx
+const tracks = player.getAvailableAudioTracks(); // AudioTrack[]
+player.selectAudioTrack(tracks[0].id);           // or call with no argument for the default track
+const currentId = player.selectedAudioTrackId;   // the active track's id (the default track when none was picked); undefined only before tracks are known
+```
+
+`AudioTrack = { id, label, language?, selected, channels? }` — `channels` is only ever populated for the track actually being rendered.
+
+React to changes via `onAudioTrackChange` → `{ availableTracks: AudioTrack[], selectedTrackId?: string }` (see `events.md`).
+
+There's no separate "requested vs. actually playing" split: the selection *is* what plays on both platforms.
+
+Track ids are only valid for the source they came from (on iOS they are positional): don't reuse an id an app saved earlier on a different source; re-resolve it from `getAvailableAudioTracks()` by `language`/`label`.

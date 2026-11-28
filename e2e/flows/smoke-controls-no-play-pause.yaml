@@ -1,0 +1,29 @@
+# controlsStyles.hidePlayPause (#5272, Android only): once the clip has ended Media3 shows
+# its controller; the position label must be on screen (proof the controller is shown)
+# and the play/pause button must not. The ids are checked by smoke-controls-default.
+# iOS ignores controlsStyles and only plays the clip.
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4-controls-no-play-pause
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 20000            # generous: emulator software decoder cold start
+- runFlow: ../shared/wait-for-end.yaml
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: ".*exo_position"
+          timeout: 10000
+      - assertNotVisible:
+          id: ".*exo_play_pause"
+- assertNotVisible:
+    id: "evt-onError"

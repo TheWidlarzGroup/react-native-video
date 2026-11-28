@@ -1,0 +1,26 @@
+# Status order on a plain load-and-play: idle before the load, then loading, then the
+# first readyToPlay (evt-ready-after-loading is set only when the first readyToPlay was
+# reported after loading). Ported from #4743 ("Status").
+#
+# Was quarantined for #5155: on iOS the timeControlStatus observer sometimes never
+# fired, so readyToPlay never came although the clip played to its end.
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 20000
+- assertVisible:
+    id: "evt-initial-idle"
+- extendedWaitUntil:
+    visible:
+      id: "evt-ready-after-loading"
+    timeout: 10000            # iOS: readyToPlay follows onLoad once the buffer allows playback
+- assertNotVisible:
+    id: "evt-onError"

@@ -8,10 +8,18 @@
 #pragma once
 
 // Forward declarations of C++ defined types
+// Forward declaration of `AudioTrackChangeData` to properly resolve imports.
+namespace margelo::nitro::video { struct AudioTrackChangeData; }
+// Forward declaration of `AudioTrack` to properly resolve imports.
+namespace margelo::nitro::video { struct AudioTrack; }
 // Forward declaration of `BandwidthData` to properly resolve imports.
 namespace margelo::nitro::video { struct BandwidthData; }
 // Forward declaration of `BufferConfig` to properly resolve imports.
 namespace margelo::nitro::video { struct BufferConfig; }
+// Forward declaration of `BufferingStrategy` to properly resolve imports.
+namespace margelo::nitro::video { enum class BufferingStrategy; }
+// Forward declaration of `CmcdMode` to properly resolve imports.
+namespace margelo::nitro::video { enum class CmcdMode; }
 // Forward declaration of `CustomVideoMetadata` to properly resolve imports.
 namespace margelo::nitro::video { struct CustomVideoMetadata; }
 // Forward declaration of `HybridVideoPlayerEventEmitterSpec` to properly resolve imports.
@@ -32,6 +40,8 @@ namespace margelo::nitro::video { class HybridVideoViewViewManagerSpec; }
 namespace margelo::nitro::video { struct ListenerSubscription; }
 // Forward declaration of `LivePlaybackParams` to properly resolve imports.
 namespace margelo::nitro::video { struct LivePlaybackParams; }
+// Forward declaration of `NativeCmcdConfiguration` to properly resolve imports.
+namespace margelo::nitro::video { struct NativeCmcdConfiguration; }
 // Forward declaration of `NativeDrmParams` to properly resolve imports.
 namespace margelo::nitro::video { struct NativeDrmParams; }
 // Forward declaration of `NativeExternalSubtitle` to properly resolve imports.
@@ -56,6 +66,10 @@ namespace margelo::nitro::video { struct VideoInformation; }
 namespace margelo::nitro::video { enum class VideoOrientation; }
 // Forward declaration of `VideoPlayerStatus` to properly resolve imports.
 namespace margelo::nitro::video { enum class VideoPlayerStatus; }
+// Forward declaration of `VideoTrackChangeData` to properly resolve imports.
+namespace margelo::nitro::video { struct VideoTrackChangeData; }
+// Forward declaration of `VideoTrack` to properly resolve imports.
+namespace margelo::nitro::video { struct VideoTrack; }
 // Forward declaration of `onLoadData` to properly resolve imports.
 namespace margelo::nitro::video { struct onLoadData; }
 // Forward declaration of `onLoadStartData` to properly resolve imports.
@@ -84,8 +98,12 @@ namespace ReactNativeVideo { class HybridVideoViewViewManagerFactorySpec_cxx; }
 namespace ReactNativeVideo { class HybridVideoViewViewManagerSpec_cxx; }
 
 // Include C++ defined types
+#include "AudioTrack.hpp"
+#include "AudioTrackChangeData.hpp"
 #include "BandwidthData.hpp"
 #include "BufferConfig.hpp"
+#include "BufferingStrategy.hpp"
+#include "CmcdMode.hpp"
 #include "CustomVideoMetadata.hpp"
 #include "HybridVideoPlayerEventEmitterSpec.hpp"
 #include "HybridVideoPlayerFactorySpec.hpp"
@@ -96,6 +114,7 @@ namespace ReactNativeVideo { class HybridVideoViewViewManagerSpec_cxx; }
 #include "HybridVideoViewViewManagerSpec.hpp"
 #include "ListenerSubscription.hpp"
 #include "LivePlaybackParams.hpp"
+#include "NativeCmcdConfiguration.hpp"
 #include "NativeDrmParams.hpp"
 #include "NativeExternalSubtitle.hpp"
 #include "OnGetLicensePayload.hpp"
@@ -108,6 +127,8 @@ namespace ReactNativeVideo { class HybridVideoViewViewManagerSpec_cxx; }
 #include "VideoInformation.hpp"
 #include "VideoOrientation.hpp"
 #include "VideoPlayerStatus.hpp"
+#include "VideoTrack.hpp"
+#include "VideoTrackChangeData.hpp"
 #include "onLoadData.hpp"
 #include "onLoadStartData.hpp"
 #include "onPlaybackStateChangeData.hpp"
@@ -341,6 +362,43 @@ namespace margelo::nitro::video::bridge::swift {
     return optional.value();
   }
   
+  // pragma MARK: std::optional<double>
+  /**
+   * Specialized version of `std::optional<double>`.
+   */
+  using std__optional_double_ = std::optional<double>;
+  inline std::optional<double> create_std__optional_double_(const double& value) noexcept {
+    return std::optional<double>(value);
+  }
+  inline bool has_value_std__optional_double_(const std::optional<double>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline double get_std__optional_double_(const std::optional<double>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::vector<VideoTrack>
+  /**
+   * Specialized version of `std::vector<VideoTrack>`.
+   */
+  using std__vector_VideoTrack_ = std::vector<VideoTrack>;
+  inline std::vector<VideoTrack> create_std__vector_VideoTrack_(size_t size) noexcept {
+    std::vector<VideoTrack> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::vector<AudioTrack>
+  /**
+   * Specialized version of `std::vector<AudioTrack>`.
+   */
+  using std__vector_AudioTrack_ = std::vector<AudioTrack>;
+  inline std::vector<AudioTrack> create_std__vector_AudioTrack_(size_t size) noexcept {
+    std::vector<AudioTrack> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
   // pragma MARK: std::shared_ptr<HybridVideoPlayerSpec>
   /**
    * Specialized version of `std::shared_ptr<HybridVideoPlayerSpec>`.
@@ -378,6 +436,24 @@ namespace margelo::nitro::video::bridge::swift {
   }
   inline Result_void_ create_Result_void_(const std::exception_ptr& error) noexcept {
     return Result<void>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::vector<VideoTrack>>
+  using Result_std__vector_VideoTrack__ = Result<std::vector<VideoTrack>>;
+  inline Result_std__vector_VideoTrack__ create_Result_std__vector_VideoTrack__(const std::vector<VideoTrack>& value) noexcept {
+    return Result<std::vector<VideoTrack>>::withValue(value);
+  }
+  inline Result_std__vector_VideoTrack__ create_Result_std__vector_VideoTrack__(const std::exception_ptr& error) noexcept {
+    return Result<std::vector<VideoTrack>>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::vector<AudioTrack>>
+  using Result_std__vector_AudioTrack__ = Result<std::vector<AudioTrack>>;
+  inline Result_std__vector_AudioTrack__ create_Result_std__vector_AudioTrack__(const std::vector<AudioTrack>& value) noexcept {
+    return Result<std::vector<AudioTrack>>::withValue(value);
+  }
+  inline Result_std__vector_AudioTrack__ create_Result_std__vector_AudioTrack__(const std::exception_ptr& error) noexcept {
+    return Result<std::vector<AudioTrack>>::withError(error);
   }
   
   // pragma MARK: std::shared_ptr<HybridVideoPlayerFactorySpec>
@@ -423,21 +499,6 @@ namespace margelo::nitro::video::bridge::swift {
     return Func_void_bool_Wrapper(std::move(value));
   }
   
-  // pragma MARK: std::optional<double>
-  /**
-   * Specialized version of `std::optional<double>`.
-   */
-  using std__optional_double_ = std::optional<double>;
-  inline std::optional<double> create_std__optional_double_(const double& value) noexcept {
-    return std::optional<double>(value);
-  }
-  inline bool has_value_std__optional_double_(const std::optional<double>& optional) noexcept {
-    return optional.has_value();
-  }
-  inline double get_std__optional_double_(const std::optional<double>& optional) noexcept {
-    return optional.value();
-  }
-  
   // pragma MARK: std::function<void(const BandwidthData& /* data */)>
   /**
    * Specialized version of `std::function<void(const BandwidthData&)>`.
@@ -458,6 +519,28 @@ namespace margelo::nitro::video::bridge::swift {
   Func_void_BandwidthData create_Func_void_BandwidthData(void* NON_NULL swiftClosureWrapper) noexcept;
   inline Func_void_BandwidthData_Wrapper wrap_Func_void_BandwidthData(Func_void_BandwidthData value) noexcept {
     return Func_void_BandwidthData_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::function<void(const std::string& /* error */)>
+  /**
+   * Specialized version of `std::function<void(const std::string&)>`.
+   */
+  using Func_void_std__string = std::function<void(const std::string& /* error */)>;
+  /**
+   * Wrapper class for a `std::function<void(const std::string& / * error * /)>`, this can be used from Swift.
+   */
+  class Func_void_std__string_Wrapper final {
+  public:
+    explicit Func_void_std__string_Wrapper(std::function<void(const std::string& /* error */)>&& func): _function(std::make_unique<std::function<void(const std::string& /* error */)>>(std::move(func))) {}
+    inline void call(std::string error) const noexcept {
+      _function->operator()(error);
+    }
+  private:
+    std::unique_ptr<std::function<void(const std::string& /* error */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_std__string create_Func_void_std__string(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_std__string_Wrapper wrap_Func_void_std__string(Func_void_std__string value) noexcept {
+    return Func_void_std__string_Wrapper(std::move(value));
   }
   
   // pragma MARK: std::function<void(const onLoadData& /* data */)>
@@ -680,6 +763,50 @@ namespace margelo::nitro::video::bridge::swift {
     return Func_void_std__optional_std__variant_nitro__NullType__TextTrack___Wrapper(std::move(value));
   }
   
+  // pragma MARK: std::function<void(const VideoTrackChangeData& /* data */)>
+  /**
+   * Specialized version of `std::function<void(const VideoTrackChangeData&)>`.
+   */
+  using Func_void_VideoTrackChangeData = std::function<void(const VideoTrackChangeData& /* data */)>;
+  /**
+   * Wrapper class for a `std::function<void(const VideoTrackChangeData& / * data * /)>`, this can be used from Swift.
+   */
+  class Func_void_VideoTrackChangeData_Wrapper final {
+  public:
+    explicit Func_void_VideoTrackChangeData_Wrapper(std::function<void(const VideoTrackChangeData& /* data */)>&& func): _function(std::make_unique<std::function<void(const VideoTrackChangeData& /* data */)>>(std::move(func))) {}
+    inline void call(VideoTrackChangeData data) const noexcept {
+      _function->operator()(data);
+    }
+  private:
+    std::unique_ptr<std::function<void(const VideoTrackChangeData& /* data */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_VideoTrackChangeData create_Func_void_VideoTrackChangeData(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_VideoTrackChangeData_Wrapper wrap_Func_void_VideoTrackChangeData(Func_void_VideoTrackChangeData value) noexcept {
+    return Func_void_VideoTrackChangeData_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::function<void(const AudioTrackChangeData& /* data */)>
+  /**
+   * Specialized version of `std::function<void(const AudioTrackChangeData&)>`.
+   */
+  using Func_void_AudioTrackChangeData = std::function<void(const AudioTrackChangeData& /* data */)>;
+  /**
+   * Wrapper class for a `std::function<void(const AudioTrackChangeData& / * data * /)>`, this can be used from Swift.
+   */
+  class Func_void_AudioTrackChangeData_Wrapper final {
+  public:
+    explicit Func_void_AudioTrackChangeData_Wrapper(std::function<void(const AudioTrackChangeData& /* data */)>&& func): _function(std::make_unique<std::function<void(const AudioTrackChangeData& /* data */)>>(std::move(func))) {}
+    inline void call(AudioTrackChangeData data) const noexcept {
+      _function->operator()(data);
+    }
+  private:
+    std::unique_ptr<std::function<void(const AudioTrackChangeData& /* data */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_AudioTrackChangeData create_Func_void_AudioTrackChangeData(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_AudioTrackChangeData_Wrapper wrap_Func_void_AudioTrackChangeData(Func_void_AudioTrackChangeData value) noexcept {
+    return Func_void_AudioTrackChangeData_Wrapper(std::move(value));
+  }
+  
   // pragma MARK: std::function<void(const onVolumeChangeData& /* data */)>
   /**
    * Specialized version of `std::function<void(const onVolumeChangeData&)>`.
@@ -804,28 +931,6 @@ namespace margelo::nitro::video::bridge::swift {
     return PromiseHolder<std::string>(std::move(promise));
   }
   
-  // pragma MARK: std::function<void(const std::string& /* result */)>
-  /**
-   * Specialized version of `std::function<void(const std::string&)>`.
-   */
-  using Func_void_std__string = std::function<void(const std::string& /* result */)>;
-  /**
-   * Wrapper class for a `std::function<void(const std::string& / * result * /)>`, this can be used from Swift.
-   */
-  class Func_void_std__string_Wrapper final {
-  public:
-    explicit Func_void_std__string_Wrapper(std::function<void(const std::string& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::string& /* result */)>>(std::move(func))) {}
-    inline void call(std::string result) const noexcept {
-      _function->operator()(result);
-    }
-  private:
-    std::unique_ptr<std::function<void(const std::string& /* result */)>> _function;
-  } SWIFT_NONCOPYABLE;
-  Func_void_std__string create_Func_void_std__string(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_std__string_Wrapper wrap_Func_void_std__string(Func_void_std__string value) noexcept {
-    return Func_void_std__string_Wrapper(std::move(value));
-  }
-  
   // pragma MARK: std::function<std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(const OnGetLicensePayload& /* payload */)>
   /**
    * Specialized version of `std::function<std::shared_ptr<Promise<std::shared_ptr<Promise<std::string>>>>(const OnGetLicensePayload&)>`.
@@ -913,6 +1018,36 @@ namespace margelo::nitro::video::bridge::swift {
     return optional.value();
   }
   
+  // pragma MARK: std::optional<std::vector<std::string>>
+  /**
+   * Specialized version of `std::optional<std::vector<std::string>>`.
+   */
+  using std__optional_std__vector_std__string__ = std::optional<std::vector<std::string>>;
+  inline std::optional<std::vector<std::string>> create_std__optional_std__vector_std__string__(const std::vector<std::string>& value) noexcept {
+    return std::optional<std::vector<std::string>>(value);
+  }
+  inline bool has_value_std__optional_std__vector_std__string__(const std::optional<std::vector<std::string>>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline std::vector<std::string> get_std__optional_std__vector_std__string__(const std::optional<std::vector<std::string>>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::optional<NativeCmcdConfiguration>
+  /**
+   * Specialized version of `std::optional<NativeCmcdConfiguration>`.
+   */
+  using std__optional_NativeCmcdConfiguration_ = std::optional<NativeCmcdConfiguration>;
+  inline std::optional<NativeCmcdConfiguration> create_std__optional_NativeCmcdConfiguration_(const NativeCmcdConfiguration& value) noexcept {
+    return std::optional<NativeCmcdConfiguration>(value);
+  }
+  inline bool has_value_std__optional_NativeCmcdConfiguration_(const std::optional<NativeCmcdConfiguration>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline NativeCmcdConfiguration get_std__optional_NativeCmcdConfiguration_(const std::optional<NativeCmcdConfiguration>& optional) noexcept {
+    return optional.value();
+  }
+  
   // pragma MARK: std::optional<LivePlaybackParams>
   /**
    * Specialized version of `std::optional<LivePlaybackParams>`.
@@ -925,6 +1060,21 @@ namespace margelo::nitro::video::bridge::swift {
     return optional.has_value();
   }
   inline LivePlaybackParams get_std__optional_LivePlaybackParams_(const std::optional<LivePlaybackParams>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::optional<BufferingStrategy>
+  /**
+   * Specialized version of `std::optional<BufferingStrategy>`.
+   */
+  using std__optional_BufferingStrategy_ = std::optional<BufferingStrategy>;
+  inline std::optional<BufferingStrategy> create_std__optional_BufferingStrategy_(const BufferingStrategy& value) noexcept {
+    return std::optional<BufferingStrategy>(value);
+  }
+  inline bool has_value_std__optional_BufferingStrategy_(const std::optional<BufferingStrategy>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline BufferingStrategy get_std__optional_BufferingStrategy_(const std::optional<BufferingStrategy>& optional) noexcept {
     return optional.value();
   }
   

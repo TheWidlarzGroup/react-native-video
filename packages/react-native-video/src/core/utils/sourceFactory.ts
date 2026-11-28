@@ -5,6 +5,7 @@ import type {
   VideoPlayerSourceFactory,
 } from '../../spec/nitro/VideoPlayerSource.nitro';
 import type {
+  CmcdData,
   ExternalSubtitle,
   NativeVideoConfig,
   SubtitleType,
@@ -55,38 +56,84 @@ export const createSourceFromVideoConfig = (
     throw new VideoRuntimeError('source/invalid-uri', 'Invalid source URI');
   }
 
-  if (config.externalSubtitles) {
-    config.externalSubtitles = parseExternalSubtitles(config.externalSubtitles);
+  // Never write defaults back into the caller's object: useVideoPlayer keys the player
+  // on JSON.stringify(source), so mutating a config the caller keeps around (a module
+  // constant, a useMemo/useState value) would change that key on the next render and
+  // destroy and recreate the player.
+  const { externalSubtitles, drm, cmcd, ...rest } = config;
+  const nativeConfig: NativeVideoConfig = {
+    ...rest,
+    // Set default value for initializeOnCreation (true)
+    initializeOnCreation: config.initializeOnCreation ?? true,
+  };
+
+  if (externalSubtitles) {
+    nativeConfig.externalSubtitles = parseExternalSubtitles(externalSubtitles);
   }
 
-  // Ensure platform-based default for DRM type if DRM is provided without a type
-  if (config.drm && config.drm.type === undefined) {
-    const defaultDrmType = Platform.select({
-      android: 'widevine',
-      ios: 'fairplay',
-      default: undefined,
-    });
-
-    if (defaultDrmType) {
-      config.drm = {
-        ...config.drm,
-        type: defaultDrmType,
-      };
-    }
+  const nativeCmcd = parseCmcd(cmcd);
+  if (nativeCmcd) {
+    nativeConfig.cmcd = nativeCmcd;
   }
 
-  // Set default value for initializeOnCreation (true)
-  if (config.initializeOnCreation === undefined) {
-    config.initializeOnCreation = true;
+  if (drm) {
+    // Ensure platform-based default for DRM type if DRM is provided without a type
+    const type =
+      drm.type ??
+      Platform.select({
+        android: 'widevine',
+        ios: 'fairplay',
+        default: undefined,
+      });
+    nativeConfig.drm = type ? { ...drm, type } : drm;
   }
 
   try {
-    return VideoPlayerSourceFactory.fromVideoConfig(
-      config as NativeVideoConfig
-    );
+    return VideoPlayerSourceFactory.fromVideoConfig(nativeConfig);
   } catch (error) {
     throw tryParseNativeVideoError(error);
   }
+};
+
+/**
+ * Turns the public `cmcd` option into what native expects: `true` means the standard keys
+ * as a query parameter, and custom keys are formatted as CMCD pairs here, because only JS
+ * knows whether a value was a string (quoted) or a number.
+ */
+const parseCmcd = (cmcd: VideoConfig['cmcd']): NativeVideoConfig['cmcd'] => {
+  if (!cmcd) {
+    return undefined;
+  }
+  if (cmcd === true) {
+    return { mode: 'query' };
+  }
+
+  const format = (data?: CmcdData) => {
+    const pairs = Object.entries(data ?? {})
+      // CMCD has no way to write NaN or Infinity, so a key with such a value is left out.
+      .filter(
+        ([, value]) => typeof value !== 'number' || Number.isFinite(value)
+      )
+      .map(([key, value]) =>
+        typeof value === 'number'
+          ? `${key}=${value}`
+          : `${key}="${String(value).replace(/(["\\])/g, '\\$1')}"`
+      );
+    return pairs.length > 0 ? pairs : undefined;
+  };
+
+  const native: NonNullable<NativeVideoConfig['cmcd']> = {
+    mode: cmcd.mode ?? 'query',
+  };
+  const request = format(cmcd.request);
+  const session = format(cmcd.session);
+  const object = format(cmcd.object);
+  const status = format(cmcd.status);
+  if (request) native.requestData = request;
+  if (session) native.sessionData = session;
+  if (object) native.objectData = object;
+  if (status) native.statusData = status;
+  return native;
 };
 
 /**

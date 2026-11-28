@@ -83,7 +83,10 @@ class NowPlayingInfoCenterManager {
         self.currentPlayer = nil
         self.findNewCurrentPlayer()
         if self.currentPlayer == nil {
-          self.updatePlaybackState()
+          // The info on the lock screen described the player that just went away, and no
+          // other registered player is playing, so it is ours to clear.
+          self.invalidateCommandTargets()
+          MPNowPlayingInfoCenter.default().nowPlayingInfo = [:]
         }
       }
     }
@@ -166,9 +169,13 @@ class NowPlayingInfoCenterManager {
         guard let self, let player = self.currentPlayer else {
           return .commandFailed
         }
-        let newTime =
+        // A cropped source must not be left through its start
+        let cropStart = CMTime(
+          seconds: player.currentItem?.cropStartSeconds ?? 0, preferredTimescale: 1000)
+        let newTime = CMTimeMaximum(
           player.currentTime()
-          - CMTime(seconds: self.SEEK_INTERVAL_SECONDS, preferredTimescale: .max)
+            - CMTime(seconds: self.SEEK_INTERVAL_SECONDS, preferredTimescale: .max),
+          cropStart)
         player.seek(to: newTime)
         return .success
       }
@@ -195,8 +202,10 @@ class NowPlayingInfoCenterManager {
                 let event = event as? MPChangePlaybackPositionCommandEvent else {
             return .commandFailed
           }
+          // The reported elapsed time counts from `cropStart` when the source is cropped
+          let cropStart = player.currentItem?.cropStartSeconds ?? 0
           player.seek(
-            to: CMTime(seconds: event.positionTime, preferredTimescale: .max)
+            to: CMTime(seconds: event.positionTime + cropStart, preferredTimescale: .max)
           )
           return .success
         }
@@ -222,16 +231,24 @@ class NowPlayingInfoCenterManager {
   }
 
   private func invalidateCommandTargets() {
-    remoteCommandCenter.playCommand.removeTarget(playTarget)
-    remoteCommandCenter.pauseCommand.removeTarget(pauseTarget)
-    remoteCommandCenter.skipForwardCommand.removeTarget(skipForwardTarget)
-    remoteCommandCenter.skipBackwardCommand.removeTarget(skipBackwardTarget)
-    remoteCommandCenter.changePlaybackPositionCommand.removeTarget(
-      playbackPositionTarget
-    )
-    remoteCommandCenter.togglePlayPauseCommand.removeTarget(
-      togglePlayPauseTarget
-    )
+    // removeTarget(nil) removes EVERY target of a command, including the app's own handlers,
+    // so only remove the targets this manager registered.
+    if let target = playTarget { remoteCommandCenter.playCommand.removeTarget(target) }
+    if let target = pauseTarget { remoteCommandCenter.pauseCommand.removeTarget(target) }
+    if let target = skipForwardTarget { remoteCommandCenter.skipForwardCommand.removeTarget(target) }
+    if let target = skipBackwardTarget { remoteCommandCenter.skipBackwardCommand.removeTarget(target) }
+    if let target = playbackPositionTarget {
+      remoteCommandCenter.changePlaybackPositionCommand.removeTarget(target)
+    }
+    if let target = togglePlayPauseTarget {
+      remoteCommandCenter.togglePlayPauseCommand.removeTarget(target)
+    }
+    playTarget = nil
+    pauseTarget = nil
+    skipForwardTarget = nil
+    skipBackwardTarget = nil
+    playbackPositionTarget = nil
+    togglePlayPauseTarget = nil
   }
 
   func updateStaticInfo(ifCurrentItem playerItem: AVPlayerItem) {
@@ -275,7 +292,7 @@ class NowPlayingInfoCenterManager {
     var info = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [:]
     info[MPMediaItemPropertyTitle] = title
     info[MPMediaItemPropertyArtist] = artist
-    info[MPMediaItemPropertyPlaybackDuration] = currentItem.duration.seconds
+    info[MPMediaItemPropertyPlaybackDuration] = currentItem.croppedDuration
     info[MPNowPlayingInfoPropertyIsLiveStream] = CMTIME_IS_INDEFINITE(currentItem.asset.duration)
     info[MPMediaItemPropertyArtwork] = nil // Clear artwork from previous item; will be loaded asynchronously below
     MPNowPlayingInfoCenter.default().nowPlayingInfo = info
@@ -303,18 +320,19 @@ class NowPlayingInfoCenterManager {
   func updatePlaybackState() {
     runOnMainThread { [weak self] in
       guard let self else { return }
+      // No player registered with notification controls: the command center and the
+      // now-playing info belong to the app, so leave them alone.
       guard let player = self.currentPlayer else {
         self.invalidateCommandTargets()
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = [:]
         return
       }
 
       guard let currentItem = player.currentItem else { return }
 
       var info = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [:]
-      info[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentItem.currentTime().seconds
+      info[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentItem.croppedCurrentTime
       info[MPNowPlayingInfoPropertyPlaybackRate] = player.rate
-      info[MPMediaItemPropertyPlaybackDuration] = currentItem.duration.seconds
+      info[MPMediaItemPropertyPlaybackDuration] = currentItem.croppedDuration
       MPNowPlayingInfoCenter.default().nowPlayingInfo = info
     }
   }

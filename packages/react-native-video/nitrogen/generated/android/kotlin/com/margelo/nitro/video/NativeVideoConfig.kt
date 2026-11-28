@@ -28,6 +28,9 @@ data class NativeVideoConfig(
   val drm: NativeDrmParams?,
   @DoNotStrip
   @Keep
+  val cmcd: NativeCmcdConfiguration?,
+  @DoNotStrip
+  @Keep
   val headers: Map<String, String>?,
   @DoNotStrip
   @Keep
@@ -37,7 +40,31 @@ data class NativeVideoConfig(
   val metadata: CustomVideoMetadata?,
   @DoNotStrip
   @Keep
-  val initializeOnCreation: Boolean?
+  val startPosition: Double?,
+  @DoNotStrip
+  @Keep
+  val cropStart: Double?,
+  @DoNotStrip
+  @Keep
+  val cropEnd: Double?,
+  @DoNotStrip
+  @Keep
+  val initializeOnCreation: Boolean?,
+  @DoNotStrip
+  @Keep
+  val shouldCache: Boolean?,
+  @DoNotStrip
+  @Keep
+  val minLoadRetryCount: Double?,
+  @DoNotStrip
+  @Keep
+  val disableDisconnectError: Boolean?,
+  @DoNotStrip
+  @Keep
+  val type: String?,
+  @DoNotStrip
+  @Keep
+  val textTracksAllowChunklessPreparation: Boolean?
 ) {
   /* primary constructor */
 
@@ -49,8 +76,8 @@ data class NativeVideoConfig(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(uri: String, externalSubtitles: Array<NativeExternalSubtitle>?, drm: NativeDrmParams?, headers: Map<String, String>?, bufferConfig: BufferConfig?, metadata: CustomVideoMetadata?, initializeOnCreation: Boolean?): NativeVideoConfig {
-      return NativeVideoConfig(uri, externalSubtitles, drm, headers, bufferConfig, metadata, initializeOnCreation)
+    private fun fromCpp(uri: String, externalSubtitles: Array<NativeExternalSubtitle>?, drm: NativeDrmParams?, cmcd: NativeCmcdConfiguration?, headers: Map<String, String>?, bufferConfig: BufferConfig?, metadata: CustomVideoMetadata?, startPosition: Double?, cropStart: Double?, cropEnd: Double?, initializeOnCreation: Boolean?, shouldCache: Boolean?, minLoadRetryCount: Double?, disableDisconnectError: Boolean?, type: String?, textTracksAllowChunklessPreparation: Boolean?): NativeVideoConfig {
+      return NativeVideoConfig(uri, externalSubtitles, drm, cmcd, headers, bufferConfig, metadata, startPosition, cropStart, cropEnd, initializeOnCreation, shouldCache, minLoadRetryCount, disableDisconnectError, type, textTracksAllowChunklessPreparation)
     }
   }
 }

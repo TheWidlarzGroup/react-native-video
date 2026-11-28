@@ -1,4 +1,5 @@
 import type {
+  AudioTrackChangeData,
   BandwidthData,
   onLoadData,
   onLoadStartData,
@@ -6,6 +7,7 @@ import type {
   onProgressData,
   onVolumeChangeData,
   TimedMetadata,
+  VideoTrackChangeData,
 } from './Events';
 import type { TextTrack } from './TextTrack';
 import type { VideoPlayerStatus } from './VideoPlayerStatus';
@@ -66,6 +68,12 @@ export interface VideoPlayerEventEmitterBase {
   ): ListenerSubscription;
   addOnTrackChangeListener(
     listener: (track: TextTrack | null) => void
+  ): ListenerSubscription;
+  addOnVideoTrackChangeListener(
+    listener: (data: VideoTrackChangeData) => void
+  ): ListenerSubscription;
+  addOnAudioTrackChangeListener(
+    listener: (data: AudioTrackChangeData) => void
   ): ListenerSubscription;
   addOnVolumeChangeListener(
     listener: (data: onVolumeChangeData) => void

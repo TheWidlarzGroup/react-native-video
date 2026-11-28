@@ -1,18 +1,32 @@
 import type { HybridObject } from 'react-native-nitro-modules';
 import type {
+  AudioTrackChangeData,
   BandwidthData,
   onLoadData,
-  onLoadStartData,
   onPlaybackStateChangeData,
   onProgressData,
   onVolumeChangeData,
+  SourceType,
   TimedMetadata,
+  VideoTrackChangeData,
 } from '../../core/types/Events';
 import type { TextTrack } from '../../core/types/TextTrack';
 import type { VideoPlayerStatus } from '../../core/types/VideoPlayerStatus';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type { VideoPlayerEvents } from '../../core/types/Events';
+
+import type { VideoPlayerSource } from './VideoPlayerSource.nitro';
+
+/**
+ * Native payload of `onLoadStart`. Same shape as the public `onLoadStartData`, but `source`
+ * is the hybrid `VideoPlayerSource`, which is what the native side passes. The public type
+ * declares `VideoPlayerSourceBase`, and nitrogen would generate a plain struct for it.
+ */
+export interface onLoadStartData {
+  sourceType: SourceType;
+  source: VideoPlayerSource;
+}
 
 export interface ListenerSubscription {
   remove(): void;
@@ -200,6 +214,26 @@ export interface VideoPlayerEventEmitter extends HybridObject<{
    */
   addOnTrackChangeListener(
     listener: (track: TextTrack | null) => void
+  ): ListenerSubscription;
+
+  /**
+   * Adds a listener for the `onVideoTrackChange` event.
+   * @see {@link VideoPlayerEvents.onVideoTrackChange}
+   * @param listener - The listener to add.
+   * @returns A subscription object that can be used to remove the listener.
+   */
+  addOnVideoTrackChangeListener(
+    listener: (data: VideoTrackChangeData) => void
+  ): ListenerSubscription;
+
+  /**
+   * Adds a listener for the `onAudioTrackChange` event.
+   * @see {@link VideoPlayerEvents.onAudioTrackChange}
+   * @param listener - The listener to add.
+   * @returns A subscription object that can be used to remove the listener.
+   */
+  addOnAudioTrackChangeListener(
+    listener: (data: AudioTrackChangeData) => void
   ): ListenerSubscription;
 
   /**

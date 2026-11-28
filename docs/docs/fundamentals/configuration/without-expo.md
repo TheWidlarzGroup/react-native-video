@@ -52,6 +52,30 @@ Add the `android:supportsPictureInPicture` flag to your *main* activity in **And
 
 PiP requires **API 26+** (Android 8.0). Make sure `minSdkVersion` is at least `26` when enabling this feature.
 
+### Register the playback service (background playback and notification controls)
+`playInBackground` and `showNotificationControls` run playback through a foreground service, `VideoPlaybackService`. The library's own manifest only declares `INTERNET`, so add the service and the two permissions it needs to your app's manifest. This is what the Expo plugin's `enableAndroidPlaybackService` option does.
+
+```xml title="android/app/src/main/AndroidManifest.xml"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+
+  <application>
+    <!-- other entries -->
+    <service
+      android:name="com.twg.video.core.services.playback.VideoPlaybackService"
+      android:exported="false"
+      android:foregroundServiceType="mediaPlayback">
+      <intent-filter>
+        <action android:name="androidx.media3.session.MediaSessionService" />
+      </intent-filter>
+    </service>
+  </application>
+</manifest>
+```
+
+Without these entries the lock screen and notification controls never appear, and background playback isn't kept alive. If your app targets Android 14 or newer, Google Play asks you to describe the media-playback foreground service in the Play Console. If your app uses neither feature, skip this section.
+
 ## Verification
 After the modifications:
 

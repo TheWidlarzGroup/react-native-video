@@ -18,6 +18,16 @@ export type ConfigProps = {
   enableBackgroundAudio?: boolean;
 
   /**
+   * Whether to register the Android playback service (`VideoPlaybackService`) and the
+   * `FOREGROUND_SERVICE` / `FOREGROUND_SERVICE_MEDIA_PLAYBACK` permissions it needs.
+   * The player starts this service when `playInBackground` or `showNotificationControls`
+   * is enabled at runtime. Set to `false` only if your app uses neither, e.g. to avoid the
+   * foreground service declaration in the Play Console.
+   * @default true
+   */
+  enableAndroidPlaybackService?: boolean;
+
+  /**
    * Android extensions for ExoPlayer - you can choose which extensions to include in order to reduce the size of the app.
    * @default { useExoplayerDash: true, useExoplayerHls: true }
    */

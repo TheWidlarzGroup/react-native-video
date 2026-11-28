@@ -18,7 +18,7 @@ public extension BufferConfig {
   /**
    * Create a new instance of `BufferConfig`.
    */
-  init(livePlayback: LivePlaybackParams?, minBufferMs: Double?, maxBufferMs: Double?, bufferForPlaybackMs: Double?, bufferForPlaybackAfterRebufferMs: Double?, backBufferDurationMs: Double?, preferredForwardBufferDurationMs: Double?, preferredPeakBitRate: Double?, preferredMaximumResolution: Resolution?, preferredPeakBitRateForExpensiveNetworks: Double?, preferredMaximumResolutionForExpensiveNetworks: Resolution?) {
+  init(livePlayback: LivePlaybackParams?, minBufferMs: Double?, maxBufferMs: Double?, bufferForPlaybackMs: Double?, bufferForPlaybackAfterRebufferMs: Double?, backBufferDurationMs: Double?, bufferingStrategy: BufferingStrategy?, maxHeapAllocationPercent: Double?, minBufferMemoryReservePercent: Double?, preferredForwardBufferDurationMs: Double?, preferredPeakBitRate: Double?, preferredMaximumResolution: Resolution?, preferredPeakBitRateForExpensiveNetworks: Double?, preferredMaximumResolutionForExpensiveNetworks: Resolution?, automaticallyWaitsToMinimizeStalling: Bool?) {
     self.init({ () -> bridge.std__optional_LivePlaybackParams_ in
       if let __unwrappedValue = livePlayback {
         return bridge.create_std__optional_LivePlaybackParams_(__unwrappedValue)
@@ -55,6 +55,24 @@ public extension BufferConfig {
       } else {
         return .init()
       }
+    }(), { () -> bridge.std__optional_BufferingStrategy_ in
+      if let __unwrappedValue = bufferingStrategy {
+        return bridge.create_std__optional_BufferingStrategy_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_double_ in
+      if let __unwrappedValue = maxHeapAllocationPercent {
+        return bridge.create_std__optional_double_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_double_ in
+      if let __unwrappedValue = minBufferMemoryReservePercent {
+        return bridge.create_std__optional_double_(__unwrappedValue)
+      } else {
+        return .init()
+      }
     }(), { () -> bridge.std__optional_double_ in
       if let __unwrappedValue = preferredForwardBufferDurationMs {
         return bridge.create_std__optional_double_(__unwrappedValue)
@@ -82,6 +100,12 @@ public extension BufferConfig {
     }(), { () -> bridge.std__optional_Resolution_ in
       if let __unwrappedValue = preferredMaximumResolutionForExpensiveNetworks {
         return bridge.create_std__optional_Resolution_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_bool_ in
+      if let __unwrappedValue = automaticallyWaitsToMinimizeStalling {
+        return bridge.create_std__optional_bool_(__unwrappedValue)
       } else {
         return .init()
       }
@@ -154,6 +178,35 @@ public extension BufferConfig {
   }
   
   @inline(__always)
+  var bufferingStrategy: BufferingStrategy? {
+    return self.__bufferingStrategy.value
+  }
+  
+  @inline(__always)
+  var maxHeapAllocationPercent: Double? {
+    return { () -> Double? in
+      if bridge.has_value_std__optional_double_(self.__maxHeapAllocationPercent) {
+        let __unwrapped = bridge.get_std__optional_double_(self.__maxHeapAllocationPercent)
+        return __unwrapped
+      } else {
+        return nil
+      }
+    }()
+  }
+  
+  @inline(__always)
+  var minBufferMemoryReservePercent: Double? {
+    return { () -> Double? in
+      if bridge.has_value_std__optional_double_(self.__minBufferMemoryReservePercent) {
+        let __unwrapped = bridge.get_std__optional_double_(self.__minBufferMemoryReservePercent)
+        return __unwrapped
+      } else {
+        return nil
+      }
+    }()
+  }
+  
+  @inline(__always)
   var preferredForwardBufferDurationMs: Double? {
     return { () -> Double? in
       if bridge.has_value_std__optional_double_(self.__preferredForwardBufferDurationMs) {
@@ -197,5 +250,17 @@ public extension BufferConfig {
   @inline(__always)
   var preferredMaximumResolutionForExpensiveNetworks: Resolution? {
     return self.__preferredMaximumResolutionForExpensiveNetworks.value
+  }
+  
+  @inline(__always)
+  var automaticallyWaitsToMinimizeStalling: Bool? {
+    return { () -> Bool? in
+      if bridge.has_value_std__optional_bool_(self.__automaticallyWaitsToMinimizeStalling) {
+        let __unwrapped = bridge.get_std__optional_bool_(self.__automaticallyWaitsToMinimizeStalling)
+        return __unwrapped
+      } else {
+        return nil
+      }
+    }()
   }
 }

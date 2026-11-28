@@ -66,7 +66,7 @@ The plugin accepts an optional configuration object with the following propertie
 
 -   **Type:** `boolean`
 -   **Default:** `false`
--   **Description:** Enables audio playback to continue when the app is in the background on Android. Ensure you have also configured the necessary background modes capabilities in your app if required by the operating system.
+-   **Description:** Adds the `audio` background mode to `UIBackgroundModes` in `Info.plist`, which iOS requires for audio to keep playing while the app is in the background. Android needs no project configuration for this: set `playInBackground` on the player, which uses the playback service the plugin always registers (see below).
 
 ### `androidExtensions` (optional)
 
@@ -76,11 +76,35 @@ The plugin accepts an optional configuration object with the following propertie
     -   `useExoplayerDash` (boolean, default: `true`): Whether to include ExoPlayer's Dash extension.
     -   `useExoplayerHls` (boolean, default: `true`): Whether to include ExoPlayer's HLS extension.
 
+### `enableAndroidPlaybackService` (optional)
+
+-   **Type:** `boolean`
+-   **Default:** `true`
+-   **Description:** Registers the Android playback service and the foreground service permissions it needs (see below). The player starts this service when `playInBackground` or `showNotificationControls` is enabled at runtime, so leave this on unless your app uses neither. Setting it to `false` keeps the two permissions out of your manifest, which also spares you the foreground service declaration in the Play Console.
+
 ### `reactNativeTestApp` (optional)
 
 -   **Type:** `boolean`
 -   **Default:** `false`
 -   **Description:** Whether to use `react-native-test-app` compatible mode.
+
+## What the plugin changes
+
+### Android, unless `enableAndroidPlaybackService` is `false`
+
+-   Registers `com.twg.video.core.services.playback.VideoPlaybackService` (a Media3 `MediaSessionService` with `android:foregroundServiceType="mediaPlayback"`) in `AndroidManifest.xml`.
+-   Adds the `android.permission.FOREGROUND_SERVICE` and `android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK` permissions.
+
+The player starts this service at runtime when `playInBackground` or `showNotificationControls` is enabled, and neither is known at prebuild time, so the service and its permissions are added by default. If your app declares a foreground service type and targets Android 14 or newer, Google Play asks you to describe its use in the Play Console; an app that uses neither feature can opt out with `enableAndroidPlaybackService: false`.
+
+### Android, per option
+
+-   `enableAndroidPictureInPicture`: sets `android:supportsPictureInPicture="true"` on `.MainActivity`.
+-   `androidExtensions`: writes `RNVideo_useExoplayerDash` and `RNVideo_useExoplayerHls` to `gradle.properties`. A key you leave out keeps its default (`true`).
+
+### iOS
+
+-   `enableBackgroundAudio`: adds `audio` to `UIBackgroundModes` in `Info.plist` (and removes it when set to `false`).
 
 ## Usage
 
