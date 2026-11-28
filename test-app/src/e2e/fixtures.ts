@@ -70,6 +70,7 @@ export const SCENARIO_SOURCES: Record<ScenarioName, VideoConfig> = {
   'mp4-controls': fixture('short.mp4'),
   'mp4-controls-styles': fixture('short.mp4'),
   'mp4-controls-no-play-pause': fixture('short.mp4'),
+  'mp4-fullscreen-cycle': fixture('short.mp4'),
   'hls': fixture('hls/index.m3u8'), // ~8 s VOD, 2 s segments
   'hls-type': { ...fixture('hls-noext/stream'), type: 'm3u8' },
   'error-404': fixture('does-not-exist.mp4'),

@@ -39,6 +39,10 @@ export const MARKER_IDS = [
   // same state up to seven times at start. A repeated false is not counted: Android reports
   // the ready state and then the end of the clip with false.
   'evt-onBuffer-true-repeated',
+  // onBuffer(false) twice in a row. Not asserted by a flow yet: Android still reports the
+  // ready state and the end of the clip with false. The marker is here so the same flow can
+  // assert it once Android reports changes only.
+  'evt-onBuffer-false-repeated',
   // VideoView's renderLoader (#5264): the loader mounted, and later unmounted because the
   // video was ready to display (smoke-loader.yaml).
   'evt-loader-shown',
@@ -67,6 +71,8 @@ export const MARKER_IDS = [
   'evt-audio-alt-selected', // onAudioTrackChange reports the Spanish track selected (2 tracks listed)
   'evt-audio-default-restored', // ...then the English (default) track selected again
   'evt-audio-tracks-after-replace', // onAudioTrackChange lists both tracks after replaceSourceAsync() was requested (#5291)
+  'evt-audio-focus-lost', // onAudioFocusChange(false): a ringing call took the audio focus (smoke-audio-focus)
+  'evt-audio-focus-regained', // ...then onAudioFocusChange(true) once the call has ended
   // An unassisted loop restart: see LOOP_VERIFIED_END_COUNT and the wrap-around rule in
   // handle('onProgress') — AVPlayer reports each loop as onEnd, ExoPlayer wraps silently,
   // so both are covered (see smoke-loop.yaml).
@@ -92,6 +98,8 @@ export const MARKER_IDS = [
   // VideoView ref calls made from JS (smoke-fullscreen-rotate): onFullscreenChange(true/false).
   'evt-fullscreen-entered',
   'evt-fullscreen-exited',
+  'evt-fullscreen-reentered', // onFullscreenChange(true) again, after an exit was reported
+  'evt-fullscreen-exited-again', // ...and onFullscreenChange(false) after that second entry
   'evt-fullscreen-call-failed', // enterFullscreen()/exitFullscreen() threw (#5152)
   // fullscreenOrientation="landscape" with fullscreenAutorotate={false} (#5286), from the
   // window size while fullscreen is shown and after it closed:
@@ -119,6 +127,7 @@ export type PlayerEvent =
   | { type: 'onSeek'; seekTime: number }
   | { type: 'onVolumeChange'; muted: boolean; volume: number }
   | { type: 'onPlaybackRateChange'; rate: number }
+  | { type: 'onAudioFocusChange'; hasAudioFocus: boolean }
   // VideoView's onFullscreenChange (a view event, not a player event).
   | { type: 'onFullscreenChange'; fullscreen: boolean }
   // The renderLoader element mounted (shown) or unmounted (hidden) inside VideoView. `at`
@@ -423,6 +432,14 @@ function apply(event: PlayerEvent) {
       return;
 
     case 'onFullscreenChange':
+      // A second round is only counted in order: entered, exited, entered, exited. A view
+      // that never reports the first exit can therefore never report a re-entry.
+      if (event.fullscreen && state.markers.has('evt-fullscreen-exited')) {
+        mark('evt-fullscreen-reentered');
+      }
+      if (!event.fullscreen && state.markers.has('evt-fullscreen-reentered')) {
+        mark('evt-fullscreen-exited-again');
+      }
       mark(
         event.fullscreen ? 'evt-fullscreen-entered' : 'evt-fullscreen-exited'
       );
@@ -529,6 +546,8 @@ function apply(event: PlayerEvent) {
       if (event.buffering) {
         mark('evt-onBuffer');
         if (state.lastBuffering === true) mark('evt-onBuffer-true-repeated');
+      } else if (state.lastBuffering === false) {
+        mark('evt-onBuffer-false-repeated');
       }
       state.lastBuffering = event.buffering;
       append(`onBuffer ${event.buffering}`);
@@ -557,6 +576,16 @@ function apply(event: PlayerEvent) {
       if (event.rate === 2) mark('evt-rate-2x');
       if (event.rate === 0.5) mark('evt-rate-0-5x');
       append(`onPlaybackRateChange ${event.rate}`);
+      return;
+
+    case 'onAudioFocusChange':
+      // Regained only counts after a loss: the focus a player takes on play sends no event.
+      if (!event.hasAudioFocus) {
+        mark('evt-audio-focus-lost');
+      } else if (state.markers.has('evt-audio-focus-lost')) {
+        mark('evt-audio-focus-regained');
+      }
+      append(`onAudioFocusChange ${event.hasAudioFocus}`);
       return;
 
     case 'initialStatus':

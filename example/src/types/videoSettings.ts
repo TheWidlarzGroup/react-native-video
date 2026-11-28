@@ -8,6 +8,7 @@ import type {
   VideoConfig,
   VideoPosterResizeMode,
   VideoViewProps,
+  SubtitleStyle,
 } from 'react-native-video';
 
 export type BufferingStrategy = NonNullable<
@@ -65,6 +66,7 @@ export interface VideoSettings {
   shutterColor: string | null;
   hideShutterView: boolean;
   source: SourceOptions;
+  subtitleStyle: SubtitleStyle;
 }
 
 export const defaultSourceOptions: SourceOptions = {
@@ -107,4 +109,5 @@ export const defaultSettings: VideoSettings = {
   shutterColor: null,
   hideShutterView: false,
   source: defaultSourceOptions,
+  subtitleStyle: {},
 };

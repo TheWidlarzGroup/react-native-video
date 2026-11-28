@@ -5,9 +5,11 @@
 ## 1. Install
 
 ```sh
-npm install react-native-video @react-native-video/drm react-native-nitro-modules
+npm install react-native-video@beta @react-native-video/drm@beta react-native-nitro-modules
 cd ios && pod install
 ```
+
+Both with the `@beta` tag: `latest` of `react-native-video` is still v6, and `latest` of the plugin still points to an old beta (7.0.0-beta.7) that does not build with the Nitro Modules version v7 needs.
 
 Autolinks on both platforms (Expo: prebuild only — not Expo Go).
 

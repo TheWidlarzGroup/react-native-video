@@ -23,6 +23,8 @@ namespace margelo::nitro::video { enum class SurfaceType; }
 namespace margelo::nitro::video { struct NativeControlsStyles; }
 // Forward declaration of `FullscreenOrientation` to properly resolve imports.
 namespace margelo::nitro::video { enum class FullscreenOrientation; }
+// Forward declaration of `SubtitleStyle` to properly resolve imports.
+namespace margelo::nitro::video { struct SubtitleStyle; }
 // Forward declaration of `ListenerSubscription` to properly resolve imports.
 namespace margelo::nitro::video { struct ListenerSubscription; }
 
@@ -33,6 +35,7 @@ namespace margelo::nitro::video { struct ListenerSubscription; }
 #include "SurfaceType.hpp"
 #include "NativeControlsStyles.hpp"
 #include "FullscreenOrientation.hpp"
+#include "SubtitleStyle.hpp"
 #include "ListenerSubscription.hpp"
 #include <functional>
 
@@ -83,6 +86,8 @@ namespace margelo::nitro::video {
       virtual void setFullscreenOrientation(FullscreenOrientation fullscreenOrientation) = 0;
       virtual bool getFullscreenAutorotate() = 0;
       virtual void setFullscreenAutorotate(bool fullscreenAutorotate) = 0;
+      virtual SubtitleStyle getSubtitleStyle() = 0;
+      virtual void setSubtitleStyle(const SubtitleStyle& subtitleStyle) = 0;
 
     public:
       // Methods

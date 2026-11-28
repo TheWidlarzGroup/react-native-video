@@ -25,7 +25,7 @@ Our agent skill knows the v6→v7 mapping. Install it with `npx skills add TheWi
 
 ### Before you start
 
-*   Read [Not in v7 yet](#not-in-v7-yet) first. Subtitle styling is in an open pull request. Start position and trimming, caching, the loading and buffering options, the poster props, `controlsStyles`, the fullscreen orientation props, audio output and secure output, and `progressUpdateInterval` come with the release after `7.0.0-beta.15`. Ads and TV platforms are planned after v7 stable. A few v6 props are removed for good. v6 is still maintained, so you can stay on it until the feature you need lands.
+*   Read [Not in v7 yet](#not-in-v7-yet) first. Subtitle styling, start position and trimming, caching, the loading and buffering options, the poster props, `controlsStyles`, the fullscreen orientation props, audio output and secure output, and `progressUpdateInterval` come with the release after `7.0.0-beta.15`. Ads and TV platforms are planned after v7 stable. A few v6 props are removed for good. v6 is still maintained, so you can stay on it until the feature you need lands.
 *   v7 needs React Native 0.75 or newer and iOS 15 or newer. See [Installation](./fundamentals/installation.md) for all requirements.
 *   Time values keep the units of v6. Positions and lengths are in seconds: `player.currentTime`, `player.duration`, `seekTo()`, `seekBy()`, and the times in `onProgress`, `onLoad` and `onSeek`. Options are in milliseconds: `bufferConfig`, and `startPosition`, `cropStart` and `cropEnd`, from the release after `7.0.0-beta.15`. The one exception is `preferredForwardBufferDuration`, which was in seconds in v6 and is `bufferConfig.preferredForwardBufferDurationMs` in v7.
 
@@ -182,6 +182,7 @@ The first argument of `useVideoPlayer` is a URL, a `require()` asset or a config
 | `fullscreenOrientation`, `fullscreenAutorotate` | Same names | From the release after `7.0.0-beta.15`, on iOS and Android. v6 had them on iOS only. |
 | `poster`, `posterResizeMode`, `renderLoader`, `shutterColor`, `hideShutterView` | Same names | From the release after `7.0.0-beta.15`, on all platforms. With one of them set when the view mounts, `style` goes to a wrapper view. See [Poster, loader and shutter](./video-view/props.md#poster-loader-and-shutter). |
 | `controlsStyles` | `controlsStyles` | Android. From the release after `7.0.0-beta.15`. See [Android: Customizing the controls](./video-view/props.md#android-customizing-the-controls). |
+| `subtitleStyle` | `subtitleStyle` | From the release after `7.0.0-beta.15`. Same name, different shape: `fontScale`, `foregroundColor`, `backgroundColor`, `windowColor`, `edgeType`, `edgeColor` and `bottomPadding`. The v6 keys (`fontSize`, `paddingTop`, `paddingBottom`, `paddingLeft`, `paddingRight`, `opacity`, `subtitlesFollowVideo`) are not accepted. See [Subtitle styling](./player/subtitle-styling.md). |
 
 `pictureInPicture` is new. It shows the Picture-in-Picture button in the native controls.
 
@@ -216,7 +217,7 @@ useEvent(player, 'onError', (error) => console.error(error.code, error.message))
 | `onAudioTracks` | `onAudioTrackChange` | `{ audioTracks }` is now `{ availableTracks, selectedTrackId }`. It also fires when the selected track changes. |
 | `onTextTracks` | None | Read the list with `player.getAvailableTextTracks()`. The new `onTrackChange` event reports the selected text track. |
 | `onAudioBecomingNoisy` | `onAudioBecomingNoisy` | Android only in v7. |
-| `onAudioFocusChanged` | `onAudioFocusChange` | `{ hasAudioFocus }` is now a `boolean`. Android. Not emitted yet: the type exists, but the event does not fire. |
+| `onAudioFocusChanged` | `onAudioFocusChange` | `{ hasAudioFocus }` is now a `boolean`. Up to `7.0.0-beta.15` it never fires; from the release after it, on Android when the focus is lost and comes back, and also on iOS, for an audio session interruption. |
 | `onExternalPlaybackChange` | `onExternalPlaybackChange` | `{ isExternalPlaybackActive }` is now a `boolean`. iOS. |
 
 :::info onProgress in v7
@@ -318,14 +319,6 @@ Without Expo, the v6 Podfile flags `$RNVideoUseGoogleIMA` and `$RNVideoUseVideoC
 ### Not in v7 yet
 
 This is the state after `7.0.0-beta.15`, with what comes in the release after `7.0.0-beta.15`. v7 runs on iOS, Android and web.
-
-#### In open pull requests
-
-This v6 feature is in an open pull request and is planned before v7 stable:
-
-| Feature | v6 API | v7 API | Pull request |
-| :--- | :--- | :--- | :--- |
-| Subtitle styling | `subtitleStyle` | `subtitleStyle` on `VideoView` | [#5149](https://github.com/TheWidlarzGroup/react-native-video/pull/5149) |
 
 #### Being worked on
 

@@ -453,6 +453,24 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   /// or stops and not every time the playback state is re-evaluated.
   var lastReportedBuffering: Bool?
 
+  // Set while redrawPausedTextCue() moves the paused position, so that step is not reported as buffering
+  var isRedrawingTextCue = false
+
+  // A style change alone only reaches the next cue: moving the paused position by 1/90000 s
+  // redraws the one on screen. Re-selecting the track does it too, but hides the cue on HLS.
+  func redrawPausedTextCue() {
+    guard let currentItem = player.currentItem, player.rate == 0 else { return }
+    let step = CMTime(value: 1, timescale: 90000)
+    var target = CMTimeAdd(currentItem.currentTime(), step)
+    if currentItem.duration.isNumeric && target > currentItem.duration {
+      target = CMTimeSubtract(currentItem.currentTime(), step)
+    }
+    isRedrawingTextCue = true
+    player.seek(to: target, toleranceBefore: .zero, toleranceAfter: .zero) { [weak self] _ in
+      DispatchQueue.main.async { self?.isRedrawingTextCue = false }
+    }
+  }
+
   var isPlaying: Bool {
     return player.rate != 0
   }

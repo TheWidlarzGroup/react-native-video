@@ -225,6 +225,27 @@ class HybridVideoViewViewManager: HybridVideoViewViewManagerSpec {
     hideNavigationBarOnFullScreenMode: true,
     hideNotificationBarOnFullScreenMode: true
   )
+
+  var subtitleStyle: SubtitleStyle {
+    get {
+      guard let view else {
+        print(DEALOCATED_WARNING)
+        return SubtitleStyle(
+          fontScale: nil, foregroundColor: nil, backgroundColor: nil, windowColor: nil, edgeType: nil, edgeColor: nil, bottomPadding: nil
+        )
+      }
+
+      return view.subtitleStyle
+    }
+    set {
+      guard let view else {
+        print(DEALOCATED_WARNING)
+        return
+      }
+
+      view.subtitleStyle = newValue
+    }
+  }
   
   func enterFullscreen() throws {
     guard let view else {

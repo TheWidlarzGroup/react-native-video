@@ -16,6 +16,7 @@ import type { ListenerSubscription } from '../types/EventEmitter';
 import type { VideoViewEvents } from '../types/Events';
 import type { FullscreenOrientation } from '../types/FullscreenOrientation';
 import type { ResizeMode } from '../types/ResizeMode';
+import type { SubtitleStyle } from '../types/SubtitleStyle';
 import type { VideoPlayerBase } from '../types/VideoPlayerBase';
 
 /**
@@ -153,6 +154,12 @@ export interface VideoViewProps
    * @platform ios, android
    */
   fullscreenAutorotate?: boolean;
+
+  /**
+   * Styling applied to the currently selected subtitle/caption track.
+   * See {@link SubtitleStyle} for the available fields and their platform support.
+   */
+  subtitleStyle?: SubtitleStyle;
 }
 
 export interface VideoViewRef {

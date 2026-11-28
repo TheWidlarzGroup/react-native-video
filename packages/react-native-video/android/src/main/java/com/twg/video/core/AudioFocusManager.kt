@@ -25,6 +25,14 @@ class AudioFocusManager() {
   private var currentMixAudioMode: MixAudioMode? = null
   private var audioFocusRequest: AudioFocusRequest? = null
   private var isEarpieceModeActive = false
+  // Paused because another app took the focus for a moment (a ringing call). The request stays
+  // in the system's focus stack until that app is done, so AUDIOFOCUS_GAIN arrives and the app
+  // hears onAudioFocusChange(true). Giving the focus up on that pause, as on any other pause,
+  // would take the player off the stack and the system would never say that the focus is back.
+  private var isWaitingForFocusGain = false
+  // Players told onAudioFocusChange(false) and not yet (true). Only they hear that the focus is
+  // back, and none of them hears false twice (a loss for good after a loss for a moment).
+  private val playersWithoutFocus = mutableSetOf<HybridVideoPlayer>()
 
   val appContext by lazy {
     NitroModules.applicationContext ?: throw UnknownError()
@@ -39,8 +47,19 @@ class AudioFocusManager() {
       when (focusChange) {
         AudioManager.AUDIOFOCUS_GAIN -> {
           unDuckActivePlayers()
+          // After a duck the focus was never reported as lost, so it is not reported as back.
+          if (isWaitingForFocusGain) {
+            isWaitingForFocusGain = false
+            emitAudioFocusBack()
+          }
+          // Players paused by the loss stay paused (no auto-resume): the focus goes, as on any
+          // pause. Players that play on (after a duck) keep it.
+          requestAudioFocusUpdate()
         }
         AudioManager.AUDIOFOCUS_LOSS -> {
+          // Lost for good: no AUDIOFOCUS_GAIN follows, so the request leaves the stack on pause.
+          isWaitingForFocusGain = false
+          emitAudioFocusLost()
           pauseActivePlayers()
           currentMixAudioMode = null
           audioFocusRequest = null
@@ -48,11 +67,12 @@ class AudioFocusManager() {
         AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
           val mixAudioMode = determineRequiredMixMode()
           if (mixAudioMode != MixAudioMode.MIXWITHOTHERS) {
+            emitAudioFocusLost()
+            isWaitingForFocusGain = true
             pauseActivePlayers()
-            currentMixAudioMode = null
-            audioFocusRequest = null
           }
         }
+        // Ducking keeps the focus at a lower volume, so it sends no onAudioFocusChange, as in v6.
         AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
           val mixAudioMode = determineRequiredMixMode()
           when (mixAudioMode) {
@@ -62,6 +82,28 @@ class AudioFocusManager() {
         }
       }
     }
+  }
+
+  /**
+   * Sends onAudioFocusChange(false) to the players that take part in audio focus, that is every
+   * player but those with 'mixWithOthers', as v6 sent onAudioFocusChanged when another app took
+   * the focus, for good or for a moment. A player that already heard it hears nothing.
+   */
+  @MainThread
+  private fun emitAudioFocusLost() {
+    players
+      .filter { player -> player.mixAudioMode != MixAudioMode.MIXWITHOTHERS }
+      .filter { player -> playersWithoutFocus.add(player) }
+      .forEach { player -> player.eventEmitter.onAudioFocusChange(false) }
+  }
+
+  /** Sends onAudioFocusChange(true) to the players that heard false, when the focus is back. */
+  @MainThread
+  private fun emitAudioFocusBack() {
+    playersWithoutFocus
+      .filter { player -> players.contains(player) }
+      .forEach { player -> player.eventEmitter.onAudioFocusChange(true) }
+    playersWithoutFocus.clear()
   }
 
   fun registerPlayer(player: HybridVideoPlayer) = Threading.runOnMainThread {
@@ -76,6 +118,7 @@ class AudioFocusManager() {
 
   fun unregisterPlayer(player: HybridVideoPlayer) = Threading.runOnMainThread {
     players.remove(player)
+    playersWithoutFocus.remove(player)
     requestAudioOutputUpdate()
     if (players.isEmpty()) {
       abandonAudioFocus()
@@ -113,7 +156,16 @@ class AudioFocusManager() {
     val requiredMixMode = determineRequiredMixMode()
 
     if (requiredMixMode == null) {
-      abandonAudioFocus()
+      if (!isWaitingForFocusGain) {
+        abandonAudioFocus()
+      }
+      return@runOnMainThread
+    }
+
+    if (isWaitingForFocusGain) {
+      // Asked to play before the other app is done: ask again, as after any loss.
+      isWaitingForFocusGain = false
+      requestAudioFocus(requiredMixMode)
       return@runOnMainThread
     }
 
@@ -184,6 +236,9 @@ class AudioFocusManager() {
 
     if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
       currentMixAudioMode = mixMode
+      // Asked anew and granted (play after a loss): a later loss is news again. No true here,
+      // as in v6: the app started playback itself.
+      playersWithoutFocus.clear()
     } else {
       currentMixAudioMode = null
       // Pause players since audio focus couldn't be obtained
@@ -221,6 +276,7 @@ class AudioFocusManager() {
 
   @MainThread
   private fun abandonAudioFocus() {
+    isWaitingForFocusGain = false
     if (currentMixAudioMode != null) {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         abandonAudioFocusNew()

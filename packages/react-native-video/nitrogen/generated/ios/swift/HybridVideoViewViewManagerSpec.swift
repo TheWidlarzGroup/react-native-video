@@ -20,6 +20,7 @@ public protocol HybridVideoViewViewManagerSpec_protocol: HybridObject {
   var controlsStyles: NativeControlsStyles { get set }
   var fullscreenOrientation: FullscreenOrientation { get set }
   var fullscreenAutorotate: Bool { get set }
+  var subtitleStyle: SubtitleStyle { get set }
 
   // Methods
   func enterFullscreen() throws -> Void

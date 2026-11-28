@@ -222,6 +222,22 @@ describe('handle', () => {
     expect(markers()).toContain('evt-onLoad-repeated');
   });
 
+  test('onBuffer(false) twice in a row marks evt-onBuffer-false-repeated', () => {
+    feed(
+      { type: 'onBuffer', buffering: true },
+      { type: 'onBuffer', buffering: false }
+    );
+    expect(markers()).not.toContain('evt-onBuffer-false-repeated');
+    feed({ type: 'onBuffer', buffering: false });
+    expect(markers()).toContain('evt-onBuffer-false-repeated');
+    expect(markers()).not.toContain('evt-onBuffer-true-repeated');
+  });
+
+  test('the first onBuffer(false) is not a repeat', () => {
+    feed({ type: 'onBuffer', buffering: false });
+    expect(markers()).not.toContain('evt-onBuffer-false-repeated');
+  });
+
   test('onProgress marks progress past the threshold, exclusive', () => {
     feed({ type: 'onProgress', currentTime: PROGRESS_MARKER_SECONDS });
     expect(markers()).toEqual(['evt-onProgress']);
@@ -842,6 +858,30 @@ describe('fullscreen', () => {
     ]);
   });
 
+  test('a second round is counted only in order: entered, exited, entered, exited', () => {
+    feed(
+      { type: 'onFullscreenChange', fullscreen: true },
+      { type: 'onFullscreenChange', fullscreen: false }
+    );
+    expect(markers()).not.toContain('evt-fullscreen-reentered');
+    feed({ type: 'onFullscreenChange', fullscreen: true });
+    expect(markers()).toContain('evt-fullscreen-reentered');
+    expect(markers()).not.toContain('evt-fullscreen-exited-again');
+    feed({ type: 'onFullscreenChange', fullscreen: false });
+    expect(markers()).toContain('evt-fullscreen-exited-again');
+  });
+
+  test('entries without a reported exit between them are not a re-entry', () => {
+    feed(
+      { type: 'onFullscreenChange', fullscreen: true },
+      { type: 'onFullscreenChange', fullscreen: true }
+    );
+    expect(markers()).toEqual(['evt-fullscreen-entered']);
+    // An exit that follows is the first one, not the second.
+    feed({ type: 'onFullscreenChange', fullscreen: false });
+    expect(markers()).not.toContain('evt-fullscreen-exited-again');
+  });
+
   test('a ref call that threw marks evt-fullscreen-call-failed and logs the message', () => {
     feed({
       type: 'fullscreenCallFailed',
@@ -1017,6 +1057,25 @@ describe('crop', () => {
       { type: 'onProgress', currentTime: 100 }
     );
     expect(markers()).not.toContain('evt-progress-past-duration');
+  });
+});
+
+describe('audio focus', () => {
+  test('a loss marks evt-audio-focus-lost, the focus coming back evt-audio-focus-regained', () => {
+    feed({ type: 'onAudioFocusChange', hasAudioFocus: false });
+    expect(markers()).toContain('evt-audio-focus-lost');
+    expect(markers()).not.toContain('evt-audio-focus-regained');
+    feed({ type: 'onAudioFocusChange', hasAudioFocus: true });
+    expect(markers()).toContain('evt-audio-focus-regained');
+    expect(lines()).toEqual([
+      'onAudioFocusChange false',
+      'onAudioFocusChange true',
+    ]);
+  });
+
+  test('focus that was never lost is not regained', () => {
+    feed({ type: 'onAudioFocusChange', hasAudioFocus: true });
+    expect(markers()).not.toContain('evt-audio-focus-regained');
   });
 });
 
