@@ -79,6 +79,10 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
     _eventEmitter?.onProgress(
       .init(currentTime: max(0, currentTime - cropStart), bufferDuration: bufferDuration)
     )
+    // AVFoundation can change the subtitle selection after load (for example when playback
+    // starts) without `mediaSelectionDidChangeNotification`. Check again, so `onTrackChange`
+    // follows what is actually selected and drawn. Deduped: emits only on a change.
+    emitSelectedTextTrackIfChanged()
   }
 
   /// Returns true when the status or the buffering flag had to be corrected.
@@ -150,6 +154,9 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
     }
 
     updateAndEmitPlaybackState()
+    // A paused player has no progress ticks, and starting playback is when the subtitle
+    // selection can change, so check it here as well (see `onProgressUpdate`).
+    emitSelectedTextTrackIfChanged()
 
     // Keep the audio session in sync with playback: starting/stopping changes whether we hold
     // the session and the mix mode (mix-with-others vs interrupt), which is otherwise only
@@ -211,6 +218,8 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
       // both where an audio pick made earlier gets replayed and where the
       // available audio renditions are first published.
       applyAudioTrackSelectionIfReady()
+      commitInitialTextTrackSelection(of: playerItem)
+      emitSelectedTextTrackIfChanged()
 
       if playerItem.isPlaybackLikelyToKeepUp
         && !playerItem.isPlaybackBufferEmpty
@@ -297,5 +306,22 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
       lastReportedBuffering = isCurrentlyBuffering
       _eventEmitter?.onBuffer(isCurrentlyBuffering)
     }
+  }
+}
+
+extension HybridVideoPlayer {
+  /// At `.readyToPlay` an HLS item reports the manifest's default subtitle (`DEFAULT=YES`) as
+  /// selected, but that selection is only provisional: when playback starts right away,
+  /// AVFoundation drops it and nothing is drawn, while the library has already reported the
+  /// track as selected. Selecting the reported option explicitly makes it stick, so what is
+  /// reported is what is drawn, whenever `play()` is called. Nothing changes when no option is
+  /// selected (no default in the manifest, or the system settings chose none) or for
+  /// sideloaded subtitles on non-HLS sources, which manage their own selection.
+  func commitInitialTextTrackSelection(of item: AVPlayerItem) {
+    guard item.sideloadedTextTracks == nil,
+      let group = item.asset.mediaSelectionGroup(forMediaCharacteristic: .legible),
+      let option = item.currentMediaSelection.selectedMediaOption(in: group)
+    else { return }
+    item.select(option, in: group)
   }
 }
