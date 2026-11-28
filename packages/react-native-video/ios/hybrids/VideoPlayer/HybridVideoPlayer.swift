@@ -570,6 +570,10 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       if let bufferConfig {
         loadedPlayerItem.item.setBufferConfig(config: bufferConfig)
       }
+      // A new source: its bitrate is not known until the access log reports it.
+      self.updateMemoryEstimate(
+        bitrate: 0,
+        forwardBufferSeconds: loadedPlayerItem.item.preferredForwardBufferDuration)
       // Off-main manifest fetch for the quality ladder.
       self.beginVideoRenditionLoad(for: loadedPlayerItem.context.source)
       // The audio tracks of the previous source are gone; the new ones are published once
@@ -1527,7 +1531,25 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     release()
   }
 
+  /// Bitrate from the access log and the forward buffer of the current item, read by
+  /// `memorySize` on the JS thread without touching AVFoundation there (#4820).
+  private let memoryEstimateLock = NSLock()
+  private var memoryEstimateBitrate: Double = 0
+  private var memoryEstimateForwardBuffer: Double = 0
+
+  func updateMemoryEstimate(bitrate: Double? = nil, forwardBufferSeconds: Double? = nil) {
+    memoryEstimateLock.lock()
+    defer { memoryEstimateLock.unlock() }
+    if let bitrate { memoryEstimateBitrate = bitrate }
+    if let forwardBufferSeconds { memoryEstimateForwardBuffer = forwardBufferSeconds }
+  }
+
   var memorySize: Int {
-    isReleased ? 0 : playerItem?.asset.estimatedMemoryUsage ?? 0
+    guard !isReleased else { return 0 }
+    memoryEstimateLock.lock()
+    let bitrate = memoryEstimateBitrate
+    let forwardBuffer = memoryEstimateForwardBuffer
+    memoryEstimateLock.unlock()
+    return VideoMemoryEstimate.bytes(bitrate: bitrate, forwardBufferSeconds: forwardBuffer)
   }
 }
