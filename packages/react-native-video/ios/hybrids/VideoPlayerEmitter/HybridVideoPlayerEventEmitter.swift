@@ -185,7 +185,14 @@ class HybridVideoPlayerEventEmitter: HybridVideoPlayerEventEmitterSpec {
   }
 
   func onLoad(_ data: onLoadData) {
+    endLoadInProgress()
     emitEvent(eventName: "onLoad") { (callback: (onLoadData) throws -> Void) in try callback(data) }
+  }
+
+  private func endLoadInProgress() {
+    loadStartLock.lock()
+    loadInProgress = nil
+    loadStartLock.unlock()
   }
 
   func onLoadStart(_ data: onLoadStartData) {
@@ -224,11 +231,11 @@ class HybridVideoPlayerEventEmitter: HybridVideoPlayerEventEmitterSpec {
   }
 
   func onStatusChange(_ status: VideoPlayerStatus) {
-    if status != .loading {
-      // Loaded, failed or released: the load is over, later listeners are not told about it.
-      loadStartLock.lock()
-      loadInProgress = nil
-      loadStartLock.unlock()
+    // Failed or released: the load is over, later listeners are not told about it.
+    // Not on .readyToPlay: iOS reports it from timeControlStatus before the item has loaded,
+    // so the load ends with onLoad instead.
+    if status == .error || status == .idle {
+      endLoadInProgress()
     }
     emitEvent(eventName: "onStatusChange") { (callback: (VideoPlayerStatus) throws -> Void) in try callback(status) }
   }
