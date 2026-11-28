@@ -68,13 +68,38 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
   }
 
   func onProgressUpdate(currentTime: Double, bufferDuration: Double) {
+    // Safety net for #5155: the status must not depend on one KVO callback. A player that
+    // AVFoundation reports as playing a ready item is ready to play, so catch up here.
+    if reconcileStatusWhilePlaying() {
+      updateAndEmitPlaybackState()
+    }
+
+    // The observer reports the item's own time; a cropped source counts from `cropStart`
+    let cropStart = player.currentItem?.cropStartSeconds ?? 0
     _eventEmitter?.onProgress(
-      .init(currentTime: currentTime, bufferDuration: bufferDuration)
+      .init(currentTime: max(0, currentTime - cropStart), bufferDuration: bufferDuration)
     )
     // AVFoundation can change the subtitle selection after load (for example when playback
     // starts) without `mediaSelectionDidChangeNotification`. Check again, so `onTrackChange`
     // follows what is actually selected and drawn. Deduped: emits only on a change.
     emitSelectedTextTrackIfChanged()
+  }
+
+  /// Returns true when the status or the buffering flag had to be corrected.
+  private func reconcileStatusWhilePlaying() -> Bool {
+    guard !hasFailed,
+      playerItem?.status == .readyToPlay,
+      player.timeControlStatus == .playing,
+      status != .readytoplay || isCurrentlyBuffering
+    else { return false }
+
+    #if DEBUG
+      // Means the timeControlStatus observer missed a change (#5155); shows up in e2e device.log
+      NSLog("[ReactNativeVideo] status caught up to readyToPlay from the progress tick")
+    #endif
+    isCurrentlyBuffering = false
+    status = .readytoplay
+    return true
   }
 
   func onPlaybackLikelyToKeepUp() {
@@ -118,7 +143,10 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
 
     case .paused:
       isCurrentlyBuffering = false
-      self.status = .readytoplay
+      // AVPlayer also reports paused when an item is assigned, long before it can play
+      if playerItem?.status == .readyToPlay {
+        self.status = .readytoplay
+      }
       break
 
     @unknown default:
@@ -274,7 +302,10 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
     _eventEmitter?.onPlaybackStateChange(
       .init(isPlaying: isPlaying, isBuffering: isCurrentlyBuffering)
     )
-    _eventEmitter?.onBuffer(isCurrentlyBuffering)
+    if lastReportedBuffering != isCurrentlyBuffering {
+      lastReportedBuffering = isCurrentlyBuffering
+      _eventEmitter?.onBuffer(isCurrentlyBuffering)
+    }
   }
 }
 

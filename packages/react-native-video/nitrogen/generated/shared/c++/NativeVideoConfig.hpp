@@ -32,6 +32,8 @@
 namespace margelo::nitro::video { struct NativeExternalSubtitle; }
 // Forward declaration of `NativeDrmParams` to properly resolve imports.
 namespace margelo::nitro::video { struct NativeDrmParams; }
+// Forward declaration of `NativeCmcdConfiguration` to properly resolve imports.
+namespace margelo::nitro::video { struct NativeCmcdConfiguration; }
 // Forward declaration of `BufferConfig` to properly resolve imports.
 namespace margelo::nitro::video { struct BufferConfig; }
 // Forward declaration of `CustomVideoMetadata` to properly resolve imports.
@@ -42,6 +44,7 @@ namespace margelo::nitro::video { struct CustomVideoMetadata; }
 #include <vector>
 #include <optional>
 #include "NativeDrmParams.hpp"
+#include "NativeCmcdConfiguration.hpp"
 #include <unordered_map>
 #include "BufferConfig.hpp"
 #include "CustomVideoMetadata.hpp"
@@ -56,14 +59,23 @@ namespace margelo::nitro::video {
     std::string uri     SWIFT_PRIVATE;
     std::optional<std::vector<NativeExternalSubtitle>> externalSubtitles     SWIFT_PRIVATE;
     std::optional<NativeDrmParams> drm     SWIFT_PRIVATE;
+    std::optional<NativeCmcdConfiguration> cmcd     SWIFT_PRIVATE;
     std::optional<std::unordered_map<std::string, std::string>> headers     SWIFT_PRIVATE;
     std::optional<BufferConfig> bufferConfig     SWIFT_PRIVATE;
     std::optional<CustomVideoMetadata> metadata     SWIFT_PRIVATE;
+    std::optional<double> startPosition     SWIFT_PRIVATE;
+    std::optional<double> cropStart     SWIFT_PRIVATE;
+    std::optional<double> cropEnd     SWIFT_PRIVATE;
     std::optional<bool> initializeOnCreation     SWIFT_PRIVATE;
+    std::optional<bool> shouldCache     SWIFT_PRIVATE;
+    std::optional<double> minLoadRetryCount     SWIFT_PRIVATE;
+    std::optional<bool> disableDisconnectError     SWIFT_PRIVATE;
+    std::optional<std::string> type     SWIFT_PRIVATE;
+    std::optional<bool> textTracksAllowChunklessPreparation     SWIFT_PRIVATE;
 
   public:
     NativeVideoConfig() = default;
-    explicit NativeVideoConfig(std::string uri, std::optional<std::vector<NativeExternalSubtitle>> externalSubtitles, std::optional<NativeDrmParams> drm, std::optional<std::unordered_map<std::string, std::string>> headers, std::optional<BufferConfig> bufferConfig, std::optional<CustomVideoMetadata> metadata, std::optional<bool> initializeOnCreation): uri(uri), externalSubtitles(externalSubtitles), drm(drm), headers(headers), bufferConfig(bufferConfig), metadata(metadata), initializeOnCreation(initializeOnCreation) {}
+    explicit NativeVideoConfig(std::string uri, std::optional<std::vector<NativeExternalSubtitle>> externalSubtitles, std::optional<NativeDrmParams> drm, std::optional<NativeCmcdConfiguration> cmcd, std::optional<std::unordered_map<std::string, std::string>> headers, std::optional<BufferConfig> bufferConfig, std::optional<CustomVideoMetadata> metadata, std::optional<double> startPosition, std::optional<double> cropStart, std::optional<double> cropEnd, std::optional<bool> initializeOnCreation, std::optional<bool> shouldCache, std::optional<double> minLoadRetryCount, std::optional<bool> disableDisconnectError, std::optional<std::string> type, std::optional<bool> textTracksAllowChunklessPreparation): uri(uri), externalSubtitles(externalSubtitles), drm(drm), cmcd(cmcd), headers(headers), bufferConfig(bufferConfig), metadata(metadata), startPosition(startPosition), cropStart(cropStart), cropEnd(cropEnd), initializeOnCreation(initializeOnCreation), shouldCache(shouldCache), minLoadRetryCount(minLoadRetryCount), disableDisconnectError(disableDisconnectError), type(type), textTracksAllowChunklessPreparation(textTracksAllowChunklessPreparation) {}
 
   public:
     // NativeVideoConfig is not equatable because these properties are not equatable: drm
@@ -82,10 +94,19 @@ namespace margelo::nitro {
         JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "uri"))),
         JSIConverter<std::optional<std::vector<margelo::nitro::video::NativeExternalSubtitle>>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "externalSubtitles"))),
         JSIConverter<std::optional<margelo::nitro::video::NativeDrmParams>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "drm"))),
+        JSIConverter<std::optional<margelo::nitro::video::NativeCmcdConfiguration>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "cmcd"))),
         JSIConverter<std::optional<std::unordered_map<std::string, std::string>>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "headers"))),
         JSIConverter<std::optional<margelo::nitro::video::BufferConfig>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "bufferConfig"))),
         JSIConverter<std::optional<margelo::nitro::video::CustomVideoMetadata>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "metadata"))),
-        JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "initializeOnCreation")))
+        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "startPosition"))),
+        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "cropStart"))),
+        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "cropEnd"))),
+        JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "initializeOnCreation"))),
+        JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "shouldCache"))),
+        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "minLoadRetryCount"))),
+        JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "disableDisconnectError"))),
+        JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "type"))),
+        JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "textTracksAllowChunklessPreparation")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::video::NativeVideoConfig& arg) {
@@ -93,10 +114,19 @@ namespace margelo::nitro {
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "uri"), JSIConverter<std::string>::toJSI(runtime, arg.uri));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "externalSubtitles"), JSIConverter<std::optional<std::vector<margelo::nitro::video::NativeExternalSubtitle>>>::toJSI(runtime, arg.externalSubtitles));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "drm"), JSIConverter<std::optional<margelo::nitro::video::NativeDrmParams>>::toJSI(runtime, arg.drm));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "cmcd"), JSIConverter<std::optional<margelo::nitro::video::NativeCmcdConfiguration>>::toJSI(runtime, arg.cmcd));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "headers"), JSIConverter<std::optional<std::unordered_map<std::string, std::string>>>::toJSI(runtime, arg.headers));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "bufferConfig"), JSIConverter<std::optional<margelo::nitro::video::BufferConfig>>::toJSI(runtime, arg.bufferConfig));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "metadata"), JSIConverter<std::optional<margelo::nitro::video::CustomVideoMetadata>>::toJSI(runtime, arg.metadata));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "startPosition"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.startPosition));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "cropStart"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.cropStart));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "cropEnd"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.cropEnd));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "initializeOnCreation"), JSIConverter<std::optional<bool>>::toJSI(runtime, arg.initializeOnCreation));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "shouldCache"), JSIConverter<std::optional<bool>>::toJSI(runtime, arg.shouldCache));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "minLoadRetryCount"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.minLoadRetryCount));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "disableDisconnectError"), JSIConverter<std::optional<bool>>::toJSI(runtime, arg.disableDisconnectError));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "type"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.type));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "textTracksAllowChunklessPreparation"), JSIConverter<std::optional<bool>>::toJSI(runtime, arg.textTracksAllowChunklessPreparation));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -110,10 +140,19 @@ namespace margelo::nitro {
       if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "uri")))) return false;
       if (!JSIConverter<std::optional<std::vector<margelo::nitro::video::NativeExternalSubtitle>>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "externalSubtitles")))) return false;
       if (!JSIConverter<std::optional<margelo::nitro::video::NativeDrmParams>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "drm")))) return false;
+      if (!JSIConverter<std::optional<margelo::nitro::video::NativeCmcdConfiguration>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "cmcd")))) return false;
       if (!JSIConverter<std::optional<std::unordered_map<std::string, std::string>>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "headers")))) return false;
       if (!JSIConverter<std::optional<margelo::nitro::video::BufferConfig>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "bufferConfig")))) return false;
       if (!JSIConverter<std::optional<margelo::nitro::video::CustomVideoMetadata>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "metadata")))) return false;
+      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "startPosition")))) return false;
+      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "cropStart")))) return false;
+      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "cropEnd")))) return false;
       if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "initializeOnCreation")))) return false;
+      if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "shouldCache")))) return false;
+      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "minLoadRetryCount")))) return false;
+      if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "disableDisconnectError")))) return false;
+      if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "type")))) return false;
+      if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "textTracksAllowChunklessPreparation")))) return false;
       return true;
     }
   };

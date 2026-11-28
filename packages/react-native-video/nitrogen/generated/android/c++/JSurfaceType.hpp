@@ -48,6 +48,9 @@ namespace margelo::nitro::video {
         case SurfaceType::TEXTURE:
           static const auto fieldTEXTURE = clazz->getStaticField<JSurfaceType>("TEXTURE");
           return clazz->getStaticFieldValue(fieldTEXTURE);
+        case SurfaceType::SECURESURFACE:
+          static const auto fieldSECURESURFACE = clazz->getStaticField<JSurfaceType>("SECURESURFACE");
+          return clazz->getStaticFieldValue(fieldSECURESURFACE);
         default:
           std::string stringValue = std::to_string(static_cast<int>(value));
           throw std::invalid_argument("Invalid enum value (" + stringValue + "!");

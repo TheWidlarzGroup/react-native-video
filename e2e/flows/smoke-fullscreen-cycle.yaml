@@ -1,0 +1,38 @@
+# Fullscreen from the app's own button: enterFullscreen() and exitFullscreen() through the
+# VideoView ref, twice each, 3 s apart (scenario mp4-fullscreen-cycle, called from JS).
+#
+# On iOS 18 the first exitFullscreen() left fullscreen without onFullscreenChange(false),
+# and the next enterFullscreen() did nothing (before the request queue of #5270 it showed a
+# black screen for good). The markers count a second round only in order: entered, exited,
+# entered again, exited again, so a missing exit event or a dropped entry fails the flow.
+#
+# The scenario screen is covered while fullscreen is shown, so the flow waits for the last
+# marker, which appears when the view is inline again, and checks the others then.
+#
+# Timeouts: Maestro measures an extendedWaitUntil timeout from the latest interaction, not
+# from the start of the step. Nothing here taps, so they are times since the scenario
+# opened: the last call comes 12 s after onLoad.
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4-fullscreen-cycle
+- extendedWaitUntil:
+    visible:
+      id: "evt-fullscreen-exited-again"
+    timeout: 60000
+- assertVisible:
+    id: "evt-fullscreen-entered"
+- assertVisible:
+    id: "evt-fullscreen-exited"
+- assertVisible:
+    id: "evt-fullscreen-reentered"
+- assertVisible:
+    id: "scenario-mp4-fullscreen-cycle"   # the app is back on screen, not a black window
+- assertNotVisible:
+    id: "evt-fullscreen-call-failed"
+- assertNotVisible:
+    id: "evt-onError"

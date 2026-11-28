@@ -131,7 +131,45 @@ class HybridVideoViewViewManager: HybridVideoViewViewManagerSpec {
     }
   }
   
-  var resizeMode: ResizeMode {
+  var fullscreenOrientation: FullscreenOrientation {
+    get {
+      guard let view else {
+        print(DEALOCATED_WARNING)
+        return .all
+      }
+
+      return view.fullscreenOrientation
+    }
+    set {
+      guard let view else {
+        print(DEALOCATED_WARNING)
+        return
+      }
+
+      view.fullscreenOrientation = newValue
+    }
+  }
+
+  var fullscreenAutorotate: Bool {
+    get {
+      guard let view else {
+        print(DEALOCATED_WARNING)
+        return true
+      }
+
+      return view.fullscreenAutorotate
+    }
+    set {
+      guard let view else {
+        print(DEALOCATED_WARNING)
+        return
+      }
+
+      view.fullscreenAutorotate = newValue
+    }
+  }
+
+  var resizeMode: VideoResizeMode {
     get {
       guard let view else {
         print(DEALOCATED_WARNING)
@@ -171,6 +209,22 @@ class HybridVideoViewViewManager: HybridVideoViewViewManagerSpec {
   
   // Android only - no-op on iOS
   var surfaceType: SurfaceType = .surface
+
+  // Android only: AVPlayerViewController has no API to hide single controls
+  var controlsStyles: NativeControlsStyles = NativeControlsStyles(
+    hideSeekBar: false,
+    hideDuration: false,
+    hidePosition: false,
+    hidePlayPause: false,
+    hideForward: false,
+    hideRewind: false,
+    hideNext: false,
+    hidePrevious: false,
+    hideFullscreen: false,
+    hideSettingButton: false,
+    hideNavigationBarOnFullScreenMode: true,
+    hideNotificationBarOnFullScreenMode: true
+  )
   
   func enterFullscreen() throws {
     guard let view else {

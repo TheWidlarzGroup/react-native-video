@@ -31,6 +31,7 @@ namespace margelo::nitro::video {
   enum class SurfaceType {
     SURFACE      SWIFT_NAME(surface) = 0,
     TEXTURE      SWIFT_NAME(texture) = 1,
+    SECURESURFACE      SWIFT_NAME(securesurface) = 2,
   } CLOSED_ENUM;
 
 } // namespace margelo::nitro::video
@@ -45,6 +46,7 @@ namespace margelo::nitro {
       switch (hashString(unionValue.c_str(), unionValue.size())) {
         case hashString("surface"): return margelo::nitro::video::SurfaceType::SURFACE;
         case hashString("texture"): return margelo::nitro::video::SurfaceType::TEXTURE;
+        case hashString("secureSurface"): return margelo::nitro::video::SurfaceType::SECURESURFACE;
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert \"" + unionValue + "\" to enum SurfaceType - invalid value!");
       }
@@ -53,6 +55,7 @@ namespace margelo::nitro {
       switch (arg) {
         case margelo::nitro::video::SurfaceType::SURFACE: return JSIConverter<std::string>::toJSI(runtime, "surface");
         case margelo::nitro::video::SurfaceType::TEXTURE: return JSIConverter<std::string>::toJSI(runtime, "texture");
+        case margelo::nitro::video::SurfaceType::SECURESURFACE: return JSIConverter<std::string>::toJSI(runtime, "secureSurface");
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert SurfaceType to JS - invalid value: "
                                     + std::to_string(static_cast<int>(arg)) + "!");
@@ -66,6 +69,7 @@ namespace margelo::nitro {
       switch (hashString(unionValue.c_str(), unionValue.size())) {
         case hashString("surface"):
         case hashString("texture"):
+        case hashString("secureSurface"):
           return true;
         default:
           return false;

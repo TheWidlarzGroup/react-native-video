@@ -1,0 +1,31 @@
+# Status after a failed load (#5285): player.status must stay error after onError, as on
+# iOS. Android reported error and then, a few milliseconds later, idle. The app reads the
+# status STATUS_SETTLE_MS (750 ms) after onError and marks evt-error-status-held only for
+# error (eventLog.ts, statusSettled). Opens mp4 first, like smoke-error-404.yaml: on a
+# truly cold launch a scenario that fails before any playback attempt fires no event.
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 20000
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: error-404
+- extendedWaitUntil:
+    visible:
+      id: "evt-onError"
+    timeout: 20000
+- extendedWaitUntil:
+    visible:
+      id: "evt-error-status-held"
+    timeout: 5000             # read 750 ms after onError
+- assertNotVisible:
+    id: "evt-onLoad"

@@ -3,9 +3,11 @@
 ## v7
 
 ```sh
-npm install react-native-video react-native-nitro-modules
+npm install react-native-video@beta react-native-nitro-modules
 cd ios && pod install
 ```
+
+- While v7 is in beta it is published under the `beta` tag; `latest` (and a plain `npm install react-native-video`) is still v6.
 
 - React Native **≥ 0.75**; `react-native-nitro-modules` is a required peer dep.
 - iOS **15.0+**, Android **minSdkVersion 24**.

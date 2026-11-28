@@ -11,17 +11,23 @@
 #include "NativeVideoConfig.hpp"
 
 #include "BufferConfig.hpp"
+#include "BufferingStrategy.hpp"
+#include "CmcdMode.hpp"
 #include "CustomVideoMetadata.hpp"
 #include "JBufferConfig.hpp"
+#include "JBufferingStrategy.hpp"
+#include "JCmcdMode.hpp"
 #include "JCustomVideoMetadata.hpp"
 #include "JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload.hpp"
 #include "JLivePlaybackParams.hpp"
+#include "JNativeCmcdConfiguration.hpp"
 #include "JNativeDrmParams.hpp"
 #include "JNativeExternalSubtitle.hpp"
 #include "JOnGetLicensePayload.hpp"
 #include "JResolution.hpp"
 #include "JSubtitleType.hpp"
 #include "LivePlaybackParams.hpp"
+#include "NativeCmcdConfiguration.hpp"
 #include "NativeDrmParams.hpp"
 #include "NativeExternalSubtitle.hpp"
 #include "OnGetLicensePayload.hpp"
@@ -61,14 +67,32 @@ namespace margelo::nitro::video {
       jni::local_ref<jni::JArrayClass<JNativeExternalSubtitle>> externalSubtitles = this->getFieldValue(fieldExternalSubtitles);
       static const auto fieldDrm = clazz->getField<JNativeDrmParams>("drm");
       jni::local_ref<JNativeDrmParams> drm = this->getFieldValue(fieldDrm);
+      static const auto fieldCmcd = clazz->getField<JNativeCmcdConfiguration>("cmcd");
+      jni::local_ref<JNativeCmcdConfiguration> cmcd = this->getFieldValue(fieldCmcd);
       static const auto fieldHeaders = clazz->getField<jni::JMap<jni::JString, jni::JString>>("headers");
       jni::local_ref<jni::JMap<jni::JString, jni::JString>> headers = this->getFieldValue(fieldHeaders);
       static const auto fieldBufferConfig = clazz->getField<JBufferConfig>("bufferConfig");
       jni::local_ref<JBufferConfig> bufferConfig = this->getFieldValue(fieldBufferConfig);
       static const auto fieldMetadata = clazz->getField<JCustomVideoMetadata>("metadata");
       jni::local_ref<JCustomVideoMetadata> metadata = this->getFieldValue(fieldMetadata);
+      static const auto fieldStartPosition = clazz->getField<jni::JDouble>("startPosition");
+      jni::local_ref<jni::JDouble> startPosition = this->getFieldValue(fieldStartPosition);
+      static const auto fieldCropStart = clazz->getField<jni::JDouble>("cropStart");
+      jni::local_ref<jni::JDouble> cropStart = this->getFieldValue(fieldCropStart);
+      static const auto fieldCropEnd = clazz->getField<jni::JDouble>("cropEnd");
+      jni::local_ref<jni::JDouble> cropEnd = this->getFieldValue(fieldCropEnd);
       static const auto fieldInitializeOnCreation = clazz->getField<jni::JBoolean>("initializeOnCreation");
       jni::local_ref<jni::JBoolean> initializeOnCreation = this->getFieldValue(fieldInitializeOnCreation);
+      static const auto fieldShouldCache = clazz->getField<jni::JBoolean>("shouldCache");
+      jni::local_ref<jni::JBoolean> shouldCache = this->getFieldValue(fieldShouldCache);
+      static const auto fieldMinLoadRetryCount = clazz->getField<jni::JDouble>("minLoadRetryCount");
+      jni::local_ref<jni::JDouble> minLoadRetryCount = this->getFieldValue(fieldMinLoadRetryCount);
+      static const auto fieldDisableDisconnectError = clazz->getField<jni::JBoolean>("disableDisconnectError");
+      jni::local_ref<jni::JBoolean> disableDisconnectError = this->getFieldValue(fieldDisableDisconnectError);
+      static const auto fieldType = clazz->getField<jni::JString>("type");
+      jni::local_ref<jni::JString> type = this->getFieldValue(fieldType);
+      static const auto fieldTextTracksAllowChunklessPreparation = clazz->getField<jni::JBoolean>("textTracksAllowChunklessPreparation");
+      jni::local_ref<jni::JBoolean> textTracksAllowChunklessPreparation = this->getFieldValue(fieldTextTracksAllowChunklessPreparation);
       return NativeVideoConfig(
         uri->toStdString(),
         externalSubtitles != nullptr ? std::make_optional([&]() {
@@ -82,6 +106,7 @@ namespace margelo::nitro::video {
           return __vector;
         }()) : std::nullopt,
         drm != nullptr ? std::make_optional(drm->toCpp()) : std::nullopt,
+        cmcd != nullptr ? std::make_optional(cmcd->toCpp()) : std::nullopt,
         headers != nullptr ? std::make_optional([&]() {
           std::unordered_map<std::string, std::string> __map;
           __map.reserve(headers->size());
@@ -92,7 +117,15 @@ namespace margelo::nitro::video {
         }()) : std::nullopt,
         bufferConfig != nullptr ? std::make_optional(bufferConfig->toCpp()) : std::nullopt,
         metadata != nullptr ? std::make_optional(metadata->toCpp()) : std::nullopt,
-        initializeOnCreation != nullptr ? std::make_optional(static_cast<bool>(initializeOnCreation->value())) : std::nullopt
+        startPosition != nullptr ? std::make_optional(startPosition->value()) : std::nullopt,
+        cropStart != nullptr ? std::make_optional(cropStart->value()) : std::nullopt,
+        cropEnd != nullptr ? std::make_optional(cropEnd->value()) : std::nullopt,
+        initializeOnCreation != nullptr ? std::make_optional(static_cast<bool>(initializeOnCreation->value())) : std::nullopt,
+        shouldCache != nullptr ? std::make_optional(static_cast<bool>(shouldCache->value())) : std::nullopt,
+        minLoadRetryCount != nullptr ? std::make_optional(minLoadRetryCount->value()) : std::nullopt,
+        disableDisconnectError != nullptr ? std::make_optional(static_cast<bool>(disableDisconnectError->value())) : std::nullopt,
+        type != nullptr ? std::make_optional(type->toStdString()) : std::nullopt,
+        textTracksAllowChunklessPreparation != nullptr ? std::make_optional(static_cast<bool>(textTracksAllowChunklessPreparation->value())) : std::nullopt
       );
     }
 
@@ -102,7 +135,7 @@ namespace margelo::nitro::video {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeVideoConfig::javaobject> fromCpp(const NativeVideoConfig& value) {
-      using JSignature = JNativeVideoConfig(jni::alias_ref<jni::JString>, jni::alias_ref<jni::JArrayClass<JNativeExternalSubtitle>>, jni::alias_ref<JNativeDrmParams>, jni::alias_ref<jni::JMap<jni::JString, jni::JString>>, jni::alias_ref<JBufferConfig>, jni::alias_ref<JCustomVideoMetadata>, jni::alias_ref<jni::JBoolean>);
+      using JSignature = JNativeVideoConfig(jni::alias_ref<jni::JString>, jni::alias_ref<jni::JArrayClass<JNativeExternalSubtitle>>, jni::alias_ref<JNativeDrmParams>, jni::alias_ref<JNativeCmcdConfiguration>, jni::alias_ref<jni::JMap<jni::JString, jni::JString>>, jni::alias_ref<JBufferConfig>, jni::alias_ref<JCustomVideoMetadata>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JBoolean>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
@@ -119,6 +152,7 @@ namespace margelo::nitro::video {
           return __array;
         }() : nullptr,
         value.drm.has_value() ? JNativeDrmParams::fromCpp(value.drm.value()) : nullptr,
+        value.cmcd.has_value() ? JNativeCmcdConfiguration::fromCpp(value.cmcd.value()) : nullptr,
         value.headers.has_value() ? [&]() -> jni::local_ref<jni::JMap<jni::JString, jni::JString>> {
           auto __map = jni::JHashMap<jni::JString, jni::JString>::create(value.headers.value().size());
           for (const auto& __entry : value.headers.value()) {
@@ -128,7 +162,15 @@ namespace margelo::nitro::video {
         }() : nullptr,
         value.bufferConfig.has_value() ? JBufferConfig::fromCpp(value.bufferConfig.value()) : nullptr,
         value.metadata.has_value() ? JCustomVideoMetadata::fromCpp(value.metadata.value()) : nullptr,
-        value.initializeOnCreation.has_value() ? jni::JBoolean::valueOf(value.initializeOnCreation.value()) : nullptr
+        value.startPosition.has_value() ? jni::JDouble::valueOf(value.startPosition.value()) : nullptr,
+        value.cropStart.has_value() ? jni::JDouble::valueOf(value.cropStart.value()) : nullptr,
+        value.cropEnd.has_value() ? jni::JDouble::valueOf(value.cropEnd.value()) : nullptr,
+        value.initializeOnCreation.has_value() ? jni::JBoolean::valueOf(value.initializeOnCreation.value()) : nullptr,
+        value.shouldCache.has_value() ? jni::JBoolean::valueOf(value.shouldCache.value()) : nullptr,
+        value.minLoadRetryCount.has_value() ? jni::JDouble::valueOf(value.minLoadRetryCount.value()) : nullptr,
+        value.disableDisconnectError.has_value() ? jni::JBoolean::valueOf(value.disableDisconnectError.value()) : nullptr,
+        value.type.has_value() ? jni::make_jstring(value.type.value()) : nullptr,
+        value.textTracksAllowChunklessPreparation.has_value() ? jni::JBoolean::valueOf(value.textTracksAllowChunklessPreparation.value()) : nullptr
       );
     }
   };

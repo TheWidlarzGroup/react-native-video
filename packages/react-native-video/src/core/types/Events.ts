@@ -16,6 +16,7 @@ export interface VideoPlayerEvents {
    * Called when the audio focus changes.
    * @param hasAudioFocus Whether the audio has focus.
    * @platform Android
+   * @note Not emitted yet: the event does not fire on any platform.
    */
   onAudioFocusChange: (hasAudioFocus: boolean) => void;
   /**
@@ -66,7 +67,9 @@ export interface VideoPlayerEvents {
    */
   onProgress: (data: onProgressData) => void;
   /**
-   * Called when the video is ready to display.
+   * Called when the first frame of the video can be shown. On Android once per source, not
+   * for audio only. On iOS once per source for every `VideoView` that shows the player, not
+   * for audio only. On web on `loadeddata`, also for audio only.
    */
   onReadyToDisplay: () => void;
   /**

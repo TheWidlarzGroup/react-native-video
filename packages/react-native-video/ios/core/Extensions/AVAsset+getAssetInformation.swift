@@ -11,7 +11,8 @@ extension AVAsset {
     var isLive = false
     var orientation: VideoOrientation = .unknown
 
-    let url = (self as? AVURLAsset)?.url
+    // An asset that goes through the file cache has a private scheme.
+    let url = (self as? AVURLAsset).map { VideoCache.originalURL(for: $0.url) }
     let fileSize: Int64
     if let url {
       fileSize = try await VideoFileHelper.getFileSize(for: url)
