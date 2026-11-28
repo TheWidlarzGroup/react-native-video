@@ -23,7 +23,7 @@ React Native Video is a library that allows you to play various kinds of video i
 
 1. Install dependencies:
 ```bash
-npm install react-native-video@next react-native-nitro-modules
+npm install react-native-video@beta react-native-nitro-modules
 ```
 
 2. Configure Library:
@@ -112,9 +112,7 @@ import { VideoView, useVideoPlayer } from 'react-native-video';
 
 export default function App() {
   const player = useVideoPlayer({
-    source: {
-      uri: 'https://www.w3schools.com/html/mov_bbb.mp4',
-    },
+    uri: 'https://www.w3schools.com/html/mov_bbb.mp4',
   });
 
   return <VideoView player={player} />;
