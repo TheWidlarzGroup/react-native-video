@@ -17,6 +17,7 @@ If you want to offer a YouTube-style "Quality" menu (Auto / 1080p / 720p / …),
 ## Quick start
 
 ```tsx
+import { Button } from 'react-native';
 import { useVideoPlayer, useEvent, VideoView } from 'react-native-video';
 
 export function Player() {
@@ -28,14 +29,17 @@ export function Player() {
   });
 
   return (
-    <VideoView
-      player={player}
-      onPress={() => {
-        const tracks = player.getAvailableVideoTracks();
-        const rung720p = tracks.find((t) => t.height === 720);
-        if (rung720p) player.selectVideoTrack(rung720p.id);
-      }}
-    />
+    <>
+      <VideoView player={player} style={{ width: '100%', aspectRatio: 16 / 9 }} />
+      <Button
+        title="720p"
+        onPress={() => {
+          const tracks = player.getAvailableVideoTracks();
+          const rung720p = tracks.find((t) => t.height === 720);
+          if (rung720p) player.selectVideoTrack(rung720p.id);
+        }}
+      />
+    </>
   );
 }
 ```
