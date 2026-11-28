@@ -17,6 +17,9 @@ export interface VideoPlayerEvents {
    * gives it back. On Android that is a loss of audio focus, for good or for a moment (not a
    * request to duck), and players with `mixAudioMode` `'mixWithOthers'` get no event, as they
    * take no focus. On iOS it is the start and the end of an audio session interruption.
+   * Only a player that got `false` gets `true`. A player that starts playing again while the
+   * other app still has the audio asks for it anew; a call usually refuses, and then `true`
+   * may not come after the call.
    * @param hasAudioFocus Whether the player has the audio again.
    * @platform Android, iOS
    */

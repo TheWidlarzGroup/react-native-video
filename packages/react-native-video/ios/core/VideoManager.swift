@@ -13,6 +13,8 @@ class VideoManager {
   static let shared = VideoManager()
   
   private let players = NSHashTable<HybridVideoPlayer>.weakObjects()
+  // Players told onAudioFocusChange(false) for the interruption going on (see emitAudioFocusChange).
+  private let playersToldInterrupted = NSHashTable<HybridVideoPlayer>.weakObjects()
   private let videoView = NSHashTable<VideoComponentView>.weakObjects()
   
   private var isAudioSessionActive = false
@@ -494,12 +496,21 @@ class VideoManager {
     }
   }
   
-  /// onAudioFocusChange for every player, as on Android: false when an interruption begins
-  /// (a call, another app's audio that does not mix), true when it ends. The audio session is
-  /// shared by all players, so all of them hear about it.
+  /// onAudioFocusChange, as on Android: false to every player when an interruption begins (a
+  /// call, another app's audio that does not mix), true when it ends, only to the players that
+  /// heard false. The audio session is shared by all players, so all of them hear about it, also
+  /// those with mixWithOthers: a call interrupts them too.
   private func emitAudioFocusChange(_ hasAudioFocus: Bool) {
-    for player in players.allObjects {
-      player._eventEmitter?.onAudioFocusChange(hasAudioFocus)
+    if hasAudioFocus {
+      for player in playersToldInterrupted.allObjects where players.contains(player) {
+        player._eventEmitter?.onAudioFocusChange(true)
+      }
+      playersToldInterrupted.removeAllObjects()
+    } else {
+      for player in players.allObjects where !playersToldInterrupted.contains(player) {
+        playersToldInterrupted.add(player)
+        player._eventEmitter?.onAudioFocusChange(false)
+      }
     }
   }
 

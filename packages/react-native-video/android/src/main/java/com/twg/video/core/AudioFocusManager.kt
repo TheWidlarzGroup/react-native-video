@@ -30,6 +30,9 @@ class AudioFocusManager() {
   // hears onAudioFocusChange(true). Giving the focus up on that pause, as on any other pause,
   // would take the player off the stack and the system would never say that the focus is back.
   private var isWaitingForFocusGain = false
+  // Players told onAudioFocusChange(false) and not yet (true). Only they hear that the focus is
+  // back, and none of them hears false twice (a loss for good after a loss for a moment).
+  private val playersWithoutFocus = mutableSetOf<HybridVideoPlayer>()
 
   val appContext by lazy {
     NitroModules.applicationContext ?: throw UnknownError()
@@ -47,7 +50,7 @@ class AudioFocusManager() {
           // After a duck the focus was never reported as lost, so it is not reported as back.
           if (isWaitingForFocusGain) {
             isWaitingForFocusGain = false
-            emitAudioFocusChange(true)
+            emitAudioFocusBack()
           }
           // Players paused by the loss stay paused (no auto-resume): the focus goes, as on any
           // pause. Players that play on (after a duck) keep it.
@@ -56,7 +59,7 @@ class AudioFocusManager() {
         AudioManager.AUDIOFOCUS_LOSS -> {
           // Lost for good: no AUDIOFOCUS_GAIN follows, so the request leaves the stack on pause.
           isWaitingForFocusGain = false
-          emitAudioFocusChange(false)
+          emitAudioFocusLost()
           pauseActivePlayers()
           currentMixAudioMode = null
           audioFocusRequest = null
@@ -64,7 +67,7 @@ class AudioFocusManager() {
         AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
           val mixAudioMode = determineRequiredMixMode()
           if (mixAudioMode != MixAudioMode.MIXWITHOTHERS) {
-            emitAudioFocusChange(false)
+            emitAudioFocusLost()
             isWaitingForFocusGain = true
             pauseActivePlayers()
           }
@@ -82,15 +85,25 @@ class AudioFocusManager() {
   }
 
   /**
-   * Sends onAudioFocusChange to the players that take part in audio focus, that is every player
-   * but those with 'mixWithOthers', as v6 sent onAudioFocusChanged: false when another app takes
-   * the focus, for good or for a moment, and true when it comes back.
+   * Sends onAudioFocusChange(false) to the players that take part in audio focus, that is every
+   * player but those with 'mixWithOthers', as v6 sent onAudioFocusChanged when another app took
+   * the focus, for good or for a moment. A player that already heard it hears nothing.
    */
   @MainThread
-  private fun emitAudioFocusChange(hasAudioFocus: Boolean) {
+  private fun emitAudioFocusLost() {
     players
       .filter { player -> player.mixAudioMode != MixAudioMode.MIXWITHOTHERS }
-      .forEach { player -> player.eventEmitter.onAudioFocusChange(hasAudioFocus) }
+      .filter { player -> playersWithoutFocus.add(player) }
+      .forEach { player -> player.eventEmitter.onAudioFocusChange(false) }
+  }
+
+  /** Sends onAudioFocusChange(true) to the players that heard false, when the focus is back. */
+  @MainThread
+  private fun emitAudioFocusBack() {
+    playersWithoutFocus
+      .filter { player -> players.contains(player) }
+      .forEach { player -> player.eventEmitter.onAudioFocusChange(true) }
+    playersWithoutFocus.clear()
   }
 
   fun registerPlayer(player: HybridVideoPlayer) = Threading.runOnMainThread {
@@ -105,6 +118,7 @@ class AudioFocusManager() {
 
   fun unregisterPlayer(player: HybridVideoPlayer) = Threading.runOnMainThread {
     players.remove(player)
+    playersWithoutFocus.remove(player)
     requestAudioOutputUpdate()
     if (players.isEmpty()) {
       abandonAudioFocus()
@@ -222,6 +236,9 @@ class AudioFocusManager() {
 
     if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
       currentMixAudioMode = mixMode
+      // Asked anew and granted (play after a loss): a later loss is news again. No true here,
+      // as in v6: the app started playback itself.
+      playersWithoutFocus.clear()
     } else {
       currentMixAudioMode = null
       // Pause players since audio focus couldn't be obtained
