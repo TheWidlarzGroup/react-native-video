@@ -405,10 +405,6 @@ class VideoManager {
       return .mixwithothers
     }
     
-    let anyPlayerNeedsMixWithOthers = activePlayers.contains { player in
-      player.mixAudioMode == .mixwithothers
-    }
-    
     let anyPlayerNeedsNotMixWithOthers = activePlayers.contains { player in
       player.mixAudioMode == .donotmix
     }

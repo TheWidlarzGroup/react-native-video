@@ -307,7 +307,7 @@ class NowPlayingInfoCenterManager {
       guard let data = try? await artworkMetadataItem.load(.dataValue),
             let image = UIImage(data: data) else { return }
       let artworkItem = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
-      await MainActor.run {
+      await MainActor.run { [weak self, weak player, weak currentItem] in
         guard let self, self.currentPlayer === player,
               self.currentPlayer?.currentItem === currentItem else { return }
         var info = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [:]
