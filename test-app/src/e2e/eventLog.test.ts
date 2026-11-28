@@ -692,6 +692,45 @@ describe('video track markers', () => {
   });
 });
 
+describe('fullscreen orientation markers (#5286)', () => {
+  test('landscape in fullscreen, held, then portrait after the exit', () => {
+    feed(
+      { type: 'windowOrientation', landscape: false, fullscreen: false },
+      { type: 'onFullscreenChange', fullscreen: true },
+      { type: 'windowOrientation', landscape: false, fullscreen: true },
+      { type: 'windowOrientation', landscape: true, fullscreen: true }
+    );
+    expect(markers()).toEqual([
+      'evt-fullscreen-entered',
+      'evt-fullscreen-landscape',
+    ]);
+    feed(
+      { type: 'onFullscreenChange', fullscreen: false },
+      { type: 'windowOrientation', landscape: true, fullscreen: false },
+      { type: 'windowOrientation', landscape: false, fullscreen: false }
+    );
+    expect(markers()).toEqual([
+      'evt-fullscreen-entered',
+      'evt-fullscreen-exited',
+      'evt-fullscreen-landscape',
+      'evt-portrait-after-exit',
+    ]);
+  });
+
+  test('portrait in fullscreen after landscape means the lock was lost', () => {
+    feed(
+      { type: 'windowOrientation', landscape: true, fullscreen: true },
+      { type: 'windowOrientation', landscape: false, fullscreen: true }
+    );
+    expect(markers()).toContain('evt-fullscreen-turned-portrait');
+  });
+
+  test('portrait before fullscreen is not a portrait after the exit', () => {
+    feed({ type: 'windowOrientation', landscape: false, fullscreen: false });
+    expect(markers()).toEqual([]);
+  });
+});
+
 describe('audio track markers', () => {
   const en = { language: 'en' };
   const es = { language: 'es' };

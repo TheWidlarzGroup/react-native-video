@@ -78,6 +78,11 @@ export const MARKER_IDS = [
   'evt-fullscreen-entered',
   'evt-fullscreen-exited',
   'evt-fullscreen-call-failed', // enterFullscreen()/exitFullscreen() threw (#5152)
+  // fullscreenOrientation="landscape" with fullscreenAutorotate={false} (#5286), from the
+  // window size while fullscreen is shown and after it closed:
+  'evt-fullscreen-landscape', // the window was landscape while in fullscreen
+  'evt-fullscreen-turned-portrait', // ...and later portrait while still in fullscreen (lock lost)
+  'evt-portrait-after-exit', // portrait again once fullscreen closed (the app's own setting back)
 ] as const;
 
 export type MarkerId = (typeof MARKER_IDS)[number];
@@ -101,6 +106,8 @@ export type PlayerEvent =
   // is a millisecond clock reading, so the time it stayed up is part of the event sequence
   // and handle() stays a pure function of it.
   | { type: 'loader'; shown: boolean; at: number }
+  // The window's shape, reported whenever its size or the fullscreen state changes.
+  | { type: 'windowOrientation'; landscape: boolean; fullscreen: boolean }
   // A VideoView ref call that threw. Caught in the scenario, so the screen stays up and
   // the flow can assert on it instead of on a red screen.
   | {
@@ -384,6 +391,27 @@ function apply(event: PlayerEvent) {
       append(`loader hidden after ${shownMs} ms`);
       return;
     }
+
+    case 'windowOrientation':
+      if (event.fullscreen && event.landscape) mark('evt-fullscreen-landscape');
+      if (
+        event.fullscreen &&
+        !event.landscape &&
+        state.markers.has('evt-fullscreen-landscape')
+      ) {
+        mark('evt-fullscreen-turned-portrait');
+      }
+      if (
+        !event.fullscreen &&
+        !event.landscape &&
+        state.markers.has('evt-fullscreen-exited')
+      ) {
+        mark('evt-portrait-after-exit');
+      }
+      append(
+        `window:${event.landscape ? 'landscape' : 'portrait'}${event.fullscreen ? ' (fullscreen)' : ''}`
+      );
+      return;
 
     case 'fullscreenCallFailed':
       mark('evt-fullscreen-call-failed');

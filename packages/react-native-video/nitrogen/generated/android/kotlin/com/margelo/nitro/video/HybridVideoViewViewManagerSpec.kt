@@ -72,6 +72,18 @@ abstract class HybridVideoViewViewManagerSpec: HybridObject() {
   @set:DoNotStrip
   @set:Keep
   abstract var controlsStyles: NativeControlsStyles
+  
+  @get:DoNotStrip
+  @get:Keep
+  @set:DoNotStrip
+  @set:Keep
+  abstract var fullscreenOrientation: FullscreenOrientation
+  
+  @get:DoNotStrip
+  @get:Keep
+  @set:DoNotStrip
+  @set:Keep
+  abstract var fullscreenAutorotate: Boolean
 
   // Methods
   @DoNotStrip

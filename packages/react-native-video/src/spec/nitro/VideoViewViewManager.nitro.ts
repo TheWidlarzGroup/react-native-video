@@ -1,5 +1,6 @@
 import type { HybridObject } from 'react-native-nitro-modules';
 import type { NativeControlsStyles } from '../../core/types/ControlsStyles';
+import type { FullscreenOrientation } from '../../core/types/FullscreenOrientation';
 import type { ResizeMode } from '../../core/types/ResizeMode';
 import type { VideoPlayer } from './VideoPlayer.nitro';
 import type { ListenerSubscription } from './VideoPlayerEventEmitter.nitro';
@@ -24,6 +25,9 @@ export interface VideoViewViewManager extends HybridObject<{
   keepScreenAwake: boolean;
   surfaceType: SurfaceType;
   controlsStyles: NativeControlsStyles;
+
+  fullscreenOrientation: FullscreenOrientation;
+  fullscreenAutorotate: boolean;
 
   // Event listeners
 

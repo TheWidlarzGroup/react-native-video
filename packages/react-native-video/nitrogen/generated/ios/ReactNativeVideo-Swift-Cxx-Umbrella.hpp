@@ -20,6 +20,8 @@ namespace margelo::nitro::video { struct BandwidthData; }
 namespace margelo::nitro::video { struct BufferConfig; }
 // Forward declaration of `CustomVideoMetadata` to properly resolve imports.
 namespace margelo::nitro::video { struct CustomVideoMetadata; }
+// Forward declaration of `FullscreenOrientation` to properly resolve imports.
+namespace margelo::nitro::video { enum class FullscreenOrientation; }
 // Forward declaration of `HybridVideoPlayerEventEmitterSpec` to properly resolve imports.
 namespace margelo::nitro::video { class HybridVideoPlayerEventEmitterSpec; }
 // Forward declaration of `HybridVideoPlayerFactorySpec` to properly resolve imports.
@@ -96,6 +98,7 @@ namespace margelo::nitro::video { struct onVolumeChangeData; }
 #include "BandwidthData.hpp"
 #include "BufferConfig.hpp"
 #include "CustomVideoMetadata.hpp"
+#include "FullscreenOrientation.hpp"
 #include "HybridVideoPlayerEventEmitterSpec.hpp"
 #include "HybridVideoPlayerFactorySpec.hpp"
 #include "HybridVideoPlayerSourceFactorySpec.hpp"
