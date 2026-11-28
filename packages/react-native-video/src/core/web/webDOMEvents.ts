@@ -47,8 +47,13 @@ export function attachPlaybackListeners(
       // The browser picks the `timeupdate` rate, so the interval can only
       // thin the events out. The tolerance keeps the default 250 ms from
       // dropping every other event when the browser fires slightly early.
+      // A paused element fires `timeupdate` only after a seek, and no other
+      // event follows it, so that one always goes out.
       const now = Date.now();
-      if (now - lastProgressAt < media.progressUpdateInterval - 30) {
+      if (
+        !video.paused &&
+        now - lastProgressAt < media.progressUpdateInterval - 30
+      ) {
         return;
       }
       lastProgressAt = now;

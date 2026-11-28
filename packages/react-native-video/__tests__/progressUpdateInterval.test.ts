@@ -70,3 +70,23 @@ test('web: onProgress is thinned out to progressUpdateInterval', () => {
     Date.now = realNow;
   }
 });
+
+test('web: a seek while paused always sends onProgress', () => {
+  const realNow = Date.now;
+  let now = 1_000_000;
+  Date.now = () => now;
+  try {
+    const { video, progress } = webHarness(1000);
+    video.dispatchEvent(new Event('timeupdate'));
+    // Paused, the user drags the seek bar: one timeupdate per seek, 100 ms apart.
+    video.paused = true;
+    for (let i = 0; i < 3; i++) {
+      now += 100;
+      video.currentTime = i + 1;
+      video.dispatchEvent(new Event('timeupdate'));
+    }
+    expect(progress.length).toBe(4);
+  } finally {
+    Date.now = realNow;
+  }
+});
