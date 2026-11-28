@@ -74,19 +74,21 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   private func replaceSourceAndBeginLoad(
     with newSource: any HybridVideoPlayerSourceSpec
   ) throws -> LoadContext {
-    try runOnMainThreadSync {
-      var previousSource: (any HybridVideoPlayerSourceSpec)?
-      guard let token = try sourceLoader.begin(onBegin: {
-        previousSource = storedSource
-        storedSource = newSource
-      }), let previousSource else { throw CancellationError() }
-      let context = LoadContext(source: newSource, token: token)
-      releaseAssetIfNotUsedByCurrentLoad(for: previousSource)
-      // The next onAudioTrackChange describes the new source. Without this, a source with the
-      // same audio tracks (the next episode, say) has the same signature and gets no event.
-      lastEmittedAudioTrackSignature = nil
-      return context
+    var previousSource: (any HybridVideoPlayerSourceSpec)?
+    guard let token = try sourceLoader.begin(onBegin: {
+      previousSource = storedSource
+      storedSource = newSource
+    }), let previousSource else { throw CancellationError() }
+    let context = LoadContext(source: newSource, token: token)
+    releaseAssetIfNotUsedByCurrentLoad(for: previousSource)
+    // The next onAudioTrackChange describes the new source. Without this, a source with the
+    // same audio tracks (the next episode, say) has the same signature and gets no event.
+    // The signature belongs to the main thread (emitAudioTrackChange); this runs there before
+    // the new item is committed, which is queued later.
+    DispatchQueue.main.async { [weak self] in
+      self?.lastEmittedAudioTrackSignature = nil
     }
+    return context
   }
 
   private func ensureCurrentLoad(_ context: LoadContext) throws {
