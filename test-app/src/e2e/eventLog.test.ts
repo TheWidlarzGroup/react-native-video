@@ -7,6 +7,7 @@ import {
   PROGRESS_MARKER_SECONDS,
   PROGRESS_SPARSE_GAPS,
   PROGRESS_SPARSE_MIN_GAP_SECONDS,
+  RETRIED_ONCE_REQUESTS,
   SEEK_BACK_LANDED_SECONDS,
   SEEK_FORWARD_LANDED_SECONDS,
   START_POSITION_LANDED_SECONDS,
@@ -997,5 +998,18 @@ describe('crop', () => {
       { type: 'onProgress', currentTime: 100 }
     );
     expect(markers()).not.toContain('evt-progress-past-duration');
+  });
+});
+
+describe('request count', () => {
+  test('the first request and one retry mark evt-retried-once', () => {
+    feed({ type: 'requestCount', count: RETRIED_ONCE_REQUESTS });
+    expect(markers()).toContain('evt-retried-once');
+    expect(lines()).toEqual([`requests: ${RETRIED_ONCE_REQUESTS}`]);
+  });
+
+  test('the default retry count does not', () => {
+    feed({ type: 'requestCount', count: 4 });
+    expect(markers()).not.toContain('evt-retried-once');
   });
 });

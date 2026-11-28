@@ -106,14 +106,96 @@ export type VideoConfig = {
    * @default false
    */
   shouldCache?: boolean;
+  /**
+   * How many times a failed load (manifest, segment, media file) is retried before the
+   * player reports an error.
+   * @default 3
+   * @platform android
+   */
+  minLoadRetryCount?: number;
+  /**
+   * Keep retrying once a second while the device has no connection, instead of reporting
+   * an error after `minLoadRetryCount` attempts. Playback continues when the connection
+   * is back.
+   * @default false
+   * @platform android
+   */
+  disableDisconnectError?: boolean;
+  /**
+   * The stream type, as a file extension, for a uri that does not show it: `'m3u8'` (HLS),
+   * `'mpd'` (DASH) or `'ism'` (SmoothStreaming). Any other value means a single media file.
+   * Without it the type is read from the uri.
+   * @example
+   * ```ts
+   * { uri: 'https://example.com/live/stream?id=42', type: 'm3u8' }
+   * ```
+   * @platform android
+   */
+  type?: string;
+  /**
+   * Whether an HLS stream may be prepared from its playlists alone, without downloading
+   * media chunks first. Set it to `false` when a stream lists subtitle or audio renditions
+   * without a `CODECS` attribute and those tracks do not show up.
+   * @default true
+   * @platform android
+   */
+  textTracksAllowChunklessPreparation?: boolean;
+  /**
+   * Send Common Media Client Data (CMCD, CTA-5004) with the requests of an HLS, DASH or
+   * SmoothStreaming stream, so the CDN can see buffer length, bitrate, session id and so on.
+   * `true` sends the standard keys as a query parameter. Pass an object to choose the mode
+   * or to add your own keys.
+   * @example
+   * ```ts
+   * cmcd: { mode: 'header', session: { 'com.example-tenant': 'acme' } }
+   * ```
+   * @platform android
+   */
+  cmcd?: boolean | CmcdConfiguration;
 };
 
+/**
+ * How CMCD data is sent: in the `CMCD` query parameter or in the `CMCD-*` request headers.
+ */
+export type CmcdMode = 'query' | 'header';
+
+/**
+ * Custom CMCD keys. A key must carry a hyphenated prefix, for example `com.example-tenant`
+ * (CTA-5004, section 3.1). Strings are sent quoted, numbers as they are.
+ */
+export type CmcdData = Record<`${string}-${string}`, string | number>;
+
+export interface CmcdConfiguration {
+  /**
+   * @default 'query'
+   */
+  mode?: CmcdMode;
+  /** Custom keys for the `CMCD-Request` group. */
+  request?: CmcdData;
+  /** Custom keys for the `CMCD-Session` group. */
+  session?: CmcdData;
+  /** Custom keys for the `CMCD-Object` group. */
+  object?: CmcdData;
+  /** Custom keys for the `CMCD-Status` group. */
+  status?: CmcdData;
+}
+
 // @internal
-export interface NativeVideoConfig extends VideoConfig {
+export interface NativeVideoConfig extends Omit<VideoConfig, 'cmcd'> {
   // The uri should be resolved to string before creating the source
   uri: string;
   externalSubtitles?: NativeExternalSubtitle[];
   drm?: NativeDrmParams;
+  cmcd?: NativeCmcdConfiguration;
+}
+
+// @internal Custom keys arrive already formatted as CMCD pairs (`key="text"`, `key=1`).
+export interface NativeCmcdConfiguration {
+  mode: CmcdMode;
+  requestData?: string[];
+  sessionData?: string[];
+  objectData?: string[];
+  statusData?: string[];
 }
 
 /**

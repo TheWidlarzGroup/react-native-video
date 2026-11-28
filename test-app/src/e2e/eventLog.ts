@@ -30,6 +30,9 @@ export const MARKER_IDS = [
   'evt-onError', // onError itself, never the error status
   'evt-onError-repeated', // a second onError in one scenario: one failure must report once
   'evt-status-error', // onStatusChange('error')
+  // error-503-retry(-offline) (#5275): after onError the fixture server reports exactly
+  // RETRIED_ONCE_REQUESTS requests, the first one and minLoadRetryCount: 1 retry.
+  'evt-retried-once',
   'evt-onPlaybackStateChanged',
   // VideoView's renderLoader (#5264): the loader mounted, and later unmounted because the
   // video was ready to display (smoke-loader.yaml).
@@ -103,6 +106,8 @@ export type PlayerEvent =
   | { type: 'onEnd' }
   | { type: 'onReadyToDisplay' }
   | { type: 'onError'; code: string }
+  // How many requests the fixture server saw for the scenario's source (error-503-retry*).
+  | { type: 'requestCount'; count: number }
   | { type: 'onStatusChange'; status: VideoPlayerStatus }
   | { type: 'onPlaybackStateChange'; isPlaying: boolean }
   | { type: 'onSeek'; seekTime: number }
@@ -155,6 +160,7 @@ export const PROGRESS_MARKER_SECONDS = 2;
 export const PROGRESS_SPARSE_MIN_GAP_SECONDS = 0.8;
 export const PROGRESS_SPARSE_MAX_GAP_SECONDS = 2;
 export const PROGRESS_SPARSE_GAPS = 3;
+export const RETRIED_ONCE_REQUESTS = 2;
 export const SEEK_FORWARD_LANDED_SECONDS = 4;
 export const SEEK_BACK_LANDED_SECONDS = 2;
 // The mp4-start-position source starts at 5 s; natural playback starts near 0.
@@ -473,6 +479,11 @@ function apply(event: PlayerEvent) {
       if (state.errorCount > 1) mark('evt-onError-repeated');
       state.errorCode = event.code;
       append(`onError code=${event.code}`);
+      return;
+
+    case 'requestCount':
+      if (event.count === RETRIED_ONCE_REQUESTS) mark('evt-retried-once');
+      append(`requests: ${event.count}`);
       return;
 
     case 'onStatusChange':

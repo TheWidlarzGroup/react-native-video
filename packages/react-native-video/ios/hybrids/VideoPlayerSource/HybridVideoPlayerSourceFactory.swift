@@ -19,6 +19,7 @@ class HybridVideoPlayerSourceFactory: HybridVideoPlayerSourceFactorySpec {
       uri: uri,
       externalSubtitles: nil,
       drm: nil,
+      cmcd: nil,
       headers: nil,
       bufferConfig: nil,
       metadata: nil,
@@ -26,7 +27,11 @@ class HybridVideoPlayerSourceFactory: HybridVideoPlayerSourceFactorySpec {
       cropStart: nil,
       cropEnd: nil,
       initializeOnCreation: true,
-      shouldCache: nil
+      shouldCache: nil,
+      minLoadRetryCount: nil,
+      disableDisconnectError: nil,
+      type: nil,
+      textTracksAllowChunklessPreparation: nil
     )
     return try HybridVideoPlayerSource(config: config)
   }

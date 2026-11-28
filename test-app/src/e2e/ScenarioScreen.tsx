@@ -26,6 +26,7 @@ import {
   AUDIO_REPLACEMENT_SOURCE,
   CACHE_TOKEN,
   FIXTURE_BASE,
+  RETRY_TOKEN,
   SCENARIO_SOURCES,
   scenarioSource,
 } from './fixtures';
@@ -139,6 +140,23 @@ function startScenario(scenario: ScenarioName, player: VideoPlayer) {
   // Set before the load, as an app does in the setup callback of useVideoPlayer.
   if (scenario === 'mp4-progress-1s') {
     player.progressUpdateInterval = 1000;
+  }
+
+  // The player has given up by the time it reports the error: count its requests then.
+  if (
+    scenario === 'error-503-retry' ||
+    scenario === 'error-503-retry-offline'
+  ) {
+    player.addEventListener('onError', () => {
+      fetch(`${FIXTURE_BASE}/__requests?token=${RETRY_TOKEN}`)
+        .then((res) => res.json())
+        .then(({ count }: { count: number }) =>
+          eventLog.handle({ type: 'requestCount', count })
+        )
+        .catch((error) =>
+          eventLog.log(`request count failed: ${String(error)}`)
+        );
+    });
   }
 
   if (scenario === 'mp4-release-mid-playback') {

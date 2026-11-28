@@ -61,6 +61,25 @@ test('a token cut off with /__go-offline loses the connection; other requests do
   expect((await fetch(`${BASE}/__go-offline`)).status).toBe(400);
 });
 
+test('serves a playlist without an extension as HLS, by its first bytes', async () => {
+  const res = await fetch(`${BASE}/hls-noext/stream`);
+  expect(res.status).toBe(200);
+  expect(res.headers.get('content-type')).toBe('application/vnd.apple.mpegurl');
+});
+
+test('counts the requests of a token', async () => {
+  expect(await (await fetch(`${BASE}/__requests?token=c1`)).json()).toEqual({ count: 0 });
+  await fetch(`${BASE}/does-not-exist.mp4?token=c1`);
+  await fetch(`${BASE}/short.mp4?token=c1`);
+  await fetch(`${BASE}/short.mp4?token=c2`);
+  expect(await (await fetch(`${BASE}/__requests?token=c1`)).json()).toEqual({ count: 2 });
+  expect((await fetch(`${BASE}/__requests`)).status).toBe(400);
+});
+
+test('answers 503 under /__unavailable/', async () => {
+  expect((await fetch(`${BASE}/__unavailable/short.mp4`)).status).toBe(503);
+});
+
 test('honours Range requests', async () => {
   const res = await fetch(`${BASE}/short.mp4`, { headers: { Range: 'bytes=0-99' } });
   expect(res.status).toBe(206);

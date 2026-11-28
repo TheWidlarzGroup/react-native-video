@@ -16,6 +16,10 @@ namespace margelo::nitro::video { struct AudioTrack; }
 namespace margelo::nitro::video { struct BandwidthData; }
 // Forward declaration of `BufferConfig` to properly resolve imports.
 namespace margelo::nitro::video { struct BufferConfig; }
+// Forward declaration of `BufferingStrategy` to properly resolve imports.
+namespace margelo::nitro::video { enum class BufferingStrategy; }
+// Forward declaration of `CmcdMode` to properly resolve imports.
+namespace margelo::nitro::video { enum class CmcdMode; }
 // Forward declaration of `CustomVideoMetadata` to properly resolve imports.
 namespace margelo::nitro::video { struct CustomVideoMetadata; }
 // Forward declaration of `HybridVideoPlayerEventEmitterSpec` to properly resolve imports.
@@ -36,6 +40,8 @@ namespace margelo::nitro::video { class HybridVideoViewViewManagerSpec; }
 namespace margelo::nitro::video { struct ListenerSubscription; }
 // Forward declaration of `LivePlaybackParams` to properly resolve imports.
 namespace margelo::nitro::video { struct LivePlaybackParams; }
+// Forward declaration of `NativeCmcdConfiguration` to properly resolve imports.
+namespace margelo::nitro::video { struct NativeCmcdConfiguration; }
 // Forward declaration of `NativeDrmParams` to properly resolve imports.
 namespace margelo::nitro::video { struct NativeDrmParams; }
 // Forward declaration of `NativeExternalSubtitle` to properly resolve imports.
@@ -96,6 +102,8 @@ namespace ReactNativeVideo { class HybridVideoViewViewManagerSpec_cxx; }
 #include "AudioTrackChangeData.hpp"
 #include "BandwidthData.hpp"
 #include "BufferConfig.hpp"
+#include "BufferingStrategy.hpp"
+#include "CmcdMode.hpp"
 #include "CustomVideoMetadata.hpp"
 #include "HybridVideoPlayerEventEmitterSpec.hpp"
 #include "HybridVideoPlayerFactorySpec.hpp"
@@ -106,6 +114,7 @@ namespace ReactNativeVideo { class HybridVideoViewViewManagerSpec_cxx; }
 #include "HybridVideoViewViewManagerSpec.hpp"
 #include "ListenerSubscription.hpp"
 #include "LivePlaybackParams.hpp"
+#include "NativeCmcdConfiguration.hpp"
 #include "NativeDrmParams.hpp"
 #include "NativeExternalSubtitle.hpp"
 #include "OnGetLicensePayload.hpp"
@@ -1009,6 +1018,36 @@ namespace margelo::nitro::video::bridge::swift {
     return optional.value();
   }
   
+  // pragma MARK: std::optional<std::vector<std::string>>
+  /**
+   * Specialized version of `std::optional<std::vector<std::string>>`.
+   */
+  using std__optional_std__vector_std__string__ = std::optional<std::vector<std::string>>;
+  inline std::optional<std::vector<std::string>> create_std__optional_std__vector_std__string__(const std::vector<std::string>& value) noexcept {
+    return std::optional<std::vector<std::string>>(value);
+  }
+  inline bool has_value_std__optional_std__vector_std__string__(const std::optional<std::vector<std::string>>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline std::vector<std::string> get_std__optional_std__vector_std__string__(const std::optional<std::vector<std::string>>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::optional<NativeCmcdConfiguration>
+  /**
+   * Specialized version of `std::optional<NativeCmcdConfiguration>`.
+   */
+  using std__optional_NativeCmcdConfiguration_ = std::optional<NativeCmcdConfiguration>;
+  inline std::optional<NativeCmcdConfiguration> create_std__optional_NativeCmcdConfiguration_(const NativeCmcdConfiguration& value) noexcept {
+    return std::optional<NativeCmcdConfiguration>(value);
+  }
+  inline bool has_value_std__optional_NativeCmcdConfiguration_(const std::optional<NativeCmcdConfiguration>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline NativeCmcdConfiguration get_std__optional_NativeCmcdConfiguration_(const std::optional<NativeCmcdConfiguration>& optional) noexcept {
+    return optional.value();
+  }
+  
   // pragma MARK: std::optional<LivePlaybackParams>
   /**
    * Specialized version of `std::optional<LivePlaybackParams>`.
@@ -1021,6 +1060,21 @@ namespace margelo::nitro::video::bridge::swift {
     return optional.has_value();
   }
   inline LivePlaybackParams get_std__optional_LivePlaybackParams_(const std::optional<LivePlaybackParams>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::optional<BufferingStrategy>
+  /**
+   * Specialized version of `std::optional<BufferingStrategy>`.
+   */
+  using std__optional_BufferingStrategy_ = std::optional<BufferingStrategy>;
+  inline std::optional<BufferingStrategy> create_std__optional_BufferingStrategy_(const BufferingStrategy& value) noexcept {
+    return std::optional<BufferingStrategy>(value);
+  }
+  inline bool has_value_std__optional_BufferingStrategy_(const std::optional<BufferingStrategy>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline BufferingStrategy get_std__optional_BufferingStrategy_(const std::optional<BufferingStrategy>& optional) noexcept {
     return optional.value();
   }
   
