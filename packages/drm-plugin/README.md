@@ -1,6 +1,6 @@
 # @react-native-video/drm
 
-DRM plugin for react-native-video. It adds Widevine (Android) and FairPlay (iOS, visionOS) playback support via the react-native-video plugin system.
+DRM plugin for react-native-video. It adds Widevine (Android) and FairPlay (iOS) playback support via the react-native-video plugin system.
 
 ## Requirements
 
