@@ -1,37 +1,79 @@
 # React Native Video (Windows)
 
-React Native Video is currently maintained for React Native Windows (RNW) >= 0.61.
+React Native Video is currently maintained for React Native Windows (RNW) >= 0.76.
+
+## TurboModule Support
+
+As of version 0.76+, React Native Video for Windows uses the **TurboModule architecture** for improved performance and forward compatibility with React Native's new architecture.
+
+### Implementation Details
+
+The Windows implementation now includes:
+- **TurboModule-based native modules** using the `REACT_MODULE` macro system
+- **VideoManager module** for imperative video control commands
+- **Microsoft.UI.Xaml.Controls** for modern XAML MediaPlayerElement
+- Codegen configuration for automatic type generation
+- Modern C++/WinRT implementation with async/await support
+
+## Project Structure
 
 There is one implementation of `react-native-video` in this folder:
 
-1. _ReactNativeVideoCPP_ is the currently maintained implementation:
-   1. Use _ReactNativeVideoCPP_ for RNW >= 0.62.
-   2. Use _ReactNativeVideoCPP61_ for RNW 0.61.
+1. _ReactNativeVideoCPP_ is the currently maintained TurboModule implementation:
+   1. Use _ReactNativeVideoCPP_ for RNW >= 0.76.
 
-# Local Development Setup (RNW >= 0.61)
+### Legacy Implementations (Deprecated)
+
+For older versions of React Native Windows:
+- Use _ReactNativeVideoCPP62_ for RNW 0.62.
+- Use _ReactNativeVideoCPP61_ for RNW 0.61.
+
+**Note:** Legacy implementations use the old IViewManager architecture and are no longer maintained.
+
+# Local Development Setup (RNW >= 0.76)
 
 In order to work on _ReactNativeVideoCPP_, you'll need to install the [Windows Development Dependencies](https://microsoft.github.io/react-native-windows/docs/rnw-dependencies).
 
-In addition, `react-native-video` targets React Native 0.61 and React Native Windows 0.61 as dev dependencies. So in order to build _ReactNativeVideoCPP_ locally against RNW > 0.61 you'll need to temporarily upgrade the development dependencies:
+## Development Requirements
 
-## RNW >= 0.63
+1. Visual Studio 2022 (or later) with:
+   - Universal Windows Platform development workload
+   - C++ (v143) Universal Windows Platform tools
+   - Windows 10/11 SDK
 
+2. Node.js and Yarn
+
+3. React Native Windows CLI tools
+
+## Building the Project
+
+1. Install dependencies:
 ```
-npm install react-native@^0.63 --only=dev
-npm install react-native-windows@^0.63 --only=dev
+yarn install
 ```
 
-Now you should be able to open `ReactNativeVideoCPP.sln` in Visual Studio and build the project.
-
-## RNW 0.62
-
+2. Run codegen (generates TurboModule specs):
 ```
-npm install react-native@^0.62 --only=dev
-npm install react-native-windows@^0.62 --only=dev
+npx react-native codegen-windows
 ```
 
-Now you should be able to open `ReactNativeVideoCPP62.sln` in Visual Studio and build the project.
+3. Open `ReactNativeVideoCPP.sln` in Visual Studio and build the project.
 
-## RNW 0.61
+## TurboModule Architecture
 
-You should be able to open `ReactNativeVideoCPP61.sln` in Visual Studio and build the project.
+The Windows implementation uses React Native's TurboModule system which provides:
+- **Type safety** through codegen from TypeScript specs
+- **Better performance** with direct native method calls
+- **Async/await support** in native code
+- **Future compatibility** with React Native's new architecture
+
+### Key Components
+
+- `VideoManagerModule.h/cpp` - TurboModule for imperative video commands
+- `ReactVideoViewManager.h/cpp` - View manager for the Video component
+- `ReactVideoView.h/cpp` - Native video player view implementation using Microsoft.UI.Xaml.Controls.MediaPlayerElement
+
+### NuGet Dependencies
+
+- **Microsoft.UI.Xaml** (2.8.6+) - Modern XAML controls including MediaPlayerElement
+- **Microsoft.Windows.CppWinRT** - C++/WinRT language projection

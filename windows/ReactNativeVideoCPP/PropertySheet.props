@@ -11,6 +11,9 @@
     For more advanced scenarios, and complete documentation, please see:
     https://github.com/Microsoft/xlang/tree/master/src/package/cppwinrt/nuget 
     -->
-  <PropertyGroup />
+  <PropertyGroup>
+    <OutDir Condition="'$(OutDir)' == ''">$(SolutionDir)$(Platform)\$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir Condition="'$(IntDir)' == ''">$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
   <ItemDefinitionGroup />
 </Project>

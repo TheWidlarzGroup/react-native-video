@@ -38,14 +38,15 @@ export const MultiValueControl = <T extends number | string | ResizeMode>({
 
   return (
     <View style={styles.container}>
-      {values.map(value => {
+      {values.map((value) => {
         const _style = value === selected ? selectedStyle : unselectedStyle;
         return (
           <TouchableOpacity
             key={value}
             onPress={() => {
               onPress?.(value);
-            }}>
+            }}
+          >
             <Text style={_style}>{value}</Text>
           </TouchableOpacity>
         );

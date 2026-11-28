@@ -15,12 +15,14 @@
     <ClCompile Include="ReactPackageProvider.cpp" />
     <ClCompile Include="ReactVideoView.cpp" />
     <ClCompile Include="ReactVideoViewManager.cpp" />
+    <ClCompile Include="VideoManagerModule.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="ReactPackageProvider.h" />
     <ClInclude Include="ReactVideoView.h" />
     <ClInclude Include="ReactVideoViewManager.h" />
+    <ClInclude Include="VideoManagerModule.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ReactNativeVideoCPP.def" />

@@ -1,6 +1,12 @@
 *AppPackages*
 *BundleArtifacts*
 
+# NuGet packages - restored via nuget restore
+packages/
+
+# Package lock files
+packages.lock.json
+
 #OS junk files
 [Tt]humbs.db
 *.DS_Store

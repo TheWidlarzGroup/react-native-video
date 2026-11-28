@@ -1,0 +1,25 @@
+// Win32/Composition implementation - does not depend on XAML
+namespace ReactNativeVideoCPP
+{
+    [webhosthidden]
+    [default_interface]
+    runtimeclass ReactVideoViewComposition
+    {
+        ReactVideoViewComposition(Microsoft.ReactNative.IReactContext context);
+        
+        void SetUriString(String uri);
+        void SetIsLoopingEnabled(Boolean isLoopingEnabled);
+        void SetPaused(Boolean isPaused);
+        void SetMuted(Boolean isMuted);
+        void SetVolume(Double volume);
+        void SetPosition(Double position);
+        void SetProgressUpdateInterval(Int64 interval);
+        void SetAutoPlay(Boolean autoPlay);
+        void SetPlaybackRate(Double rate);
+        void SetSize(Single width, Single height);
+        
+        // Returns an IInspectable representing the underlying Windows.UI.Composition.Visual
+        // Caller can cast this to Windows.UI.Composition.Visual if needed
+        Object CompositionVisual{ get; };
+    };
+}

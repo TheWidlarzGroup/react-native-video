@@ -1,16 +1,12 @@
 const project = (() => {
   try {
-    const { configureProjects } = require("react-native-test-app");
+    const {configureProjects} = require('react-native-test-app');
     return configureProjects({
       android: {
-        sourceDir: "android",
+        sourceDir: 'android',
       },
       ios: {
-        sourceDir: "ios",
-      },
-      windows: {
-        sourceDir: "windows",
-        solutionFile: "windows/BareExample.sln",
+        sourceDir: 'ios',
       },
     });
   } catch (_) {
@@ -19,5 +15,29 @@ const project = (() => {
 })();
 
 module.exports = {
-  ...(project ? { project } : undefined),
+  ...(project ? {project} : undefined),
+  // Disable react-native-video autolink for Windows (Win32 apps need manual loading)
+  // Disable @react-native-picker/picker for Windows (no Windows implementation)
+  dependencies: {
+    'react-native-video': {
+      platforms: {
+        windows: null,
+      },
+    },
+    '@react-native-picker/picker': {
+      platforms: {
+        windows: null,
+      },
+    },
+  },
+  project: {
+    ...project,
+    windows: {
+      sourceDir: 'windows',
+      solutionFile: 'BareExampleApp.sln',
+      project: {
+        projectFile: 'BareExampleApp/BareExampleApp.vcxproj',
+      },
+    },
+  },
 };

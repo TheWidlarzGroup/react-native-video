@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <!-- Override ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch after all other imports -->
+  <PropertyGroup>
+    <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
+  </PropertyGroup>
+
+  <!-- Custom target to suppress MSB3271 errors for React Native Windows UWP binaries -->
+  <Target Name="SuppressArchitectureMismatch" BeforeTargets="ResolveAssemblyReferences">
+    <PropertyGroup>
+      <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
+    </PropertyGroup>
+  </Target>
+</Project>

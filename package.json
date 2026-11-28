@@ -38,6 +38,16 @@
         "react": "*",
         "react-native": "*"
     },
+    "codegenConfig": {
+        "name": "RNVideoSpec",
+        "type": "all",
+        "jsSrcsDir": "src/specs",
+        "windows": {
+            "namespace": "ReactNativeVideo",
+            "outputDirectory": "windows/codegen",
+            "componentsWindows": true
+        }
+    },
     "scripts": {
         "lint": "yarn eslint .",
         "build": "yarn tsc",

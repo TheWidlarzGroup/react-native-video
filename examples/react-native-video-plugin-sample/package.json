@@ -5,5 +5,22 @@
   "main": "src/index",
   "author": " <> ()",
   "license": "UNLICENSED",
-  "homepage": "#readme"
+  "homepage": "#readme",
+  "scripts": {
+    "start": "react-native start",
+    "windows": "react-native run-windows --root .. --proj-dir windows --arch x64",
+    "windows:release": "react-native run-windows --root .. --proj-dir windows --arch x64 --release"
+  },
+  "peerDependencies": {
+    "react-native": "*",
+    "react-native-video": "*",
+    "react-native-windows": "*"
+  },
+  "devDependencies": {
+    "@react-native/babel-preset": "^0.78.0",
+    "@react-native/metro-config": "^0.78.0",
+    "react": "18.2.0",
+    "react-native": "0.78.2",
+    "react-native-windows": "^0.76.0"
+  }
 }
