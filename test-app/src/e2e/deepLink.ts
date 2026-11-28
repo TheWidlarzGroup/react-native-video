@@ -25,6 +25,7 @@ export const SCENARIO_NAMES = [
   'audio-tracks',
   'audio-tracks-replace', // same stream; once loaded, replaceSourceAsync() onto it under another URL (#5291)
   'mp4-fullscreen-landscape', // same clip; fullscreen locked to landscape from JS after onLoad (#5286)
+  'mp4-seek-events', // same clip, paused; seekTo and seekBy from JS, inside and outside the clip
 ] as const;
 
 export type ScenarioName = (typeof SCENARIO_NAMES)[number];

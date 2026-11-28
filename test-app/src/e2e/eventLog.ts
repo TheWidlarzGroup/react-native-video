@@ -100,6 +100,11 @@ export const MARKER_IDS = [
   'evt-fullscreen-landscape', // the window was landscape while in fullscreen
   'evt-fullscreen-turned-portrait', // ...and later portrait while still in fullscreen (lock lost)
   'evt-portrait-after-exit', // portrait again once fullscreen closed (the app's own setting back)
+  // Seeks from JS (mp4-seek-events), each judged on its onSeek value and the position after it:
+  'evt-seek-events-ok', // every step's onSeek reported the expected time
+  'evt-seek-event-mismatch',
+  'evt-seek-positions-ok', // every step's position landed where expected
+  'evt-seek-position-mismatch',
 ] as const;
 
 export type MarkerId = (typeof MARKER_IDS)[number];
@@ -136,6 +141,16 @@ export type PlayerEvent =
       call: 'enterFullscreen' | 'exitFullscreen';
       message: string;
     }
+  // One seek of mp4-seek-events: the onSeek value seen for it (null if none) and the
+  // position read after it, against the expected time.
+  | {
+      type: 'seekCheck';
+      label: string;
+      eventTime: number | null;
+      position: number;
+      expected: number;
+    }
+  | { type: 'seekChecksDone' }
   // player.status read synchronously in the setup callback, before any load starts.
   | { type: 'initialStatus'; status: VideoPlayerStatus }
   // player.status read after replaceSourceAsync(null) resolved and native teardown ran.
@@ -200,6 +215,8 @@ export const LOADER_SOURCE_HOLD_MS = 4000;
 export const LOADER_HELD_MIN_MS = 2500;
 // Set when the player reports an error status without a code (see handle).
 export const STATUS_ERROR_CODE = 'status/error';
+// mp4-seek-events: how far an onSeek value or a position may be from the expected time.
+export const SEEK_CHECK_TOLERANCE_SECONDS = 0.3;
 
 const MAX_ENTRIES = 50;
 
@@ -245,6 +262,10 @@ type State = {
   loadsOfSource: number;
   // The duration the last onLoad reported, NaN before it.
   loadedDuration: number;
+  // mp4-seek-events: steps seen and how many matched.
+  seekChecks: number;
+  seekEventsOk: number;
+  seekPositionsOk: number;
 };
 
 const initialState = (): State => ({
@@ -269,6 +290,9 @@ const initialState = (): State => ({
   sparseGaps: 0,
   loadsOfSource: 0,
   loadedDuration: NaN,
+  seekChecks: 0,
+  seekEventsOk: 0,
+  seekPositionsOk: 0,
 });
 
 let state = initialState();
@@ -567,6 +591,33 @@ function apply(event: PlayerEvent) {
       if (event.rate === 2) mark('evt-rate-2x');
       if (event.rate === 0.5) mark('evt-rate-0-5x');
       append(`onPlaybackRateChange ${event.rate}`);
+      return;
+
+    case 'seekCheck': {
+      state.seekChecks += 1;
+      const near = (value: number) =>
+        Math.abs(value - event.expected) <= SEEK_CHECK_TOLERANCE_SECONDS;
+      if (event.eventTime !== null && near(event.eventTime))
+        state.seekEventsOk += 1;
+      else mark('evt-seek-event-mismatch');
+      if (near(event.position)) state.seekPositionsOk += 1;
+      else mark('evt-seek-position-mismatch');
+      append(
+        `seek ${event.label}: onSeek=${event.eventTime ?? 'none'} position=${event.position.toFixed(2)} expected=${event.expected}`
+      );
+      return;
+    }
+
+    case 'seekChecksDone':
+      if (state.seekChecks > 0 && state.seekEventsOk === state.seekChecks) {
+        mark('evt-seek-events-ok');
+      }
+      if (state.seekChecks > 0 && state.seekPositionsOk === state.seekChecks) {
+        mark('evt-seek-positions-ok');
+      }
+      append(
+        `seek checks: events ${state.seekEventsOk}/${state.seekChecks}, positions ${state.seekPositionsOk}/${state.seekChecks}`
+      );
       return;
 
     case 'initialStatus':
