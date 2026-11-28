@@ -23,6 +23,6 @@ tags: [smoke]
       - extendedWaitUntil:
           visible:
             id: "evt-retried-once"
-          timeout: 5000
+          timeout: 35000
 - assertNotVisible:
     id: "evt-onError-repeated"

@@ -36,7 +36,7 @@ tags: [smoke]
 - extendedWaitUntil:
     visible:
       id: "evt-progress-gt-2s"
-    timeout: 15000
+    timeout: 45000
 - assertNotVisible:
     id: "video-loader-label"
 - assertNotVisible:

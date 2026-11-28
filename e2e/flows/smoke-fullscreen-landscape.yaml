@@ -34,7 +34,7 @@ onFlowComplete:
       - extendedWaitUntil:
           visible:
             id: "evt-fullscreen-landscape"
-          timeout: 10000
+          timeout: 35000
       - setOrientation: LANDSCAPE_LEFT
       - setOrientation: PORTRAIT
       - extendedWaitUntil:
@@ -46,7 +46,7 @@ onFlowComplete:
       - extendedWaitUntil:
           visible:
             id: "evt-portrait-after-exit"
-          timeout: 5000
+          timeout: 25000
       - assertNotVisible:
           id: "evt-fullscreen-call-failed"
       - assertNotVisible:

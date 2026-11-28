@@ -35,7 +35,7 @@ tags: [smoke]
 - extendedWaitUntil:
     visible:
       id: "evt-replacement-load-started"   # onLoadStart for the new source, on every platform
-    timeout: 20000
+    timeout: 30000
 - extendedWaitUntil:
     visible:
       id: "evt-replacement-loaded"

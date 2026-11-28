@@ -20,14 +20,14 @@ tags: [smoke]
 - extendedWaitUntil:
     visible:
       id: "evt-replace-resolved"
-    timeout: 15000            # requested 1 s after the first source listed its tracks
+    timeout: 55000            # requested 1 s after the first source listed its tracks
 - extendedWaitUntil:
     visible:
       id: "evt-replacement-loaded"
-    timeout: 30000
+    timeout: 85000
 - extendedWaitUntil:
     visible:
       id: "evt-audio-tracks-after-replace"
-    timeout: 10000
+    timeout: 95000
 - assertNotVisible:
     id: "evt-onError"

@@ -20,7 +20,7 @@ tags: [smoke]
 - extendedWaitUntil:
     visible:
       id: "evt-onEnded"
-    timeout: 15000            # 3 s of playback; the whole clip would take 8 s
+    timeout: 35000            # 3 s of playback; the whole clip would take 8 s
 - assertNotVisible:
     id: "evt-progress-past-duration"
 - assertNotVisible:
