@@ -105,7 +105,9 @@ function holdMs(url, now = Date.now()) {
 
 const server = createServer((req, res) => {
   const wait = holdMs(req.url);
-  if (wait === 0) return respond(req, res);
+  // holdMs() already caps the hold; the bound is checked again here, where the timer is
+  // set, so a code scanner sees that the request-controlled delay is limited.
+  if (!(wait > 0 && wait <= MAX_HOLD_MS)) return respond(req, res);
   const timer = setTimeout(() => respond(req, res), wait);
   res.on('close', () => clearTimeout(timer));
 });

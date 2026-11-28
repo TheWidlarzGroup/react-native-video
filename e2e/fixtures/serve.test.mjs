@@ -167,10 +167,25 @@ test('?hold with holdId holds every request of the id until one moment, then non
 });
 
 test('?hold ignores a value that is not a positive number', async () => {
-  for (const hold of ['0', '-5', 'abc', '']) {
+  for (const hold of ['0', '-5', 'abc', '', 'NaN', '-Infinity']) {
     const { res, ms } = await elapsedMs(`${BASE}/short.mp4?hold=${hold}`);
     expect(res.status).toBe(200);
     expect(ms).toBeLessThan(250);
+  }
+});
+
+test('?hold above the cap is still held (capped at MAX_HOLD_MS), not answered at once', async () => {
+  for (const hold of ['1e12', 'Infinity']) {
+    const controller = new AbortController();
+    let answered = false;
+    const pending = fetch(`${BASE}/short.mp4?hold=${hold}`, { signal: controller.signal }).then((res) => {
+      answered = true;
+      return res;
+    });
+    await new Promise((r) => setTimeout(r, 300));
+    expect(answered).toBe(false);
+    controller.abort();
+    await expect(pending).rejects.toThrow();
   }
 });
 
