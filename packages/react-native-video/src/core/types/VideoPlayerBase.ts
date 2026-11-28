@@ -302,7 +302,7 @@ export interface VideoPlayerSpecBase {
    * `undefined` only while no audio track is known yet, e.g. before the
    * source has loaded.
    */
-  readonly selectedAudioTrackId?: string;
+  readonly selectedAudioTrackId?: string | undefined;
 
   /**
    * Whether to show notification controls (lock screen / control center).
