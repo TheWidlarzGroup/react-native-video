@@ -1,0 +1,59 @@
+# usesExternalPlaybackWhileExternalScreenIsActive (#5299, iOS): before it is set it reads false,
+# the AVPlayer default (evt-external-screen-default; a library without the property reads
+# undefined, and a value assigned to it would read back from the JS object alone). Set to
+# true before the load, the player reads it back as true (evt-external-screen-on), and it is
+# still true once replaceSourceAsync() has loaded another source (evt-external-screen-kept):
+# the value is held by the AVPlayer, which the replacement keeps. What it does (full-screen video on a mirrored
+# TV) needs an iPhone and a TV: notes/D-telefon-28-11.md. On Android the property is a no-op,
+# so the scenario only plays and replaces the source there, which must not fail either.
+#
+# Both presses wait for the end of a clip: iOS defers a tap during playback (shared/press.yaml).
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4-external-screen
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 20000            # generous: emulator software decoder cold start
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - assertVisible:
+          id: "evt-external-screen-default"
+      - assertVisible:
+          id: "evt-external-screen-on"
+- runFlow: ../shared/wait-for-end.yaml
+- runFlow:
+    file: ../shared/press.yaml
+    env:
+      BUTTON: btn-replace-hls
+      NTH: 1
+- extendedWaitUntil:
+    visible:
+      id: "evt-replacement-loaded"
+    timeout: 20000            # HLS: manifest + first segments from the fixture server
+- extendedWaitUntil:
+    visible:
+      id: "evt-ended-after-replace"
+    timeout: 25000            # the HLS clip is ~8 s
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - runFlow:
+          file: ../shared/press.yaml
+          env:
+            BUTTON: btn-external-screen-check
+            NTH: 1
+      - extendedWaitUntil:
+          visible:
+            id: "evt-external-screen-kept"
+          timeout: 5000
+- assertNotVisible:
+    id: "evt-onError"

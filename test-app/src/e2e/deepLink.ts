@@ -4,6 +4,7 @@ export const SCENARIO_NAMES = [
   'mp4-preload', // same clip, started with preload() instead of initialize()+play()
   'mp4-release-mid-playback', // same clip; replaceSourceAsync(null) once progress > 2 s
   'mp4-progress-1s', // same clip; progressUpdateInterval = 1000 before the load
+  'mp4-external-screen', // same clip; iOS: usesExternalPlaybackWhileExternalScreenIsActive = true before the load (#5299)
   'mp4-loader', // same clip; VideoView with renderLoader (covers the video until it is shown)
   'mp4-start-position', // same clip, with startPosition: 5000 on the source
   'mp4-crop', // same clip, cropStart: 2000 and cropEnd: 5000 (plays 3 s of it)

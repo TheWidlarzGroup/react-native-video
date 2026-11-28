@@ -59,6 +59,7 @@ export const SCENARIO_SOURCES: Record<ScenarioName, VideoConfig> = {
   'mp4-preload': fixture('short.mp4'),
   'mp4-release-mid-playback': fixture('short.mp4'),
   'mp4-progress-1s': fixture('short.mp4'),
+  'mp4-external-screen': fixture('short.mp4'),
   'mp4-loader': heldFixture('short.mp4', LOADER_SOURCE_HOLD_MS),
   'mp4-start-position': { ...fixture('short.mp4'), startPosition: 5000 },
   'mp4-crop': { ...fixture('short.mp4'), cropStart: 2000, cropEnd: 5000 },

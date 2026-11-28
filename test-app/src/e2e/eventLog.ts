@@ -67,6 +67,9 @@ export const MARKER_IDS = [
   'evt-audio-alt-selected', // onAudioTrackChange reports the Spanish track selected (2 tracks listed)
   'evt-audio-default-restored', // ...then the English (default) track selected again
   'evt-audio-tracks-after-replace', // onAudioTrackChange lists both tracks after replaceSourceAsync() was requested (#5291)
+  'evt-external-screen-default', // usesExternalPlaybackWhileExternalScreenIsActive reads false before it is set (#5299)
+  'evt-external-screen-on', // ...then reads back true once set
+  'evt-external-screen-kept', // ...and still true once a replacement source has loaded
   // An unassisted loop restart: see LOOP_VERIFIED_END_COUNT and the wrap-around rule in
   // handle('onProgress') — AVPlayer reports each loop as onEnd, ExoPlayer wraps silently,
   // so both are covered (see smoke-loop.yaml).
@@ -119,6 +122,9 @@ export type PlayerEvent =
   | { type: 'onSeek'; seekTime: number }
   | { type: 'onVolumeChange'; muted: boolean; volume: number }
   | { type: 'onPlaybackRateChange'; rate: number }
+  // usesExternalPlaybackWhileExternalScreenIsActive read back from the player (#5299).
+  // value is String(read value): 'false' before it is set, 'undefined' without the property.
+  | { type: 'externalScreen'; phase: 'default' | 'read'; value: string }
   // VideoView's onFullscreenChange (a view event, not a player event).
   | { type: 'onFullscreenChange'; fullscreen: boolean }
   // The renderLoader element mounted (shown) or unmounted (hidden) inside VideoView. `at`
@@ -557,6 +563,17 @@ function apply(event: PlayerEvent) {
       if (event.rate === 2) mark('evt-rate-2x');
       if (event.rate === 0.5) mark('evt-rate-0-5x');
       append(`onPlaybackRateChange ${event.rate}`);
+      return;
+
+    case 'externalScreen':
+      if (event.phase === 'default' && event.value === 'false') {
+        mark('evt-external-screen-default');
+      } else if (event.phase === 'read' && event.value === 'true') {
+        mark('evt-external-screen-on');
+        if (state.markers.has('evt-replacement-loaded'))
+          mark('evt-external-screen-kept');
+      }
+      append(`externalScreen ${event.phase} ${event.value}`);
       return;
 
     case 'initialStatus':
