@@ -7,7 +7,6 @@ import {
 import {
   enable as enableDRMPlugin,
   disable as disableDRMPlugin,
-  isEnabled as isDRMPluginEnabled,
 } from '@react-native-video/drm';
 
 const getDRMSource = (): VideoConfig => {
@@ -103,15 +102,13 @@ export const getVideoSource = (
   options: SourceOptions = defaultSourceOptions
 ): VideoConfig => {
   if (type === 'drm') {
-    if (!isDRMPluginEnabled) {
-      enableDRMPlugin();
-    }
+    // enable() and disable() do nothing when the plugin is already in that state. The
+    // exported isEnabled is read once at import, so it cannot tell which state that is.
+    enableDRMPlugin();
     return { ...getDRMSource(), ...sourceOptionsConfig(options) };
   }
 
-  if (isDRMPluginEnabled) {
-    disableDRMPlugin();
-  }
+  disableDRMPlugin();
 
   const HLS = 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8';
   const MP4 =
