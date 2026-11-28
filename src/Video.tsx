@@ -45,18 +45,22 @@ import {
   resolveAssetSourceForVideo,
 } from './utils';
 import NativeVideoManager from './specs/NativeVideoManager';
-import {ViewType, CmcdMode, VideoRef} from './types';
+import ViewType from './types/ViewType';
 import type {
-  OnLoadData,
-  OnTextTracksData,
-  OnReceiveAdEventData,
-  ReactVideoProps,
   CmcdData,
+  ReactVideoProps,
   ReactVideoSource,
   AdConfig,
   AdConfigDAIVod,
   AdConfigDAILive,
-} from './types';
+} from './types/video';
+import {CmcdMode} from './types/video';
+import type {VideoRef} from './types/video-ref';
+import type {
+  OnLoadData,
+  OnTextTracksData,
+  OnReceiveAdEventData,
+} from './types/events';
 import type {ISO639_1} from './types/language';
 import type {AdsConfig} from './specs/VideoNativeComponent';
 
