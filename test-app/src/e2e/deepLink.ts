@@ -10,6 +10,7 @@ export const SCENARIO_NAMES = [
   'error-mid-playback',
   'video-tracks',
   'audio-tracks',
+  'mp4-fullscreen-landscape', // same clip; fullscreen locked to landscape from JS after onLoad (#5286)
 ] as const;
 
 export type ScenarioName = (typeof SCENARIO_NAMES)[number];

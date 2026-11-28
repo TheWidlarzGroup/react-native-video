@@ -30,4 +30,5 @@ export const SCENARIO_SOURCES: Record<ScenarioName, VideoConfig> = {
   'error-mid-playback': fixture('missing-segment/index.m3u8'), // 2 segments, then a 404
   'video-tracks': fixture('hls-quality/index.m3u8'), // HLS, 3 video renditions (360p/180p/90p)
   'audio-tracks': fixture('hls-audio/index.m3u8'), // HLS, English (default) + Spanish audio
+  'mp4-fullscreen-landscape': fixture('short.mp4'),
 };
