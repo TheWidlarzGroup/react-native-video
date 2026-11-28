@@ -4,6 +4,10 @@
 # between (eventLog.ts); a repeated false is not counted (Android reports the ready state and
 # the end of the clip with false).
 #
+# Timeouts: Maestro measures an extendedWaitUntil timeout from the latest interaction
+# (launch, tap), not from the start of the step. The pause at the end comes after a wait
+# with no tap between, so its timeout has to be larger than that wait's or it is no pause.
+#
 # HLS start, then a forward seek after the clip has ended, through press.yaml on an idle
 # player as in smoke-seek.yaml.
 appId: ${APP_ID}
@@ -40,7 +44,7 @@ tags: [smoke]
 - extendedWaitUntil:
     visible:
       id: "evt-onBuffer-true-repeated"
-    timeout: 3000
+    timeout: 13000            # 3 s after the 10 s above: Maestro counts from the last tap
     optional: true
 - assertNotVisible:
     id: "evt-onBuffer-true-repeated"
