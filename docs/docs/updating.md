@@ -25,9 +25,9 @@ Our agent skill knows the v6→v7 mapping. Install it with `npx skills add TheWi
 
 ### Before you start
 
-*   Read [Not in v7 yet](#not-in-v7-yet) first. Subtitle styling, start position and trimming, caching and the loading and buffering options are in open pull requests. The poster props, `controlsStyles`, the fullscreen orientation props, audio output and secure output, and `progressUpdateInterval` come with the release after `7.0.0-beta.15`. Ads and TV platforms are planned after v7 stable. A few v6 props are removed for good. v6 is still maintained, so you can stay on it until the feature you need lands.
+*   Read [Not in v7 yet](#not-in-v7-yet) first. Subtitle styling is in an open pull request. Start position and trimming, caching, the loading and buffering options, the poster props, `controlsStyles`, the fullscreen orientation props, audio output and secure output, and `progressUpdateInterval` come with the release after `7.0.0-beta.15`. Ads and TV platforms are planned after v7 stable. A few v6 props are removed for good. v6 is still maintained, so you can stay on it until the feature you need lands.
 *   v7 needs React Native 0.75 or newer and iOS 15 or newer. See [Installation](./fundamentals/installation.md) for all requirements.
-*   Time values keep the units of v6. Positions and lengths are in seconds: `player.currentTime`, `player.duration`, `seekTo()`, `seekBy()`, and the times in `onProgress`, `onLoad` and `onSeek`. Options are in milliseconds: `bufferConfig`, and `startPosition`, `cropStart` and `cropEnd` once [#5266](https://github.com/TheWidlarzGroup/react-native-video/pull/5266) lands. The one exception is `preferredForwardBufferDuration`, which was in seconds in v6 and is `bufferConfig.preferredForwardBufferDurationMs` in v7.
+*   Time values keep the units of v6. Positions and lengths are in seconds: `player.currentTime`, `player.duration`, `seekTo()`, `seekBy()`, and the times in `onProgress`, `onLoad` and `onSeek`. Options are in milliseconds: `bufferConfig`, and `startPosition`, `cropStart` and `cropEnd`, from the release after `7.0.0-beta.15`. The one exception is `preferredForwardBufferDuration`, which was in seconds in v6 and is `bufferConfig.preferredForwardBufferDurationMs` in v7.
 
 ### 1. Install
 
@@ -154,12 +154,18 @@ The first argument of `useVideoPlayer` is a URL, a `require()` asset or a config
 | `bufferConfig`, `source.bufferConfig` | `bufferConfig` | See the next table. |
 | `maxBitRate` | `bufferConfig.preferredPeakBitRate` | Bits per second, as in v6. |
 | `preferredForwardBufferDuration` | `bufferConfig.preferredForwardBufferDurationMs` | iOS. Seconds in v6, milliseconds in v7. |
+| `source.startPosition` | `startPosition` | From the release after `7.0.0-beta.15`. Milliseconds, as in v6. Also on web. |
+| `source.cropStart`, `source.cropEnd` | `cropStart`, `cropEnd` | From the release after `7.0.0-beta.15`. Milliseconds, as in v6. iOS and Android. The player treats the cropped part as the whole video. |
+| `source.shouldCache` | `shouldCache` | From the release after `7.0.0-beta.15`. iOS and Android, up to 100 MB. Progressive files only: HLS, DASH, DRM content and sources with `externalSubtitles` play without the cache. |
+| `minLoadRetryCount`, `disableDisconnectError` | Same names, in the config | From the release after `7.0.0-beta.15`. Android. |
+| `source.type`, `source.textTracksAllowChunklessPreparation`, `source.cmcd` | `type`, `textTracksAllowChunklessPreparation`, `cmcd` | From the release after `7.0.0-beta.15`. Android. |
+| `automaticallyWaitsToMinimizeStalling` | `bufferConfig.automaticallyWaitsToMinimizeStalling` | From the release after `7.0.0-beta.15`. iOS. |
 
 | v6 `bufferConfig` | v7 `bufferConfig` |
 | :--- | :--- |
 | `minBufferMs`, `maxBufferMs`, `bufferForPlaybackMs`, `bufferForPlaybackAfterRebufferMs`, `backBufferDurationMs` | Same names. Android. |
 | `live` | `livePlayback`, with the same five fields. |
-| `bufferingStrategy`, `maxHeapAllocationPercent`, `minBufferMemoryReservePercent` | Same names, in an open pull request ([#5275](https://github.com/TheWidlarzGroup/react-native-video/pull/5275)). Android. |
+| `bufferingStrategy`, `maxHeapAllocationPercent`, `minBufferMemoryReservePercent` | Same names, from the release after `7.0.0-beta.15`. Android. |
 | `minBackBufferMemoryReservePercent`, `initialBitrate`, `cacheSizeMB` | Not available. |
 
 #### View props are on `VideoView`
@@ -315,14 +321,11 @@ This is the state after `7.0.0-beta.15`, with what comes in the release after `7
 
 #### In open pull requests
 
-These v6 features are in open pull requests and are planned before v7 stable:
+This v6 feature is in an open pull request and is planned before v7 stable:
 
 | Feature | v6 API | v7 API | Pull request |
 | :--- | :--- | :--- | :--- |
 | Subtitle styling | `subtitleStyle` | `subtitleStyle` on `VideoView` | [#5149](https://github.com/TheWidlarzGroup/react-native-video/pull/5149) |
-| Start position and trimming | `source.startPosition`, `source.cropStart`, `source.cropEnd` | `startPosition`, `cropStart`, `cropEnd` in the config, in milliseconds as in v6 | [#5266](https://github.com/TheWidlarzGroup/react-native-video/pull/5266) |
-| Caching | `source.shouldCache` | `shouldCache` in the config, on Android and iOS, up to 100 MB. Progressive files only: HLS, DASH, DRM content and sources with `externalSubtitles` play without the cache | [#5267](https://github.com/TheWidlarzGroup/react-native-video/pull/5267) |
-| Loading and buffering | `minLoadRetryCount`, `disableDisconnectError`, `source.type`, `source.textTracksAllowChunklessPreparation`, `source.cmcd`, `bufferConfig.bufferingStrategy`, `automaticallyWaitsToMinimizeStalling` | Same names. `automaticallyWaitsToMinimizeStalling` moves to `bufferConfig` | [#5275](https://github.com/TheWidlarzGroup/react-native-video/pull/5275) |
 
 #### Being worked on
 
