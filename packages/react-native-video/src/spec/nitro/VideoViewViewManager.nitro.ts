@@ -1,7 +1,7 @@
 import type { HybridObject } from 'react-native-nitro-modules';
 import type { NativeControlsStyles } from '../../core/types/ControlsStyles';
 import type { FullscreenOrientation } from '../../core/types/FullscreenOrientation';
-import type { ResizeMode } from '../../core/types/ResizeMode';
+import type { VideoResizeMode } from '../../core/types/ResizeMode';
 import type { VideoPlayer } from './VideoPlayer.nitro';
 import type { ListenerSubscription } from './VideoPlayerEventEmitter.nitro';
 
@@ -16,7 +16,7 @@ export interface VideoViewViewManager extends HybridObject<{
   controls: boolean;
   pictureInPicture: boolean;
   autoEnterPictureInPicture: boolean;
-  resizeMode: ResizeMode;
+  resizeMode: VideoResizeMode;
   enterFullscreen(): void;
   exitFullscreen(): void;
   enterPictureInPicture(): void;

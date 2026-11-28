@@ -9,8 +9,8 @@
 
 // Forward declaration of `HybridVideoPlayerSpec` to properly resolve imports.
 namespace margelo::nitro::video { class HybridVideoPlayerSpec; }
-// Forward declaration of `ResizeMode` to properly resolve imports.
-namespace margelo::nitro::video { enum class ResizeMode; }
+// Forward declaration of `VideoResizeMode` to properly resolve imports.
+namespace margelo::nitro::video { enum class VideoResizeMode; }
 // Forward declaration of `SurfaceType` to properly resolve imports.
 namespace margelo::nitro::video { enum class SurfaceType; }
 // Forward declaration of `NativeControlsStyles` to properly resolve imports.
@@ -24,8 +24,8 @@ namespace margelo::nitro::video { struct ListenerSubscription; }
 #include "HybridVideoPlayerSpec.hpp"
 #include <optional>
 #include "JHybridVideoPlayerSpec.hpp"
-#include "ResizeMode.hpp"
-#include "JResizeMode.hpp"
+#include "VideoResizeMode.hpp"
+#include "JVideoResizeMode.hpp"
 #include "SurfaceType.hpp"
 #include "JSurfaceType.hpp"
 #include "NativeControlsStyles.hpp"
@@ -105,14 +105,14 @@ namespace margelo::nitro::video {
     static const auto method = _javaPart->javaClassStatic()->getMethod<void(jboolean /* autoEnterPictureInPicture */)>("setAutoEnterPictureInPicture");
     method(_javaPart, autoEnterPictureInPicture);
   }
-  ResizeMode JHybridVideoViewViewManagerSpec::getResizeMode() {
-    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JResizeMode>()>("getResizeMode");
+  VideoResizeMode JHybridVideoViewViewManagerSpec::getResizeMode() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JVideoResizeMode>()>("getResizeMode");
     auto __result = method(_javaPart);
     return __result->toCpp();
   }
-  void JHybridVideoViewViewManagerSpec::setResizeMode(ResizeMode resizeMode) {
-    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JResizeMode> /* resizeMode */)>("setResizeMode");
-    method(_javaPart, JResizeMode::fromCpp(resizeMode));
+  void JHybridVideoViewViewManagerSpec::setResizeMode(VideoResizeMode resizeMode) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JVideoResizeMode> /* resizeMode */)>("setResizeMode");
+    method(_javaPart, JVideoResizeMode::fromCpp(resizeMode));
   }
   bool JHybridVideoViewViewManagerSpec::getKeepScreenAwake() {
     static const auto method = _javaPart->javaClassStatic()->getMethod<jboolean()>("getKeepScreenAwake");
