@@ -645,6 +645,22 @@ describe('audio track markers', () => {
     ]);
   });
 
+  test('a replacement source that lists both tracks is marked, the first source is not (#5291)', () => {
+    const both = [
+      { ...en, selected: true },
+      { ...es, selected: false },
+    ];
+    feed({ type: 'onAudioTrackChange', tracks: both });
+    expect(markers()).not.toContain('evt-audio-tracks-after-replace');
+    feed(
+      { type: 'replaceSource', phase: 'requested', source: 'audio-tracks' },
+      { type: 'onAudioTrackChange', tracks: [] } // Android: the list empties first
+    );
+    expect(markers()).not.toContain('evt-audio-tracks-after-replace');
+    feed({ type: 'onAudioTrackChange', tracks: both });
+    expect(markers()).toContain('evt-audio-tracks-after-replace');
+  });
+
   test('the default track alone never sets either marker (not a real restore)', () => {
     feed({
       type: 'onAudioTrackChange',

@@ -33,4 +33,11 @@ export const SCENARIO_SOURCES: Record<ScenarioName, VideoConfig> = {
   'error-mid-playback': fixture('missing-segment/index.m3u8'), // 2 segments, then a 404
   'video-tracks': fixture('hls-quality/index.m3u8'), // HLS, 3 video renditions (360p/180p/90p)
   'audio-tracks': fixture('hls-audio/index.m3u8'), // HLS, English (default) + Spanish audio
+  'audio-tracks-replace': fixture('hls-audio/index.m3u8'),
 };
+
+// The next episode of a series: the same audio tracks (and so the same positional ids)
+// under another URL. audio-tracks-replace switches to it with replaceSourceAsync() (#5291).
+export const AUDIO_REPLACEMENT_SOURCE: VideoConfig = fixture(
+  'hls-audio/index.m3u8?episode=2'
+);

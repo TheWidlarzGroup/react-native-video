@@ -18,7 +18,7 @@ import {
 import { eventLog, PROGRESS_MARKER_SECONDS } from './eventLog';
 import { EventLogPanel } from './EventLogPanel';
 import type { ScenarioName } from './deepLink';
-import { SCENARIO_SOURCES } from './fixtures';
+import { AUDIO_REPLACEMENT_SOURCE, SCENARIO_SOURCES } from './fixtures';
 
 /**
  * replaceSourceAsync() is awaited here and, for a new source, followed by play() from
@@ -28,12 +28,21 @@ import { SCENARIO_SOURCES } from './fixtures';
  * second `then` argument, so a failure of the play() that follows is never logged as the
  * replacement rejecting.
  */
-function replaceSource(player: VideoPlayer, target: 'hls' | 'null') {
+function replaceSource(
+  player: VideoPlayer,
+  target: 'hls' | 'null' | 'audio-tracks'
+) {
   const report = (phase: 'requested' | 'resolved' | 'rejected') =>
     eventLog.handle({ type: 'replaceSource', phase, source: target });
   report('requested');
   player
-    .replaceSourceAsync(target === 'null' ? null : SCENARIO_SOURCES.hls)
+    .replaceSourceAsync(
+      target === 'null'
+        ? null
+        : target === 'audio-tracks'
+          ? AUDIO_REPLACEMENT_SOURCE
+          : SCENARIO_SOURCES.hls
+    )
     .then(
       () => {
         report('resolved');
@@ -104,6 +113,29 @@ function startScenario(scenario: ScenarioName, player: VideoPlayer) {
       if (!released && currentTime > PROGRESS_MARKER_SECONDS) {
         released = true;
         replaceSource(player, 'null');
+      }
+    });
+  }
+
+  if (scenario === 'audio-tracks-replace') {
+    // Replace only once the first source has loaded and listed its two tracks, and a
+    // second later, so no event of the first source can arrive after the request.
+    let loaded = false;
+    let listed = false;
+    let replaced = false;
+    const replaceWhenReady = () => {
+      if (!loaded || !listed || replaced) return;
+      replaced = true;
+      setTimeout(() => replaceSource(player, 'audio-tracks'), 1000);
+    };
+    player.addEventListener('onLoad', () => {
+      loaded = true;
+      replaceWhenReady();
+    });
+    player.addEventListener('onAudioTrackChange', ({ availableTracks }) => {
+      if (availableTracks.length === 2) {
+        listed = true;
+        replaceWhenReady();
       }
     });
   }
