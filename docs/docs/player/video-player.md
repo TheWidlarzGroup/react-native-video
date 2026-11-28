@@ -135,7 +135,7 @@ const player = useVideoPlayer({
 | `'doNotMix'` | Other audio stops while this player plays. |
 | `'duckOthers'` | Other audio keeps playing at a lower volume. |
 
-On Android the player takes audio focus when playback starts and gives it up on pause, at the end and when it goes idle. A buffering player keeps it, and a muted player does not take it. When another app takes the focus, the player pauses; when the other app only asks for ducking, the player plays on at half volume, or pauses with `'doNotMix'`. With several players playing, `'doNotMix'` wins over `'duckOthers'` and `'duckOthers'` over `'auto'`, and a single player with `'mixWithOthers'` makes all of them play without focus.
+On Android the player takes audio focus when playback starts and gives it up on pause, at the end and when it goes idle. A buffering player keeps it, and a muted player does not take it. When another app takes the focus, the player pauses; when the other app only asks for ducking, the player plays on at half volume, or pauses with `'doNotMix'`. [`onAudioFocusChange`](./events.md) reports the loss with `false` and, after a loss for a moment such as a ringing call, the focus coming back with `true`; the player stays paused, so call `play()` there to resume. With several players playing, `'doNotMix'` wins over `'duckOthers'` and `'duckOthers'` over `'auto'`, and a single player with `'mixWithOthers'` makes all of them play without focus.
 
 `ignoreSilentSwitchMode` (iOS only) decides what happens when the hardware silent switch is on:
 

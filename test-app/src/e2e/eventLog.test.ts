@@ -1045,6 +1045,25 @@ describe('crop', () => {
   });
 });
 
+describe('audio focus', () => {
+  test('a loss marks evt-audio-focus-lost, the focus coming back evt-audio-focus-regained', () => {
+    feed({ type: 'onAudioFocusChange', hasAudioFocus: false });
+    expect(markers()).toContain('evt-audio-focus-lost');
+    expect(markers()).not.toContain('evt-audio-focus-regained');
+    feed({ type: 'onAudioFocusChange', hasAudioFocus: true });
+    expect(markers()).toContain('evt-audio-focus-regained');
+    expect(lines()).toEqual([
+      'onAudioFocusChange false',
+      'onAudioFocusChange true',
+    ]);
+  });
+
+  test('focus that was never lost is not regained', () => {
+    feed({ type: 'onAudioFocusChange', hasAudioFocus: true });
+    expect(markers()).not.toContain('evt-audio-focus-regained');
+  });
+});
+
 describe('request count', () => {
   test('the first request and one retry mark evt-retried-once', () => {
     feed({ type: 'requestCount', count: RETRIED_ONCE_REQUESTS });
