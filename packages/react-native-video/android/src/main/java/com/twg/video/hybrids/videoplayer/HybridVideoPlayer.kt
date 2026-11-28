@@ -104,6 +104,32 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
    */
   private var loadReportedForSource = false
 
+  /**
+   * Whether `onReadyToDisplay` was already emitted for the current source. It describes the
+   * first frame of a source, so it comes once, and not again after a seek, a rebuffer or a new
+   * surface (fullscreen, picture-in-picture).
+   */
+  private var readyToDisplayReportedForSource = false
+
+  /**
+   * Whether the video renderer has drawn a frame of the current source. Media3 can draw it
+   * before `STATE_READY`, so it is kept until `onLoad` has gone out.
+   */
+  private var firstFrameRenderedForSource = false
+
+  /**
+   * Emits `onReadyToDisplay` once the source is loaded and its first frame is on screen. A
+   * source without video never draws a frame and never gets it, as on iOS, so a poster can
+   * stay up as artwork.
+   */
+  private fun reportReadyToDisplayIfDue() {
+    if (readyToDisplayReportedForSource || !loadReportedForSource || !firstFrameRenderedForSource) {
+      return
+    }
+    readyToDisplayReportedForSource = true
+    eventEmitter.onReadyToDisplay()
+  }
+
   // Listeners
   private val audioFocusChangedListener = OnAudioFocusChangedListener()
   private val audioBecomingNoisyReceiver = AudioBecomingNoisyReceiver()
@@ -632,10 +658,19 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   }
 
   private val playerListener = object : Player.Listener {
+    override fun onRenderedFirstFrame() {
+      // Called for the first frame after the source, the surface or the renderer changes, so
+      // also after a seek or when the view moves to fullscreen; only the first one counts.
+      firstFrameRenderedForSource = true
+      reportReadyToDisplayIfDue()
+    }
+
     override fun onTimelineChanged(timeline: Timeline, reason: Int) {
       // A media source was set (first source or replaceSourceAsync()): a new load begins.
       if (reason == Player.TIMELINE_CHANGE_REASON_PLAYLIST_CHANGED) {
         loadReportedForSource = false
+        readyToDisplayReportedForSource = false
+        firstFrameRenderedForSource = false
       }
     }
 
@@ -663,6 +698,8 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
           eventEmitter.onBuffer(false)
           // Stopped or failed: the next prepare() loads the source again.
           loadReportedForSource = false
+          readyToDisplayReportedForSource = false
+          firstFrameRenderedForSource = false
         }
         Player.STATE_BUFFERING -> {
           status = VideoPlayerStatus.LOADING
@@ -703,7 +740,8 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
             startProgressUpdates()
           }
 
-          eventEmitter.onReadyToDisplay()
+          // After onLoad: the first frame may already be on screen, or comes later.
+          reportReadyToDisplayIfDue()
         }
         Player.STATE_ENDED -> {
           // The source is still loaded at the end: it can be seeked and played again.

@@ -25,6 +25,8 @@ export const MARKER_IDS = [
   // defaults (250 ms on Android, 500 ms on iOS) never do.
   'evt-progress-sparse',
   'evt-onEnded',
+  'evt-onReadyToDisplay',
+  'evt-onReadyToDisplay-repeated', // a second onReadyToDisplay for the same source (#5282)
   'evt-onError', // onError itself, never the error status
   'evt-onError-repeated', // a second onError in one scenario: one failure must report once
   'evt-status-error', // onStatusChange('error')
@@ -94,6 +96,7 @@ export type PlayerEvent =
   | { type: 'onLoad'; duration: number }
   | { type: 'onProgress'; currentTime: number }
   | { type: 'onEnd' }
+  | { type: 'onReadyToDisplay' }
   | { type: 'onError'; code: string }
   | { type: 'onStatusChange'; status: VideoPlayerStatus }
   | { type: 'onPlaybackStateChange'; isPlaying: boolean }
@@ -203,6 +206,9 @@ type State = {
   replacementLoadStarts: number;
   // The next onProgress tells where the replacement source started (see onLoad).
   reloadPending: boolean;
+  // onReadyToDisplay events since the current source started loading; a replacement source
+  // (replaceSourceAsync) starts its own count.
+  readyToDisplayOfSource: number;
   // Consecutive onProgress gaps of at least PROGRESS_SPARSE_MIN_GAP_SECONDS.
   sparseGaps: number;
   // onLoad events since the current source started loading. replaceSourceAsync(source)
@@ -227,6 +233,7 @@ const initialState = (): State => ({
   replaceRequested: false,
   replacementLoadStarts: 0,
   reloadPending: false,
+  readyToDisplayOfSource: 0,
   sparseGaps: 0,
   loadsOfSource: 0,
 });
@@ -346,6 +353,14 @@ function apply(event: PlayerEvent) {
       state.lastProgress = t;
       return;
     }
+
+    case 'onReadyToDisplay':
+      mark('evt-onReadyToDisplay');
+      state.readyToDisplayOfSource += 1;
+      if (state.readyToDisplayOfSource > 1)
+        mark('evt-onReadyToDisplay-repeated');
+      append(`onReadyToDisplay (#${state.readyToDisplayOfSource})`);
+      return;
 
     case 'onEnd':
       mark('evt-onEnded');
@@ -488,6 +503,7 @@ function apply(event: PlayerEvent) {
 
     case 'replaceSource':
       if (event.phase === 'requested' && event.source !== 'null') {
+        state.readyToDisplayOfSource = 0;
         state.replaceRequested = true;
         state.loadsOfSource = 0;
       }
