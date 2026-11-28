@@ -28,6 +28,8 @@ namespace margelo::nitro::video {
       prototype.registerHybridSetter("keepScreenAwake", &HybridVideoViewViewManagerSpec::setKeepScreenAwake);
       prototype.registerHybridGetter("surfaceType", &HybridVideoViewViewManagerSpec::getSurfaceType);
       prototype.registerHybridSetter("surfaceType", &HybridVideoViewViewManagerSpec::setSurfaceType);
+      prototype.registerHybridGetter("controlsStyles", &HybridVideoViewViewManagerSpec::getControlsStyles);
+      prototype.registerHybridSetter("controlsStyles", &HybridVideoViewViewManagerSpec::setControlsStyles);
       prototype.registerHybridGetter("fullscreenOrientation", &HybridVideoViewViewManagerSpec::getFullscreenOrientation);
       prototype.registerHybridSetter("fullscreenOrientation", &HybridVideoViewViewManagerSpec::setFullscreenOrientation);
       prototype.registerHybridGetter("fullscreenAutorotate", &HybridVideoViewViewManagerSpec::getFullscreenAutorotate);

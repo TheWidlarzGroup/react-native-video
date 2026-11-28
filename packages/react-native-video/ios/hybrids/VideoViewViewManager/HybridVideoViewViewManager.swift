@@ -209,6 +209,22 @@ class HybridVideoViewViewManager: HybridVideoViewViewManagerSpec {
   
   // Android only - no-op on iOS
   var surfaceType: SurfaceType = .surface
+
+  // Android only: AVPlayerViewController has no API to hide single controls
+  var controlsStyles: NativeControlsStyles = NativeControlsStyles(
+    hideSeekBar: false,
+    hideDuration: false,
+    hidePosition: false,
+    hidePlayPause: false,
+    hideForward: false,
+    hideRewind: false,
+    hideNext: false,
+    hidePrevious: false,
+    hideFullscreen: false,
+    hideSettingButton: false,
+    hideNavigationBarOnFullScreenMode: true,
+    hideNotificationBarOnFullScreenMode: true
+  )
   
   func enterFullscreen() throws {
     guard let view else {

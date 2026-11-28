@@ -18,6 +18,8 @@ namespace margelo::nitro::video { class HybridVideoPlayerSpec; }
 namespace margelo::nitro::video { enum class ResizeMode; }
 // Forward declaration of `SurfaceType` to properly resolve imports.
 namespace margelo::nitro::video { enum class SurfaceType; }
+// Forward declaration of `NativeControlsStyles` to properly resolve imports.
+namespace margelo::nitro::video { struct NativeControlsStyles; }
 // Forward declaration of `FullscreenOrientation` to properly resolve imports.
 namespace margelo::nitro::video { enum class FullscreenOrientation; }
 // Forward declaration of `ListenerSubscription` to properly resolve imports.
@@ -28,6 +30,7 @@ namespace margelo::nitro::video { struct ListenerSubscription; }
 #include <optional>
 #include "ResizeMode.hpp"
 #include "SurfaceType.hpp"
+#include "NativeControlsStyles.hpp"
 #include "FullscreenOrientation.hpp"
 #include "ListenerSubscription.hpp"
 #include <functional>
@@ -122,6 +125,12 @@ namespace margelo::nitro::video {
     }
     inline void setSurfaceType(SurfaceType surfaceType) noexcept override {
       _swiftPart.setSurfaceType(static_cast<int>(surfaceType));
+    }
+    inline NativeControlsStyles getControlsStyles() noexcept override {
+      return _swiftPart.getControlsStyles();
+    }
+    inline void setControlsStyles(const NativeControlsStyles& controlsStyles) noexcept override {
+      _swiftPart.setControlsStyles(std::forward<decltype(controlsStyles)>(controlsStyles));
     }
     inline FullscreenOrientation getFullscreenOrientation() noexcept override {
       auto __result = _swiftPart.getFullscreenOrientation();

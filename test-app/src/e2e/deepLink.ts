@@ -3,13 +3,19 @@ export const SCENARIO_NAMES = [
   'mp4',
   'mp4-preload', // same clip, started with preload() instead of initialize()+play()
   'mp4-release-mid-playback', // same clip; replaceSourceAsync(null) once progress > 2 s
+  'mp4-loader', // same clip; VideoView with renderLoader (covers the video until it is shown)
   'mp4-fullscreen-rotate', // same clip; enterFullscreen() on landscape, exitFullscreen() on portrait
+  // Native controls (#5272, Android only), checked once the clip has ended:
+  'mp4-controls', // every control shown (the ids the other two flows rely on)
+  'mp4-controls-styles', // same clip; native controls with the seek bar, position and duration hidden
+  'mp4-controls-no-play-pause', // same clip; native controls without the play/pause button
   'hls',
   'error-404',
   'broken-manifest',
   'error-mid-playback',
   'video-tracks',
   'audio-tracks',
+  'audio-tracks-replace', // same stream; once loaded, replaceSourceAsync() onto it under another URL (#5291)
   'mp4-fullscreen-landscape', // same clip; fullscreen locked to landscape from JS after onLoad (#5286)
 ] as const;
 

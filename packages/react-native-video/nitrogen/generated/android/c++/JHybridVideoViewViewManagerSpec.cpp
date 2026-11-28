@@ -13,6 +13,8 @@ namespace margelo::nitro::video { class HybridVideoPlayerSpec; }
 namespace margelo::nitro::video { enum class ResizeMode; }
 // Forward declaration of `SurfaceType` to properly resolve imports.
 namespace margelo::nitro::video { enum class SurfaceType; }
+// Forward declaration of `NativeControlsStyles` to properly resolve imports.
+namespace margelo::nitro::video { struct NativeControlsStyles; }
 // Forward declaration of `FullscreenOrientation` to properly resolve imports.
 namespace margelo::nitro::video { enum class FullscreenOrientation; }
 // Forward declaration of `ListenerSubscription` to properly resolve imports.
@@ -26,6 +28,8 @@ namespace margelo::nitro::video { struct ListenerSubscription; }
 #include "JResizeMode.hpp"
 #include "SurfaceType.hpp"
 #include "JSurfaceType.hpp"
+#include "NativeControlsStyles.hpp"
+#include "JNativeControlsStyles.hpp"
 #include "FullscreenOrientation.hpp"
 #include "JFullscreenOrientation.hpp"
 #include "ListenerSubscription.hpp"
@@ -127,6 +131,15 @@ namespace margelo::nitro::video {
   void JHybridVideoViewViewManagerSpec::setSurfaceType(SurfaceType surfaceType) {
     static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JSurfaceType> /* surfaceType */)>("setSurfaceType");
     method(_javaPart, JSurfaceType::fromCpp(surfaceType));
+  }
+  NativeControlsStyles JHybridVideoViewViewManagerSpec::getControlsStyles() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JNativeControlsStyles>()>("getControlsStyles");
+    auto __result = method(_javaPart);
+    return __result->toCpp();
+  }
+  void JHybridVideoViewViewManagerSpec::setControlsStyles(const NativeControlsStyles& controlsStyles) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JNativeControlsStyles> /* controlsStyles */)>("setControlsStyles");
+    method(_javaPart, JNativeControlsStyles::fromCpp(controlsStyles));
   }
   FullscreenOrientation JHybridVideoViewViewManagerSpec::getFullscreenOrientation() {
     static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JFullscreenOrientation>()>("getFullscreenOrientation");

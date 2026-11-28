@@ -218,6 +218,17 @@ open class HybridVideoViewViewManagerSpec_cxx {
     }
   }
   
+  public final var controlsStyles: NativeControlsStyles {
+    @inline(__always)
+    get {
+      return self.__implementation.controlsStyles
+    }
+    @inline(__always)
+    set {
+      self.__implementation.controlsStyles = newValue
+    }
+  }
+  
   public final var fullscreenOrientation: Int32 {
     @inline(__always)
     get {

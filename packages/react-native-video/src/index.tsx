@@ -3,6 +3,7 @@ export { useVideoPlayer } from './core/hooks/useVideoPlayer';
 export type * from './core/types/Events';
 export type { IgnoreSilentSwitchMode } from './core/types/IgnoreSilentSwitchMode';
 export type { MixAudioMode } from './core/types/MixAudioMode';
+export type { ControlsStyles } from './core/types/ControlsStyles';
 export type { FullscreenOrientation } from './core/types/FullscreenOrientation';
 export type { ResizeMode } from './core/types/ResizeMode';
 export type { AudioTrack } from './core/types/AudioTrack';
@@ -27,6 +28,9 @@ export type { VideoPlayerStatus } from './core/types/VideoPlayerStatus';
 export { VideoPlayer } from './core/VideoPlayer';
 export { default as VideoView } from './core/video-view/VideoView';
 export type {
+  VideoLoaderProps,
+  VideoPoster,
+  VideoPosterResizeMode,
   VideoViewProps,
   VideoViewRef,
 } from './core/video-view/VideoViewProps';

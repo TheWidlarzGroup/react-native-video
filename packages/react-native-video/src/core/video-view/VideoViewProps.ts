@@ -1,12 +1,75 @@
-import type { ViewProps, ViewStyle } from 'react-native';
+import type { ReactNode } from 'react';
+import type {
+  ColorValue,
+  ImageProps,
+  ImageRequireSource,
+  ImageResizeMode,
+  ImageStyle,
+  ImageURISource,
+  StyleProp,
+  ViewProps,
+  ViewStyle,
+} from 'react-native';
 import type { SurfaceType } from '../../spec/nitro/VideoViewViewManager.nitro';
+import type { ControlsStyles } from '../types/ControlsStyles';
 import type { ListenerSubscription } from '../types/EventEmitter';
 import type { VideoViewEvents } from '../types/Events';
 import type { FullscreenOrientation } from '../types/FullscreenOrientation';
 import type { ResizeMode } from '../types/ResizeMode';
 import type { VideoPlayerBase } from '../types/VideoPlayerBase';
 
-export interface VideoViewProps extends Partial<VideoViewEvents>, ViewProps {
+/**
+ * The image shown before the first video frame. Takes every `Image` prop,
+ * with a single `source`.
+ */
+export type VideoPoster = Omit<ImageProps, 'source'> & {
+  source?: ImageURISource | ImageRequireSource;
+};
+
+export type VideoPosterResizeMode = ImageResizeMode | 'none';
+
+export interface VideoLoaderProps {
+  /**
+   * Style that makes the loader fill the video view.
+   */
+  style: StyleProp<ImageStyle>;
+  /**
+   * The resize mode resolved from `poster.resizeMode` and `posterResizeMode`.
+   */
+  resizeMode: ImageResizeMode;
+}
+
+export interface VideoViewOverlayProps {
+  /**
+   * An image shown over the video from the moment a source starts loading
+   * until the video is ready to display. Pass an image URL or `Image` props with a `source`.
+   * For audio-only sources the poster stays visible.
+   */
+  poster?: string | VideoPoster;
+  /**
+   * How the poster is resized to fit the view. `poster.resizeMode` wins when both are set.
+   * Defaults to 'contain'.
+   */
+  posterResizeMode?: VideoPosterResizeMode;
+  /**
+   * A custom view shown instead of the poster while the video loads.
+   * Pass an element, or a function that receives a fill style and the poster resize mode.
+   * When set, `poster` is ignored.
+   */
+  renderLoader?: ReactNode | ((props: VideoLoaderProps) => ReactNode);
+  /**
+   * The color that covers the video area until the video is ready to display.
+   * It sits under the poster or loader. By default nothing covers the video.
+   */
+  shutterColor?: ColorValue;
+  /**
+   * Turns the shutter off, so `shutterColor` is ignored. Defaults to false.
+   */
+  hideShutterView?: boolean;
+}
+
+export interface VideoViewProps
+  extends Partial<VideoViewEvents>, VideoViewOverlayProps, ViewProps {
   /**
    * The player to play the video
    */
@@ -52,6 +115,16 @@ export interface VideoViewProps extends Partial<VideoViewEvents>, ViewProps {
    */
   surfaceType?: SurfaceType;
 
+  /**
+   * Hides single elements of the native controls and chooses which system bars
+   * are hidden in fullscreen. Has an effect only when `controls` is enabled
+   * (the system bar options apply to fullscreen in general).
+   *
+   * Only applicable on Android
+   *
+   * @platform android
+   */
+  controlsStyles?: ControlsStyles;
   /**
    * The orientation of native fullscreen. Defaults to 'all'.
    * - 'all': fullscreen follows the device, in every orientation the app supports
