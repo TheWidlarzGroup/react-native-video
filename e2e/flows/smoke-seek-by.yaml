@@ -1,0 +1,45 @@
+# seekBy(): relative seeks during playback land where they should, and one that points
+# before the start lands at 0 instead of failing.
+#
+# No taps: the scenario calls seekBy(+3), seekBy(-2) and seekBy(-100) from JS while the clip
+# plays, each once the previous landing was judged (ScenarioScreen); a tap during playback
+# would be deferred to the clip's end on iOS. Each landing is read from the progress that
+# follows the seek's onSeek and compared with `position + delta` within 1.5 s (eventLog.ts,
+# SEEK_BY_TOLERANCE_SECONDS). Every step moves by 2 s or more, so a seek that did nothing
+# sets evt-seek-by-missed instead.
+#
+# Timeouts count from the latest interaction, so they grow down a run of waits
+# (e2e/CONTEXT.md, "Timeouts").
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4-seek-by
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 20000
+- extendedWaitUntil:
+    visible:
+      id: "evt-seek-by-forward-landed"
+    timeout: 35000            # the first step waits for progress > 2 s
+- extendedWaitUntil:
+    visible:
+      id: "evt-seek-by-back-landed"
+    timeout: 45000
+- extendedWaitUntil:
+    visible:
+      id: "evt-seek-by-clamped-to-start"
+    timeout: 55000
+# The clip plays on from 0 to its end: the seeks must not have stopped it.
+- runFlow:
+    file: ../shared/wait-for-end.yaml
+    env:
+      END_TIMEOUT: 80000      # 55 s of waits above, plus the rest of the clip
+- assertNotVisible:
+    id: "evt-seek-by-missed"
+- assertNotVisible:
+    id: "evt-onError"

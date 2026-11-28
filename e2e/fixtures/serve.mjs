@@ -15,6 +15,7 @@ const TYPES = {
   '.mp4': 'video/mp4',
   '.ts': 'video/mp2t',
   '.m3u8': 'application/vnd.apple.mpegurl',
+  '.vtt': 'text/vtt',
 };
 
 // Tokens whose media requests now fail as a lost connection would (the socket is closed
@@ -40,6 +41,16 @@ function sniffType(file) {
 const requestCounts = new Map();
 
 const LOOPBACK = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1']);
+
+// `?delay=<ms>` holds a response back, so a flow can act while a source is still loading
+// (smoke-replace-while-loading.yaml). Whole milliseconds only, and capped: a typo must not
+// hang a job.
+const MAX_DELAY_MS = 10000;
+function responseDelay(url) {
+  const raw = new URL(url, 'http://x').searchParams.get('delay');
+  if (raw === null || !/^\d+$/.test(raw)) return 0;
+  return Math.min(Number(raw), MAX_DELAY_MS);
+}
 
 // The one route that is not a file: iOS flows open their deep link through here (see
 // open-link.mjs). It runs a process, so it answers loopback only, and only for a scenario
@@ -104,7 +115,13 @@ function holdMs(url, now = Date.now()) {
 }
 
 const server = createServer((req, res) => {
-  const wait = holdMs(req.url);
+  let delay = 0;
+  try {
+    delay = responseDelay(req.url);
+  } catch {
+    // An unparsable URL: respond() answers it.
+  }
+  const wait = Math.max(holdMs(req.url), delay);
   if (wait === 0) return respond(req, res);
   const timer = setTimeout(() => respond(req, res), wait);
   res.on('close', () => clearTimeout(timer));

@@ -9,14 +9,17 @@ import {
 // v7 API only — never <Video>, never v6 props (see e2e/CONTEXT.md)
 import {
   useVideoPlayer,
+  VideoPlayer as VideoPlayerClass,
   VideoView,
   type ControlsStyles,
+  type ResizeMode,
   type VideoPlayer,
   type VideoTrack,
   type VideoViewRef,
 } from 'react-native-video';
 import {
   eventLog,
+  LOOP_OFF_SETTLE_MS,
   PROGRESS_MARKER_SECONDS,
   STATUS_SETTLE_MS,
 } from './eventLog';
@@ -28,6 +31,7 @@ import {
   FIXTURE_BASE,
   RETRY_TOKEN,
   SCENARIO_SOURCES,
+  SCENARIO_TEXT_LANGUAGES,
   scenarioSource,
 } from './fixtures';
 
@@ -41,7 +45,7 @@ import {
  */
 function replaceSource(
   player: VideoPlayer,
-  target: 'hls' | 'null' | 'audio-tracks' | 'cache'
+  target: 'hls' | 'mp4' | 'null' | 'audio-tracks' | 'cache'
 ) {
   const report = (phase: 'requested' | 'resolved' | 'rejected') =>
     eventLog.handle({ type: 'replaceSource', phase, source: target });
@@ -54,7 +58,7 @@ function replaceSource(
           ? AUDIO_REPLACEMENT_SOURCE
           : target === 'cache'
             ? SCENARIO_SOURCES['mp4-cache']
-            : scenarioSource('hls')
+            : scenarioSource(target)
     )
     .then(
       () => {
@@ -190,6 +194,81 @@ function startScenario(scenario: ScenarioName, player: VideoPlayer) {
         replaceWhenReady();
       }
     });
+  }
+
+  if (scenario === 'mp4-loop-toggle') {
+    // loop switched from JS while the clip plays: on during the first pass, off once the
+    // wrap was seen (the marker is derived before this listener runs: it was added first),
+    // then a timer after the final onEnd, so the flow can assert that nothing restarted.
+    let phase: 'first-pass' | 'looping' | 'last-pass' | 'done' = 'first-pass';
+    const setLoop = (enabled: boolean) => {
+      eventLog.handle({ type: 'loopSet', enabled });
+      player.loop = enabled;
+    };
+    player.addEventListener('onProgress', ({ currentTime }) => {
+      if (phase === 'first-pass' && currentTime > PROGRESS_MARKER_SECONDS) {
+        phase = 'looping';
+        setLoop(true);
+      } else if (
+        phase === 'looping' &&
+        eventLog.getMarkers().has('evt-loop-wrapped')
+      ) {
+        phase = 'last-pass';
+        setLoop(false);
+      }
+    });
+    player.addEventListener('onEnd', () => {
+      if (phase !== 'last-pass') return;
+      phase = 'done';
+      setTimeout(
+        () => eventLog.handle({ type: 'loopOffSettled' }),
+        LOOP_OFF_SETTLE_MS
+      );
+    });
+  }
+
+  if (scenario === 'mp4-seek-by') {
+    // Relative seeks during playback, from JS: a tap would be deferred to the clip's end
+    // on iOS. Each step waits until the previous landing was judged (eventLog), and the
+    // request is logged before the call, because onSeek can arrive from inside it.
+    const steps = [3, -2, -100];
+    let next = 0;
+    player.addEventListener('onProgress', ({ currentTime }) => {
+      const by = steps[next];
+      if (by === undefined || eventLog.isSeekByBusy()) return;
+      if (next === 0 && currentTime <= PROGRESS_MARKER_SECONDS) return;
+      next += 1;
+      eventLog.handle({ type: 'seekByRequest', from: currentTime, by });
+      try {
+        player.seekBy(by);
+      } catch (error) {
+        eventLog.log(`seekBy(${by}) threw: ${String(error)}`);
+      }
+    });
+  }
+
+  if (scenario === 'error-then-recover') {
+    // From JS and only once: the replacement must follow the failure whatever a tap would
+    // do (iOS defers taps), and a second onError must not start a second replacement.
+    let recovering = false;
+    player.addEventListener('onError', () => {
+      if (!recovering) {
+        recovering = true;
+        replaceSource(player, 'mp4');
+      }
+    });
+  }
+
+  if (scenario === 'mp4-replace-while-loading') {
+    // Not awaited: the replacement has to find this load in flight (the fixture server
+    // holds the clip back, see fixtures.ts). A superseded load only rejects; it is not a
+    // failure, so onError must stay silent.
+    player.initialize().then(
+      () => eventLog.handle({ type: 'supersededLoad', outcome: 'resolved' }),
+      () => eventLog.handle({ type: 'supersededLoad', outcome: 'rejected' })
+    );
+    replaceSource(player, 'hls');
+    return;
   }
 
   const load =
@@ -345,11 +424,166 @@ function useFullscreenCycle(
   }, [enabled, player, view]);
 }
 
+// mp4-resize-modes: every other mode, then back to the one the screen starts with, one
+// per second of playback.
+const RESIZE_STEPS: readonly { mode: ResizeMode; after: number }[] = [
+  { mode: 'cover', after: 1 },
+  { mode: 'stretch', after: 2 },
+  { mode: 'none', after: 3 },
+  { mode: 'contain', after: 4 },
+];
+
+/**
+ * The resizeMode for VideoView. On mp4-resize-modes it changes while the clip plays,
+ * driven by playback position rather than by taps (iOS defers taps during playback). Each
+ * change is logged with the position that triggered it, so the flow can assert that
+ * playback went on afterwards and that nothing reloaded.
+ */
+function useResizeMode(enabled: boolean, player: VideoPlayer): ResizeMode {
+  const [mode, setMode] = useState<ResizeMode>('contain');
+  useEffect(() => {
+    if (!enabled) return;
+    let next = 0;
+    const subscription = player.addEventListener(
+      'onProgress',
+      ({ currentTime }) => {
+        const step = RESIZE_STEPS[next];
+        if (step === undefined || currentTime <= step.after) return;
+        next += 1;
+        eventLog.handle({
+          type: 'resizeMode',
+          mode: step.mode,
+          at: currentTime,
+        });
+        setMode(step.mode);
+      }
+    );
+    return () => {
+      try {
+        subscription.remove();
+      } catch {
+        // The player was released first (the screen is going away): nothing to remove.
+      }
+    };
+  }, [enabled, player]);
+  return mode;
+}
+
+// The library keeps a released player's native object for 5 s (VideoPlayer.ts, __destroy);
+// after that every method throws `player/released`. The call is made past that window, so
+// what it does is defined by JS alone and is the same on every platform.
+const RELEASED_CALL_DELAY_MS = 5500;
+
+const errorCode = (error: unknown): string =>
+  typeof error === 'object' && error !== null && 'code' in error
+    ? String(error.code)
+    : 'unknown';
+
+/**
+ * mp4-release-reuse: once the scenario's player has played past PROGRESS_MARKER_SECONDS it
+ * is released with release(), and a new VideoPlayer for the same clip takes its place on
+ * the view. Returns the player to show. The second player is released when the screen goes
+ * away, so it cannot play on under the next scenario.
+ */
+function useReleaseAndReuse(enabled: boolean, first: VideoPlayer): VideoPlayer {
+  const [second, setSecond] = useState<VideoPlayer | null>(null);
+  useEffect(() => {
+    if (!enabled) return;
+    let created: VideoPlayer | null = null;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    first.addEventListener('onProgress', ({ currentTime }) => {
+      if (created !== null || currentTime <= PROGRESS_MARKER_SECONDS) return;
+      first.release();
+      eventLog.log('release()');
+      timer = setTimeout(() => {
+        try {
+          first.play();
+          eventLog.handle({ type: 'releasedCall', code: null });
+        } catch (error) {
+          eventLog.handle({ type: 'releasedCall', code: errorCode(error) });
+        }
+      }, RELEASED_CALL_DELAY_MS);
+
+      const player = new VideoPlayerClass(SCENARIO_SOURCES.mp4);
+      created = player;
+      player.addEventListener('onLoad', () =>
+        eventLog.handle({ type: 'secondPlayer', event: 'onLoad' })
+      );
+      player.addEventListener('onProgress', (progress) =>
+        eventLog.handle({
+          type: 'secondPlayer',
+          event: 'onProgress',
+          currentTime: progress.currentTime,
+        })
+      );
+      player.addEventListener('onError', () =>
+        eventLog.handle({ type: 'secondPlayer', event: 'onError' })
+      );
+      setSecond(player);
+      player
+        .initialize()
+        .then(() => player.play())
+        .catch(() => {
+          // Surfaced by the onError listener.
+        });
+    });
+    return () => {
+      if (timer !== undefined) clearTimeout(timer);
+      created?.release();
+    };
+  }, [enabled, first]);
+  return second ?? first;
+}
+
 type Control = {
   id: string;
   title: string;
   press: (player: VideoPlayer) => void;
+  // Shown only on scenarios that pass this test; every other control is on all of them.
+  // Keeps the marker panel where the existing flows expect it.
+  when?: (scenario: ScenarioName) => boolean;
 };
+
+const hasExternalSubtitles = (scenario: ScenarioName) =>
+  SCENARIO_TEXT_LANGUAGES[scenario] !== undefined;
+
+const TEXT_TRACKS_TIMEOUT_MS = 5000;
+const TEXT_TRACKS_POLL_MS = 100;
+
+/**
+ * Reads getAvailableTextTracks() once the list has as many tracks as the scenario expects
+ * and reports it; at the deadline it reports whatever is there, so a short list fails the
+ * flow on its marker instead of on a timeout. Polled because the list is filled by the
+ * native player on its own schedule: it is not guaranteed to be complete at onLoad.
+ */
+function reportTextTracks(
+  player: VideoPlayer,
+  expectedLanguages: readonly string[]
+) {
+  const deadline = Date.now() + TEXT_TRACKS_TIMEOUT_MS;
+  const poll = () => {
+    let tracks: ReturnType<VideoPlayer['getAvailableTextTracks']> = [];
+    try {
+      tracks = player.getAvailableTextTracks();
+    } catch (error) {
+      eventLog.log(`getAvailableTextTracks threw: ${String(error)}`);
+    }
+    if (tracks.length >= expectedLanguages.length || Date.now() >= deadline) {
+      eventLog.handle({
+        type: 'textTracks',
+        tracks: tracks.map(({ id, language, selected }) => ({
+          id,
+          language,
+          selected,
+        })),
+        expectedLanguages,
+      });
+      return;
+    }
+    setTimeout(poll, TEXT_TRACKS_POLL_MS);
+  };
+  poll();
+}
 
 // Every control sets an absolute value: a Maestro tap can be delivered long after it was
 // issued (see e2e/CONTEXT.md), so none may depend on the player's state at press time.
@@ -450,6 +684,27 @@ const CONTROLS: Control[] = [
         .catch((error) => eventLog.log(`go-offline failed: ${String(error)}`));
     },
   },
+  {
+    id: 'btn-subs-es',
+    title: 'subs es',
+    when: hasExternalSubtitles,
+    press: (p) => {
+      const track = p
+        .getAvailableTextTracks()
+        .find((t) => (t.language ?? '').toLowerCase().startsWith('es'));
+      eventLog.handle({ type: 'textTrackSelect', id: track?.id ?? null });
+      if (track) p.selectTextTrack(track);
+    },
+  },
+  {
+    id: 'btn-subs-off',
+    title: 'subs off',
+    when: hasExternalSubtitles,
+    press: (p) => {
+      eventLog.handle({ type: 'textTrackClear' });
+      p.selectTextTrack(null);
+    },
+  },
 ];
 
 /**
@@ -475,15 +730,37 @@ function LoaderProbe() {
 }
 
 // Marker derivation lives in eventLog.handle(); this only maps payloads.
-function logPlayerEvents(player: VideoPlayer) {
+function logPlayerEvents(player: VideoPlayer, scenario: ScenarioName) {
   // Bound to this scenario: events of a player whose screen is gone are dropped.
   const handle = eventLog.forSession();
+  const expectedLanguages = SCENARIO_TEXT_LANGUAGES[scenario];
+  let textTracksReported = false;
   player.addEventListener('onLoadStart', () => handle({ type: 'onLoadStart' }));
-  player.addEventListener('onLoad', ({ duration }) =>
-    handle({ type: 'onLoad', duration })
-  );
-  player.addEventListener('onProgress', ({ currentTime }) =>
-    handle({ type: 'onProgress', currentTime })
+  player.addEventListener('onLoad', ({ duration }) => {
+    handle({ type: 'onLoad', duration });
+    // Once per scenario: Android repeats onLoad after a re-buffer or a replay.
+    if (expectedLanguages !== undefined && !textTracksReported) {
+      textTracksReported = true;
+      reportTextTracks(player, expectedLanguages);
+    }
+  });
+  player.addEventListener('onTrackChange', (track) => {
+    // Read inside the listener: by now the selection the event reports is applied, so the
+    // getter has to agree with it (an immediate read after selectTextTrack() need not).
+    let selectedId: string | null = null;
+    try {
+      selectedId = player.selectedTrack?.id ?? null;
+    } catch (error) {
+      eventLog.log(`selectedTrack threw: ${String(error)}`);
+    }
+    handle({
+      type: 'onTrackChange',
+      id: track?.id ?? null,
+      selectedId,
+    });
+  });
+  player.addEventListener('onProgress', ({ currentTime, bufferDuration }) =>
+    handle({ type: 'onProgress', currentTime, bufferDuration })
   );
   player.addEventListener('onEnd', () => {
     handle({ type: 'onEnd' });
@@ -543,12 +820,17 @@ export function ScenarioScreen({ scenario }: { scenario: ScenarioName }) {
   const player = useVideoPlayer(scenarioSource(scenario), (p) => {
     eventLog.reset();
     eventLog.log(`scenario:${scenario}`);
-    logPlayerEvents(p);
+    logPlayerEvents(p, scenario);
     startScenario(scenario, p);
   });
 
   useFullscreenFollowsRotation(scenario === 'mp4-fullscreen-rotate', viewRef);
   useFullscreenCycle(scenario === 'mp4-fullscreen-cycle', player, viewRef);
+  const resizeMode = useResizeMode(scenario === 'mp4-resize-modes', player);
+  const shownPlayer = useReleaseAndReuse(
+    scenario === 'mp4-release-reuse',
+    player
+  );
 
   const [fullscreen, setFullscreen] = useState(false);
   const landscapeLocked = scenario === 'mp4-fullscreen-landscape';
@@ -564,9 +846,9 @@ export function ScenarioScreen({ scenario }: { scenario: ScenarioName }) {
       <Text>scenario:{scenario}</Text>
       <VideoView
         ref={viewRef}
-        player={player}
+        player={shownPlayer}
         style={styles.video}
-        resizeMode="contain"
+        resizeMode={resizeMode}
         // #5152 needs the native controls: exitFullscreen() resets the fullscreen button
         // icon, and only a shown controller makes that touch the view hierarchy.
         controls={
@@ -580,7 +862,9 @@ export function ScenarioScreen({ scenario }: { scenario: ScenarioName }) {
         fullscreenAutorotate={landscapeLocked ? false : undefined}
       />
       <View style={styles.controls}>
-        {CONTROLS.map(({ id, title, press }) => (
+        {CONTROLS.filter(
+          ({ when }) => when === undefined || when(scenario)
+        ).map(({ id, title, press }) => (
           <Button
             key={id}
             testID={id}

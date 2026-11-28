@@ -3,6 +3,7 @@ import {
   eventLog,
   LOOP_WRAP_FROM_SECONDS,
   LOOP_WRAP_TO_SECONDS,
+  LOOP_TOGGLE_DROP_SECONDS,
   MARKER_IDS,
   PROGRESS_MARKER_SECONDS,
   PROGRESS_SPARSE_GAPS,
@@ -14,12 +15,17 @@ import {
   CROP_DURATION_SECONDS,
   PAST_DURATION_TOLERANCE_SECONDS,
   STATUS_ERROR_CODE,
+  BUFFER_AHEAD_TOLERANCE_SECONDS,
   VOLUME_LOW_THRESHOLD,
   FIXTURE_DURATION_SECONDS,
   FIXTURE_DURATION_TOLERANCE_SECONDS,
+  RELEASED_PLAYER_ERROR_CODE,
   RELOAD_START_SECONDS,
   LOADER_HELD_MIN_MS,
   LOADER_SOURCE_HOLD_MS,
+  RESIZE_MODES,
+  SEEK_BY_LANDING_SAMPLES,
+  SEEK_BY_TOLERANCE_SECONDS,
   type MarkerId,
   type PlayerEvent,
 } from './eventLog';
@@ -1089,5 +1095,643 @@ describe('request count', () => {
   test('the default retry count does not', () => {
     feed({ type: 'requestCount', count: 4 });
     expect(markers()).not.toContain('evt-retried-once');
+  });
+});
+
+describe('external subtitles', () => {
+  const listed = [
+    { id: 'external-0', language: 'en', selected: false },
+    { id: 'external-1', language: 'es', selected: false },
+  ];
+  const expectedLanguages = ['en', 'es'];
+
+  test('a complete list marks the count, the languages and the default selection', () => {
+    feed({ type: 'textTracks', tracks: listed, expectedLanguages });
+    expect(markers()).toEqual([
+      'evt-text-track-default-none',
+      'evt-text-track-languages-ok',
+      'evt-text-track-languages-present',
+      'evt-text-tracks-listed',
+    ]);
+    expect(lines()).toEqual(['textTracks external-0:en external-1:es']);
+  });
+
+  test('language tags are compared by their base language, in any order', () => {
+    feed({
+      type: 'textTracks',
+      tracks: [
+        { id: 'external-1', language: 'es-ES', selected: false },
+        { id: 'external-0', language: 'EN_us', selected: true },
+      ],
+      expectedLanguages,
+    });
+    expect(markers()).toEqual([
+      'evt-text-track-default-selected',
+      'evt-text-track-languages-ok',
+      'evt-text-track-languages-present',
+      'evt-text-tracks-listed',
+    ]);
+  });
+
+  test('a short list, a wrong language or a missing language marks neither', () => {
+    feed({ type: 'textTracks', tracks: listed.slice(0, 1), expectedLanguages });
+    expect(markers()).toEqual(['evt-text-track-default-none']);
+
+    eventLog.reset();
+    feed({
+      type: 'textTracks',
+      tracks: [
+        listed[0]!,
+        { id: 'external-1', language: 'fr', selected: false },
+      ],
+      expectedLanguages,
+    });
+    expect(markers()).toEqual([
+      'evt-text-track-default-none',
+      'evt-text-tracks-listed',
+    ]);
+
+    eventLog.reset();
+    feed({
+      type: 'textTracks',
+      tracks: [listed[0]!, { id: 'external-1', selected: false }],
+      expectedLanguages,
+    });
+    expect(markers()).toEqual([
+      'evt-text-track-default-none',
+      'evt-text-tracks-listed',
+    ]);
+  });
+
+  test('languages-present needs every expected language, and tolerates extra tracks', () => {
+    // A player-provided track next to the external one (no language): present, not exact.
+    feed({
+      type: 'textTracks',
+      tracks: [
+        { id: 'text-0', selected: false },
+        { id: 'external-1', language: 'es', selected: false },
+      ],
+      expectedLanguages: ['es'],
+    });
+    expect(markers()).toEqual([
+      'evt-text-track-default-none',
+      'evt-text-track-languages-present',
+    ]);
+
+    eventLog.reset();
+    feed({
+      type: 'textTracks',
+      tracks: [{ id: 'external-0', language: 'en', selected: false }],
+      expectedLanguages: ['es'],
+    });
+    expect(markers()).toEqual([
+      'evt-text-track-default-none',
+      'evt-text-tracks-listed',
+    ]);
+
+    // Nothing expected proves nothing.
+    eventLog.reset();
+    feed({ type: 'textTracks', tracks: [], expectedLanguages: [] });
+    expect(markers()).not.toContain('evt-text-track-languages-present');
+  });
+
+  test('a change before any request is the platform default and marks nothing', () => {
+    feed(
+      { type: 'textTracks', tracks: listed, expectedLanguages },
+      { type: 'onTrackChange', id: 'external-0', selectedId: 'external-0' }
+    );
+    expect(markers()).not.toContain('evt-track-change-selected');
+    expect(markers()).not.toContain('evt-track-change-repeated');
+  });
+
+  test('select then clear: one change each, ids agree with the list and the getter', () => {
+    feed(
+      { type: 'textTracks', tracks: listed, expectedLanguages },
+      { type: 'textTrackSelect', id: 'external-1' },
+      { type: 'onTrackChange', id: 'external-1', selectedId: 'external-1' }
+    );
+    expect(markers()).toEqual([
+      'evt-selected-id-matches-list',
+      'evt-text-track-default-none',
+      'evt-text-track-languages-ok',
+      'evt-text-track-languages-present',
+      'evt-text-tracks-listed',
+      'evt-track-change-selected',
+    ]);
+    feed(
+      { type: 'textTrackClear' },
+      { type: 'onTrackChange', id: null, selectedId: null }
+    );
+    expect(markers()).toContain('evt-track-cleared');
+    expect(markers()).not.toContain('evt-track-change-repeated');
+  });
+
+  test('the id must be the requested one, be in the list and match the getter', () => {
+    const select = { type: 'textTrackSelect', id: 'external-1' } as const;
+    // Another track than the requested one.
+    feed({ type: 'textTracks', tracks: listed, expectedLanguages }, select, {
+      type: 'onTrackChange',
+      id: 'external-0',
+      selectedId: 'external-0',
+    });
+    expect(markers()).toContain('evt-track-change-selected');
+    expect(markers()).not.toContain('evt-selected-id-matches-list');
+
+    // The getter still reports something else.
+    eventLog.reset();
+    feed({ type: 'textTracks', tracks: listed, expectedLanguages }, select, {
+      type: 'onTrackChange',
+      id: 'external-1',
+      selectedId: null,
+    });
+    expect(markers()).not.toContain('evt-selected-id-matches-list');
+
+    // An id that was never listed.
+    eventLog.reset();
+    feed(
+      { type: 'textTracks', tracks: listed.slice(0, 1), expectedLanguages },
+      select,
+      { type: 'onTrackChange', id: 'external-1', selectedId: 'external-1' }
+    );
+    expect(markers()).not.toContain('evt-selected-id-matches-list');
+  });
+
+  test('a second change for one request marks evt-track-change-repeated', () => {
+    feed(
+      { type: 'textTrackSelect', id: 'external-1' },
+      { type: 'onTrackChange', id: null, selectedId: null },
+      { type: 'onTrackChange', id: 'external-1', selectedId: 'external-1' }
+    );
+    expect(markers()).toContain('evt-track-change-repeated');
+  });
+
+  test('a new request starts a new count', () => {
+    feed(
+      { type: 'textTrackSelect', id: 'external-1' },
+      { type: 'onTrackChange', id: 'external-1', selectedId: 'external-1' },
+      { type: 'textTrackClear' },
+      { type: 'onTrackChange', id: null, selectedId: null },
+      { type: 'textTrackSelect', id: 'external-1' },
+      { type: 'onTrackChange', id: 'external-1', selectedId: 'external-1' }
+    );
+    expect(markers()).not.toContain('evt-track-change-repeated');
+  });
+
+  test('a clear only counts after a selection was reported', () => {
+    feed(
+      { type: 'textTrackClear' },
+      { type: 'onTrackChange', id: null, selectedId: null }
+    );
+    expect(markers()).not.toContain('evt-track-cleared');
+  });
+
+  test('a select with no match in the list requests nothing', () => {
+    feed(
+      { type: 'textTrackSelect', id: null },
+      { type: 'onTrackChange', id: 'external-0', selectedId: 'external-0' }
+    );
+    expect(markers()).toEqual([]);
+    expect(lines()[0]).toBe('selectTextTrack no match in the list');
+  });
+});
+
+describe('buffer ahead (bufferDuration)', () => {
+  const duration = 8;
+
+  test('an amount ahead of the playhead marks only evt-buffer-ahead-positive', () => {
+    feed(
+      { type: 'onLoad', duration },
+      { type: 'onProgress', currentTime: 0.5, bufferDuration: 7.5 },
+      { type: 'onProgress', currentTime: 4, bufferDuration: 4 },
+      { type: 'onProgress', currentTime: 8, bufferDuration: 0 }
+    );
+    expect(markers()).toContain('evt-buffer-ahead-positive');
+    expect(markers()).not.toContain('evt-buffer-ahead-negative');
+    expect(markers()).not.toContain('evt-buffer-ahead-beyond-duration');
+  });
+
+  test('zero all the way never marks evt-buffer-ahead-positive', () => {
+    feed(
+      { type: 'onLoad', duration },
+      { type: 'onProgress', currentTime: 1, bufferDuration: 0 },
+      { type: 'onProgress', currentTime: 2, bufferDuration: Number.NaN }
+    );
+    expect(markers()).not.toContain('evt-buffer-ahead-positive');
+    expect(markers()).not.toContain('evt-buffer-ahead-negative');
+    expect(markers()).not.toContain('evt-buffer-ahead-beyond-duration');
+  });
+
+  test('a negative value marks evt-buffer-ahead-negative', () => {
+    feed(
+      { type: 'onLoad', duration },
+      { type: 'onProgress', currentTime: 3, bufferDuration: -0.1 }
+    );
+    expect(markers()).toContain('evt-buffer-ahead-negative');
+  });
+
+  test('the end position of the buffer reported as bufferDuration is caught', () => {
+    // iOS before #5246: the whole 8 s clip is buffered, so the value stays at 8.
+    feed(
+      { type: 'onLoad', duration },
+      { type: 'onProgress', currentTime: 0.5, bufferDuration: 8 }
+    );
+    // Within the tolerance while playback is this close to the start...
+    expect(markers()).not.toContain('evt-buffer-ahead-beyond-duration');
+    feed({
+      type: 'onProgress',
+      currentTime: BUFFER_AHEAD_TOLERANCE_SECONDS + 0.5,
+      bufferDuration: 8,
+    });
+    // ...and past it as soon as currentTime exceeds the tolerance.
+    expect(markers()).toContain('evt-buffer-ahead-beyond-duration');
+  });
+
+  test('the tolerance is inclusive', () => {
+    feed(
+      { type: 'onLoad', duration },
+      {
+        type: 'onProgress',
+        currentTime: 4,
+        bufferDuration: 4 + BUFFER_AHEAD_TOLERANCE_SECONDS,
+      }
+    );
+    expect(markers()).not.toContain('evt-buffer-ahead-beyond-duration');
+  });
+
+  test('without a usable duration the rule is not applied', () => {
+    feed({ type: 'onProgress', currentTime: 4, bufferDuration: 100 });
+    expect(markers()).not.toContain('evt-buffer-ahead-beyond-duration');
+    feed(
+      { type: 'onLoad', duration: Number.NaN },
+      { type: 'onProgress', currentTime: 4, bufferDuration: 100 }
+    );
+    expect(markers()).not.toContain('evt-buffer-ahead-beyond-duration');
+  });
+
+  test('an onProgress without bufferDuration marks none of the three', () => {
+    feed({ type: 'onLoad', duration }, { type: 'onProgress', currentTime: 4 });
+    expect(
+      markers().filter((marker) => marker.startsWith('evt-buffer-ahead'))
+    ).toEqual([]);
+  });
+});
+
+describe('a load superseded by replaceSourceAsync()', () => {
+  test('its rejection and its resolution are separate markers', () => {
+    feed({ type: 'supersededLoad', outcome: 'rejected' });
+    expect(markers()).toEqual(['evt-superseded-load-rejected']);
+    expect(lines()).toEqual(['superseded load rejected']);
+    eventLog.reset();
+    feed({ type: 'supersededLoad', outcome: 'resolved' });
+    expect(markers()).toEqual(['evt-superseded-load-resolved']);
+  });
+
+  test('the replacement is judged by the existing replacement markers', () => {
+    feed(
+      { type: 'replaceSource', phase: 'requested', source: 'hls' },
+      { type: 'supersededLoad', outcome: 'rejected' },
+      { type: 'replaceSource', phase: 'resolved', source: 'hls' },
+      { type: 'onLoad', duration: 8 },
+      { type: 'onProgress', currentTime: 0.2 },
+      { type: 'onEnd' }
+    );
+    expect(markers()).toEqual(
+      [
+        'evt-duration-fixture',
+        'evt-ended-after-replace',
+        'evt-onEnded',
+        'evt-onLoad',
+        'evt-onProgress',
+        'evt-reloaded-from-start',
+        'evt-replace-resolved',
+        'evt-replacement-loaded',
+        'evt-superseded-load-rejected',
+      ].sort()
+    );
+  });
+});
+
+describe('recovery from a failed source', () => {
+  const failure: PlayerEvent[] = [
+    { type: 'onStatusChange', status: 'loading' },
+    { type: 'onError', code: 'player/playback-failed' },
+    { type: 'onStatusChange', status: 'error' },
+  ];
+
+  test('a loading status counts only after the failure', () => {
+    feed({ type: 'onStatusChange', status: 'loading' });
+    expect(markers()).not.toContain('evt-loading-after-error');
+    feed(...failure.slice(1), { type: 'onStatusChange', status: 'loading' });
+    expect(markers()).toContain('evt-loading-after-error');
+  });
+
+  test('the error status alone is enough for the loading that follows to count', () => {
+    feed(
+      { type: 'onStatusChange', status: 'error' },
+      { type: 'onStatusChange', status: 'loading' }
+    );
+    expect(markers()).toContain('evt-loading-after-error');
+  });
+
+  test('the error status of the failed source is not an error after recovery', () => {
+    // onError first, its status after the replacement was already requested.
+    feed(
+      failure[0]!,
+      failure[1]!,
+      { type: 'replaceSource', phase: 'requested', source: 'mp4' },
+      failure[2]!
+    );
+    expect(markers()).not.toContain('evt-error-after-recovery');
+  });
+
+  test('an error status after the replacement loaded is', () => {
+    feed(
+      ...failure,
+      { type: 'replaceSource', phase: 'requested', source: 'mp4' },
+      { type: 'onStatusChange', status: 'loading' },
+      { type: 'onLoad', duration: 8 },
+      { type: 'onProgress', currentTime: 0.3 }
+    );
+    expect(markers()).toContain('evt-replacement-loaded');
+    expect(markers()).toContain('evt-reloaded-from-start');
+    expect(markers()).not.toContain('evt-error-after-recovery');
+    feed({ type: 'onStatusChange', status: 'error' });
+    expect(markers()).toContain('evt-error-after-recovery');
+    // One failure, one onError: the status alone does not make it "repeated".
+    expect(markers()).not.toContain('evt-onError-repeated');
+  });
+});
+
+describe('seekBy()', () => {
+  const seekByMarkers = () =>
+    markers().filter((marker) => marker.startsWith('evt-seek-by'));
+  const request = (from: number, by: number): PlayerEvent[] => [
+    { type: 'seekByRequest', from, by },
+    { type: 'onSeek', seekTime: Math.max(0, from + by) },
+  ];
+
+  beforeEach(() => feed({ type: 'onLoad', duration: 8 }));
+
+  test('forward, back and past the start each get their own marker', () => {
+    feed(...request(2.3, 3), { type: 'onProgress', currentTime: 5.5 });
+    expect(seekByMarkers()).toEqual(['evt-seek-by-forward-landed']);
+    feed(...request(5.5, -2), { type: 'onProgress', currentTime: 3.7 });
+    expect(seekByMarkers()).toEqual([
+      'evt-seek-by-back-landed',
+      'evt-seek-by-forward-landed',
+    ]);
+    feed(...request(3.7, -100), { type: 'onProgress', currentTime: 0.2 });
+    expect(seekByMarkers()).toEqual([
+      'evt-seek-by-back-landed',
+      'evt-seek-by-clamped-to-start',
+      'evt-seek-by-forward-landed',
+    ]);
+    expect(eventLog.isSeekByBusy()).toBe(false);
+  });
+
+  test('a seek that did nothing misses, whichever way it was meant to go', () => {
+    feed(
+      ...request(2.3, 3),
+      { type: 'onProgress', currentTime: 2.5 },
+      { type: 'onProgress', currentTime: 2.9 }
+    );
+    expect(seekByMarkers()).toEqual(['evt-seek-by-missed']);
+    eventLog.reset();
+    feed(
+      { type: 'onLoad', duration: 8 },
+      ...request(5.5, -2),
+      { type: 'onProgress', currentTime: 5.7 },
+      { type: 'onProgress', currentTime: 6.1 }
+    );
+    expect(seekByMarkers()).toEqual(['evt-seek-by-missed']);
+  });
+
+  test('one stale progress sample is allowed before the landing', () => {
+    expect(SEEK_BY_LANDING_SAMPLES).toBe(2);
+    feed(...request(2.3, 3), { type: 'onProgress', currentTime: 2.4 });
+    expect(seekByMarkers()).toEqual([]);
+    expect(eventLog.isSeekByBusy()).toBe(true);
+    feed({ type: 'onProgress', currentTime: 5.6 });
+    expect(seekByMarkers()).toEqual(['evt-seek-by-forward-landed']);
+  });
+
+  test('the tolerance is inclusive and symmetric', () => {
+    feed(...request(2, 3), {
+      type: 'onProgress',
+      currentTime: 5 + SEEK_BY_TOLERANCE_SECONDS,
+    });
+    expect(seekByMarkers()).toEqual(['evt-seek-by-forward-landed']);
+    feed(...request(6, -2), {
+      type: 'onProgress',
+      currentTime: 4 - SEEK_BY_TOLERANCE_SECONDS,
+    });
+    expect(seekByMarkers()).toContain('evt-seek-by-back-landed');
+    expect(seekByMarkers()).not.toContain('evt-seek-by-missed');
+  });
+
+  test('a seek past the end is expected at the duration', () => {
+    feed(...request(6, 100), { type: 'onProgress', currentTime: 7.9 });
+    expect(seekByMarkers()).toEqual(['evt-seek-by-forward-landed']);
+  });
+
+  test('progress before the onSeek is not the landing', () => {
+    feed(
+      { type: 'seekByRequest', from: 2.3, by: 3 },
+      { type: 'onProgress', currentTime: 2.5 },
+      { type: 'onProgress', currentTime: 2.8 }
+    );
+    expect(seekByMarkers()).toEqual([]);
+    expect(eventLog.isSeekByBusy()).toBe(true);
+    feed(
+      { type: 'onSeek', seekTime: 5.3 },
+      { type: 'onProgress', currentTime: 5.4 }
+    );
+    expect(seekByMarkers()).toEqual(['evt-seek-by-forward-landed']);
+  });
+
+  test('an onSeek without a request is an ordinary seek', () => {
+    feed(
+      { type: 'onSeek', seekTime: 5 },
+      { type: 'onProgress', currentTime: 5.1 }
+    );
+    expect(seekByMarkers()).toEqual([]);
+    expect(markers()).toContain('evt-seek-fwd-landed');
+  });
+});
+
+describe('resizeMode changed while playing', () => {
+  const resizeMarkers = () =>
+    markers().filter(
+      (marker) => marker.includes('resize') && marker !== 'evt-onLoad'
+    );
+  // The order the scenario applies them in: contain is the mode it starts with.
+  const cycle: PlayerEvent[] = [
+    { type: 'resizeMode', mode: 'cover', at: 1.1 },
+    { type: 'resizeMode', mode: 'stretch', at: 2.1 },
+    { type: 'resizeMode', mode: 'none', at: 3.1 },
+    { type: 'resizeMode', mode: 'contain', at: 4.1 },
+  ];
+
+  beforeEach(() =>
+    feed(
+      { type: 'onStatusChange', status: 'loading' },
+      { type: 'onLoad', duration: 8 },
+      { type: 'onProgress', currentTime: 0.5 }
+    )
+  );
+
+  test('the cycle is complete only once every mode was applied', () => {
+    expect(RESIZE_MODES.length).toBe(4);
+    feed(...cycle.slice(0, 3));
+    expect(resizeMarkers()).toEqual([]);
+    feed(cycle[3]!);
+    expect(resizeMarkers()).toEqual(['evt-resize-modes-cycled']);
+  });
+
+  test('progress counts only after the last change, and only past its position', () => {
+    feed(...cycle.slice(0, 3), { type: 'onProgress', currentTime: 3.6 });
+    expect(resizeMarkers()).toEqual([]);
+    feed(cycle[3]!, { type: 'onProgress', currentTime: 4.1 });
+    expect(resizeMarkers()).toEqual(['evt-resize-modes-cycled']);
+    feed({ type: 'onProgress', currentTime: 4.4 });
+    expect(resizeMarkers()).toEqual([
+      'evt-progress-after-resize',
+      'evt-resize-modes-cycled',
+    ]);
+  });
+
+  test('the load before the first change is not a reload', () => {
+    feed(...cycle, { type: 'onProgress', currentTime: 5 });
+    expect(resizeMarkers()).not.toContain('evt-reload-after-resize');
+  });
+
+  test('an onLoad after a change is a reload', () => {
+    feed(cycle[0]!, { type: 'onLoad', duration: 8 });
+    expect(resizeMarkers()).toEqual(['evt-reload-after-resize']);
+  });
+
+  test('so is the loading status', () => {
+    feed(cycle[0]!, { type: 'onStatusChange', status: 'loading' });
+    expect(resizeMarkers()).toEqual(['evt-reload-after-resize']);
+  });
+});
+
+describe('loop switched during playback', () => {
+  const loopMarkers = () =>
+    markers().filter(
+      (marker) => marker.includes('loop') || marker.includes('wrapped')
+    );
+  const firstPass: PlayerEvent[] = [
+    { type: 'onLoad', duration: 8 },
+    { type: 'onProgress', currentTime: 2.2 },
+    { type: 'loopSet', enabled: true },
+    { type: 'onProgress', currentTime: 7.8 },
+  ];
+
+  test('a fall back in progress with loop on is a wrap, with or without an onEnd', () => {
+    // Android: silent.
+    feed(...firstPass, { type: 'onProgress', currentTime: 0.6 });
+    expect(loopMarkers()).toEqual(['evt-loop-wrapped']);
+    eventLog.reset();
+    // iOS: each pass reports onEnd; with loop on it is not the end the flow waits for.
+    feed(
+      ...firstPass,
+      { type: 'onEnd' },
+      { type: 'onProgress', currentTime: 0.6 }
+    );
+    expect(loopMarkers()).toEqual(['evt-loop-wrapped']);
+  });
+
+  test('the fall has to be larger than the threshold', () => {
+    feed(
+      { type: 'onLoad', duration: 8 },
+      { type: 'loopSet', enabled: true },
+      { type: 'onProgress', currentTime: 6 },
+      { type: 'onProgress', currentTime: 6 - LOOP_TOGGLE_DROP_SECONDS }
+    );
+    expect(loopMarkers()).toEqual([]);
+    feed(
+      { type: 'onProgress', currentTime: 6 },
+      { type: 'onProgress', currentTime: 5.9 - LOOP_TOGGLE_DROP_SECONDS }
+    );
+    expect(loopMarkers()).toEqual(['evt-loop-wrapped']);
+  });
+
+  test('without the scenario switching loop, a fall in progress marks nothing here', () => {
+    feed(
+      { type: 'onLoad', duration: 8 },
+      { type: 'onProgress', currentTime: 7.8 },
+      { type: 'onProgress', currentTime: 0.2 },
+      { type: 'onEnd' }
+    );
+    expect(loopMarkers()).toEqual([]);
+  });
+
+  test('after loop is switched off the next end is an onEnd and nothing wraps', () => {
+    feed(
+      ...firstPass,
+      { type: 'onProgress', currentTime: 0.4 },
+      { type: 'loopSet', enabled: false },
+      { type: 'onProgress', currentTime: 7.9 },
+      { type: 'onEnd' },
+      { type: 'loopOffSettled' }
+    );
+    expect(loopMarkers()).toEqual([
+      'evt-ended-after-loop-off',
+      'evt-loop-off-settled',
+      'evt-loop-wrapped',
+    ]);
+  });
+
+  test('a restart after loop was switched off is reported', () => {
+    feed(
+      ...firstPass,
+      { type: 'onProgress', currentTime: 0.4 },
+      { type: 'loopSet', enabled: false },
+      { type: 'onProgress', currentTime: 7.9 },
+      { type: 'onProgress', currentTime: 0.3 }
+    );
+    expect(loopMarkers()).toEqual([
+      'evt-loop-wrapped',
+      'evt-wrapped-after-loop-off',
+    ]);
+  });
+});
+
+describe('release() and a new player', () => {
+  test('the second player has its own markers, apart from the first one', () => {
+    feed(
+      { type: 'secondPlayer', event: 'onLoad' },
+      { type: 'secondPlayer', event: 'onProgress', currentTime: 0.5 }
+    );
+    expect(markers()).toEqual(['evt-second-player-loaded']);
+    feed({
+      type: 'secondPlayer',
+      event: 'onProgress',
+      currentTime: PROGRESS_MARKER_SECONDS + 0.1,
+    });
+    expect(markers()).toEqual([
+      'evt-second-player-loaded',
+      'evt-second-player-progress',
+    ]);
+    expect(lines()).toEqual(['second player onLoad']);
+  });
+
+  test('an error of the second player is not the scenario player failing', () => {
+    feed({ type: 'secondPlayer', event: 'onError' });
+    expect(markers()).toEqual(['evt-second-player-error']);
+    expect(eventLog.getErrorCode()).toBe('');
+  });
+
+  test('a call on the released player counts as rejected only with the released code', () => {
+    feed({ type: 'releasedCall', code: RELEASED_PLAYER_ERROR_CODE });
+    expect(markers()).toEqual(['evt-released-call-rejected']);
+    eventLog.reset();
+    feed({ type: 'releasedCall', code: null });
+    expect(markers()).toEqual(['evt-released-call-accepted']);
+    expect(lines()).toEqual(['play() on the released player: did not throw']);
+    eventLog.reset();
+    feed({ type: 'releasedCall', code: 'unknown/unknown' });
+    expect(markers()).toEqual(['evt-released-call-accepted']);
   });
 });

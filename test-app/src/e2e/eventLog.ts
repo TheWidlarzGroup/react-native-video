@@ -106,6 +106,64 @@ export const MARKER_IDS = [
   'evt-fullscreen-landscape', // the window was landscape while in fullscreen
   'evt-fullscreen-turned-portrait', // ...and later portrait while still in fullscreen (lock lost)
   'evt-portrait-after-exit', // portrait again once fullscreen closed (the app's own setting back)
+  // External subtitles (smoke-external-subtitles.yaml). The list is read once after onLoad.
+  'evt-text-tracks-listed', // getAvailableTextTracks() has as many tracks as the scenario expects
+  'evt-text-track-languages-ok', // ...and their languages are exactly the expected ones
+  // Every expected language is in the list, whatever else is. For HLS, where a player may
+  // list tracks of its own next to the external one (smoke-external-subtitles-hls.yaml).
+  'evt-text-track-languages-present',
+  // What is selected before any request. Informational: the platforms differ here (Android
+  // starts with none; iOS selects the first side-loaded track of a non-HLS source).
+  'evt-text-track-default-none',
+  'evt-text-track-default-selected',
+  'evt-track-change-selected', // onTrackChange with a track, after a select request
+  // ...whose id is the requested one, is in the list, and is what player.selectedTrack reports
+  'evt-selected-id-matches-list',
+  'evt-track-cleared', // onTrackChange(null) after a clear request that followed a selection
+  'evt-track-change-repeated', // a second onTrackChange for one request: must report once
+  // onProgress.bufferDuration is the time buffered AHEAD of currentTime (#5246), so it is
+  // never negative and never reaches past the end of the clip (smoke-buffer-ahead.yaml).
+  'evt-buffer-ahead-positive', // some onProgress reported bufferDuration > 0
+  'evt-buffer-ahead-negative', // some onProgress reported bufferDuration < 0
+  // currentTime + bufferDuration went past duration + BUFFER_AHEAD_TOLERANCE_SECONDS: the
+  // value was a position in the clip, not an amount ahead of the playhead
+  'evt-buffer-ahead-beyond-duration',
+  // A load superseded by replaceSourceAsync() (smoke-replace-while-loading.yaml): its
+  // promise rejects, it is not a failure (no onError), and it must not resolve.
+  'evt-superseded-load-rejected',
+  'evt-superseded-load-resolved',
+  // Recovery from a failed source by replaceSourceAsync() (smoke-error-then-recover.yaml).
+  'evt-loading-after-error', // onStatusChange('loading') after the failure was reported
+  // The error status again once the replacement had loaded: the old failure must not
+  // leak into the new source (a second onError is evt-onError-repeated).
+  'evt-error-after-recovery',
+  // seekBy() (smoke-seek-by.yaml): where each relative seek landed, judged like the seek
+  // markers above from the progress that follows its onSeek, against the position the
+  // scenario asked for (SEEK_BY_TOLERANCE_SECONDS).
+  'evt-seek-by-forward-landed',
+  'evt-seek-by-back-landed',
+  'evt-seek-by-clamped-to-start', // a seekBy() past the start lands at 0, not on an error
+  'evt-seek-by-missed', // a relative seek landed somewhere else
+  // resizeMode changed while playing (smoke-resize-mode-runtime.yaml): a view prop, so the
+  // player must neither reload nor stall. How the picture looks is the visual suite's job.
+  'evt-resize-modes-cycled', // cover, stretch, none and contain were each applied
+  'evt-progress-after-resize', // playback moved on after the last of them
+  'evt-reload-after-resize', // onLoad or the loading status after the first change
+  // `loop` switched during playback (smoke-loop-toggle.yaml; smoke-loop.yaml enables it on
+  // an ended player and never switches it off).
+  'evt-loop-wrapped', // loop on: progress fell back by more than LOOP_TOGGLE_DROP_SECONDS
+  'evt-ended-after-loop-off', // loop off again: the next end is an onEnd
+  'evt-wrapped-after-loop-off', // ...and playback must not start over after that
+  'evt-loop-off-settled', // the scenario waited LOOP_OFF_SETTLE_MS after that onEnd
+  // release() and what comes after it (smoke-release-reuse.yaml; smoke-release-source.yaml
+  // covers replaceSourceAsync(null) and that the released player stops).
+  'evt-second-player-loaded', // a new VideoPlayer on the same screen reported onLoad
+  'evt-second-player-progress', // ...and played past PROGRESS_MARKER_SECONDS
+  'evt-second-player-error', // ...or reported onError
+  // play() on the released player, called after the library's grace period: it must throw
+  // RELEASED_PLAYER_ERROR_CODE, not be accepted and not fail with something else.
+  'evt-released-call-rejected',
+  'evt-released-call-accepted',
 ] as const;
 
 export type MarkerId = (typeof MARKER_IDS)[number];
@@ -115,7 +173,8 @@ export type LogEntry = { readonly id: number; readonly text: string };
 export type PlayerEvent =
   | { type: 'onLoadStart' }
   | { type: 'onLoad'; duration: number }
-  | { type: 'onProgress'; currentTime: number }
+  // bufferDuration is optional so tests of the other markers need not pass it.
+  | { type: 'onProgress'; currentTime: number; bufferDuration?: number }
   | { type: 'onEnd' }
   | { type: 'onReadyToDisplay' }
   | { type: 'onError'; code: string }
@@ -157,8 +216,27 @@ export type PlayerEvent =
       type: 'replaceSource';
       phase: 'requested' | 'resolved' | 'rejected';
       // 'cache': the mp4-cache source again, with the fixture server cut off.
-      source: 'hls' | 'null' | 'audio-tracks' | 'cache';
+      source: 'hls' | 'mp4' | 'null' | 'audio-tracks' | 'cache';
     }
+  // An event of the second player the release scenario creates.
+  | { type: 'secondPlayer'; event: 'onLoad' | 'onError' }
+  | { type: 'secondPlayer'; event: 'onProgress'; currentTime: number }
+  // play() called on the released player: the code of what it threw, null if nothing.
+  | { type: 'releasedCall'; code: string | null }
+  // The scenario set player.loop.
+  | { type: 'loopSet'; enabled: boolean }
+  // The scenario's timer after the onEnd that followed loop = false.
+  | { type: 'loopOffSettled' }
+  // The scenario set VideoView's resizeMode prop; `at` is the position it last saw.
+  | {
+      type: 'resizeMode';
+      mode: 'contain' | 'cover' | 'stretch' | 'none';
+      at: number;
+    }
+  // The scenario is about to call seekBy(by); `from` is the position it last saw.
+  | { type: 'seekByRequest'; from: number; by: number }
+  // How the promise of a load settled after a newer load replaced it.
+  | { type: 'supersededLoad'; outcome: 'rejected' | 'resolved' }
   | {
       type: 'onVideoTrackChange';
       tracks: readonly { id: string; height?: number }[];
@@ -167,7 +245,19 @@ export type PlayerEvent =
   | {
       type: 'onAudioTrackChange';
       tracks: readonly { language?: string; selected: boolean }[];
-    };
+    }
+  // getAvailableTextTracks() read once after onLoad, with what the scenario expects.
+  | {
+      type: 'textTracks';
+      tracks: readonly { id: string; language?: string; selected: boolean }[];
+      expectedLanguages: readonly string[];
+    }
+  // A control asked for a text track (id from the list; null when the list had no match)...
+  | { type: 'textTrackSelect'; id: string | null }
+  // ...or for none: selectTextTrack(null).
+  | { type: 'textTrackClear' }
+  // onTrackChange, with player.selectedTrack?.id read inside the listener.
+  | { type: 'onTrackChange'; id: string | null; selectedId: string | null };
 
 // Renditions in the hls-quality fixture (e2e/fixtures/generate.sh).
 export const VIDEO_TRACK_COUNT = 3;
@@ -205,6 +295,37 @@ export const STATUS_SETTLE_MS = 750;
 // after it mounted did not.
 export const LOADER_SOURCE_HOLD_MS = 4000;
 export const LOADER_HELD_MIN_MS = 2500;
+// How far currentTime + bufferDuration may exceed the duration before it counts as a
+// position instead of an amount ahead. The two values of one onProgress are sampled a
+// moment apart, the buffered range ends on a segment or sample boundary rather than at
+// the reported duration, and HLS reports the sum of its segment durations; all of that
+// stays well under a second on the 8 s fixtures. A buffer END position reported as
+// bufferDuration (iOS before #5246) is off by currentTime itself, so it trips the rule
+// as soon as playback is more than this far in.
+export const BUFFER_AHEAD_TOLERANCE_SECONDS = 1;
+// How far from `from + by` a seekBy() may land. `from` is the last onProgress the scenario
+// saw, so it is up to one progress interval old (250 ms on Android, 500 ms on iOS) when the
+// seek runs, and the landing is read from the next onProgress, up to one more interval
+// later; a second sample is allowed (below), which adds another. That is 1.5 s at most on
+// iOS, and every step of the scenario moves by 2 s or more, so a seek that did nothing can
+// never pass.
+export const SEEK_BY_TOLERANCE_SECONDS = 1.5;
+// A progress tick already queued when the seek started can still carry the old position,
+// so the landing is judged on up to this many onProgress events after the onSeek.
+export const SEEK_BY_LANDING_SAMPLES = 2;
+// What a method of a released player throws once the library has dropped the native
+// object (VideoPlayer.ts, the `player` getter).
+export const RELEASED_PLAYER_ERROR_CODE = 'player/released';
+// A loop pass seen from progress alone: the position fell back by more than this. The
+// clip is 8 s and the loop scenario never seeks, so only a restart can do that. Unlike
+// LOOP_WRAP_TO_SECONDS it does not depend on how soon after the restart the first
+// onProgress comes (up to 500 ms on iOS).
+export const LOOP_TOGGLE_DROP_SECONDS = 4;
+// How long the loop scenario waits after the final onEnd before it reports "settled": long
+// enough for a restart to show up as progress (two iOS progress intervals and a margin).
+export const LOOP_OFF_SETTLE_MS = 2000;
+// Every value of the ResizeMode type; evt-resize-modes-cycled needs each applied once.
+export const RESIZE_MODES = ['contain', 'cover', 'stretch', 'none'] as const;
 // Set when the player reports an error status without a code (see handle).
 export const STATUS_ERROR_CODE = 'status/error';
 
@@ -229,6 +350,8 @@ type State = {
   loadCount: number;
   // When the loader element mounted, or null while it is not up.
   loaderShownAt: number | null;
+  // Duration from the latest onLoad; the buffer-ahead rule needs it.
+  duration: number | null;
   // Status order: only the first readyToPlay is judged against an earlier loading.
   loadingSeen: boolean;
   readySeen: boolean;
@@ -252,6 +375,28 @@ type State = {
   loadsOfSource: number;
   // The duration the last onLoad reported, NaN before it.
   loadedDuration: number;
+  // Text tracks: ids from the reported list, and the request a control made last. Only an
+  // onTrackChange after a request is judged; one before it is the platform's default.
+  listedTextTrackIds: ReadonlySet<string>;
+  textTrackRequest: 'none' | 'select' | 'clear';
+  requestedTextTrackId: string | null;
+  trackChangesSinceRequest: number;
+  // seekBy(): the request waiting for its onSeek, then the landing waiting for progress.
+  seekByRequested: SeekByTarget | null;
+  seekByLanding: (SeekByTarget & { samplesLeft: number }) | null;
+  // resizeMode changes: which modes were applied, and the position at the latest one.
+  resizeModesApplied: ReadonlySet<string>;
+  lastResizeAt: number | null;
+  // loop switched by the loop-toggle scenario; 'unset' everywhere else.
+  loopToggle: 'unset' | 'on' | 'off';
+};
+
+type SeekByTarget = {
+  expected: number;
+  marker:
+    | 'evt-seek-by-forward-landed'
+    | 'evt-seek-by-back-landed'
+    | 'evt-seek-by-clamped-to-start';
 };
 
 const initialState = (): State => ({
@@ -266,6 +411,7 @@ const initialState = (): State => ({
   lastProgress: null,
   loadCount: 0,
   loaderShownAt: null,
+  duration: null,
   loadingSeen: false,
   readySeen: false,
   replaceRequested: false,
@@ -276,6 +422,15 @@ const initialState = (): State => ({
   sparseGaps: 0,
   loadsOfSource: 0,
   loadedDuration: NaN,
+  listedTextTrackIds: new Set(),
+  textTrackRequest: 'none',
+  requestedTextTrackId: null,
+  trackChangesSinceRequest: 0,
+  seekByRequested: null,
+  seekByLanding: null,
+  resizeModesApplied: new Set(),
+  lastResizeAt: null,
+  loopToggle: 'unset',
 });
 
 let state = initialState();
@@ -305,6 +460,10 @@ function append(line: string) {
   state.entries = [...state.entries, entry].slice(-MAX_ENTRIES);
 }
 
+// 'en-US', 'en_US' and 'EN' are all 'en': the platforms report language tags differently.
+const baseLanguage = (language: string | undefined): string =>
+  (language ?? '').toLowerCase().split(/[-_]/)[0] ?? '';
+
 function apply(event: PlayerEvent) {
   switch (event.type) {
     case 'onLoadStart':
@@ -330,6 +489,8 @@ function apply(event: PlayerEvent) {
       ) {
         mark('evt-duration-crop');
       }
+      state.duration = event.duration;
+      if (state.lastResizeAt !== null) mark('evt-reload-after-resize');
       if (state.replaceRequested) {
         // Order, judged once, on the replacement's first onLoad (Android re-emits onLoad
         // on a re-buffer): a start reported only after it is too late for an app that
@@ -385,11 +546,59 @@ function apply(event: PlayerEvent) {
       if (state.lastProgress === null && t > START_POSITION_LANDED_SECONDS) {
         mark('evt-started-at-position');
       }
+      const ahead = event.bufferDuration;
+      if (ahead !== undefined) {
+        if (ahead > 0) mark('evt-buffer-ahead-positive');
+        if (ahead < 0) mark('evt-buffer-ahead-negative');
+        if (
+          state.duration !== null &&
+          Number.isFinite(state.duration) &&
+          state.duration > 0 &&
+          t + ahead > state.duration + BUFFER_AHEAD_TOLERANCE_SECONDS
+        ) {
+          mark('evt-buffer-ahead-beyond-duration');
+        }
+      }
       // A replaced source must start from its beginning: the first progress after its
       // onLoad proves it, the way the seek markers prove where a seek landed.
       if (state.reloadPending) {
         state.reloadPending = false;
         if (t < RELOAD_START_SECONDS) mark('evt-reloaded-from-start');
+      }
+      if (
+        state.loopToggle !== 'unset' &&
+        state.lastProgress !== null &&
+        state.lastProgress - t > LOOP_TOGGLE_DROP_SECONDS
+      ) {
+        mark(
+          state.loopToggle === 'on'
+            ? 'evt-loop-wrapped'
+            : 'evt-wrapped-after-loop-off'
+        );
+      }
+      if (
+        state.markers.has('evt-resize-modes-cycled') &&
+        state.lastResizeAt !== null &&
+        t > state.lastResizeAt
+      ) {
+        mark('evt-progress-after-resize');
+      }
+      if (state.seekByLanding !== null) {
+        const { expected, marker, samplesLeft } = state.seekByLanding;
+        if (Math.abs(t - expected) <= SEEK_BY_TOLERANCE_SECONDS) {
+          state.seekByLanding = null;
+          mark(marker);
+        } else if (samplesLeft > 1) {
+          state.seekByLanding = {
+            expected,
+            marker,
+            samplesLeft: samplesLeft - 1,
+          };
+        } else {
+          state.seekByLanding = null;
+          mark('evt-seek-by-missed');
+          append(`seekBy landed at ${t}, expected ${expected}`);
+        }
       }
       // The seek markers are derived from the FIRST progress after an onSeek, so
       // natural playback can never satisfy them: a forward seek must report > 4 s, a
@@ -427,6 +636,7 @@ function apply(event: PlayerEvent) {
       // real counter: smoke-loop.yaml taps play once to get from end #1 to end #2, then
       // makes no further taps — only `loop` itself can produce a #3.
       if (state.replaceRequested) mark('evt-ended-after-replace');
+      if (state.loopToggle === 'off') mark('evt-ended-after-loop-off');
       if (state.endCount >= LOOP_VERIFIED_END_COUNT) mark('evt-loop-verified');
       append(`onEnded (#${state.endCount})`);
       return;
@@ -518,8 +728,20 @@ function apply(event: PlayerEvent) {
       if (event.status === 'error') {
         mark('evt-status-error');
         if (state.errorCode === '') state.errorCode = STATUS_ERROR_CODE;
+        if (state.markers.has('evt-replacement-loaded')) {
+          mark('evt-error-after-recovery');
+        }
       }
-      if (event.status === 'loading') state.loadingSeen = true;
+      if (event.status === 'loading') {
+        state.loadingSeen = true;
+        if (state.lastResizeAt !== null) mark('evt-reload-after-resize');
+        if (
+          state.markers.has('evt-onError') ||
+          state.markers.has('evt-status-error')
+        ) {
+          mark('evt-loading-after-error');
+        }
+      }
       if (event.status === 'readyToPlay' && !state.readySeen) {
         state.readySeen = true;
         // Order, judged once: the first readyToPlay must follow a loading. A later
@@ -557,6 +779,13 @@ function apply(event: PlayerEvent) {
       mark('evt-onSeek');
       // The next progress event is where this seek landed (and not a loop wrap).
       state.seekPending = true;
+      if (state.seekByRequested !== null) {
+        state.seekByLanding = {
+          ...state.seekByRequested,
+          samplesLeft: SEEK_BY_LANDING_SAMPLES,
+        };
+        state.seekByRequested = null;
+      }
       append(`onSeek ${event.seekTime}`);
       return;
 
@@ -602,6 +831,77 @@ function apply(event: PlayerEvent) {
       if (event.phase === 'resolved') mark('evt-replace-resolved');
       if (event.phase === 'rejected') mark('evt-replace-rejected');
       append(`replaceSource(${event.source}) ${event.phase}`);
+      return;
+
+    case 'secondPlayer':
+      if (event.event === 'onLoad') mark('evt-second-player-loaded');
+      if (event.event === 'onError') mark('evt-second-player-error');
+      if (
+        event.event === 'onProgress' &&
+        event.currentTime > PROGRESS_MARKER_SECONDS
+      ) {
+        mark('evt-second-player-progress');
+      }
+      // Progress would flood the log; the two one-off events are worth a line.
+      if (event.event !== 'onProgress') append(`second player ${event.event}`);
+      return;
+
+    case 'releasedCall':
+      mark(
+        event.code === RELEASED_PLAYER_ERROR_CODE
+          ? 'evt-released-call-rejected'
+          : 'evt-released-call-accepted'
+      );
+      append(`play() on the released player: ${event.code ?? 'did not throw'}`);
+      return;
+
+    case 'loopSet':
+      state.loopToggle = event.enabled ? 'on' : 'off';
+      append(`loop=${event.enabled}`);
+      return;
+
+    case 'loopOffSettled':
+      mark('evt-loop-off-settled');
+      append('loop off: settled');
+      return;
+
+    case 'resizeMode':
+      state.resizeModesApplied = new Set(state.resizeModesApplied).add(
+        event.mode
+      );
+      state.lastResizeAt = event.at;
+      if (RESIZE_MODES.every((mode) => state.resizeModesApplied.has(mode))) {
+        mark('evt-resize-modes-cycled');
+      }
+      append(`resizeMode=${event.mode} at ${event.at}`);
+      return;
+
+    case 'seekByRequest': {
+      const target = event.from + event.by;
+      const end =
+        state.duration !== null && Number.isFinite(state.duration)
+          ? state.duration
+          : Infinity;
+      state.seekByRequested = {
+        expected: Math.min(Math.max(target, 0), end),
+        marker:
+          target < 0
+            ? 'evt-seek-by-clamped-to-start'
+            : event.by > 0
+              ? 'evt-seek-by-forward-landed'
+              : 'evt-seek-by-back-landed',
+      };
+      append(`seekBy(${event.by}) from ${event.from}`);
+      return;
+    }
+
+    case 'supersededLoad':
+      mark(
+        event.outcome === 'rejected'
+          ? 'evt-superseded-load-rejected'
+          : 'evt-superseded-load-resolved'
+      );
+      append(`superseded load ${event.outcome}`);
       return;
 
     case 'statusAfterRelease':
@@ -669,6 +969,82 @@ function apply(event: PlayerEvent) {
       return;
     }
 
+    case 'textTracks': {
+      state.listedTextTrackIds = new Set(event.tracks.map(({ id }) => id));
+      if (event.tracks.length === event.expectedLanguages.length) {
+        mark('evt-text-tracks-listed');
+      }
+      const listed = event.tracks.map((t) => baseLanguage(t.language)).sort();
+      const expected = event.expectedLanguages.map(baseLanguage).sort();
+      if (
+        expected.length > 0 &&
+        expected.every((language) => listed.includes(language))
+      ) {
+        mark('evt-text-track-languages-present');
+      }
+      if (
+        listed.length === expected.length &&
+        listed.every((language, i) => language === expected[i])
+      ) {
+        mark('evt-text-track-languages-ok');
+      }
+      mark(
+        event.tracks.some((t) => t.selected)
+          ? 'evt-text-track-default-selected'
+          : 'evt-text-track-default-none'
+      );
+      append(
+        `textTracks ${event.tracks
+          .map((t) => `${t.id}:${t.language ?? '?'}${t.selected ? '*' : ''}`)
+          .join(' ')}`
+      );
+      return;
+    }
+
+    case 'textTrackSelect':
+      // No match in the list: nothing was requested, so no later change may count.
+      if (event.id !== null) {
+        state.textTrackRequest = 'select';
+        state.requestedTextTrackId = event.id;
+        state.trackChangesSinceRequest = 0;
+      }
+      append(`selectTextTrack ${event.id ?? 'no match in the list'}`);
+      return;
+
+    case 'textTrackClear':
+      state.textTrackRequest = 'clear';
+      state.requestedTextTrackId = null;
+      state.trackChangesSinceRequest = 0;
+      append('selectTextTrack null');
+      return;
+
+    case 'onTrackChange':
+      append(
+        `onTrackChange ${event.id ?? 'none'} (selectedTrack=${event.selectedId ?? 'none'})`
+      );
+      // Before any request this is the platform's own default selection.
+      if (state.textTrackRequest === 'none') return;
+      state.trackChangesSinceRequest += 1;
+      if (state.trackChangesSinceRequest > 1) mark('evt-track-change-repeated');
+      if (state.textTrackRequest === 'select' && event.id !== null) {
+        mark('evt-track-change-selected');
+        if (
+          event.id === state.requestedTextTrackId &&
+          state.listedTextTrackIds.has(event.id) &&
+          event.selectedId === event.id
+        ) {
+          mark('evt-selected-id-matches-list');
+        }
+      }
+      if (
+        state.textTrackRequest === 'clear' &&
+        event.id === null &&
+        state.markers.has('evt-track-change-selected')
+      ) {
+        mark('evt-track-cleared');
+      }
+      return;
+
     default:
       // A new PlayerEvent type fails to compile here until it is handled.
       event satisfies never;
@@ -693,6 +1069,10 @@ export const eventLog = {
     append(`press:${title}`);
     emit();
   },
+  // True from a seekByRequest until its landing was judged: the seekBy scenario issues its
+  // next step only when this is false, so one landing is never judged against another.
+  isSeekByBusy: (): boolean =>
+    state.seekByRequested !== null || state.seekByLanding !== null,
   // Called by btn-loop-on: the wrap-around rule in handle only applies while loop is on.
   setLoopEnabled(enabled: boolean) {
     state.loopEnabled = enabled;

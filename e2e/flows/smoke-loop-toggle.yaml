@@ -1,0 +1,42 @@
+# `loop` switched while a clip plays, in both directions. smoke-loop.yaml enables it on an
+# ended player and never switches it off; this covers the other half of the contract:
+#   - set to true during the first pass: the clip starts over at its end instead of
+#     stopping (evt-loop-wrapped: progress falls back by more than 4 s; iOS also reports an
+#     onEnd for the pass, Android wraps silently);
+#   - set to false during the second pass: that pass ends with an onEnd
+#     (evt-ended-after-loop-off) and playback does not start over again.
+# No taps: the scenario switches loop from JS on playback position (ScenarioScreen), and
+# reports evt-loop-off-settled 2 s after the final onEnd, so "did not start over" is
+# asserted after a real wait and not at the instant of the end.
+#
+# Timeouts: Maestro measures an extendedWaitUntil timeout from the latest interaction
+# (launch, tap, opening the link), not from the start of the step. This flow never taps,
+# so every timeout below is the time since the scenario opened and they have to grow.
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4-loop-toggle
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 20000
+- extendedWaitUntil:
+    visible:
+      id: "evt-loop-wrapped"
+    timeout: 30000            # the first pass is 8 s
+- extendedWaitUntil:
+    visible:
+      id: "evt-ended-after-loop-off"
+    timeout: 40000            # the second pass is another 8 s
+- extendedWaitUntil:
+    visible:
+      id: "evt-loop-off-settled"
+    timeout: 50000            # 2 s after that end; see the note on timeouts above
+- assertNotVisible:
+    id: "evt-wrapped-after-loop-off"
+- assertNotVisible:
+    id: "evt-onError"

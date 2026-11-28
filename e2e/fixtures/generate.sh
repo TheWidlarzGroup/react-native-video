@@ -93,3 +93,12 @@ ffmpeg -y \
 
 echo "Fixtures written to $(pwd)/media"
 ls -laR media
+
+# External subtitles for the 8 s clips (smoke-external-subtitles*.yaml): hand-written
+# WebVTT, three cues each, all inside the clip's duration.
+for lang in en:English es:Spanish; do
+  code="${lang%%:*}"
+  word="${lang##*:}"
+  printf 'WEBVTT\n\n00:00:00.500 --> 00:00:02.500\n%s one\n\n00:00:03.000 --> 00:00:05.000\n%s two\n\n00:00:05.500 --> 00:00:07.500\n%s three\n' \
+    "$word" "$word" "$word" > "media/subs-${code}.vtt"
+done

@@ -1,0 +1,37 @@
+# resizeMode changed while a clip plays: it is a prop of the view, so the player must
+# neither reload the source nor stop. The scenario applies cover, stretch, none and contain
+# in turn, one per second of playback, from JS (ScenarioScreen; taps during playback are
+# deferred on iOS). The flow asserts that all four were applied, that playback moved on
+# after the last one and reached the end, and that no onLoad or loading status followed a
+# change. What the picture looks like in each mode belongs to the visual suite, not here.
+#
+# Timeouts count from the latest interaction, so they grow down a run of waits
+# (e2e/CONTEXT.md, "Timeouts").
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4-resize-modes
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 20000
+- extendedWaitUntil:
+    visible:
+      id: "evt-resize-modes-cycled"
+    timeout: 35000            # the last change follows 4 s of playback
+- extendedWaitUntil:
+    visible:
+      id: "evt-progress-after-resize"
+    timeout: 40000
+- runFlow:
+    file: ../shared/wait-for-end.yaml
+    env:
+      END_TIMEOUT: 65000      # 40 s of waits above, plus the rest of the clip
+- assertNotVisible:
+    id: "evt-reload-after-resize"
+- assertNotVisible:
+    id: "evt-onError"

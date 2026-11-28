@@ -1,0 +1,44 @@
+# release() is final for that player and for nothing else:
+#   - a new VideoPlayer created on the same screen afterwards loads and plays
+#     (evt-second-player-loaded, evt-second-player-progress);
+#   - a method called on the released player throws `player/released`
+#     (evt-released-call-rejected). The call is made 5.5 s after release(), past the 5 s for
+#     which the library keeps the native object, so the outcome is the same on both platforms.
+# smoke-release-source.yaml covers replaceSourceAsync(null) and that the released player
+# stops; this covers release() itself and what an app does next.
+#
+# No taps: the scenario releases from JS once the first player has played past 2 s, hands
+# the view the second player and makes the late call on a timer (ScenarioScreen).
+#
+# Timeouts count from the latest interaction, so they grow down a run of waits
+# (e2e/CONTEXT.md, "Timeouts").
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4-release-reuse
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 20000
+- extendedWaitUntil:
+    visible:
+      id: "evt-second-player-loaded"
+    timeout: 40000            # follows 2 s of playback of the first player
+- extendedWaitUntil:
+    visible:
+      id: "evt-second-player-progress"
+    timeout: 55000
+- extendedWaitUntil:
+    visible:
+      id: "evt-released-call-rejected"
+    timeout: 65000            # 5.5 s after release()
+- assertNotVisible:
+    id: "evt-released-call-accepted"
+- assertNotVisible:
+    id: "evt-second-player-error"
+- assertNotVisible:
+    id: "evt-onError"
