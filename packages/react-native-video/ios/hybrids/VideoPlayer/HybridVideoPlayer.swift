@@ -141,9 +141,28 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     guard let releasedSource = close() else { return }
     try? _eventEmitter?.clearAllListeners()
     releaseAsset(for: releasedSource)
+    videoRenditionLoadTask?.cancel()
+    videoQualityRecheckWorkItem?.cancel()
+    // Plugins are told on the main thread, as before. A weak reference formed here is already
+    // empty (Swift clears it once deinit starts), so a plugin gets no usable player, as before.
+    let destroyed = Weak<NativeVideoPlayer>(value: self)
 
-    runOnMainThreadSync {
-      releaseOnMainThread()
+    // AVFoundation objects are torn down on the main thread, but deinit can run on the JS
+    // thread after a garbage collection. Hand them over instead of waiting (#4820). The
+    // closure must not capture self, which is going away.
+    let player = self.player
+    let observer = playerObserver
+    let teardown = {
+      observer?.invalidatePlayerItemObservers(ownPlayer: player)
+      observer?.invalidatePlayerObservers(ownPlayer: player)
+      NowPlayingInfoCenterManager.shared.removePlayer(player: player)
+      player.replaceCurrentItem(with: nil)
+      PluginsRegistry.shared.notifyPlayerDestroyed(destroyed)
+    }
+    if Thread.isMainThread {
+      teardown()
+    } else {
+      DispatchQueue.main.async(execute: teardown)
     }
   }
 

@@ -104,6 +104,13 @@ public final class PluginsRegistry {
     }
   }
 
+  /// For a player that is being deinitialized and can no longer be referenced.
+  internal func notifyPlayerDestroyed(_ player: Weak<NativeVideoPlayer>) {
+    for plugin in registeredPlugins {
+      plugin.onPlayerDestroyed(player: player)
+    }
+  }
+
   internal func notifyVideoViewCreated(view: VideoComponentView) {
     for plugin in registeredPlugins {
       plugin.onVideoViewCreated(view: Weak(value: view))
