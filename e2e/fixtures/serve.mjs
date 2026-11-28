@@ -106,7 +106,8 @@ function holdMs(url, now = Date.now()) {
 const server = createServer((req, res) => {
   const wait = holdMs(req.url);
   if (wait === 0) return respond(req, res);
-  const timer = setTimeout(() => respond(req, res), wait);
+  // Clamped again here, at the timer, so the bound is visible where the delay is used.
+  const timer = setTimeout(() => respond(req, res), Math.min(wait, MAX_HOLD_MS));
   res.on('close', () => clearTimeout(timer));
 });
 
