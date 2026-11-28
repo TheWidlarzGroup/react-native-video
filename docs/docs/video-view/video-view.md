@@ -16,7 +16,7 @@ To use `VideoView`, you need to pass a `VideoPlayer` instance to its `player` pr
 
 ```tsx
 import React from 'react';
-import { VideoPlayer, VideoView } from 'react-native-video';
+import { useVideoPlayer, VideoView } from 'react-native-video';
 import { StyleSheet } from 'react-native';
 
 const App = () => {

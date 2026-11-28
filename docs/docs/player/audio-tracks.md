@@ -17,6 +17,7 @@ If your content ships multiple audio renditions (dubs, commentary tracks, audio 
 ## Quick start
 
 ```tsx
+import { Button } from 'react-native';
 import { useVideoPlayer, useEvent, VideoView } from 'react-native-video';
 
 export function Player() {
@@ -27,15 +28,17 @@ export function Player() {
     console.log('Selected:', data.selectedTrackId);
   });
 
+  const selectSpanish = () => {
+    const tracks = player.getAvailableAudioTracks();
+    const spanish = tracks.find((t) => t.language === 'es');
+    if (spanish) player.selectAudioTrack(spanish.id);
+  };
+
   return (
-    <VideoView
-      player={player}
-      onPress={() => {
-        const tracks = player.getAvailableAudioTracks();
-        const spanish = tracks.find((t) => t.language === 'es');
-        if (spanish) player.selectAudioTrack(spanish.id);
-      }}
-    />
+    <>
+      <VideoView player={player} style={{ width: '100%', aspectRatio: 16 / 9 }} />
+      <Button title="Spanish audio" onPress={selectSpanish} />
+    </>
   );
 }
 ```
