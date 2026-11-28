@@ -13,6 +13,9 @@ on:
       # Update on code change (Api Reference)
       - "packages/react-native-video/src/**"
 
+permissions:
+  contents: read
+
 jobs:
   test-docs-deploy:
     name: Test Documentation Build
