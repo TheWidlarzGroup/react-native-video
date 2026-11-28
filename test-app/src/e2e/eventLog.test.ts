@@ -12,6 +12,8 @@ import {
   FIXTURE_DURATION_SECONDS,
   FIXTURE_DURATION_TOLERANCE_SECONDS,
   RELOAD_START_SECONDS,
+  LOADER_HELD_MIN_MS,
+  LOADER_SOURCE_HOLD_MS,
   type MarkerId,
   type PlayerEvent,
 } from './eventLog';
@@ -468,6 +470,48 @@ describe('lifecycle (ported from #4743)', () => {
     expect(markers()).toContain('evt-duration-fixture');
   });
 
+  test('the replacement start is in order when it comes before the replacement onLoad', () => {
+    feed({ type: 'onLoadStart' }, { type: 'onLoad', duration: 8 });
+    replaceRequested();
+    feed({ type: 'onLoadStart' }, { type: 'onLoad', duration: 8 });
+    expect(markers()).toContain('evt-replacement-start-before-load');
+    expect(markers()).not.toContain('evt-replacement-load-start-repeated');
+  });
+
+  test('a replacement start that comes after its onLoad, or never, is not in order', () => {
+    replaceRequested();
+    feed({ type: 'onLoad', duration: 8 }, { type: 'onLoadStart' });
+    expect(markers()).toContain('evt-replacement-load-started');
+    expect(markers()).not.toContain('evt-replacement-start-before-load');
+    // A later onLoad (Android re-emits it on a re-buffer) must not repair the order.
+    feed({ type: 'onLoad', duration: 8 });
+    expect(markers()).not.toContain('evt-replacement-start-before-load');
+
+    eventLog.reset();
+    replaceRequested();
+    feed({ type: 'onLoad', duration: 8 });
+    expect(markers()).not.toContain('evt-replacement-start-before-load');
+  });
+
+  test('a second onLoadStart for one replacement is reported as repeated', () => {
+    feed({ type: 'onLoadStart' });
+    replaceRequested();
+    feed({ type: 'onLoadStart' });
+    expect(markers()).not.toContain('evt-replacement-load-start-repeated');
+    feed({ type: 'onLoadStart' });
+    expect(markers()).toContain('evt-replacement-load-start-repeated');
+  });
+
+  test('an onLoadStart counts as the replacement starting only after a replacement was requested', () => {
+    // The first source's own onLoadStart is not a replacement.
+    feed({ type: 'onLoadStart' });
+    expect(markers()).not.toContain('evt-replacement-load-started');
+    replaceRequested();
+    feed({ type: 'onLoadStart' });
+    expect(markers()).toContain('evt-replacement-load-started');
+    expect(lines()).toContain('onLoadStart');
+  });
+
   test('an onLoad counts as the replacement only after a replacement was requested', () => {
     // Android re-emits onLoad after a re-buffer or a replay: not a replacement.
     feed({ type: 'onLoad', duration: 8 }, { type: 'onLoad', duration: 8 });
@@ -698,6 +742,64 @@ describe('fullscreen', () => {
     });
     expect(markers()).toEqual(['evt-fullscreen-call-failed']);
     expect(lines()).toEqual(['exitFullscreen() threw: boom']);
+  });
+});
+
+describe('loader', () => {
+  test('a loader that covers the held load marks shown, before-load, hidden and held', () => {
+    feed({ type: 'loader', shown: true, at: 1000 });
+    expect(markers()).toEqual(['evt-loader-before-load', 'evt-loader-shown']);
+    feed(
+      { type: 'onLoad', duration: 8 },
+      { type: 'loader', shown: false, at: 1000 + LOADER_SOURCE_HOLD_MS + 300 }
+    );
+    expect(markers()).toContain('evt-loader-hidden');
+    expect(markers()).toContain('evt-loader-held');
+    expect(lines()).toEqual([
+      'loader shown',
+      'onLoad duration=8 (#1)',
+      `loader hidden after ${LOADER_SOURCE_HOLD_MS + 300} ms`,
+    ]);
+  });
+
+  test('a loader taken off right after it mounted is hidden but not held', () => {
+    feed(
+      { type: 'loader', shown: true, at: 1000 },
+      { type: 'loader', shown: false, at: 1000 + LOADER_HELD_MIN_MS - 1 }
+    );
+    expect(markers()).toContain('evt-loader-hidden');
+    expect(markers()).not.toContain('evt-loader-held');
+  });
+
+  test('progress at 0 s while the source loads does not stop before-load (Android)', () => {
+    feed(
+      { type: 'onProgress', currentTime: 0 },
+      { type: 'onProgress', currentTime: 0 },
+      { type: 'loader', shown: true, at: 1 }
+    );
+    expect(markers()).toContain('evt-loader-before-load');
+  });
+
+  test('a loader that first mounts after onLoad or progress is not before-load', () => {
+    feed(
+      { type: 'onLoad', duration: 8 },
+      { type: 'loader', shown: true, at: 1 }
+    );
+    expect(markers()).toContain('evt-loader-shown');
+    expect(markers()).not.toContain('evt-loader-before-load');
+
+    eventLog.reset();
+    feed(
+      { type: 'onProgress', currentTime: 0.2 },
+      { type: 'loader', shown: true, at: 1 }
+    );
+    expect(markers()).not.toContain('evt-loader-before-load');
+  });
+
+  test('hidden is only marked after the loader was shown', () => {
+    feed({ type: 'loader', shown: false, at: 5000 });
+    expect(markers()).not.toContain('evt-loader-hidden');
+    expect(markers()).not.toContain('evt-loader-held');
   });
 });
 

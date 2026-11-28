@@ -38,6 +38,13 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
 - Standard `ubuntu-latest` runners have KVM; the udev rule step must run before the
   emulator starts (see `_e2e-android.yml`).
 - Keep clips 5–15 s — `onEnded` tests must not wait minutes.
+- **A slow source is made by the fixture server, not by the network.** `?hold=<ms>` on a
+  fixture URL keeps the request waiting that long; with `&holdId=<id>` every request
+  carrying the id waits until <ms> after the first one, because AVPlayer fetches a clip
+  in several range requests, some in parallel. `fixtures.ts` builds such a URL with a
+  fresh id per app launch (`heldFixture`); `smoke-loader.yaml` uses it so that the
+  view's loader has a load to cover. Keep a hold under ExoPlayer's 8 s read timeout
+  unless the flow wants the timeout.
 - **Zero retries.** A flow is never re-run to turn it green — a retry hides exactly the
   race conditions this suite exists to catch. A flow that proves unstable gets quarantined
   (`tags: [flaky]`) with an issue, and drops out of the gate until it is fixed. The only

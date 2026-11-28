@@ -28,6 +28,9 @@ export type { VideoPlayerStatus } from './core/types/VideoPlayerStatus';
 export { VideoPlayer } from './core/VideoPlayer';
 export { default as VideoView } from './core/video-view/VideoView';
 export type {
+  VideoLoaderProps,
+  VideoPoster,
+  VideoPosterResizeMode,
   VideoViewProps,
   VideoViewRef,
 } from './core/video-view/VideoViewProps';

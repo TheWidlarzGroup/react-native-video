@@ -343,13 +343,18 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
     player.setMediaSource(hybridSource.mediaSource)
     ensureNotReleased()
 
-    // Emit onLoadStart
+    emitLoadStart(hybridSource)
+    ensureNotReleased()
+    startProgressUpdates()
+  }
+
+  // A new source starts loading: reported the same way for the first source and for one set
+  // by replaceSourceAsync().
+  private fun emitLoadStart(hybridSource: HybridVideoPlayerSource) {
     val sourceType = if (hybridSource.uri.startsWith("http")) SourceType.NETWORK else SourceType.LOCAL
     eventEmitter.onLoadStart(onLoadStartData(sourceType = sourceType, source = hybridSource))
     ensureNotReleased()
     status = VideoPlayerStatus.LOADING
-    ensureNotReleased()
-    startProgressUpdates()
   }
 
   /**
@@ -460,6 +465,13 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
         progressHandler.removeCallbacks(audioSwitchAckRunnable)
         player.setMediaSource(hybridSource.mediaSource)
         ensureNotReleased()
+
+        // Before initialize() the player is a placeholder without listeners, and
+        // initializePlayer() reports the load start itself.
+        if (loadedWithSource) {
+          emitLoadStart(hybridSource)
+          ensureNotReleased()
+        }
 
         player.prepare()
         ensureNotReleased()

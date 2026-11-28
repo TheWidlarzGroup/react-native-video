@@ -42,7 +42,33 @@ async function handleOpenLink(req, res) {
   return json(result.ok ? 200 : 502, result);
 }
 
+// `?hold=<ms>` keeps a request waiting that long before it is answered, so a flow can
+// look at what the app shows while a source loads. With `&holdId=<id>`, every request
+// carrying the id waits until <ms> after the first one arrived, and once that moment has
+// passed none waits: AVPlayer fetches a clip in several range requests, some of them in
+// parallel, and holding each one by <ms> would multiply the wait. A client that goes away
+// cancels its wait. Capped at MAX_HOLD_MS.
+const MAX_HOLD_MS = 120_000;
+const holdDeadlines = new Map();
+
+function holdMs(url, now = Date.now()) {
+  const { searchParams } = new URL(url, 'http://x');
+  const hold = Math.min(Number(searchParams.get('hold')), MAX_HOLD_MS);
+  if (!Number.isFinite(hold) || hold <= 0) return 0;
+  const id = searchParams.get('holdId');
+  if (id === null) return hold;
+  if (!holdDeadlines.has(id)) holdDeadlines.set(id, now + hold);
+  return Math.max(0, holdDeadlines.get(id) - now);
+}
+
 const server = createServer((req, res) => {
+  const wait = holdMs(req.url);
+  if (wait === 0) return respond(req, res);
+  const timer = setTimeout(() => respond(req, res), wait);
+  res.on('close', () => clearTimeout(timer));
+});
+
+function respond(req, res) {
   try {
     const path = decodeURIComponent(new URL(req.url, 'http://x').pathname);
 
@@ -138,7 +164,7 @@ const server = createServer((req, res) => {
     console.error(`[fixtures] unexpected error: ${err.message}`);
     res.destroy();
   }
-});
+}
 
 server.on('error', (err) => {
   console.error(`[fixtures] ${err.message}`);
