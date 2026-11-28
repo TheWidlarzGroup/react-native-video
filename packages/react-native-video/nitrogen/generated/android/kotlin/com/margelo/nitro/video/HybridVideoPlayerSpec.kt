@@ -119,6 +119,12 @@ abstract class HybridVideoPlayerSpec: HybridObject() {
   @get:Keep
   @set:DoNotStrip
   @set:Keep
+  abstract var usesExternalPlaybackWhileExternalScreenIsActive: Boolean
+  
+  @get:DoNotStrip
+  @get:Keep
+  @set:DoNotStrip
+  @set:Keep
   abstract var allowsExternalPlayback: Boolean
   
   @get:DoNotStrip

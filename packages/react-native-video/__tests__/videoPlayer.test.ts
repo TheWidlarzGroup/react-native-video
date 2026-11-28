@@ -152,3 +152,21 @@ test('replaceSourceAsync(null) resolves', async () => {
   const player = new VideoPlayer('https://x/a.mp4');
   await expect(player.replaceSourceAsync(null)).resolves.toBeUndefined();
 });
+
+test('usesExternalPlaybackWhileExternalScreenIsActive is passed to the native player', () => {
+  (globalThis as { __DEV__?: boolean }).__DEV__ = false;
+  const player = new VideoPlayer('https://x/a.mp4');
+  const nativePlayer = native.created.at(-1) as unknown as Record<
+    string,
+    unknown
+  >;
+  player.usesExternalPlaybackWhileExternalScreenIsActive = true;
+  expect(nativePlayer.usesExternalPlaybackWhileExternalScreenIsActive).toBe(
+    true
+  );
+  expect(player.usesExternalPlaybackWhileExternalScreenIsActive).toBe(true);
+  player.usesExternalPlaybackWhileExternalScreenIsActive = false;
+  expect(nativePlayer.usesExternalPlaybackWhileExternalScreenIsActive).toBe(
+    false
+  );
+});

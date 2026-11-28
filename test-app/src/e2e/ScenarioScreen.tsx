@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Button,
+  Platform,
   StyleSheet,
   Text,
   useWindowDimensions,
@@ -134,12 +135,33 @@ function reportStatusSettled(player: VideoPlayer, after: 'end' | 'error') {
  * release stops playback (the clip must not reach its end), and needs no tap, which iOS
  * would defer until the end anyway. Every other scenario initializes and plays.
  */
+// Reads the property from the native player. Before anything is set it must be false (the
+// AVPlayer default): a library without the property gives undefined there, while a value
+// assigned to it would read back from the JS object alone.
+function reportExternalScreen(player: VideoPlayer, phase: 'default' | 'read') {
+  const value: unknown = player.usesExternalPlaybackWhileExternalScreenIsActive;
+  eventLog.handle({ type: 'externalScreen', phase, value: String(value) });
+}
+
 function startScenario(scenario: ScenarioName, player: VideoPlayer) {
   eventLog.handle({ type: 'initialStatus', status: player.status });
 
   // Set before the load, as an app does in the setup callback of useVideoPlayer.
   if (scenario === 'mp4-progress-1s') {
     player.progressUpdateInterval = 1000;
+  }
+
+  // iOS only: elsewhere the setter logs a dev warning, which LogBox shows over the controls.
+  if (scenario === 'mp4-external-screen' && Platform.OS === 'ios') {
+    reportExternalScreen(player, 'default');
+    try {
+      player.usesExternalPlaybackWhileExternalScreenIsActive = true;
+    } catch (error) {
+      eventLog.log(
+        `usesExternalPlaybackWhileExternalScreenIsActive threw: ${String(error)}`
+      );
+    }
+    reportExternalScreen(player, 'read');
   }
 
   // The player has given up by the time it reports the error: count its requests then.
@@ -435,6 +457,12 @@ const CONTROLS: Control[] = [
     id: 'btn-replace-hls',
     title: 'replace hls',
     press: (p) => replaceSource(p, 'hls'),
+  },
+  {
+    // mp4-external-screen: read the property back, after a source change.
+    id: 'btn-external-screen-check',
+    title: 'external screen',
+    press: (p) => reportExternalScreen(p, 'read'),
   },
   {
     // mp4-cache: cut the source off at the fixture server, then load it again. It can only

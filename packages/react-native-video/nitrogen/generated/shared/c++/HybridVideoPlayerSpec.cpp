@@ -42,6 +42,8 @@ namespace margelo::nitro::video {
       prototype.registerHybridSetter("progressUpdateInterval", &HybridVideoPlayerSpec::setProgressUpdateInterval);
       prototype.registerHybridGetter("disableAudioSessionManagement", &HybridVideoPlayerSpec::getDisableAudioSessionManagement);
       prototype.registerHybridSetter("disableAudioSessionManagement", &HybridVideoPlayerSpec::setDisableAudioSessionManagement);
+      prototype.registerHybridGetter("usesExternalPlaybackWhileExternalScreenIsActive", &HybridVideoPlayerSpec::getUsesExternalPlaybackWhileExternalScreenIsActive);
+      prototype.registerHybridSetter("usesExternalPlaybackWhileExternalScreenIsActive", &HybridVideoPlayerSpec::setUsesExternalPlaybackWhileExternalScreenIsActive);
       prototype.registerHybridGetter("allowsExternalPlayback", &HybridVideoPlayerSpec::getAllowsExternalPlayback);
       prototype.registerHybridSetter("allowsExternalPlayback", &HybridVideoPlayerSpec::setAllowsExternalPlayback);
       prototype.registerHybridGetter("audioOutput", &HybridVideoPlayerSpec::getAudioOutput);

@@ -104,6 +104,8 @@ namespace margelo::nitro::video {
       virtual void setProgressUpdateInterval(double progressUpdateInterval) = 0;
       virtual bool getDisableAudioSessionManagement() = 0;
       virtual void setDisableAudioSessionManagement(bool disableAudioSessionManagement) = 0;
+      virtual bool getUsesExternalPlaybackWhileExternalScreenIsActive() = 0;
+      virtual void setUsesExternalPlaybackWhileExternalScreenIsActive(bool usesExternalPlaybackWhileExternalScreenIsActive) = 0;
       virtual bool getAllowsExternalPlayback() = 0;
       virtual void setAllowsExternalPlayback(bool allowsExternalPlayback) = 0;
       virtual AudioOutput getAudioOutput() = 0;

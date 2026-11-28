@@ -270,6 +270,8 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   override var disableAudioSessionManagement: Boolean = false
 
   // iOS only property - no-op on Android
+  override var usesExternalPlaybackWhileExternalScreenIsActive: Boolean = false
+
   override var allowsExternalPlayback: Boolean = true
 
   override var audioOutput: AudioOutput = AudioOutput.SPEAKER

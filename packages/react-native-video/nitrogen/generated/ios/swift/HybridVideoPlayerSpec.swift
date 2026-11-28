@@ -26,6 +26,7 @@ public protocol HybridVideoPlayerSpec_protocol: HybridObject {
   var playWhenInactive: Bool { get set }
   var progressUpdateInterval: Double { get set }
   var disableAudioSessionManagement: Bool { get set }
+  var usesExternalPlaybackWhileExternalScreenIsActive: Bool { get set }
   var allowsExternalPlayback: Bool { get set }
   var audioOutput: AudioOutput { get set }
   var isPlaying: Bool { get }

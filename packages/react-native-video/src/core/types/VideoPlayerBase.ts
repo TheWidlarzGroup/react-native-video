@@ -139,6 +139,17 @@ export interface VideoPlayerSpecBase {
   disableAudioSessionManagement: boolean;
 
   /**
+   * Whether the video switches to external playback while the screen is mirrored
+   * (AirPlay screen mirroring or a cable to a TV), so it plays full screen on the external
+   * display instead of inside the mirrored app. Maps to AVPlayer's
+   * `usesExternalPlaybackWhileExternalScreenIsActive`.
+   *
+   * @note Has no effect while {@link allowsExternalPlayback} is `false`.
+   * @default false
+   * @platform iOS
+   */
+  usesExternalPlaybackWhileExternalScreenIsActive: boolean;
+  /**
    * Whether the player may switch to external playback, such as AirPlay video.
    *
    * - `true` - the video can be sent to an AirPlay device (default).

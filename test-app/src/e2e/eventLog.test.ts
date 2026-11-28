@@ -1075,3 +1075,29 @@ describe('request count', () => {
     expect(markers()).not.toContain('evt-retried-once');
   });
 });
+
+describe('external screen', () => {
+  test('false before it is set marks evt-external-screen-default, undefined does not', () => {
+    feed({ type: 'externalScreen', phase: 'default', value: 'undefined' });
+    expect(markers()).not.toContain('evt-external-screen-default');
+    feed({ type: 'externalScreen', phase: 'default', value: 'false' });
+    expect(markers()).toContain('evt-external-screen-default');
+    expect(lines()).toEqual([
+      'externalScreen default undefined',
+      'externalScreen default false',
+    ]);
+  });
+
+  test('a true read marks evt-external-screen-on, after a replacement also -kept', () => {
+    feed({ type: 'externalScreen', phase: 'read', value: 'true' });
+    expect(markers()).toContain('evt-external-screen-on');
+    expect(markers()).not.toContain('evt-external-screen-kept');
+    feed({ type: 'onLoad', duration: 8 });
+    feed({ type: 'replaceSource', phase: 'requested', source: 'hls' });
+    feed(
+      { type: 'onLoad', duration: 8 },
+      { type: 'externalScreen', phase: 'read', value: 'true' }
+    );
+    expect(markers()).toContain('evt-external-screen-kept');
+  });
+});
