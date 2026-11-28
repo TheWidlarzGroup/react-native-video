@@ -95,11 +95,19 @@ export const VideoViewOverlay = ({
   const isHidden =
     hidden.player === player ? hidden.value : isReadyToDisplay(player);
 
+  // A failed load never becomes ready to display: the loader would stay up for good.
+  const [failed, setFailed] = React.useState<VideoPlayerBase | null>(null);
+  const hasFailed = failed === player;
+
   useEvent(player, 'onLoadStart', () => {
     setHidden({ player, value: false });
+    setFailed(null);
   });
   useEvent(player, 'onReadyToDisplay', () => {
     setHidden({ player, value: true });
+  });
+  useEvent(player, 'onError', () => {
+    setFailed(player);
   });
 
   if (isHidden) {
@@ -116,7 +124,11 @@ export const VideoViewOverlay = ({
 
   let content: React.ReactNode = null;
 
-  if (renderLoader != null) {
+  if (renderLoader != null && hasFailed) {
+    // The loader says "loading", which is no longer true. The shutter color stays, as a
+    // poster does when there is no loader, so the app can draw its own error state.
+    content = null;
+  } else if (renderLoader != null) {
     if (
       isDev() &&
       !didWarnAboutLoaderAndPoster &&

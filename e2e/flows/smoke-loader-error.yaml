@@ -1,0 +1,32 @@
+# VideoView's renderLoader on a source that fails (404): the loader goes away once the
+# player reports the error, instead of spinning forever (it only waits for
+# onReadyToDisplay, which a failed load never sends). Opens the mp4 scenario first, as
+# smoke-error-404.yaml does (cold-launch gotcha in e2e/CONTEXT.md).
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 20000
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: error-404-loader
+- extendedWaitUntil:
+    visible:
+      id: "evt-onError"
+    timeout: 20000
+- assertVisible:
+    id: "evt-loader-shown"
+- extendedWaitUntil:
+    visible:
+      id: "evt-loader-hidden"
+    timeout: 5000
+- assertNotVisible:
+    id: "evt-onLoad"

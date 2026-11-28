@@ -160,6 +160,33 @@ test('renderLoader replaces the poster and gets the fill style', () => {
   ).toHaveLength(1);
 });
 
+test('the loader goes away on an error and comes back with the next load', () => {
+  const player = fakePlayer();
+  const spinners = (r: TestRenderer.ReactTestRenderer) =>
+    r.root.findAll((n) => (n.type as unknown) === 'Spinner');
+  const r = render({
+    player,
+    renderLoader: React.createElement('Spinner'),
+    shutterColor: 'black',
+  });
+  expect(spinners(r)).toHaveLength(1);
+
+  act(() => player.emit('onError', new Error('404')));
+  expect(spinners(r)).toHaveLength(0);
+  // The shutter still covers the failed video.
+  expect(r.toJSON()).not.toBeNull();
+
+  act(() => player.emit('onLoadStart'));
+  expect(spinners(r)).toHaveLength(1);
+});
+
+test('a poster stays after an error', () => {
+  const player = fakePlayer();
+  const r = render({ player, poster: 'https://x/p.png' });
+  act(() => player.emit('onError', new Error('404')));
+  expect(images(r)).toHaveLength(1);
+});
+
 test('shutterColor paints the cover, hideShutterView turns it off', () => {
   const background = (props: Record<string, unknown>) => {
     const r = render({ player: fakePlayer(), ...props });
@@ -300,7 +327,7 @@ test('the overlay listeners are removed on unmount and move with the player', ()
   const first = counted();
   const second = counted();
   const r = render({ player: first, poster: 'https://x/p.png' });
-  expect(first.live()).toBe(2);
+  expect(first.live()).toBe(3);
 
   act(() => {
     r.update(
@@ -312,7 +339,7 @@ test('the overlay listeners are removed on unmount and move with the player', ()
     );
   });
   expect(first.live()).toBe(0);
-  expect(second.live()).toBe(2);
+  expect(second.live()).toBe(3);
 
   act(() => r.unmount());
   expect(second.live()).toBe(0);
