@@ -26,6 +26,10 @@ export let FIXTURE_BASE = fixtureBase(DEFAULT_FIXTURE_PORT);
 // Every source `fixture()` has handed out, so `setFixturePort` can move them too.
 const fixtureSources: VideoConfig[] = [];
 
+// mp4-cache: a token per app launch, so the fixture server can cut off exactly this source
+// (`/__go-offline?token=`), and a fresh launch (cleared app data, empty cache) starts online.
+export const CACHE_TOKEN = Math.random().toString(36).slice(2);
+
 // Every scenario starts its own load after attaching listeners (see ScenarioScreen).
 const fixture = (path: string): VideoConfig => {
   const source: VideoConfig = {
@@ -54,6 +58,10 @@ export const SCENARIO_SOURCES: Record<ScenarioName, VideoConfig> = {
   'mp4-loader': heldFixture('short.mp4', LOADER_SOURCE_HOLD_MS),
   'mp4-start-position': { ...fixture('short.mp4'), startPosition: 5000 },
   'mp4-crop': { ...fixture('short.mp4'), cropStart: 2000, cropEnd: 5000 },
+  'mp4-cache': {
+    ...fixture(`short.mp4?token=${CACHE_TOKEN}`),
+    shouldCache: true,
+  },
   'mp4-fullscreen-rotate': fixture('short.mp4'),
   'mp4-controls': fixture('short.mp4'),
   'mp4-controls-styles': fixture('short.mp4'),

@@ -73,6 +73,13 @@ test('cropStart and cropEnd reach native unchanged, in milliseconds', () => {
   expect(lastConfig().cropEnd).toBeUndefined();
 });
 
+test('shouldCache is passed through and stays unset by default', () => {
+  createSource({ uri: 'https://x/a.mp4' });
+  expect(lastConfig().shouldCache).toBeUndefined();
+  createSource({ uri: 'https://x/a.mp4', shouldCache: true });
+  expect(lastConfig().shouldCache).toBe(true);
+});
+
 test('a config with a numeric uri resolves the asset and keeps the other fields', () => {
   createSource({ uri: 7, headers: { a: 'b' } });
   expect(lastConfig().uri).toBe('file:///asset.mp4');

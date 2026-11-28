@@ -16,6 +16,11 @@ const TYPES = {
   '.m3u8': 'application/vnd.apple.mpegurl',
 };
 
+// Tokens whose media requests now fail as a lost connection would (the socket is closed
+// without an answer). `GET /__go-offline?token=<t>` adds one: smoke-cache.yaml cuts its source
+// off after the first playback, so a second playback can only come from the disk cache.
+const offlineTokens = new Set();
+
 const LOOPBACK = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1']);
 
 // The one route that is not a file: iOS flows open their deep link through here (see
@@ -70,7 +75,24 @@ const server = createServer((req, res) => {
 
 function respond(req, res) {
   try {
-    const path = decodeURIComponent(new URL(req.url, 'http://x').pathname);
+    const url = new URL(req.url, 'http://x');
+    const path = decodeURIComponent(url.pathname);
+    const token = url.searchParams.get('token');
+
+    if (path === '/__go-offline') {
+      if (!token) {
+        res.writeHead(400).end('expected ?token=<t>');
+        return;
+      }
+      offlineTokens.add(token);
+      console.log(`[fixtures] offline: ${token}`);
+      res.writeHead(200).end('ok');
+      return;
+    }
+    if (token && offlineTokens.has(token)) {
+      req.socket.destroy();
+      return;
+    }
 
     if (path === '/__open-link') {
       handleOpenLink(req, res).catch((err) => {

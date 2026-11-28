@@ -90,6 +90,22 @@ export type VideoConfig = {
    * @default true
    */
   initializeOnCreation?: boolean;
+  /**
+   * Keep the downloaded file on disk and play it from there next time.
+   *
+   * Only progressive files loaded over the network (for example `.mp4`) are cached. HLS and
+   * DASH streams, DRM content and sources with `externalSubtitles` are played without the cache.
+   * The cache is shared by all players, lives in the app's cache directory and evicts the least
+   * recently used files above 100 MB. A file larger than 100 MB is never kept, it is downloaded
+   * again on every play.
+   *
+   * A cached file is identified by the `uri` and the `headers` of the source, so changing a
+   * header (for example a refreshed `Authorization` token) starts a new file.
+   *
+   * @platform android, ios
+   * @default false
+   */
+  shouldCache?: boolean;
 };
 
 // @internal

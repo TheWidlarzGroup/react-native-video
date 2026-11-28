@@ -52,6 +52,15 @@ test('serves the HLS manifest from a subdirectory', async () => {
   expect(res.headers.get('content-type')).toBe('application/vnd.apple.mpegurl');
 });
 
+test('a token cut off with /__go-offline loses the connection; other requests do not', async () => {
+  expect((await fetch(`${BASE}/short.mp4?token=t1`)).status).toBe(200);
+  expect((await fetch(`${BASE}/__go-offline?token=t1`)).status).toBe(200);
+  await expect(fetch(`${BASE}/short.mp4?token=t1`)).rejects.toThrow();
+  expect((await fetch(`${BASE}/short.mp4?token=t2`)).status).toBe(200);
+  expect((await fetch(`${BASE}/short.mp4`)).status).toBe(200);
+  expect((await fetch(`${BASE}/__go-offline`)).status).toBe(400);
+});
+
 test('honours Range requests', async () => {
   const res = await fetch(`${BASE}/short.mp4`, { headers: { Range: 'bytes=0-99' } });
   expect(res.status).toBe(206);

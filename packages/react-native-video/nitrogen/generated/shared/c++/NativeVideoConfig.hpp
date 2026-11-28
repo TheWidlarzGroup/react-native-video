@@ -63,10 +63,11 @@ namespace margelo::nitro::video {
     std::optional<double> cropStart     SWIFT_PRIVATE;
     std::optional<double> cropEnd     SWIFT_PRIVATE;
     std::optional<bool> initializeOnCreation     SWIFT_PRIVATE;
+    std::optional<bool> shouldCache     SWIFT_PRIVATE;
 
   public:
     NativeVideoConfig() = default;
-    explicit NativeVideoConfig(std::string uri, std::optional<std::vector<NativeExternalSubtitle>> externalSubtitles, std::optional<NativeDrmParams> drm, std::optional<std::unordered_map<std::string, std::string>> headers, std::optional<BufferConfig> bufferConfig, std::optional<CustomVideoMetadata> metadata, std::optional<double> startPosition, std::optional<double> cropStart, std::optional<double> cropEnd, std::optional<bool> initializeOnCreation): uri(uri), externalSubtitles(externalSubtitles), drm(drm), headers(headers), bufferConfig(bufferConfig), metadata(metadata), startPosition(startPosition), cropStart(cropStart), cropEnd(cropEnd), initializeOnCreation(initializeOnCreation) {}
+    explicit NativeVideoConfig(std::string uri, std::optional<std::vector<NativeExternalSubtitle>> externalSubtitles, std::optional<NativeDrmParams> drm, std::optional<std::unordered_map<std::string, std::string>> headers, std::optional<BufferConfig> bufferConfig, std::optional<CustomVideoMetadata> metadata, std::optional<double> startPosition, std::optional<double> cropStart, std::optional<double> cropEnd, std::optional<bool> initializeOnCreation, std::optional<bool> shouldCache): uri(uri), externalSubtitles(externalSubtitles), drm(drm), headers(headers), bufferConfig(bufferConfig), metadata(metadata), startPosition(startPosition), cropStart(cropStart), cropEnd(cropEnd), initializeOnCreation(initializeOnCreation), shouldCache(shouldCache) {}
 
   public:
     // NativeVideoConfig is not equatable because these properties are not equatable: drm
@@ -91,7 +92,8 @@ namespace margelo::nitro {
         JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "startPosition"))),
         JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "cropStart"))),
         JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "cropEnd"))),
-        JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "initializeOnCreation")))
+        JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "initializeOnCreation"))),
+        JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "shouldCache")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::video::NativeVideoConfig& arg) {
@@ -106,6 +108,7 @@ namespace margelo::nitro {
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "cropStart"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.cropStart));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "cropEnd"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.cropEnd));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "initializeOnCreation"), JSIConverter<std::optional<bool>>::toJSI(runtime, arg.initializeOnCreation));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "shouldCache"), JSIConverter<std::optional<bool>>::toJSI(runtime, arg.shouldCache));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -126,6 +129,7 @@ namespace margelo::nitro {
       if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "cropStart")))) return false;
       if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "cropEnd")))) return false;
       if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "initializeOnCreation")))) return false;
+      if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "shouldCache")))) return false;
       return true;
     }
   };

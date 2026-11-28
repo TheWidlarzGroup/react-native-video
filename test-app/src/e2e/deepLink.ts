@@ -7,6 +7,7 @@ export const SCENARIO_NAMES = [
   'mp4-loader', // same clip; VideoView with renderLoader (covers the video until it is shown)
   'mp4-start-position', // same clip, with startPosition: 5000 on the source
   'mp4-crop', // same clip, cropStart: 2000 and cropEnd: 5000 (plays 3 s of it)
+  'mp4-cache', // same clip with shouldCache; btn-cache-replay replays it with the server cut off
   'mp4-fullscreen-rotate', // same clip; enterFullscreen() on landscape, exitFullscreen() on portrait
   // Native controls (#5272, Android only), checked once the clip has ended:
   'mp4-controls', // every control shown (the ids the other two flows rely on)

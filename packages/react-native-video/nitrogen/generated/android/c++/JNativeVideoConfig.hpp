@@ -75,6 +75,8 @@ namespace margelo::nitro::video {
       jni::local_ref<jni::JDouble> cropEnd = this->getFieldValue(fieldCropEnd);
       static const auto fieldInitializeOnCreation = clazz->getField<jni::JBoolean>("initializeOnCreation");
       jni::local_ref<jni::JBoolean> initializeOnCreation = this->getFieldValue(fieldInitializeOnCreation);
+      static const auto fieldShouldCache = clazz->getField<jni::JBoolean>("shouldCache");
+      jni::local_ref<jni::JBoolean> shouldCache = this->getFieldValue(fieldShouldCache);
       return NativeVideoConfig(
         uri->toStdString(),
         externalSubtitles != nullptr ? std::make_optional([&]() {
@@ -101,7 +103,8 @@ namespace margelo::nitro::video {
         startPosition != nullptr ? std::make_optional(startPosition->value()) : std::nullopt,
         cropStart != nullptr ? std::make_optional(cropStart->value()) : std::nullopt,
         cropEnd != nullptr ? std::make_optional(cropEnd->value()) : std::nullopt,
-        initializeOnCreation != nullptr ? std::make_optional(static_cast<bool>(initializeOnCreation->value())) : std::nullopt
+        initializeOnCreation != nullptr ? std::make_optional(static_cast<bool>(initializeOnCreation->value())) : std::nullopt,
+        shouldCache != nullptr ? std::make_optional(static_cast<bool>(shouldCache->value())) : std::nullopt
       );
     }
 
@@ -111,7 +114,7 @@ namespace margelo::nitro::video {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeVideoConfig::javaobject> fromCpp(const NativeVideoConfig& value) {
-      using JSignature = JNativeVideoConfig(jni::alias_ref<jni::JString>, jni::alias_ref<jni::JArrayClass<JNativeExternalSubtitle>>, jni::alias_ref<JNativeDrmParams>, jni::alias_ref<jni::JMap<jni::JString, jni::JString>>, jni::alias_ref<JBufferConfig>, jni::alias_ref<JCustomVideoMetadata>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JBoolean>);
+      using JSignature = JNativeVideoConfig(jni::alias_ref<jni::JString>, jni::alias_ref<jni::JArrayClass<JNativeExternalSubtitle>>, jni::alias_ref<JNativeDrmParams>, jni::alias_ref<jni::JMap<jni::JString, jni::JString>>, jni::alias_ref<JBufferConfig>, jni::alias_ref<JCustomVideoMetadata>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JBoolean>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
@@ -140,7 +143,8 @@ namespace margelo::nitro::video {
         value.startPosition.has_value() ? jni::JDouble::valueOf(value.startPosition.value()) : nullptr,
         value.cropStart.has_value() ? jni::JDouble::valueOf(value.cropStart.value()) : nullptr,
         value.cropEnd.has_value() ? jni::JDouble::valueOf(value.cropEnd.value()) : nullptr,
-        value.initializeOnCreation.has_value() ? jni::JBoolean::valueOf(value.initializeOnCreation.value()) : nullptr
+        value.initializeOnCreation.has_value() ? jni::JBoolean::valueOf(value.initializeOnCreation.value()) : nullptr,
+        value.shouldCache.has_value() ? jni::JBoolean::valueOf(value.shouldCache.value()) : nullptr
       );
     }
   };
