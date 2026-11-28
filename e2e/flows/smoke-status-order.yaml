@@ -21,6 +21,6 @@ tags: [smoke]
 - extendedWaitUntil:
     visible:
       id: "evt-ready-after-loading"
-    timeout: 10000            # iOS: readyToPlay follows onLoad once the buffer allows playback
+    timeout: 30000            # iOS: readyToPlay follows onLoad once the buffer allows playback
 - assertNotVisible:
     id: "evt-onError"

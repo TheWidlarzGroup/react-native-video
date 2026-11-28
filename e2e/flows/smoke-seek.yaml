@@ -37,7 +37,7 @@ tags: [smoke]
 - extendedWaitUntil:
     visible:
       id: "evt-seek-fwd-landed"
-    timeout: 5000
+    timeout: 10000
 # Bare taps: these are issued during playback and iOS delivers them only at the next end,
 # later than press.yaml waits.
 - tapOn:

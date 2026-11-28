@@ -14,7 +14,7 @@ tags: [smoke]
 - extendedWaitUntil:
     visible:
       id: "evt-paused"
-    timeout: 5000
+    timeout: 50000
 - runFlow:
     file: ../shared/press.yaml
     env:

@@ -31,6 +31,6 @@ tags: [smoke]
 - extendedWaitUntil:
     visible:
       id: "evt-seek-fwd-landed"
-    timeout: 10000
+    timeout: 15000
 - assertNotVisible:
     id: "evt-onError"

@@ -21,7 +21,7 @@ tags: [smoke]
 - extendedWaitUntil:
     visible:
       id: "evt-ready-after-loading"
-    timeout: 20000            # generous: emulator software decoder cold start
+    timeout: 25000            # generous: emulator software decoder cold start
 - extendedWaitUntil:
     visible:
       id: "evt-playing"
@@ -43,10 +43,10 @@ tags: [smoke]
 - extendedWaitUntil:
     visible:
       id: "evt-progress-gt-2s"
-    timeout: 10000
+    timeout: 15000
 - extendedWaitUntil:
     visible:
       id: "evt-onEnded"
-    timeout: 20000
+    timeout: 35000
 - assertNotVisible:
     id: "evt-onError"

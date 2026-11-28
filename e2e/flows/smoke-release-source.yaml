@@ -25,15 +25,15 @@ tags: [smoke]
 - extendedWaitUntil:
     visible:
       id: "evt-progress-gt-2s"
-    timeout: 15000
+    timeout: 35000
 - extendedWaitUntil:
     visible:
       id: "evt-replace-resolved"
-    timeout: 10000
+    timeout: 45000
 - extendedWaitUntil:
     visible:
       id: "evt-idle-after-release"
-    timeout: 5000
+    timeout: 50000
 - assertNotVisible:
     id: "evt-replace-rejected"
 - assertNotVisible:

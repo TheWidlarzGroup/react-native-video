@@ -11,6 +11,9 @@ appId: ${APP_ID}
 - extendedWaitUntil:
     visible:
       id: "evt-onEnded"
-    timeout: 25000
+    # Since the latest interaction (see e2e/CONTEXT.md, "Timeouts"): up to 20 s for the
+    # load that flows wait for first, then the 8 s clip with a margin. A flow that waits
+    # longer before this passes END_TIMEOUT.
+    timeout: ${END_TIMEOUT || 45000}
 - waitForAnimationToEnd:
     timeout: 5000

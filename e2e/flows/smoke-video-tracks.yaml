@@ -20,9 +20,12 @@ tags: [smoke]
 - extendedWaitUntil:
     visible:
       id: "evt-video-tracks-listed"
-    timeout: 15000
+    timeout: 55000
 # Interact only on an idle player (see smoke-mute-volume.yaml).
-- runFlow: ../shared/wait-for-end.yaml
+- runFlow:
+    file: ../shared/wait-for-end.yaml
+    env:
+      END_TIMEOUT: 85000      # after the two waits above (55 s), plus the 8 s clip
 - runFlow:
     file: ../shared/press.yaml
     env:

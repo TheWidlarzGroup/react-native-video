@@ -24,7 +24,7 @@ tags: [smoke]
 - extendedWaitUntil:
     visible:
       id: "evt-status-error"
-    timeout: 20000
+    timeout: 40000
 - assertVisible:
     id: "evt-error-code"
     text: "error-code:player/playback-failed"   # same code on both platforms

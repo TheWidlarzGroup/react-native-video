@@ -197,6 +197,22 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
 
 ## Flow-design gotchas (Maestro)
 
+- **Timeouts: an `extendedWaitUntil` timeout is counted from the latest interaction, not from
+  the start of the step.** Maestro keeps the time of the last command that touched the app
+  (launch, tap, opening a link, an orientation change) and gives every later wait only what
+  is left of its timeout since then (`Orchestra.adjustedToLatestInteraction` in Maestro
+  2.10.0). In a run of waits with nothing in between, the second wait does not get a fresh
+  timeout: a `timeout: 10000` that follows a wait which already took 10 s fails at once,
+  about one second after it starts, whatever the file says. This was found with a flow that
+  never taps: its last step failed 1.1 s in with 10 s written next to it.
+  So inside such a run every timeout is the time since the last interaction and has to be
+  larger than the one before it: write the sum of the budgets, not the budget of the step.
+  An `optional: true` wait is exempt (it is a pause or a probe), but for the same reason it
+  pauses for less than its timeout says. `shared/wait-for-end.yaml` waits 45 s since the last
+  interaction (a 20 s load, then the clip); a flow that waits longer before it passes
+  `END_TIMEOUT`. `scripts/e2e/check-flow-timeouts.mjs` checks all flows and runs with the
+  unit tests (`check-flow-timeouts.test.mjs`).
+
 - **A tap can be lost between the driver and JS even on an idle player** (#5130). Nightly
   2026-09-21 and 09-22, iOS 26 with RN 0.87 only: `btn-mute` was tapped 2.4 s after
   `onEnded`, the simulator log shows touch-down and touch-up reaching the app's window,

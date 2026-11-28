@@ -21,10 +21,10 @@ tags: [smoke]
 - extendedWaitUntil:
     visible:
       id: "evt-progress-gt-2s"
-    timeout: 15000
+    timeout: 35000
 - extendedWaitUntil:
     visible:
       id: "evt-onEnded"
-    timeout: 20000            # clip is 8 s; must arrive well within this
+    timeout: 55000            # clip is 8 s; must arrive well within this
 - assertNotVisible:
     id: "evt-onError"
