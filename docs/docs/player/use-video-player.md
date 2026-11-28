@@ -152,6 +152,9 @@ Properties below are Android‑only
 | `bufferForPlaybackMs` | `number` | Media that must be buffered before playback can start or resume after user action (ms). Default: 1000. |
 | `bufferForPlaybackAfterRebufferMs` | `number` | Media that must be buffered to resume after a rebuffer (ms). Default: 2000. |
 | `backBufferDurationMs` | `number` | Duration kept behind the current position to allow instant rewind without rebuffer (ms). |
+| `bufferingStrategy` | `'default' \| 'disableBuffering' \| 'dependingOnMemory'` | How the player decides whether to keep loading ahead. `disableBuffering` loads only what playback needs to start or resume (the `bufferForPlayback…` durations) and nothing ahead of that, so expect more rebuffering. `dependingOnMemory` behaves like `default` but pauses loading while the app is short on memory. Default: `'default'`. |
+| `maxHeapAllocationPercent` | `number` | With `dependingOnMemory`: the share (0 to 1) of the app's heap the buffer may take before loading pauses. Default: 1. |
+| `minBufferMemoryReservePercent` | `number` | With `dependingOnMemory`: the share (0 to 1) of the app's heap to keep free; loading pauses when less is free and more than 2 seconds are buffered. Default: 0. |
 | `livePlayback.minPlaybackSpeed` | `number` | Minimum playback speed used to maintain target live offset. |
 | `livePlayback.maxPlaybackSpeed` | `number` | Maximum playback speed used to catch up to target live offset. |
 | `livePlayback.minOffsetMs` | `number` | Minimum allowed live offset (ms). |
@@ -168,7 +171,20 @@ Properties below are iOS-only
 | `preferredMaximumResolution` | `{ width: number; height: number }` | Preferred maximum video resolution. Android: applied as `maxVideoSize`. |
 | `preferredPeakBitRateForExpensiveNetworks` | `number` | Bandwidth limit for expensive networks (e.g., cellular), in bits per second. |
 | `preferredMaximumResolutionForExpensiveNetworks` | `{ width: number; height: number }` | Preferred maximum resolution on expensive networks. |
+| `automaticallyWaitsToMinimizeStalling` | `boolean` | Whether the player may delay playback to avoid stalling. With `false`, playback starts as soon as `play()` is called and may stall while the buffer fills. iOS only. Default: `true`. |
 | `livePlayback.targetOffsetMs` | `number` | Target live offset (ms) the player will try to maintain. |
+
+### Loading Options
+
+These go on the `VideoConfig` next to `uri`. They cover v6 source props that control how the media is loaded.
+
+| Property | Type | Platform | Description |
+|----------|------|----------|-------------|
+| `minLoadRetryCount` | `number` | Android | How many times a failed load (manifest, segment or media file) is retried before the player reports an error. Default: 3. |
+| `disableDisconnectError` | `boolean` | Android | Keep retrying once a second while the device has no connection, instead of reporting an error after `minLoadRetryCount` attempts. Default: `false`. |
+| `type` | `string` | Android | The stream type, as a file extension, for a uri that does not show it: `m3u8` (HLS), `mpd` (DASH) or `ism` (SmoothStreaming). Without it the type is read from the uri. |
+| `textTracksAllowChunklessPreparation` | `boolean` | Android | Whether an HLS stream may be prepared from its playlists alone. Set it to `false` when subtitle or audio renditions without a `CODECS` attribute do not show up. Not applied when `externalSubtitles` is set. Default: `true`. |
+| `cmcd` | `boolean \| CmcdConfiguration` | Android | Send Common Media Client Data (CTA-5004) with the requests of an HLS, DASH or SmoothStreaming stream. `true` sends the standard keys in the `CMCD` query parameter. An object picks the mode (`'query'` or `'header'`) and adds custom keys per group: `request`, `session`, `object`, `status`. Custom keys need a hyphenated prefix, for example `com.example-tenant`. |
 
 ## DRM
 

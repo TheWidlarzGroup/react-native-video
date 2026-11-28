@@ -7,6 +7,7 @@ import {
   PROGRESS_MARKER_SECONDS,
   PROGRESS_SPARSE_GAPS,
   PROGRESS_SPARSE_MIN_GAP_SECONDS,
+  RETRIED_ONCE_REQUESTS,
   SEEK_BACK_LANDED_SECONDS,
   SEEK_FORWARD_LANDED_SECONDS,
   START_POSITION_LANDED_SECONDS,
@@ -165,6 +166,25 @@ describe('handle', () => {
       'onLoad duration=42 (#1)',
       'onLoad duration=NaN (#2)',
     ]);
+  });
+
+  test('onBuffer(true) twice in a row marks evt-onBuffer-true-repeated', () => {
+    feed({ type: 'onBuffer', buffering: true });
+    expect(markers()).toEqual(['evt-onBuffer']);
+    feed({ type: 'onBuffer', buffering: true });
+    expect(markers()).toContain('evt-onBuffer-true-repeated');
+    expect(lines()).toEqual(['onBuffer true', 'onBuffer true']);
+  });
+
+  test('alternating onBuffer and a repeated false are not a repeat', () => {
+    feed(
+      { type: 'onBuffer', buffering: true },
+      { type: 'onBuffer', buffering: false },
+      { type: 'onBuffer', buffering: true },
+      { type: 'onBuffer', buffering: false },
+      { type: 'onBuffer', buffering: false }
+    );
+    expect(markers()).not.toContain('evt-onBuffer-true-repeated');
   });
 
   test('onReadyToDisplay marks; a second one for the same source is a repeat', () => {
@@ -1016,5 +1036,18 @@ describe('audio focus', () => {
   test('focus that was never lost is not regained', () => {
     feed({ type: 'onAudioFocusChange', hasAudioFocus: true });
     expect(markers()).not.toContain('evt-audio-focus-regained');
+  });
+});
+
+describe('request count', () => {
+  test('the first request and one retry mark evt-retried-once', () => {
+    feed({ type: 'requestCount', count: RETRIED_ONCE_REQUESTS });
+    expect(markers()).toContain('evt-retried-once');
+    expect(lines()).toEqual([`requests: ${RETRIED_ONCE_REQUESTS}`]);
+  });
+
+  test('the default retry count does not', () => {
+    feed({ type: 'requestCount', count: 4 });
+    expect(markers()).not.toContain('evt-retried-once');
   });
 });

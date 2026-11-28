@@ -14,7 +14,10 @@ export const SCENARIO_NAMES = [
   'mp4-controls-styles', // same clip; native controls with the seek bar, position and duration hidden
   'mp4-controls-no-play-pause', // same clip; native controls without the play/pause button
   'hls',
+  'hls-type', // the same HLS VOD behind a uri without an extension, with type: 'm3u8'
   'error-404',
+  'error-503-retry', // a source that answers 503, with minLoadRetryCount: 1 and a request counter
+  'error-503-retry-offline', // the same with disableDisconnectError: a 503 is not a lost connection
   'broken-manifest',
   'error-mid-playback',
   'video-tracks',

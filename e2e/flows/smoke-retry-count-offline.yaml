@@ -1,0 +1,28 @@
+# disableDisconnectError (#5275, Android only) retries a load without end while the
+# connection is lost. A server that answers is not a lost connection: error-503-retry-offline
+# is error-503-retry (always 503, minLoadRetryCount: 1) with the option on, and must end the
+# same way, in one onError after exactly two requests (evt-retried-once). A 503 taken for a
+# lost connection is retried once a second and never reports an error, which fails the wait
+# for evt-onError. iOS ignores both options and only has to report the error.
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: error-503-retry-offline
+- extendedWaitUntil:
+    visible:
+      id: "evt-onError"
+    timeout: 30000            # a retry waits up to a few seconds on Android
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "evt-retried-once"
+          timeout: 5000
+- assertNotVisible:
+    id: "evt-onError-repeated"

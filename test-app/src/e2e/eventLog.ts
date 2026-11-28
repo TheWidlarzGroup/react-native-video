@@ -30,7 +30,15 @@ export const MARKER_IDS = [
   'evt-onError', // onError itself, never the error status
   'evt-onError-repeated', // a second onError in one scenario: one failure must report once
   'evt-status-error', // onStatusChange('error')
+  // error-503-retry(-offline) (#5275): after onError the fixture server reports exactly
+  // RETRIED_ONCE_REQUESTS requests, the first one and minLoadRetryCount: 1 retry.
+  'evt-retried-once',
   'evt-onPlaybackStateChanged',
+  'evt-onBuffer', // onBuffer(true) seen at least once
+  // onBuffer(true) twice in a row without onBuffer(false) between (#5269): iOS reported the
+  // same state up to seven times at start. A repeated false is not counted: Android reports
+  // the ready state and then the end of the clip with false.
+  'evt-onBuffer-true-repeated',
   // VideoView's renderLoader (#5264): the loader mounted, and later unmounted because the
   // video was ready to display (smoke-loader.yaml).
   'evt-loader-shown',
@@ -105,8 +113,11 @@ export type PlayerEvent =
   | { type: 'onEnd' }
   | { type: 'onReadyToDisplay' }
   | { type: 'onError'; code: string }
+  // How many requests the fixture server saw for the scenario's source (error-503-retry*).
+  | { type: 'requestCount'; count: number }
   | { type: 'onStatusChange'; status: VideoPlayerStatus }
   | { type: 'onPlaybackStateChange'; isPlaying: boolean }
+  | { type: 'onBuffer'; buffering: boolean }
   | { type: 'onSeek'; seekTime: number }
   | { type: 'onVolumeChange'; muted: boolean; volume: number }
   | { type: 'onPlaybackRateChange'; rate: number }
@@ -158,6 +169,7 @@ export const PROGRESS_MARKER_SECONDS = 2;
 export const PROGRESS_SPARSE_MIN_GAP_SECONDS = 0.8;
 export const PROGRESS_SPARSE_MAX_GAP_SECONDS = 2;
 export const PROGRESS_SPARSE_GAPS = 3;
+export const RETRIED_ONCE_REQUESTS = 2;
 export const SEEK_FORWARD_LANDED_SECONDS = 4;
 export const SEEK_BACK_LANDED_SECONDS = 2;
 // The mp4-start-position source starts at 5 s; natural playback starts near 0.
@@ -222,6 +234,8 @@ type State = {
   replacementLoadStarts: number;
   // The next onProgress tells where the replacement source started (see onLoad).
   reloadPending: boolean;
+  // The value of the last onBuffer, null before the first one.
+  lastBuffering: boolean | null;
   // onReadyToDisplay events since the current source started loading; a replacement source
   // (replaceSourceAsync) starts its own count.
   readyToDisplayOfSource: number;
@@ -251,6 +265,7 @@ const initialState = (): State => ({
   replaceRequested: false,
   replacementLoadStarts: 0,
   reloadPending: false,
+  lastBuffering: null,
   readyToDisplayOfSource: 0,
   sparseGaps: 0,
   loadsOfSource: 0,
@@ -478,6 +493,11 @@ function apply(event: PlayerEvent) {
       append(`onError code=${event.code}`);
       return;
 
+    case 'requestCount':
+      if (event.count === RETRIED_ONCE_REQUESTS) mark('evt-retried-once');
+      append(`requests: ${event.count}`);
+      return;
+
     case 'onStatusChange':
       // A separate marker, so a flow can assert onError and the error status apart. The
       // status has no code, so it must not replace one onError already reported.
@@ -506,6 +526,15 @@ function apply(event: PlayerEvent) {
         mark('evt-paused');
       }
       append(`playbackState isPlaying=${event.isPlaying}`);
+      return;
+
+    case 'onBuffer':
+      if (event.buffering) {
+        mark('evt-onBuffer');
+        if (state.lastBuffering === true) mark('evt-onBuffer-true-repeated');
+      }
+      state.lastBuffering = event.buffering;
+      append(`onBuffer ${event.buffering}`);
       return;
 
     case 'onSeek':

@@ -227,7 +227,7 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec, NativeVideoPlayerSou
     let asset: AVAsset
     if url.scheme?.lowercased() == "ph" {
       asset = try await photoLibraryAssetLoader.loadAsset(for: uri)
-    } else if VideoCache.canCache(url: url, config: config) {
+    } else if VideoCache.canCache(url: url, config: config, declaredType: config.type) {
       asset = VideoCache.shared.asset(for: url, headers: config.headers)
     } else if let headers = config.headers {
       asset = AVURLAsset(
