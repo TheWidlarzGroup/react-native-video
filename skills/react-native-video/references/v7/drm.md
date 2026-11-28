@@ -59,8 +59,8 @@ function Player() {
 |---|---|---|---|
 | `type` | `'widevine' \| 'fairplay' \| string` | all | Android defaults to `widevine`; on iOS set `'fairplay'` explicitly. |
 | `licenseUrl` | `string` | all | License server URL (required for the default license flow on both platforms). |
-| `certificateUrl` | `string` | iOS/visionOS | FairPlay app certificate (**required for FairPlay**). |
-| `contentId` | `string` | iOS/visionOS | Derived from the `skd://` key URL if omitted. |
+| `certificateUrl` | `string` | iOS | FairPlay app certificate (**required for FairPlay**). |
+| `contentId` | `string` | iOS | Derived from the `skd://` key URL if omitted. |
 | `licenseHeaders` | `Record<string,string>` | **Android** | Headers on the license request. |
 | `multiSession` | `boolean` | **Android** | Multiple Widevine sessions / key rotation. |
 | `getLicense` | `(payload) => Promise<string>` | **iOS** | Custom CKC fetch; resolve a base64 CKC. Payload: `{ contentId, licenseUrl, keyUrl, spc }`. |
