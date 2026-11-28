@@ -67,6 +67,8 @@ export const MARKER_IDS = [
   'evt-audio-alt-selected', // onAudioTrackChange reports the Spanish track selected (2 tracks listed)
   'evt-audio-default-restored', // ...then the English (default) track selected again
   'evt-audio-tracks-after-replace', // onAudioTrackChange lists both tracks after replaceSourceAsync() was requested (#5291)
+  'evt-audio-focus-lost', // onAudioFocusChange(false): a ringing call took the audio focus (smoke-audio-focus)
+  'evt-audio-focus-regained', // ...then onAudioFocusChange(true) once the call has ended
   // onTextTrackDataChanged (subtitles scenario): text when a cue appears, [] when it goes away.
   'evt-text-shown', // a subtitle with text
   'evt-text-cleared', // [] after it, when the cue ended
@@ -126,6 +128,7 @@ export type PlayerEvent =
   | { type: 'onSeek'; seekTime: number }
   | { type: 'onVolumeChange'; muted: boolean; volume: number }
   | { type: 'onPlaybackRateChange'; rate: number }
+  | { type: 'onAudioFocusChange'; hasAudioFocus: boolean }
   // VideoView's onFullscreenChange (a view event, not a player event).
   | { type: 'onFullscreenChange'; fullscreen: boolean }
   // The renderLoader element mounted (shown) or unmounted (hidden) inside VideoView. `at`
@@ -581,6 +584,16 @@ function apply(event: PlayerEvent) {
       if (event.rate === 2) mark('evt-rate-2x');
       if (event.rate === 0.5) mark('evt-rate-0-5x');
       append(`onPlaybackRateChange ${event.rate}`);
+      return;
+
+    case 'onAudioFocusChange':
+      // Regained only counts after a loss: the focus a player takes on play sends no event.
+      if (!event.hasAudioFocus) {
+        mark('evt-audio-focus-lost');
+      } else if (state.markers.has('evt-audio-focus-lost')) {
+        mark('evt-audio-focus-regained');
+      }
+      append(`onAudioFocusChange ${event.hasAudioFocus}`);
       return;
 
     case 'initialStatus':
