@@ -10,6 +10,7 @@ import {
 import {
   useVideoPlayer,
   VideoView,
+  type ControlsStyles,
   type VideoPlayer,
   type VideoTrack,
   type VideoViewRef,
@@ -21,7 +22,7 @@ import {
 } from './eventLog';
 import { EventLogPanel } from './EventLogPanel';
 import type { ScenarioName } from './deepLink';
-import { SCENARIO_SOURCES } from './fixtures';
+import { AUDIO_REPLACEMENT_SOURCE, SCENARIO_SOURCES } from './fixtures';
 
 /**
  * replaceSourceAsync() is awaited here and, for a new source, followed by play() from
@@ -31,12 +32,21 @@ import { SCENARIO_SOURCES } from './fixtures';
  * second `then` argument, so a failure of the play() that follows is never logged as the
  * replacement rejecting.
  */
-function replaceSource(player: VideoPlayer, target: 'hls' | 'null') {
+function replaceSource(
+  player: VideoPlayer,
+  target: 'hls' | 'null' | 'audio-tracks'
+) {
   const report = (phase: 'requested' | 'resolved' | 'rejected') =>
     eventLog.handle({ type: 'replaceSource', phase, source: target });
   report('requested');
   player
-    .replaceSourceAsync(target === 'null' ? null : SCENARIO_SOURCES.hls)
+    .replaceSourceAsync(
+      target === 'null'
+        ? null
+        : target === 'audio-tracks'
+          ? AUDIO_REPLACEMENT_SOURCE
+          : SCENARIO_SOURCES.hls
+    )
     .then(
       () => {
         report('resolved');
@@ -53,6 +63,19 @@ function replaceSource(player: VideoPlayer, target: 'hls' | 'null') {
       () => report('rejected')
     );
 }
+
+// Scenarios with the native controls (#5272; controlsStyles is Android only), and what each
+// hides. mp4-controls hides nothing: smoke-controls-default.yaml finds every Media3 view
+// there, so a hidden one in the other flows means hidden, not a wrong id.
+const CONTROLS_STYLES: Partial<Record<ScenarioName, ControlsStyles>> = {
+  'mp4-controls': {},
+  'mp4-controls-styles': {
+    hideSeekBar: true,
+    hidePosition: true,
+    hideDuration: true,
+  },
+  'mp4-controls-no-play-pause': { hidePlayPause: true },
+};
 
 const STATUS_AFTER_RELEASE_TIMEOUT_MS = 2000;
 const STATUS_AFTER_RELEASE_POLL_MS = 50;
@@ -111,6 +134,29 @@ function startScenario(scenario: ScenarioName, player: VideoPlayer) {
       if (!released && currentTime > PROGRESS_MARKER_SECONDS) {
         released = true;
         replaceSource(player, 'null');
+      }
+    });
+  }
+
+  if (scenario === 'audio-tracks-replace') {
+    // Replace only once the first source has loaded and listed its two tracks, and a
+    // second later, so no event of the first source can arrive after the request.
+    let loaded = false;
+    let listed = false;
+    let replaced = false;
+    const replaceWhenReady = () => {
+      if (!loaded || !listed || replaced) return;
+      replaced = true;
+      setTimeout(() => replaceSource(player, 'audio-tracks'), 1000);
+    };
+    player.addEventListener('onLoad', () => {
+      loaded = true;
+      replaceWhenReady();
+    });
+    player.addEventListener('onAudioTrackChange', ({ availableTracks }) => {
+      if (availableTracks.length === 2) {
+        listed = true;
+        replaceWhenReady();
       }
     });
   }
@@ -254,48 +300,73 @@ const CONTROLS: Control[] = [
   },
 ];
 
+/**
+ * The renderLoader of mp4-loader. VideoView mounts it while the source loads and unmounts
+ * it once the video is ready to display; both moments go to the event log, so the flow does
+ * not depend on catching the loader on screen.
+ */
+function LoaderProbe() {
+  useEffect(() => {
+    eventLog.handle({ type: 'loader', shown: true, at: Date.now() });
+    return () =>
+      eventLog.handle({ type: 'loader', shown: false, at: Date.now() });
+  }, []);
+  // The label makes the loader an element of the view hierarchy (an empty view may be
+  // left out of it), so the flow's last check can see that nothing of it is left.
+  return (
+    <View testID="video-loader" style={styles.loader}>
+      <Text testID="video-loader-label" style={styles.loaderLabel}>
+        loading
+      </Text>
+    </View>
+  );
+}
+
 // Marker derivation lives in eventLog.handle(); this only maps payloads.
 function logPlayerEvents(player: VideoPlayer) {
+  // Bound to this scenario: events of a player whose screen is gone are dropped.
+  const handle = eventLog.forSession();
+  player.addEventListener('onLoadStart', () => handle({ type: 'onLoadStart' }));
   player.addEventListener('onLoad', ({ duration }) =>
-    eventLog.handle({ type: 'onLoad', duration })
+    handle({ type: 'onLoad', duration })
   );
   player.addEventListener('onProgress', ({ currentTime }) =>
-    eventLog.handle({ type: 'onProgress', currentTime })
+    handle({ type: 'onProgress', currentTime })
   );
   player.addEventListener('onEnd', () => {
-    eventLog.handle({ type: 'onEnd' });
+    handle({ type: 'onEnd' });
     reportStatusSettled(player, 'end');
   });
   player.addEventListener('onError', (error) => {
-    eventLog.handle({ type: 'onError', code: error.code });
+    handle({ type: 'onError', code: error.code });
     reportStatusSettled(player, 'error');
   });
   player.addEventListener('onStatusChange', (status) =>
-    eventLog.handle({ type: 'onStatusChange', status })
+    handle({ type: 'onStatusChange', status })
   );
   player.addEventListener('onPlaybackStateChange', ({ isPlaying }) =>
-    eventLog.handle({ type: 'onPlaybackStateChange', isPlaying })
+    handle({ type: 'onPlaybackStateChange', isPlaying })
   );
   player.addEventListener('onSeek', (seekTime) =>
-    eventLog.handle({ type: 'onSeek', seekTime })
+    handle({ type: 'onSeek', seekTime })
   );
   player.addEventListener('onVolumeChange', ({ muted, volume }) =>
-    eventLog.handle({ type: 'onVolumeChange', muted, volume })
+    handle({ type: 'onVolumeChange', muted, volume })
   );
   player.addEventListener('onPlaybackRateChange', (rate) =>
-    eventLog.handle({ type: 'onPlaybackRateChange', rate })
+    handle({ type: 'onPlaybackRateChange', rate })
   );
   player.addEventListener(
     'onVideoTrackChange',
     ({ availableTracks, selectedTrackId }) =>
-      eventLog.handle({
+      handle({
         type: 'onVideoTrackChange',
         tracks: availableTracks,
         selectedTrackId,
       })
   );
   player.addEventListener('onAudioTrackChange', ({ availableTracks }) =>
-    eventLog.handle({ type: 'onAudioTrackChange', tracks: availableTracks })
+    handle({ type: 'onAudioTrackChange', tracks: availableTracks })
   );
 }
 
@@ -330,8 +401,13 @@ export function ScenarioScreen({ scenario }: { scenario: ScenarioName }) {
         resizeMode="contain"
         // #5152 needs the native controls: exitFullscreen() resets the fullscreen button
         // icon, and only a shown controller makes that touch the view hierarchy.
-        controls={scenario === 'mp4-fullscreen-rotate'}
+        controls={
+          scenario === 'mp4-fullscreen-rotate' || scenario in CONTROLS_STYLES
+        }
+        // Android only (#5272): the smoke-controls-* flows check the native controls.
+        controlsStyles={CONTROLS_STYLES[scenario]}
         onFullscreenChange={onFullscreenChange}
+        renderLoader={scenario === 'mp4-loader' ? <LoaderProbe /> : undefined}
       />
       <View style={styles.controls}>
         {CONTROLS.map(({ id, title, press }) => (
@@ -356,4 +432,11 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
   video: { width: '100%', aspectRatio: 16 / 9 },
   controls: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  loader: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#202020',
+  },
+  loaderLabel: { color: '#ffffff' },
 });

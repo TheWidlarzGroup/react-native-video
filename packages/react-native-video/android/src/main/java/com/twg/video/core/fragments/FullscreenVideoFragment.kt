@@ -19,6 +19,7 @@ import androidx.annotation.OptIn
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.media3.common.util.UnstableApi
+import com.twg.video.core.utils.ControlsStylesUtils
 import com.twg.video.core.utils.PictureInPictureUtils.createPictureInPictureParams
 import com.twg.video.core.utils.SmallVideoPlayerOptimizer
 import com.twg.video.view.VideoView
@@ -158,6 +159,7 @@ class FullscreenVideoFragment(private val videoView: VideoView) : Fragment() {
 
     setupFullscreenButton()
     videoView.playerView.setShowSubtitleButton(true)
+    ControlsStylesUtils.apply(videoView.playerView, videoView.controlsStyles)
     
     // Apply optimizations based on video player size in fullscreen mode
     SmallVideoPlayerOptimizer.applyOptimizations(videoView.playerView, requireContext(), isFullscreen = true)
@@ -183,14 +185,18 @@ class FullscreenVideoFragment(private val videoView: VideoView) : Fragment() {
       }
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
         container.fitsSystemWindows = false
-        container.windowInsetsController?.let { controller ->
-          controller.hide(WindowInsets.Type.systemBars())
-          controller.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        val barsToHide = ControlsStylesUtils.fullscreenHiddenBars(videoView.controlsStyles)
+        if (barsToHide != 0) {
+          container.windowInsetsController?.let { controller ->
+            controller.hide(barsToHide)
+            controller.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+          }
         }
       } else {
         // Keep the app's own flags (e.g. light status bar)
         val decorView = currentActivity.window.decorView
-        decorView.systemUiVisibility = decorView.systemUiVisibility or LEGACY_FULLSCREEN_FLAGS
+        decorView.systemUiVisibility =
+          decorView.systemUiVisibility or ControlsStylesUtils.fullscreenLegacyFlags(videoView.controlsStyles)
       }
     }
   }
