@@ -159,7 +159,33 @@ export function attachTrackListeners(
   const cleanups: Cleanup[] = [];
   const textTracks = video.textTracks;
 
+  // One `onTextTrackDataChanged` per subtitle that appears, and one `[]` when it goes away
+  // (the cue ends or the track is turned off), same as Android and iOS.
+  let textShown = false;
+  const emitTextTrackData = (texts: string[]) => {
+    if (texts.length === 0 && !textShown) return;
+    textShown = texts.length > 0;
+    emit('onTextTrackDataChanged', texts);
+  };
+
   const onTrackChange = () => {
+    // A disabled track fires no `cuechange` and has no active cues, so turning subtitles
+    // off is only seen here.
+    if (textShown) {
+      let visible = false;
+      for (let i = 0; i < textTracks.length; i++) {
+        const t = textTracks[i]!;
+        if (
+          t.kind !== 'metadata' &&
+          t.mode === 'showing' &&
+          (t.activeCues?.length ?? 0) > 0
+        ) {
+          visible = true;
+          break;
+        }
+      }
+      if (!visible) emitTextTrackData([]);
+    }
     let selected: TextTrack | null = null;
     for (let i = 0; i < textTracks.length; i++) {
       const t = textTracks[i]!;
@@ -206,7 +232,7 @@ export function attachTrackListeners(
           for (let j = 0; j < cues.length; j++) {
             texts.push((cues[j] as VTTCue).text ?? '');
           }
-          emit('onTextTrackDataChanged', texts);
+          emitTextTrackData(texts);
         }
       };
 
