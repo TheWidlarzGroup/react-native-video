@@ -1,0 +1,38 @@
+# onProgress.bufferDuration is the time buffered ahead of the playhead, on both platforms
+# (#5246 made iOS report it that way; Android already did). Markers derived in eventLog.ts
+# from every onProgress of the mp4 scenario:
+#  - evt-buffer-ahead-positive: at least one event reported something buffered ahead, so
+#    the two rules below cannot pass on a value that is always 0.
+#  - evt-buffer-ahead-negative: a negative value. Must not appear.
+#  - evt-buffer-ahead-beyond-duration: currentTime + bufferDuration went more than
+#    BUFFER_AHEAD_TOLERANCE_SECONDS past the duration, i.e. the value was the position the
+#    buffer reaches, not an amount ahead. Must not appear.
+# The whole clip is played, so the rules see the start, the middle and the end.
+#
+# Timeouts count from the latest interaction, so they grow down a run of waits
+# (e2e/CONTEXT.md, "Timeouts").
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 20000
+- extendedWaitUntil:
+    visible:
+      id: "evt-progress-gt-2s"
+    timeout: 35000
+- runFlow: ../shared/wait-for-end.yaml
+- assertVisible:
+    id: "evt-buffer-ahead-positive"
+- assertNotVisible:
+    id: "evt-buffer-ahead-negative"
+- assertNotVisible:
+    id: "evt-buffer-ahead-beyond-duration"
+- assertNotVisible:
+    id: "evt-onError"

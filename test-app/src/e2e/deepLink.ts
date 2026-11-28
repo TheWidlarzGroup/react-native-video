@@ -25,6 +25,15 @@ export const SCENARIO_NAMES = [
   'audio-tracks',
   'audio-tracks-replace', // same stream; once loaded, replaceSourceAsync() onto it under another URL (#5291)
   'mp4-fullscreen-landscape', // same clip; fullscreen locked to landscape from JS after onLoad (#5286)
+  'mp4-external-subs', // short.mp4 with two external WebVTT tracks (en, es)
+  'hls-external-subs', // the hls clip (a media playlist, no master) with one external track (es)
+  // short.mp4 held back by the fixture server; replaceSourceAsync(hls) while it still loads
+  'mp4-replace-while-loading',
+  'error-then-recover', // a 404 source; replaceSourceAsync(mp4) from JS once onError arrived
+  'mp4-seek-by', // short.mp4; seekBy(+3), seekBy(-2), seekBy(-100) from JS during playback
+  'mp4-resize-modes', // short.mp4; the VideoView resizeMode prop changes four times while it plays
+  'mp4-loop-toggle', // short.mp4; loop set to true during the first pass and to false after the wrap
+  'mp4-release-reuse', // short.mp4; release() mid-playback, then a new VideoPlayer on the same view
 ] as const;
 
 export type ScenarioName = (typeof SCENARIO_NAMES)[number];

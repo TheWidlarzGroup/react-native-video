@@ -1,0 +1,55 @@
+# External subtitles on an HLS stream that is a media playlist, with no master playlist to
+# declare the subtitle track in (#5243): the external track (es) is listed and can be
+# selected and cleared, each with one onTrackChange. Same markers as
+# smoke-external-subtitles.yaml, derived in eventLog.ts, with one difference: the list is
+# checked with evt-text-track-languages-present (the expected language is there), not with
+# an exact count, because a player may list tracks of its own for an HLS stream (ExoPlayer
+# can expose a closed-captions track when no master playlist says there is none).
+#
+# Timeouts count from the latest interaction, so they grow down a run of waits
+# (e2e/CONTEXT.md, "Timeouts").
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: hls-external-subs
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 40000            # HLS: first load is the slow one
+- extendedWaitUntil:
+    visible:
+      id: "evt-text-track-languages-present"
+    timeout: 50000            # the list is polled for up to 5 s after onLoad
+# Interact only on an idle player (see smoke-mute-volume.yaml).
+- runFlow:
+    file: ../shared/wait-for-end.yaml
+    env:
+      END_TIMEOUT: 75000      # 50 s of waits above, plus the 8 s clip
+- runFlow:
+    file: ../shared/press.yaml
+    env:
+      BUTTON: btn-subs-es
+      NTH: 1
+- extendedWaitUntil:
+    visible:
+      id: "evt-track-change-selected"
+    timeout: 8000
+- assertVisible:
+    id: "evt-selected-id-matches-list"
+- runFlow:
+    file: ../shared/press.yaml
+    env:
+      BUTTON: btn-subs-off
+      NTH: 1
+- extendedWaitUntil:
+    visible:
+      id: "evt-track-cleared"
+    timeout: 8000
+- assertNotVisible:
+    id: "evt-track-change-repeated"
+- assertNotVisible:
+    id: "evt-onError"

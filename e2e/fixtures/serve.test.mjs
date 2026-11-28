@@ -46,6 +46,30 @@ test('serves a fixture with the right content type', async () => {
   expect(res.headers.get('content-type')).toBe('video/mp4');
 });
 
+test('serves a WebVTT subtitle file as text/vtt', async () => {
+  const res = await fetch(`${BASE}/subs-en.vtt`);
+  expect(res.status).toBe(200);
+  expect(res.headers.get('content-type')).toBe('text/vtt');
+  expect((await res.text()).startsWith('WEBVTT')).toBe(true);
+});
+
+test('?delay=<ms> holds the response back, and only a whole number of milliseconds does', async () => {
+  const timed = async (query) => {
+    const started = Date.now();
+    const res = await fetch(`${BASE}/subs-en.vtt${query}`);
+    await res.arrayBuffer();
+    return { status: res.status, ms: Date.now() - started };
+  };
+  const delayed = await timed('?delay=400');
+  expect(delayed.status).toBe(200);
+  expect(delayed.ms).toBeGreaterThanOrEqual(390);
+  for (const query of ['', '?delay=abc', '?delay=-400', '?delay=1.5']) {
+    const plain = await timed(query);
+    expect(plain.status).toBe(200);
+    expect(plain.ms).toBeLessThan(390);
+  }
+});
+
 test('serves the HLS manifest from a subdirectory', async () => {
   const res = await fetch(`${BASE}/hls/index.m3u8`);
   expect(res.status).toBe(200);

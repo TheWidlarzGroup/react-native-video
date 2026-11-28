@@ -54,6 +54,28 @@ const heldFixture = (path: string, holdMs: number): VideoConfig =>
 
 // Built for the default port; `setFixturePort` moves every entry when a run uses another
 // one, so `SCENARIO_SOURCES[name]` and `scenarioSource(name)` give the same source.
+// External WebVTT for the 8 s clips (e2e/fixtures/media/subs-<code>.vtt). The labels are
+// plain ASCII and distinct: Android recognises an external track by its label.
+const subtitle = (code: 'en' | 'es', label: string) =>
+  ({
+    uri: `${FIXTURE_BASE}/subs-${code}.vtt`,
+    label,
+    language: code,
+    type: 'vtt',
+  }) as const;
+
+/**
+ * The languages getAvailableTextTracks() must list for a scenario with external
+ * subtitles, in no particular order. A scenario listed here reports its text tracks once
+ * after onLoad and shows the subtitle controls (see ScenarioScreen).
+ */
+export const SCENARIO_TEXT_LANGUAGES: Partial<
+  Record<ScenarioName, readonly string[]>
+> = {
+  'mp4-external-subs': ['en', 'es'],
+  'hls-external-subs': ['es'],
+};
+
 export const SCENARIO_SOURCES: Record<ScenarioName, VideoConfig> = {
   'mp4': fixture('short.mp4'), // 8 s, testsrc + sine audio
   'mp4-preload': fixture('short.mp4'),
@@ -91,6 +113,23 @@ export const SCENARIO_SOURCES: Record<ScenarioName, VideoConfig> = {
   'audio-tracks': fixture('hls-audio/index.m3u8'), // HLS, English (default) + Spanish audio
   'audio-tracks-replace': fixture('hls-audio/index.m3u8'),
   'mp4-fullscreen-landscape': fixture('short.mp4'),
+  'mp4-external-subs': {
+    ...fixture('short.mp4'),
+    externalSubtitles: [subtitle('en', 'English'), subtitle('es', 'Spanish')],
+  },
+  // hls/index.m3u8 is a media playlist: there is no master playlist to add the track to.
+  'hls-external-subs': {
+    ...fixture('hls/index.m3u8'),
+    externalSubtitles: [subtitle('es', 'Spanish')],
+  },
+  // The fixture server holds every response for this URL back by 4 s (`?delay`, serve.mjs),
+  // so the first load is still in flight when the scenario replaces the source.
+  'mp4-replace-while-loading': fixture('short.mp4?delay=4000'),
+  'error-then-recover': fixture('does-not-exist.mp4'),
+  'mp4-seek-by': fixture('short.mp4'),
+  'mp4-resize-modes': fixture('short.mp4'),
+  'mp4-loop-toggle': fixture('short.mp4'),
+  'mp4-release-reuse': fixture('short.mp4'),
 };
 
 // The next episode of a series: the same audio tracks (and so the same positional ids)

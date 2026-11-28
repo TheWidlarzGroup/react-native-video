@@ -1,0 +1,60 @@
+# External subtitles on a progressive source (short.mp4 with two WebVTT files, en and es):
+# the tracks are listed, one can be selected and the selection can be cleared, and each
+# request is reported by exactly one onTrackChange (#5242, #5244, #5248, #5249).
+# Markers are derived in eventLog.ts:
+#  - evt-text-tracks-listed / evt-text-track-languages-ok: getAvailableTextTracks(), read
+#    once after onLoad, has exactly the two external tracks with their languages.
+#  - evt-track-change-selected: onTrackChange reported a track after btn-subs-es.
+#  - evt-selected-id-matches-list: that track's id is the one taken from the list, and
+#    player.selectedTrack reports the same id when read inside the listener.
+#  - evt-track-cleared: onTrackChange(null) after btn-subs-off.
+#  - evt-track-change-repeated: a second onTrackChange for one request. Must not appear.
+# What is selected before any request is not asserted: Android starts with no text track,
+# iOS enables the first side-loaded one. Both show up as evt-text-track-default-*.
+#
+# Timeouts count from the latest interaction, so they grow down a run of waits
+# (e2e/CONTEXT.md, "Timeouts").
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4-external-subs
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 20000
+- extendedWaitUntil:
+    visible:
+      id: "evt-text-tracks-listed"
+    timeout: 30000            # the list is polled for up to 5 s after onLoad
+- assertVisible:
+    id: "evt-text-track-languages-ok"
+# Interact only on an idle player (see smoke-mute-volume.yaml).
+- runFlow: ../shared/wait-for-end.yaml
+- runFlow:
+    file: ../shared/press.yaml
+    env:
+      BUTTON: btn-subs-es
+      NTH: 1
+- extendedWaitUntil:
+    visible:
+      id: "evt-track-change-selected"
+    timeout: 8000
+- assertVisible:
+    id: "evt-selected-id-matches-list"
+- runFlow:
+    file: ../shared/press.yaml
+    env:
+      BUTTON: btn-subs-off
+      NTH: 1
+- extendedWaitUntil:
+    visible:
+      id: "evt-track-cleared"
+    timeout: 8000
+- assertNotVisible:
+    id: "evt-track-change-repeated"
+- assertNotVisible:
+    id: "evt-onError"

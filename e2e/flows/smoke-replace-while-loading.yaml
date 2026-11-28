@@ -1,0 +1,48 @@
+# replaceSourceAsync(new source) while the first source is still loading: the first load
+# is superseded, not failed. Its promise rejects, onError stays silent, and the new source
+# loads, starts from its beginning and plays to its own end.
+#
+# No taps: the scenario calls initialize() and, without waiting for it, replaceSourceAsync(hls)
+# from JS (ScenarioScreen). The fixture server holds the first clip back for 4 s (`?delay`,
+# e2e/fixtures/serve.mjs), so that load cannot have finished. The replacement markers are
+# the ones smoke-replace-source.yaml uses; the wait for the replacement's own end (~8 s)
+# also outlasts the 4 s after which the held-back clip would have arrived.
+#
+# Timeouts count from the latest interaction, so they grow down a run of waits
+# (e2e/CONTEXT.md, "Timeouts").
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4-replace-while-loading
+- extendedWaitUntil:
+    visible:
+      id: "evt-replace-resolved"
+    timeout: 20000            # HLS: manifest + first segments from the fixture server
+- extendedWaitUntil:
+    visible:
+      id: "evt-replacement-loaded"
+    timeout: 40000
+- extendedWaitUntil:
+    visible:
+      id: "evt-reloaded-from-start"
+    timeout: 50000
+- extendedWaitUntil:
+    visible:
+      id: "evt-superseded-load-rejected"
+    timeout: 60000
+- extendedWaitUntil:
+    visible:
+      id: "evt-ended-after-replace"
+    timeout: 85000            # the HLS clip is ~8 s
+- assertVisible:
+    id: "evt-progress-gt-2s"
+- assertNotVisible:
+    id: "evt-superseded-load-resolved"
+- assertNotVisible:
+    id: "evt-replace-rejected"
+- assertNotVisible:
+    id: "evt-onError"
