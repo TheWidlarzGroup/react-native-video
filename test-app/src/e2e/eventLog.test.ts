@@ -999,3 +999,22 @@ describe('crop', () => {
     expect(markers()).not.toContain('evt-progress-past-duration');
   });
 });
+
+describe('audio focus', () => {
+  test('a loss marks evt-audio-focus-lost, the focus coming back evt-audio-focus-regained', () => {
+    feed({ type: 'onAudioFocusChange', hasAudioFocus: false });
+    expect(markers()).toContain('evt-audio-focus-lost');
+    expect(markers()).not.toContain('evt-audio-focus-regained');
+    feed({ type: 'onAudioFocusChange', hasAudioFocus: true });
+    expect(markers()).toContain('evt-audio-focus-regained');
+    expect(lines()).toEqual([
+      'onAudioFocusChange false',
+      'onAudioFocusChange true',
+    ]);
+  });
+
+  test('focus that was never lost is not regained', () => {
+    feed({ type: 'onAudioFocusChange', hasAudioFocus: true });
+    expect(markers()).not.toContain('evt-audio-focus-regained');
+  });
+});
