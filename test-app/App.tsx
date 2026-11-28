@@ -13,7 +13,12 @@ import {
   View,
 } from 'react-native';
 import { ScenarioScreen } from './src/e2e/ScenarioScreen';
-import { parseScenario, type ScenarioName } from './src/e2e/deepLink';
+import {
+  parseFixturePort,
+  parseScenario,
+  type ScenarioName,
+} from './src/e2e/deepLink';
+import { setFixturePort } from './src/e2e/fixtures';
 
 /**
  * Resolves the scenario from the launch URL and from later `url` events.
@@ -31,8 +36,13 @@ function useScenarioDeepLink(): {
 
   React.useEffect(() => {
     let cancelled = false;
+    // The port is set before the scenario, so the screen mounts with the right sources.
+    const open = (url: string | null) => {
+      setFixturePort(parseFixturePort(url));
+      return parseScenario(url);
+    };
     const sub = Linking.addEventListener('url', ({ url }) =>
-      setScenario(parseScenario(url))
+      setScenario(open(url))
     );
     setReady(true);
 
@@ -40,7 +50,7 @@ function useScenarioDeepLink(): {
     Linking.getInitialURL()
       .then((url) => {
         if (!cancelled) {
-          setScenario((current) => current ?? parseScenario(url));
+          setScenario((current) => current ?? open(url));
         }
       })
       .catch(() => {});

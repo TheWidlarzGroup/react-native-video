@@ -66,6 +66,10 @@ namespace margelo::nitro::video {
     void setSurfaceType(SurfaceType surfaceType) override;
     NativeControlsStyles getControlsStyles() override;
     void setControlsStyles(const NativeControlsStyles& controlsStyles) override;
+    FullscreenOrientation getFullscreenOrientation() override;
+    void setFullscreenOrientation(FullscreenOrientation fullscreenOrientation) override;
+    bool getFullscreenAutorotate() override;
+    void setFullscreenAutorotate(bool fullscreenAutorotate) override;
 
   public:
     // Methods

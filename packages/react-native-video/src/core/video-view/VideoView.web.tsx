@@ -107,6 +107,8 @@ const VideoView = forwardRef<VideoViewRef, VideoViewProps>(
       shutterColor,
       hideShutterView,
       controlsStyles: _controlsStyles,
+      fullscreenOrientation: _fullscreenOrientation,
+      fullscreenAutorotate: _fullscreenAutorotate,
       ...props
     },
     ref

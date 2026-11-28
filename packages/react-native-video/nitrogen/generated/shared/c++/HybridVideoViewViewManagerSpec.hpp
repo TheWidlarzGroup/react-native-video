@@ -21,6 +21,8 @@ namespace margelo::nitro::video { enum class ResizeMode; }
 namespace margelo::nitro::video { enum class SurfaceType; }
 // Forward declaration of `NativeControlsStyles` to properly resolve imports.
 namespace margelo::nitro::video { struct NativeControlsStyles; }
+// Forward declaration of `FullscreenOrientation` to properly resolve imports.
+namespace margelo::nitro::video { enum class FullscreenOrientation; }
 // Forward declaration of `ListenerSubscription` to properly resolve imports.
 namespace margelo::nitro::video { struct ListenerSubscription; }
 
@@ -30,6 +32,7 @@ namespace margelo::nitro::video { struct ListenerSubscription; }
 #include "ResizeMode.hpp"
 #include "SurfaceType.hpp"
 #include "NativeControlsStyles.hpp"
+#include "FullscreenOrientation.hpp"
 #include "ListenerSubscription.hpp"
 #include <functional>
 
@@ -76,6 +79,10 @@ namespace margelo::nitro::video {
       virtual void setSurfaceType(SurfaceType surfaceType) = 0;
       virtual NativeControlsStyles getControlsStyles() = 0;
       virtual void setControlsStyles(const NativeControlsStyles& controlsStyles) = 0;
+      virtual FullscreenOrientation getFullscreenOrientation() = 0;
+      virtual void setFullscreenOrientation(FullscreenOrientation fullscreenOrientation) = 0;
+      virtual bool getFullscreenAutorotate() = 0;
+      virtual void setFullscreenAutorotate(bool fullscreenAutorotate) = 0;
 
     public:
       // Methods

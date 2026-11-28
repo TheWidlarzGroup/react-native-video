@@ -141,7 +141,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   }
 
   private companion object {
-    const val PROGRESS_UPDATE_INTERVAL_MS = 250L
+    const val DEFAULT_PROGRESS_UPDATE_INTERVAL_MS = 250L
     const val AUDIO_SWITCH_ACK_TIMEOUT_MS = 300L
     private const val TAG = "HybridVideoPlayer"
     private const val DEFAULT_MIN_BUFFER_DURATION_MS = 5000
@@ -251,6 +251,17 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
     }
 
   override var playWhenInactive: Boolean = false
+
+  // Read on the main thread by the progress runnable, written from JS.
+  @Volatile
+  private var progressUpdateIntervalMs: Long = DEFAULT_PROGRESS_UPDATE_INTERVAL_MS
+
+  override var progressUpdateInterval: Double
+    get() = progressUpdateIntervalMs.toDouble()
+    set(value) {
+      if (value.isNaN() || value.isInfinite() || value < 1.0) return
+      progressUpdateIntervalMs = value.toLong()
+    }
 
   override var isPlaying: Boolean by mainThreadProperty(
     get = { player.isPlaying == true }
@@ -547,7 +558,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
               bufferDuration = playableDurationFromNow
             )
           )
-          progressHandler.postDelayed(this, PROGRESS_UPDATE_INTERVAL_MS)
+          progressHandler.postDelayed(this, progressUpdateIntervalMs)
         }
       }
     }
@@ -614,7 +625,10 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
 
       when (playbackState) {
         Player.STATE_IDLE -> {
-          status = VideoPlayerStatus.IDLE
+          // ExoPlayer goes idle right after a failure: keep `error` until a source loads again.
+          if (player.playerError == null) {
+            status = VideoPlayerStatus.IDLE
+          }
           eventEmitter.onBuffer(false)
           // Stopped or failed: the next prepare() loads the source again.
           loadReportedForSource = false
@@ -661,7 +675,8 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
           eventEmitter.onReadyToDisplay()
         }
         Player.STATE_ENDED -> {
-          status = VideoPlayerStatus.IDLE // Or a specific 'COMPLETED' status if you add one
+          // The source is still loaded at the end: it can be seeked and played again.
+          status = VideoPlayerStatus.READYTOPLAY
           eventEmitter.onEnd()
           eventEmitter.onBuffer(false)
           stopProgressUpdates()

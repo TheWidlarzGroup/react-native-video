@@ -20,6 +20,10 @@ export const MARKER_IDS = [
   'evt-onLoad-repeated', // a second onLoad for the same source (#5268): one load reports once
   'evt-onProgress',
   'evt-progress-gt-2s',
+  // PROGRESS_SPARSE_GAPS consecutive onProgress events at least PROGRESS_SPARSE_MIN_GAP_SECONDS
+  // of playback apart: only a progressUpdateInterval near 1 s produces it (#5281). The
+  // defaults (250 ms on Android, 500 ms on iOS) never do.
+  'evt-progress-sparse',
   'evt-onEnded',
   'evt-onError', // onError itself, never the error status
   'evt-onError-repeated', // a second onError in one scenario: one failure must report once
@@ -66,10 +70,19 @@ export const MARKER_IDS = [
   'evt-reloaded-from-start', // first onProgress after that onLoad is < RELOAD_START_SECONDS
   'evt-ended-after-replace', // onEnd after replaceSourceAsync(source) was requested
   'evt-idle-after-release', // player.status read as 'idle' once replaceSourceAsync(null) resolved
+  // player.status read STATUS_SETTLE_MS after onEnd / onError (#5285): Android went to idle
+  // a few milliseconds after both, iOS keeps readyToPlay and error.
+  'evt-ready-after-end', // status after the end of the clip is readyToPlay
+  'evt-error-status-held', // status after a failed load is error
   // VideoView ref calls made from JS (smoke-fullscreen-rotate): onFullscreenChange(true/false).
   'evt-fullscreen-entered',
   'evt-fullscreen-exited',
   'evt-fullscreen-call-failed', // enterFullscreen()/exitFullscreen() threw (#5152)
+  // fullscreenOrientation="landscape" with fullscreenAutorotate={false} (#5286), from the
+  // window size while fullscreen is shown and after it closed:
+  'evt-fullscreen-landscape', // the window was landscape while in fullscreen
+  'evt-fullscreen-turned-portrait', // ...and later portrait while still in fullscreen (lock lost)
+  'evt-portrait-after-exit', // portrait again once fullscreen closed (the app's own setting back)
 ] as const;
 
 export type MarkerId = (typeof MARKER_IDS)[number];
@@ -93,6 +106,8 @@ export type PlayerEvent =
   // is a millisecond clock reading, so the time it stayed up is part of the event sequence
   // and handle() stays a pure function of it.
   | { type: 'loader'; shown: boolean; at: number }
+  // The window's shape, reported whenever its size or the fullscreen state changes.
+  | { type: 'windowOrientation'; landscape: boolean; fullscreen: boolean }
   // A VideoView ref call that threw. Caught in the scenario, so the screen stays up and
   // the flow can assert on it instead of on a red screen.
   | {
@@ -106,6 +121,9 @@ export type PlayerEvent =
   // Read, not listened for: both native players detach every emitter listener during
   // release, so no onStatusChange can report the idle status (see ScenarioScreen).
   | { type: 'statusAfterRelease'; status: VideoPlayerStatus }
+  // player.status read STATUS_SETTLE_MS after onEnd or onError, once the native side has
+  // settled (a status change that follows the event within a few ms is caught too).
+  | { type: 'statusSettled'; after: 'end' | 'error'; status: VideoPlayerStatus }
   // The three moments of a replaceSourceAsync() issued by a control.
   | {
       type: 'replaceSource';
@@ -125,6 +143,9 @@ export type PlayerEvent =
 // Renditions in the hls-quality fixture (e2e/fixtures/generate.sh).
 export const VIDEO_TRACK_COUNT = 3;
 export const PROGRESS_MARKER_SECONDS = 2;
+export const PROGRESS_SPARSE_MIN_GAP_SECONDS = 0.8;
+export const PROGRESS_SPARSE_MAX_GAP_SECONDS = 2;
+export const PROGRESS_SPARSE_GAPS = 3;
 export const SEEK_FORWARD_LANDED_SECONDS = 4;
 export const SEEK_BACK_LANDED_SECONDS = 2;
 export const VOLUME_LOW_THRESHOLD = 0.35;
@@ -140,6 +161,8 @@ export const FIXTURE_DURATION_SECONDS = 8;
 export const FIXTURE_DURATION_TOLERANCE_SECONDS = 1;
 // A replacement source must start near 0; its own rule, independent of the seek rules.
 export const RELOAD_START_SECONDS = 2;
+// How long after onEnd / onError player.status is read (statusSettled).
+export const STATUS_SETTLE_MS = 750;
 // mp4-loader's clip is held by the fixture server for LOADER_SOURCE_HOLD_MS (fixtures.ts).
 // A loader that covered the load stayed up for most of that time; one taken off right
 // after it mounted did not.
@@ -180,6 +203,8 @@ type State = {
   replacementLoadStarts: number;
   // The next onProgress tells where the replacement source started (see onLoad).
   reloadPending: boolean;
+  // Consecutive onProgress gaps of at least PROGRESS_SPARSE_MIN_GAP_SECONDS.
+  sparseGaps: number;
   // onLoad events since the current source started loading. replaceSourceAsync(source)
   // starts a new source, so its onLoad is not a repeat.
   loadsOfSource: number;
@@ -202,6 +227,7 @@ const initialState = (): State => ({
   replaceRequested: false,
   replacementLoadStarts: 0,
   reloadPending: false,
+  sparseGaps: 0,
   loadsOfSource: 0,
 });
 
@@ -277,6 +303,23 @@ function apply(event: PlayerEvent) {
       const t = event.currentTime;
       // derived markers: assert text, not numbers
       if (t > PROGRESS_MARKER_SECONDS) mark('evt-progress-gt-2s');
+      // How far apart progress events are, in playback time. A seek or a jump (a loop
+      // restart, a gap of more than two intervals) is not a gap: it restarts the count.
+      const gap =
+        state.lastProgress === null || state.seekPending
+          ? null
+          : t - state.lastProgress;
+      if (
+        gap !== null &&
+        gap >= PROGRESS_SPARSE_MIN_GAP_SECONDS &&
+        gap <= PROGRESS_SPARSE_MAX_GAP_SECONDS
+      ) {
+        state.sparseGaps += 1;
+        if (state.sparseGaps >= PROGRESS_SPARSE_GAPS)
+          mark('evt-progress-sparse');
+      } else {
+        state.sparseGaps = 0;
+      }
       // A replaced source must start from its beginning: the first progress after its
       // onLoad proves it, the way the seek markers prove where a seek landed.
       if (state.reloadPending) {
@@ -348,6 +391,27 @@ function apply(event: PlayerEvent) {
       append(`loader hidden after ${shownMs} ms`);
       return;
     }
+
+    case 'windowOrientation':
+      if (event.fullscreen && event.landscape) mark('evt-fullscreen-landscape');
+      if (
+        event.fullscreen &&
+        !event.landscape &&
+        state.markers.has('evt-fullscreen-landscape')
+      ) {
+        mark('evt-fullscreen-turned-portrait');
+      }
+      if (
+        !event.fullscreen &&
+        !event.landscape &&
+        state.markers.has('evt-fullscreen-exited')
+      ) {
+        mark('evt-portrait-after-exit');
+      }
+      append(
+        `window:${event.landscape ? 'landscape' : 'portrait'}${event.fullscreen ? ' (fullscreen)' : ''}`
+      );
+      return;
 
     case 'fullscreenCallFailed':
       mark('evt-fullscreen-call-failed');
@@ -435,6 +499,16 @@ function apply(event: PlayerEvent) {
     case 'statusAfterRelease':
       if (event.status === 'idle') mark('evt-idle-after-release');
       append(`statusAfterRelease:${event.status}`);
+      return;
+
+    case 'statusSettled':
+      if (event.after === 'end' && event.status === 'readyToPlay') {
+        mark('evt-ready-after-end');
+      }
+      if (event.after === 'error' && event.status === 'error') {
+        mark('evt-error-status-held');
+      }
+      append(`status after ${event.after}:${event.status}`);
       return;
 
     case 'onVideoTrackChange': {

@@ -66,7 +66,7 @@ The `VideoPlayer` class offers a comprehensive set of methods and properties to 
 | Property | Access | Type | Description |
 |----------|--------|------|-------------|
 | `source` | Read-only | `VideoPlayerSource` | Gets the current `VideoPlayerSource` object. |
-| `status` | Read-only | `VideoPlayerStatus` | Gets the current status (e.g., `playing`, `paused`, `buffering`). |
+| `status` | Read-only | `VideoPlayerStatus` | Gets the current status: `idle` (no source loaded), `loading`, `readyToPlay` or `error`. It stays `readyToPlay` after the video has played to the end, and `error` until a source is loaded again. Whether the video is playing is in `isPlaying` and the `onPlaybackStateChange` event. |
 | `duration` | Read-only | `number` | Gets the total duration of the video in seconds. Returns `NaN` until metadata is loaded. |
 | `volume` | Read/Write | `number` | Gets or sets the player volume (0.0 to 1.0). |
 | `currentTime` | Read/Write | `number` | Gets or sets the current playback time in seconds. |
@@ -268,7 +268,7 @@ By default, the player initializes automatically after construction. If you need
 
 ### Controlling Playback
 
--   `pause()`: Pauses playback. `status` changes to `paused`.
+-   `pause()`: Pauses playback. `isPlaying` becomes `false`; `status` does not change.
 -   `seekTo(time)`, `seekBy(time)`: Changes the current playback position. `onSeek` is fired when the seek operation completes.
 -   `set volume(value)`, `set muted(value)`, `set loop(value)`, `set rate(value)`: Modify player properties. Corresponding events like `onVolumeChange` or `onPlaybackRateChange` might be fired.
 

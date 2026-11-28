@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Button,
   StyleSheet,
@@ -15,10 +15,14 @@ import {
   type VideoTrack,
   type VideoViewRef,
 } from 'react-native-video';
-import { eventLog, PROGRESS_MARKER_SECONDS } from './eventLog';
+import {
+  eventLog,
+  PROGRESS_MARKER_SECONDS,
+  STATUS_SETTLE_MS,
+} from './eventLog';
 import { EventLogPanel } from './EventLogPanel';
 import type { ScenarioName } from './deepLink';
-import { AUDIO_REPLACEMENT_SOURCE, SCENARIO_SOURCES } from './fixtures';
+import { AUDIO_REPLACEMENT_SOURCE, scenarioSource } from './fixtures';
 
 /**
  * replaceSourceAsync() is awaited here and, for a new source, followed by play() from
@@ -41,7 +45,7 @@ function replaceSource(
         ? null
         : target === 'audio-tracks'
           ? AUDIO_REPLACEMENT_SOURCE
-          : SCENARIO_SOURCES.hls
+          : scenarioSource('hls')
     )
     .then(
       () => {
@@ -97,6 +101,23 @@ function reportStatusAfterRelease(player: VideoPlayer) {
 }
 
 /**
+ * Reads player.status STATUS_SETTLE_MS after onEnd or onError (#5285). Read, not taken
+ * from onStatusChange alone: the question is where the status stays, and on Android it
+ * went to idle a few milliseconds after both events.
+ */
+function reportStatusSettled(player: VideoPlayer, after: 'end' | 'error') {
+  setTimeout(() => {
+    let status;
+    try {
+      status = player.status;
+    } catch {
+      return; // the scenario's player was released in the meantime
+    }
+    eventLog.handle({ type: 'statusSettled', after, status });
+  }, STATUS_SETTLE_MS);
+}
+
+/**
  * How a scenario starts its load once every listener is attached. The preload scenario
  * only prepares the source, so a flow can assert that nothing plays until btn-play. The
  * release scenario plays and then calls replaceSourceAsync(null) itself, from JS, once
@@ -106,6 +127,11 @@ function reportStatusAfterRelease(player: VideoPlayer) {
  */
 function startScenario(scenario: ScenarioName, player: VideoPlayer) {
   eventLog.handle({ type: 'initialStatus', status: player.status });
+
+  // Set before the load, as an app does in the setup callback of useVideoPlayer.
+  if (scenario === 'mp4-progress-1s') {
+    player.progressUpdateInterval = 1000;
+  }
 
   if (scenario === 'mp4-release-mid-playback') {
     let released = false;
@@ -184,6 +210,63 @@ function useFullscreenFollowsRotation(
       call('exitFullscreen');
     }
   }, [enabled, view, width, height]);
+}
+
+const FULLSCREEN_LANDSCAPE_HOLD_MS = 12000;
+
+/**
+ * mp4-fullscreen-landscape (#5286): fullscreenOrientation="landscape" with
+ * fullscreenAutorotate={false}. Fullscreen opens from JS once the clip has loaded (the
+ * device stays upright) and closes FULLSCREEN_LANDSCAPE_HOLD_MS later, so the flow only
+ * turns the device in between. The window's shape goes to the log on every change of its
+ * size or of the fullscreen state, and the markers judge it (eventLog.ts).
+ */
+function useFullscreenLandscape(
+  enabled: boolean,
+  player: VideoPlayer,
+  view: React.RefObject<VideoViewRef | null>,
+  fullscreen: boolean
+) {
+  const { width, height } = useWindowDimensions();
+  useEffect(() => {
+    if (!enabled) return;
+    eventLog.handle({
+      type: 'windowOrientation',
+      landscape: width > height,
+      fullscreen,
+    });
+  }, [enabled, width, height, fullscreen]);
+  useEffect(() => {
+    if (!enabled) return;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const call = (name: 'enterFullscreen' | 'exitFullscreen') => {
+      try {
+        view.current?.[name]();
+      } catch (e) {
+        eventLog.handle({
+          type: 'fullscreenCallFailed',
+          call: name,
+          message: e instanceof Error ? e.message : String(e),
+        });
+      }
+    };
+    let entered = false;
+    const subscription = player.addEventListener('onLoad', () => {
+      if (entered) return;
+      entered = true;
+      timers.push(setTimeout(() => call('enterFullscreen'), 500));
+      timers.push(
+        setTimeout(
+          () => call('exitFullscreen'),
+          500 + FULLSCREEN_LANDSCAPE_HOLD_MS
+        )
+      );
+    });
+    return () => {
+      subscription.remove();
+      timers.forEach(clearTimeout);
+    };
+  }, [enabled, player, view]);
 }
 
 type Control = {
@@ -312,10 +395,14 @@ function logPlayerEvents(player: VideoPlayer) {
   player.addEventListener('onProgress', ({ currentTime }) =>
     handle({ type: 'onProgress', currentTime })
   );
-  player.addEventListener('onEnd', () => handle({ type: 'onEnd' }));
-  player.addEventListener('onError', (error) =>
-    handle({ type: 'onError', code: error.code })
-  );
+  player.addEventListener('onEnd', () => {
+    handle({ type: 'onEnd' });
+    reportStatusSettled(player, 'end');
+  });
+  player.addEventListener('onError', (error) => {
+    handle({ type: 'onError', code: error.code });
+    reportStatusSettled(player, 'error');
+  });
   player.addEventListener('onStatusChange', (status) =>
     handle({ type: 'onStatusChange', status })
   );
@@ -354,7 +441,7 @@ function logPlayerEvents(player: VideoPlayer) {
  */
 export function ScenarioScreen({ scenario }: { scenario: ScenarioName }) {
   const viewRef = useRef<VideoViewRef>(null);
-  const player = useVideoPlayer(SCENARIO_SOURCES[scenario], (p) => {
+  const player = useVideoPlayer(scenarioSource(scenario), (p) => {
     eventLog.reset();
     eventLog.log(`scenario:${scenario}`);
     logPlayerEvents(p);
@@ -363,8 +450,14 @@ export function ScenarioScreen({ scenario }: { scenario: ScenarioName }) {
 
   useFullscreenFollowsRotation(scenario === 'mp4-fullscreen-rotate', viewRef);
 
-  const onFullscreenChange = (fullscreen: boolean) =>
-    eventLog.handle({ type: 'onFullscreenChange', fullscreen });
+  const [fullscreen, setFullscreen] = useState(false);
+  const landscapeLocked = scenario === 'mp4-fullscreen-landscape';
+  useFullscreenLandscape(landscapeLocked, player, viewRef, fullscreen);
+
+  const onFullscreenChange = (isFullscreen: boolean) => {
+    eventLog.handle({ type: 'onFullscreenChange', fullscreen: isFullscreen });
+    setFullscreen(isFullscreen);
+  };
 
   return (
     <View style={styles.screen} testID={`scenario-${scenario}`}>
@@ -383,6 +476,8 @@ export function ScenarioScreen({ scenario }: { scenario: ScenarioName }) {
         controlsStyles={CONTROLS_STYLES[scenario]}
         onFullscreenChange={onFullscreenChange}
         renderLoader={scenario === 'mp4-loader' ? <LoaderProbe /> : undefined}
+        fullscreenOrientation={landscapeLocked ? 'landscape' : undefined}
+        fullscreenAutorotate={landscapeLocked ? false : undefined}
       />
       <View style={styles.controls}>
         {CONTROLS.map(({ id, title, press }) => (
