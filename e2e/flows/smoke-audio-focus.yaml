@@ -10,6 +10,18 @@
 # call has ended. iOS has no way to start a call on the simulator: the flow only plays there.
 appId: ${APP_ID}
 tags: [smoke]
+# Ends the call also when the flow fails before its own cancel, so the next flow does not
+# start with a ringing phone. SOFT: the call may be over already.
+onFlowComplete:
+  - runFlow:
+      when:
+        platform: Android
+      commands:
+        - runScript:
+            file: ../shared/gsm-android.js
+            env:
+              ACTION: cancel
+              SOFT: "true"
 ---
 - evalScript: "${output.gsmPort = typeof FIXTURE_PORT === 'undefined' ? '8090' : FIXTURE_PORT}"
 - runFlow: ../shared/launch-app.yaml
