@@ -10,6 +10,7 @@ import {
 import {
   useVideoPlayer,
   VideoView,
+  type ControlsStyles,
   type VideoPlayer,
   type VideoTrack,
   type VideoViewRef,
@@ -49,6 +50,19 @@ function replaceSource(player: VideoPlayer, target: 'hls' | 'null') {
       () => report('rejected')
     );
 }
+
+// Scenarios with the native controls (#5272; controlsStyles is Android only), and what each
+// hides. mp4-controls hides nothing: smoke-controls-default.yaml finds every Media3 view
+// there, so a hidden one in the other flows means hidden, not a wrong id.
+const CONTROLS_STYLES: Partial<Record<ScenarioName, ControlsStyles>> = {
+  'mp4-controls': {},
+  'mp4-controls-styles': {
+    hideSeekBar: true,
+    hidePosition: true,
+    hideDuration: true,
+  },
+  'mp4-controls-no-play-pause': { hidePlayPause: true },
+};
 
 const STATUS_AFTER_RELEASE_TIMEOUT_MS = 2000;
 const STATUS_AFTER_RELEASE_POLL_MS = 50;
@@ -307,7 +321,11 @@ export function ScenarioScreen({ scenario }: { scenario: ScenarioName }) {
         resizeMode="contain"
         // #5152 needs the native controls: exitFullscreen() resets the fullscreen button
         // icon, and only a shown controller makes that touch the view hierarchy.
-        controls={scenario === 'mp4-fullscreen-rotate'}
+        controls={
+          scenario === 'mp4-fullscreen-rotate' || scenario in CONTROLS_STYLES
+        }
+        // Android only (#5272): the smoke-controls-* flows check the native controls.
+        controlsStyles={CONTROLS_STYLES[scenario]}
         onFullscreenChange={onFullscreenChange}
       />
       <View style={styles.controls}>

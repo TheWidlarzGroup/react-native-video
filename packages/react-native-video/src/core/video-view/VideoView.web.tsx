@@ -96,6 +96,7 @@ const VideoView = forwardRef<VideoViewRef, VideoViewProps>(
       pictureInPicture: _pip = false,
       autoEnterPictureInPicture: _autoPip = false,
       keepScreenAwake: _keepAwake = true,
+      controlsStyles: _controlsStyles,
       ...props
     },
     ref

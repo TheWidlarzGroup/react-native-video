@@ -43,6 +43,17 @@ export const player = {
   created: [] as FakePlayer[],
 };
 
+// Every native view manager the fake factory handed out, oldest first. Each one records
+// what the library assigned to it, so tests can read the props that reached native.
+export type FakeViewManager = Record<string, unknown> & {
+  nitroId: number;
+  clearAllListeners: () => void;
+};
+
+export const viewManagers = {
+  created: [] as FakeViewManager[],
+};
+
 export function resetNativeMocks() {
   platform.OS = 'ios';
   assets.resolved = { uri: 'file:///asset.mp4' };
@@ -55,6 +66,7 @@ export function resetNativeMocks() {
   player.replaceSourceRejects = null;
   player.released = 0;
   player.created = [];
+  viewManagers.created = [];
 }
 
 export type FakeEmitter = {
@@ -101,6 +113,14 @@ mock.module('react-native', () => ({
       platform.OS in spec ? spec[platform.OS] : spec.default,
   },
   Image: { resolveAssetSource: () => assets.resolved },
+  // Host components and the lookup NativeVideoView does, for tests that render views.
+  View: 'View',
+  UIManager: { hasViewManagerConfig: () => true },
+}));
+
+// The Fabric spec file calls this at import time; render a plain host element instead.
+mock.module('react-native/Libraries/Utilities/codegenNativeComponent', () => ({
+  default: (name: string) => name,
 }));
 
 mock.module('react-native-nitro-modules', () => ({
@@ -157,6 +177,18 @@ mock.module('react-native-nitro-modules', () => ({
             };
             player.created.push(fake);
             return fake;
+          },
+        };
+      }
+      if (name === 'VideoViewViewManagerFactory') {
+        return {
+          createViewManager: (nitroId: number) => {
+            const manager: FakeViewManager = {
+              nitroId,
+              clearAllListeners: () => {},
+            };
+            viewManagers.created.push(manager);
+            return manager;
           },
         };
       }

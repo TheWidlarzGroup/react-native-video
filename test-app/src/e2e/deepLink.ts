@@ -4,6 +4,10 @@ export const SCENARIO_NAMES = [
   'mp4-preload', // same clip, started with preload() instead of initialize()+play()
   'mp4-release-mid-playback', // same clip; replaceSourceAsync(null) once progress > 2 s
   'mp4-fullscreen-rotate', // same clip; enterFullscreen() on landscape, exitFullscreen() on portrait
+  // Native controls (#5272, Android only), checked once the clip has ended:
+  'mp4-controls', // every control shown (the ids the other two flows rely on)
+  'mp4-controls-styles', // same clip; native controls with the seek bar, position and duration hidden
+  'mp4-controls-no-play-pause', // same clip; native controls without the play/pause button
   'hls',
   'error-404',
   'broken-manifest',
