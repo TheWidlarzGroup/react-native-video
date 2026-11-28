@@ -49,7 +49,6 @@ import { VideoView, useVideoPlayer } from 'react-native-video';
 
 export function Player() {
   const player = useVideoPlayer({
-    source: {
     uri: 'https://example.com/manifest.mpd', // or HLS .m3u8 for FairPlay
     // On iOS these headers are also used for the default license request
     headers: { Authorization: 'Bearer <token>' },
@@ -57,7 +56,6 @@ export function Player() {
       // type: 'widevine' | 'fairplay'  // optional; inferred by platform
       licenseUrl: 'https://license.example.com/widevine',
     },
-  },
   });
 
   return <VideoView player={player} />;
@@ -103,14 +101,12 @@ Example:
 
 ```tsx
 useVideoPlayer({
-  source: {
-    uri: 'https://example.com/manifest.mpd',
-    drm: {
-      // type: 'widevine', // optional
-      licenseUrl: 'https://license.example.com/widevine',
-      licenseHeaders: { 'X-Custom-Header': 'value' },
-      multiSession: false,
-    },
+  uri: 'https://example.com/manifest.mpd',
+  drm: {
+    // type: 'widevine', // optional
+    licenseUrl: 'https://license.example.com/widevine',
+    licenseHeaders: { 'X-Custom-Header': 'value' },
+    multiSession: false,
   },
 });
 ```
@@ -136,15 +132,13 @@ Default flow example:
 
 ```tsx
 useVideoPlayer({
-  source: {
-    uri: 'https://example.com/fairplay.m3u8',
-    headers: { Authorization: 'Bearer <token>' }, // used for the license request
-    drm: {
-      // type: 'fairplay', // optional
-      certificateUrl: 'https://license.example.com/fps-cert',
-      licenseUrl: 'https://license.example.com/fps',
-      // contentId: 'my-content-id', // optional
-    },
+  uri: 'https://example.com/fairplay.m3u8',
+  headers: { Authorization: 'Bearer <token>' }, // used for the license request
+  drm: {
+    // type: 'fairplay', // optional
+    certificateUrl: 'https://license.example.com/fps-cert',
+    licenseUrl: 'https://license.example.com/fps',
+    // contentId: 'my-content-id', // optional
   },
 });
 ```
@@ -157,27 +151,25 @@ This is example code for a custom `getLicense` implementation. it may differ fro
 
 ```tsx
 useVideoPlayer({
-  source: {
   uri: 'https://example.com/fairplay.m3u8',
   drm: {
     certificateUrl: 'https://license.example.com/fps-cert',
     licenseUrl: 'https://license.example.com/fps',
     getLicense: async ({ contentId, licenseUrl, keyUrl, spc }) => {
       // Example: POST SPC to your license server and return base64 CKC
-        const res = await fetch(licenseUrl, {
-          method: 'POST',
-          body: Buffer.from(spc, 'base64'), // server expects raw SPC bytes
-          headers: {
-            'Content-Type': 'application/octet-stream',
-            'X-Content-ID': contentId,
-            'X-Asset-Id': keyUrl,
-          },
-        });
-        if (!res.ok) throw new Error(`License request failed: ${res.status}`);
-        const ckc = await res.arrayBuffer();
-        // return base64 CKC string
-        return Buffer.from(ckc).toString('base64');
-      },
+      const res = await fetch(licenseUrl, {
+        method: 'POST',
+        body: Buffer.from(spc, 'base64'), // server expects raw SPC bytes
+        headers: {
+          'Content-Type': 'application/octet-stream',
+          'X-Content-ID': contentId,
+          'X-Asset-Id': keyUrl,
+        },
+      });
+      if (!res.ok) throw new Error(`License request failed: ${res.status}`);
+      const ckc = await res.arrayBuffer();
+      // return base64 CKC string
+      return Buffer.from(ckc).toString('base64');
     },
   },
 });
