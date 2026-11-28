@@ -656,7 +656,10 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
 
       when (playbackState) {
         Player.STATE_IDLE -> {
-          status = VideoPlayerStatus.IDLE
+          // ExoPlayer goes idle right after a failure: keep `error` until a source loads again.
+          if (player.playerError == null) {
+            status = VideoPlayerStatus.IDLE
+          }
           eventEmitter.onBuffer(false)
           // Stopped or failed: the next prepare() loads the source again.
           loadReportedForSource = false
@@ -703,7 +706,8 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
           eventEmitter.onReadyToDisplay()
         }
         Player.STATE_ENDED -> {
-          status = VideoPlayerStatus.IDLE // Or a specific 'COMPLETED' status if you add one
+          // The source is still loaded at the end: it can be seeked and played again.
+          status = VideoPlayerStatus.READYTOPLAY
           eventEmitter.onEnd()
           eventEmitter.onBuffer(false)
           stopProgressUpdates()

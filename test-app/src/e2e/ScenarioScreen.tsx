@@ -15,7 +15,11 @@ import {
   type VideoTrack,
   type VideoViewRef,
 } from 'react-native-video';
-import { eventLog, PROGRESS_MARKER_SECONDS } from './eventLog';
+import {
+  eventLog,
+  PROGRESS_MARKER_SECONDS,
+  STATUS_SETTLE_MS,
+} from './eventLog';
 import { EventLogPanel } from './EventLogPanel';
 import type { ScenarioName } from './deepLink';
 import { AUDIO_REPLACEMENT_SOURCE, scenarioSource } from './fixtures';
@@ -94,6 +98,23 @@ function reportStatusAfterRelease(player: VideoPlayer) {
     setTimeout(poll, STATUS_AFTER_RELEASE_POLL_MS);
   };
   poll();
+}
+
+/**
+ * Reads player.status STATUS_SETTLE_MS after onEnd or onError (#5285). Read, not taken
+ * from onStatusChange alone: the question is where the status stays, and on Android it
+ * went to idle a few milliseconds after both events.
+ */
+function reportStatusSettled(player: VideoPlayer, after: 'end' | 'error') {
+  setTimeout(() => {
+    let status;
+    try {
+      status = player.status;
+    } catch {
+      return; // the scenario's player was released in the meantime
+    }
+    eventLog.handle({ type: 'statusSettled', after, status });
+  }, STATUS_SETTLE_MS);
 }
 
 /**
@@ -317,10 +338,14 @@ function logPlayerEvents(player: VideoPlayer) {
   player.addEventListener('onProgress', ({ currentTime }) =>
     handle({ type: 'onProgress', currentTime })
   );
-  player.addEventListener('onEnd', () => handle({ type: 'onEnd' }));
-  player.addEventListener('onError', (error) =>
-    handle({ type: 'onError', code: error.code })
-  );
+  player.addEventListener('onEnd', () => {
+    handle({ type: 'onEnd' });
+    reportStatusSettled(player, 'end');
+  });
+  player.addEventListener('onError', (error) => {
+    handle({ type: 'onError', code: error.code });
+    reportStatusSettled(player, 'error');
+  });
   player.addEventListener('onStatusChange', (status) =>
     handle({ type: 'onStatusChange', status })
   );
