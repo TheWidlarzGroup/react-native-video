@@ -212,6 +212,14 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
   interaction (a 20 s load, then the clip); a flow that waits longer before it passes
   `END_TIMEOUT`. `scripts/e2e/check-flow-timeouts.mjs` checks all flows and runs with the
   unit tests (`check-flow-timeouts.test.mjs`).
+  What restarts the clock in 2.10.0 (each command handler returns whether it touched the
+  app): `launchApp`, `stopApp`, `clearState`, `openLink`, `tapOn`, `setOrientation`,
+  `runScript` and `waitForAnimationToEnd` do; `assertVisible`, `assertNotVisible` and
+  `extendedWaitUntil` do not. So opening a scenario is an interaction on iOS as well, where
+  the link goes through `runScript` (`open-link-ios.js`) and not through `openLink`. The
+  check counts only launches, taps, links, orientation changes and the shared subflows that
+  contain them, which is the cautious reading: it never assumes a restart that Maestro
+  might not make.
 
 - **A tap can be lost between the driver and JS even on an idle player** (#5130). Nightly
   2026-09-21 and 09-22, iOS 26 with RN 0.87 only: `btn-mute` was tapped 2.4 s after
