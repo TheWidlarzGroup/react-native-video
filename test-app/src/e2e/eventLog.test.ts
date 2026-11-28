@@ -533,6 +533,33 @@ describe('lifecycle (ported from #4743)', () => {
     ]);
   });
 
+  test('status after the end is readyToPlay, after an error it is error (#5285)', () => {
+    feed(
+      { type: 'statusSettled', after: 'end', status: 'idle' },
+      { type: 'statusSettled', after: 'error', status: 'idle' }
+    );
+    expect(markers()).toEqual([]);
+    feed(
+      { type: 'statusSettled', after: 'end', status: 'readyToPlay' },
+      { type: 'statusSettled', after: 'error', status: 'error' }
+    );
+    expect(markers()).toEqual(['evt-error-status-held', 'evt-ready-after-end']);
+    expect(lines()).toEqual([
+      'status after end:idle',
+      'status after error:idle',
+      'status after end:readyToPlay',
+      'status after error:error',
+    ]);
+  });
+
+  test('a status that only fits the other event does not mark', () => {
+    feed(
+      { type: 'statusSettled', after: 'end', status: 'error' },
+      { type: 'statusSettled', after: 'error', status: 'readyToPlay' }
+    );
+    expect(markers()).toEqual([]);
+  });
+
   test('reset clears the lifecycle bookkeeping', () => {
     replaceRequested();
     feed(

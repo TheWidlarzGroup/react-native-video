@@ -55,6 +55,10 @@ export const MARKER_IDS = [
   'evt-reloaded-from-start', // first onProgress after that onLoad is < RELOAD_START_SECONDS
   'evt-ended-after-replace', // onEnd after replaceSourceAsync(source) was requested
   'evt-idle-after-release', // player.status read as 'idle' once replaceSourceAsync(null) resolved
+  // player.status read STATUS_SETTLE_MS after onEnd / onError (#5285): Android went to idle
+  // a few milliseconds after both, iOS keeps readyToPlay and error.
+  'evt-ready-after-end', // status after the end of the clip is readyToPlay
+  'evt-error-status-held', // status after a failed load is error
   // VideoView ref calls made from JS (smoke-fullscreen-rotate): onFullscreenChange(true/false).
   'evt-fullscreen-entered',
   'evt-fullscreen-exited',
@@ -90,6 +94,9 @@ export type PlayerEvent =
   // Read, not listened for: both native players detach every emitter listener during
   // release, so no onStatusChange can report the idle status (see ScenarioScreen).
   | { type: 'statusAfterRelease'; status: VideoPlayerStatus }
+  // player.status read STATUS_SETTLE_MS after onEnd or onError, once the native side has
+  // settled (a status change that follows the event within a few ms is caught too).
+  | { type: 'statusSettled'; after: 'end' | 'error'; status: VideoPlayerStatus }
   // The three moments of a replaceSourceAsync() issued by a control.
   | {
       type: 'replaceSource';
@@ -124,6 +131,8 @@ export const FIXTURE_DURATION_SECONDS = 8;
 export const FIXTURE_DURATION_TOLERANCE_SECONDS = 1;
 // A replacement source must start near 0; its own rule, independent of the seek rules.
 export const RELOAD_START_SECONDS = 2;
+// How long after onEnd / onError player.status is read (statusSettled).
+export const STATUS_SETTLE_MS = 750;
 // Set when the player reports an error status without a code (see handle).
 export const STATUS_ERROR_CODE = 'status/error';
 
@@ -349,6 +358,16 @@ function apply(event: PlayerEvent) {
     case 'statusAfterRelease':
       if (event.status === 'idle') mark('evt-idle-after-release');
       append(`statusAfterRelease:${event.status}`);
+      return;
+
+    case 'statusSettled':
+      if (event.after === 'end' && event.status === 'readyToPlay') {
+        mark('evt-ready-after-end');
+      }
+      if (event.after === 'error' && event.status === 'error') {
+        mark('evt-error-status-held');
+      }
+      append(`status after ${event.after}:${event.status}`);
       return;
 
     case 'onVideoTrackChange': {
