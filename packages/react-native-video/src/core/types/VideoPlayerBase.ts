@@ -112,6 +112,22 @@ export interface VideoPlayerSpecBase {
   playWhenInactive: boolean;
 
   /**
+   * The interval, in milliseconds, between two `onProgress` events while the
+   * video is playing.
+   *
+   * Values that are not a finite number greater than 0 are ignored.
+   *
+   * Reading it returns the interval in effect, so before anything is set it
+   * reports the platform default.
+   *
+   * @note on web the browser decides how often `timeupdate` fires (about 4
+   * times per second), so an interval below ~250 ms cannot be reached there.
+   *
+   * @default 250 on Android and web, 500 on iOS
+   */
+  progressUpdateInterval: number;
+
+  /**
    * Disables the internal audio session management for this player.
    * When disabled, react-native-video will not configure or activate the AVAudioSession,
    * allowing other libraries (like audio recording libraries) to manage it.

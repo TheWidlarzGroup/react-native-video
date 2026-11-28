@@ -18,7 +18,7 @@ import {
 import { eventLog, PROGRESS_MARKER_SECONDS } from './eventLog';
 import { EventLogPanel } from './EventLogPanel';
 import type { ScenarioName } from './deepLink';
-import { AUDIO_REPLACEMENT_SOURCE, SCENARIO_SOURCES } from './fixtures';
+import { AUDIO_REPLACEMENT_SOURCE, scenarioSource } from './fixtures';
 
 /**
  * replaceSourceAsync() is awaited here and, for a new source, followed by play() from
@@ -41,7 +41,7 @@ function replaceSource(
         ? null
         : target === 'audio-tracks'
           ? AUDIO_REPLACEMENT_SOURCE
-          : SCENARIO_SOURCES.hls
+          : scenarioSource('hls')
     )
     .then(
       () => {
@@ -106,6 +106,11 @@ function reportStatusAfterRelease(player: VideoPlayer) {
  */
 function startScenario(scenario: ScenarioName, player: VideoPlayer) {
   eventLog.handle({ type: 'initialStatus', status: player.status });
+
+  // Set before the load, as an app does in the setup callback of useVideoPlayer.
+  if (scenario === 'mp4-progress-1s') {
+    player.progressUpdateInterval = 1000;
+  }
 
   if (scenario === 'mp4-release-mid-playback') {
     let released = false;
@@ -354,7 +359,7 @@ function logPlayerEvents(player: VideoPlayer) {
  */
 export function ScenarioScreen({ scenario }: { scenario: ScenarioName }) {
   const viewRef = useRef<VideoViewRef>(null);
-  const player = useVideoPlayer(SCENARIO_SOURCES[scenario], (p) => {
+  const player = useVideoPlayer(scenarioSource(scenario), (p) => {
     eventLog.reset();
     eventLog.log(`scenario:${scenario}`);
     logPlayerEvents(p);

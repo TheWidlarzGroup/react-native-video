@@ -87,6 +87,7 @@ player.muted = true;
 | `playWhenInactive` | Read/Write | `boolean` | Whether playback should continue when the app is inactive (e.g., during a phone call). |
 | `allowsExternalPlayback` | Read/Write | `boolean` | iOS-only. Whether the video can be sent to an AirPlay device. Defaults to `true`. With `false` the video stays on the device. |
 | `audioOutput` | Read/Write | `'speaker' \| 'earpiece'` | Where the audio plays on a phone. `'earpiece'` uses the receiver, as in a phone call. Defaults to `'speaker'`. On iOS `'earpiece'` is ignored while any player uses Picture in Picture, `playInBackground` or `showNotificationControls`. On Android, add the `MODIFY_AUDIO_SETTINGS` permission to your manifest so the player can switch the audio mode. No effect on web. |
+| `progressUpdateInterval` | Read/Write | `number` | Time between two `onProgress` events in milliseconds. Defaults to `250` on Android and web and `500` on iOS. On web the browser limits it to about 250 ms at best. |
 | `isPlaying` | Read-only | `boolean` | Returns `true` if the video is currently playing. |
 | `selectedTrack` | Read-only | `TextTrack \| undefined` | Currently selected text track, or `undefined` when no track is selected. |
 

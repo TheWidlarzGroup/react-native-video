@@ -153,6 +153,14 @@ class VideoPlayer extends VideoPlayerEvents implements WebVideoPlayer {
     return this._media.video;
   }
 
+  /**
+   * The underlying `<video>` element. It exists as soon as the player is
+   * created, before a `VideoView` mounts it.
+   */
+  get nativeHtmlVideoElement(): HTMLVideoElement {
+    return this._media.video;
+  }
+
   // --- Playback state (read from store or video element) ---
 
   get source(): VideoPlayerSourceBase {
@@ -244,6 +252,15 @@ class VideoPlayer extends VideoPlayerEvents implements WebVideoPlayer {
     return true;
   }
   set playWhenInactive(_: boolean) {}
+  get progressUpdateInterval(): number {
+    return this._media.progressUpdateInterval;
+  }
+  set progressUpdateInterval(value: number) {
+    if (!Number.isFinite(value) || value <= 0) {
+      return;
+    }
+    this._media.progressUpdateInterval = value;
+  }
   get disableAudioSessionManagement(): boolean {
     return false;
   }
