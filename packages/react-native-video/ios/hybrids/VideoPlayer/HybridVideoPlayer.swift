@@ -720,6 +720,34 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     return try await loadPlayerItem(for: context).item
   }
 
+  /// Creates the item for `asset` with the source's external subtitles, crop and start
+  /// position. `AVPlayerItem` belongs to the main actor in current SDKs, so the item is built
+  /// and configured there; the external subtitles path already created its item there.
+  @MainActor
+  private static func makePlayerItem(
+    asset: AVAsset,
+    config: NativeVideoConfig
+  ) async throws -> AVPlayerItem {
+    // Returns a plain `AVPlayerItem(asset:)` when the source has no external subtitles.
+    let playerItem = try await AVPlayerItem.withExternalSubtitles(for: asset, config: config)
+
+    playerItem.setCrop(start: config.cropStart, end: config.cropEnd)
+
+    // Seeking an item that has no player yet sets where its playback starts.
+    // `startPosition` counts from `cropStart`.
+    let startSeconds = playerItem.cropStartSeconds + max(0, config.startPosition ?? 0) / 1000
+    if startSeconds > 0 {
+      playerItem.seek(
+        to: CMTime(seconds: startSeconds, preferredTimescale: 1000),
+        toleranceBefore: .zero,
+        toleranceAfter: .zero,
+        completionHandler: nil
+      )
+    }
+
+    return playerItem
+  }
+
   private func initializePlayerItem(
     source: any HybridVideoPlayerSourceSpec,
     context: LoadContext
@@ -752,33 +780,8 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     }
     try ensureCurrentLoad(context)
 
-    let playerItem: AVPlayerItem
-
-    if let externalSubtitles = source.config.externalSubtitles,
-      externalSubtitles.isEmpty == false
-    {
-      playerItem = try await AVPlayerItem.withExternalSubtitles(
-        for: asset,
-        config: source.config
-      )
-    } else {
-      playerItem = AVPlayerItem(asset: asset)
-    }
+    let playerItem = try await Self.makePlayerItem(asset: asset, config: source.config)
     try ensureCurrentLoad(context)
-
-    playerItem.setCrop(start: source.config.cropStart, end: source.config.cropEnd)
-
-    // Seeking an item that has no player yet sets where its playback starts.
-    // `startPosition` counts from `cropStart`.
-    let startSeconds = playerItem.cropStartSeconds + max(0, source.config.startPosition ?? 0) / 1000
-    if startSeconds > 0 {
-      playerItem.seek(
-        to: CMTime(seconds: startSeconds, preferredTimescale: 1000),
-        toleranceBefore: .zero,
-        toleranceAfter: .zero,
-        completionHandler: nil
-      )
-    }
 
     if let metadata = source.config.metadata {
       let title = metadata.title
