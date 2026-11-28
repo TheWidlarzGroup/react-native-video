@@ -317,6 +317,56 @@ function useFullscreenLandscape(
   }, [enabled, player, view]);
 }
 
+/**
+ * mp4-fullscreen-cycle: an app with its own fullscreen button. enterFullscreen() and
+ * exitFullscreen() are called twice each through the VideoView ref, 3 s apart, starting
+ * with the first onLoad. No taps: the screen is covered while fullscreen is shown, and iOS
+ * would hold a tap back until playback stops. On iOS 18 the first exit was never
+ * reported and the second entry was dropped; before that it showed a black screen.
+ */
+const FULLSCREEN_CYCLE_STEP_MS = 3000;
+function useFullscreenCycle(
+  enabled: boolean,
+  player: VideoPlayer,
+  view: React.RefObject<VideoViewRef | null>
+) {
+  useEffect(() => {
+    if (!enabled) return;
+    let timers: ReturnType<typeof setTimeout>[] = [];
+    const calls = [
+      'enterFullscreen',
+      'exitFullscreen',
+      'enterFullscreen',
+      'exitFullscreen',
+    ] as const;
+    const sub = player.addEventListener('onLoad', () => {
+      if (timers.length > 0) return;
+      player.loop = true;
+      timers = calls.map((name, index) =>
+        setTimeout(
+          () => {
+            eventLog.log(`call ${name}`);
+            try {
+              view.current?.[name]();
+            } catch (e) {
+              eventLog.handle({
+                type: 'fullscreenCallFailed',
+                call: name,
+                message: e instanceof Error ? e.message : String(e),
+              });
+            }
+          },
+          (index + 1) * FULLSCREEN_CYCLE_STEP_MS
+        )
+      );
+    });
+    return () => {
+      sub.remove();
+      timers.forEach(clearTimeout);
+    };
+  }, [enabled, player, view]);
+}
+
 type Control = {
   id: string;
   title: string;
@@ -501,6 +551,9 @@ function logPlayerEvents(player: VideoPlayer) {
         selectedTrackId,
       })
   );
+  player.addEventListener('onAudioFocusChange', (hasAudioFocus) =>
+    handle({ type: 'onAudioFocusChange', hasAudioFocus })
+  );
   player.addEventListener('onAudioTrackChange', ({ availableTracks }) =>
     handle({ type: 'onAudioTrackChange', tracks: availableTracks })
   );
@@ -523,6 +576,7 @@ export function ScenarioScreen({ scenario }: { scenario: ScenarioName }) {
   });
 
   useFullscreenFollowsRotation(scenario === 'mp4-fullscreen-rotate', viewRef);
+  useFullscreenCycle(scenario === 'mp4-fullscreen-cycle', player, viewRef);
 
   const [fullscreen, setFullscreen] = useState(false);
   const landscapeLocked = scenario === 'mp4-fullscreen-landscape';

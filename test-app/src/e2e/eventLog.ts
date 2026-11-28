@@ -70,6 +70,8 @@ export const MARKER_IDS = [
   'evt-external-screen-default', // usesExternalPlaybackWhileExternalScreenIsActive reads false before it is set (#5299)
   'evt-external-screen-on', // ...then reads back true once set
   'evt-external-screen-kept', // ...and still true once a replacement source has loaded
+  'evt-audio-focus-lost', // onAudioFocusChange(false): a ringing call took the audio focus (smoke-audio-focus)
+  'evt-audio-focus-regained', // ...then onAudioFocusChange(true) once the call has ended
   // An unassisted loop restart: see LOOP_VERIFIED_END_COUNT and the wrap-around rule in
   // handle('onProgress') — AVPlayer reports each loop as onEnd, ExoPlayer wraps silently,
   // so both are covered (see smoke-loop.yaml).
@@ -95,6 +97,8 @@ export const MARKER_IDS = [
   // VideoView ref calls made from JS (smoke-fullscreen-rotate): onFullscreenChange(true/false).
   'evt-fullscreen-entered',
   'evt-fullscreen-exited',
+  'evt-fullscreen-reentered', // onFullscreenChange(true) again, after an exit was reported
+  'evt-fullscreen-exited-again', // ...and onFullscreenChange(false) after that second entry
   'evt-fullscreen-call-failed', // enterFullscreen()/exitFullscreen() threw (#5152)
   // fullscreenOrientation="landscape" with fullscreenAutorotate={false} (#5286), from the
   // window size while fullscreen is shown and after it closed:
@@ -125,6 +129,7 @@ export type PlayerEvent =
   // usesExternalPlaybackWhileExternalScreenIsActive read back from the player (#5299).
   // value is String(read value): 'false' before it is set, 'undefined' without the property.
   | { type: 'externalScreen'; phase: 'default' | 'read'; value: string }
+  | { type: 'onAudioFocusChange'; hasAudioFocus: boolean }
   // VideoView's onFullscreenChange (a view event, not a player event).
   | { type: 'onFullscreenChange'; fullscreen: boolean }
   // The renderLoader element mounted (shown) or unmounted (hidden) inside VideoView. `at`
@@ -429,6 +434,14 @@ function apply(event: PlayerEvent) {
       return;
 
     case 'onFullscreenChange':
+      // A second round is only counted in order: entered, exited, entered, exited. A view
+      // that never reports the first exit can therefore never report a re-entry.
+      if (event.fullscreen && state.markers.has('evt-fullscreen-exited')) {
+        mark('evt-fullscreen-reentered');
+      }
+      if (!event.fullscreen && state.markers.has('evt-fullscreen-reentered')) {
+        mark('evt-fullscreen-exited-again');
+      }
       mark(
         event.fullscreen ? 'evt-fullscreen-entered' : 'evt-fullscreen-exited'
       );
@@ -574,6 +587,16 @@ function apply(event: PlayerEvent) {
           mark('evt-external-screen-kept');
       }
       append(`externalScreen ${event.phase} ${event.value}`);
+      return;
+
+    case 'onAudioFocusChange':
+      // Regained only counts after a loss: the focus a player takes on play sends no event.
+      if (!event.hasAudioFocus) {
+        mark('evt-audio-focus-lost');
+      } else if (state.markers.has('evt-audio-focus-lost')) {
+        mark('evt-audio-focus-regained');
+      }
+      append(`onAudioFocusChange ${event.hasAudioFocus}`);
       return;
 
     case 'initialStatus':

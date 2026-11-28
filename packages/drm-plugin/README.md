@@ -10,10 +10,12 @@ DRM plugin for react-native-video. It adds Widevine (Android) and FairPlay (iOS,
 ## Installation
 
 ```sh
-npm install @react-native-video/drm react-native-video react-native-nitro-modules
+npm install @react-native-video/drm@beta react-native-video@beta react-native-nitro-modules
 # then for iOS
 npx pod-install
 ```
+
+Use the `@beta` tag for both packages while v7 is in beta: `latest` of `react-native-video` is still v6, and `latest` of this plugin still points to an old beta (7.0.0-beta.7), which does not build with the Nitro Modules version that `react-native-video` v7 needs.
 
 Notes
 - This library uses Nitro Modules; autolinking is supported. No manual native changes are needed besides running CocoaPods on iOS.
