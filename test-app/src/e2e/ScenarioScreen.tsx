@@ -575,7 +575,11 @@ export function ScenarioScreen({ scenario }: { scenario: ScenarioName }) {
         // Android only (#5272): the smoke-controls-* flows check the native controls.
         controlsStyles={CONTROLS_STYLES[scenario]}
         onFullscreenChange={onFullscreenChange}
-        renderLoader={scenario === 'mp4-loader' ? <LoaderProbe /> : undefined}
+        renderLoader={
+          scenario === 'mp4-loader' || scenario === 'error-404-loader' ? (
+            <LoaderProbe />
+          ) : undefined
+        }
         fullscreenOrientation={landscapeLocked ? 'landscape' : undefined}
         fullscreenAutorotate={landscapeLocked ? false : undefined}
       />

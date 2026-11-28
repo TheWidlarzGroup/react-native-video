@@ -74,6 +74,7 @@ export const SCENARIO_SOURCES: Record<ScenarioName, VideoConfig> = {
   'hls': fixture('hls/index.m3u8'), // ~8 s VOD, 2 s segments
   'hls-type': { ...fixture('hls-noext/stream'), type: 'm3u8' },
   'error-404': fixture('does-not-exist.mp4'),
+  'error-404-loader': fixture('does-not-exist.mp4'),
   'error-503-retry': {
     ...fixture(`__unavailable/short.mp4?token=${RETRY_TOKEN}`), // 503, which is retried
     minLoadRetryCount: 1,
