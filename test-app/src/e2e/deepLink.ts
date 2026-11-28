@@ -13,6 +13,7 @@ export const SCENARIO_NAMES = [
   'mp4-controls', // every control shown (the ids the other two flows rely on)
   'mp4-controls-styles', // same clip; native controls with the seek bar, position and duration hidden
   'mp4-controls-no-play-pause', // same clip; native controls without the play/pause button
+  'mp4-fullscreen-cycle', // same clip; enter, exit, enter and exit fullscreen from JS, 3 s apart
   'hls',
   'hls-type', // the same HLS VOD behind a uri without an extension, with type: 'm3u8'
   'error-404',

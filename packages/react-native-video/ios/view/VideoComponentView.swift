@@ -377,7 +377,15 @@ import UIKit
     if target {
       playerViewController.enterFullscreen(animated: true)
     } else {
-      playerViewController.exitFullscreen(animated: true)
+      // Called through its IMP, with a real BOOL and a completion block. Through
+      // `perform(_:with:with:)` with a nil handler, AVKit on iOS 18 left fullscreen without
+      // calling the delegate: `onFullscreenChange(false)` never came, and the next
+      // `enterFullscreen()` was dropped (or, before the request queue, showed a black screen).
+      playerViewController.exitFullscreen(animated: true) { [weak observer] in
+        DispatchQueue.main.async {
+          observer?.fullscreenExitRequestDidComplete()
+        }
+      }
     }
   }
 

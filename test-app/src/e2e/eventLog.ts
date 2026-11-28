@@ -92,6 +92,8 @@ export const MARKER_IDS = [
   // VideoView ref calls made from JS (smoke-fullscreen-rotate): onFullscreenChange(true/false).
   'evt-fullscreen-entered',
   'evt-fullscreen-exited',
+  'evt-fullscreen-reentered', // onFullscreenChange(true) again, after an exit was reported
+  'evt-fullscreen-exited-again', // ...and onFullscreenChange(false) after that second entry
   'evt-fullscreen-call-failed', // enterFullscreen()/exitFullscreen() threw (#5152)
   // fullscreenOrientation="landscape" with fullscreenAutorotate={false} (#5286), from the
   // window size while fullscreen is shown and after it closed:
@@ -423,6 +425,14 @@ function apply(event: PlayerEvent) {
       return;
 
     case 'onFullscreenChange':
+      // A second round is only counted in order: entered, exited, entered, exited. A view
+      // that never reports the first exit can therefore never report a re-entry.
+      if (event.fullscreen && state.markers.has('evt-fullscreen-exited')) {
+        mark('evt-fullscreen-reentered');
+      }
+      if (!event.fullscreen && state.markers.has('evt-fullscreen-reentered')) {
+        mark('evt-fullscreen-exited-again');
+      }
       mark(
         event.fullscreen ? 'evt-fullscreen-entered' : 'evt-fullscreen-exited'
       );

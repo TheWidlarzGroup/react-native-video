@@ -842,6 +842,30 @@ describe('fullscreen', () => {
     ]);
   });
 
+  test('a second round is counted only in order: entered, exited, entered, exited', () => {
+    feed(
+      { type: 'onFullscreenChange', fullscreen: true },
+      { type: 'onFullscreenChange', fullscreen: false }
+    );
+    expect(markers()).not.toContain('evt-fullscreen-reentered');
+    feed({ type: 'onFullscreenChange', fullscreen: true });
+    expect(markers()).toContain('evt-fullscreen-reentered');
+    expect(markers()).not.toContain('evt-fullscreen-exited-again');
+    feed({ type: 'onFullscreenChange', fullscreen: false });
+    expect(markers()).toContain('evt-fullscreen-exited-again');
+  });
+
+  test('entries without a reported exit between them are not a re-entry', () => {
+    feed(
+      { type: 'onFullscreenChange', fullscreen: true },
+      { type: 'onFullscreenChange', fullscreen: true }
+    );
+    expect(markers()).toEqual(['evt-fullscreen-entered']);
+    // An exit that follows is the first one, not the second.
+    feed({ type: 'onFullscreenChange', fullscreen: false });
+    expect(markers()).not.toContain('evt-fullscreen-exited-again');
+  });
+
   test('a ref call that threw marks evt-fullscreen-call-failed and logs the message', () => {
     feed({
       type: 'fullscreenCallFailed',
