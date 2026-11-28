@@ -39,56 +39,56 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     let context: LoadContext
   }
 
+  // The helpers below run on the JS thread. They only touch state that `sourceLoader`
+  // guards with its lock, so they must not wait for the main thread: it is busy installing
+  // the previous item exactly when JS creates or re-sources a player (#4820). Everything
+  // that needs the main thread (`commitPlayerItem`, `releaseOnMainThread`) is dispatched.
   private func beginLoad() throws -> LoadContext {
-    try runOnMainThreadSync {
-      var source: (any HybridVideoPlayerSourceSpec)?
-      guard let token = try sourceLoader.begin(onBegin: {
-        source = storedSource
-      }), let source else { throw CancellationError() }
-      return LoadContext(source: source, token: token)
-    }
+    var source: (any HybridVideoPlayerSourceSpec)?
+    guard let token = try sourceLoader.begin(onBegin: {
+      source = storedSource
+    }), let source else { throw CancellationError() }
+    return LoadContext(source: source, token: token)
   }
 
   private func beginLoadIfPlayerItemMissing() throws -> LoadContext? {
-    try runOnMainThreadSync {
-      var source: (any HybridVideoPlayerSourceSpec)?
-      guard let token = try sourceLoader.begin(
-        if: { storedPlayerItem == nil },
-        onBegin: { source = storedSource }
-      ) else { return nil }
-      guard let source else { throw CancellationError() }
-      return LoadContext(source: source, token: token)
-    }
+    var source: (any HybridVideoPlayerSourceSpec)?
+    guard let token = try sourceLoader.begin(
+      if: { storedPlayerItem == nil },
+      onBegin: { source = storedSource }
+    ) else { return nil }
+    guard let source else { throw CancellationError() }
+    return LoadContext(source: source, token: token)
   }
 
   private func beginPreloadIfNeeded() throws -> LoadContext? {
-    try runOnMainThreadSync {
-      var source: (any HybridVideoPlayerSourceSpec)?
-      guard let token = try sourceLoader.begin(
-        if: { storedStatus == .idle },
-        onBegin: { source = storedSource }
-      ) else { return nil }
-      guard let source else { throw CancellationError() }
-      return LoadContext(source: source, token: token)
-    }
+    var source: (any HybridVideoPlayerSourceSpec)?
+    guard let token = try sourceLoader.begin(
+      if: { storedStatus == .idle },
+      onBegin: { source = storedSource }
+    ) else { return nil }
+    guard let source else { throw CancellationError() }
+    return LoadContext(source: source, token: token)
   }
 
   private func replaceSourceAndBeginLoad(
     with newSource: any HybridVideoPlayerSourceSpec
   ) throws -> LoadContext {
-    try runOnMainThreadSync {
-      var previousSource: (any HybridVideoPlayerSourceSpec)?
-      guard let token = try sourceLoader.begin(onBegin: {
-        previousSource = storedSource
-        storedSource = newSource
-      }), let previousSource else { throw CancellationError() }
-      let context = LoadContext(source: newSource, token: token)
-      releaseAssetIfNotUsedByCurrentLoad(for: previousSource)
-      // The next onAudioTrackChange describes the new source. Without this, a source with the
-      // same audio tracks (the next episode, say) has the same signature and gets no event.
-      lastEmittedAudioTrackSignature = nil
-      return context
+    var previousSource: (any HybridVideoPlayerSourceSpec)?
+    guard let token = try sourceLoader.begin(onBegin: {
+      previousSource = storedSource
+      storedSource = newSource
+    }), let previousSource else { throw CancellationError() }
+    let context = LoadContext(source: newSource, token: token)
+    releaseAssetIfNotUsedByCurrentLoad(for: previousSource)
+    // The next onAudioTrackChange describes the new source. Without this, a source with the
+    // same audio tracks (the next episode, say) has the same signature and gets no event.
+    // The signature belongs to the main thread (emitAudioTrackChange); this runs there before
+    // the new item is committed, which is queued later.
+    DispatchQueue.main.async { [weak self] in
+      self?.lastEmittedAudioTrackSignature = nil
     }
+    return context
   }
 
   private func ensureCurrentLoad(_ context: LoadContext) throws {
@@ -108,9 +108,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   }
 
   private func close() -> (any HybridVideoPlayerSourceSpec)? {
-    runOnMainThreadSync {
-      sourceLoader.close(update: { storedSource })
-    }
+    sourceLoader.close(update: { storedSource })
   }
 
   init(source: (any HybridVideoPlayerSourceSpec)) throws {
@@ -154,12 +152,10 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   var source: any HybridVideoPlayerSourceSpec {
     get { sourceLoader.withState { storedSource } }
     set {
-      let releasedSource = runOnMainThreadSync {
-        sourceLoader.cancel {
-          let releasedSource = storedSource
-          storedSource = newValue
-          return releasedSource
-        }
+      let releasedSource = sourceLoader.cancel {
+        let releasedSource = storedSource
+        storedSource = newValue
+        return releasedSource
       }
       withExtendedLifetime(releasedSource) {}
     }
@@ -236,20 +232,30 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
 
   var currentTime: Double {
     set {
-      _eventEmitter?.onSeek(newValue)
+      // Time is counted from `cropStart` when the source is cropped, and a seek past
+      // `cropEnd` stops at `cropEnd`, as on Android.
+      var target = max(0, newValue)
+      if let item = player.currentItem, item.forwardPlaybackEndTime.isNumeric {
+        let croppedDuration = item.croppedDuration
+        if croppedDuration.isFinite {
+          target = min(target, croppedDuration)
+        }
+      }
+      _eventEmitter?.onSeek(target)
+      let cropStart = player.currentItem?.cropStartSeconds ?? 0
       player.seek(
-        to: CMTime(seconds: newValue, preferredTimescale: 1000),
+        to: CMTime(seconds: target + cropStart, preferredTimescale: 1000),
         toleranceBefore: .zero,
         toleranceAfter: .zero
       )
     }
     get {
-      player.currentTime().seconds
+      player.currentItem?.croppedCurrentTime ?? player.currentTime().seconds
     }
   }
 
   var duration: Double {
-    Double(player.currentItem?.duration.seconds ?? Double.nan)
+    player.currentItem?.croppedDuration ?? Double.nan
   }
 
   var rate: Double {
@@ -483,14 +489,23 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
         self.storedPlayerItem = loadedPlayerItem.item
       }
 
-      if let bufferConfig = loadedPlayerItem.context.source.config.bufferConfig {
+      let bufferConfig = loadedPlayerItem.context.source.config.bufferConfig
+      if let bufferConfig {
         loadedPlayerItem.item.setBufferConfig(config: bufferConfig)
       }
-
       // Off-main manifest fetch for the quality ladder.
       self.beginVideoRenditionLoad(for: loadedPlayerItem.context.source)
 
       self.player.replaceCurrentItem(with: loadedPlayerItem.item)
+
+      // A player property, not an item one: set for every source so a source without the
+      // option gets the AVPlayer default back. Written once the new item is in place and
+      // only when the value changes, because the setter makes AVPlayer publish
+      // `timeControlStatus` again.
+      let waitsToMinimizeStalling = bufferConfig?.automaticallyWaitsToMinimizeStalling ?? true
+      if self.player.automaticallyWaitsToMinimizeStalling != waitsToMinimizeStalling {
+        self.player.automaticallyWaitsToMinimizeStalling = waitsToMinimizeStalling
+      }
     }
   }
 
@@ -561,13 +576,11 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       throw PlayerError.notInitialized.error()
     }
 
-    let currentItemTime = currentItem.currentTime()
-
     // Duration is NaN for live streams
     let fixedDurration = duration.isNaN ? Double.infinity : duration
 
     // Clap by <0, duration>
-    let newTime = max(0, min(currentItemTime.seconds + time, fixedDurration))
+    let newTime = max(0, min(currentItem.croppedCurrentTime + time, fixedDurration))
 
     currentTime = newTime
   }
@@ -691,6 +704,20 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       playerItem = AVPlayerItem(asset: asset)
     }
     try ensureCurrentLoad(context)
+
+    playerItem.setCrop(start: source.config.cropStart, end: source.config.cropEnd)
+
+    // Seeking an item that has no player yet sets where its playback starts.
+    // `startPosition` counts from `cropStart`.
+    let startSeconds = playerItem.cropStartSeconds + max(0, source.config.startPosition ?? 0) / 1000
+    if startSeconds > 0 {
+      playerItem.seek(
+        to: CMTime(seconds: startSeconds, preferredTimescale: 1000),
+        toleranceBefore: .zero,
+        toleranceAfter: .zero,
+        completionHandler: nil
+      )
+    }
 
     if let metadata = source.config.metadata {
       let title = metadata.title

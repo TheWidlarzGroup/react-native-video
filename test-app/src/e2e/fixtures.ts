@@ -26,6 +26,14 @@ export let FIXTURE_BASE = fixtureBase(DEFAULT_FIXTURE_PORT);
 // Every source `fixture()` has handed out, so `setFixturePort` can move them too.
 const fixtureSources: VideoConfig[] = [];
 
+// mp4-cache: a token per app launch, so the fixture server can cut off exactly this source
+// (`/__go-offline?token=`), and a fresh launch (cleared app data, empty cache) starts online.
+export const CACHE_TOKEN = Math.random().toString(36).slice(2);
+
+// error-503-retry(-offline): a token per app launch, so the fixture server can count this source's
+// requests (`/__requests?token=`).
+export const RETRY_TOKEN = Math.random().toString(36).slice(2);
+
 // Every scenario starts its own load after attaching listeners (see ScenarioScreen).
 const fixture = (path: string): VideoConfig => {
   const source: VideoConfig = {
@@ -52,12 +60,30 @@ export const SCENARIO_SOURCES: Record<ScenarioName, VideoConfig> = {
   'mp4-release-mid-playback': fixture('short.mp4'),
   'mp4-progress-1s': fixture('short.mp4'),
   'mp4-loader': heldFixture('short.mp4', LOADER_SOURCE_HOLD_MS),
+  'mp4-start-position': { ...fixture('short.mp4'), startPosition: 5000 },
+  'mp4-crop': { ...fixture('short.mp4'), cropStart: 2000, cropEnd: 5000 },
+  'mp4-cache': {
+    ...fixture(`short.mp4?token=${CACHE_TOKEN}`),
+    shouldCache: true,
+  },
   'mp4-fullscreen-rotate': fixture('short.mp4'),
   'mp4-controls': fixture('short.mp4'),
   'mp4-controls-styles': fixture('short.mp4'),
   'mp4-controls-no-play-pause': fixture('short.mp4'),
   'hls': fixture('hls/index.m3u8'), // ~8 s VOD, 2 s segments
+  'hls-type': { ...fixture('hls-noext/stream'), type: 'm3u8' },
   'error-404': fixture('does-not-exist.mp4'),
+  'error-503-retry': {
+    ...fixture(`__unavailable/short.mp4?token=${RETRY_TOKEN}`), // 503, which is retried
+    minLoadRetryCount: 1,
+  },
+  // disableDisconnectError retries without end only while there is no connection (Android;
+  // other platforms ignore it). A server that answers is not a lost connection.
+  'error-503-retry-offline': {
+    ...fixture(`__unavailable/short.mp4?token=${RETRY_TOKEN}`),
+    minLoadRetryCount: 1,
+    disableDisconnectError: true,
+  },
   'broken-manifest': fixture('broken/index.m3u8'),
   'error-mid-playback': fixture('missing-segment/index.m3u8'), // 2 segments, then a 404
   'video-tracks': fixture('hls-quality/index.m3u8'), // HLS, 3 video renditions (360p/180p/90p)

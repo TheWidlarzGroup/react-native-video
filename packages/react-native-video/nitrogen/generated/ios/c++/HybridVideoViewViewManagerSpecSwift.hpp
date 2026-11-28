@@ -14,8 +14,8 @@ namespace ReactNativeVideo { class HybridVideoViewViewManagerSpec_cxx; }
 
 // Forward declaration of `HybridVideoPlayerSpec` to properly resolve imports.
 namespace margelo::nitro::video { class HybridVideoPlayerSpec; }
-// Forward declaration of `ResizeMode` to properly resolve imports.
-namespace margelo::nitro::video { enum class ResizeMode; }
+// Forward declaration of `VideoResizeMode` to properly resolve imports.
+namespace margelo::nitro::video { enum class VideoResizeMode; }
 // Forward declaration of `SurfaceType` to properly resolve imports.
 namespace margelo::nitro::video { enum class SurfaceType; }
 // Forward declaration of `NativeControlsStyles` to properly resolve imports.
@@ -28,7 +28,7 @@ namespace margelo::nitro::video { struct ListenerSubscription; }
 #include <memory>
 #include "HybridVideoPlayerSpec.hpp"
 #include <optional>
-#include "ResizeMode.hpp"
+#include "VideoResizeMode.hpp"
 #include "SurfaceType.hpp"
 #include "NativeControlsStyles.hpp"
 #include "FullscreenOrientation.hpp"
@@ -106,11 +106,11 @@ namespace margelo::nitro::video {
     inline void setAutoEnterPictureInPicture(bool autoEnterPictureInPicture) noexcept override {
       _swiftPart.setAutoEnterPictureInPicture(std::forward<decltype(autoEnterPictureInPicture)>(autoEnterPictureInPicture));
     }
-    inline ResizeMode getResizeMode() noexcept override {
+    inline VideoResizeMode getResizeMode() noexcept override {
       auto __result = _swiftPart.getResizeMode();
-      return static_cast<ResizeMode>(__result);
+      return static_cast<VideoResizeMode>(__result);
     }
-    inline void setResizeMode(ResizeMode resizeMode) noexcept override {
+    inline void setResizeMode(VideoResizeMode resizeMode) noexcept override {
       _swiftPart.setResizeMode(static_cast<int>(resizeMode));
     }
     inline bool getKeepScreenAwake() noexcept override {

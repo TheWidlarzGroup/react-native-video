@@ -5,13 +5,19 @@ export const SCENARIO_NAMES = [
   'mp4-release-mid-playback', // same clip; replaceSourceAsync(null) once progress > 2 s
   'mp4-progress-1s', // same clip; progressUpdateInterval = 1000 before the load
   'mp4-loader', // same clip; VideoView with renderLoader (covers the video until it is shown)
+  'mp4-start-position', // same clip, with startPosition: 5000 on the source
+  'mp4-crop', // same clip, cropStart: 2000 and cropEnd: 5000 (plays 3 s of it)
+  'mp4-cache', // same clip with shouldCache; btn-cache-replay replays it with the server cut off
   'mp4-fullscreen-rotate', // same clip; enterFullscreen() on landscape, exitFullscreen() on portrait
   // Native controls (#5272, Android only), checked once the clip has ended:
   'mp4-controls', // every control shown (the ids the other two flows rely on)
   'mp4-controls-styles', // same clip; native controls with the seek bar, position and duration hidden
   'mp4-controls-no-play-pause', // same clip; native controls without the play/pause button
   'hls',
+  'hls-type', // the same HLS VOD behind a uri without an extension, with type: 'm3u8'
   'error-404',
+  'error-503-retry', // a source that answers 503, with minLoadRetryCount: 1 and a request counter
+  'error-503-retry-offline', // the same with disableDisconnectError: a 503 is not a lost connection
   'broken-manifest',
   'error-mid-playback',
   'video-tracks',

@@ -30,6 +30,9 @@ export const MARKER_IDS = [
   'evt-onError', // onError itself, never the error status
   'evt-onError-repeated', // a second onError in one scenario: one failure must report once
   'evt-status-error', // onStatusChange('error')
+  // error-503-retry(-offline) (#5275): after onError the fixture server reports exactly
+  // RETRIED_ONCE_REQUESTS requests, the first one and minLoadRetryCount: 1 retry.
+  'evt-retried-once',
   'evt-onPlaybackStateChanged',
   // VideoView's renderLoader (#5264): the loader mounted, and later unmounted because the
   // video was ready to display (smoke-loader.yaml).
@@ -43,6 +46,11 @@ export const MARKER_IDS = [
   'evt-onSeek',
   'evt-seek-fwd-landed', // first onProgress after an onSeek reports currentTime > 4s
   'evt-seek-back-landed', // first onProgress after an onSeek reports currentTime < 2s
+  'evt-started-at-position', // the scenario's FIRST onProgress reports currentTime > 4s
+  // mp4-crop (smoke-crop.yaml): onLoad reports the length of the cropped part, and
+  // progress never goes past the length onLoad reported.
+  'evt-duration-crop',
+  'evt-progress-past-duration',
   'evt-muted',
   'evt-unmuted', // muted:false after evt-muted (real unmute, not the initial default)
   'evt-volume-low', // onVolumeChange volume <= 0.35 while not muted
@@ -98,6 +106,8 @@ export type PlayerEvent =
   | { type: 'onEnd' }
   | { type: 'onReadyToDisplay' }
   | { type: 'onError'; code: string }
+  // How many requests the fixture server saw for the scenario's source (error-503-retry*).
+  | { type: 'requestCount'; count: number }
   | { type: 'onStatusChange'; status: VideoPlayerStatus }
   | { type: 'onPlaybackStateChange'; isPlaying: boolean }
   | { type: 'onSeek'; seekTime: number }
@@ -131,7 +141,8 @@ export type PlayerEvent =
   | {
       type: 'replaceSource';
       phase: 'requested' | 'resolved' | 'rejected';
-      source: 'hls' | 'null' | 'audio-tracks';
+      // 'cache': the mp4-cache source again, with the fixture server cut off.
+      source: 'hls' | 'null' | 'audio-tracks' | 'cache';
     }
   | {
       type: 'onVideoTrackChange';
@@ -149,8 +160,16 @@ export const PROGRESS_MARKER_SECONDS = 2;
 export const PROGRESS_SPARSE_MIN_GAP_SECONDS = 0.8;
 export const PROGRESS_SPARSE_MAX_GAP_SECONDS = 2;
 export const PROGRESS_SPARSE_GAPS = 3;
+export const RETRIED_ONCE_REQUESTS = 2;
 export const SEEK_FORWARD_LANDED_SECONDS = 4;
 export const SEEK_BACK_LANDED_SECONDS = 2;
+// The mp4-start-position source starts at 5 s; natural playback starts near 0.
+export const START_POSITION_LANDED_SECONDS = 4;
+// mp4-crop plays 2 s to 5 s of the 8 s clip.
+export const CROP_DURATION_SECONDS = 3;
+export const CROP_DURATION_TOLERANCE_SECONDS = 0.5;
+// Progress may run a little past the reported duration before onEnd; more is a bug.
+export const PAST_DURATION_TOLERANCE_SECONDS = 0.5;
 export const VOLUME_LOW_THRESHOLD = 0.35;
 export const LOOP_VERIFIED_END_COUNT = 3;
 // A loop wrap-around: progress was near the end of the 8 s clip and is now near its
@@ -214,6 +233,8 @@ type State = {
   // onLoad events since the current source started loading. replaceSourceAsync(source)
   // starts a new source, so its onLoad is not a repeat.
   loadsOfSource: number;
+  // The duration the last onLoad reported, NaN before it.
+  loadedDuration: number;
 };
 
 const initialState = (): State => ({
@@ -236,6 +257,7 @@ const initialState = (): State => ({
   readyToDisplayOfSource: 0,
   sparseGaps: 0,
   loadsOfSource: 0,
+  loadedDuration: NaN,
 });
 
 let state = initialState();
@@ -283,6 +305,13 @@ function apply(event: PlayerEvent) {
       state.loadCount += 1;
       state.loadsOfSource += 1;
       if (state.loadsOfSource > 1) mark('evt-onLoad-repeated');
+      state.loadedDuration = event.duration;
+      if (
+        Math.abs(event.duration - CROP_DURATION_SECONDS) <=
+        CROP_DURATION_TOLERANCE_SECONDS
+      ) {
+        mark('evt-duration-crop');
+      }
       if (state.replaceRequested) {
         // Order, judged once, on the replacement's first onLoad (Android re-emits onLoad
         // on a re-buffer): a start reported only after it is too late for an app that
@@ -326,6 +355,17 @@ function apply(event: PlayerEvent) {
           mark('evt-progress-sparse');
       } else {
         state.sparseGaps = 0;
+      }
+      if (
+        Number.isFinite(state.loadedDuration) &&
+        t > state.loadedDuration + PAST_DURATION_TOLERANCE_SECONDS
+      ) {
+        mark('evt-progress-past-duration');
+      }
+      // Where playback started: only the first progress of the scenario can tell, so
+      // natural playback can never satisfy it (smoke-start-position.yaml).
+      if (state.lastProgress === null && t > START_POSITION_LANDED_SECONDS) {
+        mark('evt-started-at-position');
       }
       // A replaced source must start from its beginning: the first progress after its
       // onLoad proves it, the way the seek markers prove where a seek landed.
@@ -439,6 +479,11 @@ function apply(event: PlayerEvent) {
       if (state.errorCount > 1) mark('evt-onError-repeated');
       state.errorCode = event.code;
       append(`onError code=${event.code}`);
+      return;
+
+    case 'requestCount':
+      if (event.count === RETRIED_ONCE_REQUESTS) mark('evt-retried-once');
+      append(`requests: ${event.count}`);
       return;
 
     case 'onStatusChange':

@@ -74,8 +74,10 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
       updateAndEmitPlaybackState()
     }
 
+    // The observer reports the item's own time; a cropped source counts from `cropStart`
+    let cropStart = player.currentItem?.cropStartSeconds ?? 0
     _eventEmitter?.onProgress(
-      .init(currentTime: currentTime, bufferDuration: bufferDuration)
+      .init(currentTime: max(0, currentTime - cropStart), bufferDuration: bufferDuration)
     )
   }
 

@@ -26,7 +26,7 @@ import com.margelo.nitro.NitroModules
 import com.margelo.nitro.video.FullscreenOrientation
 import com.margelo.nitro.video.HybridVideoPlayer
 import com.margelo.nitro.video.NativeControlsStyles
-import com.margelo.nitro.video.ResizeMode
+import com.margelo.nitro.video.VideoResizeMode
 import com.margelo.nitro.video.SurfaceType
 import com.margelo.nitro.video.VideoViewEventsEmitter
 import com.twg.video.core.LibraryError
@@ -128,7 +128,7 @@ class VideoView @JvmOverloads constructor(
   var fullscreenOrientation: FullscreenOrientation = FullscreenOrientation.ALL
   var fullscreenAutorotate: Boolean = true
 
-  var resizeMode: ResizeMode = ResizeMode.NONE
+  var resizeMode: VideoResizeMode = VideoResizeMode.NONE
     set(value) {
       field = value
       runOnMainThread {

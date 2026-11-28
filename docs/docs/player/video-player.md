@@ -161,6 +161,39 @@ setAudioSessionManagementDisabled(false);
 
 On Android and web `setAudioSessionManagementDisabled` does nothing (in development it logs a warning).
 
+### Start Position
+
+Set `startPosition` (in **milliseconds**) on the `VideoConfig` to start playback of that source at a given position instead of at the beginning. It is applied whenever the source is loaded: on creation, by `initialize()` / `preload()`, and by `replaceSourceAsync()`. A value that is not greater than `0` is ignored.
+
+```typescript
+const player = new VideoPlayer({
+  uri: 'https://example.com/video.mp4',
+  startPosition: 30_000, // start 30 seconds in
+});
+```
+
+:::note
+`startPosition` uses milliseconds, like in v6, while `currentTime`, `seekTo()` and `seekBy()` use seconds. No `onSeek` event is emitted for it on iOS and Android. For live streams the position is relative to the start of the seekable window, so prefer `bufferConfig.livePlayback` there.
+:::
+
+### Playing Only a Part of the Video
+
+Set `cropStart` and/or `cropEnd` (in **milliseconds** from the beginning of the source) on the `VideoConfig` to play only a part of it. Available on iOS and Android.
+
+```typescript
+const player = new VideoPlayer({
+  uri: 'https://example.com/video.mp4',
+  cropStart: 36_000,
+  cropEnd: 48_500, // plays 12.5 seconds of the video
+});
+```
+
+The player treats that part as the whole video: `currentTime` is `0` at `cropStart`, `duration` is the length of the part, `seekTo()` and `seekBy()` move inside it, `onEnd` is emitted at `cropEnd`, and `loop` restarts from `cropStart`. `startPosition` counts from `cropStart`.
+
+:::note
+A `cropStart` that is not greater than `0` and a `cropEnd` that is not greater than `cropStart` are ignored, as are `NaN` and `Infinity`. A seek past `cropEnd` stops at `cropEnd`. Cropping is not supported for live streams. On iOS the scrubber of the native controls still shows the whole video. On the web both options are ignored.
+:::
+
 ### Buffer Config
 
 You can fine‑tune buffering via `bufferConfig` on the `VideoConfig` you pass to `useVideoPlayer`/`VideoPlayer`. This controls how much data is buffered, live latency targets, and iOS network constraints.
@@ -192,6 +225,9 @@ Properties below are Android‑only
 | `bufferForPlaybackMs` | `number` | Media that must be buffered before playback can start or resume after user action (ms). Default: 1000. |
 | `bufferForPlaybackAfterRebufferMs` | `number` | Media that must be buffered to resume after a rebuffer (ms). Default: 2000. |
 | `backBufferDurationMs` | `number` | Duration kept behind the current position to allow instant rewind without rebuffer (ms). |
+| `bufferingStrategy` | `'default' \| 'disableBuffering' \| 'dependingOnMemory'` | How the player decides whether to keep loading ahead. `disableBuffering` loads only what playback needs to start or resume (the `bufferForPlayback…` durations) and nothing ahead of that, so expect more rebuffering. `dependingOnMemory` behaves like `default` but pauses loading while the app is short on memory. Default: `'default'`. |
+| `maxHeapAllocationPercent` | `number` | With `dependingOnMemory`: the share (0 to 1) of the app's heap the buffer may take before loading pauses. Default: 1. |
+| `minBufferMemoryReservePercent` | `number` | With `dependingOnMemory`: the share (0 to 1) of the app's heap to keep free; loading pauses when less is free and more than 2 seconds are buffered. Default: 0. |
 | `livePlayback.minPlaybackSpeed` | `number` | Minimum playback speed used to maintain target live offset. |
 | `livePlayback.maxPlaybackSpeed` | `number` | Maximum playback speed used to catch up to target live offset. |
 | `livePlayback.minOffsetMs` | `number` | Minimum allowed live offset (ms). |
@@ -208,7 +244,20 @@ Properties below are iOS-only
 | `preferredMaximumResolution` | `{ width: number; height: number }` | Preferred maximum video resolution. Android: applied as `maxVideoSize`. |
 | `preferredPeakBitRateForExpensiveNetworks` | `number` | Bandwidth limit for expensive networks (e.g., cellular), in bits per second. |
 | `preferredMaximumResolutionForExpensiveNetworks` | `{ width: number; height: number }` | Preferred maximum resolution on expensive networks. |
+| `automaticallyWaitsToMinimizeStalling` | `boolean` | Whether the player may delay playback to avoid stalling. With `false`, playback starts as soon as `play()` is called and may stall while the buffer fills. iOS only. Default: `true`. |
 | `livePlayback.targetOffsetMs` | `number` | Target live offset (ms) the player will try to maintain. |
+
+### Loading Options
+
+These go on the `VideoConfig` next to `uri`. They cover v6 source props that control how the media is loaded.
+
+| Property | Type | Platform | Description |
+|----------|------|----------|-------------|
+| `minLoadRetryCount` | `number` | Android | How many times a failed load (manifest, segment or media file) is retried before the player reports an error. Default: 3. |
+| `disableDisconnectError` | `boolean` | Android | Keep retrying once a second while the device has no connection, instead of reporting an error after `minLoadRetryCount` attempts. Default: `false`. |
+| `type` | `string` | Android | The stream type, as a file extension, for a uri that does not show it: `m3u8` (HLS), `mpd` (DASH) or `ism` (SmoothStreaming). Without it the type is read from the uri. |
+| `textTracksAllowChunklessPreparation` | `boolean` | Android | Whether an HLS stream may be prepared from its playlists alone. Set it to `false` when subtitle or audio renditions without a `CODECS` attribute do not show up. Not applied when `externalSubtitles` is set. Default: `true`. |
+| `cmcd` | `boolean \| CmcdConfiguration` | Android | Send Common Media Client Data (CTA-5004) with the requests of an HLS, DASH or SmoothStreaming stream. `true` sends the standard keys in the `CMCD` query parameter. An object picks the mode (`'query'` or `'header'`) and adds custom keys per group: `request`, `session`, `object`, `status`. Custom keys need a hyphenated prefix, for example `com.example-tenant`. |
 
 ## DRM
 

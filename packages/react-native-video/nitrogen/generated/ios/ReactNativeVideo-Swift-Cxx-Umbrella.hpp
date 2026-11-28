@@ -18,6 +18,10 @@ namespace margelo::nitro::video { struct AudioTrack; }
 namespace margelo::nitro::video { struct BandwidthData; }
 // Forward declaration of `BufferConfig` to properly resolve imports.
 namespace margelo::nitro::video { struct BufferConfig; }
+// Forward declaration of `BufferingStrategy` to properly resolve imports.
+namespace margelo::nitro::video { enum class BufferingStrategy; }
+// Forward declaration of `CmcdMode` to properly resolve imports.
+namespace margelo::nitro::video { enum class CmcdMode; }
 // Forward declaration of `CustomVideoMetadata` to properly resolve imports.
 namespace margelo::nitro::video { struct CustomVideoMetadata; }
 // Forward declaration of `FullscreenOrientation` to properly resolve imports.
@@ -44,6 +48,8 @@ namespace margelo::nitro::video { struct ListenerSubscription; }
 namespace margelo::nitro::video { struct LivePlaybackParams; }
 // Forward declaration of `MixAudioMode` to properly resolve imports.
 namespace margelo::nitro::video { enum class MixAudioMode; }
+// Forward declaration of `NativeCmcdConfiguration` to properly resolve imports.
+namespace margelo::nitro::video { struct NativeCmcdConfiguration; }
 // Forward declaration of `NativeControlsStyles` to properly resolve imports.
 namespace margelo::nitro::video { struct NativeControlsStyles; }
 // Forward declaration of `NativeDrmParams` to properly resolve imports.
@@ -54,8 +60,6 @@ namespace margelo::nitro::video { struct NativeExternalSubtitle; }
 namespace margelo::nitro::video { struct NativeVideoConfig; }
 // Forward declaration of `OnGetLicensePayload` to properly resolve imports.
 namespace margelo::nitro::video { struct OnGetLicensePayload; }
-// Forward declaration of `ResizeMode` to properly resolve imports.
-namespace margelo::nitro::video { enum class ResizeMode; }
 // Forward declaration of `Resolution` to properly resolve imports.
 namespace margelo::nitro::video { struct Resolution; }
 // Forward declaration of `SourceType` to properly resolve imports.
@@ -76,6 +80,8 @@ namespace margelo::nitro::video { struct VideoInformation; }
 namespace margelo::nitro::video { enum class VideoOrientation; }
 // Forward declaration of `VideoPlayerStatus` to properly resolve imports.
 namespace margelo::nitro::video { enum class VideoPlayerStatus; }
+// Forward declaration of `VideoResizeMode` to properly resolve imports.
+namespace margelo::nitro::video { enum class VideoResizeMode; }
 // Forward declaration of `VideoTrackChangeData` to properly resolve imports.
 namespace margelo::nitro::video { struct VideoTrackChangeData; }
 // Forward declaration of `VideoTrack` to properly resolve imports.
@@ -97,6 +103,8 @@ namespace margelo::nitro::video { struct onVolumeChangeData; }
 #include "AudioTrackChangeData.hpp"
 #include "BandwidthData.hpp"
 #include "BufferConfig.hpp"
+#include "BufferingStrategy.hpp"
+#include "CmcdMode.hpp"
 #include "CustomVideoMetadata.hpp"
 #include "FullscreenOrientation.hpp"
 #include "HybridVideoPlayerEventEmitterSpec.hpp"
@@ -110,12 +118,12 @@ namespace margelo::nitro::video { struct onVolumeChangeData; }
 #include "ListenerSubscription.hpp"
 #include "LivePlaybackParams.hpp"
 #include "MixAudioMode.hpp"
+#include "NativeCmcdConfiguration.hpp"
 #include "NativeControlsStyles.hpp"
 #include "NativeDrmParams.hpp"
 #include "NativeExternalSubtitle.hpp"
 #include "NativeVideoConfig.hpp"
 #include "OnGetLicensePayload.hpp"
-#include "ResizeMode.hpp"
 #include "Resolution.hpp"
 #include "SourceType.hpp"
 #include "SubtitleType.hpp"
@@ -126,6 +134,7 @@ namespace margelo::nitro::video { struct onVolumeChangeData; }
 #include "VideoInformation.hpp"
 #include "VideoOrientation.hpp"
 #include "VideoPlayerStatus.hpp"
+#include "VideoResizeMode.hpp"
 #include "VideoTrack.hpp"
 #include "VideoTrackChangeData.hpp"
 #include "onLoadData.hpp"
