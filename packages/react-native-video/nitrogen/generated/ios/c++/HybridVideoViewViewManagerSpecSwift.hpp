@@ -22,6 +22,10 @@ namespace margelo::nitro::video { enum class SurfaceType; }
 namespace margelo::nitro::video { struct NativeControlsStyles; }
 // Forward declaration of `FullscreenOrientation` to properly resolve imports.
 namespace margelo::nitro::video { enum class FullscreenOrientation; }
+// Forward declaration of `SubtitleStyle` to properly resolve imports.
+namespace margelo::nitro::video { struct SubtitleStyle; }
+// Forward declaration of `SubtitleEdgeType` to properly resolve imports.
+namespace margelo::nitro::video { enum class SubtitleEdgeType; }
 // Forward declaration of `ListenerSubscription` to properly resolve imports.
 namespace margelo::nitro::video { struct ListenerSubscription; }
 
@@ -32,6 +36,9 @@ namespace margelo::nitro::video { struct ListenerSubscription; }
 #include "SurfaceType.hpp"
 #include "NativeControlsStyles.hpp"
 #include "FullscreenOrientation.hpp"
+#include "SubtitleStyle.hpp"
+#include <string>
+#include "SubtitleEdgeType.hpp"
 #include "ListenerSubscription.hpp"
 #include <functional>
 
@@ -144,6 +151,12 @@ namespace margelo::nitro::video {
     }
     inline void setFullscreenAutorotate(bool fullscreenAutorotate) noexcept override {
       _swiftPart.setFullscreenAutorotate(std::forward<decltype(fullscreenAutorotate)>(fullscreenAutorotate));
+    }
+    inline SubtitleStyle getSubtitleStyle() noexcept override {
+      return _swiftPart.getSubtitleStyle();
+    }
+    inline void setSubtitleStyle(const SubtitleStyle& subtitleStyle) noexcept override {
+      _swiftPart.setSubtitleStyle(std::forward<decltype(subtitleStyle)>(subtitleStyle));
     }
 
   public:

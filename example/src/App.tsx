@@ -19,6 +19,7 @@ import {
   ToggleButton,
 } from './components/Controls';
 import AudioTrackManager from './components/AudioTrackManager';
+import SubtitleStyleManager from './components/SubtitleStyleManager';
 import TextTrackManager from './components/TextTrackManager';
 import VideoQualityManager from './components/VideoQualityManager';
 import { styles } from './styles';
@@ -172,6 +173,7 @@ const VideoDemo = () => {
             onFullscreenChange={handleFullscreenChange}
             onPictureInPictureChange={handlePictureInPictureChange}
             resizeMode={settings.resizeMode}
+            subtitleStyle={settings.subtitleStyle}
           />
         ) : (
           <View style={styles.hiddenVideo}>
@@ -377,6 +379,16 @@ const VideoDemo = () => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Audio Tracks</Text>
         <AudioTrackManager player={player} />
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Subtitle Style</Text>
+        <SubtitleStyleManager
+          style={settings.subtitleStyle}
+          onChange={(subtitleStyle) =>
+            updateSetting('subtitleStyle', subtitleStyle)
+          }
+        />
       </View>
 
       <View style={styles.section}>

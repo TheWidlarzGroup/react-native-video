@@ -17,6 +17,10 @@ namespace margelo::nitro::video { enum class SurfaceType; }
 namespace margelo::nitro::video { struct NativeControlsStyles; }
 // Forward declaration of `FullscreenOrientation` to properly resolve imports.
 namespace margelo::nitro::video { enum class FullscreenOrientation; }
+// Forward declaration of `SubtitleStyle` to properly resolve imports.
+namespace margelo::nitro::video { struct SubtitleStyle; }
+// Forward declaration of `SubtitleEdgeType` to properly resolve imports.
+namespace margelo::nitro::video { enum class SubtitleEdgeType; }
 // Forward declaration of `ListenerSubscription` to properly resolve imports.
 namespace margelo::nitro::video { struct ListenerSubscription; }
 
@@ -32,6 +36,11 @@ namespace margelo::nitro::video { struct ListenerSubscription; }
 #include "JNativeControlsStyles.hpp"
 #include "FullscreenOrientation.hpp"
 #include "JFullscreenOrientation.hpp"
+#include "SubtitleStyle.hpp"
+#include "JSubtitleStyle.hpp"
+#include <string>
+#include "SubtitleEdgeType.hpp"
+#include "JSubtitleEdgeType.hpp"
 #include "ListenerSubscription.hpp"
 #include "JListenerSubscription.hpp"
 #include <functional>
@@ -158,6 +167,15 @@ namespace margelo::nitro::video {
   void JHybridVideoViewViewManagerSpec::setFullscreenAutorotate(bool fullscreenAutorotate) {
     static const auto method = _javaPart->javaClassStatic()->getMethod<void(jboolean /* fullscreenAutorotate */)>("setFullscreenAutorotate");
     method(_javaPart, fullscreenAutorotate);
+  }
+  SubtitleStyle JHybridVideoViewViewManagerSpec::getSubtitleStyle() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JSubtitleStyle>()>("getSubtitleStyle");
+    auto __result = method(_javaPart);
+    return __result->toCpp();
+  }
+  void JHybridVideoViewViewManagerSpec::setSubtitleStyle(const SubtitleStyle& subtitleStyle) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JSubtitleStyle> /* subtitleStyle */)>("setSubtitleStyle");
+    method(_javaPart, JSubtitleStyle::fromCpp(subtitleStyle));
   }
 
   // Methods

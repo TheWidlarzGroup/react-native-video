@@ -52,6 +52,8 @@ namespace margelo::nitro::video { struct OnGetLicensePayload; }
 namespace margelo::nitro::video { struct Resolution; }
 // Forward declaration of `SourceType` to properly resolve imports.
 namespace margelo::nitro::video { enum class SourceType; }
+// Forward declaration of `SubtitleEdgeType` to properly resolve imports.
+namespace margelo::nitro::video { enum class SubtitleEdgeType; }
 // Forward declaration of `SubtitleType` to properly resolve imports.
 namespace margelo::nitro::video { enum class SubtitleType; }
 // Forward declaration of `TextTrack` to properly resolve imports.
@@ -120,6 +122,7 @@ namespace ReactNativeVideo { class HybridVideoViewViewManagerSpec_cxx; }
 #include "OnGetLicensePayload.hpp"
 #include "Resolution.hpp"
 #include "SourceType.hpp"
+#include "SubtitleEdgeType.hpp"
 #include "SubtitleType.hpp"
 #include "TextTrack.hpp"
 #include "TimedMetadata.hpp"
@@ -1199,6 +1202,21 @@ namespace margelo::nitro::video::bridge::swift {
     return optional.has_value();
   }
   inline std::shared_ptr<HybridVideoPlayerSpec> get_std__optional_std__shared_ptr_HybridVideoPlayerSpec__(const std::optional<std::shared_ptr<HybridVideoPlayerSpec>>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::optional<SubtitleEdgeType>
+  /**
+   * Specialized version of `std::optional<SubtitleEdgeType>`.
+   */
+  using std__optional_SubtitleEdgeType_ = std::optional<SubtitleEdgeType>;
+  inline std::optional<SubtitleEdgeType> create_std__optional_SubtitleEdgeType_(const SubtitleEdgeType& value) noexcept {
+    return std::optional<SubtitleEdgeType>(value);
+  }
+  inline bool has_value_std__optional_SubtitleEdgeType_(const std::optional<SubtitleEdgeType>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline SubtitleEdgeType get_std__optional_SubtitleEdgeType_(const std::optional<SubtitleEdgeType>& optional) noexcept {
     return optional.value();
   }
   

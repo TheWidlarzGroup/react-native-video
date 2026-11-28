@@ -70,6 +70,8 @@ namespace margelo::nitro::video {
     void setFullscreenOrientation(FullscreenOrientation fullscreenOrientation) override;
     bool getFullscreenAutorotate() override;
     void setFullscreenAutorotate(bool fullscreenAutorotate) override;
+    SubtitleStyle getSubtitleStyle() override;
+    void setSubtitleStyle(const SubtitleStyle& subtitleStyle) override;
 
   public:
     // Methods

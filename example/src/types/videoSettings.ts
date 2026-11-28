@@ -2,6 +2,7 @@ import type {
   IgnoreSilentSwitchMode,
   MixAudioMode,
   ResizeMode,
+  SubtitleStyle,
 } from 'react-native-video';
 
 export interface VideoSettings {
@@ -18,6 +19,7 @@ export interface VideoSettings {
   playInBackground: boolean;
   playWhenInactive: boolean;
   showNotificationControls: boolean;
+  subtitleStyle: SubtitleStyle;
 }
 
 export const defaultSettings: VideoSettings = {
@@ -34,4 +36,5 @@ export const defaultSettings: VideoSettings = {
   playInBackground: true,
   playWhenInactive: false,
   showNotificationControls: true,
+  subtitleStyle: {},
 };
