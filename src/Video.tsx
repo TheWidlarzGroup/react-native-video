@@ -249,8 +249,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
             };
 
         let _cmcd: NativeCmcdConfiguration | undefined;
-        if (Platform.OS === 'android' && sourceObject?.cmcd) {
-          const cmcd = sourceObject.cmcd;
+        if (Platform.OS === 'android' && _sourceObject?.cmcd) {
+          const cmcd = _sourceObject.cmcd;
 
           if (typeof cmcd === 'boolean') {
             _cmcd = cmcd ? {mode: CmcdMode.MODE_QUERY_PARAMETER} : undefined;
@@ -273,12 +273,12 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         }
 
         const selectedContentStartTime =
-          _sourceObject?.contentStartTime || contentStartTime;
+          _sourceObject?.contentStartTime ?? contentStartTime;
 
         const _ad = normalizeAdConfig(_sourceObject?.ad, adTagUrl, adLanguage);
 
         const _minLoadRetryCount =
-          _sourceObject?.minLoadRetryCount || minLoadRetryCount;
+          _sourceObject?.minLoadRetryCount ?? minLoadRetryCount;
 
         const _bufferConfig = _sourceObject?.bufferConfig || bufferConfig;
         return {
@@ -313,7 +313,6 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         drm,
         localSourceEncryptionKeyScheme,
         minLoadRetryCount,
-        sourceObject?.cmcd,
         textTracks,
         bufferConfig,
       ],
