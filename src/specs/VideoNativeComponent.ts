@@ -27,8 +27,16 @@ type VideoMetadata = Readonly<{
 }>;
 
 export type AdsConfig = Readonly<{
+  type?: string;
+  streamType?: string;
   adTagUrl?: string;
   adLanguage?: string;
+  contentSourceId?: string;
+  videoId?: string;
+  assetKey?: string;
+  format?: string;
+  adTagParameters?: Record<string, string>;
+  fallbackUri?: string;
 }>;
 
 export type VideoSrc = Readonly<{
@@ -191,6 +199,7 @@ export type OnProgressData = Readonly<{
   currentTime: Float;
   playableDuration: Float;
   seekableDuration: Float;
+  currentPlaybackTime?: Double;
 }>;
 
 export type OnBandwidthUpdateData = Readonly<{
@@ -321,6 +330,7 @@ type ControlsStyles = Readonly<{
   hideSettingButton?: WithDefault<boolean, true>;
   seekIncrementMS?: Int32;
   liveLabel?: string;
+  hideLiveBadge?: WithDefault<boolean, false>;
 }>;
 
 export type OnControlsVisibilityChange = Readonly<{
@@ -361,7 +371,6 @@ export interface VideoNativeProps extends ViewProps {
   restoreUserInterfaceForPIPStopCompletionHandler?: boolean;
   debug?: DebugConfig;
   showNotificationControls?: WithDefault<boolean, false>; // Android, iOS
-  currentPlaybackTime?: Double; // Android
   disableDisconnectError?: boolean; // Android
   focusable?: boolean; // Android
   hideShutterView?: boolean; //	Android

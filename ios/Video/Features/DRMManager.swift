@@ -16,7 +16,7 @@ class DRMManager: NSObject, DRMManagerSpec {
     var onVideoError: RCTDirectEventBlock?
     var onGetLicense: RCTDirectEventBlock?
 
-    // Licenses handled by onGetLicense (from JS side)
+    /// Licenses handled by onGetLicense (from JS side)
     var pendingLicenses: [String: AVContentKeyRequest] = [:]
 
     override init() {

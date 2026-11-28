@@ -21,7 +21,7 @@ export default function App() {
               'https://pbs.twimg.com/profile_images/1498641868397191170/6qW2XkuI_400x400.png',
           },
         }}
-        style={[styles.fullScreen, StyleSheet.absoluteFillObject]}
+        style={[styles.fullScreen, StyleSheet.absoluteFill]}
         controls
         fullscreen
         resizeMode={'contain'}

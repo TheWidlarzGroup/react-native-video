@@ -1,4 +1,69 @@
+# Changelog
 
+# [6.20.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.19.3...v6.20.0) (2026-11-27)
+
+
+### Bug Fixes
+
+* **android/v6:** implement native viewType switching in ExoPlayerView ([#4871](https://github.com/TheWidlarzGroup/react-native-video/issues/4871)) ([3ee1f18](https://github.com/TheWidlarzGroup/react-native-video/commit/3ee1f18119e69ed6f0a0553c35050ca15c0b3f8f)), closes [#4581](https://github.com/TheWidlarzGroup/react-native-video/issues/4581)
+* **android:** add null check for player in videoLoaded() to prevent NPE ([#5026](https://github.com/TheWidlarzGroup/react-native-video/issues/5026)) ([5e4cf91](https://github.com/TheWidlarzGroup/react-native-video/commit/5e4cf91d72941a6b5bf01aab535d981fdb941c85)), closes [#4902](https://github.com/TheWidlarzGroup/react-native-video/issues/4902)
+* **android:** avoid internal OkHttp list helper in playback service ([#5174](https://github.com/TheWidlarzGroup/react-native-video/issues/5174)) ([db315f9](https://github.com/TheWidlarzGroup/react-native-video/commit/db315f9771d1f19004a2d5cd86377acf0083afa0))
+* **android:** avoid NPE in onBuffering when player is released ([#5166](https://github.com/TheWidlarzGroup/react-native-video/issues/5166)) ([f5e4b19](https://github.com/TheWidlarzGroup/react-native-video/commit/f5e4b194d1b8946bc79711ceb07cb1796386cb8a))
+* **android:** create asset data sources on demand ([#5068](https://github.com/TheWidlarzGroup/react-native-video/issues/5068)) ([ebf4d96](https://github.com/TheWidlarzGroup/react-native-video/commit/ebf4d960d0c0b2ed187713d338fbb52c7ec49d46))
+* **android:** don't crash on a source with contentStartTime ([#5238](https://github.com/TheWidlarzGroup/react-native-video/issues/5238)) ([e72be52](https://github.com/TheWidlarzGroup/react-native-video/commit/e72be52b98db23a1d4923897609d2eccddd627aa))
+* **android:** honor source DRM when choosing view type ([#5075](https://github.com/TheWidlarzGroup/react-native-video/issues/5075)) ([7575676](https://github.com/TheWidlarzGroup/react-native-video/commit/757567689ceb26598ac78b2c93c58b6daf6fb0f6))
+* **android:** isolate source request headers ([#5066](https://github.com/TheWidlarzGroup/react-native-video/issues/5066)) ([ab28a35](https://github.com/TheWidlarzGroup/react-native-video/commit/ab28a353d4af26a1fed52d7eebf7246caec76a18))
+* **android:** mark manifest track lookup as worker-only ([#5047](https://github.com/TheWidlarzGroup/react-native-video/issues/5047)) ([3e3ef97](https://github.com/TheWidlarzGroup/react-native-video/commit/3e3ef9788e322101fd3aa7296be3b70b383f21f5))
+* **android:** match selectedTextTrack index against the flat track position ([#5031](https://github.com/TheWidlarzGroup/react-native-video/issues/5031)) ([e6b7b7a](https://github.com/TheWidlarzGroup/react-native-video/commit/e6b7b7a2810bf127f0f617a18a94552f2772ae1b))
+* **android:** only one player moves into the PiP window ([#5239](https://github.com/TheWidlarzGroup/react-native-video/issues/5239)) ([43b3834](https://github.com/TheWidlarzGroup/react-native-video/commit/43b3834ad29661b04fa058da58d4c98fd3c02478))
+* **android:** report decoder type accurately ([#5063](https://github.com/TheWidlarzGroup/react-native-video/issues/5063)) ([2fe2e9a](https://github.com/TheWidlarzGroup/react-native-video/commit/2fe2e9a6f72ff05f3f5d5b8974b5c75e4215e933))
+* **android:** report track selection in onTextTracks/onAudioTracks with controls ([#4920](https://github.com/TheWidlarzGroup/react-native-video/issues/4920)) ([56c6bb7](https://github.com/TheWidlarzGroup/react-native-video/commit/56c6bb79a1d8b000997975be6723156f2a325ef2))
+* **android:** reset playback service connection on cleanup ([#5056](https://github.com/TheWidlarzGroup/react-native-video/issues/5056)) ([fb13ce2](https://github.com/TheWidlarzGroup/react-native-video/commit/fb13ce2f990703fa3f571871500db17400f1c5a2))
+* **ios:** cancel an in-flight setSrc when the view is removed ([#3567](https://github.com/TheWidlarzGroup/react-native-video/issues/3567)) ([#5223](https://github.com/TheWidlarzGroup/react-native-video/issues/5223)) ([bb4c458](https://github.com/TheWidlarzGroup/react-native-video/commit/bb4c4588ce4805a5a3e37ad45dfc1769af7adc14))
+* **ios:** cancel stale source initialization ([#5072](https://github.com/TheWidlarzGroup/react-native-video/issues/5072)) ([b0e8a4a](https://github.com/TheWidlarzGroup/react-native-video/commit/b0e8a4ada6b84a635121940f96e675b550d26c56))
+* **ios:** clean up and replace now-playing observers ([#5060](https://github.com/TheWidlarzGroup/react-native-video/issues/5060)) ([7dd6c0f](https://github.com/TheWidlarzGroup/react-native-video/commit/7dd6c0fdb18f67c50a724d62f574706ae697ef09))
+* **ios:** emit playback time in milliseconds ([#5059](https://github.com/TheWidlarzGroup/react-native-video/issues/5059)) ([2e74326](https://github.com/TheWidlarzGroup/react-native-video/commit/2e74326c8d5809d764f13d2d5ee423241357c926))
+* **ios:** keep playing after seek() when controls are enabled ([#5251](https://github.com/TheWidlarzGroup/react-native-video/issues/5251)) ([6940e12](https://github.com/TheWidlarzGroup/react-native-video/commit/6940e120625ee4934324f4a2360f74d665084f0c))
+* **ios:** make disableAudioSessionManagement a per-view opt-out ([#5133](https://github.com/TheWidlarzGroup/react-native-video/issues/5133)) ([9d218d5](https://github.com/TheWidlarzGroup/react-native-video/commit/9d218d50673f53e50cafcc123ae3266a732c3342))
+* **ios:** stop IMA ads when the video view is removed ([#4866](https://github.com/TheWidlarzGroup/react-native-video/issues/4866)) ([#5218](https://github.com/TheWidlarzGroup/react-native-video/issues/5218)) ([0ab33d8](https://github.com/TheWidlarzGroup/react-native-video/commit/0ab33d86c2ae7cdc664ea33f55309db6f4a03dfe)), closes [#3385](https://github.com/TheWidlarzGroup/react-native-video/issues/3385) [#3911](https://github.com/TheWidlarzGroup/react-native-video/issues/3911) [#3722](https://github.com/TheWidlarzGroup/react-native-video/issues/3722) [#3911](https://github.com/TheWidlarzGroup/react-native-video/issues/3911)
+* **ios:** tear down picture-in-picture controller when the view is removed ([#5196](https://github.com/TheWidlarzGroup/react-native-video/issues/5196)) ([70f7688](https://github.com/TheWidlarzGroup/react-native-video/commit/70f7688f2f4f16a49e5a162bab60400a1d31ea6a))
+* **tvos:** conform tvOS RCTPictureInPicture stub to AVPictureInPictureControllerDelegate ([#5182](https://github.com/TheWidlarzGroup/react-native-video/issues/5182)) ([1c134fb](https://github.com/TheWidlarzGroup/react-native-video/commit/1c134fbbf189b3f5d7bf95613f544baf0673dfe7))
+* **types:** accept bundled video asset ids ([#5049](https://github.com/TheWidlarzGroup/react-native-video/issues/5049)) ([60c8ceb](https://github.com/TheWidlarzGroup/react-native-video/commit/60c8cebe2840680b42ce68a098d6fbf12917e60a))
+* **types:** expose current playback time on progress ([#5077](https://github.com/TheWidlarzGroup/react-native-video/issues/5077)) ([4f9342b](https://github.com/TheWidlarzGroup/react-native-video/commit/4f9342bc5b2a6f553a6d3dc32090d906375bd9d1))
+* **types:** match native manager return values ([#5078](https://github.com/TheWidlarzGroup/react-native-video/issues/5078)) ([0fa346d](https://github.com/TheWidlarzGroup/react-native-video/commit/0fa346d42b138eafdd86eab8af14db1ed1bedca0))
+* **web:** guard screen.orientation.unlock on browsers without it ([#5205](https://github.com/TheWidlarzGroup/react-native-video/issues/5205)) ([f8b1828](https://github.com/TheWidlarzGroup/react-native-video/commit/f8b1828e52c2af8c2cfbd2f0b6955ff0954e9593))
+* **web:** handle asynchronous media command failures ([#5055](https://github.com/TheWidlarzGroup/react-native-video/issues/5055)) ([03529d5](https://github.com/TheWidlarzGroup/react-native-video/commit/03529d5d7dc5903114c2cb2b6f2dbc8419187182))
+* **web:** respect video resize mode ([#5046](https://github.com/TheWidlarzGroup/react-native-video/issues/5046)) ([7a47177](https://github.com/TheWidlarzGroup/react-native-video/commit/7a471777a453bc0135efdfdd6d21f57b06cda9ae))
+* **web:** use the documented volume range ([#5053](https://github.com/TheWidlarzGroup/react-native-video/issues/5053)) ([740743f](https://github.com/TheWidlarzGroup/react-native-video/commit/740743f020e6986f3a82f215ed9a96b0c22f8898))
+* **windows:** keep playback state per view ([#5074](https://github.com/TheWidlarzGroup/react-native-video/issues/5074)) ([79fdd0e](https://github.com/TheWidlarzGroup/react-native-video/commit/79fdd0e97696249e30bae4fe31f6bd9d4ffcb714))
+* **windows:** preserve fractional event times ([#5073](https://github.com/TheWidlarzGroup/react-native-video/issues/5073)) ([e72c93f](https://github.com/TheWidlarzGroup/react-native-video/commit/e72c93f342f2522c8df7dcb73b7ef2767cf863f1))
+
+## [6.19.2](https://github.com/moskalakamil/react-native-video/compare/v6.19.1...v6.19.2) (2026-04-28)
+
+
+### Bug Fixes
+
+* replace `absoluteFillObject` with `absoluteFill` ([#4880](https://github.com/moskalakamil/react-native-video/issues/4880)) ([ae7ff4f](https://github.com/moskalakamil/react-native-video/commit/ae7ff4fa07ce9234575664a541bbd2f557ff051c))
+
+## [6.19.1](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.19.0...v6.19.1) (2026-03-15)
+
+
+### Bug Fixes
+
+* **ios:** IMA ad container resizing on orientation change ([#4771](https://github.com/TheWidlarzGroup/react-native-video/issues/4771)) ([fc936c4](https://github.com/TheWidlarzGroup/react-native-video/commit/fc936c49ef3c2734173442042b7d5038aeaef301))
+* RCTVideoManager crash in bridgeless mode RN0.84 ([#4855](https://github.com/TheWidlarzGroup/react-native-video/issues/4855)) ([92b0a0e](https://github.com/TheWidlarzGroup/react-native-video/commit/92b0a0e416c7f313120a811cd2dc972f87b1c82f))
+
+# [6.19.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.18.0...v6.19.0) (2026-01-19)
+
+
+### Bug Fixes
+
+* **android:** correct videoTrack type definitions to match Android implementation ([#4778](https://github.com/TheWidlarzGroup/react-native-video/issues/4778)) ([commit](https://github.com/TheWidlarzGroup/react-native-video/commit/f38717778515b06c462fe75dcd94d2cce5ba3f95))
+
+
+### Features
+
+* **BREAKING CHANGE:** add DAI support ([#4816](https://github.com/TheWidlarzGroup/react-native-video/issues/4816)) ([commit](https://github.com/TheWidlarzGroup/react-native-video/commit/88ac1ae1dcdc907415f806bd64bd3d0a92ccd7d1))
 
 # [6.18.0](https://github.com/TheWidlarzGroup/react-native-video/compare/v6.17.0...v6.18.0) (2025-11-18)
 
@@ -745,7 +810,7 @@
 * add release-it ([#3342](https://github.com/react-native-video/react-native-video/issues/3342)) ([da27089](https://github.com/react-native-video/react-native-video/commit/da270891fbce485bb132825a336638f2af98408d))
 * **ios:** add onBandwidthUpdate event ([#3331](https://github.com/react-native-video/react-native-video/issues/3331)) ([9054db3](https://github.com/react-native-video/react-native-video/commit/9054db35d7d5e4e6d54739fc9349576c03522d7c))
 
-## Changelog
+#
 
 ## Next
 - Android, iOS: add onVolumeChange event #3322

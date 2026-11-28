@@ -17,6 +17,8 @@ using namespace Microsoft::UI::Xaml::Controls;
 
 namespace winrt::ReactNativeVideoCPP::implementation {
 
+constexpr double TicksPerSecond = 10'000'000.0;
+
 ReactVideoView::ReactVideoView(winrt::Microsoft::ReactNative::IReactContext const &reactContext)
     : m_reactContext(reactContext)
     // Create MediaPlayerElement using Microsoft.UI.Xaml.Controls
@@ -80,7 +82,7 @@ ReactVideoView::ReactVideoView(winrt::Microsoft::ReactNative::IReactContext cons
       if (auto mediaPlayer = self->m_player) {
         if (mediaPlayer.PlaybackSession().PlaybackState() ==
             winrt::Windows::Media::Playback::MediaPlaybackState::Playing) {
-          auto currentTimeInSeconds = mediaPlayer.PlaybackSession().Position().count() / 10000000;
+          auto currentTimeInSeconds = mediaPlayer.PlaybackSession().Position().count() / TicksPerSecond;
           self->m_reactContext.DispatchEvent(
               *self,
               L"topVideoProgress",
@@ -125,8 +127,8 @@ void ReactVideoView::OnMediaOpened(IInspectable const &, IInspectable const &) {
         auto width = mediaPlayer.PlaybackSession().NaturalVideoWidth();
         auto height = mediaPlayer.PlaybackSession().NaturalVideoHeight();
         auto orientation = (width > height) ? L"landscape" : L"portrait";
-        auto durationInSeconds = mediaPlayer.PlaybackSession().NaturalDuration().count() / 10000000;
-        auto currentTimeInSeconds = mediaPlayer.PlaybackSession().Position().count() / 10000000;
+        auto durationInSeconds = mediaPlayer.PlaybackSession().NaturalDuration().count() / TicksPerSecond;
+        auto currentTimeInSeconds = mediaPlayer.PlaybackSession().Position().count() / TicksPerSecond;
 
         strong_this->m_reactContext.DispatchEvent(
             *strong_this,
@@ -142,7 +144,6 @@ void ReactVideoView::OnMediaOpened(IInspectable const &, IInspectable const &) {
                   eventDataWriter.WriteObjectBegin();
                   WriteProperty(eventDataWriter, L"width", width);
                   WriteProperty(eventDataWriter, L"height", height);
-                  WriteProperty(eventDataWriter, L"orientation", orientation);
                   WriteProperty(eventDataWriter, L"orientation", orientation);
                   eventDataWriter.WriteObjectEnd();
                 }
@@ -184,8 +185,8 @@ void ReactVideoView::OnSeekCompleted(IInspectable const &, IInspectable const &)
   runOnQueue([weak_this{get_weak()}]() {
     if (auto strong_this{weak_this.get()}) {
       if (auto mediaPlayer = strong_this->m_player) {
-        auto currentTimeInSeconds = mediaPlayer.PlaybackSession().Position().count() / 10000000;
-        auto seekTimeInSeconds = strong_this->m_mediaPlayerPosition / 10000000;
+        auto currentTimeInSeconds = mediaPlayer.PlaybackSession().Position().count() / TicksPerSecond;
+        auto seekTimeInSeconds = strong_this->m_mediaPlayerPosition / TicksPerSecond;
 
         strong_this->m_reactContext.DispatchEvent(
           *strong_this,
@@ -217,8 +218,20 @@ void ReactVideoView::Set_IsLoopingEnabled(bool value) {
 void ReactVideoView::Set_UriString(hstring const &value) {
   m_uriString = value;
   if (m_player != nullptr) {
-    auto uri = Uri(m_uriString);
-    m_player.Source(MediaSource::CreateFromUri(uri));
+    try {
+      auto uri = Uri(m_uriString);
+      m_player.Source(MediaSource::CreateFromUri(uri));
+    } catch (...) {
+      Clear_Source();
+      OnMediaFailed(nullptr, nullptr);
+    }
+  }
+}
+
+void ReactVideoView::Clear_Source() {
+  m_uriString = L"";
+  if (m_player != nullptr) {
+    m_player.Source(nullptr);
   }
 }
 
@@ -285,6 +298,10 @@ void ReactVideoView::Set_PlaybackRate(double rate) {
   if (m_player != nullptr) {
     m_player.PlaybackSession().PlaybackRate(rate);
   }
+}
+
+bool ReactVideoView::IsPaused() const noexcept {
+  return m_isPaused;
 }
 
 bool ReactVideoView::IsPlaying(MediaPlaybackState currentState) {

@@ -53,7 +53,57 @@ import type {
   ReactVideoProps,
   CmcdData,
   ReactVideoSource,
+  AdConfig,
+  AdConfigDAIVod,
+  AdConfigDAILive,
 } from './types';
+import type {ISO639_1} from './types/language';
+import type {AdsConfig} from './specs/VideoNativeComponent';
+
+function normalizeAdConfig(
+  ad: AdConfig | undefined,
+  legacyAdTagUrl: string | undefined,
+  legacyAdLanguage: ISO639_1 | undefined,
+): AdsConfig | undefined {
+  if (ad) {
+    // Default to 'csai' for backward compatibility with old API (ad without type)
+    const adType = 'type' in ad ? ad.type : 'csai';
+
+    if (adType === 'ssai') {
+      const daiAd = ad as AdConfigDAIVod | AdConfigDAILive;
+      return {
+        type: 'ssai',
+        streamType: daiAd.streamType,
+        adLanguage: daiAd.adLanguage,
+        contentSourceId:
+          'contentSourceId' in daiAd ? daiAd.contentSourceId : undefined,
+        videoId: 'videoId' in daiAd ? daiAd.videoId : undefined,
+        assetKey: 'assetKey' in daiAd ? daiAd.assetKey : undefined,
+        format: daiAd.format,
+        adTagParameters: daiAd.adTagParameters,
+        fallbackUri: daiAd.fallbackUri,
+      };
+    }
+
+    // CSAI (explicit or default for backward compatibility)
+    return {
+      type: 'csai',
+      adTagUrl: 'adTagUrl' in ad ? ad.adTagUrl : undefined,
+      adLanguage: ad.adLanguage,
+    };
+  }
+
+  // Legacy props at <Video> component level
+  if (legacyAdTagUrl || legacyAdLanguage) {
+    return {
+      type: 'csai',
+      adTagUrl: legacyAdTagUrl,
+      adLanguage: legacyAdLanguage,
+    };
+  }
+
+  return undefined;
+}
 
 const Video = forwardRef<VideoRef, ReactVideoProps>(
   (
@@ -116,6 +166,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     const nativeRef = useRef<ElementRef<typeof NativeVideoComponent>>(null);
 
     const isPosterDeprecated = typeof poster === 'string';
+    const sourceObject = typeof source === 'number' ? undefined : source;
 
     const _renderLoader = useMemo(
       () =>
@@ -152,6 +203,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           return undefined;
         }
 
+        const _sourceObject = typeof _source === 'number' ? undefined : _source;
+
         const isLocalAssetFile =
           typeof _source === 'number' ||
           ('uri' in _source && typeof _source.uri === 'number') ||
@@ -166,7 +219,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         if (uri && uri.match(/^\//)) {
           uri = `file://${uri}`;
         }
-        if (!uri) {
+        if (!uri && _sourceObject?.ad?.type !== 'ssai') {
           console.log('Trying to load empty source');
         }
         const isNetwork = !!(uri && uri.match(/^(rtp|rtsp|http|https):/));
@@ -177,8 +230,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           )
         );
 
-        const selectedDrm = _source.drm || drm;
-        const _textTracks = _source.textTracks || textTracks;
+        const selectedDrm = _sourceObject?.drm || drm;
+        const _textTracks = _sourceObject?.textTracks || textTracks;
         const _drm = !selectedDrm
           ? undefined
           : {
@@ -196,8 +249,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
             };
 
         let _cmcd: NativeCmcdConfiguration | undefined;
-        if (Platform.OS === 'android' && source?.cmcd) {
-          const cmcd = source.cmcd;
+        if (Platform.OS === 'android' && sourceObject?.cmcd) {
+          const cmcd = sourceObject.cmcd;
 
           if (typeof cmcd === 'boolean') {
             _cmcd = cmcd ? {mode: CmcdMode.MODE_QUERY_PARAMETER} : undefined;
@@ -220,18 +273,14 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         }
 
         const selectedContentStartTime =
-          _source.contentStartTime || contentStartTime;
+          _sourceObject?.contentStartTime || contentStartTime;
 
-        const _ad =
-          _source.ad ||
-          (adTagUrl || adLanguage
-            ? {adTagUrl: adTagUrl, adLanguage: adLanguage}
-            : undefined);
+        const _ad = normalizeAdConfig(_sourceObject?.ad, adTagUrl, adLanguage);
 
         const _minLoadRetryCount =
-          _source.minLoadRetryCount || minLoadRetryCount;
+          _sourceObject?.minLoadRetryCount || minLoadRetryCount;
 
-        const _bufferConfig = _source.bufferConfig || bufferConfig;
+        const _bufferConfig = _sourceObject?.bufferConfig || bufferConfig;
         return {
           uri,
           isNetwork,
@@ -264,7 +313,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         drm,
         localSourceEncryptionKeyScheme,
         minLoadRetryCount,
-        source?.cmcd,
+        sourceObject?.cmcd,
         textTracks,
         bufferConfig,
       ],
@@ -635,7 +684,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       [onControlsVisibilityChange],
     );
 
-    const selectedDrm = source?.drm || drm;
+    const selectedDrm = sourceObject?.drm || drm;
     const usingExternalGetLicense = selectedDrm?.getLicense instanceof Function;
 
     const onGetLicense = useCallback(
@@ -719,7 +768,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
 
     const _viewType = useMemo(() => {
       const hasValidDrmProp =
-        drm !== undefined && Object.keys(drm).length !== 0;
+        selectedDrm !== undefined && Object.keys(selectedDrm).length !== 0;
 
       const shallForceViewType =
         hasValidDrmProp && (viewType === ViewType.TEXTURE || useTextureView);
@@ -750,7 +799,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       }
 
       return ViewType.SURFACE;
-    }, [drm, useSecureView, useTextureView, viewType]);
+    }, [selectedDrm, useSecureView, useTextureView, viewType]);
 
     const _renderPoster = useCallback(() => {
       if (!hasPoster || !showPoster) {
@@ -767,10 +816,10 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       }
 
       // poster style
-      const baseStyle: StyleProp<ImageStyle> = {
-        ...StyleSheet.absoluteFillObject,
-        resizeMode: _posterResizeMode,
-      };
+      const baseStyle: StyleProp<ImageStyle> = [
+        StyleSheet.absoluteFill,
+        {resizeMode: _posterResizeMode},
+      ];
 
       let posterStyle: StyleProp<ImageStyle> = baseStyle;
 
@@ -820,9 +869,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     ]);
 
     const _style: StyleProp<ViewStyle> = useMemo(
-      () => ({
-        ...StyleSheet.absoluteFillObject,
-      }),
+      () => [StyleSheet.absoluteFill],
       [],
     );
 

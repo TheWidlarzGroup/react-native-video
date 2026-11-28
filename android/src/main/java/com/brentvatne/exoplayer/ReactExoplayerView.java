@@ -27,6 +27,7 @@ import android.os.Message;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -55,10 +56,13 @@ import androidx.media3.common.text.CueGroup;
 import androidx.media3.common.util.Util;
 import androidx.media3.datasource.DataSource;
 import androidx.media3.datasource.DataSpec;
+import androidx.media3.datasource.DefaultDataSource;
 import androidx.media3.datasource.HttpDataSource;
 import androidx.media3.exoplayer.DefaultLoadControl;
 import androidx.media3.exoplayer.DefaultRenderersFactory;
 import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.exoplayer.LoadControl;
+import androidx.media3.exoplayer.analytics.PlayerId;
 import androidx.media3.exoplayer.dash.DashMediaSource;
 import androidx.media3.exoplayer.dash.DashUtil;
 import androidx.media3.exoplayer.dash.DefaultDashChunkSource;
@@ -76,6 +80,8 @@ import androidx.media3.exoplayer.drm.HttpMediaDrmCallback;
 import androidx.media3.exoplayer.drm.UnsupportedDrmException;
 import androidx.media3.exoplayer.hls.HlsMediaSource;
 import androidx.media3.exoplayer.ima.ImaAdsLoader;
+import androidx.media3.exoplayer.ima.ImaServerSideAdInsertionMediaSource;
+import androidx.media3.exoplayer.ima.ImaServerSideAdInsertionUriBuilder;
 import androidx.media3.exoplayer.mediacodec.MediaCodecInfo;
 import androidx.media3.exoplayer.mediacodec.MediaCodecUtil;
 import androidx.media3.exoplayer.rtsp.RtspMediaSource;
@@ -95,6 +101,7 @@ import androidx.media3.exoplayer.trackselection.MappingTrackSelector;
 import androidx.media3.exoplayer.trackselection.TrackSelection;
 import androidx.media3.exoplayer.trackselection.TrackSelectionArray;
 import androidx.media3.exoplayer.upstream.BandwidthMeter;
+import androidx.media3.exoplayer.upstream.Allocator;
 import androidx.media3.exoplayer.upstream.CmcdConfiguration;
 import androidx.media3.exoplayer.upstream.DefaultAllocator;
 import androidx.media3.exoplayer.upstream.DefaultBandwidthMeter;
@@ -125,9 +132,11 @@ import com.brentvatne.react.ReactNativeVideoManager;
 import com.brentvatne.receiver.AudioBecomingNoisyReceiver;
 import com.brentvatne.receiver.BecomingNoisyListener;
 import com.brentvatne.receiver.PictureInPictureReceiver;
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.UiThreadUtil;
+import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.google.ads.interactivemedia.v3.api.AdError;
 import com.google.ads.interactivemedia.v3.api.AdErrorEvent;
@@ -136,10 +145,13 @@ import com.google.ads.interactivemedia.v3.api.ImaSdkFactory;
 import com.google.ads.interactivemedia.v3.api.ImaSdkSettings;
 import com.google.common.collect.ImmutableList;
 
+import java.lang.ref.WeakReference;
+import java.lang.reflect.Method;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -182,6 +194,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private ExoPlayerView exoPlayerView;
     private FullScreenPlayerView fullScreenPlayerView;
     private ImaAdsLoader adsLoader;
+    private ImaServerSideAdInsertionMediaSource.AdsLoader daiAdsLoader;
 
     private DataSource.Factory mediaDataSourceFactory;
     private ExoPlayer player;
@@ -219,7 +232,12 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean useCache = false;
     private boolean disableCache = false;
     private ControlsConfig controlsConfig = new ControlsConfig();
-    private ArrayList<Integer> rootViewChildrenOriginalVisibility = new ArrayList<Integer>();
+    private final Map<View, Integer> rootViewChildrenOriginalVisibility = new HashMap<>();
+    // The activity has one PiP window, so only one player moves its view into the root: the one that called
+    // enterPictureInPictureMode(); otherwise (auto-enter, or PiP started by the app) the first one with
+    // enterPictureInPictureOnLeave, or failing that the first one notified.
+    private static WeakReference<ReactExoplayerView> pictureInPictureOwner = new WeakReference<>(null);
+    private static boolean pictureInPictureOwnerIsFallback = false;
 
     /*
      * When user is seeking first called is on onPositionDiscontinuity -> DISCONTINUITY_REASON_SEEK
@@ -230,7 +248,9 @@ public class ReactExoplayerView extends FrameLayout implements
     private boolean hasVideoEnded = false;
 
     // Props from React
-    private Source source = new Source();
+    // volatile: RNVLoadControl.shouldContinueLoading reads this from the playback thread while the
+    // setters below run on the UI thread.
+    private volatile Source source = new Source();
     private boolean repeat;
     private String audioTrackType;
     private String audioTrackValue;
@@ -240,7 +260,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private String textTrackValue;
     private boolean disableFocus;
     private boolean focusable = true;
-    private BufferingStrategy.BufferingStrategyEnum bufferingStrategy;
+    private volatile BufferingStrategy.BufferingStrategyEnum bufferingStrategy;
     private boolean disableDisconnectError;
     private boolean preventsDisplaySleepDuringVideoPlayback = true;
     private float mProgressUpdateInterval = 250.0f;
@@ -393,6 +413,8 @@ public class ReactExoplayerView extends FrameLayout implements
     public void cleanUpResources() {
         stopPlayback();
         themedReactContext.removeLifecycleEventListener(this);
+        if (pictureInPictureOwner.get() == this) pictureInPictureOwner = new WeakReference<>(null);
+        restoreRootViewChildren(false);
         releasePlayer();
         viewHasDropped = true;
     }
@@ -445,19 +467,18 @@ public class ReactExoplayerView extends FrameLayout implements
 
     private void updateControllerConfig() {
         if (exoPlayerView == null) return;
-        
+
         exoPlayerView.setControllerShowTimeoutMs(5000);
-        
         exoPlayerView.setControllerAutoShow(true);
         exoPlayerView.setControllerHideOnTouch(true);
-        
+
         updateControllerVisibility();
     }
 
     private void updateControllerVisibility() {
         if (exoPlayerView == null) return;
-            
-        exoPlayerView.setUseController(controls && !controlsConfig.getHideFullscreen());
+
+        exoPlayerView.setUseController(controls || isFullscreen);
     }
 
     private void openSettings() {
@@ -498,10 +519,6 @@ public class ReactExoplayerView extends FrameLayout implements
         builder.show();
     }
 
-    private void addPlayerControl() {
-        updateControllerConfig();
-    }
-
     /**
      * Update the layout
      * @param view  view needs to update layout
@@ -516,7 +533,7 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     private void refreshControlsStyles() {
-        if (exoPlayerView == null || player == null || !controls) return;
+        if (exoPlayerView == null || player == null) return;
         updateControllerVisibility();
     }
 
@@ -555,56 +572,73 @@ public class ReactExoplayerView extends FrameLayout implements
         exoPlayerView.updateSurfaceView(viewType);
     }
 
-    private class RNVLoadControl extends DefaultLoadControl {
+    // Built with the Builder rather than a subclass: DefaultLoadControl's constructors are not stable
+    // across Media3 versions, and apps may resolve a newer Media3 than this library compiles against.
+    private static DefaultLoadControl buildLoadControl(BufferConfig config, DefaultAllocator allocator) {
+        return new DefaultLoadControl.Builder()
+                .setAllocator(allocator)
+                .setBufferDurationsMs(
+                        valueOrDefault(config.getMinBufferMs(), DefaultLoadControl.DEFAULT_MIN_BUFFER_MS),
+                        valueOrDefault(config.getMaxBufferMs(), DefaultLoadControl.DEFAULT_MAX_BUFFER_MS),
+                        valueOrDefault(config.getBufferForPlaybackMs(), DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS),
+                        valueOrDefault(config.getBufferForPlaybackAfterRebufferMs(), DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS))
+                .setPrioritizeTimeOverSizeThresholds(true)
+                .setBackBuffer(
+                        valueOrDefault(config.getBackBufferDurationMs(), DefaultLoadControl.DEFAULT_BACK_BUFFER_DURATION_MS),
+                        DefaultLoadControl.DEFAULT_RETAIN_BACK_BUFFER_FROM_KEYFRAME)
+                .build();
+    }
+
+    private static int valueOrDefault(int value, int defaultValue) {
+        return value != BufferConfig.Companion.getBufferConfigPropUnsetInt() ? value : defaultValue;
+    }
+
+    private static double valueOrDefault(double value, double defaultValue) {
+        return value != BufferConfig.Companion.getBufferConfigPropUnsetDouble() ? value : defaultValue;
+    }
+
+    // Applies bufferingStrategy on top of DefaultLoadControl. It wraps rather than extends it (see
+    // buildLoadControl) and forwards only methods whose signatures match across Media3 1.8-1.10; a
+    // LoadControl method that a newer Media3 starts calling would get the interface default instead.
+    //
+    // One method is deliberately not forwarded: shouldContinuePreloading takes a PlayerId in 1.9+ but
+    // not in 1.8, so no single declaration works on both. ExoPlayer only calls it once a preload
+    // configuration is set, which nothing here does, and the interface default logs a warning and
+    // returns false. Forward it (by reflection, like getAllocator below) if that ever changes.
+    private class RNVLoadControl implements LoadControl {
+        private final DefaultAllocator allocator = new DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE);
+        private final DefaultLoadControl defaultLoadControl;
+        private final Runtime runtime = Runtime.getRuntime();
         private final int availableHeapInBytes;
-        private final Runtime runtime;
-        public RNVLoadControl(DefaultAllocator allocator, BufferConfig config) {
-            super(allocator,
-                    config.getMinBufferMs() != BufferConfig.Companion.getBufferConfigPropUnsetInt()
-                            ? config.getMinBufferMs()
-                            : DefaultLoadControl.DEFAULT_MIN_BUFFER_MS,
-                    config.getMaxBufferMs() != BufferConfig.Companion.getBufferConfigPropUnsetInt()
-                            ? config.getMaxBufferMs()
-                            : DefaultLoadControl.DEFAULT_MAX_BUFFER_MS,
-                    config.getBufferForPlaybackMs() != BufferConfig.Companion.getBufferConfigPropUnsetInt()
-                            ? config.getBufferForPlaybackMs()
-                            : DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS ,
-                    config.getBufferForPlaybackAfterRebufferMs() != BufferConfig.Companion.getBufferConfigPropUnsetInt()
-                            ? config.getBufferForPlaybackAfterRebufferMs()
-                            : DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS,
-                    -1,
-                    true,
-                    config.getBackBufferDurationMs() != BufferConfig.Companion.getBufferConfigPropUnsetInt()
-                            ? config.getBackBufferDurationMs()
-                            : DefaultLoadControl.DEFAULT_BACK_BUFFER_DURATION_MS,
-                    DefaultLoadControl.DEFAULT_RETAIN_BACK_BUFFER_FROM_KEYFRAME);
-            runtime = Runtime.getRuntime();
+        @Nullable private final Method defaultGetAllocatorForPlayer = findGetAllocatorForPlayer();
+        private boolean allocatorLookupFailureLogged = false;
+
+        RNVLoadControl(BufferConfig config) {
+            defaultLoadControl = buildLoadControl(config, allocator);
             ActivityManager activityManager = (ActivityManager) themedReactContext.getSystemService(ThemedReactContext.ACTIVITY_SERVICE);
-            double maxHeap = config.getMaxHeapAllocationPercent() != BufferConfig.Companion.getBufferConfigPropUnsetDouble()
-                    ? config.getMaxHeapAllocationPercent()
-                    : DEFAULT_MAX_HEAP_ALLOCATION_PERCENT;
+            double maxHeap = valueOrDefault(config.getMaxHeapAllocationPercent(), DEFAULT_MAX_HEAP_ALLOCATION_PERCENT);
             availableHeapInBytes = (int) Math.floor(activityManager.getMemoryClass() * maxHeap * 1024 * 1024);
         }
 
         @Override
-        public boolean shouldContinueLoading(long playbackPositionUs, long bufferedDurationUs, float playbackSpeed) {
+        public boolean shouldContinueLoading(LoadControl.Parameters parameters) {
             if (bufferingStrategy == BufferingStrategy.BufferingStrategyEnum.DisableBuffering) {
                 return false;
             } else if (bufferingStrategy == BufferingStrategy.BufferingStrategyEnum.DependingOnMemory) {
                 // The goal of this algorithm is to pause video loading (increasing the buffer)
                 // when available memory on device become low.
-                int loadedBytes = getAllocator().getTotalBytesAllocated();
+                int loadedBytes = allocator.getTotalBytesAllocated();
                 boolean isHeapReached = availableHeapInBytes > 0 && loadedBytes >= availableHeapInBytes;
                 if (isHeapReached) {
                     return false;
                 }
                 long usedMemory = runtime.totalMemory() - runtime.freeMemory();
                 long freeMemory = runtime.maxMemory() - usedMemory;
-                double minBufferMemoryReservePercent = source.getBufferConfig().getMinBufferMemoryReservePercent() != BufferConfig.Companion.getBufferConfigPropUnsetDouble()
-                        ? source.getBufferConfig().getMinBufferMemoryReservePercent()
-                        : ReactExoplayerView.DEFAULT_MIN_BUFFER_MEMORY_RESERVE;
-                long reserveMemory = (long) minBufferMemoryReservePercent * runtime.maxMemory();
-                long bufferedMs = bufferedDurationUs / (long) 1000;
+                double minBufferMemoryReservePercent = valueOrDefault(
+                        source.getBufferConfig().getMinBufferMemoryReservePercent(),
+                        DEFAULT_MIN_BUFFER_MEMORY_RESERVE);
+                long reserveMemory = (long) (minBufferMemoryReservePercent * runtime.maxMemory());
+                long bufferedMs = parameters.bufferedDurationUs / 1000;
                 if (reserveMemory > freeMemory && bufferedMs > 2000) {
                     // We don't have enough memory in reserve so we stop buffering to allow other components to use it instead
                     return false;
@@ -616,13 +650,87 @@ public class ReactExoplayerView extends FrameLayout implements
                 }
             }
             // "default" case or normal case for "DependingOnMemory"
-            return super.shouldContinueLoading(playbackPositionUs, bufferedDurationUs, playbackSpeed);
+            return defaultLoadControl.shouldContinueLoading(parameters);
+        }
+
+        // Media3 1.8 calls getAllocator() and 1.9+ calls getAllocator(PlayerId); both are declared,
+        // without @Override, so this compiles against either.
+        public Allocator getAllocator() {
+            return allocator;
+        }
+
+        // On 1.9+ DefaultLoadControl counts buffered bytes per player only through the allocator it
+        // hands out here, so returning the raw allocator would silently disable its byte limit. The
+        // method does not exist in the Media3 this library compiles against, hence the reflection.
+        public Allocator getAllocator(PlayerId playerId) {
+            if (defaultGetAllocatorForPlayer != null) {
+                try {
+                    return (Allocator) defaultGetAllocatorForPlayer.invoke(defaultLoadControl, playerId);
+                } catch (ReflectiveOperationException e) {
+                    DebugLog.w(TAG, "Falling back to the raw allocator: " + e);
+                }
+            } else if (!allocatorLookupFailureLogged) {
+                // Reaching this method at all means the runtime calls the PlayerId overload, so the
+                // lookup should have found it. Not finding it means DefaultLoadControl's byte limit
+                // is inactive; say so once rather than silently buffering by time alone.
+                allocatorLookupFailureLogged = true;
+                DebugLog.w(TAG, "DefaultLoadControl.getAllocator(PlayerId) not found; its buffered byte limit is disabled");
+            }
+            return allocator;
+        }
+
+        // Matched by signature rather than name, so it survives R8 renaming it in minified apps.
+        @Nullable
+        private Method findGetAllocatorForPlayer() {
+            for (Method method : DefaultLoadControl.class.getMethods()) {
+                Class<?>[] parameterTypes = method.getParameterTypes();
+                if (method.getReturnType() == Allocator.class
+                        && parameterTypes.length == 1
+                        && parameterTypes[0] == PlayerId.class) {
+                    return method;
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public void onPrepared(PlayerId playerId) {
+            defaultLoadControl.onPrepared(playerId);
+        }
+
+        @Override
+        public void onTracksSelected(LoadControl.Parameters parameters, TrackGroupArray trackGroups, ExoTrackSelection[] trackSelections) {
+            defaultLoadControl.onTracksSelected(parameters, trackGroups, trackSelections);
+        }
+
+        @Override
+        public void onStopped(PlayerId playerId) {
+            defaultLoadControl.onStopped(playerId);
+        }
+
+        @Override
+        public void onReleased(PlayerId playerId) {
+            defaultLoadControl.onReleased(playerId);
+        }
+
+        @Override
+        public long getBackBufferDurationUs(PlayerId playerId) {
+            return defaultLoadControl.getBackBufferDurationUs(playerId);
+        }
+
+        @Override
+        public boolean retainBackBufferFromKeyframe(PlayerId playerId) {
+            return defaultLoadControl.retainBackBufferFromKeyframe(playerId);
+        }
+
+        @Override
+        public boolean shouldStartPlayback(LoadControl.Parameters parameters) {
+            return defaultLoadControl.shouldStartPlayback(parameters);
         }
     }
 
     private void initializePlayer() {
         disableCache = ReactNativeVideoManager.Companion.getInstance().shouldDisableCache(source);
-
         ReactExoplayerView self = this;
         Activity activity = themedReactContext.getCurrentActivity();
         // This ensures all props have been settled, to avoid async racing conditions.
@@ -632,7 +740,7 @@ public class ReactExoplayerView extends FrameLayout implements
                 return;
             }
             try {
-                if (runningSource.getUri() == null) {
+                if (runningSource.getUri() == null && !isDaiRequest(runningSource)) {
                     return;
                 }
 
@@ -713,11 +821,7 @@ public class ReactExoplayerView extends FrameLayout implements
         self.trackSelector.setParameters(trackSelector.buildUponParameters()
                 .setMaxVideoBitrate(maxBitRate == 0 ? Integer.MAX_VALUE : maxBitRate));
 
-        DefaultAllocator allocator = new DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE);
-        RNVLoadControl loadControl = new RNVLoadControl(
-                allocator,
-                source.getBufferConfig()
-        );
+        LoadControl loadControl = new RNVLoadControl(source.getBufferConfig());
 
         long initialBitrate = source.getBufferConfig().getInitialBitrate();
         if (initialBitrate > 0) {
@@ -731,12 +835,19 @@ public class ReactExoplayerView extends FrameLayout implements
                         .setEnableDecoderFallback(true)
                         .forceEnableMediaCodecAsynchronousQueueing();
 
-        DefaultMediaSourceFactory mediaSourceFactory = new DefaultMediaSourceFactory(mediaDataSourceFactory);
+        DefaultMediaSourceFactory mediaSourceFactory;
+        
+        if (isDaiRequest(source)) {
+            mediaSourceFactory = createDaiMediaSourceFactory();
+        } else {
+            mediaSourceFactory = new DefaultMediaSourceFactory(mediaDataSourceFactory);
+
+            mediaSourceFactory.setLocalAdInsertionComponents(unusedAdTagUri -> adsLoader, exoPlayerView.getPlayerView());
+        }
+
         if (useCache && !disableCache) {
             mediaSourceFactory.setDataSourceFactory(RNVSimpleCache.INSTANCE.getCacheFactory(buildHttpDataSourceFactory(true)));
         }
-
-        mediaSourceFactory.setLocalAdInsertionComponents(unusedAdTagUri -> adsLoader, exoPlayerView.getPlayerView());
 
         player = new ExoPlayer.Builder(getContext(), renderersFactory)
                 .setTrackSelector(self.trackSelector)
@@ -831,6 +942,11 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     private void initializePlayerSource(Source runningSource) {
+        if (isDaiRequest(runningSource)) {
+            initializeDaiSource(runningSource);
+            return;
+        }
+        
         if (runningSource.getUri() == null) {
             return;
         }
@@ -969,18 +1085,21 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     private void cleanupPlaybackService() {
+        ServiceConnection connection = playbackServiceConnection;
+        playbackServiceConnection = null;
+
         try {
             if(player != null && playbackServiceBinder != null) {
                 playbackServiceBinder.getService().unregisterPlayer(player);
             }
 
-            playbackServiceBinder = null;
-
-            if(playbackServiceConnection != null) {
-                themedReactContext.unbindService(playbackServiceConnection);
+            if(connection != null) {
+                themedReactContext.unbindService(connection);
             }
         } catch(Exception e) {
-            DebugLog.w(TAG, "Cloud not cleanup playback service");
+            DebugLog.w(TAG, "Could not clean up playback service");
+        } finally {
+            playbackServiceBinder = null;
         }
     }
 
@@ -1076,7 +1195,7 @@ public class ReactExoplayerView extends FrameLayout implements
             case CONTENT_TYPE_OTHER:
                 if ("asset".equals(uri.getScheme())) {
                     try {
-                        DataSource.Factory assetDataSourceFactory = DataSourceUtil.buildAssetDataSourceFactory(themedReactContext, uri);
+                        DataSource.Factory assetDataSourceFactory = DataSourceUtil.buildAssetDataSourceFactory(themedReactContext);
                         mediaSourceFactory = new ProgressiveMediaSource.Factory(assetDataSourceFactory);
                     } catch (Exception e) {
                         throw new IllegalStateException("cannot open input file:" + uri);
@@ -1203,10 +1322,7 @@ public class ReactExoplayerView extends FrameLayout implements
 
     private void releasePlayer() {
         if (player != null) {
-            if(playbackServiceBinder != null) {
-                playbackServiceBinder.getService().unregisterPlayer(player);
-                themedReactContext.unbindService(playbackServiceConnection);
-            }
+            cleanupPlaybackService();
 
             updateResumePosition();
             player.release();
@@ -1225,6 +1341,12 @@ public class ReactExoplayerView extends FrameLayout implements
             adsLoader.release();
             adsLoader = null;
         }
+
+        if (daiAdsLoader != null) {
+            daiAdsLoader.release();
+            daiAdsLoader = null;
+        }
+
         progressHandler.removeMessages(SHOW_PROGRESS);
         audioBecomingNoisyReceiver.removeListener();
         pictureInPictureReceiver.removeListener();
@@ -1343,6 +1465,8 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     private void updateResumePosition() {
+        // Listener callbacks can still reach this after releasePlayer() has cleared the player (see #4902).
+        if (player == null) return;
         resumeWindow = player.getCurrentMediaItemIndex();
         resumePosition = player.isCurrentMediaItemSeekable() ? Math.max(0, player.getCurrentPosition())
                 : C.TIME_UNSET;
@@ -1460,7 +1584,14 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     private void videoLoaded() {
-        if (!player.isPlayingAd() && loadVideoStarted) {
+        // player can be null here: ListenerSet posts onEvents() on the main
+        // looper, and if the view is unmounted (releasePlayer() nulls player)
+        // before that posted message is dispatched, this fires against an
+        // already-released player. Most visible in feed-style UIs that
+        // mount/unmount <Video> on scroll or key-remount on source change.
+        // Fixes #4902.
+        if (player == null) return;
+        if (!isPlayingAd() && loadVideoStarted) {
             loadVideoStarted = false;
             if (audioTrackType != null) {
                 setSelectedAudioTrack(audioTrackType, audioTrackValue);
@@ -1486,15 +1617,28 @@ public class ReactExoplayerView extends FrameLayout implements
             if (source.getContentStartTime() != -1) {
                 ExecutorService es = Executors.newSingleThreadExecutor();
                 es.execute(() -> {
-                    // To prevent ANRs caused by getVideoTrackInfo we run this on a different thread and notify the player only when we're done
-                    ArrayList<VideoTrack> videoTracks = getVideoTrackInfoFromManifest();
-                    if (videoTracks != null) {
-                        isUsingContentResolution = true;
+                    try {
+                        // To prevent ANRs caused by getVideoTrackInfo we run this on a different thread and notify the player only when we're done
+                        final ArrayList<VideoTrack> manifestTracks = getVideoTrackInfoFromManifest();
+                        // The rest reads the player and updates views, so it goes back to the main thread.
+                        mainHandler.post(() -> {
+                            if (player == null) return;
+                            ArrayList<VideoTrack> videoTracks = manifestTracks;
+                            if (videoTracks != null) {
+                                isUsingContentResolution = true;
+                            } else {
+                                // No representation matches contentStartTime (a VOD manifest, for example):
+                                // report the player's own tracks, as without contentStartTime.
+                                videoTracks = getVideoTrackInfo();
+                            }
+                            eventEmitter.onVideoLoad.invoke(duration, currentPosition, width, height,
+                                    audioTracks, textTracks, videoTracks, trackId);
+
+                            updateSubtitleButtonVisibility();
+                        });
+                    } finally {
+                        es.shutdown();
                     }
-                    eventEmitter.onVideoLoad.invoke(duration, currentPosition, width, height,
-                            audioTracks, textTracks, videoTracks, trackId );
-                    
-                    updateSubtitleButtonVisibility();
                 });
                 return;
             }
@@ -1528,7 +1672,7 @@ public class ReactExoplayerView extends FrameLayout implements
         }
         TrackGroupArray groups = info.getTrackGroups(index);
         TrackSelectionArray selectionArray = player.getCurrentTrackSelections();
-        TrackSelection selection = selectionArray.get(C.TRACK_TYPE_AUDIO);
+        TrackSelection selection = selectionArray.get(index);
 
 
         for (int groupIndex = 0; groupIndex < groups.length; ++groupIndex) {
@@ -1589,6 +1733,7 @@ public class ReactExoplayerView extends FrameLayout implements
         return videoTracks;
     }
 
+    @WorkerThread
     private ArrayList<VideoTrack> getVideoTrackInfoFromManifest() {
         return this.getVideoTrackInfoFromManifest(0);
     }
@@ -1646,12 +1791,14 @@ public class ReactExoplayerView extends FrameLayout implements
         try {
             ArrayList<VideoTrack> results = result.get(3000, TimeUnit.MILLISECONDS);
             if (results == null && retryCount < 1) {
-                return this.getVideoTrackInfoFromManifest(++retryCount);
+                return this.getVideoTrackInfoFromManifest(retryCount + 1);
             }
-            es.shutdown();
             return results;
         } catch (Exception e) {
             DebugLog.w(TAG, "error in getVideoTrackInfoFromManifest handling request:" + e.getMessage());
+        } finally {
+            result.cancel(true);
+            es.shutdownNow();
         }
 
         return null;
@@ -1680,7 +1827,7 @@ public class ReactExoplayerView extends FrameLayout implements
         }
         
         TrackSelectionArray selectionArray = player.getCurrentTrackSelections();
-        TrackSelection selection = selectionArray.get(C.TRACK_TYPE_TEXT);
+        TrackSelection selection = selectionArray.get(index);
         TrackGroupArray groups = info.getTrackGroups(index);
 
         for (int groupIndex = 0; groupIndex < groups.length; ++groupIndex) {
@@ -1721,24 +1868,26 @@ public class ReactExoplayerView extends FrameLayout implements
         }
 
         TrackGroupArray groups = info.getTrackGroups(index);
-        
+        TrackSelectionArray selectionArray = player.getCurrentTrackSelections();
+        TrackSelection selection = selectionArray.get(index);
+
         for (int groupIndex = 0; groupIndex < groups.length; ++groupIndex) {
             TrackGroup group = groups.get(groupIndex);
             Format format = group.getFormat(0);
-            
-            // Create track without trying to determine selection status
+
             Track track = new Track();
             track.setIndex(groupIndex);
             track.setLanguage(format.language != null ? format.language : "unknown");
             track.setTitle(format.label != null ? format.label : "Track " + (groupIndex + 1));
-            track.setSelected(false); // Don't report selection status - let PlayerView handle it
+            // Report the actual selection state so JS stays in sync with the native picker
+            track.setSelected(selection != null && selection.getTrackGroup() == group);
             if (format.sampleMimeType != null) track.setMimeType(format.sampleMimeType);
             track.setBitrate(format.bitrate == Format.NO_VALUE ? 0 : format.bitrate);
-            
+
             tracks.add(track);
         }
-        
-        DebugLog.d(TAG, "getBasicAudioTrackInfo: returning " + tracks.size() + " audio tracks (no selection status)");
+
+        DebugLog.d(TAG, "getBasicAudioTrackInfo: returning " + tracks.size() + " audio tracks");
         return tracks;
     }
 
@@ -1755,19 +1904,21 @@ public class ReactExoplayerView extends FrameLayout implements
         }
         
         TrackGroupArray groups = info.getTrackGroups(index);
+        TrackSelectionArray selectionArray = player.getCurrentTrackSelections();
+        TrackSelection selection = selectionArray.get(index);
 
         for (int groupIndex = 0; groupIndex < groups.length; ++groupIndex) {
             TrackGroup group = groups.get(groupIndex);
             for (int trackIndex = 0; trackIndex < group.length; trackIndex++) {
                 Format format = group.getFormat(trackIndex);
-                
+
                 Track textTrack = new Track();
                 textTrack.setIndex(textTracks.size());
                 if (format.sampleMimeType != null) textTrack.setMimeType(format.sampleMimeType);
                 if (format.language != null) textTrack.setLanguage(format.language);
-                
+
                 boolean isExternal = format.id != null && format.id.startsWith("external-subtitle-");
-                
+
                 if (format.label != null && !format.label.isEmpty()) {
                     textTrack.setTitle(format.label);
                 } else if (isExternal) {
@@ -1775,8 +1926,9 @@ public class ReactExoplayerView extends FrameLayout implements
                 } else {
                     textTrack.setTitle("Track " + (textTracks.size() + 1));
                 }
-                
-                textTrack.setSelected(false); // Don't report selection status - let PlayerView handle it
+
+                // Report the actual selection state so JS stays in sync with the native picker (#4918)
+                textTrack.setSelected(isTrackSelected(selection, group, trackIndex));
                 textTracks.add(textTrack);
             }
         }
@@ -1789,7 +1941,11 @@ public class ReactExoplayerView extends FrameLayout implements
         }
 
         if (isPaused && isSeeking && !buffering) {
-            eventEmitter.onVideoSeek.invoke(player.getCurrentPosition(), seekPosition);
+            // Player events are delivered asynchronously, so this can run after releasePlayer()
+            // has already set `player` to null.
+            if (player != null) {
+                eventEmitter.onVideoSeek.invoke(player.getCurrentPosition(), seekPosition);
+            }
             isSeeking = false;
         }
 
@@ -2015,7 +2171,7 @@ public class ReactExoplayerView extends FrameLayout implements
     }
 
     public void setSrc(Source source) {
-        if (source.getUri() != null) {
+        if (source.getUri() != null || isDaiRequest(source)) {
             clearResumePosition();
             boolean isSourceEqual = source.isEquals(this.source);
             hasDrmFailed = false;
@@ -2123,10 +2279,15 @@ public class ReactExoplayerView extends FrameLayout implements
                 if (textRendererIndex != C.INDEX_UNSET) {
                     TrackGroupArray groups = info.getTrackGroups(textRendererIndex);
                     boolean trackFound = false;
+                    // "index" counts the way getTextTrackInfo numbers the tracks reported
+                    // to JS: a flat position across all groups and their tracks. Comparing
+                    // against trackIndex (the position inside a group) only ever matched 0,
+                    // because text tracks are typically one group per track.
+                    int flatIndex = 0;
                     
                     for (int groupIndex = 0; groupIndex < groups.length; groupIndex++) {
                         TrackGroup group = groups.get(groupIndex);
-                        for (int trackIndex = 0; trackIndex < group.length; trackIndex++) {
+                        for (int trackIndex = 0; trackIndex < group.length; trackIndex++, flatIndex++) {
                             Format format = group.getFormat(trackIndex);
                             
                             boolean isMatch = false;
@@ -2136,7 +2297,7 @@ public class ReactExoplayerView extends FrameLayout implements
                                 isMatch = true;
                             } else if ("index".equals(type)) {
                                 int targetIndex = ReactBridgeUtils.safeParseInt(value, -1);
-                                if (targetIndex == trackIndex) {
+                                if (targetIndex == flatIndex) {
                                     isMatch = true;
                                 }
                             }
@@ -2454,67 +2615,86 @@ public class ReactExoplayerView extends FrameLayout implements
             return;
         }
 
+        if (!isInPictureInPicture) {
+            pictureInPictureOwner = new WeakReference<>(null);
+            restoreRootViewChildren(true);
+            return;
+        }
+
+        ReactExoplayerView owner = pictureInPictureOwner.get();
+        if (owner == null || (owner != this && pictureInPictureOwnerIsFallback && enterPictureInPictureOnLeave)) {
+            if (owner != null) owner.restoreRootViewChildren(true);
+            pictureInPictureOwner = new WeakReference<>(this);
+            pictureInPictureOwnerIsFallback = !enterPictureInPictureOnLeave;
+            owner = this;
+        }
+        if (owner != this) return;
+
+        ViewGroup rootView = getActivityRootView();
+        if (rootView == null || exoPlayerView.getParent() == rootView) return;
+        ViewGroup parent = (ViewGroup) exoPlayerView.getParent();
+        if (parent != null) {
+            parent.removeView(exoPlayerView);
+        }
+        rootViewChildrenOriginalVisibility.clear();
+        for (int i = 0; i < rootView.getChildCount(); i++) {
+            View child = rootView.getChildAt(i);
+            rootViewChildrenOriginalVisibility.put(child, child.getVisibility());
+            child.setVisibility(View.GONE);
+        }
+        rootView.addView(exoPlayerView, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+    }
+
+    @Nullable
+    private ViewGroup getActivityRootView() {
         Activity currentActivity = themedReactContext.getCurrentActivity();
-        if (currentActivity == null) return;
+        if (currentActivity == null) return null;
+        return currentActivity.getWindow().getDecorView().findViewById(android.R.id.content);
+    }
 
-        View decorView = currentActivity.getWindow().getDecorView();
-        ViewGroup rootView = decorView.findViewById(android.R.id.content);
-
-        LayoutParams layoutParams = new LayoutParams(
-                LayoutParams.MATCH_PARENT,
-                LayoutParams.MATCH_PARENT);
-
-        if (isInPictureInPicture) {
-            ViewGroup parent = (ViewGroup)exoPlayerView.getParent();
-            if (parent != null) {
-                parent.removeView(exoPlayerView);
-            }
-            for (int i = 0; i < rootView.getChildCount(); i++) {
-                if (rootView.getChildAt(i) != exoPlayerView) {
-                    rootViewChildrenOriginalVisibility.add(rootView.getChildAt(i).getVisibility());
-                    rootView.getChildAt(i).setVisibility(View.GONE);
-                }
-            }
-            rootView.addView(exoPlayerView, layoutParams);
-        } else {
-            rootView.removeView(exoPlayerView);
-            if (!rootViewChildrenOriginalVisibility.isEmpty()) {
-                for (int i = 0; i < rootView.getChildCount(); i++) {
-                    rootView.getChildAt(i).setVisibility(rootViewChildrenOriginalVisibility.get(i));
-                }
-                addView(exoPlayerView, 0, layoutParams);
-                reLayoutControls();
-            }
+    /** Takes exoPlayerView out of the activity root and shows the views that were hidden for PiP. */
+    private void restoreRootViewChildren(boolean reattach) {
+        ViewParent parent = exoPlayerView.getParent();
+        if (!rootViewChildrenOriginalVisibility.isEmpty() && parent instanceof ViewGroup && parent != this) {
+            ((ViewGroup) parent).removeView(exoPlayerView);
+        }
+        for (Map.Entry<View, Integer> entry : rootViewChildrenOriginalVisibility.entrySet()) {
+            entry.getKey().setVisibility(entry.getValue());
+        }
+        rootViewChildrenOriginalVisibility.clear();
+        if (reattach && exoPlayerView.getParent() == null) {
+            addView(exoPlayerView, 0, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+            reLayoutControls();
         }
     }
 
     public void enterPictureInPictureMode() {
+        boolean claimed = pictureInPictureOwner.get() == null;
+        if (claimed) {
+            pictureInPictureOwner = new WeakReference<>(this);
+            pictureInPictureOwnerIsFallback = false;
+        }
         PictureInPictureParams _pipParams = null;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             ArrayList<RemoteAction> actions = PictureInPictureUtil.getPictureInPictureActions(themedReactContext, isPaused, pictureInPictureReceiver);
             pictureInPictureParamsBuilder.setActions(actions);
-            if (player.getPlaybackState() == Player.STATE_READY) {
+            if (player != null && player.getPlaybackState() == Player.STATE_READY
+                    && player.getVideoSize().width > 0 && player.getVideoSize().height > 0) {
                 pictureInPictureParamsBuilder.setAspectRatio(PictureInPictureUtil.calcPictureInPictureAspectRatio(player));
             }
             _pipParams = pictureInPictureParamsBuilder.build();
         }
-        PictureInPictureUtil.enterPictureInPictureMode(themedReactContext, _pipParams);
+        boolean entered = PictureInPictureUtil.enterPictureInPictureMode(themedReactContext, _pipParams);
+        if (!entered && claimed && pictureInPictureOwner.get() == this) {
+            pictureInPictureOwner = new WeakReference<>(null);
+        }
     }
 
     public void exitPictureInPictureMode() {
         Activity currentActivity = themedReactContext.getCurrentActivity();
         if (currentActivity == null) return;
 
-        View decorView = currentActivity.getWindow().getDecorView();
-        ViewGroup rootView = decorView.findViewById(android.R.id.content);
-
-        if (!rootViewChildrenOriginalVisibility.isEmpty()) {
-            if (exoPlayerView.getParent().equals(rootView)) rootView.removeView(exoPlayerView);
-            for (int i = 0; i < rootView.getChildCount(); i++) {
-                rootView.getChildAt(i).setVisibility(rootViewChildrenOriginalVisibility.get(i));
-            }
-            rootViewChildrenOriginalVisibility.clear();
-        }
+        restoreRootViewChildren(true);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && currentActivity.isInPictureInPictureMode()) {
             currentActivity.moveTaskToBack(false);
@@ -2642,6 +2822,7 @@ public class ReactExoplayerView extends FrameLayout implements
                     setFullscreen(false);
                 }
             }, controlsConfig);
+            refreshControlsStyles();
             eventEmitter.onVideoFullscreenPlayerWillPresent.invoke();
             if (fullScreenPlayerView != null) {
                 fullScreenPlayerView.show();
@@ -2654,7 +2835,10 @@ public class ReactExoplayerView extends FrameLayout implements
             if (fullScreenPlayerView != null) {
                 fullScreenPlayerView.dismiss();
                 reLayoutControls();
-                setControls(controls);
+                refreshControlsStyles();
+                if (!controls && exoPlayerView != null) {
+                    exoPlayerView.hideController();
+                }
             }
             UiThreadUtil.runOnUiThread(() -> {
                 eventEmitter.onVideoFullscreenPlayerDidDismiss.invoke();
@@ -2697,20 +2881,13 @@ public class ReactExoplayerView extends FrameLayout implements
      * Handling controls prop
      *
      * @param controls  Controls prop, if true enable controls, if false disable them
+     *                  Note: Controls are always visible in fullscreen mode, even if controls={false}
      */
     public void setControls(boolean controls) {
         this.controls = controls;
-        if (exoPlayerView != null) {
-            exoPlayerView.setUseController(controls);
-            // Additional configuration for proper touch handling
-            if (controls) {
-                exoPlayerView.setControllerAutoShow(true);
-                exoPlayerView.setControllerHideOnTouch(true);  // Show controls on touch, don't hide
-                exoPlayerView.setControllerShowTimeoutMs(5000);
-            }
-        }
-        if (controls) {
-            addPlayerControl();
+        boolean shouldShowControls = controls || isFullscreen;
+        if (shouldShowControls) {
+            updateControllerConfig();
         }
         refreshControlsStyles();
     }
@@ -2741,10 +2918,183 @@ public class ReactExoplayerView extends FrameLayout implements
                 "type", String.valueOf(error.getErrorType())
         );
         eventEmitter.onReceiveAdEvent.invoke("ERROR", errMap);
+        
+        handleDaiBackupStream();
     }
 
     public void setControlsStyles(ControlsConfig controlsStyles) {
         controlsConfig = controlsStyles;
+        if (exoPlayerView != null) {
+            exoPlayerView.setHideLiveBadge(controlsConfig.getHideLiveBadge());
+        }
         refreshControlsStyles();
+    }
+    
+    /**
+     * Checks if the source is a DAI (Dynamic Ad Insertion) request.
+     *
+     * A DAI request is identified by either:
+     * - VOD: both contentSourceId and videoId are present
+     * - Live: assetKey is present
+     *
+     * @param source The source to check
+     * @return true if the source is a DAI request, false otherwise
+     */
+    private boolean isDaiRequest(Source source) {
+        if (source == null || source.getAdsProps() == null) {
+            return false;
+        }
+        return source.getAdsProps().isDAI();
+    }
+
+    /**
+     * Creates and configures a server-side ad insertion (SSAI) AdsLoader for DAI.
+     *
+     * @return The configured IMA server-side ad insertion AdsLoader
+     */
+    private ImaServerSideAdInsertionMediaSource.AdsLoader createAdsLoader() {
+        ImaServerSideAdInsertionMediaSource.AdsLoader.Builder adsLoaderBuilder =
+                new ImaServerSideAdInsertionMediaSource.AdsLoader.Builder(getContext(), exoPlayerView.getPlayerView())
+                        .setAdEventListener(this)
+                        .setAdErrorListener(this);
+
+        return adsLoaderBuilder.build();
+    }
+
+    /**
+     * Creates and configures a media source factory for DAI playback.
+     *
+     * @return The configured DefaultMediaSourceFactory with DAI support
+     */
+    private DefaultMediaSourceFactory createDaiMediaSourceFactory() {
+        daiAdsLoader = createAdsLoader();
+
+        DataSource.Factory dataSourceFactory = new DefaultDataSource.Factory(getContext());
+        DefaultMediaSourceFactory mediaSourceFactory = new DefaultMediaSourceFactory(dataSourceFactory);
+
+        ImaServerSideAdInsertionMediaSource.Factory adsMediaSourceFactory =
+                new ImaServerSideAdInsertionMediaSource.Factory(daiAdsLoader, mediaSourceFactory);
+
+        mediaSourceFactory.setServerSideAdInsertionMediaSourceFactory(adsMediaSourceFactory);
+        
+        return mediaSourceFactory;
+    }
+
+    /**
+     * Initializes the player for DAI source.
+     *
+     * Requests the DAI stream and completes player initialization.
+     *
+     * @param runningSource The source containing DAI properties
+     */
+    private void initializeDaiSource(Source runningSource) {
+        if (player == null) {
+            DebugLog.w(TAG, "Player is null in initializeDaiSource, skipping DAI initialization");
+            return;
+        }
+
+        requestDaiStream(runningSource);
+
+        player.prepare();
+        playerNeedsSource = false;
+
+        eventEmitter.onVideoLoadStart.invoke();
+        loadVideoStarted = true;
+
+        finishPlayerInitialization();
+    }
+
+    /**
+     * Requests a DAI stream from Google IMA using the ExoPlayer IMA extension.
+     *
+     * Builds an SSAI URI based on the provided parameters and sets it on the player.
+     * Supports both VOD (contentSourceId + videoId) and Live (assetKey) streams.
+     *
+     * @param runningSource The source containing DAI properties
+     */
+    private void requestDaiStream(Source runningSource) {
+        if (daiAdsLoader == null) {
+            eventEmitter.onVideoError.invoke("DaiAdsLoader is null", null, "DAI_ADS_LOADER_NULL_ERROR");
+            return;
+        }
+        
+        daiAdsLoader.setPlayer(player);
+        
+        AdsProps adsProps = runningSource.getAdsProps();
+        int streamFormat = "dash".equalsIgnoreCase(adsProps.getFormat()) ? CONTENT_TYPE_DASH : CONTENT_TYPE_HLS;
+        
+        try {
+            Uri.Builder uriBuilder;
+            
+            if (adsProps.isDAILive()) {
+                uriBuilder = new ImaServerSideAdInsertionUriBuilder()
+                        .setAssetKey(adsProps.getAssetKey())
+                        .setFormat(streamFormat)
+                        .build()
+                        .buildUpon();
+            } else if (adsProps.isDAIVod()) {
+                uriBuilder = new ImaServerSideAdInsertionUriBuilder()
+                        .setContentSourceId(adsProps.getContentSourceId())
+                        .setVideoId(adsProps.getVideoId())
+                        .setFormat(streamFormat)
+                        .build()
+                        .buildUpon();
+            } else {
+                throw new IllegalArgumentException("Either assetKey (for live) or contentSourceId+videoId (for VOD) must be provided");
+            }
+            
+            Map<String, String> adTagParameters = adsProps.getAdTagParameters();
+            if (adTagParameters != null && !adTagParameters.isEmpty()) {
+                for (Map.Entry<String, String> entry : adTagParameters.entrySet()) {
+                    uriBuilder.appendQueryParameter(entry.getKey(), entry.getValue());
+                }
+            }
+            
+            Uri ssaiUri = uriBuilder.build();
+            MediaItem ssaiMediaItem = MediaItem.fromUri(ssaiUri);
+            
+            player.setMediaItem(ssaiMediaItem);
+        } catch (Exception e) {
+            eventEmitter.onVideoError.invoke("DAI stream request failed: " + e.getMessage(), e, "DAI_REQUEST_ERROR");
+            handleDaiBackupStream();
+        }
+    }
+
+    /**
+     * Handles fallback to backup stream when DAI stream fails.
+     *
+     * If a backup stream URI is available in the DAI properties, it cleans up DAI resources
+     * and switches to the backup stream.
+     *
+     * @return true if backup stream was successfully used, false otherwise
+     */
+    private boolean handleDaiBackupStream() {
+        if (source == null || source.getAdsProps() == null) {
+            return false;
+        }
+        
+        String fallbackStreamUri = source.getAdsProps().getFallbackUri();
+        if (fallbackStreamUri == null || fallbackStreamUri.isEmpty()) {
+            return false;
+        }
+        
+        DebugLog.d(TAG, "DAI stream error occurred, falling back to backup stream URI: " + fallbackStreamUri);
+        
+        WritableMap backupSourceMap = Arguments.createMap();
+        backupSourceMap.putString("uri", fallbackStreamUri);
+        backupSourceMap.putBoolean("isNetwork", true);
+        
+        Source backupSource = Source.parse(backupSourceMap, themedReactContext);
+        if (backupSource == null || backupSource.getUri() == null) {
+            return false;
+        }
+        
+        if (daiAdsLoader != null) {
+            daiAdsLoader.setPlayer(null);
+        }
+        
+        setSrc(backupSource);
+        
+        return true;
     }
 }

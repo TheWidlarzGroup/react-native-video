@@ -1,5 +1,5 @@
 struct SubtitleStyle {
-    // Extend with more style properties as needed.
+    /// Extend with more style properties as needed.
     private(set) var opacity: CGFloat
 
     enum SubtitleStyleKeys {
