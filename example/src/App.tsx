@@ -257,10 +257,14 @@ const VideoDemo = () => {
   useEvent(player, 'onPlaybackRateChange', handlePlaybackRateChange);
   useEvent(player, 'onExternalPlaybackChange', handleExternalPlaybackChange);
 
+  // Volume and muted have their own effect: iOS sends onVolumeChange on every write, also
+  // when the value does not change, so writing them on any other setting flooded the log.
   React.useEffect(() => {
     player.volume = settings.volume;
     player.muted = settings.muted;
+  }, [settings.volume, settings.muted, player]);
 
+  React.useEffect(() => {
     if (player.isPlaying) {
       player.rate = settings.rate;
     }
