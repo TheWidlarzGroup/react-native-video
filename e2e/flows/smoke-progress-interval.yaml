@@ -17,6 +17,6 @@ tags: [smoke]
 - extendedWaitUntil:
     visible:
       id: "evt-progress-sparse"
-    timeout: 15000            # three gaps of 1 s; the clip is 8 s
+    timeout: 35000            # three gaps of 1 s; the clip is 8 s
 - assertNotVisible:
     id: "evt-onError"

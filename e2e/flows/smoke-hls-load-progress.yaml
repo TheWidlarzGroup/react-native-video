@@ -14,6 +14,6 @@ tags: [smoke]
 - extendedWaitUntil:
     visible:
       id: "evt-progress-gt-2s"
-    timeout: 15000
+    timeout: 55000
 - assertNotVisible:
     id: "evt-onError"

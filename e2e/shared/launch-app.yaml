@@ -33,6 +33,13 @@ appId: ${APP_ID}
     commands:
       - tapOn: "Open"
       - launchApp
+# The check above is not an interaction, so it does not restart the clock (CONTEXT.md,
+# "Timeouts"), and when the prompt is absent it waits out the whole element lookup: on
+# iOS 18.1 (28.11) it took 7.6 s in a typical flow and up to 36 s. Restart the clock
+# here, so the 30 s below is all the app's (smoke-video-tracks once failed with the app
+# shown 1.2 s later).
+- waitForAnimationToEnd:
+    timeout: 500
 # Generous on purpose: this waits for the app to start, not for library behaviour, and a
 # freshly cleared app on a busy emulator or hosted runner has taken 15-18 s to get here.
 - extendedWaitUntil:

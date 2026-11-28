@@ -45,7 +45,7 @@ onFlowComplete:
       - extendedWaitUntil:
           visible:
             id: "evt-audio-focus-lost"
-          timeout: 8000
+          timeout: 28000
           optional: true
       - runScript:
           file: ../shared/gsm-android.js
@@ -55,7 +55,7 @@ onFlowComplete:
       - extendedWaitUntil:
           visible:
             id: "evt-audio-focus-regained"
-          timeout: 10000
+          timeout: 38000
       - assertVisible:
           id: "evt-audio-focus-lost"
 - assertNotVisible:

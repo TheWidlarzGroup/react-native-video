@@ -22,7 +22,7 @@ tags: [smoke]
       - extendedWaitUntil:
           visible:
             id: ".*exo_position"
-          timeout: 10000
+          timeout: 55000
       - assertNotVisible:
           id: ".*exo_play_pause"
 - assertNotVisible:

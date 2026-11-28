@@ -35,21 +35,21 @@ tags: [smoke]
 - extendedWaitUntil:
     visible:
       id: "evt-replacement-load-started"   # onLoadStart for the new source, on every platform
-    timeout: 20000
+    timeout: 30000
 - extendedWaitUntil:
     visible:
       id: "evt-replacement-loaded"
-    timeout: 20000
+    timeout: 40000
 - assertVisible:
     id: "evt-replacement-start-before-load"   # the start was reported before the load, not after
 - extendedWaitUntil:
     visible:
       id: "evt-reloaded-from-start"
-    timeout: 10000
+    timeout: 50000
 - extendedWaitUntil:
     visible:
       id: "evt-ended-after-replace"
-    timeout: 25000            # the HLS clip is ~8 s
+    timeout: 75000            # the HLS clip is ~8 s
 - assertNotVisible:
     id: "evt-replacement-load-start-repeated"   # one replacement, one onLoadStart
 - assertNotVisible:

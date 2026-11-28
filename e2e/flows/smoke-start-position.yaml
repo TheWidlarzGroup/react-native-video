@@ -17,11 +17,11 @@ tags: [smoke]
 - extendedWaitUntil:
     visible:
       id: "evt-started-at-position"
-    timeout: 15000
+    timeout: 35000
 - extendedWaitUntil:
     visible:
       id: "evt-onEnded"
-    timeout: 15000            # 3 s of the clip are left
+    timeout: 50000            # 3 s of the clip are left
 - assertNotVisible:
     id: "evt-onSeek"
 - assertNotVisible:

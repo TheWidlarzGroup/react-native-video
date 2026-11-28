@@ -22,11 +22,11 @@ tags: [smoke]
       - extendedWaitUntil:
           visible:
             id: "evt-onError"
-          timeout: 40000
+          timeout: 80000
       - extendedWaitUntil:
           visible:
             id: "evt-status-error"
-          timeout: 20000
+          timeout: 100000
       - assertVisible:
           id: "evt-error-code"
           text: "error-code:player/playback-failed"

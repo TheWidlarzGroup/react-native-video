@@ -26,6 +26,6 @@ tags: [smoke]
 - extendedWaitUntil:
     visible:
       id: "evt-error-status-held"
-    timeout: 5000             # read 750 ms after onError
+    timeout: 25000             # read 750 ms after onError
 - assertNotVisible:
     id: "evt-onLoad"

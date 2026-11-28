@@ -21,6 +21,6 @@ tags: [smoke]
 - extendedWaitUntil:
     visible:
       id: "evt-ready-after-end"
-    timeout: 5000
+    timeout: 50000
 - assertNotVisible:
     id: "evt-onError"

@@ -90,6 +90,10 @@ deep links (`rnvtest://scenario/<name>`), never via UI navigation.
    `tapOn`: iOS delivers them only once the player is idle, later than the subflow waits.
 3. Timeouts: generous on first event after load (emulator decoders are slow to start),
    tight after playback is running. Clips are 8 s; only HLS's first load waits up to 40 s.
+   Maestro counts a timeout from the latest interaction, not from the start of the step,
+   so between two taps (or after opening the scenario) each timeout has to be larger than
+   the one before it: the sum so far, not the step's own budget (`CONTEXT.md`, "Flow-design
+   gotchas"). `node scripts/e2e/check-flow-timeouts.mjs` tells you when one is not.
 4. End every flow that expects playback with `assertNotVisible: evt-onError`, so an error
    after the asserted marker still fails it.
 5. Run locally on the platforms you have before opening a PR; CI runs both. If you cannot
