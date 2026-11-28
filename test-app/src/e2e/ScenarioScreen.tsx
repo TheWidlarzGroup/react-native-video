@@ -235,42 +235,44 @@ const CONTROLS: Control[] = [
 
 // Marker derivation lives in eventLog.handle(); this only maps payloads.
 function logPlayerEvents(player: VideoPlayer) {
+  // Bound to this scenario: events of a player whose screen is gone are dropped.
+  const handle = eventLog.forSession();
   player.addEventListener('onLoad', ({ duration }) =>
-    eventLog.handle({ type: 'onLoad', duration })
+    handle({ type: 'onLoad', duration })
   );
   player.addEventListener('onProgress', ({ currentTime }) =>
-    eventLog.handle({ type: 'onProgress', currentTime })
+    handle({ type: 'onProgress', currentTime })
   );
-  player.addEventListener('onEnd', () => eventLog.handle({ type: 'onEnd' }));
+  player.addEventListener('onEnd', () => handle({ type: 'onEnd' }));
   player.addEventListener('onError', (error) =>
-    eventLog.handle({ type: 'onError', code: error.code })
+    handle({ type: 'onError', code: error.code })
   );
   player.addEventListener('onStatusChange', (status) =>
-    eventLog.handle({ type: 'onStatusChange', status })
+    handle({ type: 'onStatusChange', status })
   );
   player.addEventListener('onPlaybackStateChange', ({ isPlaying }) =>
-    eventLog.handle({ type: 'onPlaybackStateChange', isPlaying })
+    handle({ type: 'onPlaybackStateChange', isPlaying })
   );
   player.addEventListener('onSeek', (seekTime) =>
-    eventLog.handle({ type: 'onSeek', seekTime })
+    handle({ type: 'onSeek', seekTime })
   );
   player.addEventListener('onVolumeChange', ({ muted, volume }) =>
-    eventLog.handle({ type: 'onVolumeChange', muted, volume })
+    handle({ type: 'onVolumeChange', muted, volume })
   );
   player.addEventListener('onPlaybackRateChange', (rate) =>
-    eventLog.handle({ type: 'onPlaybackRateChange', rate })
+    handle({ type: 'onPlaybackRateChange', rate })
   );
   player.addEventListener(
     'onVideoTrackChange',
     ({ availableTracks, selectedTrackId }) =>
-      eventLog.handle({
+      handle({
         type: 'onVideoTrackChange',
         tracks: availableTracks,
         selectedTrackId,
       })
   );
   player.addEventListener('onAudioTrackChange', ({ availableTracks }) =>
-    eventLog.handle({ type: 'onAudioTrackChange', tracks: availableTracks })
+    handle({ type: 'onAudioTrackChange', tracks: availableTracks })
   );
 }
 
