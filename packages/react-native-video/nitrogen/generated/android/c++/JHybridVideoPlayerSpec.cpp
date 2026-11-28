@@ -21,6 +21,8 @@ namespace margelo::nitro::video { enum class IgnoreSilentSwitchMode; }
 namespace margelo::nitro::video { struct TextTrack; }
 // Forward declaration of `VideoTrack` to properly resolve imports.
 namespace margelo::nitro::video { struct VideoTrack; }
+// Forward declaration of `AudioTrack` to properly resolve imports.
+namespace margelo::nitro::video { struct AudioTrack; }
 
 #include <memory>
 #include "HybridVideoPlayerSourceSpec.hpp"
@@ -36,13 +38,15 @@ namespace margelo::nitro::video { struct VideoTrack; }
 #include "TextTrack.hpp"
 #include <optional>
 #include "JTextTrack.hpp"
-#include "VideoTrack.hpp"
-#include "JVideoTrack.hpp"
 #include <string>
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/JPromise.hpp>
 #include <NitroModules/JUnit.hpp>
 #include <vector>
+#include "VideoTrack.hpp"
+#include "JVideoTrack.hpp"
+#include "AudioTrack.hpp"
+#include "JAudioTrack.hpp"
 #include <NitroModules/Null.hpp>
 #include <variant>
 #include "JVariant_NullType_HybridVideoPlayerSourceSpec.hpp"
@@ -189,6 +193,15 @@ namespace margelo::nitro::video {
     static const auto method = _javaPart->javaClassStatic()->getMethod<void(jboolean /* playWhenInactive */)>("setPlayWhenInactive");
     method(_javaPart, playWhenInactive);
   }
+  double JHybridVideoPlayerSpec::getProgressUpdateInterval() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<double()>("getProgressUpdateInterval");
+    auto __result = method(_javaPart);
+    return __result;
+  }
+  void JHybridVideoPlayerSpec::setProgressUpdateInterval(double progressUpdateInterval) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(double /* progressUpdateInterval */)>("setProgressUpdateInterval");
+    method(_javaPart, progressUpdateInterval);
+  }
   bool JHybridVideoPlayerSpec::getDisableAudioSessionManagement() {
     static const auto method = _javaPart->javaClassStatic()->getMethod<jboolean()>("getDisableAudioSessionManagement");
     auto __result = method(_javaPart);
@@ -210,6 +223,11 @@ namespace margelo::nitro::video {
   }
   std::optional<std::string> JHybridVideoPlayerSpec::getSelectedVideoTrackId() {
     static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<jni::JString>()>("getSelectedVideoTrackId");
+    auto __result = method(_javaPart);
+    return __result != nullptr ? std::make_optional(__result->toStdString()) : std::nullopt;
+  }
+  std::optional<std::string> JHybridVideoPlayerSpec::getSelectedAudioTrackId() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<jni::JString>()>("getSelectedAudioTrackId");
     auto __result = method(_javaPart);
     return __result != nullptr ? std::make_optional(__result->toStdString()) : std::nullopt;
   }
@@ -247,24 +265,6 @@ namespace margelo::nitro::video {
   void JHybridVideoPlayerSpec::selectTextTrack(const std::optional<std::variant<nitro::NullType, TextTrack>>& textTrack) {
     static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JVariant_NullType_TextTrack> /* textTrack */)>("selectTextTrack");
     method(_javaPart, textTrack.has_value() ? JVariant_NullType_TextTrack::fromCpp(textTrack.value()) : nullptr);
-  }
-  std::vector<VideoTrack> JHybridVideoPlayerSpec::getAvailableVideoTracks() {
-    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<jni::JArrayClass<JVideoTrack>>()>("getAvailableVideoTracks");
-    auto __result = method(_javaPart);
-    return [&]() {
-      size_t __size = __result->size();
-      std::vector<VideoTrack> __vector;
-      __vector.reserve(__size);
-      for (size_t __i = 0; __i < __size; __i++) {
-        auto __element = __result->getElement(__i);
-        __vector.push_back(__element->toCpp());
-      }
-      return __vector;
-    }();
-  }
-  void JHybridVideoPlayerSpec::selectVideoTrack(const std::optional<std::string>& trackId) {
-    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<jni::JString> /* trackId */)>("selectVideoTrack");
-    method(_javaPart, trackId.has_value() ? jni::make_jstring(trackId.value()) : nullptr);
   }
   void JHybridVideoPlayerSpec::release() {
     static const auto method = _javaPart->javaClassStatic()->getMethod<void()>("release");
@@ -315,6 +315,42 @@ namespace margelo::nitro::video {
   void JHybridVideoPlayerSpec::seekTo(double time) {
     static const auto method = _javaPart->javaClassStatic()->getMethod<void(double /* time */)>("seekTo");
     method(_javaPart, time);
+  }
+  std::vector<VideoTrack> JHybridVideoPlayerSpec::getAvailableVideoTracks() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<jni::JArrayClass<JVideoTrack>>()>("getAvailableVideoTracks");
+    auto __result = method(_javaPart);
+    return [&]() {
+      size_t __size = __result->size();
+      std::vector<VideoTrack> __vector;
+      __vector.reserve(__size);
+      for (size_t __i = 0; __i < __size; __i++) {
+        auto __element = __result->getElement(__i);
+        __vector.push_back(__element->toCpp());
+      }
+      return __vector;
+    }();
+  }
+  void JHybridVideoPlayerSpec::selectVideoTrack(const std::optional<std::string>& trackId) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<jni::JString> /* trackId */)>("selectVideoTrack");
+    method(_javaPart, trackId.has_value() ? jni::make_jstring(trackId.value()) : nullptr);
+  }
+  std::vector<AudioTrack> JHybridVideoPlayerSpec::getAvailableAudioTracks() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<jni::JArrayClass<JAudioTrack>>()>("getAvailableAudioTracks");
+    auto __result = method(_javaPart);
+    return [&]() {
+      size_t __size = __result->size();
+      std::vector<AudioTrack> __vector;
+      __vector.reserve(__size);
+      for (size_t __i = 0; __i < __size; __i++) {
+        auto __element = __result->getElement(__i);
+        __vector.push_back(__element->toCpp());
+      }
+      return __vector;
+    }();
+  }
+  void JHybridVideoPlayerSpec::selectAudioTrack(const std::optional<std::string>& trackId) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<jni::JString> /* trackId */)>("selectAudioTrack");
+    method(_javaPart, trackId.has_value() ? jni::make_jstring(trackId.value()) : nullptr);
   }
 
 } // namespace margelo::nitro::video

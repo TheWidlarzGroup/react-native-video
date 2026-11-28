@@ -3,6 +3,7 @@ package com.twg.video.view
 import android.annotation.SuppressLint
 import android.app.PictureInPictureParams
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.util.AttributeSet
@@ -21,7 +22,9 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.PlayerView
 import com.facebook.react.bridge.ReactApplicationContext
 import com.margelo.nitro.NitroModules
+import com.margelo.nitro.video.FullscreenOrientation
 import com.margelo.nitro.video.HybridVideoPlayer
+import com.margelo.nitro.video.NativeControlsStyles
 import com.margelo.nitro.video.ResizeMode
 import com.margelo.nitro.video.SurfaceType
 import com.margelo.nitro.video.VideoViewEventsEmitter
@@ -37,6 +40,7 @@ import com.twg.video.core.utils.Threading.runOnMainThread
 import com.twg.video.core.extensions.toAspectRatioFrameLayout
 import com.twg.video.core.utils.PictureInPictureUtils
 import com.twg.video.core.utils.PictureInPictureUtils.createDisabledPictureInPictureParams
+import com.twg.video.core.utils.ControlsStylesUtils
 import com.twg.video.core.utils.SmallVideoPlayerOptimizer
 import com.twg.video.R.layout.player_view_surface
 import com.twg.video.R.layout.player_view_texture
@@ -92,6 +96,15 @@ class VideoView @JvmOverloads constructor(
       }
     }
 
+  var controlsStyles: NativeControlsStyles = ControlsStylesUtils.DEFAULT
+    set(value) {
+      if (field == value) return
+      field = value
+      runOnMainThread {
+        applyControlsStyles()
+      }
+    }
+
   var pictureInPictureEnabled: Boolean = false
 
   var surfaceType: SurfaceType = SurfaceType.SURFACE
@@ -105,8 +118,14 @@ class VideoView @JvmOverloads constructor(
         playerView = createPlayerView()
         playerView.player = hybridPlayer?.player
         addView(playerView)
+        setupFullscreenButton()
+        applyControlsStyles()
       }
     }
+
+  // Read when fullscreen opens; a change made while fullscreen is open applies the next time.
+  var fullscreenOrientation: FullscreenOrientation = FullscreenOrientation.ALL
+  var fullscreenAutorotate: Boolean = true
 
   var resizeMode: ResizeMode = ResizeMode.NONE
     set(value) {
@@ -220,12 +239,31 @@ class VideoView @JvmOverloads constructor(
 
   @SuppressLint("PrivateResource")
   private fun setupFullscreenButton() {
+    // Setting the listener makes PlayerView show the button
     playerView.setFullscreenButtonClickListener { _ ->
       enterFullscreen()
     }
 
-    playerView.findViewById<ImageButton>(androidx.media3.ui.R.id.exo_fullscreen)
-      ?.setImageResource(androidx.media3.ui.R.drawable.exo_ic_fullscreen_enter)
+    playerView.findViewById<ImageButton>(androidx.media3.ui.R.id.exo_fullscreen)?.apply {
+      setImageResource(androidx.media3.ui.R.drawable.exo_ic_fullscreen_enter)
+      if (controlsStyles.hideFullscreen) visibility = View.GONE
+    }
+    // The same button in the compact layout that small players use
+    if (controlsStyles.hideFullscreen) {
+      playerView.findViewById<View>(androidx.media3.ui.R.id.exo_minimal_fullscreen)?.visibility = View.GONE
+    }
+  }
+
+  /**
+   * Applies [controlsStyles] to the current PlayerView. Call it again whenever the PlayerView
+   * is recreated or leaves fullscreen.
+   */
+  fun applyControlsStyles() {
+    ControlsStylesUtils.apply(playerView, controlsStyles)
+    // In fullscreen the button leaves fullscreen and stays visible; the fragment owns it there.
+    if (!isInFullscreen) {
+      setupFullscreenButton()
+    }
   }
 
   fun enterFullscreen() {
@@ -481,6 +519,25 @@ class VideoView @JvmOverloads constructor(
     } catch (e: Exception) {
       Log.e("ReactNativeVideo", "Exception in internalEnterPictureInPicture for nitroId: $nitroId", e)
       false
+    }
+  }
+
+  /**
+   * Leaves picture-in-picture on request from JS. Android has no call that leaves it, so while the
+   * activity is in PiP this brings it back to the front: the system then leaves PiP and
+   * [PictureInPictureHelperFragment] restores the views through [exitPictureInPicture].
+   */
+  fun requestExitPictureInPicture() {
+    if (!isInPictureInPicture) return
+
+    val currentActivity = applicationContent.currentActivity
+    if (currentActivity?.isInPictureInPictureMode == true) {
+      currentActivity.startActivity(
+        Intent(currentActivity, currentActivity.javaClass)
+          .addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+      )
+    } else {
+      exitPictureInPicture()
     }
   }
 

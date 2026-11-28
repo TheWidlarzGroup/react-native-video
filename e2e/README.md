@@ -54,6 +54,15 @@ maestro test -e APP_ID=com.rnvtest.host e2e/flows/smoke-mp4-happy-path.yaml  # o
 Android emulator reaches fixtures via `10.0.2.2:8090` (cleartext HTTP must be allowed in
 the debug build), iOS simulator via `localhost:8090` — handled in the app (`fixtures.ts`).
 
+To run on another port, for example when a second run on the same machine already holds
+8090, start the server there and tell the flows with `-e FIXTURE_PORT`. The app is not
+rebuilt: every scenario link carries the port (`?fixturePort=`).
+
+```bash
+node e2e/fixtures/serve.mjs e2e/fixtures/media 8690
+maestro test -e APP_ID=com.rnvtest.host -e FIXTURE_PORT=8690 e2e/flows/
+```
+
 ## How assertions work
 
 The test app renders player events as text markers with stable `testID`s

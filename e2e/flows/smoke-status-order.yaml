@@ -2,12 +2,10 @@
 # first readyToPlay (evt-ready-after-loading is set only when the first readyToPlay was
 # reported after loading). Ported from #4743 ("Status").
 #
-# QUARANTINED (tags: [flaky], issue #5155): on iOS the readyToPlay status is sometimes
-# never reported although the clip plays to its end (seen in CI on consecutive runs of
-# the same code: one pass, one fail). Runs in the nightly quarantine leg, not in the
-# gate, until #5155 is fixed; then drop the tag.
+# Was quarantined for #5155: on iOS the timeControlStatus observer sometimes never
+# fired, so readyToPlay never came although the clip played to its end.
 appId: ${APP_ID}
-tags: [smoke, flaky]
+tags: [smoke]
 ---
 - runFlow: ../shared/launch-app.yaml
 - runFlow:

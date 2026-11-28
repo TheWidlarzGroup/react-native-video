@@ -18,6 +18,7 @@ import {
   SwitchControl,
   ToggleButton,
 } from './components/Controls';
+import AudioTrackManager from './components/AudioTrackManager';
 import TextTrackManager from './components/TextTrackManager';
 import VideoQualityManager from './components/VideoQualityManager';
 import { styles } from './styles';
@@ -371,6 +372,11 @@ const VideoDemo = () => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Text Tracks</Text>
         <TextTrackManager player={player} />
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Audio Tracks</Text>
+        <AudioTrackManager player={player} />
       </View>
 
       <View style={styles.section}>
