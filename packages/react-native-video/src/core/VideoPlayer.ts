@@ -260,6 +260,18 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     this.player.playWhenInactive = value;
   }
 
+  // Progress Update Interval
+  get progressUpdateInterval(): number {
+    return this.player.progressUpdateInterval;
+  }
+
+  set progressUpdateInterval(value: number) {
+    if (!Number.isFinite(value) || value <= 0) {
+      return;
+    }
+    this.player.progressUpdateInterval = value;
+  }
+
   // Disable Audio Session Management
   get disableAudioSessionManagement(): boolean {
     return this.player.disableAudioSessionManagement;

@@ -193,6 +193,15 @@ namespace margelo::nitro::video {
     static const auto method = _javaPart->javaClassStatic()->getMethod<void(jboolean /* playWhenInactive */)>("setPlayWhenInactive");
     method(_javaPart, playWhenInactive);
   }
+  double JHybridVideoPlayerSpec::getProgressUpdateInterval() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<double()>("getProgressUpdateInterval");
+    auto __result = method(_javaPart);
+    return __result;
+  }
+  void JHybridVideoPlayerSpec::setProgressUpdateInterval(double progressUpdateInterval) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(double /* progressUpdateInterval */)>("setProgressUpdateInterval");
+    method(_javaPart, progressUpdateInterval);
+  }
   bool JHybridVideoPlayerSpec::getDisableAudioSessionManagement() {
     static const auto method = _javaPart->javaClassStatic()->getMethod<jboolean()>("getDisableAudioSessionManagement");
     auto __result = method(_javaPart);

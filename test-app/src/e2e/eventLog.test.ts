@@ -5,6 +5,8 @@ import {
   LOOP_WRAP_TO_SECONDS,
   MARKER_IDS,
   PROGRESS_MARKER_SECONDS,
+  PROGRESS_SPARSE_GAPS,
+  PROGRESS_SPARSE_MIN_GAP_SECONDS,
   SEEK_BACK_LANDED_SECONDS,
   SEEK_FORWARD_LANDED_SECONDS,
   STATUS_ERROR_CODE,
@@ -742,6 +744,44 @@ describe('fullscreen', () => {
     });
     expect(markers()).toEqual(['evt-fullscreen-call-failed']);
     expect(lines()).toEqual(['exitFullscreen() threw: boom']);
+  });
+});
+
+describe('progress interval', () => {
+  const progressEvery = (step: number, count: number, from = 0) =>
+    Array.from({ length: count }, (_, i) => ({
+      type: 'onProgress' as const,
+      currentTime: from + i * step,
+    }));
+
+  test('progress about once a second marks evt-progress-sparse', () => {
+    feed(...progressEvery(1, PROGRESS_SPARSE_GAPS + 1));
+    expect(markers()).toContain('evt-progress-sparse');
+  });
+
+  test('the default intervals never do', () => {
+    feed(...progressEvery(0.25, 30));
+    feed(...progressEvery(0.5, 15, 10));
+    expect(markers()).not.toContain('evt-progress-sparse');
+  });
+
+  test('a short gap restarts the count', () => {
+    feed(...progressEvery(1, PROGRESS_SPARSE_GAPS), {
+      type: 'onProgress',
+      currentTime:
+        PROGRESS_SPARSE_GAPS - 1 + PROGRESS_SPARSE_MIN_GAP_SECONDS / 2,
+    });
+    expect(markers()).not.toContain('evt-progress-sparse');
+  });
+
+  test('a seek is not a gap', () => {
+    feed(
+      { type: 'onProgress', currentTime: 0 },
+      { type: 'onSeek', seekTime: 5 },
+      { type: 'onProgress', currentTime: 5 },
+      { type: 'onProgress', currentTime: 5.25 }
+    );
+    expect(markers()).not.toContain('evt-progress-sparse');
   });
 });
 

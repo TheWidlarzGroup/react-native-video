@@ -265,6 +265,17 @@ open class HybridVideoPlayerSpec_cxx {
     }
   }
   
+  public final var progressUpdateInterval: Double {
+    @inline(__always)
+    get {
+      return self.__implementation.progressUpdateInterval
+    }
+    @inline(__always)
+    set {
+      self.__implementation.progressUpdateInterval = newValue
+    }
+  }
+  
   public final var disableAudioSessionManagement: Bool {
     @inline(__always)
     get {

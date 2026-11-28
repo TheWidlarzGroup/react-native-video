@@ -32,6 +32,7 @@ export const SCENARIO_SOURCES: Record<ScenarioName, VideoConfig> = {
   'mp4': fixture('short.mp4'), // 8 s, testsrc + sine audio
   'mp4-preload': fixture('short.mp4'),
   'mp4-release-mid-playback': fixture('short.mp4'),
+  'mp4-progress-1s': fixture('short.mp4'),
   'mp4-loader': heldFixture('short.mp4', LOADER_SOURCE_HOLD_MS),
   'mp4-fullscreen-rotate': fixture('short.mp4'),
   'mp4-controls': fixture('short.mp4'),

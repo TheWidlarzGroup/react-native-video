@@ -107,6 +107,11 @@ function reportStatusAfterRelease(player: VideoPlayer) {
 function startScenario(scenario: ScenarioName, player: VideoPlayer) {
   eventLog.handle({ type: 'initialStatus', status: player.status });
 
+  // Set before the load, as an app does in the setup callback of useVideoPlayer.
+  if (scenario === 'mp4-progress-1s') {
+    player.progressUpdateInterval = 1000;
+  }
+
   if (scenario === 'mp4-release-mid-playback') {
     let released = false;
     player.addEventListener('onProgress', ({ currentTime }) => {
