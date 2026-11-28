@@ -166,6 +166,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     const nativeRef = useRef<ElementRef<typeof NativeVideoComponent>>(null);
 
     const isPosterDeprecated = typeof poster === 'string';
+    const sourceObject = typeof source === 'number' ? undefined : source;
 
     const _renderLoader = useMemo(
       () =>
@@ -202,6 +203,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           return undefined;
         }
 
+        const _sourceObject = typeof _source === 'number' ? undefined : _source;
+
         const isLocalAssetFile =
           typeof _source === 'number' ||
           ('uri' in _source && typeof _source.uri === 'number') ||
@@ -216,7 +219,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         if (uri && uri.match(/^\//)) {
           uri = `file://${uri}`;
         }
-        if (!uri && _source.ad?.type !== 'ssai') {
+        if (!uri && _sourceObject?.ad?.type !== 'ssai') {
           console.log('Trying to load empty source');
         }
         const isNetwork = !!(uri && uri.match(/^(rtp|rtsp|http|https):/));
@@ -227,8 +230,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           )
         );
 
-        const selectedDrm = _source.drm || drm;
-        const _textTracks = _source.textTracks || textTracks;
+        const selectedDrm = _sourceObject?.drm || drm;
+        const _textTracks = _sourceObject?.textTracks || textTracks;
         const _drm = !selectedDrm
           ? undefined
           : {
@@ -246,8 +249,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
             };
 
         let _cmcd: NativeCmcdConfiguration | undefined;
-        if (Platform.OS === 'android' && _source.cmcd) {
-          const cmcd = _source.cmcd;
+        if (Platform.OS === 'android' && _sourceObject?.cmcd) {
+          const cmcd = _sourceObject.cmcd;
 
           if (typeof cmcd === 'boolean') {
             _cmcd = cmcd ? {mode: CmcdMode.MODE_QUERY_PARAMETER} : undefined;
@@ -270,14 +273,14 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
         }
 
         const selectedContentStartTime =
-          _source.contentStartTime ?? contentStartTime;
+          _sourceObject?.contentStartTime ?? contentStartTime;
 
-        const _ad = normalizeAdConfig(_source.ad, adTagUrl, adLanguage);
+        const _ad = normalizeAdConfig(_sourceObject?.ad, adTagUrl, adLanguage);
 
         const _minLoadRetryCount =
-          _source.minLoadRetryCount ?? minLoadRetryCount;
+          _sourceObject?.minLoadRetryCount ?? minLoadRetryCount;
 
-        const _bufferConfig = _source.bufferConfig || bufferConfig;
+        const _bufferConfig = _sourceObject?.bufferConfig || bufferConfig;
         return {
           uri,
           isNetwork,
@@ -680,7 +683,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       [onControlsVisibilityChange],
     );
 
-    const selectedDrm = source?.drm || drm;
+    const selectedDrm = sourceObject?.drm || drm;
     const usingExternalGetLicense = selectedDrm?.getLicense instanceof Function;
 
     const onGetLicense = useCallback(
@@ -764,7 +767,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
 
     const _viewType = useMemo(() => {
       const hasValidDrmProp =
-        drm !== undefined && Object.keys(drm).length !== 0;
+        selectedDrm !== undefined && Object.keys(selectedDrm).length !== 0;
 
       const shallForceViewType =
         hasValidDrmProp && (viewType === ViewType.TEXTURE || useTextureView);
@@ -795,7 +798,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       }
 
       return ViewType.SURFACE;
-    }, [drm, useSecureView, useTextureView, viewType]);
+    }, [selectedDrm, useSecureView, useTextureView, viewType]);
 
     const _renderPoster = useCallback(() => {
       if (!hasPoster || !showPoster) {
