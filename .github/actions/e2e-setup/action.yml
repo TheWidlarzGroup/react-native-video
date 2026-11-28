@@ -9,7 +9,7 @@ inputs:
     description: 'android or ios — selects which JS bundle to build'
     required: true
   fixture-port:
-    description: 'Port for the local media fixture server'
+    description: 'Port for the local media fixture server. A leg that changes it also passes -e FIXTURE_PORT=<port> to maestro'
     default: '8090'
     required: false
 

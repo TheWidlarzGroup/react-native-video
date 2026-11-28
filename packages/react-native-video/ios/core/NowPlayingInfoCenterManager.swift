@@ -83,7 +83,10 @@ class NowPlayingInfoCenterManager {
         self.currentPlayer = nil
         self.findNewCurrentPlayer()
         if self.currentPlayer == nil {
-          self.updatePlaybackState()
+          // The info on the lock screen described the player that just went away, and no
+          // other registered player is playing, so it is ours to clear.
+          self.invalidateCommandTargets()
+          MPNowPlayingInfoCenter.default().nowPlayingInfo = [:]
         }
       }
     }
@@ -222,16 +225,24 @@ class NowPlayingInfoCenterManager {
   }
 
   private func invalidateCommandTargets() {
-    remoteCommandCenter.playCommand.removeTarget(playTarget)
-    remoteCommandCenter.pauseCommand.removeTarget(pauseTarget)
-    remoteCommandCenter.skipForwardCommand.removeTarget(skipForwardTarget)
-    remoteCommandCenter.skipBackwardCommand.removeTarget(skipBackwardTarget)
-    remoteCommandCenter.changePlaybackPositionCommand.removeTarget(
-      playbackPositionTarget
-    )
-    remoteCommandCenter.togglePlayPauseCommand.removeTarget(
-      togglePlayPauseTarget
-    )
+    // removeTarget(nil) removes EVERY target of a command, including the app's own handlers,
+    // so only remove the targets this manager registered.
+    if let target = playTarget { remoteCommandCenter.playCommand.removeTarget(target) }
+    if let target = pauseTarget { remoteCommandCenter.pauseCommand.removeTarget(target) }
+    if let target = skipForwardTarget { remoteCommandCenter.skipForwardCommand.removeTarget(target) }
+    if let target = skipBackwardTarget { remoteCommandCenter.skipBackwardCommand.removeTarget(target) }
+    if let target = playbackPositionTarget {
+      remoteCommandCenter.changePlaybackPositionCommand.removeTarget(target)
+    }
+    if let target = togglePlayPauseTarget {
+      remoteCommandCenter.togglePlayPauseCommand.removeTarget(target)
+    }
+    playTarget = nil
+    pauseTarget = nil
+    skipForwardTarget = nil
+    skipBackwardTarget = nil
+    playbackPositionTarget = nil
+    togglePlayPauseTarget = nil
   }
 
   func updateStaticInfo(ifCurrentItem playerItem: AVPlayerItem) {
@@ -303,9 +314,10 @@ class NowPlayingInfoCenterManager {
   func updatePlaybackState() {
     runOnMainThread { [weak self] in
       guard let self else { return }
+      // No player registered with notification controls: the command center and the
+      // now-playing info belong to the app, so leave them alone.
       guard let player = self.currentPlayer else {
         self.invalidateCommandTargets()
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = [:]
         return
       }
 

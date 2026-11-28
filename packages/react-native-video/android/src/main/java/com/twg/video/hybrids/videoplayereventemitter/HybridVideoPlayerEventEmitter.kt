@@ -11,6 +11,11 @@ class HybridVideoPlayerEventEmitter : HybridVideoPlayerEventEmitterSpec() {
 
   var listeners: MutableList<ListenerPair> = mutableListOf()
 
+  // The load that is in progress, from onLoadStart until the status leaves "loading".
+  // A player starts loading in its constructor, before JS can add a listener, so a listener
+  // added while the load is still running is told about it right away.
+  private var loadInProgress: onLoadStartData? = null
+
   // MARK: - Private helpers
   private fun <T : Any> addListener(eventName: String, listener: T): ListenerSubscription {
     val id = UUID.randomUUID()
@@ -73,8 +78,27 @@ class HybridVideoPlayerEventEmitter : HybridVideoPlayerEventEmitterSpec() {
   override fun addOnLoadListener(listener: (onLoadData) -> Unit) =
     addListener("onLoad", listener)
 
-  override fun addOnLoadStartListener(listener: (onLoadStartData) -> Unit) =
-    addListener("onLoadStart", listener)
+  override fun addOnLoadStartListener(listener: (onLoadStartData) -> Unit): ListenerSubscription {
+    val id = UUID.randomUUID()
+    // One lock for "add" and "read the running load": a listener gets a load either from
+    // onLoadStart() or from here, never from both.
+    val runningLoad = synchronized(lock) {
+      listeners.add(ListenerPair(id, "onLoadStart", listener))
+      loadInProgress
+    }
+    runningLoad?.let { data ->
+      try {
+        listener(data)
+      } catch (t: Throwable) {
+        Log.d(TAG, "Error calling onLoadStart listener", t)
+      }
+    }
+    return ListenerSubscription {
+      synchronized(lock) {
+        listeners.removeAll { it.id == id }
+      }
+    }
+  }
 
   override fun addOnPlaybackStateChangeListener(listener: (onPlaybackStateChangeData) -> Unit) =
     addListener("onPlaybackStateChange", listener)
@@ -106,12 +130,16 @@ class HybridVideoPlayerEventEmitter : HybridVideoPlayerEventEmitterSpec() {
   override fun addOnVideoTrackChangeListener(listener: (VideoTrackChangeData) -> Unit) =
     addListener("onVideoTrackChange", listener)
 
+  override fun addOnAudioTrackChangeListener(listener: (AudioTrackChangeData) -> Unit) =
+    addListener("onAudioTrackChange", listener)
+
   override fun addOnVolumeChangeListener(listener: (onVolumeChangeData) -> Unit) =
     addListener("onVolumeChange", listener)
 
   override fun clearAllListeners() {
     synchronized(lock) {
       listeners.clear()
+      loadInProgress = null
     }
   }
 
@@ -144,8 +172,21 @@ class HybridVideoPlayerEventEmitter : HybridVideoPlayerEventEmitterSpec() {
   fun onLoad(data: onLoadData) =
     emitEvent<(onLoadData) -> Unit>("onLoad") { it(data) }
 
-  fun onLoadStart(data: onLoadStartData) =
-    emitEvent<(onLoadStartData) -> Unit>("onLoadStart") { it(data) }
+  fun onLoadStart(data: onLoadStartData) {
+    val snapshot: List<ListenerPair> = synchronized(lock) {
+      loadInProgress = data
+      listeners.filter { it.eventName == "onLoadStart" }.toList()
+    }
+
+    snapshot.forEach { pair ->
+      try {
+        @Suppress("UNCHECKED_CAST")
+        (pair.callback as (onLoadStartData) -> Unit)(data)
+      } catch (t: Throwable) {
+        Log.d(TAG, "Error calling onLoadStart listener", t)
+      }
+    }
+  }
 
   fun onPlaybackStateChange(data: onPlaybackStateChangeData) =
     emitEvent<(onPlaybackStateChangeData) -> Unit>("onPlaybackStateChange") { it(data) }
@@ -180,11 +221,21 @@ class HybridVideoPlayerEventEmitter : HybridVideoPlayerEventEmitterSpec() {
   fun onVideoTrackChange(data: VideoTrackChangeData) =
     emitEvent<(VideoTrackChangeData) -> Unit>("onVideoTrackChange") { it(data) }
 
+  fun onAudioTrackChange(data: AudioTrackChangeData) =
+    emitEvent<(AudioTrackChangeData) -> Unit>("onAudioTrackChange") { it(data) }
+
   fun onVolumeChange(data: onVolumeChangeData) =
     emitEvent<(onVolumeChangeData) -> Unit>("onVolumeChange") { it(data) }
 
-  fun onStatusChange(status: VideoPlayerStatus) =
+  fun onStatusChange(status: VideoPlayerStatus) {
+    if (status != VideoPlayerStatus.LOADING) {
+      // Loaded, failed or released: the load is over, later listeners are not told about it.
+      synchronized(lock) {
+        loadInProgress = null
+      }
+    }
     emitEvent<(VideoPlayerStatus) -> Unit>("onStatusChange") { it(status) }
+  }
 
   companion object {
     const val TAG = "HybridVideoPlayerEventEmitter"

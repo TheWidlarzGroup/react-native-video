@@ -74,11 +74,14 @@ namespace margelo::nitro::video {
     void setPlayInBackground(bool playInBackground) override;
     bool getPlayWhenInactive() override;
     void setPlayWhenInactive(bool playWhenInactive) override;
+    double getProgressUpdateInterval() override;
+    void setProgressUpdateInterval(double progressUpdateInterval) override;
     bool getDisableAudioSessionManagement() override;
     void setDisableAudioSessionManagement(bool disableAudioSessionManagement) override;
     bool getIsPlaying() override;
     std::optional<TextTrack> getSelectedTrack() override;
     std::optional<std::string> getSelectedVideoTrackId() override;
+    std::optional<std::string> getSelectedAudioTrackId() override;
 
   public:
     // Methods
@@ -94,6 +97,8 @@ namespace margelo::nitro::video {
     void seekTo(double time) override;
     std::vector<VideoTrack> getAvailableVideoTracks() override;
     void selectVideoTrack(const std::optional<std::string>& trackId) override;
+    std::vector<AudioTrack> getAvailableAudioTracks() override;
+    void selectAudioTrack(const std::optional<std::string>& trackId) override;
 
   private:
     jni::global_ref<JHybridVideoPlayerSpec::JavaPart> _javaPart;

@@ -38,11 +38,14 @@ namespace margelo::nitro::video {
       prototype.registerHybridSetter("playInBackground", &HybridVideoPlayerSpec::setPlayInBackground);
       prototype.registerHybridGetter("playWhenInactive", &HybridVideoPlayerSpec::getPlayWhenInactive);
       prototype.registerHybridSetter("playWhenInactive", &HybridVideoPlayerSpec::setPlayWhenInactive);
+      prototype.registerHybridGetter("progressUpdateInterval", &HybridVideoPlayerSpec::getProgressUpdateInterval);
+      prototype.registerHybridSetter("progressUpdateInterval", &HybridVideoPlayerSpec::setProgressUpdateInterval);
       prototype.registerHybridGetter("disableAudioSessionManagement", &HybridVideoPlayerSpec::getDisableAudioSessionManagement);
       prototype.registerHybridSetter("disableAudioSessionManagement", &HybridVideoPlayerSpec::setDisableAudioSessionManagement);
       prototype.registerHybridGetter("isPlaying", &HybridVideoPlayerSpec::getIsPlaying);
       prototype.registerHybridGetter("selectedTrack", &HybridVideoPlayerSpec::getSelectedTrack);
       prototype.registerHybridGetter("selectedVideoTrackId", &HybridVideoPlayerSpec::getSelectedVideoTrackId);
+      prototype.registerHybridGetter("selectedAudioTrackId", &HybridVideoPlayerSpec::getSelectedAudioTrackId);
       prototype.registerHybridMethod("replaceSourceAsync", &HybridVideoPlayerSpec::replaceSourceAsync);
       prototype.registerHybridMethod("getAvailableTextTracks", &HybridVideoPlayerSpec::getAvailableTextTracks);
       prototype.registerHybridMethod("selectTextTrack", &HybridVideoPlayerSpec::selectTextTrack);
@@ -55,6 +58,8 @@ namespace margelo::nitro::video {
       prototype.registerHybridMethod("seekTo", &HybridVideoPlayerSpec::seekTo);
       prototype.registerHybridMethod("getAvailableVideoTracks", &HybridVideoPlayerSpec::getAvailableVideoTracks);
       prototype.registerHybridMethod("selectVideoTrack", &HybridVideoPlayerSpec::selectVideoTrack);
+      prototype.registerHybridMethod("getAvailableAudioTracks", &HybridVideoPlayerSpec::getAvailableAudioTracks);
+      prototype.registerHybridMethod("selectAudioTrack", &HybridVideoPlayerSpec::selectAudioTrack);
     });
   }
 

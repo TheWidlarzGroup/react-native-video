@@ -107,6 +107,12 @@ abstract class HybridVideoPlayerSpec: HybridObject() {
   @get:Keep
   @set:DoNotStrip
   @set:Keep
+  abstract var progressUpdateInterval: Double
+  
+  @get:DoNotStrip
+  @get:Keep
+  @set:DoNotStrip
+  @set:Keep
   abstract var disableAudioSessionManagement: Boolean
   
   @get:DoNotStrip
@@ -120,6 +126,10 @@ abstract class HybridVideoPlayerSpec: HybridObject() {
   @get:DoNotStrip
   @get:Keep
   abstract val selectedVideoTrackId: String?
+  
+  @get:DoNotStrip
+  @get:Keep
+  abstract val selectedAudioTrackId: String?
 
   // Methods
   @DoNotStrip
@@ -169,6 +179,14 @@ abstract class HybridVideoPlayerSpec: HybridObject() {
   @DoNotStrip
   @Keep
   abstract fun selectVideoTrack(trackId: String?): Unit
+  
+  @DoNotStrip
+  @Keep
+  abstract fun getAvailableAudioTracks(): Array<AudioTrack>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun selectAudioTrack(trackId: String?): Unit
 
   // Default implementation of `HybridObject.toString()`
   override fun toString(): String {

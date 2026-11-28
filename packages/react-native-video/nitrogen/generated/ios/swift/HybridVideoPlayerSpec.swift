@@ -24,10 +24,12 @@ public protocol HybridVideoPlayerSpec_protocol: HybridObject {
   var ignoreSilentSwitchMode: IgnoreSilentSwitchMode { get set }
   var playInBackground: Bool { get set }
   var playWhenInactive: Bool { get set }
+  var progressUpdateInterval: Double { get set }
   var disableAudioSessionManagement: Bool { get set }
   var isPlaying: Bool { get }
   var selectedTrack: TextTrack? { get }
   var selectedVideoTrackId: String? { get }
+  var selectedAudioTrackId: String? { get }
 
   // Methods
   func replaceSourceAsync(source: Variant_NullType__any_HybridVideoPlayerSourceSpec_?) throws -> Promise<Void>
@@ -42,6 +44,8 @@ public protocol HybridVideoPlayerSpec_protocol: HybridObject {
   func seekTo(time: Double) throws -> Void
   func getAvailableVideoTracks() throws -> [VideoTrack]
   func selectVideoTrack(trackId: String?) throws -> Void
+  func getAvailableAudioTracks() throws -> [AudioTrack]
+  func selectAudioTrack(trackId: String?) throws -> Void
 }
 
 public extension HybridVideoPlayerSpec_protocol {
