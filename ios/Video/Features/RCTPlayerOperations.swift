@@ -48,14 +48,12 @@ enum RCTPlayerOperations {
                     break
                 }
             }
-        } else if type == "index" {
-            if let value = criteria?.value { // check value is provided
-                if let indexValue = Int(value as String) { // ensure value is an integer an String to Snt
-                    if textTracks.count > indexValue { // ensure value is in group range
-                        selectedTrackIndex = indexValue
-                    }
-                }
-            }
+        } else if type == "index", let value = criteria?.value,
+                  // check value is provided
+                  let indexValue = Int(value as String),
+                  // ensure value is an integer an String to Snt
+                  textTracks.count > indexValue { // ensure value is in group range
+            selectedTrackIndex = indexValue
         }
 
         // in the situation that a selected text track is not available (eg. specifies a textTrack not available)
@@ -112,12 +110,12 @@ enum RCTPlayerOperations {
             // } else if ([type isEqualToString:@"default"]) {
             //  option = group.defaultOption; */
         } else if type == "index" {
-            if let value = criteria?.value { // check value is provided
-                if let indexValue = Int(value as String) { // ensure value is an integer an String to Snt
-                    if group.options.count > indexValue { // ensure value is in group range
-                        mediaOption = group.options[indexValue]
-                    }
-                }
+            if let value = criteria?.value,
+               // check value is provided
+               let indexValue = Int(value as String),
+               // ensure value is an integer an String to Snt
+               group.options.count > indexValue { // ensure value is in group range
+                mediaOption = group.options[indexValue]
             }
         } else { // default. invalid type or "system"
             await player?.currentItem?.selectMediaOptionAutomatically(in: group)
@@ -144,7 +142,9 @@ enum RCTPlayerOperations {
             return
         }
 
-        if !paused { player.pause() }
+        if !paused {
+            player.pause()
+        }
 
         player.seek(
             to: cmSeekTime, toleranceBefore: tolerance, toleranceAfter: tolerance,
