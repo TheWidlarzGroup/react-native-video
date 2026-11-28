@@ -41,13 +41,13 @@ namespace margelo::nitro::video { struct onVolumeChangeData; }
 #include "ListenerSubscription.hpp"
 #include <functional>
 #include "BandwidthData.hpp"
+#include <string>
 #include "onLoadData.hpp"
 #include "onLoadStartData.hpp"
 #include "onPlaybackStateChangeData.hpp"
 #include "onProgressData.hpp"
 #include "VideoPlayerStatus.hpp"
 #include "TimedMetadata.hpp"
-#include <string>
 #include <vector>
 #include <NitroModules/Null.hpp>
 #include "TextTrack.hpp"

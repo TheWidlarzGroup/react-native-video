@@ -31,7 +31,7 @@ function VideoPlayer() {
   });
 
   useEvent(player, 'onError', (error) => {
-    analytics.track('video_error', { error: error.error });
+    analytics.track('video_error', { code: error.code, message: error.message });
   });
 
   useEvent(player, 'onEnd', () => {

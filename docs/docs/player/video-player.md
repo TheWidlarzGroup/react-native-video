@@ -30,7 +30,7 @@ const playerWithSource = new VideoPlayer({ uri: 'https://example.com/video.mp4' 
 
 // Using a VideoConfig object
 const playerWithConfig = new VideoPlayer({
-  source: { uri: 'https://example.com/video.mp4' },
+  uri: 'https://example.com/video.mp4',
   // other configurations
 });
 ```
@@ -55,13 +55,18 @@ The `VideoPlayer` class offers a comprehensive set of methods and properties to 
 | `initialize()` | Manually initialize the underlying native player item when `initializeOnCreation` was set to `false`. No-op if already initialized. |
 | `preload()` | Ensures the media source is set and prepared (buffering started) without starting playback. If not yet initialized it will initialize first. |
 | `release()` | Releases the player's native resources. The player is no longer usable after calling this method. **Note:** on iOS and Android `replaceSourceAsync(null)` releases the native player the same way; to play another video, call `replaceSourceAsync(newSource)` on a live player or create a new one. |
+| `addEventListener(event, callback)` | Subscribes to a player event and returns a subscription; call `remove()` on it to stop listening. See [Events](./events.md). |
+| `getAvailableTextTracks()` | Returns the text tracks of the current source, embedded ones and those from `externalSubtitles`, as `TextTrack[]`. |
+| `selectTextTrack(textTrack: TextTrack \| null)` | Shows the given text track, or hides subtitles with `null`. `onTrackChange` reports the change. |
+| `getAvailableVideoTracks()` | Returns the video renditions of the current source, best first; empty until the manifest has loaded. See [Video quality](./video-quality.md). |
+| `selectVideoTrack(trackId?: string)` | Pins playback to one rendition from `getAvailableVideoTracks()`, or returns to automatic selection with no argument. See [Video quality](./video-quality.md). |
 
 ### Properties
 
 | Property | Access | Type | Description |
 |----------|--------|------|-------------|
 | `source` | Read-only | `VideoPlayerSource` | Gets the current `VideoPlayerSource` object. |
-| `status` | Read-only | `VideoPlayerStatus` | Gets the current status (e.g., `playing`, `paused`, `buffering`). |
+| `status` | Read-only | `VideoPlayerStatus` | Gets the current status: `idle` (no source loaded), `loading`, `readyToPlay` or `error`. It stays `readyToPlay` after the video has played to the end, and `error` until a source is loaded again. Whether the video is playing is in `isPlaying` and the `onPlaybackStateChange` event. |
 | `duration` | Read-only | `number` | Gets the total duration of the video in seconds. Returns `NaN` until metadata is loaded. |
 | `volume` | Read/Write | `number` | Gets or sets the player volume (0.0 to 1.0). |
 | `currentTime` | Read/Write | `number` | Gets or sets the current playback time in seconds. |
@@ -72,14 +77,87 @@ The `VideoPlayer` class offers a comprehensive set of methods and properties to 
 | `ignoreSilentSwitchMode` | Read/Write | `IgnoreSilentSwitchMode` | iOS-only. Determines how audio should behave when the hardware mute (silent) switch is on. |
 | `playInBackground` | Read/Write | `boolean` | Whether playback should continue when the app goes to the background. |
 | `playWhenInactive` | Read/Write | `boolean` | Whether playback should continue when the app is inactive (e.g., during a phone call). |
+| `allowsExternalPlayback` | Read/Write | `boolean` | iOS-only. Whether the video can be sent to an AirPlay device. Defaults to `true`. With `false` the video stays on the device. |
+| `audioOutput` | Read/Write | `'speaker' \| 'earpiece'` | Where the audio plays on a phone. `'earpiece'` uses the receiver, as in a phone call. Defaults to `'speaker'`. On iOS `'earpiece'` is ignored while any player uses Picture in Picture, `playInBackground` or `showNotificationControls`. On Android, add the `MODIFY_AUDIO_SETTINGS` permission to your manifest so the player can switch the audio mode. No effect on web. |
 | `isPlaying` | Read-only | `boolean` | Returns `true` if the video is currently playing. |
 | `selectedTrack` | Read-only | `TextTrack \| undefined` | Currently selected text track, or `undefined` when no track is selected. |
+| `selectedVideoTrackId` | Read-only | `string \| undefined` | The id passed to the last `selectVideoTrack()` call, or `undefined` while selection is automatic. |
+| `showNotificationControls` | Read/Write | `boolean` | Shows playback controls on the lock screen and in Control Center (iOS), in the media notification (Android) and through the Media Session API (web), with the `metadata` of the source. On Android, `playInBackground: true` shows the notification as well, because background playback runs in a foreground service that needs one. Default: `false`. |
+| `disableAudioSessionManagement` | Read/Write | `boolean` | iOS-only. When `true`, this player does not configure or activate the `AVAudioSession`, so another library (for example an audio recorder) can manage it. To switch it off for every player, use [`setAudioSessionManagementDisabled`](./video-player.md#audio-session). Default: `false`. |
 
 ### Error Handling
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `onError?` | `(error: VideoRuntimeError) => void` | A callback function that is invoked when a runtime error occurs in the player. You can use this to catch and handle errors gracefully. |
+Errors are delivered through the `onError` event: subscribe with `player.addEventListener('onError', (error) => …)` or the [`useEvent`](./events.md#using-the-useevent-hook) hook. The callback receives a `VideoRuntimeError` with a `code` and a `message`. Every code is listed in [Errors](./errors.md).
+
+### Source configuration
+
+`new VideoPlayer()`, `useVideoPlayer()` and `replaceSourceAsync()` take either a source (a URL string or a `require()`d asset) or a `VideoConfig` object:
+
+| Field | Type | Platforms | Description |
+|-------|------|-----------|-------------|
+| `uri` | `string \| number` | all | The video: a URL, a local file path, or a `require()`d asset. Required. |
+| `headers` | `Record<string, string>` | iOS, Android | HTTP headers sent with every request for the video. On iOS they are also used for the default FairPlay license request (see [DRM](./drm.md)). |
+| `drm` | `DrmParams` | iOS, Android | DRM configuration; needs the DRM plugin. See [DRM](./drm.md). |
+| `bufferConfig` | `BufferConfig` | iOS, Android | Buffering and network limits. See [Buffer Config](#buffer-config). |
+| `metadata` | `CustomVideoMetadata` | all | Information shown by the system with `showNotificationControls` (on web through the Media Session API): `title`, `subtitle`, `description`, `artist` and `imageUri` (artwork URL). |
+| `externalSubtitles` | `ExternalSubtitle[]` | all | Subtitle files loaded next to the video. Each entry has `uri`, `label`, `type` (`'vtt'`, `'srt'`, `'ssa'`, `'ass'` or `'auto'`, from the file extension) and optional `language` (ISO 639-1 or 639-2, default `'und'`). On iOS only WebVTT (`.vtt`) is supported, and the player may replace `label`. |
+| `initializeOnCreation` | `boolean` | all | Whether the native player item is created right away. Default: `true`. See [Deferred Initialization](#deferred-initialization-advanced). |
+
+```tsx
+import { useVideoPlayer } from 'react-native-video';
+
+const player = useVideoPlayer({
+  uri: 'https://example.com/video.m3u8',
+  headers: { Authorization: 'Bearer <token>' },
+  metadata: {
+    title: 'Big Buck Bunny',
+    artist: 'Blender Foundation',
+    imageUri: 'https://example.com/poster.jpg',
+  },
+  externalSubtitles: [
+    { uri: 'https://example.com/subtitles_en.vtt', label: 'English', type: 'vtt', language: 'en' },
+  ],
+}, (instance) => {
+  instance.showNotificationControls = true;
+});
+```
+
+`player.source.getAssetInformationAsync()` reads information about the video from the source without playing it: `width`, `height`, `duration` (seconds, `-1` if unknown), `bitrate` (kbps), `fileSize` (bytes, `-1` if unknown), `isHDR`, `isLive` and `orientation`.
+
+### Audio
+
+`mixAudioMode` controls how the player's audio coexists with other audio:
+
+| Value | Description |
+|-------|-------------|
+| `'auto'` | The default behavior of the player. Default. |
+| `'mixWithOthers'` | Plays together with other audio. |
+| `'doNotMix'` | Other audio stops while this player plays. |
+| `'duckOthers'` | Other audio keeps playing at a lower volume. |
+
+`ignoreSilentSwitchMode` (iOS only) decides what happens when the hardware silent switch is on:
+
+| Value | Description |
+|-------|-------------|
+| `'auto'` | The default behavior of the player. Default. |
+| `'ignore'` | Plays sound even with the silent switch on. |
+| `'obey'` | Stays silent while the silent switch is on. |
+
+#### Audio session
+
+On iOS the library configures and activates the `AVAudioSession` for its players. When another library needs the session, for example to record audio, switch this off for one player with `player.disableAudioSessionManagement = true`, or for every player with `setAudioSessionManagementDisabled`:
+
+```tsx
+import { setAudioSessionManagementDisabled } from 'react-native-video';
+
+// Before recording with another library
+setAudioSessionManagementDisabled(true);
+
+// After recording
+setAudioSessionManagementDisabled(false);
+```
+
+On Android and web `setAudioSessionManagementDisabled` does nothing (in development it logs a warning).
 
 ### Buffer Config
 
@@ -89,17 +167,15 @@ Example
 
 ```ts
 const player = new VideoPlayer({
-  source: {
-    uri: 'https://example.com/stream.m3u8',
-    bufferConfig: {
-      // Android
-      minBufferMs: 5000,
-      maxBufferMs: 10000,
-      // iOS
-      preferredForwardBufferDurationMs: 3000,
-      // Live (cross‑platform target)
-      livePlayback: { targetOffsetMs: 500 },
-    },
+  uri: 'https://example.com/stream.m3u8',
+  bufferConfig: {
+    // Android
+    minBufferMs: 5000,
+    maxBufferMs: 10000,
+    // iOS
+    preferredForwardBufferDurationMs: 3000,
+    // Live (cross‑platform target)
+    livePlayback: { targetOffsetMs: 500 },
   },
 });
 ```
@@ -120,8 +196,8 @@ Properties below are Android‑only
 | `livePlayback.maxOffsetMs` | `number` | Maximum allowed live offset (ms). |
 | `livePlayback.targetOffsetMs` | `number` | Target live offset the player tries to maintain (ms). |
 
-#### iOS, visionOS, tvOS
-Properties below are Apple platforms‑only
+#### iOS
+Properties below are iOS-only
 
 | Property | Type | Description |
 |----------|------|-------------|
@@ -194,7 +270,7 @@ By default, the player initializes automatically after construction. If you need
 
 ### Controlling Playback
 
--   `pause()`: Pauses playback. `status` changes to `paused`.
+-   `pause()`: Pauses playback. `isPlaying` becomes `false`; `status` does not change.
 -   `seekTo(time)`, `seekBy(time)`: Changes the current playback position. `onSeek` is fired when the seek operation completes.
 -   `set volume(value)`, `set muted(value)`, `set loop(value)`, `set rate(value)`: Modify player properties. Corresponding events like `onVolumeChange` or `onPlaybackRateChange` might be fired.
 
@@ -252,11 +328,11 @@ Using `useVideoPlayer` is the recommended way to manage `VideoPlayer` instances 
 
 ```tsx
 const player = useVideoPlayer({
-    source: { uri: 'https://example.com/video.mp4' },
+    uri: 'https://example.com/video.mp4',
     initializeOnCreation: false,
 }, (instance) => {
     // Attach listeners first
-    instance.onLoad = () => console.log('Loaded');
+    instance.addEventListener('onLoad', () => console.log('Loaded'));
 });
 
 // Later (e.g. on user tap)

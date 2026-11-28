@@ -4,12 +4,14 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import androidx.annotation.MainThread
+import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.Format
 import androidx.media3.common.Metadata
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
+import androidx.media3.common.Timeline
 import androidx.media3.common.Tracks
 import androidx.media3.common.text.CueGroup
 import androidx.media3.common.util.UnstableApi
@@ -95,6 +97,39 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   private val progressHandler = Handler(Looper.getMainLooper())
   private var progressRunnable: Runnable? = null
 
+  /**
+   * Whether `onLoad` was already emitted for the source the player currently holds. The player
+   * returns to `STATE_READY` after every rebuffer and every seek, and `onLoad` must not follow
+   * it there: it is a once-per-source event, as on iOS and in v6.
+   */
+  private var loadReportedForSource = false
+
+  /**
+   * Whether `onReadyToDisplay` was already emitted for the current source. It describes the
+   * first frame of a source, so it comes once, and not again after a seek, a rebuffer or a new
+   * surface (fullscreen, picture-in-picture).
+   */
+  private var readyToDisplayReportedForSource = false
+
+  /**
+   * Whether the video renderer has drawn a frame of the current source. Media3 can draw it
+   * before `STATE_READY`, so it is kept until `onLoad` has gone out.
+   */
+  private var firstFrameRenderedForSource = false
+
+  /**
+   * Emits `onReadyToDisplay` once the source is loaded and its first frame is on screen. A
+   * source without video never draws a frame and never gets it, as on iOS, so a poster can
+   * stay up as artwork.
+   */
+  private fun reportReadyToDisplayIfDue() {
+    if (readyToDisplayReportedForSource || !loadReportedForSource || !firstFrameRenderedForSource) {
+      return
+    }
+    readyToDisplayReportedForSource = true
+    eventEmitter.onReadyToDisplay()
+  }
+
   // Listeners
   private val audioFocusChangedListener = OnAudioFocusChangedListener()
   private val audioBecomingNoisyReceiver = AudioBecomingNoisyReceiver()
@@ -133,7 +168,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   }
 
   private companion object {
-    const val PROGRESS_UPDATE_INTERVAL_MS = 250L
+    const val DEFAULT_PROGRESS_UPDATE_INTERVAL_MS = 250L
     const val AUDIO_SWITCH_ACK_TIMEOUT_MS = 300L
     private const val TAG = "HybridVideoPlayer"
     private const val DEFAULT_MIN_BUFFER_DURATION_MS = 5000
@@ -223,8 +258,8 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
 
   override var mixAudioMode: MixAudioMode = MixAudioMode.AUTO
     set(value) {
-      VideoManager.audioFocusManager.requestAudioFocusUpdate()
       field = value
+      VideoManager.audioFocusManager.requestAudioFocusUpdate()
     }
 
   // iOS only property
@@ -232,6 +267,35 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
 
   // iOS only property - no-op on Android
   override var disableAudioSessionManagement: Boolean = false
+
+  // iOS only property - no-op on Android
+  override var allowsExternalPlayback: Boolean = true
+
+  override var audioOutput: AudioOutput = AudioOutput.SPEAKER
+    set(value) {
+      field = value
+      runOnMainThread {
+        applyAudioOutput()
+        VideoManager.audioFocusManager.requestAudioOutputUpdate()
+      }
+    }
+
+  /**
+   * Routes this player's audio like a call (earpiece) or like media (speaker). The player is
+   * rebuilt in [initializePlayer], so this runs again there.
+   */
+  @MainThread
+  private fun applyAudioOutput() {
+    val attributes = if (audioOutput == AudioOutput.EARPIECE) {
+      AudioAttributes.Builder()
+        .setUsage(C.USAGE_VOICE_COMMUNICATION)
+        .setContentType(C.AUDIO_CONTENT_TYPE_SPEECH)
+        .build()
+    } else {
+      AudioAttributes.DEFAULT
+    }
+    player.setAudioAttributes(attributes, false)
+  }
 
   override var playInBackground: Boolean = false
     get() = runOnMainThreadSync { field }
@@ -243,6 +307,17 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
     }
 
   override var playWhenInactive: Boolean = false
+
+  // Read on the main thread by the progress runnable, written from JS.
+  @Volatile
+  private var progressUpdateIntervalMs: Long = DEFAULT_PROGRESS_UPDATE_INTERVAL_MS
+
+  override var progressUpdateInterval: Double
+    get() = progressUpdateIntervalMs.toDouble()
+    set(value) {
+      if (value.isNaN() || value.isInfinite() || value < 1.0) return
+      progressUpdateIntervalMs = value.toLong()
+    }
 
   override var isPlaying: Boolean by mainThreadProperty(
     get = { player.isPlaying == true }
@@ -298,19 +373,25 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
     loadedWithSource = true
 
     applyVideoQualityConstraints()
+    applyAudioOutput()
 
     player.addListener(playerListener)
     player.addAnalyticsListener(analyticsListener)
     player.setMediaSource(hybridSource.mediaSource)
     ensureNotReleased()
 
-    // Emit onLoadStart
+    emitLoadStart(hybridSource)
+    ensureNotReleased()
+    startProgressUpdates()
+  }
+
+  // A new source starts loading: reported the same way for the first source and for one set
+  // by replaceSourceAsync().
+  private fun emitLoadStart(hybridSource: HybridVideoPlayerSource) {
     val sourceType = if (hybridSource.uri.startsWith("http")) SourceType.NETWORK else SourceType.LOCAL
     eventEmitter.onLoadStart(onLoadStartData(sourceType = sourceType, source = hybridSource))
     ensureNotReleased()
     status = VideoPlayerStatus.LOADING
-    ensureNotReleased()
-    startProgressUpdates()
   }
 
   /**
@@ -422,6 +503,13 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
         player.setMediaSource(hybridSource.mediaSource)
         ensureNotReleased()
 
+        // Before initialize() the player is a placeholder without listeners, and
+        // initializePlayer() reports the load start itself.
+        if (loadedWithSource) {
+          emitLoadStart(hybridSource)
+          ensureNotReleased()
+        }
+
         player.prepare()
         ensureNotReleased()
       }
@@ -469,6 +557,16 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
 
       player.removeListener(playerListener)
       player.removeAnalyticsListener(analyticsListener)
+      // Unbind the view before releasing. The released player stays in memory until JS
+      // collects this hybrid object, and its image renderer would keep the last PlayerView
+      // and with it the whole VideoView alive (about 40 views per player). A released player
+      // no longer processes the message that clears the image output, so it must go first.
+      // Only while the view still shows this player: a VideoView that has moved on to another
+      // player (a pool, a list, a swapped `player` prop) keeps that one.
+      currentPlayerView?.get()?.let { view ->
+        if (view.player === player) view.player = null
+      }
+      currentPlayerView = null
       player.release() // Release player
 
       // Clean Listeners
@@ -517,7 +615,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
               bufferDuration = playableDurationFromNow
             )
           )
-          progressHandler.postDelayed(this, PROGRESS_UPDATE_INTERVAL_MS)
+          progressHandler.postDelayed(this, progressUpdateIntervalMs)
         }
       }
     }
@@ -560,9 +658,29 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   }
 
   private val playerListener = object : Player.Listener {
+    override fun onRenderedFirstFrame() {
+      // Called for the first frame after the source, the surface or the renderer changes, so
+      // also after a seek or when the view moves to fullscreen; only the first one counts.
+      firstFrameRenderedForSource = true
+      reportReadyToDisplayIfDue()
+    }
+
+    override fun onTimelineChanged(timeline: Timeline, reason: Int) {
+      // A media source was set (first source or replaceSourceAsync()): a new load begins.
+      if (reason == Player.TIMELINE_CHANGE_REASON_PLAYLIST_CHANGED) {
+        loadReportedForSource = false
+        readyToDisplayReportedForSource = false
+        firstFrameRenderedForSource = false
+      }
+    }
+
     override fun onPlaybackStateChanged(playbackState: Int) {
       val isPlayingUpdate = player.isPlaying
       val isBufferingUpdate = playbackState == Player.STATE_BUFFERING
+
+      // The focus follows the source too: it is taken when a playing player starts loading and
+      // given up when playback ends or the player goes idle.
+      VideoManager.audioFocusManager.requestAudioFocusUpdate()
 
       eventEmitter.onPlaybackStateChange(
         onPlaybackStateChangeData(
@@ -573,8 +691,15 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
 
       when (playbackState) {
         Player.STATE_IDLE -> {
-          status = VideoPlayerStatus.IDLE
+          // ExoPlayer goes idle right after a failure: keep `error` until a source loads again.
+          if (player.playerError == null) {
+            status = VideoPlayerStatus.IDLE
+          }
           eventEmitter.onBuffer(false)
+          // Stopped or failed: the next prepare() loads the source again.
+          loadReportedForSource = false
+          readyToDisplayReportedForSource = false
+          firstFrameRenderedForSource = false
         }
         Player.STATE_BUFFERING -> {
           status = VideoPlayerStatus.LOADING
@@ -598,24 +723,29 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
           val height = selectedVideoTrackFormat?.height ?: generalVideoFormat?.height ?: 0
           val rotationDegrees = selectedVideoTrackFormat?.rotationDegrees ?: generalVideoFormat?.rotationDegrees
 
-          eventEmitter.onLoad(
-            onLoadData(
-              currentTime = player.currentPosition / 1000.0,
-              duration = if (player.duration == C.TIME_UNSET) Double.NaN else player.duration / 1000.0,
-              width = width.toDouble(),
-              height = height.toDouble(),
-              orientation = VideoOrientationUtils.fromWHR(width, height, rotationDegrees)
+          if (!loadReportedForSource) {
+            loadReportedForSource = true
+            eventEmitter.onLoad(
+              onLoadData(
+                currentTime = player.currentPosition / 1000.0,
+                duration = if (player.duration == C.TIME_UNSET) Double.NaN else player.duration / 1000.0,
+                width = width.toDouble(),
+                height = height.toDouble(),
+                orientation = VideoOrientationUtils.fromWHR(width, height, rotationDegrees)
+              )
             )
-          )
+          }
           // If player becomes ready and is set to play, start progress updates
           if (player.playWhenReady) {
             startProgressUpdates()
           }
 
-          eventEmitter.onReadyToDisplay()
+          // After onLoad: the first frame may already be on screen, or comes later.
+          reportReadyToDisplayIfDue()
         }
         Player.STATE_ENDED -> {
-          status = VideoPlayerStatus.IDLE // Or a specific 'COMPLETED' status if you add one
+          // The source is still loaded at the end: it can be seeked and played again.
+          status = VideoPlayerStatus.READYTOPLAY
           eventEmitter.onEnd()
           eventEmitter.onBuffer(false)
           stopProgressUpdates()
@@ -653,6 +783,9 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
 
       // playWhenReady can change without isPlaying (pause while buffering), so refresh here too.
       VideoManager.refreshPictureInPictureParams()
+      // Request audio focus when the player is asked to play and release it on pause, so another
+      // app's playback pauses or ducks this player. Buffering keeps the focus.
+      VideoManager.audioFocusManager.requestAudioFocusUpdate()
     }
 
     override fun onPlayerError(error: PlaybackException) {

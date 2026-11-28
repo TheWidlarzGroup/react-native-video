@@ -74,14 +74,19 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   private func replaceSourceAndBeginLoad(
     with newSource: any HybridVideoPlayerSourceSpec
   ) throws -> LoadContext {
-    var previousSource: (any HybridVideoPlayerSourceSpec)?
-    guard let token = try sourceLoader.begin(onBegin: {
-      previousSource = storedSource
-      storedSource = newSource
-    }), let previousSource else { throw CancellationError() }
-    let context = LoadContext(source: newSource, token: token)
-    releaseAssetIfNotUsedByCurrentLoad(for: previousSource)
-    return context
+    try runOnMainThreadSync {
+      var previousSource: (any HybridVideoPlayerSourceSpec)?
+      guard let token = try sourceLoader.begin(onBegin: {
+        previousSource = storedSource
+        storedSource = newSource
+      }), let previousSource else { throw CancellationError() }
+      let context = LoadContext(source: newSource, token: token)
+      releaseAssetIfNotUsedByCurrentLoad(for: previousSource)
+      // The next onAudioTrackChange describes the new source. Without this, a source with the
+      // same audio tracks (the next episode, say) has the same signature and gets no event.
+      lastEmittedAudioTrackSignature = nil
+      return context
+    }
   }
 
   private func ensureCurrentLoad(_ context: LoadContext) throws {
@@ -281,7 +286,33 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
 
   var playWhenInactive: Bool = false
 
+  // iOS default: 500 ms, as before this option existed. Android uses 250 ms.
+  var progressUpdateInterval: Double = VideoPlayerObserver.defaultProgressUpdateInterval {
+    didSet {
+      guard progressUpdateInterval.isFinite, progressUpdateInterval > 0 else {
+        progressUpdateInterval = oldValue
+        return
+      }
+      playerObserver?.progressUpdateInterval = progressUpdateInterval
+    }
+  }
+
   var disableAudioSessionManagement: Bool = false {
+    didSet {
+      VideoManager.shared.requestAudioSessionUpdate()
+    }
+  }
+
+  var allowsExternalPlayback: Bool {
+    get {
+      return player.allowsExternalPlayback
+    }
+    set {
+      player.allowsExternalPlayback = newValue
+    }
+  }
+
+  var audioOutput: AudioOutput = .speaker {
     didSet {
       VideoManager.shared.requestAudioSessionUpdate()
     }

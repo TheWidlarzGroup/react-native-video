@@ -53,6 +53,7 @@ namespace margelo::nitro::video { struct onVolumeChangeData; }
 #include <functional>
 #include "BandwidthData.hpp"
 #include <optional>
+#include <string>
 #include "onLoadData.hpp"
 #include "VideoOrientation.hpp"
 #include "onLoadStartData.hpp"
@@ -65,7 +66,6 @@ namespace margelo::nitro::video { struct onVolumeChangeData; }
 #include "TimedMetadata.hpp"
 #include "TimedMetadataObject.hpp"
 #include <vector>
-#include <string>
 #include <NitroModules/Null.hpp>
 #include "TextTrack.hpp"
 #include <variant>
