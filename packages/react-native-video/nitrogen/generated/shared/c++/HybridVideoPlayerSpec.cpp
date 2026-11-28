@@ -38,10 +38,16 @@ namespace margelo::nitro::video {
       prototype.registerHybridSetter("playInBackground", &HybridVideoPlayerSpec::setPlayInBackground);
       prototype.registerHybridGetter("playWhenInactive", &HybridVideoPlayerSpec::getPlayWhenInactive);
       prototype.registerHybridSetter("playWhenInactive", &HybridVideoPlayerSpec::setPlayWhenInactive);
+      prototype.registerHybridGetter("progressUpdateInterval", &HybridVideoPlayerSpec::getProgressUpdateInterval);
+      prototype.registerHybridSetter("progressUpdateInterval", &HybridVideoPlayerSpec::setProgressUpdateInterval);
       prototype.registerHybridGetter("disableAudioSessionManagement", &HybridVideoPlayerSpec::getDisableAudioSessionManagement);
       prototype.registerHybridSetter("disableAudioSessionManagement", &HybridVideoPlayerSpec::setDisableAudioSessionManagement);
       prototype.registerHybridGetter("usesExternalPlaybackWhileExternalScreenIsActive", &HybridVideoPlayerSpec::getUsesExternalPlaybackWhileExternalScreenIsActive);
       prototype.registerHybridSetter("usesExternalPlaybackWhileExternalScreenIsActive", &HybridVideoPlayerSpec::setUsesExternalPlaybackWhileExternalScreenIsActive);
+      prototype.registerHybridGetter("allowsExternalPlayback", &HybridVideoPlayerSpec::getAllowsExternalPlayback);
+      prototype.registerHybridSetter("allowsExternalPlayback", &HybridVideoPlayerSpec::setAllowsExternalPlayback);
+      prototype.registerHybridGetter("audioOutput", &HybridVideoPlayerSpec::getAudioOutput);
+      prototype.registerHybridSetter("audioOutput", &HybridVideoPlayerSpec::setAudioOutput);
       prototype.registerHybridGetter("isPlaying", &HybridVideoPlayerSpec::getIsPlaying);
       prototype.registerHybridGetter("selectedTrack", &HybridVideoPlayerSpec::getSelectedTrack);
       prototype.registerHybridGetter("selectedVideoTrackId", &HybridVideoPlayerSpec::getSelectedVideoTrackId);

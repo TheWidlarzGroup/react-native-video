@@ -18,7 +18,7 @@ public extension NativeVideoConfig {
   /**
    * Create a new instance of `NativeVideoConfig`.
    */
-  init(uri: String, externalSubtitles: [NativeExternalSubtitle]?, drm: NativeDrmParams?, headers: Dictionary<String, String>?, bufferConfig: BufferConfig?, metadata: CustomVideoMetadata?, initializeOnCreation: Bool?) {
+  init(uri: String, externalSubtitles: [NativeExternalSubtitle]?, drm: NativeDrmParams?, cmcd: NativeCmcdConfiguration?, headers: Dictionary<String, String>?, bufferConfig: BufferConfig?, metadata: CustomVideoMetadata?, startPosition: Double?, cropStart: Double?, cropEnd: Double?, initializeOnCreation: Bool?, shouldCache: Bool?, minLoadRetryCount: Double?, disableDisconnectError: Bool?, type: String?, textTracksAllowChunklessPreparation: Bool?) {
     self.init(std.string(uri), { () -> bridge.std__optional_std__vector_NativeExternalSubtitle__ in
       if let __unwrappedValue = externalSubtitles {
         return bridge.create_std__optional_std__vector_NativeExternalSubtitle__({ () -> bridge.std__vector_NativeExternalSubtitle_ in
@@ -34,6 +34,12 @@ public extension NativeVideoConfig {
     }(), { () -> bridge.std__optional_NativeDrmParams_ in
       if let __unwrappedValue = drm {
         return bridge.create_std__optional_NativeDrmParams_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_NativeCmcdConfiguration_ in
+      if let __unwrappedValue = cmcd {
+        return bridge.create_std__optional_NativeCmcdConfiguration_(__unwrappedValue)
       } else {
         return .init()
       }
@@ -61,8 +67,56 @@ public extension NativeVideoConfig {
       } else {
         return .init()
       }
+    }(), { () -> bridge.std__optional_double_ in
+      if let __unwrappedValue = startPosition {
+        return bridge.create_std__optional_double_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_double_ in
+      if let __unwrappedValue = cropStart {
+        return bridge.create_std__optional_double_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_double_ in
+      if let __unwrappedValue = cropEnd {
+        return bridge.create_std__optional_double_(__unwrappedValue)
+      } else {
+        return .init()
+      }
     }(), { () -> bridge.std__optional_bool_ in
       if let __unwrappedValue = initializeOnCreation {
+        return bridge.create_std__optional_bool_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_bool_ in
+      if let __unwrappedValue = shouldCache {
+        return bridge.create_std__optional_bool_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_double_ in
+      if let __unwrappedValue = minLoadRetryCount {
+        return bridge.create_std__optional_double_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_bool_ in
+      if let __unwrappedValue = disableDisconnectError {
+        return bridge.create_std__optional_bool_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_std__string_ in
+      if let __unwrappedValue = type {
+        return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_bool_ in
+      if let __unwrappedValue = textTracksAllowChunklessPreparation {
         return bridge.create_std__optional_bool_(__unwrappedValue)
       } else {
         return .init()
@@ -90,6 +144,11 @@ public extension NativeVideoConfig {
   @inline(__always)
   var drm: NativeDrmParams? {
     return self.__drm.value
+  }
+  
+  @inline(__always)
+  var cmcd: NativeCmcdConfiguration? {
+    return self.__cmcd.value
   }
   
   @inline(__always)
@@ -123,10 +182,106 @@ public extension NativeVideoConfig {
   }
   
   @inline(__always)
+  var startPosition: Double? {
+    return { () -> Double? in
+      if bridge.has_value_std__optional_double_(self.__startPosition) {
+        let __unwrapped = bridge.get_std__optional_double_(self.__startPosition)
+        return __unwrapped
+      } else {
+        return nil
+      }
+    }()
+  }
+  
+  @inline(__always)
+  var cropStart: Double? {
+    return { () -> Double? in
+      if bridge.has_value_std__optional_double_(self.__cropStart) {
+        let __unwrapped = bridge.get_std__optional_double_(self.__cropStart)
+        return __unwrapped
+      } else {
+        return nil
+      }
+    }()
+  }
+  
+  @inline(__always)
+  var cropEnd: Double? {
+    return { () -> Double? in
+      if bridge.has_value_std__optional_double_(self.__cropEnd) {
+        let __unwrapped = bridge.get_std__optional_double_(self.__cropEnd)
+        return __unwrapped
+      } else {
+        return nil
+      }
+    }()
+  }
+  
+  @inline(__always)
   var initializeOnCreation: Bool? {
     return { () -> Bool? in
       if bridge.has_value_std__optional_bool_(self.__initializeOnCreation) {
         let __unwrapped = bridge.get_std__optional_bool_(self.__initializeOnCreation)
+        return __unwrapped
+      } else {
+        return nil
+      }
+    }()
+  }
+  
+  @inline(__always)
+  var shouldCache: Bool? {
+    return { () -> Bool? in
+      if bridge.has_value_std__optional_bool_(self.__shouldCache) {
+        let __unwrapped = bridge.get_std__optional_bool_(self.__shouldCache)
+        return __unwrapped
+      } else {
+        return nil
+      }
+    }()
+  }
+  
+  @inline(__always)
+  var minLoadRetryCount: Double? {
+    return { () -> Double? in
+      if bridge.has_value_std__optional_double_(self.__minLoadRetryCount) {
+        let __unwrapped = bridge.get_std__optional_double_(self.__minLoadRetryCount)
+        return __unwrapped
+      } else {
+        return nil
+      }
+    }()
+  }
+  
+  @inline(__always)
+  var disableDisconnectError: Bool? {
+    return { () -> Bool? in
+      if bridge.has_value_std__optional_bool_(self.__disableDisconnectError) {
+        let __unwrapped = bridge.get_std__optional_bool_(self.__disableDisconnectError)
+        return __unwrapped
+      } else {
+        return nil
+      }
+    }()
+  }
+  
+  @inline(__always)
+  var type: String? {
+    return { () -> String? in
+      if bridge.has_value_std__optional_std__string_(self.__type) {
+        let __unwrapped = bridge.get_std__optional_std__string_(self.__type)
+        return String(__unwrapped)
+      } else {
+        return nil
+      }
+    }()
+  }
+  
+  @inline(__always)
+  var textTracksAllowChunklessPreparation: Bool? {
+    return { () -> Bool? in
+      if bridge.has_value_std__optional_bool_(self.__textTracksAllowChunklessPreparation) {
+        let __unwrapped = bridge.get_std__optional_bool_(self.__textTracksAllowChunklessPreparation)
         return __unwrapped
       } else {
         return nil

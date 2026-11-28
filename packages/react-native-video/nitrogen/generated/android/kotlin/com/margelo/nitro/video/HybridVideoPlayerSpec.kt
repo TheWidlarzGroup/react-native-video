@@ -107,6 +107,12 @@ abstract class HybridVideoPlayerSpec: HybridObject() {
   @get:Keep
   @set:DoNotStrip
   @set:Keep
+  abstract var progressUpdateInterval: Double
+  
+  @get:DoNotStrip
+  @get:Keep
+  @set:DoNotStrip
+  @set:Keep
   abstract var disableAudioSessionManagement: Boolean
   
   @get:DoNotStrip
@@ -114,6 +120,18 @@ abstract class HybridVideoPlayerSpec: HybridObject() {
   @set:DoNotStrip
   @set:Keep
   abstract var usesExternalPlaybackWhileExternalScreenIsActive: Boolean
+  
+  @get:DoNotStrip
+  @get:Keep
+  @set:DoNotStrip
+  @set:Keep
+  abstract var allowsExternalPlayback: Boolean
+  
+  @get:DoNotStrip
+  @get:Keep
+  @set:DoNotStrip
+  @set:Keep
+  abstract var audioOutput: AudioOutput
   
   @get:DoNotStrip
   @get:Keep

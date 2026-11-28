@@ -19,6 +19,8 @@ import androidx.annotation.OptIn
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.media3.common.util.UnstableApi
+import com.twg.video.core.utils.ControlsStylesUtils
+import com.twg.video.core.utils.FullscreenOrientationLock
 import com.twg.video.core.utils.PictureInPictureUtils.createPictureInPictureParams
 import com.twg.video.core.utils.SmallVideoPlayerOptimizer
 import com.twg.video.view.VideoView
@@ -35,6 +37,8 @@ class FullscreenVideoFragment(private val videoView: VideoView) : Fragment() {
 
   // The window's system bars before fullscreen, restored on exit (saved once, onResume hides again)
   private var barsBeforeFullscreen: SystemBarsState? = null
+
+  private var orientationLock: FullscreenOrientationLock? = null
 
   // Back press callback to handle back navigation
   private val backPressCallback = object : OnBackPressedCallback(true) {
@@ -123,6 +127,10 @@ class FullscreenVideoFragment(private val videoView: VideoView) : Fragment() {
 
     // Hide all root content views
     val currentActivity = requireActivity()
+
+    orientationLock = FullscreenOrientationLock(currentActivity).also {
+      it.apply(videoView.fullscreenOrientation, videoView.fullscreenAutorotate)
+    }
     val rootContent = currentActivity.window.decorView.findViewById<ViewGroup>(android.R.id.content)
     rootContentViews = (0 until rootContent.childCount)
       .map { rootContent.getChildAt(it) }
@@ -158,6 +166,7 @@ class FullscreenVideoFragment(private val videoView: VideoView) : Fragment() {
 
     setupFullscreenButton()
     videoView.playerView.setShowSubtitleButton(true)
+    ControlsStylesUtils.apply(videoView.playerView, videoView.controlsStyles)
     
     // Apply optimizations based on video player size in fullscreen mode
     SmallVideoPlayerOptimizer.applyOptimizations(videoView.playerView, requireContext(), isFullscreen = true)
@@ -183,14 +192,18 @@ class FullscreenVideoFragment(private val videoView: VideoView) : Fragment() {
       }
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
         container.fitsSystemWindows = false
-        container.windowInsetsController?.let { controller ->
-          controller.hide(WindowInsets.Type.systemBars())
-          controller.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        val barsToHide = ControlsStylesUtils.fullscreenHiddenBars(videoView.controlsStyles)
+        if (barsToHide != 0) {
+          container.windowInsetsController?.let { controller ->
+            controller.hide(barsToHide)
+            controller.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+          }
         }
       } else {
         // Keep the app's own flags (e.g. light status bar)
         val decorView = currentActivity.window.decorView
-        decorView.systemUiVisibility = decorView.systemUiVisibility or LEGACY_FULLSCREEN_FLAGS
+        decorView.systemUiVisibility =
+          decorView.systemUiVisibility or ControlsStylesUtils.fullscreenLegacyFlags(videoView.controlsStyles)
       }
     }
   }
@@ -232,6 +245,9 @@ class FullscreenVideoFragment(private val videoView: VideoView) : Fragment() {
   fun exitFullscreen() {
     // Remove back press callback since we're exiting
     backPressCallback.remove()
+
+    orientationLock?.release()
+    orientationLock = null
 
     restoreSystemUI()
 

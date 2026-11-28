@@ -17,6 +17,8 @@ namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 namespace margelo::nitro::video { enum class MixAudioMode; }
 // Forward declaration of `IgnoreSilentSwitchMode` to properly resolve imports.
 namespace margelo::nitro::video { enum class IgnoreSilentSwitchMode; }
+// Forward declaration of `AudioOutput` to properly resolve imports.
+namespace margelo::nitro::video { enum class AudioOutput; }
 // Forward declaration of `TextTrack` to properly resolve imports.
 namespace margelo::nitro::video { struct TextTrack; }
 // Forward declaration of `VideoTrack` to properly resolve imports.
@@ -35,6 +37,8 @@ namespace margelo::nitro::video { struct AudioTrack; }
 #include "JMixAudioMode.hpp"
 #include "IgnoreSilentSwitchMode.hpp"
 #include "JIgnoreSilentSwitchMode.hpp"
+#include "AudioOutput.hpp"
+#include "JAudioOutput.hpp"
 #include "TextTrack.hpp"
 #include <optional>
 #include "JTextTrack.hpp"
@@ -193,6 +197,15 @@ namespace margelo::nitro::video {
     static const auto method = _javaPart->javaClassStatic()->getMethod<void(jboolean /* playWhenInactive */)>("setPlayWhenInactive");
     method(_javaPart, playWhenInactive);
   }
+  double JHybridVideoPlayerSpec::getProgressUpdateInterval() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<double()>("getProgressUpdateInterval");
+    auto __result = method(_javaPart);
+    return __result;
+  }
+  void JHybridVideoPlayerSpec::setProgressUpdateInterval(double progressUpdateInterval) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(double /* progressUpdateInterval */)>("setProgressUpdateInterval");
+    method(_javaPart, progressUpdateInterval);
+  }
   bool JHybridVideoPlayerSpec::getDisableAudioSessionManagement() {
     static const auto method = _javaPart->javaClassStatic()->getMethod<jboolean()>("getDisableAudioSessionManagement");
     auto __result = method(_javaPart);
@@ -210,6 +223,24 @@ namespace margelo::nitro::video {
   void JHybridVideoPlayerSpec::setUsesExternalPlaybackWhileExternalScreenIsActive(bool usesExternalPlaybackWhileExternalScreenIsActive) {
     static const auto method = _javaPart->javaClassStatic()->getMethod<void(jboolean /* usesExternalPlaybackWhileExternalScreenIsActive */)>("setUsesExternalPlaybackWhileExternalScreenIsActive");
     method(_javaPart, usesExternalPlaybackWhileExternalScreenIsActive);
+  }
+  bool JHybridVideoPlayerSpec::getAllowsExternalPlayback() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jboolean()>("getAllowsExternalPlayback");
+    auto __result = method(_javaPart);
+    return static_cast<bool>(__result);
+  }
+  void JHybridVideoPlayerSpec::setAllowsExternalPlayback(bool allowsExternalPlayback) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jboolean /* allowsExternalPlayback */)>("setAllowsExternalPlayback");
+    method(_javaPart, allowsExternalPlayback);
+  }
+  AudioOutput JHybridVideoPlayerSpec::getAudioOutput() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JAudioOutput>()>("getAudioOutput");
+    auto __result = method(_javaPart);
+    return __result->toCpp();
+  }
+  void JHybridVideoPlayerSpec::setAudioOutput(AudioOutput audioOutput) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JAudioOutput> /* audioOutput */)>("setAudioOutput");
+    method(_javaPart, JAudioOutput::fromCpp(audioOutput));
   }
   bool JHybridVideoPlayerSpec::getIsPlaying() {
     static const auto method = _javaPart->javaClassStatic()->getMethod<jboolean()>("isPlaying");

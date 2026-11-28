@@ -20,6 +20,7 @@ export function attachPlaybackListeners(
   // Read directly from video element — store may not have synced yet
   // when the DOM event fires, causing a stale (previous) value.
   const isBuffering = () => video.readyState < video.HAVE_FUTURE_DATA;
+  let lastProgressAt = 0;
 
   return [
     on(video, 'play', () => {
@@ -43,6 +44,19 @@ export function attachPlaybackListeners(
       emit('onStatusChange', 'readyToPlay');
     }),
     on(video, 'timeupdate', () => {
+      // The browser picks the `timeupdate` rate, so the interval can only
+      // thin the events out. The tolerance keeps the default 250 ms from
+      // dropping every other event when the browser fires slightly early.
+      // A paused element fires `timeupdate` only after a seek, and no other
+      // event follows it, so that one always goes out.
+      const now = Date.now();
+      if (
+        !video.paused &&
+        now - lastProgressAt < media.progressUpdateInterval - 30
+      ) {
+        return;
+      }
+      lastProgressAt = now;
       emit('onProgress', {
         currentTime: video.currentTime,
         bufferDuration: media.bufferAhead,
