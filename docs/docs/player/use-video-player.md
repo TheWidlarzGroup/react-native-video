@@ -24,11 +24,11 @@ You can also pass a configuration object for more control:
 
 ```tsx
 const player = useVideoPlayer({
-  source: {
-    uri: 'https://www.w3schools.com/html/mov_bbb.mp4',
-  },
+  uri: 'https://www.w3schools.com/html/mov_bbb.mp4',
 });
 ```
+
+All fields of the configuration object (`headers`, `metadata`, `externalSubtitles`, `bufferConfig`, `drm`, `initializeOnCreation`) are listed in [VideoPlayer: Source configuration](./video-player.md#source-configuration).
 
 ## Why useVideoPlayer?
 
@@ -68,6 +68,11 @@ player.muted = true;
 | `initialize()` | Manually initialize the underlying native player item when `initializeOnCreation` was set to `false`. No-op if already initialized. |
 | `preload()` | Ensures the media source is set and prepared (buffering started) without starting playback. If not yet initialized it will initialize first. |
 | `release()` | Releases the player's native resources. The player is no longer usable after calling this method. **Note:** on iOS and Android `replaceSourceAsync(null)` releases the native player the same way; to play another video, call `replaceSourceAsync(newSource)` on a live player or create a new one. |
+| `addEventListener(event, callback)` | Subscribes to a player event and returns a subscription; call `remove()` on it to stop listening. See [Events](./events.md). |
+| `getAvailableTextTracks()` | Returns the text tracks of the current source, embedded ones and those from `externalSubtitles`, as `TextTrack[]`. |
+| `selectTextTrack(textTrack: TextTrack \| null)` | Shows the given text track, or hides subtitles with `null`. `onTrackChange` reports the change. |
+| `getAvailableVideoTracks()` | Returns the video renditions of the current source, best first; empty until the manifest has loaded. See [Video quality](./video-quality.md). |
+| `selectVideoTrack(trackId?: string)` | Pins playback to one rendition from `getAvailableVideoTracks()`, or returns to automatic selection with no argument. See [Video quality](./video-quality.md). |
 
 ### Properties
 
@@ -85,14 +90,36 @@ player.muted = true;
 | `ignoreSilentSwitchMode` | Read/Write | `IgnoreSilentSwitchMode` | iOS-only. Determines how audio should behave when the hardware mute (silent) switch is on. |
 | `playInBackground` | Read/Write | `boolean` | Whether playback should continue when the app goes to the background. |
 | `playWhenInactive` | Read/Write | `boolean` | Whether playback should continue when the app is inactive (e.g., during a phone call). |
+| `allowsExternalPlayback` | Read/Write | `boolean` | iOS-only. Whether the video can be sent to an AirPlay device. Defaults to `true`. With `false` the video stays on the device. |
+| `audioOutput` | Read/Write | `'speaker' \| 'earpiece'` | Where the audio plays on a phone. `'earpiece'` uses the receiver, as in a phone call. Defaults to `'speaker'`. On iOS `'earpiece'` is ignored while any player uses Picture in Picture, `playInBackground` or `showNotificationControls`. On Android, add the `MODIFY_AUDIO_SETTINGS` permission to your manifest so the player can switch the audio mode. No effect on web. |
+| `progressUpdateInterval` | Read/Write | `number` | Time between two `onProgress` events in milliseconds. Defaults to `250` on Android and web and `500` on iOS. On web the browser limits it to about 250 ms at best. |
 | `isPlaying` | Read-only | `boolean` | Returns `true` if the video is currently playing. |
 | `selectedTrack` | Read-only | `TextTrack \| undefined` | Currently selected text track, or `undefined` when no track is selected. |
+| `selectedVideoTrackId` | Read-only | `string \| undefined` | The id passed to the last `selectVideoTrack()` call, or `undefined` while selection is automatic. |
+| `showNotificationControls` | Read/Write | `boolean` | Shows playback controls on the lock screen and in Control Center (iOS), in the media notification (Android) and through the Media Session API (web), with the `metadata` of the source. On Android, `playInBackground: true` shows the notification as well, because background playback runs in a foreground service that needs one. Default: `false`. |
+| `disableAudioSessionManagement` | Read/Write | `boolean` | iOS-only. When `true`, this player does not configure or activate the `AVAudioSession`, so another library (for example an audio recorder) can manage it. To switch it off for every player, use [`setAudioSessionManagementDisabled`](./video-player.md#audio-session). Default: `false`. |
 
 ### Error Handling
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `onError?` | `(error: VideoRuntimeError) => void` | A callback function that is invoked when a runtime error occurs in the player. You can use this to catch and handle errors gracefully. |
+Errors are delivered through the `onError` event: subscribe with `player.addEventListener('onError', (error) => …)` or the [`useEvent`](./events.md#using-the-useevent-hook) hook. The callback receives a `VideoRuntimeError` with a `code` and a `message`. Every code is listed in [Errors](./errors.md).
+
+### Caching
+
+Set `shouldCache` on the `VideoConfig` to keep the downloaded file on disk and play it from there next time.
+
+```ts
+const player = useVideoPlayer({
+  source: { uri: 'https://example.com/video.mp4', shouldCache: true },
+});
+```
+
+| Platform | Behaviour |
+|----------|-----------|
+| Android | Progressive files loaded over the network are cached in the app's cache directory (`RNVCache`). The cache is shared by all players and evicts the least recently used files above 100 MB. A file larger than 100 MB is never kept: it is downloaded again on every play. HLS and DASH streams, DRM content and sources with `externalSubtitles` are played without the cache. A partly downloaded file is checked against the server (`Last-Modified` or `ETag`, and the length) before it is finished, and downloaded anew when the file changed. |
+| iOS | The same rules and the same 100 MB limit, in `Library/Caches/RNVCache`. While a file is not complete, the player's requests go to the network and every byte that passes is kept, so a file is downloaded once. A file that was only partly played is finished the next time it plays. No extra pods or build flags. |
+| Web | Ignored, the browser's HTTP cache applies. |
+
+On Android and iOS a cached file is identified by the source `uri` together with its `headers`. Two sources with the same `uri` and different headers are cached as two files, so a file downloaded with one `Authorization` header is never played for another one. This also means that a refreshed token starts a new file; the old one is evicted when the cache is over its limit.
 
 ### Buffer Config
 
@@ -102,17 +129,15 @@ Example
 
 ```ts
 const player = useVideoPlayer({
-  source: {
-    uri: 'https://example.com/stream.m3u8',
-    bufferConfig: {
-      // Android
-      minBufferMs: 5000,
-      maxBufferMs: 10000,
-      // iOS
-      preferredForwardBufferDurationMs: 3000,
-      // Live (cross‑platform target)
-      livePlayback: { targetOffsetMs: 500 },
-    },
+  uri: 'https://example.com/stream.m3u8',
+  bufferConfig: {
+    // Android
+    minBufferMs: 5000,
+    maxBufferMs: 10000,
+    // iOS
+    preferredForwardBufferDurationMs: 3000,
+    // Live (cross‑platform target)
+    livePlayback: { targetOffsetMs: 500 },
   },
 });
 ```
@@ -133,8 +158,8 @@ Properties below are Android‑only
 | `livePlayback.maxOffsetMs` | `number` | Maximum allowed live offset (ms). |
 | `livePlayback.targetOffsetMs` | `number` | Target live offset the player tries to maintain (ms). |
 
-#### iOS, visionOS, tvOS
-Properties below are Apple platforms‑only
+#### iOS
+Properties below are iOS-only
 
 | Property | Type | Description |
 |----------|------|-------------|

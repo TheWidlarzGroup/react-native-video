@@ -3,6 +3,7 @@ import { NitroModules } from 'react-native-nitro-modules';
 import type { VideoPlayer as VideoPlayerImpl } from '../spec/nitro/VideoPlayer.nitro';
 import type { VideoPlayerSource } from '../spec/nitro/VideoPlayerSource.nitro';
 import type { IgnoreSilentSwitchMode } from './types/IgnoreSilentSwitchMode';
+import type { AudioOutput } from './types/AudioOutput';
 import type { AudioTrack } from './types/AudioTrack';
 import type { MixAudioMode } from './types/MixAudioMode';
 import type { TextTrack } from './types/TextTrack';
@@ -260,6 +261,18 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     this.player.playWhenInactive = value;
   }
 
+  // Progress Update Interval
+  get progressUpdateInterval(): number {
+    return this.player.progressUpdateInterval;
+  }
+
+  set progressUpdateInterval(value: number) {
+    if (!Number.isFinite(value) || value <= 0) {
+      return;
+    }
+    this.player.progressUpdateInterval = value;
+  }
+
   // Disable Audio Session Management
   get disableAudioSessionManagement(): boolean {
     return this.player.disableAudioSessionManagement;
@@ -273,6 +286,30 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     }
 
     this.player.disableAudioSessionManagement = value;
+  }
+
+  // Allows External Playback
+  get allowsExternalPlayback(): boolean {
+    return this.player.allowsExternalPlayback;
+  }
+
+  set allowsExternalPlayback(value: boolean) {
+    if (__DEV__ && !['ios'].includes(Platform.OS)) {
+      console.warn(
+        'allowsExternalPlayback is not supported on this platform, it wont have any effect'
+      );
+    }
+
+    this.player.allowsExternalPlayback = value;
+  }
+
+  // Audio Output
+  get audioOutput(): AudioOutput {
+    return this.player.audioOutput;
+  }
+
+  set audioOutput(value: AudioOutput) {
+    this.player.audioOutput = value;
   }
 
   // Is Playing

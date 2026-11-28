@@ -3,10 +3,10 @@ import type {
   AudioTrackChangeData,
   BandwidthData,
   onLoadData,
-  onLoadStartData,
   onPlaybackStateChangeData,
   onProgressData,
   onVolumeChangeData,
+  SourceType,
   TimedMetadata,
   VideoTrackChangeData,
 } from '../../core/types/Events';
@@ -15,6 +15,18 @@ import type { VideoPlayerStatus } from '../../core/types/VideoPlayerStatus';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type { VideoPlayerEvents } from '../../core/types/Events';
+
+import type { VideoPlayerSource } from './VideoPlayerSource.nitro';
+
+/**
+ * Native payload of `onLoadStart`. Same shape as the public `onLoadStartData`, but `source`
+ * is the hybrid `VideoPlayerSource`, which is what the native side passes. The public type
+ * declares `VideoPlayerSourceBase`, and nitrogen would generate a plain struct for it.
+ */
+export interface onLoadStartData {
+  sourceType: SourceType;
+  source: VideoPlayerSource;
+}
 
 export interface ListenerSubscription {
   remove(): void;

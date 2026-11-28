@@ -52,6 +52,15 @@ test('serves the HLS manifest from a subdirectory', async () => {
   expect(res.headers.get('content-type')).toBe('application/vnd.apple.mpegurl');
 });
 
+test('a token cut off with /__go-offline loses the connection; other requests do not', async () => {
+  expect((await fetch(`${BASE}/short.mp4?token=t1`)).status).toBe(200);
+  expect((await fetch(`${BASE}/__go-offline?token=t1`)).status).toBe(200);
+  await expect(fetch(`${BASE}/short.mp4?token=t1`)).rejects.toThrow();
+  expect((await fetch(`${BASE}/short.mp4?token=t2`)).status).toBe(200);
+  expect((await fetch(`${BASE}/short.mp4`)).status).toBe(200);
+  expect((await fetch(`${BASE}/__go-offline`)).status).toBe(400);
+});
+
 test('honours Range requests', async () => {
   const res = await fetch(`${BASE}/short.mp4`, { headers: { Range: 'bytes=0-99' } });
   expect(res.status).toBe(206);
@@ -106,6 +115,54 @@ test('handles open-ended ranges correctly (bytes=N-)', async () => {
 });
 
 const openLinkUrl = (link) => `${BASE}/__open-link?url=${encodeURIComponent(link)}`;
+
+const elapsedMs = async (url, init) => {
+  const start = performance.now();
+  const res = await fetch(url, init);
+  await res.arrayBuffer();
+  return { res, ms: performance.now() - start };
+};
+
+test('?hold keeps a request waiting, then serves the file', async () => {
+  const { res, ms } = await elapsedMs(`${BASE}/short.mp4?hold=300`, {
+    headers: { Range: 'bytes=0-99' },
+  });
+  expect(res.status).toBe(206);
+  expect(ms).toBeGreaterThanOrEqual(290);
+});
+
+test('?hold with holdId holds every request of the id until one moment, then none', async () => {
+  const url = `${BASE}/short.mp4?hold=400&holdId=serve-test-1`;
+  // Two parallel requests (AVPlayer's range requests) end together, not one hold apart.
+  const [a, b] = await Promise.all([elapsedMs(url), elapsedMs(url, { headers: { Range: 'bytes=0-1' } })]);
+  expect(a.res.status).toBe(200);
+  expect(b.res.status).toBe(206);
+  for (const { ms } of [a, b]) {
+    expect(ms).toBeGreaterThanOrEqual(390);
+    expect(ms).toBeLessThan(700);
+  }
+  // After that moment the id is not held again.
+  expect((await elapsedMs(url)).ms).toBeLessThan(250);
+  // Another id waits again.
+  expect((await elapsedMs(`${BASE}/short.mp4?hold=300&holdId=serve-test-2`)).ms).toBeGreaterThanOrEqual(290);
+});
+
+test('?hold ignores a value that is not a positive number', async () => {
+  for (const hold of ['0', '-5', 'abc', '']) {
+    const { res, ms } = await elapsedMs(`${BASE}/short.mp4?hold=${hold}`);
+    expect(res.status).toBe(200);
+    expect(ms).toBeLessThan(250);
+  }
+});
+
+test('a held request whose client went away is dropped, and the server keeps serving', async () => {
+  const controller = new AbortController();
+  const pending = fetch(`${BASE}/short.mp4?hold=60000`, { signal: controller.signal });
+  await new Promise((r) => setTimeout(r, 50));
+  controller.abort();
+  await expect(pending).rejects.toThrow();
+  expect((await fetch(`${BASE}/short.mp4`, { method: 'HEAD' })).status).toBe(200);
+});
 
 test('/__open-link opens a scenario link on the simulator, retrying a failed attempt', async () => {
   const res = await fetch(openLinkUrl('rnvtest://scenario/mp4'), { method: 'POST' });

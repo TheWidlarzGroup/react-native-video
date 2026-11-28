@@ -10,6 +10,15 @@ describe('scenarioLink', () => {
     expect(scenarioLink(request('rnvtest://scenario/error-404'))).toBe('rnvtest://scenario/error-404');
   });
 
+  test('accepts a scenario deep link that carries the fixture port', () => {
+    expect(scenarioLink(request('rnvtest://scenario/mp4?fixturePort=8690'))).toBe(
+      'rnvtest://scenario/mp4?fixturePort=8690'
+    );
+    expect(scenarioLink(request('rnvtest://scenario/error-404?fixturePort=8090'))).toBe(
+      'rnvtest://scenario/error-404?fixturePort=8090'
+    );
+  });
+
   test('rejects anything that is not exactly a scenario deep link', () => {
     for (const link of [
       'https://example.com',
@@ -17,6 +26,12 @@ describe('scenarioLink', () => {
       'rnvtest://scenario/',
       'rnvtest://scenario/mp4/extra',
       'rnvtest://scenario/mp4?x=1',
+      'rnvtest://scenario/mp4?fixturePort=',
+      'rnvtest://scenario/mp4?fixturePort=abc',
+      'rnvtest://scenario/mp4?fixturePort=123456',
+      'rnvtest://scenario/mp4?fixturePort=8690&x=1',
+      'rnvtest://scenario/mp4?fixturePort=8690 --help',
+      'rnvtest://scenario/mp4?fixturePort=8690;rm',
       'rnvtest://scenario/MP4',
       'rnvtest://scenario/mp4 --help',
       'rnvtest://scenario/mp4;rm',

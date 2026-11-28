@@ -22,7 +22,11 @@ class HybridVideoPlayerSourceFactory: HybridVideoPlayerSourceFactorySpec {
       headers: nil,
       bufferConfig: nil,
       metadata: nil,
-      initializeOnCreation: true
+      startPosition: nil,
+      cropStart: nil,
+      cropEnd: nil,
+      initializeOnCreation: true,
+      shouldCache: nil
     )
     return try HybridVideoPlayerSource(config: config)
   }

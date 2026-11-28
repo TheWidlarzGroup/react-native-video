@@ -9,6 +9,7 @@ import com.margelo.nitro.core.Promise
 import com.twg.video.core.LibraryError
 import com.twg.video.core.player.DRMManagerSpec
 import com.twg.video.core.player.buildMediaSource
+import com.twg.video.core.player.clipMediaSource
 import com.twg.video.core.player.createMediaItemFromVideoConfig
 import com.twg.video.core.plugins.PluginsRegistry
 import com.twg.video.core.utils.SourceLoader
@@ -44,10 +45,13 @@ class HybridVideoPlayerSource(): HybridVideoPlayerSourceSpec() {
     )
 
     NitroModules.applicationContext?.let {
-      this.mediaSource = buildMediaSource(
-        context = it,
-        source = overriddenSource,
-        mediaItem
+      this.mediaSource = clipMediaSource(
+        buildMediaSource(
+          context = it,
+          source = overriddenSource,
+          mediaItem
+        ),
+        config
       )
     } ?: run {
       throw LibraryError.ApplicationContextNotFound

@@ -81,6 +81,13 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     }), let previousSource else { throw CancellationError() }
     let context = LoadContext(source: newSource, token: token)
     releaseAssetIfNotUsedByCurrentLoad(for: previousSource)
+    // The next onAudioTrackChange describes the new source. Without this, a source with the
+    // same audio tracks (the next episode, say) has the same signature and gets no event.
+    // The signature belongs to the main thread (emitAudioTrackChange); this runs there before
+    // the new item is committed, which is queued later.
+    DispatchQueue.main.async { [weak self] in
+      self?.lastEmittedAudioTrackSignature = nil
+    }
     return context
   }
 
@@ -225,20 +232,30 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
 
   var currentTime: Double {
     set {
-      _eventEmitter?.onSeek(newValue)
+      // Time is counted from `cropStart` when the source is cropped, and a seek past
+      // `cropEnd` stops at `cropEnd`, as on Android.
+      var target = max(0, newValue)
+      if let item = player.currentItem, item.forwardPlaybackEndTime.isNumeric {
+        let croppedDuration = item.croppedDuration
+        if croppedDuration.isFinite {
+          target = min(target, croppedDuration)
+        }
+      }
+      _eventEmitter?.onSeek(target)
+      let cropStart = player.currentItem?.cropStartSeconds ?? 0
       player.seek(
-        to: CMTime(seconds: newValue, preferredTimescale: 1000),
+        to: CMTime(seconds: target + cropStart, preferredTimescale: 1000),
         toleranceBefore: .zero,
         toleranceAfter: .zero
       )
     }
     get {
-      player.currentTime().seconds
+      player.currentItem?.croppedCurrentTime ?? player.currentTime().seconds
     }
   }
 
   var duration: Double {
-    Double(player.currentItem?.duration.seconds ?? Double.nan)
+    player.currentItem?.croppedDuration ?? Double.nan
   }
 
   var rate: Double {
@@ -281,7 +298,33 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
 
   var playWhenInactive: Bool = false
 
+  // iOS default: 500 ms, as before this option existed. Android uses 250 ms.
+  var progressUpdateInterval: Double = VideoPlayerObserver.defaultProgressUpdateInterval {
+    didSet {
+      guard progressUpdateInterval.isFinite, progressUpdateInterval > 0 else {
+        progressUpdateInterval = oldValue
+        return
+      }
+      playerObserver?.progressUpdateInterval = progressUpdateInterval
+    }
+  }
+
   var disableAudioSessionManagement: Bool = false {
+    didSet {
+      VideoManager.shared.requestAudioSessionUpdate()
+    }
+  }
+
+  var allowsExternalPlayback: Bool {
+    get {
+      return player.allowsExternalPlayback
+    }
+    set {
+      player.allowsExternalPlayback = newValue
+    }
+  }
+
+  var audioOutput: AudioOutput = .speaker {
     didSet {
       VideoManager.shared.requestAudioSessionUpdate()
     }
@@ -581,13 +624,11 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       throw PlayerError.notInitialized.error()
     }
 
-    let currentItemTime = currentItem.currentTime()
-
     // Duration is NaN for live streams
     let fixedDurration = duration.isNaN ? Double.infinity : duration
 
     // Clap by <0, duration>
-    let newTime = max(0, min(currentItemTime.seconds + time, fixedDurration))
+    let newTime = max(0, min(currentItem.croppedCurrentTime + time, fixedDurration))
 
     currentTime = newTime
   }
@@ -711,6 +752,20 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       playerItem = AVPlayerItem(asset: asset)
     }
     try ensureCurrentLoad(context)
+
+    playerItem.setCrop(start: source.config.cropStart, end: source.config.cropEnd)
+
+    // Seeking an item that has no player yet sets where its playback starts.
+    // `startPosition` counts from `cropStart`.
+    let startSeconds = playerItem.cropStartSeconds + max(0, source.config.startPosition ?? 0) / 1000
+    if startSeconds > 0 {
+      playerItem.seek(
+        to: CMTime(seconds: startSeconds, preferredTimescale: 1000),
+        toleranceBefore: .zero,
+        toleranceAfter: .zero,
+        completionHandler: nil
+      )
+    }
 
     if let metadata = source.config.metadata {
       let title = metadata.title

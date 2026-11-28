@@ -265,6 +265,17 @@ open class HybridVideoPlayerSpec_cxx {
     }
   }
   
+  public final var progressUpdateInterval: Double {
+    @inline(__always)
+    get {
+      return self.__implementation.progressUpdateInterval
+    }
+    @inline(__always)
+    set {
+      self.__implementation.progressUpdateInterval = newValue
+    }
+  }
+  
   public final var disableAudioSessionManagement: Bool {
     @inline(__always)
     get {
@@ -273,6 +284,28 @@ open class HybridVideoPlayerSpec_cxx {
     @inline(__always)
     set {
       self.__implementation.disableAudioSessionManagement = newValue
+    }
+  }
+  
+  public final var allowsExternalPlayback: Bool {
+    @inline(__always)
+    get {
+      return self.__implementation.allowsExternalPlayback
+    }
+    @inline(__always)
+    set {
+      self.__implementation.allowsExternalPlayback = newValue
+    }
+  }
+  
+  public final var audioOutput: Int32 {
+    @inline(__always)
+    get {
+      return self.__implementation.audioOutput.rawValue
+    }
+    @inline(__always)
+    set {
+      self.__implementation.audioOutput = margelo.nitro.video.AudioOutput(rawValue: newValue)!
     }
   }
   

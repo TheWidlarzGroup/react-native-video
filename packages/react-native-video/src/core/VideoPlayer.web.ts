@@ -1,5 +1,6 @@
 import type { AudioTrack } from './types/AudioTrack';
 import type { IgnoreSilentSwitchMode } from './types/IgnoreSilentSwitchMode';
+import type { AudioOutput } from './types/AudioOutput';
 import type { MixAudioMode } from './types/MixAudioMode';
 import type { TextTrack } from './types/TextTrack';
 import type { VideoTrack } from './types/VideoTrack';
@@ -152,6 +153,14 @@ class VideoPlayer extends VideoPlayerEvents implements WebVideoPlayer {
     return this._media.video;
   }
 
+  /**
+   * The underlying `<video>` element. It exists as soon as the player is
+   * created, before a `VideoView` mounts it.
+   */
+  get nativeHtmlVideoElement(): HTMLVideoElement {
+    return this._media.video;
+  }
+
   // --- Playback state (read from store or video element) ---
 
   get source(): VideoPlayerSourceBase {
@@ -243,10 +252,27 @@ class VideoPlayer extends VideoPlayerEvents implements WebVideoPlayer {
     return true;
   }
   set playWhenInactive(_: boolean) {}
+  get progressUpdateInterval(): number {
+    return this._media.progressUpdateInterval;
+  }
+  set progressUpdateInterval(value: number) {
+    if (!Number.isFinite(value) || value <= 0) {
+      return;
+    }
+    this._media.progressUpdateInterval = value;
+  }
   get disableAudioSessionManagement(): boolean {
     return false;
   }
   set disableAudioSessionManagement(_: boolean) {}
+  get allowsExternalPlayback(): boolean {
+    return true;
+  }
+  set allowsExternalPlayback(_: boolean) {}
+  get audioOutput(): AudioOutput {
+    return 'speaker';
+  }
+  set audioOutput(_: AudioOutput) {}
 
   // --- Media Session ---
 
@@ -323,6 +349,20 @@ class VideoPlayer extends VideoPlayerEvents implements WebVideoPlayer {
 
     this._source = source as NativeVideoConfig;
     this._media.loadSource(source.uri);
+
+    const startPosition = source.startPosition;
+    if (startPosition !== undefined && startPosition > 0) {
+      video.addEventListener(
+        'loadedmetadata',
+        () => {
+          // Skip if the source was replaced before this one loaded
+          if (this._source === source) {
+            video.currentTime = startPosition / 1000;
+          }
+        },
+        { once: true }
+      );
+    }
 
     if (this.mediaSession?.enabled) {
       this.mediaSession.updateMediaSession(source.metadata);
