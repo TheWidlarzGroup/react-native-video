@@ -168,6 +168,25 @@ describe('handle', () => {
     ]);
   });
 
+  test('onBuffer(true) twice in a row marks evt-onBuffer-true-repeated', () => {
+    feed({ type: 'onBuffer', buffering: true });
+    expect(markers()).toEqual(['evt-onBuffer']);
+    feed({ type: 'onBuffer', buffering: true });
+    expect(markers()).toContain('evt-onBuffer-true-repeated');
+    expect(lines()).toEqual(['onBuffer true', 'onBuffer true']);
+  });
+
+  test('alternating onBuffer and a repeated false are not a repeat', () => {
+    feed(
+      { type: 'onBuffer', buffering: true },
+      { type: 'onBuffer', buffering: false },
+      { type: 'onBuffer', buffering: true },
+      { type: 'onBuffer', buffering: false },
+      { type: 'onBuffer', buffering: false }
+    );
+    expect(markers()).not.toContain('evt-onBuffer-true-repeated');
+  });
+
   test('onReadyToDisplay marks; a second one for the same source is a repeat', () => {
     feed({ type: 'onReadyToDisplay' });
     expect(markers()).toEqual(['evt-onReadyToDisplay']);

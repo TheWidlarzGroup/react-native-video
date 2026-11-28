@@ -452,6 +452,9 @@ function logPlayerEvents(player: VideoPlayer) {
   player.addEventListener('onPlaybackStateChange', ({ isPlaying }) =>
     handle({ type: 'onPlaybackStateChange', isPlaying })
   );
+  player.addEventListener('onBuffer', (buffering) =>
+    handle({ type: 'onBuffer', buffering })
+  );
   player.addEventListener('onSeek', (seekTime) =>
     handle({ type: 'onSeek', seekTime })
   );

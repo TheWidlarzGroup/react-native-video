@@ -49,7 +49,7 @@ The `VideoPlayer` class, through `VideoPlayerEvents`, supports the following eve
 | `onAudioBecomingNoisy`     | () => void                                           | Fired when audio is about to become noisy (e.g., headphones unplugged).                     |
 | `onAudioFocusChange`       | (hasAudioFocus: boolean) => void                     | Fired when the audio focus changes (e.g., another app starts playing audio).                |
 | `onBandwidthUpdate`        | (data: [BandwidthData](../api-reference/interfaces/BandwidthData.md)) => void                        | Fired with an estimate of the available bandwidth.                                          |
-| `onBuffer`                 | (buffering: boolean) => void                         | Fired when the player starts or stops buffering data.                                       |
+| `onBuffer`                 | (buffering: boolean) => void                         | Fired when the player starts or stops buffering data. On iOS it fires only when that state changes, so two events in a row never carry the same value.                                       |
 | `onControlsVisibleChange`  | (visible: boolean) => void                           | Fired when the visibility of native controls changes.                                       |
 | `onEnd`                    | () => void                                           | Fired when the video playback reaches the end.                                              |
 | `onExternalPlaybackChange` | (externalPlaybackActive: boolean) => void            | Fired when the external playback status changes (e.g., AirPlay).                            |

@@ -34,6 +34,11 @@ export const MARKER_IDS = [
   // RETRIED_ONCE_REQUESTS requests, the first one and minLoadRetryCount: 1 retry.
   'evt-retried-once',
   'evt-onPlaybackStateChanged',
+  'evt-onBuffer', // onBuffer(true) seen at least once
+  // onBuffer(true) twice in a row without onBuffer(false) between (#5269): iOS reported the
+  // same state up to seven times at start. A repeated false is not counted: Android reports
+  // the ready state and then the end of the clip with false.
+  'evt-onBuffer-true-repeated',
   // VideoView's renderLoader (#5264): the loader mounted, and later unmounted because the
   // video was ready to display (smoke-loader.yaml).
   'evt-loader-shown',
@@ -110,6 +115,7 @@ export type PlayerEvent =
   | { type: 'requestCount'; count: number }
   | { type: 'onStatusChange'; status: VideoPlayerStatus }
   | { type: 'onPlaybackStateChange'; isPlaying: boolean }
+  | { type: 'onBuffer'; buffering: boolean }
   | { type: 'onSeek'; seekTime: number }
   | { type: 'onVolumeChange'; muted: boolean; volume: number }
   | { type: 'onPlaybackRateChange'; rate: number }
@@ -225,6 +231,8 @@ type State = {
   replacementLoadStarts: number;
   // The next onProgress tells where the replacement source started (see onLoad).
   reloadPending: boolean;
+  // The value of the last onBuffer, null before the first one.
+  lastBuffering: boolean | null;
   // onReadyToDisplay events since the current source started loading; a replacement source
   // (replaceSourceAsync) starts its own count.
   readyToDisplayOfSource: number;
@@ -254,6 +262,7 @@ const initialState = (): State => ({
   replaceRequested: false,
   replacementLoadStarts: 0,
   reloadPending: false,
+  lastBuffering: null,
   readyToDisplayOfSource: 0,
   sparseGaps: 0,
   loadsOfSource: 0,
@@ -514,6 +523,15 @@ function apply(event: PlayerEvent) {
         mark('evt-paused');
       }
       append(`playbackState isPlaying=${event.isPlaying}`);
+      return;
+
+    case 'onBuffer':
+      if (event.buffering) {
+        mark('evt-onBuffer');
+        if (state.lastBuffering === true) mark('evt-onBuffer-true-repeated');
+      }
+      state.lastBuffering = event.buffering;
+      append(`onBuffer ${event.buffering}`);
       return;
 
     case 'onSeek':

@@ -449,6 +449,10 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
 
   var isCurrentlyBuffering: Bool = false
 
+  /// The value the last `onBuffer` event carried, so the event is sent when buffering starts
+  /// or stops and not every time the playback state is re-evaluated.
+  var lastReportedBuffering: Bool?
+
   var isPlaying: Bool {
     return player.rate != 0
   }
