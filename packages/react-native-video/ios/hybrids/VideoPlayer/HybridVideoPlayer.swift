@@ -999,7 +999,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       }
       guard !Task.isCancelled else { return }
 
-      await MainActor.run {
+      await MainActor.run { [weak self, renditions] in
         guard let self, self.cachedVideoRenditionsURL == url,
           self.cachedVideoRenditionsHeaders == headers
         else { return }

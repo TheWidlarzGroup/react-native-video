@@ -30,7 +30,8 @@ final class SideloadedTextTracks {
 }
 
 extension AVPlayerItem {
-  var sideloadedTextTracks: SideloadedTextTracks? {
+  // An associated object, not AVPlayerItem state: set where the item is built, off the main actor
+  nonisolated var sideloadedTextTracks: SideloadedTextTracks? {
     get {
       objc_getAssociatedObject(self, &SideloadedTextTracksAssociatedKey) as? SideloadedTextTracks
     }
