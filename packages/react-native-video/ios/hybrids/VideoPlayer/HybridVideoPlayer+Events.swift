@@ -102,15 +102,14 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
       self.status = .loading
       break
 
-    case .playing:
+    case .playing, .paused:
       isCurrentlyBuffering = false
-      self.status = .readytoplay
-      break
-
-    case .paused:
-      isCurrentlyBuffering = false
-      self.status = .readytoplay
-      break
+      // AVPlayer also publishes `paused` when a player property is set while the item is
+      // still loading. That says nothing about the source, so it must not report
+      // `readyToPlay` ahead of `loading`.
+      if player.currentItem?.status == .readyToPlay {
+        self.status = .readytoplay
+      }
 
     @unknown default:
       break

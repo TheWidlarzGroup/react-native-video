@@ -441,11 +441,16 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       // Off-main manifest fetch for the quality ladder.
       self.beginVideoRenditionLoad(for: loadedPlayerItem.context.source)
 
-      // A player property, not an item one: set for every source so a source without the
-      // option gets the AVPlayer default back.
-      self.player.automaticallyWaitsToMinimizeStalling =
-        bufferConfig?.automaticallyWaitsToMinimizeStalling ?? true
       self.player.replaceCurrentItem(with: loadedPlayerItem.item)
+
+      // A player property, not an item one: set for every source so a source without the
+      // option gets the AVPlayer default back. Written once the new item is in place and
+      // only when the value changes, because the setter makes AVPlayer publish
+      // `timeControlStatus` again.
+      let waitsToMinimizeStalling = bufferConfig?.automaticallyWaitsToMinimizeStalling ?? true
+      if self.player.automaticallyWaitsToMinimizeStalling != waitsToMinimizeStalling {
+        self.player.automaticallyWaitsToMinimizeStalling = waitsToMinimizeStalling
+      }
     }
   }
 
