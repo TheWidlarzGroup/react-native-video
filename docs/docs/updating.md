@@ -204,7 +204,7 @@ useEvent(player, 'onError', (error) => console.error(error.code, error.message))
 | `onAudioTracks` | `onAudioTrackChange` | `{ audioTracks }` is now `{ availableTracks, selectedTrackId }`. It also fires when the selected track changes. |
 | `onTextTracks` | None | Read the list with `player.getAvailableTextTracks()`. The new `onTrackChange` event reports the selected text track. |
 | `onAudioBecomingNoisy` | `onAudioBecomingNoisy` | Android only in v7. |
-| `onAudioFocusChanged` | `onAudioFocusChange` | `{ hasAudioFocus }` is now a `boolean`. Android. |
+| `onAudioFocusChanged` | `onAudioFocusChange` | `{ hasAudioFocus }` is now a `boolean`. Up to `7.0.0-beta.15` it never fires; from the release after it, on Android when the focus is lost and comes back, and also on iOS, for an audio session interruption. |
 | `onExternalPlaybackChange` | `onExternalPlaybackChange` | `{ isExternalPlaybackActive }` is now a `boolean`. iOS. |
 
 :::info onProgress in v7

@@ -13,9 +13,12 @@ export interface VideoPlayerEvents {
    */
   onAudioBecomingNoisy: () => void;
   /**
-   * Called when the audio focus changes.
-   * @param hasAudioFocus Whether the audio has focus.
-   * @platform Android
+   * Called with `false` when another app or a call takes the audio, and with `true` when it
+   * gives it back. On Android that is a loss of audio focus, for good or for a moment (not a
+   * request to duck), and players with `mixAudioMode` `'mixWithOthers'` get no event, as they
+   * take no focus. On iOS it is the start and the end of an audio session interruption.
+   * @param hasAudioFocus Whether the player has the audio again.
+   * @platform Android, iOS
    */
   onAudioFocusChange: (hasAudioFocus: boolean) => void;
   /**
