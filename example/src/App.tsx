@@ -12,11 +12,16 @@ import {
   type ViewStyle,
 } from 'react-native';
 import {
+  type AudioTrackChangeData,
+  type BandwidthData,
   type ControlsStyles,
+  type TextTrack,
+  type TimedMetadata,
   type VideoConfig,
   type VideoLoaderProps,
   type VideoPlayerStatus,
   type VideoRuntimeError,
+  type VideoTrackChangeData,
   VideoView,
   type VideoViewRef,
   type onLoadData,
@@ -76,6 +81,18 @@ const CONTROLS_STYLES_OPTIONS: ReadonlyArray<
 const timestamp = () => {
   const now = new Date();
   return `${now.toLocaleTimeString()}.${String(now.getMilliseconds()).padStart(3, '0')}`;
+};
+
+// Short names for the event log: a track's label, or its id when it has none
+const trackName = (track: { id: string; label: string }) =>
+  track.label || track.id;
+const selectedName = (
+  tracks: ReadonlyArray<{ id: string; label: string }>,
+  id: string | undefined
+) => {
+  if (id === undefined) return undefined;
+  const track = tracks.find((t) => t.id === id);
+  return track ? trackName(track) : id;
 };
 
 const VideoDemo = () => {
@@ -194,6 +211,67 @@ const VideoDemo = () => {
     [addEvent]
   );
 
+  const handleBandwidthUpdate = React.useCallback(
+    ({ bitrate, width, height }: BandwidthData) => {
+      const size = width && height ? ` ${width}x${height}` : '';
+      addEvent(
+        `Player: onBandwidthUpdate ${(bitrate / 1e6).toFixed(2)} Mbps${size}`
+      );
+    },
+    [addEvent]
+  );
+  const handleControlsVisibleChange = React.useCallback(
+    (visible: boolean) => {
+      addEvent(`Player: onControlsVisibleChange ${visible}`);
+    },
+    [addEvent]
+  );
+  const handleTimedMetadata = React.useCallback(
+    ({ metadata }: TimedMetadata) => {
+      const items = metadata.map((m) => `${m.identifier}=${m.value}`);
+      addEvent(
+        `Player: onTimedMetadata ${items.length ? items.join(', ') : '[]'}`
+      );
+    },
+    [addEvent]
+  );
+  const handleTrackChange = React.useCallback(
+    (track: TextTrack | null) => {
+      addEvent(`Player: onTrackChange ${track ? trackName(track) : 'null'}`);
+    },
+    [addEvent]
+  );
+  const handleTextTrackDataChanged = React.useCallback(
+    (texts: string[]) => {
+      // Cues can span lines; keep the log entry on one line
+      const text = texts.join(' | ').replace(/\s*\n\s*/g, ' ');
+      addEvent(`Player: onTextTrackDataChanged ${texts.length ? text : '[]'}`);
+    },
+    [addEvent]
+  );
+  const handleAudioTrackChange = React.useCallback(
+    ({ availableTracks, selectedTrackId }: AudioTrackChangeData) => {
+      addEvent(
+        `Player: onAudioTrackChange ${selectedName(availableTracks, selectedTrackId) ?? 'null'} (${availableTracks.length} tracks)`
+      );
+    },
+    [addEvent]
+  );
+  const handleVideoTrackChange = React.useCallback(
+    ({
+      availableTracks,
+      selectedTrackId,
+      activeTrackId,
+    }: VideoTrackChangeData) => {
+      const selected = selectedName(availableTracks, selectedTrackId) ?? 'auto';
+      const active = selectedName(availableTracks, activeTrackId) ?? 'null';
+      addEvent(
+        `Player: onVideoTrackChange selected=${selected} active=${active} (${availableTracks.length} tracks)`
+      );
+    },
+    [addEvent]
+  );
+
   const handlePlayerBuffer = React.useCallback(
     (buffering: boolean) => {
       addEvent('Player: onBuffer ' + buffering);
@@ -257,6 +335,13 @@ const VideoDemo = () => {
   useEvent(player, 'onAudioBecomingNoisy', handleAudioBecomingNoisy);
   useEvent(player, 'onPlaybackRateChange', handlePlaybackRateChange);
   useEvent(player, 'onExternalPlaybackChange', handleExternalPlaybackChange);
+  useEvent(player, 'onBandwidthUpdate', handleBandwidthUpdate);
+  useEvent(player, 'onControlsVisibleChange', handleControlsVisibleChange);
+  useEvent(player, 'onTimedMetadata', handleTimedMetadata);
+  useEvent(player, 'onTrackChange', handleTrackChange);
+  useEvent(player, 'onTextTrackDataChanged', handleTextTrackDataChanged);
+  useEvent(player, 'onAudioTrackChange', handleAudioTrackChange);
+  useEvent(player, 'onVideoTrackChange', handleVideoTrackChange);
 
   // Volume and muted have their own effect: iOS sends onVolumeChange on every write, also
   // when the value does not change, so writing them on any other setting flooded the log.
@@ -312,6 +397,14 @@ const VideoDemo = () => {
             autoEnterPictureInPicture={true}
             onFullscreenChange={handleFullscreenChange}
             onPictureInPictureChange={handlePictureInPictureChange}
+            willEnterFullscreen={() => addEvent('View: willEnterFullscreen')}
+            willExitFullscreen={() => addEvent('View: willExitFullscreen')}
+            willEnterPictureInPicture={() =>
+              addEvent('View: willEnterPictureInPicture')
+            }
+            willExitPictureInPicture={() =>
+              addEvent('View: willExitPictureInPicture')
+            }
             resizeMode={settings.resizeMode}
             surfaceType={settings.surfaceType}
             fullscreenOrientation={settings.fullscreenOrientation}
