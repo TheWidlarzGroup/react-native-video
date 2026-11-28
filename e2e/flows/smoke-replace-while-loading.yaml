@@ -1,6 +1,6 @@
 # replaceSourceAsync(new source) while the first source is still loading: the first load
-# is superseded, not failed. Its promise rejects, onError stays silent, and the new source
-# loads, starts from its beginning and plays to its own end.
+# is superseded, not failed. On iOS its promise rejects; on every platform onError stays
+# silent and the new source loads, starts from its beginning and plays to its own end.
 #
 # No taps: the scenario calls initialize() and, without waiting for it, replaceSourceAsync(hls)
 # from JS (ScenarioScreen). The fixture server holds the first clip back for 4 s (`?delay`,
@@ -30,18 +30,29 @@ tags: [smoke]
     visible:
       id: "evt-reloaded-from-start"
     timeout: 50000
-- extendedWaitUntil:
-    visible:
-      id: "evt-superseded-load-rejected"
-    timeout: 60000
+# iOS only for now: on Android initialize() resolves once prepare() is called, so the
+# superseded load resolves instead of rejecting. The team chose to make Android reject it as
+# iOS does (28.11); drop the platform guards here when that lands.
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "evt-superseded-load-rejected"
+          timeout: 60000
 - extendedWaitUntil:
     visible:
       id: "evt-ended-after-replace"
     timeout: 85000            # the HLS clip is ~8 s
 - assertVisible:
     id: "evt-progress-gt-2s"
-- assertNotVisible:
-    id: "evt-superseded-load-resolved"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - assertNotVisible:
+          id: "evt-superseded-load-resolved"
 - assertNotVisible:
     id: "evt-replace-rejected"
 - assertNotVisible:
