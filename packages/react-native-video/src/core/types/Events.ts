@@ -88,8 +88,8 @@ export interface VideoPlayerEvents {
   onTimedMetadata: (metadata: TimedMetadata) => void;
   /**
    * Called when a subtitle appears on screen, with its text (one string per line or cue),
-   * and with an empty array when it goes away (the cue ends, the track is turned off or the
-   * source is replaced).
+   * and with an empty array when it goes away: the cue ends or the track is turned off (on
+   * Android and iOS also when the source is replaced).
    * @platform Android, Ios
    */
   onTextTrackDataChanged: (texts: string[]) => void;
