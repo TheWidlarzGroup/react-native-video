@@ -34,6 +34,8 @@ const player = useVideoPlayer(
 | `bufferConfig` | `BufferConfig` | Buffer tuning — see `../shared/streaming-sources.md`. |
 | `metadata` | `{ title?; subtitle?; description?; artist?; imageUri? }` | Lock-screen / notification info. |
 | `externalSubtitles` | `{ uri; label; type?; language? }[]` | Sidecar subs (iOS: `.vtt` only). |
+| `startPosition` | `number` (**milliseconds**) | Start playback of this source at that position (v6 `source.startPosition`). Ignored when not > 0. |
+| `cropStart` / `cropEnd` | `number` (**milliseconds**) | Play only that part of the source (iOS, Android). Time and `duration` are then relative to the part; `startPosition` counts from `cropStart`. |
 | `initializeOnCreation` | `boolean` (default `true`) | If `false`, call `player.initialize()` yourself. |
 
 ## `useVideoPlayer` (hook) vs `new VideoPlayer` (class)
@@ -54,7 +56,7 @@ player.release();
 
 ## `VideoPlayer` properties
 
-**Read/write:** `volume` (0–1), `currentTime` (seconds), `muted`, `loop`, `rate` (1 = normal, 0 = pause), `playInBackground`, `playWhenInactive` (iOS), `showNotificationControls`, `mixAudioMode` (`'mixWithOthers'|'doNotMix'|'duckOthers'|'auto'`), `ignoreSilentSwitchMode` (iOS: `'auto'|'ignore'|'obey'`).
+**Read/write:** `volume` (0–1), `currentTime` (seconds), `muted`, `loop`, `rate` (1 = normal, 0 = pause), `playInBackground`, `playWhenInactive` (iOS), `allowsExternalPlayback` (iOS, AirPlay video, default `true`), `audioOutput` (`'speaker'|'earpiece'`), `showNotificationControls`, `mixAudioMode` (`'mixWithOthers'|'doNotMix'|'duckOthers'|'auto'`), `ignoreSilentSwitchMode` (iOS: `'auto'|'ignore'|'obey'`).
 
 **Read-only:** `status` (`'idle'|'loading'|'readyToPlay'|'error'`), `duration` (seconds, `NaN` if unknown), `isPlaying`, `source`, `selectedTrack`.
 
@@ -71,8 +73,14 @@ Extends RN `ViewProps`, plus:
 | `autoEnterPictureInPicture` | `boolean` | `false` | Auto-enter PiP on background. |
 | `keepScreenAwake` | `boolean` | `true` | Keep screen on while mounted. |
 | `surfaceType` | `'surface'\|'texture'` | `'surface'` | Android only: `texture` is animatable, `surface` is more performant. |
+| `poster` | `string \| VideoPoster` | — | Image shown from load start until the first frame. A URL, or `Image` props with a `source`. |
+| `posterResizeMode` | `'contain'\|'cover'\|'stretch'\|'center'\|'repeat'\|'none'` | `'contain'` | `poster.resizeMode` wins when both are set. |
+| `renderLoader` | `ReactNode \| (props) => ReactNode` | — | Custom view instead of the poster while loading. |
+| `shutterColor` | `ColorValue` | — | Color covering the video area until the first frame, under the poster or loader. |
+| `hideShutterView` | `boolean` | `false` | Turns `shutterColor` off. |
+| `controlsStyles` | `ControlsStyles` | - | Android only: hide single native controls (`hideSeekBar`, `hideForward`, `hideFullscreen`, ...) and pick the system bars hidden in fullscreen |
 
-For a placeholder/poster, overlay your own `<Image>` and remove it on the `onReadyToDisplay` event. See `pip-fullscreen-controls.md` for the imperative ref (`enterFullscreen`, `enterPictureInPicture`, …) and `events.md` for view events.
+For a placeholder use `poster` (or `renderLoader` for a custom view); it hides on `onReadyToDisplay` and returns when a new source starts loading. Don't overlay your own `<Image>`. For audio-only sources the poster stays visible. See `pip-fullscreen-controls.md` for the imperative ref (`enterFullscreen`, `enterPictureInPicture`, …) and `events.md` for view events.
 
 ## Audio-only (no view)
 

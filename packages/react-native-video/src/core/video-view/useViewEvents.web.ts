@@ -62,7 +62,11 @@ export function useViewEvents(
     for (const event of Object.keys(callbacksRef.current)) {
       subs.push(
         emitter.__addListener(event, (...args: unknown[]) => {
-          callbacksRef.current[event as keyof VideoViewEvents]?.(...args);
+          // Each event has its own argument list; the emitter hands them over untyped.
+          const callback = callbacksRef.current[
+            event as keyof VideoViewEvents
+          ] as ((...eventArgs: unknown[]) => void) | undefined;
+          callback?.(...args);
         })
       );
     }

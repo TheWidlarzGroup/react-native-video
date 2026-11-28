@@ -1,0 +1,24 @@
+# Source `type` (#5275): an HLS VOD behind a uri without an extension (hls-noext/stream),
+# with type: 'm3u8'. The fixture server sends it as a playlist (by its first bytes), which
+# is enough for iOS, where `type` has no effect. Android picks the media source from the
+# uri, so without `type` it opens the playlist as a single file and fails with onError.
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: hls-type
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 40000            # HLS first load is the slowest start in the suite
+- assertVisible:
+    id: "evt-duration-fixture"
+- extendedWaitUntil:
+    visible:
+      id: "evt-progress-gt-2s"
+    timeout: 15000
+- assertNotVisible:
+    id: "evt-onError"

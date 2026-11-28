@@ -24,7 +24,10 @@ public protocol HybridVideoPlayerSpec_protocol: HybridObject {
   var ignoreSilentSwitchMode: IgnoreSilentSwitchMode { get set }
   var playInBackground: Bool { get set }
   var playWhenInactive: Bool { get set }
+  var progressUpdateInterval: Double { get set }
   var disableAudioSessionManagement: Bool { get set }
+  var allowsExternalPlayback: Bool { get set }
+  var audioOutput: AudioOutput { get set }
   var isPlaying: Bool { get }
   var selectedTrack: TextTrack? { get }
   var selectedVideoTrackId: String? { get }

@@ -1,0 +1,22 @@
+# progressUpdateInterval (#5281): set to 1000 ms before the load, onProgress comes about
+# once a second of playback. evt-progress-sparse needs three consecutive onProgress events
+# at least 0.8 s of playback apart (eventLog.ts); the defaults (250 ms on Android, 500 ms on
+# iOS) never produce it. Without the option the flow fails on both platforms.
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4-progress-1s
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 20000            # generous: emulator software decoder cold start
+- extendedWaitUntil:
+    visible:
+      id: "evt-progress-sparse"
+    timeout: 15000            # three gaps of 1 s; the clip is 8 s
+- assertNotVisible:
+    id: "evt-onError"

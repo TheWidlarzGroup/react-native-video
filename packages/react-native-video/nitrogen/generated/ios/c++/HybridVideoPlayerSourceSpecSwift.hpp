@@ -22,10 +22,16 @@ namespace margelo::nitro::video { enum class SubtitleType; }
 namespace margelo::nitro::video { struct NativeDrmParams; }
 // Forward declaration of `OnGetLicensePayload` to properly resolve imports.
 namespace margelo::nitro::video { struct OnGetLicensePayload; }
+// Forward declaration of `NativeCmcdConfiguration` to properly resolve imports.
+namespace margelo::nitro::video { struct NativeCmcdConfiguration; }
+// Forward declaration of `CmcdMode` to properly resolve imports.
+namespace margelo::nitro::video { enum class CmcdMode; }
 // Forward declaration of `BufferConfig` to properly resolve imports.
 namespace margelo::nitro::video { struct BufferConfig; }
 // Forward declaration of `LivePlaybackParams` to properly resolve imports.
 namespace margelo::nitro::video { struct LivePlaybackParams; }
+// Forward declaration of `BufferingStrategy` to properly resolve imports.
+namespace margelo::nitro::video { enum class BufferingStrategy; }
 // Forward declaration of `Resolution` to properly resolve imports.
 namespace margelo::nitro::video { struct Resolution; }
 // Forward declaration of `CustomVideoMetadata` to properly resolve imports.
@@ -46,8 +52,11 @@ namespace margelo::nitro::video { enum class VideoOrientation; }
 #include <NitroModules/Promise.hpp>
 #include "OnGetLicensePayload.hpp"
 #include <functional>
+#include "NativeCmcdConfiguration.hpp"
+#include "CmcdMode.hpp"
 #include "BufferConfig.hpp"
 #include "LivePlaybackParams.hpp"
+#include "BufferingStrategy.hpp"
 #include "Resolution.hpp"
 #include "CustomVideoMetadata.hpp"
 #include "VideoInformation.hpp"
