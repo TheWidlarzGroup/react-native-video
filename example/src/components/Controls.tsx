@@ -83,15 +83,15 @@ export const ActionButton = ({
  * A row of toggle buttons for one setting: the button of the current value is active.
  * `options` pairs each value with its label.
  */
-export const OptionGroup = <T,>({
+export const OptionGroup = <T extends string | number | boolean | null>({
   title,
   options,
   value,
   onChange,
 }: {
   title: string;
-  // NoInfer: the type comes from `value`, so literal options are not widened to string.
-  options: ReadonlyArray<readonly [NoInfer<T>, string]>;
+  // T is limited to primitives, so literal options keep their literal types.
+  options: ReadonlyArray<readonly [T, string]>;
   value: T;
   onChange: (value: T) => void;
 }) => (
