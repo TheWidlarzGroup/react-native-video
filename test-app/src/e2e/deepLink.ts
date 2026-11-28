@@ -10,6 +10,7 @@ export const SCENARIO_NAMES = [
   'error-mid-playback',
   'video-tracks',
   'audio-tracks',
+  'audio-tracks-replace', // same stream; once loaded, replaceSourceAsync() onto it under another URL (#5291)
 ] as const;
 
 export type ScenarioName = (typeof SCENARIO_NAMES)[number];

@@ -40,6 +40,7 @@ export const MARKER_IDS = [
   'evt-video-track-auto', // ...then reports no pinned selection again (automatic)
   'evt-audio-alt-selected', // onAudioTrackChange reports the Spanish track selected (2 tracks listed)
   'evt-audio-default-restored', // ...then the English (default) track selected again
+  'evt-audio-tracks-after-replace', // onAudioTrackChange lists both tracks after replaceSourceAsync() was requested (#5291)
   // An unassisted loop restart: see LOOP_VERIFIED_END_COUNT and the wrap-around rule in
   // handle('onProgress') — AVPlayer reports each loop as onEnd, ExoPlayer wraps silently,
   // so both are covered (see smoke-loop.yaml).
@@ -94,7 +95,7 @@ export type PlayerEvent =
   | {
       type: 'replaceSource';
       phase: 'requested' | 'resolved' | 'rejected';
-      source: 'hls' | 'null';
+      source: 'hls' | 'null' | 'audio-tracks';
     }
   | {
       type: 'onVideoTrackChange';
@@ -384,6 +385,11 @@ function apply(event: PlayerEvent) {
     case 'onAudioTrackChange': {
       // The fixture's two renditions are told apart by language (en default, es alternate).
       const selected = event.tracks.find((track) => track.selected)?.language;
+      // A source with the same tracks still owes its own list: iOS skipped it while the
+      // ids were unchanged (#5291). Android goes through an empty list first.
+      if (state.replaceRequested && event.tracks.length === 2) {
+        mark('evt-audio-tracks-after-replace');
+      }
       if (event.tracks.length === 2 && selected === 'es') {
         mark('evt-audio-alt-selected');
       } else if (
