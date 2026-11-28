@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Button,
   StyleSheet,
@@ -212,6 +212,63 @@ function useFullscreenFollowsRotation(
   }, [enabled, view, width, height]);
 }
 
+const FULLSCREEN_LANDSCAPE_HOLD_MS = 12000;
+
+/**
+ * mp4-fullscreen-landscape (#5286): fullscreenOrientation="landscape" with
+ * fullscreenAutorotate={false}. Fullscreen opens from JS once the clip has loaded (the
+ * device stays upright) and closes FULLSCREEN_LANDSCAPE_HOLD_MS later, so the flow only
+ * turns the device in between. The window's shape goes to the log on every change of its
+ * size or of the fullscreen state, and the markers judge it (eventLog.ts).
+ */
+function useFullscreenLandscape(
+  enabled: boolean,
+  player: VideoPlayer,
+  view: React.RefObject<VideoViewRef | null>,
+  fullscreen: boolean
+) {
+  const { width, height } = useWindowDimensions();
+  useEffect(() => {
+    if (!enabled) return;
+    eventLog.handle({
+      type: 'windowOrientation',
+      landscape: width > height,
+      fullscreen,
+    });
+  }, [enabled, width, height, fullscreen]);
+  useEffect(() => {
+    if (!enabled) return;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const call = (name: 'enterFullscreen' | 'exitFullscreen') => {
+      try {
+        view.current?.[name]();
+      } catch (e) {
+        eventLog.handle({
+          type: 'fullscreenCallFailed',
+          call: name,
+          message: e instanceof Error ? e.message : String(e),
+        });
+      }
+    };
+    let entered = false;
+    const subscription = player.addEventListener('onLoad', () => {
+      if (entered) return;
+      entered = true;
+      timers.push(setTimeout(() => call('enterFullscreen'), 500));
+      timers.push(
+        setTimeout(
+          () => call('exitFullscreen'),
+          500 + FULLSCREEN_LANDSCAPE_HOLD_MS
+        )
+      );
+    });
+    return () => {
+      subscription.remove();
+      timers.forEach(clearTimeout);
+    };
+  }, [enabled, player, view]);
+}
+
 type Control = {
   id: string;
   title: string;
@@ -393,8 +450,14 @@ export function ScenarioScreen({ scenario }: { scenario: ScenarioName }) {
 
   useFullscreenFollowsRotation(scenario === 'mp4-fullscreen-rotate', viewRef);
 
-  const onFullscreenChange = (fullscreen: boolean) =>
-    eventLog.handle({ type: 'onFullscreenChange', fullscreen });
+  const [fullscreen, setFullscreen] = useState(false);
+  const landscapeLocked = scenario === 'mp4-fullscreen-landscape';
+  useFullscreenLandscape(landscapeLocked, player, viewRef, fullscreen);
+
+  const onFullscreenChange = (isFullscreen: boolean) => {
+    eventLog.handle({ type: 'onFullscreenChange', fullscreen: isFullscreen });
+    setFullscreen(isFullscreen);
+  };
 
   return (
     <View style={styles.screen} testID={`scenario-${scenario}`}>
@@ -413,6 +476,8 @@ export function ScenarioScreen({ scenario }: { scenario: ScenarioName }) {
         controlsStyles={CONTROLS_STYLES[scenario]}
         onFullscreenChange={onFullscreenChange}
         renderLoader={scenario === 'mp4-loader' ? <LoaderProbe /> : undefined}
+        fullscreenOrientation={landscapeLocked ? 'landscape' : undefined}
+        fullscreenAutorotate={landscapeLocked ? false : undefined}
       />
       <View style={styles.controls}>
         {CONTROLS.map(({ id, title, press }) => (

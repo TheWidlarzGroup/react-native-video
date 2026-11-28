@@ -109,6 +109,18 @@ class HybridVideoViewViewManager(nitroId: Int): HybridVideoViewViewManagerSpec()
       videoView.get()?.controlsStyles = value
     }
 
+  override var fullscreenOrientation: FullscreenOrientation
+    get() = videoView.get()?.fullscreenOrientation ?: FullscreenOrientation.ALL
+    set(value) {
+      videoView.get()?.fullscreenOrientation = value
+    }
+
+  override var fullscreenAutorotate: Boolean
+    get() = videoView.get()?.fullscreenAutorotate ?: true
+    set(value) {
+      videoView.get()?.fullscreenAutorotate = value
+    }
+
   // MARK: - Private helpers
 
   private fun <T> addListener(eventName: String, listener: T): ListenerSubscription {

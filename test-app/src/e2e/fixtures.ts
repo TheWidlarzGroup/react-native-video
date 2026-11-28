@@ -63,6 +63,7 @@ export const SCENARIO_SOURCES: Record<ScenarioName, VideoConfig> = {
   'video-tracks': fixture('hls-quality/index.m3u8'), // HLS, 3 video renditions (360p/180p/90p)
   'audio-tracks': fixture('hls-audio/index.m3u8'), // HLS, English (default) + Spanish audio
   'audio-tracks-replace': fixture('hls-audio/index.m3u8'),
+  'mp4-fullscreen-landscape': fixture('short.mp4'),
 };
 
 // The next episode of a series: the same audio tracks (and so the same positional ids)

@@ -53,6 +53,8 @@ const updateProps = (manager: VideoViewViewManager, props: VideoViewProps) => {
   manager.keepScreenAwake = props.keepScreenAwake ?? true;
   manager.surfaceType = props.surfaceType ?? 'surface';
   manager.controlsStyles = resolveControlsStyles(props.controlsStyles);
+  manager.fullscreenOrientation = props.fullscreenOrientation ?? 'all';
+  manager.fullscreenAutorotate = props.fullscreenAutorotate ?? true;
 };
 
 // Android reports "ready to display" once per source, whichever view draws the first
