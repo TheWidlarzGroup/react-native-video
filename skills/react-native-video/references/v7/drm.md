@@ -5,9 +5,11 @@
 ## 1. Install
 
 ```sh
-npm install react-native-video @react-native-video/drm react-native-nitro-modules
+npm install react-native-video@beta @react-native-video/drm@beta react-native-nitro-modules
 cd ios && pod install
 ```
+
+Both with the `@beta` tag: `latest` of `react-native-video` is still v6, and `latest` of the plugin still points to an old beta (7.0.0-beta.7) that does not build with the Nitro Modules version v7 needs.
 
 Autolinks on both platforms (Expo: prebuild only — not Expo Go).
 
@@ -59,8 +61,8 @@ function Player() {
 |---|---|---|---|
 | `type` | `'widevine' \| 'fairplay' \| string` | all | Android defaults to `widevine`; on iOS set `'fairplay'` explicitly. |
 | `licenseUrl` | `string` | all | License server URL (required for the default license flow on both platforms). |
-| `certificateUrl` | `string` | iOS/visionOS | FairPlay app certificate (**required for FairPlay**). |
-| `contentId` | `string` | iOS/visionOS | Derived from the `skd://` key URL if omitted. |
+| `certificateUrl` | `string` | iOS | FairPlay app certificate (**required for FairPlay**). |
+| `contentId` | `string` | iOS | Derived from the `skd://` key URL if omitted. |
 | `licenseHeaders` | `Record<string,string>` | **Android** | Headers on the license request. |
 | `multiSession` | `boolean` | **Android** | Multiple Widevine sessions / key rotation. |
 | `getLicense` | `(payload) => Promise<string>` | **iOS** | Custom CKC fetch; resolve a base64 CKC. Payload: `{ contentId, licenseUrl, keyUrl, spc }`. |

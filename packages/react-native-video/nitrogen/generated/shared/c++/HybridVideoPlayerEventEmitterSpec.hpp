@@ -31,24 +31,30 @@ namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 namespace margelo::nitro::video { struct TimedMetadata; }
 // Forward declaration of `TextTrack` to properly resolve imports.
 namespace margelo::nitro::video { struct TextTrack; }
+// Forward declaration of `VideoTrackChangeData` to properly resolve imports.
+namespace margelo::nitro::video { struct VideoTrackChangeData; }
+// Forward declaration of `AudioTrackChangeData` to properly resolve imports.
+namespace margelo::nitro::video { struct AudioTrackChangeData; }
 // Forward declaration of `onVolumeChangeData` to properly resolve imports.
 namespace margelo::nitro::video { struct onVolumeChangeData; }
 
 #include "ListenerSubscription.hpp"
 #include <functional>
 #include "BandwidthData.hpp"
+#include <string>
 #include "onLoadData.hpp"
 #include "onLoadStartData.hpp"
 #include "onPlaybackStateChangeData.hpp"
 #include "onProgressData.hpp"
 #include "VideoPlayerStatus.hpp"
 #include "TimedMetadata.hpp"
-#include <string>
 #include <vector>
 #include <NitroModules/Null.hpp>
 #include "TextTrack.hpp"
 #include <variant>
 #include <optional>
+#include "VideoTrackChangeData.hpp"
+#include "AudioTrackChangeData.hpp"
 #include "onVolumeChangeData.hpp"
 
 namespace margelo::nitro::video {
@@ -101,6 +107,8 @@ namespace margelo::nitro::video {
       virtual ListenerSubscription addOnTimedMetadataListener(const std::function<void(const TimedMetadata& /* data */)>& listener) = 0;
       virtual ListenerSubscription addOnTextTrackDataChangedListener(const std::function<void(const std::vector<std::string>& /* data */)>& listener) = 0;
       virtual ListenerSubscription addOnTrackChangeListener(const std::function<void(const std::optional<std::variant<nitro::NullType, TextTrack>>& /* track */)>& listener) = 0;
+      virtual ListenerSubscription addOnVideoTrackChangeListener(const std::function<void(const VideoTrackChangeData& /* data */)>& listener) = 0;
+      virtual ListenerSubscription addOnAudioTrackChangeListener(const std::function<void(const AudioTrackChangeData& /* data */)>& listener) = 0;
       virtual ListenerSubscription addOnVolumeChangeListener(const std::function<void(const onVolumeChangeData& /* data */)>& listener) = 0;
       virtual void clearAllListeners() = 0;
 

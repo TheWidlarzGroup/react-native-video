@@ -94,6 +94,14 @@ export class VideoPlayerEvents extends VideoPlayerEventsBase {
         return this.eventEmitter.addOnTrackChangeListener(
           callback as PlayerEvents['onTrackChange']
         );
+      case 'onVideoTrackChange':
+        return this.eventEmitter.addOnVideoTrackChangeListener(
+          callback as PlayerEvents['onVideoTrackChange']
+        );
+      case 'onAudioTrackChange':
+        return this.eventEmitter.addOnAudioTrackChangeListener(
+          callback as PlayerEvents['onAudioTrackChange']
+        );
       case 'onVolumeChange':
         return this.eventEmitter.addOnVolumeChangeListener(
           callback as PlayerEvents['onVolumeChange']

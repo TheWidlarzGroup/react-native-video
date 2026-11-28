@@ -12,7 +12,8 @@ import { promisify } from 'node:util';
 const execFileAsync = promisify(execFile);
 
 // Deliberately narrower than the app's parser: this value becomes a process argument.
-const SCENARIO_LINK = /^rnvtest:\/\/scenario\/[a-z0-9]+(?:-[a-z0-9]+)*$/;
+// The only query it may carry is the fixture server's port (e2e/shared/open-scenario.yaml).
+const SCENARIO_LINK = /^rnvtest:\/\/scenario\/[a-z0-9]+(?:-[a-z0-9]+)*(?:\?fixturePort=\d{1,5})?$/;
 
 const SIMULATOR_UDID = /^[0-9A-F]{8}(?:-[0-9A-F]{4}){3}-[0-9A-F]{12}$/i;
 

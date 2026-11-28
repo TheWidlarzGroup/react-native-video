@@ -13,9 +13,25 @@ import com.facebook.react.modules.network.OkHttpClientProvider
 import com.margelo.nitro.video.HybridVideoPlayerSourceSpec
 import okhttp3.JavaNetCookieJar
 
-fun buildBaseDataSourceFactory(context: Context, source: HybridVideoPlayerSourceSpec): DefaultDataSource.Factory {
+/**
+ * @param useCache write what is downloaded to [VideoCache] and read it from there next time.
+ * Only network sources are cached.
+ */
+fun buildBaseDataSourceFactory(
+  context: Context,
+  source: HybridVideoPlayerSourceSpec,
+  useCache: Boolean = false
+): DefaultDataSource.Factory {
   return if (source.uri.startsWith("http")) {
-    DefaultDataSource.Factory(context, buildHttpDataSourceFactory(context, source))
+    val httpDataSourceFactory = buildHttpDataSourceFactory(context, source)
+    DefaultDataSource.Factory(
+      context,
+      if (useCache) {
+        VideoCache.wrap(context, httpDataSourceFactory, source.config.headers)
+      } else {
+        httpDataSourceFactory
+      }
+    )
   } else {
     DefaultDataSource.Factory(context)
   }

@@ -1,0 +1,28 @@
+# minLoadRetryCount (#5275, Android only): the source of error-503-retry always answers 503
+# (a temporarily unavailable server, which players retry) and has minLoadRetryCount: 1, so
+# the player asks once and retries once before onError. After
+# onError the app reads how many requests the fixture server saw for the source
+# (`/__requests?token=`); evt-retried-once means exactly two. The default (3 retries) gives
+# four. iOS ignores the option and only has to report the error.
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: error-503-retry
+- extendedWaitUntil:
+    visible:
+      id: "evt-onError"
+    timeout: 30000            # a retry waits up to a few seconds on Android
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "evt-retried-once"
+          timeout: 5000
+- assertNotVisible:
+    id: "evt-onError-repeated"

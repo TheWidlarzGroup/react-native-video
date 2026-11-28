@@ -8,6 +8,9 @@ import type { VideoStore } from './VideoStore';
 export class WebMediaProxy {
   private _storeRef: WeakRef<VideoStore> | null = null;
 
+  /** Minimum time between two onProgress events, in milliseconds. */
+  progressUpdateInterval = 250;
+
   constructor(readonly video: HTMLVideoElement) {}
 
   get store(): VideoStore | null {

@@ -21,6 +21,8 @@ public extension SurfaceType {
         self = .surface
       case "texture":
         self = .texture
+      case "secureSurface":
+        self = .securesurface
       default:
         return nil
     }
@@ -35,6 +37,8 @@ public extension SurfaceType {
         return "surface"
       case .texture:
         return "texture"
+      case .securesurface:
+        return "secureSurface"
     }
   }
 }
