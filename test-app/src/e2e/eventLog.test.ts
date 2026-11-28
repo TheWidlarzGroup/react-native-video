@@ -160,6 +160,24 @@ describe('handle', () => {
     ]);
   });
 
+  test('a second onLoad for the same source marks evt-onLoad-repeated', () => {
+    feed({ type: 'onLoad', duration: 8 });
+    expect(markers()).not.toContain('evt-onLoad-repeated');
+    feed({ type: 'onLoad', duration: 8 });
+    expect(markers()).toContain('evt-onLoad-repeated');
+  });
+
+  test('the onLoad of a replacement source is not a repeat', () => {
+    feed(
+      { type: 'onLoad', duration: 8 },
+      { type: 'replaceSource', phase: 'requested', source: 'hls' },
+      { type: 'onLoad', duration: 8 }
+    );
+    expect(markers()).not.toContain('evt-onLoad-repeated');
+    feed({ type: 'onLoad', duration: 8 }); // a repeat of the replacement
+    expect(markers()).toContain('evt-onLoad-repeated');
+  });
+
   test('onProgress marks progress past the threshold, exclusive', () => {
     feed({ type: 'onProgress', currentTime: PROGRESS_MARKER_SECONDS });
     expect(markers()).toEqual(['evt-onProgress']);
