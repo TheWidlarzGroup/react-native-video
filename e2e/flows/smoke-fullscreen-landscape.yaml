@@ -1,0 +1,53 @@
+# fullscreenOrientation="landscape" with fullscreenAutorotate={false} (#5286). With the
+# device upright, the scenario opens fullscreen from JS once the clip has loaded and closes
+# it 12 s later. The app logs the window's shape on every change of its size or of the
+# fullscreen state (eventLog.ts, windowOrientation):
+# - evt-fullscreen-landscape: the window was landscape while fullscreen was shown;
+# - evt-fullscreen-turned-portrait: it later turned portrait in fullscreen (lock lost);
+# - evt-portrait-after-exit: portrait again once fullscreen closed (the app's own setting).
+# Once the window is landscape in fullscreen, the device is turned to landscape and back
+# upright, and the window must stay landscape until fullscreen closes. The scenario screen
+# stays in the view hierarchy under fullscreen, so the markers are read while it is shown.
+#
+# Android only, like smoke-fullscreen-rotate.yaml: Maestro turns the emulator with the
+# system rotation setting, which a landscape-locked activity must ignore. On iOS the
+# scenario only opens and closes fullscreen; the lock is not asserted there.
+appId: ${APP_ID}
+tags: [smoke]
+onFlowComplete:
+  - runFlow: ../shared/portrait.yaml
+---
+- runFlow: ../shared/portrait.yaml
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4-fullscreen-landscape
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "evt-fullscreen-entered"
+          timeout: 25000      # fullscreen opens 0.5 s after onLoad
+      - extendedWaitUntil:
+          visible:
+            id: "evt-fullscreen-landscape"
+          timeout: 10000
+      - setOrientation: LANDSCAPE_LEFT
+      - setOrientation: PORTRAIT
+      - extendedWaitUntil:
+          visible:
+            id: "evt-fullscreen-exited"
+          timeout: 20000      # closes 12 s after it opened
+      - assertNotVisible:
+          id: "evt-fullscreen-turned-portrait"
+      - extendedWaitUntil:
+          visible:
+            id: "evt-portrait-after-exit"
+          timeout: 5000
+      - assertNotVisible:
+          id: "evt-fullscreen-call-failed"
+      - assertNotVisible:
+          id: "evt-onError"

@@ -14,6 +14,7 @@ import type { SurfaceType } from '../../spec/nitro/VideoViewViewManager.nitro';
 import type { ControlsStyles } from '../types/ControlsStyles';
 import type { ListenerSubscription } from '../types/EventEmitter';
 import type { VideoViewEvents } from '../types/Events';
+import type { FullscreenOrientation } from '../types/FullscreenOrientation';
 import type { ResizeMode } from '../types/ResizeMode';
 import type { VideoPlayerBase } from '../types/VideoPlayerBase';
 
@@ -124,6 +125,32 @@ export interface VideoViewProps
    * @platform android
    */
   controlsStyles?: ControlsStyles;
+  /**
+   * The orientation of native fullscreen. Defaults to 'all'.
+   * - 'all': fullscreen follows the device, in every orientation the app supports
+   * - 'landscape': fullscreen opens in landscape
+   * - 'portrait': fullscreen opens in portrait
+   *
+   * On iOS the app has to support the orientation (`UISupportedInterfaceOrientations`),
+   * and the prop has no effect on iPad when the app supports multitasking (Split View).
+   * On Android the activity is turned for the time fullscreen is open, and the value
+   * is read when fullscreen opens.
+   *
+   * @default 'all'
+   * @platform ios, android
+   */
+  fullscreenOrientation?: FullscreenOrientation;
+
+  /**
+   * Whether fullscreen may leave {@link fullscreenOrientation} when the user turns
+   * the device. With `true`, fullscreen opens in that orientation and follows the
+   * device once the user has turned it there. With `false`, fullscreen stays locked.
+   * Ignored when `fullscreenOrientation` is 'all'.
+   *
+   * @default true
+   * @platform ios, android
+   */
+  fullscreenAutorotate?: boolean;
 }
 
 export interface VideoViewRef {

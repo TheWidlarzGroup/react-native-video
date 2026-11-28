@@ -18,6 +18,8 @@ public protocol HybridVideoViewViewManagerSpec_protocol: HybridObject {
   var keepScreenAwake: Bool { get set }
   var surfaceType: SurfaceType { get set }
   var controlsStyles: NativeControlsStyles { get set }
+  var fullscreenOrientation: FullscreenOrientation { get set }
+  var fullscreenAutorotate: Bool { get set }
 
   // Methods
   func enterFullscreen() throws -> Void

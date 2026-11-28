@@ -5,13 +5,18 @@
 # which retries `simctl openurl` when it times out on a hosted runner - Maestro's `retry`
 # does not catch that failure. Only the transport is retried: a marker that does not
 # appear still fails the flow (zero-retries rule, CONTEXT.md).
+#
+# The link carries the fixture server's port (`?fixturePort=`), which the app reads, so a
+# run started with `-e FIXTURE_PORT=<port>` uses its own server. Without it: 8090.
 appId: ${APP_ID}
 ---
+# Quoted: the expression contains ": ", which YAML would read as a mapping.
+- evalScript: "${output.fixturePort = typeof FIXTURE_PORT === 'undefined' ? '8090' : FIXTURE_PORT}"
 - runFlow:
     when:
       platform: Android
     commands:
-      - openLink: rnvtest://scenario/${SCENARIO}
+      - openLink: rnvtest://scenario/${SCENARIO}?fixturePort=${output.fixturePort}
 - runFlow:
     when:
       platform: iOS
@@ -19,7 +24,8 @@ appId: ${APP_ID}
       - runScript:
           file: open-link-ios.js
           env:
-            LINK: rnvtest://scenario/${SCENARIO}
+            LINK: rnvtest://scenario/${SCENARIO}?fixturePort=${output.fixturePort}
+            FIXTURE_PORT: ${output.fixturePort}
 # iOS can ask "Open in app?" for the first link; the iOS leg pre-approves it in a warm-up
 # flow, so this normally gives up after 1.5 s. Android never asks.
 - runFlow:

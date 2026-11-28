@@ -5,6 +5,8 @@ import {
   LOOP_WRAP_TO_SECONDS,
   MARKER_IDS,
   PROGRESS_MARKER_SECONDS,
+  PROGRESS_SPARSE_GAPS,
+  PROGRESS_SPARSE_MIN_GAP_SECONDS,
   SEEK_BACK_LANDED_SECONDS,
   SEEK_FORWARD_LANDED_SECONDS,
   STATUS_ERROR_CODE,
@@ -595,6 +597,33 @@ describe('lifecycle (ported from #4743)', () => {
     ]);
   });
 
+  test('status after the end is readyToPlay, after an error it is error (#5285)', () => {
+    feed(
+      { type: 'statusSettled', after: 'end', status: 'idle' },
+      { type: 'statusSettled', after: 'error', status: 'idle' }
+    );
+    expect(markers()).toEqual([]);
+    feed(
+      { type: 'statusSettled', after: 'end', status: 'readyToPlay' },
+      { type: 'statusSettled', after: 'error', status: 'error' }
+    );
+    expect(markers()).toEqual(['evt-error-status-held', 'evt-ready-after-end']);
+    expect(lines()).toEqual([
+      'status after end:idle',
+      'status after error:idle',
+      'status after end:readyToPlay',
+      'status after error:error',
+    ]);
+  });
+
+  test('a status that only fits the other event does not mark', () => {
+    feed(
+      { type: 'statusSettled', after: 'end', status: 'error' },
+      { type: 'statusSettled', after: 'error', status: 'readyToPlay' }
+    );
+    expect(markers()).toEqual([]);
+  });
+
   test('reset clears the lifecycle bookkeeping', () => {
     replaceRequested();
     feed(
@@ -659,6 +688,45 @@ describe('video track markers', () => {
       tracks: tracks.slice(1),
       selectedTrackId: 'low',
     });
+    expect(markers()).toEqual([]);
+  });
+});
+
+describe('fullscreen orientation markers (#5286)', () => {
+  test('landscape in fullscreen, held, then portrait after the exit', () => {
+    feed(
+      { type: 'windowOrientation', landscape: false, fullscreen: false },
+      { type: 'onFullscreenChange', fullscreen: true },
+      { type: 'windowOrientation', landscape: false, fullscreen: true },
+      { type: 'windowOrientation', landscape: true, fullscreen: true }
+    );
+    expect(markers()).toEqual([
+      'evt-fullscreen-entered',
+      'evt-fullscreen-landscape',
+    ]);
+    feed(
+      { type: 'onFullscreenChange', fullscreen: false },
+      { type: 'windowOrientation', landscape: true, fullscreen: false },
+      { type: 'windowOrientation', landscape: false, fullscreen: false }
+    );
+    expect(markers()).toEqual([
+      'evt-fullscreen-entered',
+      'evt-fullscreen-exited',
+      'evt-fullscreen-landscape',
+      'evt-portrait-after-exit',
+    ]);
+  });
+
+  test('portrait in fullscreen after landscape means the lock was lost', () => {
+    feed(
+      { type: 'windowOrientation', landscape: true, fullscreen: true },
+      { type: 'windowOrientation', landscape: false, fullscreen: true }
+    );
+    expect(markers()).toContain('evt-fullscreen-turned-portrait');
+  });
+
+  test('portrait before fullscreen is not a portrait after the exit', () => {
+    feed({ type: 'windowOrientation', landscape: false, fullscreen: false });
     expect(markers()).toEqual([]);
   });
 });
@@ -742,6 +810,44 @@ describe('fullscreen', () => {
     });
     expect(markers()).toEqual(['evt-fullscreen-call-failed']);
     expect(lines()).toEqual(['exitFullscreen() threw: boom']);
+  });
+});
+
+describe('progress interval', () => {
+  const progressEvery = (step: number, count: number, from = 0) =>
+    Array.from({ length: count }, (_, i) => ({
+      type: 'onProgress' as const,
+      currentTime: from + i * step,
+    }));
+
+  test('progress about once a second marks evt-progress-sparse', () => {
+    feed(...progressEvery(1, PROGRESS_SPARSE_GAPS + 1));
+    expect(markers()).toContain('evt-progress-sparse');
+  });
+
+  test('the default intervals never do', () => {
+    feed(...progressEvery(0.25, 30));
+    feed(...progressEvery(0.5, 15, 10));
+    expect(markers()).not.toContain('evt-progress-sparse');
+  });
+
+  test('a short gap restarts the count', () => {
+    feed(...progressEvery(1, PROGRESS_SPARSE_GAPS), {
+      type: 'onProgress',
+      currentTime:
+        PROGRESS_SPARSE_GAPS - 1 + PROGRESS_SPARSE_MIN_GAP_SECONDS / 2,
+    });
+    expect(markers()).not.toContain('evt-progress-sparse');
+  });
+
+  test('a seek is not a gap', () => {
+    feed(
+      { type: 'onProgress', currentTime: 0 },
+      { type: 'onSeek', seekTime: 5 },
+      { type: 'onProgress', currentTime: 5 },
+      { type: 'onProgress', currentTime: 5.25 }
+    );
+    expect(markers()).not.toContain('evt-progress-sparse');
   });
 });
 
