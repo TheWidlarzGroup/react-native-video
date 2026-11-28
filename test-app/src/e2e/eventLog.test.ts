@@ -5,13 +5,21 @@ import {
   LOOP_WRAP_TO_SECONDS,
   MARKER_IDS,
   PROGRESS_MARKER_SECONDS,
+  PROGRESS_SPARSE_GAPS,
+  PROGRESS_SPARSE_MIN_GAP_SECONDS,
+  RETRIED_ONCE_REQUESTS,
   SEEK_BACK_LANDED_SECONDS,
   SEEK_FORWARD_LANDED_SECONDS,
+  START_POSITION_LANDED_SECONDS,
+  CROP_DURATION_SECONDS,
+  PAST_DURATION_TOLERANCE_SECONDS,
   STATUS_ERROR_CODE,
   VOLUME_LOW_THRESHOLD,
   FIXTURE_DURATION_SECONDS,
   FIXTURE_DURATION_TOLERANCE_SECONDS,
   RELOAD_START_SECONDS,
+  LOADER_HELD_MIN_MS,
+  LOADER_SOURCE_HOLD_MS,
   type MarkerId,
   type PlayerEvent,
 } from './eventLog';
@@ -158,6 +166,60 @@ describe('handle', () => {
       'onLoad duration=42 (#1)',
       'onLoad duration=NaN (#2)',
     ]);
+  });
+
+  test('onBuffer(true) twice in a row marks evt-onBuffer-true-repeated', () => {
+    feed({ type: 'onBuffer', buffering: true });
+    expect(markers()).toEqual(['evt-onBuffer']);
+    feed({ type: 'onBuffer', buffering: true });
+    expect(markers()).toContain('evt-onBuffer-true-repeated');
+    expect(lines()).toEqual(['onBuffer true', 'onBuffer true']);
+  });
+
+  test('alternating onBuffer and a repeated false are not a repeat', () => {
+    feed(
+      { type: 'onBuffer', buffering: true },
+      { type: 'onBuffer', buffering: false },
+      { type: 'onBuffer', buffering: true },
+      { type: 'onBuffer', buffering: false },
+      { type: 'onBuffer', buffering: false }
+    );
+    expect(markers()).not.toContain('evt-onBuffer-true-repeated');
+  });
+
+  test('onReadyToDisplay marks; a second one for the same source is a repeat', () => {
+    feed({ type: 'onReadyToDisplay' });
+    expect(markers()).toEqual(['evt-onReadyToDisplay']);
+    feed({ type: 'onReadyToDisplay' });
+    expect(markers()).toContain('evt-onReadyToDisplay-repeated');
+    expect(lines()).toEqual(['onReadyToDisplay (#1)', 'onReadyToDisplay (#2)']);
+  });
+
+  test('the onReadyToDisplay of a replacement source is not a repeat', () => {
+    feed(
+      { type: 'onReadyToDisplay' },
+      { type: 'replaceSource', phase: 'requested', source: 'hls' },
+      { type: 'onReadyToDisplay' }
+    );
+    expect(markers()).not.toContain('evt-onReadyToDisplay-repeated');
+  });
+
+  test('a second onLoad for the same source marks evt-onLoad-repeated', () => {
+    feed({ type: 'onLoad', duration: 8 });
+    expect(markers()).not.toContain('evt-onLoad-repeated');
+    feed({ type: 'onLoad', duration: 8 });
+    expect(markers()).toContain('evt-onLoad-repeated');
+  });
+
+  test('the onLoad of a replacement source is not a repeat', () => {
+    feed(
+      { type: 'onLoad', duration: 8 },
+      { type: 'replaceSource', phase: 'requested', source: 'hls' },
+      { type: 'onLoad', duration: 8 }
+    );
+    expect(markers()).not.toContain('evt-onLoad-repeated');
+    feed({ type: 'onLoad', duration: 8 }); // a repeat of the replacement
+    expect(markers()).toContain('evt-onLoad-repeated');
   });
 
   test('onProgress marks progress past the threshold, exclusive', () => {
@@ -450,6 +512,48 @@ describe('lifecycle (ported from #4743)', () => {
     expect(markers()).toContain('evt-duration-fixture');
   });
 
+  test('the replacement start is in order when it comes before the replacement onLoad', () => {
+    feed({ type: 'onLoadStart' }, { type: 'onLoad', duration: 8 });
+    replaceRequested();
+    feed({ type: 'onLoadStart' }, { type: 'onLoad', duration: 8 });
+    expect(markers()).toContain('evt-replacement-start-before-load');
+    expect(markers()).not.toContain('evt-replacement-load-start-repeated');
+  });
+
+  test('a replacement start that comes after its onLoad, or never, is not in order', () => {
+    replaceRequested();
+    feed({ type: 'onLoad', duration: 8 }, { type: 'onLoadStart' });
+    expect(markers()).toContain('evt-replacement-load-started');
+    expect(markers()).not.toContain('evt-replacement-start-before-load');
+    // A later onLoad (Android re-emits it on a re-buffer) must not repair the order.
+    feed({ type: 'onLoad', duration: 8 });
+    expect(markers()).not.toContain('evt-replacement-start-before-load');
+
+    eventLog.reset();
+    replaceRequested();
+    feed({ type: 'onLoad', duration: 8 });
+    expect(markers()).not.toContain('evt-replacement-start-before-load');
+  });
+
+  test('a second onLoadStart for one replacement is reported as repeated', () => {
+    feed({ type: 'onLoadStart' });
+    replaceRequested();
+    feed({ type: 'onLoadStart' });
+    expect(markers()).not.toContain('evt-replacement-load-start-repeated');
+    feed({ type: 'onLoadStart' });
+    expect(markers()).toContain('evt-replacement-load-start-repeated');
+  });
+
+  test('an onLoadStart counts as the replacement starting only after a replacement was requested', () => {
+    // The first source's own onLoadStart is not a replacement.
+    feed({ type: 'onLoadStart' });
+    expect(markers()).not.toContain('evt-replacement-load-started');
+    replaceRequested();
+    feed({ type: 'onLoadStart' });
+    expect(markers()).toContain('evt-replacement-load-started');
+    expect(lines()).toContain('onLoadStart');
+  });
+
   test('an onLoad counts as the replacement only after a replacement was requested', () => {
     // Android re-emits onLoad after a re-buffer or a replay: not a replacement.
     feed({ type: 'onLoad', duration: 8 }, { type: 'onLoad', duration: 8 });
@@ -533,6 +637,33 @@ describe('lifecycle (ported from #4743)', () => {
     ]);
   });
 
+  test('status after the end is readyToPlay, after an error it is error (#5285)', () => {
+    feed(
+      { type: 'statusSettled', after: 'end', status: 'idle' },
+      { type: 'statusSettled', after: 'error', status: 'idle' }
+    );
+    expect(markers()).toEqual([]);
+    feed(
+      { type: 'statusSettled', after: 'end', status: 'readyToPlay' },
+      { type: 'statusSettled', after: 'error', status: 'error' }
+    );
+    expect(markers()).toEqual(['evt-error-status-held', 'evt-ready-after-end']);
+    expect(lines()).toEqual([
+      'status after end:idle',
+      'status after error:idle',
+      'status after end:readyToPlay',
+      'status after error:error',
+    ]);
+  });
+
+  test('a status that only fits the other event does not mark', () => {
+    feed(
+      { type: 'statusSettled', after: 'end', status: 'error' },
+      { type: 'statusSettled', after: 'error', status: 'readyToPlay' }
+    );
+    expect(markers()).toEqual([]);
+  });
+
   test('reset clears the lifecycle bookkeeping', () => {
     replaceRequested();
     feed(
@@ -601,6 +732,45 @@ describe('video track markers', () => {
   });
 });
 
+describe('fullscreen orientation markers (#5286)', () => {
+  test('landscape in fullscreen, held, then portrait after the exit', () => {
+    feed(
+      { type: 'windowOrientation', landscape: false, fullscreen: false },
+      { type: 'onFullscreenChange', fullscreen: true },
+      { type: 'windowOrientation', landscape: false, fullscreen: true },
+      { type: 'windowOrientation', landscape: true, fullscreen: true }
+    );
+    expect(markers()).toEqual([
+      'evt-fullscreen-entered',
+      'evt-fullscreen-landscape',
+    ]);
+    feed(
+      { type: 'onFullscreenChange', fullscreen: false },
+      { type: 'windowOrientation', landscape: true, fullscreen: false },
+      { type: 'windowOrientation', landscape: false, fullscreen: false }
+    );
+    expect(markers()).toEqual([
+      'evt-fullscreen-entered',
+      'evt-fullscreen-exited',
+      'evt-fullscreen-landscape',
+      'evt-portrait-after-exit',
+    ]);
+  });
+
+  test('portrait in fullscreen after landscape means the lock was lost', () => {
+    feed(
+      { type: 'windowOrientation', landscape: true, fullscreen: true },
+      { type: 'windowOrientation', landscape: false, fullscreen: true }
+    );
+    expect(markers()).toContain('evt-fullscreen-turned-portrait');
+  });
+
+  test('portrait before fullscreen is not a portrait after the exit', () => {
+    feed({ type: 'windowOrientation', landscape: false, fullscreen: false });
+    expect(markers()).toEqual([]);
+  });
+});
+
 describe('audio track markers', () => {
   const en = { language: 'en' };
   const es = { language: 'es' };
@@ -625,6 +795,22 @@ describe('audio track markers', () => {
       'evt-audio-alt-selected',
       'evt-audio-default-restored',
     ]);
+  });
+
+  test('a replacement source that lists both tracks is marked, the first source is not (#5291)', () => {
+    const both = [
+      { ...en, selected: true },
+      { ...es, selected: false },
+    ];
+    feed({ type: 'onAudioTrackChange', tracks: both });
+    expect(markers()).not.toContain('evt-audio-tracks-after-replace');
+    feed(
+      { type: 'replaceSource', phase: 'requested', source: 'audio-tracks' },
+      { type: 'onAudioTrackChange', tracks: [] } // Android: the list empties first
+    );
+    expect(markers()).not.toContain('evt-audio-tracks-after-replace');
+    feed({ type: 'onAudioTrackChange', tracks: both });
+    expect(markers()).toContain('evt-audio-tracks-after-replace');
   });
 
   test('the default track alone never sets either marker (not a real restore)', () => {
@@ -664,5 +850,185 @@ describe('fullscreen', () => {
     });
     expect(markers()).toEqual(['evt-fullscreen-call-failed']);
     expect(lines()).toEqual(['exitFullscreen() threw: boom']);
+  });
+});
+
+describe('progress interval', () => {
+  const progressEvery = (step: number, count: number, from = 0) =>
+    Array.from({ length: count }, (_, i) => ({
+      type: 'onProgress' as const,
+      currentTime: from + i * step,
+    }));
+
+  test('progress about once a second marks evt-progress-sparse', () => {
+    feed(...progressEvery(1, PROGRESS_SPARSE_GAPS + 1));
+    expect(markers()).toContain('evt-progress-sparse');
+  });
+
+  test('the default intervals never do', () => {
+    feed(...progressEvery(0.25, 30));
+    feed(...progressEvery(0.5, 15, 10));
+    expect(markers()).not.toContain('evt-progress-sparse');
+  });
+
+  test('a short gap restarts the count', () => {
+    feed(...progressEvery(1, PROGRESS_SPARSE_GAPS), {
+      type: 'onProgress',
+      currentTime:
+        PROGRESS_SPARSE_GAPS - 1 + PROGRESS_SPARSE_MIN_GAP_SECONDS / 2,
+    });
+    expect(markers()).not.toContain('evt-progress-sparse');
+  });
+
+  test('a seek is not a gap', () => {
+    feed(
+      { type: 'onProgress', currentTime: 0 },
+      { type: 'onSeek', seekTime: 5 },
+      { type: 'onProgress', currentTime: 5 },
+      { type: 'onProgress', currentTime: 5.25 }
+    );
+    expect(markers()).not.toContain('evt-progress-sparse');
+  });
+});
+
+describe('loader', () => {
+  test('a loader that covers the held load marks shown, before-load, hidden and held', () => {
+    feed({ type: 'loader', shown: true, at: 1000 });
+    expect(markers()).toEqual(['evt-loader-before-load', 'evt-loader-shown']);
+    feed(
+      { type: 'onLoad', duration: 8 },
+      { type: 'loader', shown: false, at: 1000 + LOADER_SOURCE_HOLD_MS + 300 }
+    );
+    expect(markers()).toContain('evt-loader-hidden');
+    expect(markers()).toContain('evt-loader-held');
+    expect(lines()).toEqual([
+      'loader shown',
+      'onLoad duration=8 (#1)',
+      `loader hidden after ${LOADER_SOURCE_HOLD_MS + 300} ms`,
+    ]);
+  });
+
+  test('a loader taken off right after it mounted is hidden but not held', () => {
+    feed(
+      { type: 'loader', shown: true, at: 1000 },
+      { type: 'loader', shown: false, at: 1000 + LOADER_HELD_MIN_MS - 1 }
+    );
+    expect(markers()).toContain('evt-loader-hidden');
+    expect(markers()).not.toContain('evt-loader-held');
+  });
+
+  test('progress at 0 s while the source loads does not stop before-load (Android)', () => {
+    feed(
+      { type: 'onProgress', currentTime: 0 },
+      { type: 'onProgress', currentTime: 0 },
+      { type: 'loader', shown: true, at: 1 }
+    );
+    expect(markers()).toContain('evt-loader-before-load');
+  });
+
+  test('a loader that first mounts after onLoad or progress is not before-load', () => {
+    feed(
+      { type: 'onLoad', duration: 8 },
+      { type: 'loader', shown: true, at: 1 }
+    );
+    expect(markers()).toContain('evt-loader-shown');
+    expect(markers()).not.toContain('evt-loader-before-load');
+
+    eventLog.reset();
+    feed(
+      { type: 'onProgress', currentTime: 0.2 },
+      { type: 'loader', shown: true, at: 1 }
+    );
+    expect(markers()).not.toContain('evt-loader-before-load');
+  });
+
+  test('hidden is only marked after the loader was shown', () => {
+    feed({ type: 'loader', shown: false, at: 5000 });
+    expect(markers()).not.toContain('evt-loader-hidden');
+    expect(markers()).not.toContain('evt-loader-held');
+  });
+});
+
+describe('session', () => {
+  test('a handler bound to the current scenario applies its events', () => {
+    const handle = eventLog.forSession();
+    handle({ type: 'onEnd' });
+    expect(markers()).toEqual(['evt-onEnded']);
+  });
+
+  test("after a reset, the previous scenario's handler changes nothing", () => {
+    const previous = eventLog.forSession();
+    eventLog.reset(); // the next scenario starts
+    const current = eventLog.forSession();
+    previous({ type: 'onError', code: 'player/playback-failed' });
+    expect(markers()).toEqual([]);
+    current({ type: 'onEnd' });
+    expect(markers()).toEqual(['evt-onEnded']);
+  });
+});
+
+describe('start position', () => {
+  test('only the first progress of the scenario tells where playback started', () => {
+    feed({
+      type: 'onProgress',
+      currentTime: START_POSITION_LANDED_SECONDS + 1,
+    });
+    expect(markers()).toContain('evt-started-at-position');
+  });
+
+  test('playback that started at 0 never satisfies it, however far it gets', () => {
+    feed(
+      { type: 'onProgress', currentTime: 0.1 },
+      { type: 'onProgress', currentTime: START_POSITION_LANDED_SECONDS + 1 }
+    );
+    expect(markers()).not.toContain('evt-started-at-position');
+  });
+});
+
+describe('crop', () => {
+  test('an onLoad with the length of the cropped part marks evt-duration-crop', () => {
+    feed({ type: 'onLoad', duration: CROP_DURATION_SECONDS + 0.2 });
+    expect(markers()).toContain('evt-duration-crop');
+  });
+
+  test('the whole 8 s clip is not the cropped part', () => {
+    feed({ type: 'onLoad', duration: FIXTURE_DURATION_SECONDS });
+    expect(markers()).not.toContain('evt-duration-crop');
+  });
+
+  test('progress past the reported duration marks evt-progress-past-duration', () => {
+    feed(
+      { type: 'onLoad', duration: CROP_DURATION_SECONDS },
+      { type: 'onProgress', currentTime: CROP_DURATION_SECONDS }
+    );
+    expect(markers()).not.toContain('evt-progress-past-duration');
+    feed({
+      type: 'onProgress',
+      currentTime:
+        CROP_DURATION_SECONDS + PAST_DURATION_TOLERANCE_SECONDS + 0.1,
+    });
+    expect(markers()).toContain('evt-progress-past-duration');
+  });
+
+  test('progress before any onLoad, or with an unknown duration, is not judged', () => {
+    feed({ type: 'onProgress', currentTime: 100 });
+    feed(
+      { type: 'onLoad', duration: NaN },
+      { type: 'onProgress', currentTime: 100 }
+    );
+    expect(markers()).not.toContain('evt-progress-past-duration');
+  });
+});
+
+describe('request count', () => {
+  test('the first request and one retry mark evt-retried-once', () => {
+    feed({ type: 'requestCount', count: RETRIED_ONCE_REQUESTS });
+    expect(markers()).toContain('evt-retried-once');
+    expect(lines()).toEqual([`requests: ${RETRIED_ONCE_REQUESTS}`]);
+  });
+
+  test('the default retry count does not', () => {
+    feed({ type: 'requestCount', count: 4 });
+    expect(markers()).not.toContain('evt-retried-once');
   });
 });

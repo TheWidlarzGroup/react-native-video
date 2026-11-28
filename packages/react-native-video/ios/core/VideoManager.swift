@@ -278,11 +278,15 @@ class VideoManager {
     let anyPlayerNeedsNotificationControls = players.allObjects.contains { player in
       player.showNotificationControls
     }
+
+    let anyPlayerNeedsEarpiece = players.allObjects.contains { player in
+      player.audioOutput == .earpiece
+    }
     
     let category: AVAudioSession.Category = determineAudioCategory(
       silentSwitchObey: anyPlayerNeedsSilentSwitchObey,
       silentSwitchIgnore: anyPlayerNeedsSilentSwitchIgnore,
-      earpiece: false, // TODO: Pass actual value after we add prop
+      earpiece: anyPlayerNeedsEarpiece,
       pip: anyViewNeedsPictureInPicture,
       backgroundPlayback: anyPlayerNeedsBackgroundPlayback,
       notificationControls: anyPlayerNeedsNotificationControls
@@ -304,16 +308,20 @@ class VideoManager {
       break
     }
     
+    // moviePlayback is only valid with the playback category. playAndRecord (earpiece) keeps the
+    // default mode, which routes to the receiver unless headphones are connected.
+    let mode: AVAudioSession.Mode = category == .playAndRecord ? .default : .moviePlayback
+
     // setCategory is a relatively expensive IPC and this runs on every audio-session refresh —
     // skip it when nothing changed (category/mode/options are readable, unlike the active state).
     if audioSession.category == category
-      && audioSession.mode == .moviePlayback
+      && audioSession.mode == mode
       && audioSession.categoryOptions == audioSessionCategoryOptions {
       return
     }
 
     do {
-      try audioSession.setCategory(category, mode: .moviePlayback, options: audioSessionCategoryOptions)
+      try audioSession.setCategory(category, mode: mode, options: audioSessionCategoryOptions)
     } catch {
       print("ReactNativeVideo: Failed to set audio session category: \(error.localizedDescription)")
     }

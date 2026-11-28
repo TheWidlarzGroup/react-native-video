@@ -1,0 +1,28 @@
+# startPosition on the source: the clip (8 s) starts at 5 s instead of 0.
+# evt-started-at-position is derived from the scenario's FIRST onProgress (> 4 s, see
+# eventLog.ts), so natural playback can never satisfy it. No onSeek is expected: the
+# position is part of the load, not a seek the app asked for.
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4-start-position
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 20000            # generous: emulator software decoder cold start
+- extendedWaitUntil:
+    visible:
+      id: "evt-started-at-position"
+    timeout: 15000
+- extendedWaitUntil:
+    visible:
+      id: "evt-onEnded"
+    timeout: 15000            # 3 s of the clip are left
+- assertNotVisible:
+    id: "evt-onSeek"
+- assertNotVisible:
+    id: "evt-onError"

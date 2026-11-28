@@ -2,7 +2,7 @@
 // would fetch a package from the network before every CI job, which is a flake source
 // unrelated to the library under test.
 import { createServer } from 'node:http';
-import { createReadStream, statSync } from 'node:fs';
+import { closeSync, createReadStream, openSync, readSync, statSync } from 'node:fs';
 import { join, normalize, extname, resolve } from 'node:path';
 import { openLink, scenarioLink, simulatorDevice } from './open-link.mjs';
 
@@ -15,6 +15,28 @@ const TYPES = {
   '.ts': 'video/mp2t',
   '.m3u8': 'application/vnd.apple.mpegurl',
 };
+
+// Tokens whose media requests now fail as a lost connection would (the socket is closed
+// without an answer). `GET /__go-offline?token=<t>` adds one: smoke-cache.yaml cuts its source
+// off after the first playback, so a second playback can only come from the disk cache.
+const offlineTokens = new Set();
+
+// A file without a known extension (hls-noext/stream) is typed by its first bytes, the way a
+// CDN serves a playlist behind a uri that does not show it.
+function sniffType(file) {
+  const head = Buffer.alloc(7);
+  const fd = openSync(file, 'r');
+  try {
+    readSync(fd, head, 0, head.length, 0);
+  } finally {
+    closeSync(fd);
+  }
+  return head.toString('latin1') === '#EXTM3U' ? TYPES['.m3u8'] : 'application/octet-stream';
+}
+
+// Requests seen per `?token=`, for flows that count how often the player asked
+// (`GET /__requests?token=<t>` answers `{ "count": n }`; smoke-retry-count.yaml).
+const requestCounts = new Map();
 
 const LOOPBACK = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1']);
 
@@ -42,9 +64,65 @@ async function handleOpenLink(req, res) {
   return json(result.ok ? 200 : 502, result);
 }
 
+// `?hold=<ms>` keeps a request waiting that long before it is answered, so a flow can
+// look at what the app shows while a source loads. With `&holdId=<id>`, every request
+// carrying the id waits until <ms> after the first one arrived, and once that moment has
+// passed none waits: AVPlayer fetches a clip in several range requests, some of them in
+// parallel, and holding each one by <ms> would multiply the wait. A client that goes away
+// cancels its wait. Capped at MAX_HOLD_MS.
+const MAX_HOLD_MS = 120_000;
+const holdDeadlines = new Map();
+
+function holdMs(url, now = Date.now()) {
+  const { searchParams } = new URL(url, 'http://x');
+  const hold = Math.min(Number(searchParams.get('hold')), MAX_HOLD_MS);
+  if (!Number.isFinite(hold) || hold <= 0) return 0;
+  const id = searchParams.get('holdId');
+  if (id === null) return hold;
+  if (!holdDeadlines.has(id)) holdDeadlines.set(id, now + hold);
+  return Math.max(0, holdDeadlines.get(id) - now);
+}
+
 const server = createServer((req, res) => {
+  const wait = holdMs(req.url);
+  if (wait === 0) return respond(req, res);
+  const timer = setTimeout(() => respond(req, res), wait);
+  res.on('close', () => clearTimeout(timer));
+});
+
+function respond(req, res) {
   try {
-    const path = decodeURIComponent(new URL(req.url, 'http://x').pathname);
+    const url = new URL(req.url, 'http://x');
+    const path = decodeURIComponent(url.pathname);
+    const token = url.searchParams.get('token');
+
+    if (path === '/__go-offline') {
+      if (!token) {
+        res.writeHead(400).end('expected ?token=<t>');
+        return;
+      }
+      offlineTokens.add(token);
+      console.log(`[fixtures] offline: ${token}`);
+      res.writeHead(200).end('ok');
+      return;
+    }
+    if (token && offlineTokens.has(token)) {
+      req.socket.destroy();
+      return;
+    }
+
+    if (path === '/__requests') {
+      res
+        .writeHead(token ? 200 : 400, { 'Content-Type': 'application/json' })
+        .end(JSON.stringify(token ? { count: requestCounts.get(token) ?? 0 } : { error: 'expected ?token=<t>' }));
+      return;
+    }
+    if (token) requestCounts.set(token, (requestCounts.get(token) ?? 0) + 1);
+    // A server that is temporarily unavailable (503), which players retry, unlike a 404.
+    if (path.startsWith('/__unavailable/')) {
+      res.writeHead(503).end();
+      return;
+    }
 
     if (path === '/__open-link') {
       handleOpenLink(req, res).catch((err) => {
@@ -70,7 +148,7 @@ const server = createServer((req, res) => {
       return;
     }
 
-    const type = TYPES[extname(file)] ?? 'application/octet-stream';
+    const type = TYPES[extname(file)] ?? sniffType(file);
     const range = req.headers.range;
 
     // AVPlayer and ExoPlayer both request byte ranges; without this, playback stalls.
@@ -138,7 +216,7 @@ const server = createServer((req, res) => {
     console.error(`[fixtures] unexpected error: ${err.message}`);
     res.destroy();
   }
-});
+}
 
 server.on('error', (err) => {
   console.error(`[fixtures] ${err.message}`);

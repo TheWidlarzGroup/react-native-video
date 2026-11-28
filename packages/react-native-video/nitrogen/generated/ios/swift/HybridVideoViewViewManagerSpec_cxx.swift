@@ -192,7 +192,7 @@ open class HybridVideoViewViewManagerSpec_cxx {
     }
     @inline(__always)
     set {
-      self.__implementation.resizeMode = margelo.nitro.video.ResizeMode(rawValue: newValue)!
+      self.__implementation.resizeMode = margelo.nitro.video.VideoResizeMode(rawValue: newValue)!
     }
   }
   
@@ -215,6 +215,39 @@ open class HybridVideoViewViewManagerSpec_cxx {
     @inline(__always)
     set {
       self.__implementation.surfaceType = margelo.nitro.video.SurfaceType(rawValue: newValue)!
+    }
+  }
+  
+  public final var controlsStyles: NativeControlsStyles {
+    @inline(__always)
+    get {
+      return self.__implementation.controlsStyles
+    }
+    @inline(__always)
+    set {
+      self.__implementation.controlsStyles = newValue
+    }
+  }
+  
+  public final var fullscreenOrientation: Int32 {
+    @inline(__always)
+    get {
+      return self.__implementation.fullscreenOrientation.rawValue
+    }
+    @inline(__always)
+    set {
+      self.__implementation.fullscreenOrientation = margelo.nitro.video.FullscreenOrientation(rawValue: newValue)!
+    }
+  }
+  
+  public final var fullscreenAutorotate: Bool {
+    @inline(__always)
+    get {
+      return self.__implementation.fullscreenAutorotate
+    }
+    @inline(__always)
+    set {
+      self.__implementation.fullscreenAutorotate = newValue
     }
   }
 

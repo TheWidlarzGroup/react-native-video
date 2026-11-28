@@ -1,0 +1,33 @@
+# Audio tracks after replaceSourceAsync() onto a source with the same tracks (#5291): the
+# next episode of a series has the same languages, so the same positional track ids. iOS
+# deduped onAudioTrackChange against the last list and sent nothing for the new source;
+# an app that rebuilds its audio menu on this event kept the old one. The scenario plays
+# the multi-audio HLS stream and, once it has loaded and listed both tracks, replaces it
+# with the same stream under another URL, from JS. evt-audio-tracks-after-replace needs a
+# two-track onAudioTrackChange after that request (Android's empty list does not count).
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: audio-tracks-replace
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 40000            # HLS: first load is the slow one
+- extendedWaitUntil:
+    visible:
+      id: "evt-replace-resolved"
+    timeout: 15000            # requested 1 s after the first source listed its tracks
+- extendedWaitUntil:
+    visible:
+      id: "evt-replacement-loaded"
+    timeout: 30000
+- extendedWaitUntil:
+    visible:
+      id: "evt-audio-tracks-after-replace"
+    timeout: 10000
+- assertNotVisible:
+    id: "evt-onError"

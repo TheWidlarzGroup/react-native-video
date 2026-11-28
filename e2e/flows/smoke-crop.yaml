@@ -1,0 +1,29 @@
+# cropStart and cropEnd on the source (#5266): the 8 s clip plays only from 2 s to 5 s, and
+# the player treats that part as the whole video. onLoad reports its length
+# (evt-duration-crop, 3 s +- 0.5 s), onEnd comes at cropEnd, and progress never goes past
+# the reported length (evt-progress-past-duration, eventLog.ts). No onSeek is expected: the
+# start of the part is applied with the load.
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4-crop
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 20000            # generous: emulator software decoder cold start
+- assertVisible:
+    id: "evt-duration-crop"
+- extendedWaitUntil:
+    visible:
+      id: "evt-onEnded"
+    timeout: 15000            # 3 s of playback; the whole clip would take 8 s
+- assertNotVisible:
+    id: "evt-progress-past-duration"
+- assertNotVisible:
+    id: "evt-onSeek"
+- assertNotVisible:
+    id: "evt-onError"

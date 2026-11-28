@@ -20,9 +20,7 @@ To use the `VideoPlayer`, you first need to create an instance of it with a vide
 import { useVideoPlayer } from 'react-native-video';
 
 const player = useVideoPlayer({
-  source: {
-    uri: 'https://www.w3schools.com/html/mov_bbb.mp4',
-  },
+  uri: 'https://www.w3schools.com/html/mov_bbb.mp4',
 });
 ```
 
@@ -45,7 +43,7 @@ const playerWithSource = new VideoPlayer({ uri: 'https://example.com/video.mp4' 
 
 // Using a VideoConfig object
 const playerWithConfig = new VideoPlayer({
-  source: { uri: 'https://example.com/video.mp4' },
+  uri: 'https://example.com/video.mp4',
   // other configurations
 });
 ```
@@ -55,3 +53,15 @@ When using `VideoPlayer` class directly, you need to manually manage the player 
 :::
 
 For detailed information about using the class, see [VideoPlayer](./video-player.md).
+
+## Time units
+
+Positions and lengths of the video are in **seconds**, as on the web `<video>` element and in v6:
+
+- `player.currentTime`, `player.duration`, `player.seekTo()` and `player.seekBy()`
+- `currentTime`, `duration` and `bufferDuration` in the `onProgress` and `onLoad` events, and the position passed to `onSeek`
+- `duration` returned by `source.getAssetInformationAsync()`
+
+Options that configure loading and buffering are in **milliseconds**, as in v6. The `bufferConfig` fields show it in their names, which end with `Ms`.
+
+A length that is not known yet is `NaN` for `player.duration` and the events, and `-1` for `getAssetInformationAsync()`.
