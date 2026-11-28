@@ -3,6 +3,7 @@ package com.twg.video.view
 import android.annotation.SuppressLint
 import android.app.PictureInPictureParams
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.util.AttributeSet
@@ -481,6 +482,25 @@ class VideoView @JvmOverloads constructor(
     } catch (e: Exception) {
       Log.e("ReactNativeVideo", "Exception in internalEnterPictureInPicture for nitroId: $nitroId", e)
       false
+    }
+  }
+
+  /**
+   * Leaves picture-in-picture on request from JS. Android has no call that leaves it, so while the
+   * activity is in PiP this brings it back to the front: the system then leaves PiP and
+   * [PictureInPictureHelperFragment] restores the views through [exitPictureInPicture].
+   */
+  fun requestExitPictureInPicture() {
+    if (!isInPictureInPicture) return
+
+    val currentActivity = applicationContent.currentActivity
+    if (currentActivity?.isInPictureInPictureMode == true) {
+      currentActivity.startActivity(
+        Intent(currentActivity, currentActivity.javaClass)
+          .addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+      )
+    } else {
+      exitPictureInPicture()
     }
   }
 

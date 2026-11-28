@@ -60,7 +60,7 @@ class HybridVideoViewViewManager(nitroId: Int): HybridVideoViewViewManagerSpec()
 
   override fun exitPictureInPicture() {
     Threading.runOnMainThread {
-      videoView.get()?.exitPictureInPicture()
+      videoView.get()?.requestExitPictureInPicture()
     }
   }
 
