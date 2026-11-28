@@ -20,8 +20,14 @@ typealias NativeVideoPlayer = HybridVideoPlayer
 typealias NativeVideoPlayerSource = HybridVideoPlayerSource
 
 class PluginsRegistry {
-  // Plugin ID -> ReactNativeVideoPluginSpec
+  // Plugin ID -> ReactNativeVideoPluginSpec. Guarded by `synchronized(plugins)`: plugins
+  // register from the JS thread while players and sources use the registry on other threads.
   private val plugins: MutableMap<String, ReactNativeVideoPluginSpec> = mutableMapOf()
+
+  // The plugins at this moment. Callbacks run on this copy, outside the lock, so a plugin
+  // may register or unregister from inside one.
+  private val registeredPlugins: List<ReactNativeVideoPluginSpec>
+    get() = synchronized(plugins) { plugins.values.toList() }
 
   companion object {
     val shared = PluginsRegistry()
@@ -31,7 +37,7 @@ class PluginsRegistry {
   // Public methods
   fun register(plugin: ReactNativeVideoPluginSpec) {
     if(hasPlugin(plugin)) {
-      plugins.replace(plugin.id, plugin)
+      synchronized(plugins) { plugins.replace(plugin.id, plugin) }
 
       if (BuildConfig.DEBUG) {
         Log.d(TAG, "Replaced plugin ${plugin.name} (ID: ${plugin.id})")
@@ -40,7 +46,7 @@ class PluginsRegistry {
       return
     }
 
-    plugins.put(plugin.id, plugin)
+    synchronized(plugins) { plugins.put(plugin.id, plugin) }
 
     if (BuildConfig.DEBUG) {
       Log.d(TAG, "Registered plugin ${plugin.name} (ID: ${plugin.id})")
@@ -57,7 +63,7 @@ class PluginsRegistry {
       return
     }
 
-    plugins.remove(plugin.id)
+    synchronized(plugins) { plugins.remove(plugin.id) }
 
     if (BuildConfig.DEBUG) {
       Log.d(TAG, "Unregistered plugin ${plugin.name} (ID: ${plugin.id})")
@@ -67,22 +73,22 @@ class PluginsRegistry {
   // Notifications
   @OptIn(UnstableApi::class)
   internal fun notifyPlayerCreated(player: WeakReference<NativeVideoPlayer>) {
-    plugins.values.forEach { it.onPlayerCreated(player) }
+    registeredPlugins.forEach { it.onPlayerCreated(player) }
   }
 
   @OptIn(UnstableApi::class)
   internal fun notifyPlayerDestroyed(player: WeakReference<NativeVideoPlayer>) {
-    plugins.values.forEach { it.onPlayerDestroyed(player) }
+    registeredPlugins.forEach { it.onPlayerDestroyed(player) }
   }
 
   @OptIn(UnstableApi::class)
   internal fun notifyVideoViewCreated(view: WeakReference<VideoView>) {
-    plugins.values.forEach { it.onVideoViewCreated(view) }
+    registeredPlugins.forEach { it.onVideoViewCreated(view) }
   }
 
   @OptIn(UnstableApi::class)
   internal fun notifyVideoViewDestroyed(view: WeakReference<VideoView>) {
-    plugins.values.forEach { it.onVideoViewDestroyed(view) }
+    registeredPlugins.forEach { it.onVideoViewDestroyed(view) }
   }
 
   // Internal methods
@@ -102,7 +108,7 @@ class PluginsRegistry {
   internal fun overrideSource(source: NativeVideoPlayerSource): NativeVideoPlayerSource {
     var overriddenSource = source
 
-    for (plugin in plugins.values) {
+    for (plugin in registeredPlugins) {
       overriddenSource = plugin.overrideSource(overriddenSource)
     }
 
@@ -116,7 +122,7 @@ class PluginsRegistry {
    * @return Any
    */
    internal fun getDRMManager(source: NativeVideoPlayerSource): DRMManagerSpec {
-    for (plugin in plugins.values) {
+    for (plugin in registeredPlugins) {
       val manager = plugin.getDRMManager(source)
 
       if (manager != null) return manager
@@ -138,7 +144,7 @@ class PluginsRegistry {
     source: NativeVideoPlayerSource,
     mediaDataSourceFactory: DataSource.Factory
   ): DataSource.Factory {
-    for (plugin in plugins.values) {
+    for (plugin in registeredPlugins) {
       val factory = plugin.getMediaDataSourceFactory(source, mediaDataSourceFactory)
 
       if (factory != null) return factory
@@ -162,7 +168,7 @@ class PluginsRegistry {
     mediaSourceFactory: MediaSource.Factory,
     mediaDataSourceFactory: DataSource.Factory
   ): MediaSource.Factory {
-    for (plugin in plugins.values) {
+    for (plugin in registeredPlugins) {
       val factory = plugin.getMediaSourceFactory(source, mediaSourceFactory, mediaDataSourceFactory)
 
       if (factory != null) return factory
@@ -184,7 +190,7 @@ class PluginsRegistry {
     source: NativeVideoPlayerSource,
     mediaItemBuilder: MediaItem.Builder
   ): MediaItem.Builder {
-    for (plugin in plugins.values) {
+    for (plugin in registeredPlugins) {
       val builder = plugin.getMediaItemBuilder(source, mediaItemBuilder)
 
       if (builder != null) return builder
@@ -202,7 +208,7 @@ class PluginsRegistry {
    * @return The maybe disabled cache.
    */
   internal fun shouldDisableCache(source: NativeVideoPlayerSource): Boolean {
-    for (plugin in plugins.values) {
+    for (plugin in registeredPlugins) {
       val shouldDisable = plugin.shouldDisableCache(source)
 
       if (shouldDisable) return true
@@ -218,6 +224,6 @@ class PluginsRegistry {
    * @return True if the plugin is registered, false otherwise.
    */
   internal fun hasPlugin(plugin: ReactNativeVideoPluginSpec): Boolean {
-    return plugins.any { it.key == plugin.id }
+    return synchronized(plugins) { plugins.any { it.key == plugin.id } }
   }
 }

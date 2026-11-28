@@ -11,8 +11,18 @@ import Foundation
 public final class PluginsRegistry {
   public static let shared = PluginsRegistry()
 
-  // Plugin ID -> ReactNativeVideoPluginSpec
+  // Plugin ID -> ReactNativeVideoPluginSpec. Guarded by `lock`: plugins register from the JS
+  // thread while sources load off the main thread and players notify from the main thread.
   private var plugins: [String: ReactNativeVideoPluginSpec] = [:]
+  private let lock = NSLock()
+
+  /// The plugins at this moment. Callbacks run on this copy, outside the lock, so a plugin
+  /// may register or unregister from inside one.
+  private var registeredPlugins: [ReactNativeVideoPluginSpec] {
+    lock.lock()
+    defer { lock.unlock() }
+    return Array(plugins.values)
+  }
 
   // MARK: - Public API
 
@@ -29,7 +39,9 @@ public final class PluginsRegistry {
       }
     #endif
 
+    lock.lock()
     plugins.updateValue(plugin, forKey: plugin.id)
+    lock.unlock()
   }
 
   public func unregister(plugin: ReactNativeVideoPluginSpec) {
@@ -43,17 +55,21 @@ public final class PluginsRegistry {
       }
     #endif
 
+    lock.lock()
     plugins.removeValue(forKey: plugin.id)
+    lock.unlock()
   }
 
   // MARK: - Internal API
 
   private func hasPlugin(plugin: ReactNativeVideoPluginSpec) -> Bool {
+    lock.lock()
+    defer { lock.unlock() }
     return plugins.contains { $0.value.id == plugin.id }
   }
 
   internal func getDrmManager(source: NativeVideoPlayerSource) throws -> DRMManagerSpec? {
-    for plugin in plugins.values {
+    for plugin in registeredPlugins {
       if let drmManager = plugin.getDRMManager(source: source) {
         return drmManager
       }
@@ -67,7 +83,7 @@ public final class PluginsRegistry {
   {
     var overriddenSource = source
 
-    for plugin in plugins.values {
+    for plugin in registeredPlugins {
       overriddenSource = await plugin.overrideSource(source: overriddenSource)
     }
 
@@ -77,25 +93,25 @@ public final class PluginsRegistry {
   // MARK: - Notifications
 
   internal func notifyPlayerCreated(player: NativeVideoPlayer) {
-    for plugin in plugins.values {
+    for plugin in registeredPlugins {
       plugin.onPlayerCreated(player: Weak(value: player))
     }
   }
 
   internal func notifyPlayerDestroyed(player: NativeVideoPlayer) {
-    for plugin in plugins.values {
+    for plugin in registeredPlugins {
       plugin.onPlayerDestroyed(player: Weak(value: player))
     }
   }
 
   internal func notifyVideoViewCreated(view: VideoComponentView) {
-    for plugin in plugins.values {
+    for plugin in registeredPlugins {
       plugin.onVideoViewCreated(view: Weak(value: view))
     }
   }
 
   internal func notifyVideoViewDestroyed(view: VideoComponentView) {
-    for plugin in plugins.values {
+    for plugin in registeredPlugins {
       plugin.onVideoViewDestroyed(view: Weak(value: view))
     }
   }
