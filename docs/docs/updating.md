@@ -17,7 +17,7 @@ Version 7 splits the v6 `<Video>` component in two:
 
 A player exists without a view, so you can create and preload it before anything is on screen.
 
-This page maps the whole v6 API to v7 and lists what v7 does not have yet. It describes `7.0.0-beta.14`.
+This page maps the whole v6 API to v7 and lists what v7 does not have yet. It describes `7.0.0-beta.15`.
 
 :::tip Migrate faster with an AI assistant
 Our agent skill knows the v6→v7 mapping. Install it with `npx skills add TheWidlarzGroup/react-native-video` and let your editor rewrite `Video` calls into the `useVideoPlayer` + `VideoView` model. See [Build with AI](./build-with-ai/overview.mdx).
@@ -25,7 +25,7 @@ Our agent skill knows the v6→v7 mapping. Install it with `npx skills add TheWi
 
 ### Before you start
 
-*   Read [Not in v7 yet](#not-in-v7-yet) first. Audio track selection, subtitle styling, the poster props, start position and trimming, caching, the loading and buffering options and `controlsStyles` are in open pull requests. Ads and TV platforms are planned after v7 stable. A few v6 props are removed for good. v6 is still maintained, so you can stay on it until the feature you need lands.
+*   Read [Not in v7 yet](#not-in-v7-yet) first. Subtitle styling, the poster props, start position and trimming, caching, the loading and buffering options, `controlsStyles`, the fullscreen orientation props, audio output and secure output, and `progressUpdateInterval` are in open pull requests. Ads and TV platforms are planned after v7 stable. A few v6 props are removed for good. v6 is still maintained, so you can stay on it until the feature you need lands.
 *   v7 needs React Native 0.75 or newer and iOS 15 or newer. See [Installation](./fundamentals/installation.md) for all requirements.
 *   Time values keep the units of v6. Positions and lengths are in seconds: `player.currentTime`, `player.duration`, `seekTo()`, `seekBy()`, and the times in `onProgress`, `onLoad` and `onSeek`. Options are in milliseconds: `bufferConfig`, and `startPosition`, `cropStart` and `cropEnd` once [#5266](https://github.com/TheWidlarzGroup/react-native-video/pull/5266) lands. The one exception is `preferredForwardBufferDuration`, which was in seconds in v6 and is `bufferConfig.preferredForwardBufferDurationMs` in v7.
 
@@ -104,6 +104,8 @@ const Player = () => {
 | Lifetime | The player lives as long as the component is mounted. | `useVideoPlayer` releases the player when the component unmounts. A player made with `new VideoPlayer(source)` lives until you call `player.release()`. |
 | Event payloads | Always an object, such as `{ isBuffering }`. | Often a plain value, such as a `boolean`. See [Events](#events). |
 | Buffer on Android | ExoPlayer's defaults: `minBufferMs` and `maxBufferMs` are both `50000`. | `minBufferMs` is `5000` and `maxBufferMs` is `10000`. Set [`bufferConfig`](./player/use-video-player.md#buffer-config) if you relied on the larger buffer. |
+| Audio focus on Android | Playback takes audio focus when it starts, so other apps pause. `disableFocus` turns this off. | Up to `7.0.0-beta.15` the player does not take audio focus: other apps keep playing next to the video, and they do not pause it. Once [#5293](https://github.com/TheWidlarzGroup/react-native-video/pull/5293) lands, it takes focus when playback starts. With the default `mixAudioMode: 'auto'` other apps lower their volume, with `'doNotMix'` they pause as in v6, and `'mixWithOthers'` does not take focus. |
+| Status after an error or the end on Android | `onIdle` fires after a playback error. | Up to `7.0.0-beta.15` the status goes to `'error'` and a moment later to `'idle'`, and to `'idle'` at the end. Once [#5285](https://github.com/TheWidlarzGroup/react-native-video/pull/5285) lands, it stays `'error'` after a failure and `'readyToPlay'` after the end, as on iOS. Detect a failure with `onError` and the end with `onEnd`, not with `'idle'`. |
 
 ### Props
 
@@ -128,7 +130,8 @@ Set them in the setup callback of `useVideoPlayer`, or at any later time.
 | `showNotificationControls` | `player.showNotificationControls` | |
 | `disableAudioSessionManagement` | `player.disableAudioSessionManagement` | iOS. The exported `setAudioSessionManagementDisabled(true)` turns it off globally. |
 | `selectedTextTrack` | `player.selectTextTrack(track)` | Pick the track from `player.getAvailableTextTracks()`. Pass `null` to turn subtitles off. |
-| `selectedVideoTrack` | `player.selectVideoTrack(trackId)` | From the release after `7.0.0-beta.14`. Pick the id from `player.getAvailableVideoTracks()`. Pass `undefined` for automatic quality. `onVideoTrackChange` reports what is playing. See [Video quality](./player/video-quality.md). |
+| `selectedAudioTrack` | `player.selectAudioTrack(trackId)` | From `7.0.0-beta.15`. Pick the id from `player.getAvailableAudioTracks()` instead of a `{ type, value }` object. Pass `undefined` for the default track. `player.selectedAudioTrackId` and `onAudioTrackChange` report the selection. Ids can differ between sources. See [Audio tracks](./player/audio-tracks.md). |
+| `selectedVideoTrack` | `player.selectVideoTrack(trackId)` | From `7.0.0-beta.15`. Pick the id from `player.getAvailableVideoTracks()`. Pass `undefined` for automatic quality. `onVideoTrackChange` reports what is playing. See [Video quality](./player/video-quality.md). |
 | `reportBandwidth` | Not needed | `onBandwidthUpdate` is always emitted. |
 
 See [Player](./player/player.md) for the full reference.
@@ -165,7 +168,7 @@ The first argument of `useVideoPlayer` is a URL, a `require()` asset or a config
 | `resizeMode` | `resizeMode` | Same values: `'none'`, `'contain'`, `'cover'`, `'stretch'`. |
 | `enterPictureInPictureOnLeave` | `autoEnterPictureInPicture` | |
 | `preventsDisplaySleepDuringVideoPlayback` | `keepScreenAwake` | Still `true` by default. |
-| `viewType`, `useTextureView` | `surfaceType` | Android. `'surface'` (default) or `'texture'`. |
+| `viewType`, `useTextureView` | `surfaceType` | Android. `'surface'` (default) or `'texture'`. `ViewType.SURFACE_SECURE` and `useSecureView` become `'secureSurface'` once [#5280](https://github.com/TheWidlarzGroup/react-native-video/pull/5280) lands. |
 | `fullscreen` | `enterFullscreen()` and `exitFullscreen()` on the view ref | See [Ref methods](#ref-methods). |
 
 `pictureInPicture` is new. It shows the Picture-in-Picture button in the native controls.
@@ -194,20 +197,21 @@ useEvent(player, 'onError', (error) => console.error(error.code, error.message))
 | `onSeek` | `onSeek` | `{ currentTime, seekTime }` is now a `number`: the position the player moved to. |
 | `onEnd` | `onEnd` | |
 | `onError` | `onError` | `{ error }` is now a `VideoRuntimeError` with a `code`, such as `'player/playback-failed'`, and a `message`. |
-| `onIdle` | `onStatusChange` | Called with `'idle'`, `'loading'`, `'readyToPlay'` or `'error'`. |
+| `onIdle` | `onStatusChange` | Called with `'idle'`, `'loading'`, `'readyToPlay'` or `'error'`. `'idle'` means that no source is loaded. On Android `'idle'` still comes after an error and at the end; see [Check the behavior changes](#3-check-the-behavior-changes). |
 | `onBandwidthUpdate` | `onBandwidthUpdate` | `trackId` is gone. Android and iOS. |
 | `onTimedMetadata` | `onTimedMetadata` | Unchanged. |
 | `onTextTrackDataChanged` | `onTextTrackDataChanged` | `{ subtitleTracks }` is now a `string[]`. |
+| `onAudioTracks` | `onAudioTrackChange` | `{ audioTracks }` is now `{ availableTracks, selectedTrackId }`. It also fires when the selected track changes. |
 | `onTextTracks` | None | Read the list with `player.getAvailableTextTracks()`. The new `onTrackChange` event reports the selected text track. |
 | `onAudioBecomingNoisy` | `onAudioBecomingNoisy` | Android only in v7. |
 | `onAudioFocusChanged` | `onAudioFocusChange` | `{ hasAudioFocus }` is now a `boolean`. Android. |
 | `onExternalPlaybackChange` | `onExternalPlaybackChange` | `{ isExternalPlaybackActive }` is now a `boolean`. iOS. |
 
 :::info onProgress in v7
-*   **Interval.** `progressUpdateInterval` is not available yet. The event fires every 250 ms on Android and every 500 ms on iOS. On web it follows the browser's `timeupdate` event.
+*   **Interval.** `progressUpdateInterval` is in an open pull request ([#5281](https://github.com/TheWidlarzGroup/react-native-video/pull/5281)) as `player.progressUpdateInterval`, in milliseconds. Until it lands the event fires every 250 ms on Android and every 500 ms on iOS, where v6 used 250 ms. On web it follows the browser's `timeupdate` event.
 *   **Duration.** `seekableDuration` is gone. Read `player.duration`.
-*   **Buffer.** v6 `playableDuration` was the position the buffer reaches. `bufferDuration` is the number of seconds buffered ahead of the current position, so the v6 value is `currentTime + bufferDuration`. On iOS this holds from the release after `7.0.0-beta.14`; earlier betas report the position the buffer reaches (see [#5028](https://github.com/TheWidlarzGroup/react-native-video/issues/5028)).
-*   **Status and buffering on iOS.** Up to `7.0.0-beta.14` the player did not report status and buffering changes that come from playback stalls. From the next release `onBuffer`, `onStatusChange` and `isBuffering` in `onPlaybackStateChange` fire for them.
+*   **Buffer.** v6 `playableDuration` was the position the buffer reaches. `bufferDuration` is the number of seconds buffered ahead of the current position, so the v6 value is `currentTime + bufferDuration`. On iOS this holds from `7.0.0-beta.15`; earlier betas report the position the buffer reaches (see [#5028](https://github.com/TheWidlarzGroup/react-native-video/issues/5028)).
+*   **Status and buffering on iOS.** Up to `7.0.0-beta.14` the player did not report status and buffering changes that come from playback stalls. From `7.0.0-beta.15` `onBuffer`, `onStatusChange` and `isBuffering` in `onPlaybackStateChange` fire for them.
 :::
 
 Fullscreen and Picture-in-Picture events are props of `VideoView`:
@@ -250,7 +254,7 @@ const viewRef = useRef<VideoViewRef>(null);
 | `exitPictureInPicture()` | `viewRef.current.exitPictureInPicture()` | |
 | `restoreUserInterfaceForPictureInPictureStopCompleted()` | Not needed | |
 | `save()` | Not yet | |
-| `nativeHtmlVideoRef` (web) | Not yet | The `<video>` element is not exposed. |
+| `nativeHtmlVideoRef` (web) | Not yet | `player.nativeHtmlVideoElement` on the web player is in an open pull request ([#5281](https://github.com/TheWidlarzGroup/react-native-video/pull/5281)). |
 
 See [VideoView methods](./video-view/methods.md) for the full reference.
 
@@ -301,7 +305,7 @@ Without Expo, the v6 Podfile flags `$RNVideoUseGoogleIMA` and `$RNVideoUseVideoC
 
 ### Not in v7 yet
 
-This is the state of `7.0.0-beta.14`. v7 runs on iOS, Android and web.
+This is the state of `7.0.0-beta.15`. v7 runs on iOS, Android and web.
 
 #### In open pull requests
 
@@ -309,15 +313,15 @@ These v6 features are in open pull requests and are planned before v7 stable:
 
 | Feature | v6 API | v7 API | Pull request |
 | :--- | :--- | :--- | :--- |
-| Audio track selection | `selectedAudioTrack`, `onAudioTracks` | `player.selectAudioTrack(trackId)` with ids from `player.getAvailableAudioTracks()`, `onAudioTrackChange` | [#5148](https://github.com/TheWidlarzGroup/react-native-video/pull/5148) |
 | Subtitle styling | `subtitleStyle` | `subtitleStyle` on `VideoView` | [#5149](https://github.com/TheWidlarzGroup/react-native-video/pull/5149) |
 | Poster and loading state | `poster`, `posterResizeMode`, `renderLoader`, `shutterColor`, `hideShutterView` | Same names, on `VideoView` | [#5264](https://github.com/TheWidlarzGroup/react-native-video/pull/5264) |
 | Start position and trimming | `source.startPosition`, `source.cropStart`, `source.cropEnd` | `startPosition`, `cropStart`, `cropEnd` in the config, in milliseconds as in v6 | [#5266](https://github.com/TheWidlarzGroup/react-native-video/pull/5266) |
-| Caching | `source.shouldCache` | `shouldCache` in the config. Progressive files only (no HLS or DASH), on Android and iOS, up to 100 MB | [#5267](https://github.com/TheWidlarzGroup/react-native-video/pull/5267) |
+| Caching | `source.shouldCache` | `shouldCache` in the config, on Android and iOS, up to 100 MB. Progressive files only: HLS, DASH, DRM content and sources with `externalSubtitles` play without the cache | [#5267](https://github.com/TheWidlarzGroup/react-native-video/pull/5267) |
 | Loading and buffering | `minLoadRetryCount`, `disableDisconnectError`, `source.type`, `source.textTracksAllowChunklessPreparation`, `source.cmcd`, `bufferConfig.bufferingStrategy`, `automaticallyWaitsToMinimizeStalling` | Same names. `automaticallyWaitsToMinimizeStalling` moves to `bufferConfig` | [#5275](https://github.com/TheWidlarzGroup/react-native-video/pull/5275) |
 | Native controls on Android | `controlsStyles` | `controlsStyles` on `VideoView` | [#5272](https://github.com/TheWidlarzGroup/react-native-video/pull/5272) |
-
-On web you can already read and select audio tracks through [`WebVideoPlayer`](./fundamentals/web-support.mdx).
+| Fullscreen orientation | `fullscreenOrientation`, `fullscreenAutorotate` | Same names, on `VideoView`, on iOS and Android. v6 had them on iOS only | [#5286](https://github.com/TheWidlarzGroup/react-native-video/pull/5286) |
+| Audio output and secure output | `audioOutput`, `allowsExternalPlayback`, `useSecureView`, `ViewType.SURFACE_SECURE` | `player.audioOutput` (`'speaker'` or `'earpiece'`; on Android `'earpiece'` needs the `MODIFY_AUDIO_SETTINGS` permission), `player.allowsExternalPlayback` (iOS), `surfaceType="secureSurface"` on `VideoView` (Android) | [#5280](https://github.com/TheWidlarzGroup/react-native-video/pull/5280) |
+| Progress interval and web video element | `progressUpdateInterval`, `nativeHtmlVideoRef` | `player.progressUpdateInterval` in milliseconds, and `player.nativeHtmlVideoElement` on the web player, which returns the `<video>` element | [#5281](https://github.com/TheWidlarzGroup/react-native-video/pull/5281) |
 
 Until the poster props land, render your own image or loader above `VideoView` and hide it when `onReadyToDisplay` fires.
 
@@ -327,9 +331,6 @@ These have no pull request yet, but work on them has started:
 
 | Area | v6 API |
 | :--- | :--- |
-| Fullscreen orientation | `fullscreenAutorotate`, `fullscreenOrientation` |
-| Progress interval and web video element | `progressUpdateInterval`, `nativeHtmlVideoRef` |
-| Audio output and secure output | `audioOutput`, `allowsExternalPlayback`, `useSecureView`, `ViewType.SURFACE_SECURE` |
 | Content start time | `contentStartTime` (Android, DASH with server-side ads) |
 
 #### Planned after v7 stable
