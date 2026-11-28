@@ -90,6 +90,7 @@ export const SCENARIO_SOURCES: Record<ScenarioName, VideoConfig> = {
   'video-tracks': fixture('hls-quality/index.m3u8'), // HLS, 3 video renditions (360p/180p/90p)
   'audio-tracks': fixture('hls-audio/index.m3u8'), // HLS, English (default) + Spanish audio
   'audio-tracks-replace': fixture('hls-audio/index.m3u8'),
+  'subtitles': fixture('hls-subs/index.m3u8'), // the hls clip + WebVTT cues at 0.5, 3 and 5.5 s, 1 s each
   'mp4-fullscreen-landscape': fixture('short.mp4'),
 };
 

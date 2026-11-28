@@ -1,0 +1,11 @@
+WEBVTT
+X-TIMESTAMP-MAP=MPEGTS:126000,LOCAL:00:00:00.000
+
+00:00.500 --> 00:01.500
+Cue A, half to one and a half
+
+00:03.000 --> 00:04.000
+Cue B, three to four
+
+00:05.500 --> 00:06.500
+Cue C, five and a half to six and a half

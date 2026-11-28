@@ -231,7 +231,23 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
   }
 
   func onTextTrackDataChanged(texts: [NSAttributedString]) {
-    _eventEmitter?.onTextTrackDataChanged(texts.map { $0.string })
+    // One event per subtitle that appears, with its lines, and one `[]` when it goes away
+    // (same on Android and the web). The legible output also sends empty updates while no
+    // subtitle is shown; only the first one after a subtitle is reported.
+    let strings = texts.map { $0.string }.filter { !$0.isEmpty }
+    guard !strings.isEmpty else {
+      clearTextTrackDataIfShown()
+      return
+    }
+    isTextTrackDataShown = true
+    _eventEmitter?.onTextTrackDataChanged(strings)
+  }
+
+  /// Reports `[]` if the last `onTextTrackDataChanged` had text, so the app can clear it.
+  func clearTextTrackDataIfShown() {
+    guard isTextTrackDataShown else { return }
+    isTextTrackDataShown = false
+    _eventEmitter?.onTextTrackDataChanged([])
   }
 
   func onMediaSelectionChanged() {
@@ -276,6 +292,8 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
   }
 
   func onPlayerItemWillChange(hasNewPlayerItem: Bool) {
+    // The old item's outputs are gone, so a subtitle it showed will not be cleared by them.
+    clearTextTrackDataIfShown()
     if hasNewPlayerItem {
       // Set initial buffering state when playerItem is assigned
       isCurrentlyBuffering = true

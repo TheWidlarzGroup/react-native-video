@@ -1075,3 +1075,46 @@ describe('request count', () => {
     expect(markers()).not.toContain('evt-retried-once');
   });
 });
+
+describe('onTextTrackDataChanged', () => {
+  const text = (...texts: string[]): PlayerEvent => ({
+    type: 'onTextTrackDataChanged',
+    texts,
+  });
+
+  test('a cue that appears and ends marks shown, then cleared', () => {
+    feed(text('Cue A'));
+    expect(markers()).toEqual(['evt-text-shown']);
+    feed(text());
+    expect(markers()).toEqual(['evt-text-cleared', 'evt-text-shown']);
+  });
+
+  test('a [] after the track was turned off is marked apart from a cue end', () => {
+    feed(text('Cue A'), text(), text('Cue B'), { type: 'textTrackOff' });
+    expect(markers()).not.toContain('evt-text-cleared-after-off');
+    feed(text());
+    expect(markers()).toEqual([
+      'evt-text-cleared',
+      'evt-text-cleared-after-off',
+      'evt-text-shown',
+    ]);
+  });
+
+  test('a [] that follows no text is unpaired: first event or a repeat', () => {
+    feed(text());
+    expect(markers()).toEqual(['evt-text-cleared-unpaired']);
+    eventLog.reset();
+    feed(text('Cue A'), text(), text());
+    expect(markers()).toContain('evt-text-cleared-unpaired');
+  });
+
+  test('turning off with no cue shown clears nothing', () => {
+    feed(text('Cue A'), text(), { type: 'textTrackOff' });
+    expect(markers()).not.toContain('evt-text-cleared-after-off');
+    expect(lines()).toEqual([
+      'onTextTrackDataChanged ["Cue A"]',
+      'onTextTrackDataChanged []',
+      'textTrackOff',
+    ]);
+  });
+});

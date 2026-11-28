@@ -25,6 +25,7 @@ export const SCENARIO_NAMES = [
   'audio-tracks',
   'audio-tracks-replace', // same stream; once loaded, replaceSourceAsync() onto it under another URL (#5291)
   'mp4-fullscreen-landscape', // same clip; fullscreen locked to landscape from JS after onLoad (#5286)
+  'subtitles', // HLS with a subtitle track of 3 cues with gaps; turned off during the second cue
 ] as const;
 
 export type ScenarioName = (typeof SCENARIO_NAMES)[number];

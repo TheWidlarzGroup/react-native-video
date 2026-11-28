@@ -342,6 +342,8 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   private var selectedExternalTrackIndex: Int? = nil
   // The text track last reported by onTrackChange, nil for none.
   private var emittedTextTrackId: String? = nil
+  // Whether the last onTextTrackDataChanged reported text (a `[]` is due when it goes away).
+  var isTextTrackDataShown = false
 
   // MARK: - Video track (quality) selection state
   //
@@ -954,6 +956,8 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     let track = selectedTrack
     guard track?.id != emittedTextTrackId else { return }
     emittedTextTrackId = track?.id
+    // The legible output goes quiet when the track is turned off, so clear what it showed.
+    clearTextTrackDataIfShown()
     _eventEmitter?.onTrackChange(track.map { .second($0) })
   }
 

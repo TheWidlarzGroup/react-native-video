@@ -142,6 +142,8 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   private var selectedExternalTrackIndex: Int? = null
   // The text track last reported by onTrackChange, null for none.
   private var emittedTextTrackId: String? = null
+  // Whether the last onTextTrackDataChanged reported text (a `[]` is due when it goes away).
+  private var isTextTrackDataShown = false
 
   // Video track (quality) selection state. The whole VideoTrack is kept, not just its id, so the
   // pick can be resolved again by resolution/bitrate after the track set changes and ids shift.
@@ -873,10 +875,13 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
     }
 
     override fun onCues(cueGroup: CueGroup) {
-      val texts = cueGroup.cues.mapNotNull { it.text?.toString() }
-      if (texts.isNotEmpty()) {
-        eventEmitter.onTextTrackDataChanged(texts.toTypedArray())
-      }
+      // One event per subtitle that appears, with its lines, and one `[]` when it goes away
+      // (same on iOS and the web). Media3 also sends empty cue groups while no subtitle is
+      // shown (seeks, track changes); only the first one after a subtitle is reported.
+      val texts = cueGroup.cues.mapNotNull { it.text?.toString() }.filter { it.isNotEmpty() }
+      if (texts.isEmpty() && !isTextTrackDataShown) return
+      isTextTrackDataShown = texts.isNotEmpty()
+      eventEmitter.onTextTrackDataChanged(texts.toTypedArray())
     }
 
     override fun onMetadata(metadata: Metadata) {

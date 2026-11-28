@@ -1,0 +1,37 @@
+# Subtitle text through onTextTrackDataChanged: HLS with a WebVTT track of three 1 s cues
+# with gaps. Each cue reports its text when it appears and [] when it ends; the scenario
+# turns the track off (selectTextTrack(null)) 0.3 s into the second cue, which reports []
+# as well. A [] that follows no text (a second [] in a row) fails the flow. Markers are
+# derived in eventLog.ts; the scenario acts from JS, so no tap lands during playback.
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: subtitles
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 40000            # HLS: first load is the slow one
+- extendedWaitUntil:
+    visible:
+      id: "evt-text-shown"
+    timeout: 15000
+- extendedWaitUntil:
+    visible:
+      id: "evt-text-cleared"
+    timeout: 10000
+- extendedWaitUntil:
+    visible:
+      id: "evt-text-cleared-after-off"
+    timeout: 10000
+- extendedWaitUntil:        # the last cue has passed, so no [] can still be on its way
+    visible:
+      id: "evt-onEnded"
+    timeout: 15000
+- assertNotVisible:
+    id: "evt-text-cleared-unpaired"
+- assertNotVisible:
+    id: "evt-onError"
