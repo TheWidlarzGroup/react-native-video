@@ -113,11 +113,28 @@ jobs:
       # Kept even though restore + pod install is not faster than a cold pod install:
       # a restored tree keeps the Pods sources' timestamps, which is what lets the
       # DerivedData cache below turn a 12-minute build into a ~2-minute incremental one.
+      # hashFiles() walks the whole workspace, node_modules included, whatever its pattern;
+      # on a hosted macOS runner it once gave up at its fixed 120 s on the Pods key below
+      # and failed the leg before any build (28.11). Both cache keys are computed here
+      # instead, from the named files and from git's index for the source trees, which
+      # takes well under a second. The inputs are the ones the hashFiles() calls listed.
+      - name: Cache keys
+        id: keys
+        run: |
+          set -euo pipefail
+          pods=$(shasum -a 256 test-app/ios/Podfile.lock | cut -d' ' -f1)
+          inputs=$(shasum -a 256 test-app/ios/Podfile.lock test-app/ios/Podfile test-app/app.json test-app/rnv-e2e-plugin.mjs)
+          sources=$(git ls-files -s -- packages/react-native-video/ios packages/react-native-video/nitrogen/generated/ios packages/react-native-video/nitrogen/generated/shared packages/react-native-video/cpp)
+          test -n "$sources" || { echo "::error::no iOS sources in git's index for the DerivedData key" >&2; exit 1; }
+          deriveddata=$(printf '%s\n%s\n' "$inputs" "$sources" | shasum -a 256 | cut -d' ' -f1)
+          echo "pods=${pods}" >> "$GITHUB_OUTPUT"
+          echo "deriveddata=${deriveddata}" >> "$GITHUB_OUTPUT"
+
       - name: Cache Pods
         uses: actions/cache@v6
         with:
           path: test-app/ios/Pods
-          key: pods-${{ inputs.runner }}-rn${{ inputs.rn-version }}-${{ hashFiles('test-app/ios/Podfile.lock') }}
+          key: pods-${{ inputs.runner }}-rn${{ inputs.rn-version }}-${{ steps.keys.outputs.pods }}
           restore-keys: pods-${{ inputs.runner }}-rn${{ inputs.rn-version }}-
 
       - name: Install pods
@@ -137,7 +154,7 @@ jobs:
         uses: actions/cache@v6
         with:
           path: build
-          key: deriveddata-${{ inputs.runner }}-rn${{ inputs.rn-version }}-${{ hashFiles('test-app/ios/Podfile.lock', 'test-app/ios/Podfile', 'test-app/app.json', 'test-app/rnv-e2e-plugin.mjs', 'packages/react-native-video/ios/**', 'packages/react-native-video/nitrogen/generated/ios/**', 'packages/react-native-video/nitrogen/generated/shared/**', 'packages/react-native-video/cpp/**') }}
+          key: deriveddata-${{ inputs.runner }}-rn${{ inputs.rn-version }}-${{ steps.keys.outputs.deriveddata }}
           restore-keys: deriveddata-${{ inputs.runner }}-rn${{ inputs.rn-version }}-
 
       # pipefail: without it xcbeautify's exit code would mask a failed xcodebuild.

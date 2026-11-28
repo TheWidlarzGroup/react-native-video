@@ -84,6 +84,9 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       }), let previousSource else { throw CancellationError() }
       let context = LoadContext(source: newSource, token: token)
       releaseAssetIfNotUsedByCurrentLoad(for: previousSource)
+      // The next onAudioTrackChange describes the new source. Without this, a source with the
+      // same audio tracks (the next episode, say) has the same signature and gets no event.
+      lastEmittedAudioTrackSignature = nil
       return context
     }
   }

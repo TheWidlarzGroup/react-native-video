@@ -30,7 +30,7 @@ const playerWithSource = new VideoPlayer({ uri: 'https://example.com/video.mp4' 
 
 // Using a VideoConfig object
 const playerWithConfig = new VideoPlayer({
-  source: { uri: 'https://example.com/video.mp4' },
+  uri: 'https://example.com/video.mp4',
   // other configurations
 });
 ```
@@ -122,8 +122,8 @@ Properties below are Android‑only
 | `livePlayback.maxOffsetMs` | `number` | Maximum allowed live offset (ms). |
 | `livePlayback.targetOffsetMs` | `number` | Target live offset the player tries to maintain (ms). |
 
-#### iOS, visionOS, tvOS
-Properties below are Apple platforms‑only
+#### iOS
+Properties below are iOS-only
 
 | Property | Type | Description |
 |----------|------|-------------|

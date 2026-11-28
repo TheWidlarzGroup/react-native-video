@@ -4,6 +4,7 @@ export type * from './core/types/Events';
 export type { IgnoreSilentSwitchMode } from './core/types/IgnoreSilentSwitchMode';
 export type { AudioOutput } from './core/types/AudioOutput';
 export type { MixAudioMode } from './core/types/MixAudioMode';
+export type { ControlsStyles } from './core/types/ControlsStyles';
 export type { ResizeMode } from './core/types/ResizeMode';
 export type { AudioTrack } from './core/types/AudioTrack';
 export type { TextTrack } from './core/types/TextTrack';

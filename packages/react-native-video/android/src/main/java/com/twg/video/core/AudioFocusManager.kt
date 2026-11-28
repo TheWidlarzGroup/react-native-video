@@ -10,6 +10,7 @@ import android.os.Build
 import androidx.annotation.MainThread
 import androidx.annotation.OptIn
 import androidx.annotation.RequiresApi
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import com.margelo.nitro.NitroModules
 import com.margelo.nitro.video.AudioOutput
@@ -121,11 +122,22 @@ class AudioFocusManager() {
     }
   }
 
+  /**
+   * Whether the player is audible or about to be: it was asked to play and has not ended.
+   * isPlaying is not used here, because it is false while the player buffers. Focus given up
+   * during a stall lets the app that was ducked or paused come back in the middle of the video.
+   */
+  @MainThread
+  private fun holdsAudio(player: HybridVideoPlayer): Boolean {
+    val mediaPlayer = player.player
+    val isLoadedOrLoading = mediaPlayer.playbackState == Player.STATE_READY ||
+      mediaPlayer.playbackState == Player.STATE_BUFFERING
+    return mediaPlayer.playWhenReady && isLoadedOrLoading && mediaPlayer.volume != 0f
+  }
+
   @MainThread
   private fun determineRequiredMixMode(): MixAudioMode? {
-    val activePlayers = players.filter { player ->
-      player.player.isPlaying && player.player.volume != 0f
-    }
+    val activePlayers = players.filter { player -> holdsAudio(player) }
 
     if (activePlayers.isEmpty()) {
       return null
@@ -238,7 +250,8 @@ class AudioFocusManager() {
   private fun pauseActivePlayers() {
     players.forEach { player ->
       player.player.let { mediaPlayer ->
-        if (mediaPlayer.volume != 0f && mediaPlayer.isPlaying) {
+        // A buffering player is paused too, or it would start once it has data.
+        if (holdsAudio(player)) {
           mediaPlayer.pause()
         }
       }

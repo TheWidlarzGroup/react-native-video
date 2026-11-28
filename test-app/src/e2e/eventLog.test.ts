@@ -160,6 +160,24 @@ describe('handle', () => {
     ]);
   });
 
+  test('a second onLoad for the same source marks evt-onLoad-repeated', () => {
+    feed({ type: 'onLoad', duration: 8 });
+    expect(markers()).not.toContain('evt-onLoad-repeated');
+    feed({ type: 'onLoad', duration: 8 });
+    expect(markers()).toContain('evt-onLoad-repeated');
+  });
+
+  test('the onLoad of a replacement source is not a repeat', () => {
+    feed(
+      { type: 'onLoad', duration: 8 },
+      { type: 'replaceSource', phase: 'requested', source: 'hls' },
+      { type: 'onLoad', duration: 8 }
+    );
+    expect(markers()).not.toContain('evt-onLoad-repeated');
+    feed({ type: 'onLoad', duration: 8 }); // a repeat of the replacement
+    expect(markers()).toContain('evt-onLoad-repeated');
+  });
+
   test('onProgress marks progress past the threshold, exclusive', () => {
     feed({ type: 'onProgress', currentTime: PROGRESS_MARKER_SECONDS });
     expect(markers()).toEqual(['evt-onProgress']);
@@ -627,6 +645,22 @@ describe('audio track markers', () => {
     ]);
   });
 
+  test('a replacement source that lists both tracks is marked, the first source is not (#5291)', () => {
+    const both = [
+      { ...en, selected: true },
+      { ...es, selected: false },
+    ];
+    feed({ type: 'onAudioTrackChange', tracks: both });
+    expect(markers()).not.toContain('evt-audio-tracks-after-replace');
+    feed(
+      { type: 'replaceSource', phase: 'requested', source: 'audio-tracks' },
+      { type: 'onAudioTrackChange', tracks: [] } // Android: the list empties first
+    );
+    expect(markers()).not.toContain('evt-audio-tracks-after-replace');
+    feed({ type: 'onAudioTrackChange', tracks: both });
+    expect(markers()).toContain('evt-audio-tracks-after-replace');
+  });
+
   test('the default track alone never sets either marker (not a real restore)', () => {
     feed({
       type: 'onAudioTrackChange',
@@ -664,5 +698,23 @@ describe('fullscreen', () => {
     });
     expect(markers()).toEqual(['evt-fullscreen-call-failed']);
     expect(lines()).toEqual(['exitFullscreen() threw: boom']);
+  });
+});
+
+describe('session', () => {
+  test('a handler bound to the current scenario applies its events', () => {
+    const handle = eventLog.forSession();
+    handle({ type: 'onEnd' });
+    expect(markers()).toEqual(['evt-onEnded']);
+  });
+
+  test("after a reset, the previous scenario's handler changes nothing", () => {
+    const previous = eventLog.forSession();
+    eventLog.reset(); // the next scenario starts
+    const current = eventLog.forSession();
+    previous({ type: 'onError', code: 'player/playback-failed' });
+    expect(markers()).toEqual([]);
+    current({ type: 'onEnd' });
+    expect(markers()).toEqual(['evt-onEnded']);
   });
 });

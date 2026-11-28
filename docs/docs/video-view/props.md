@@ -2,7 +2,7 @@
 title: VideoView Props — Controls, PiP & Resize Mode
 sidebar_position: 2
 sidebar_label: Props
-description: Full reference of VideoView component props — player binding, controls, picture-in-picture, resize mode, and surface type options.
+description: Full reference of VideoView component props — player binding, controls, picture-in-picture, resize mode, surface type and Android controls options.
 keywords: [VideoView props, player, controls, resizeMode, surfaceType, picture-in-picture, react native video]
 ---
 
@@ -18,6 +18,7 @@ keywords: [VideoView props, player, controls, resizeMode, surfaceType, picture-i
 | `resizeMode` | `'contain' \| 'cover' \| 'stretch' \| 'none'` | No | `'none'` | How the video should be resized to fit the view. |
 | `keepScreenAwake` | `boolean` | No | `true` | Whether to keep the device screen awake while the video view is mounted. |
 | `surfaceType` | `'surface' \| 'texture' \| 'secureSurface'` | No (Android only) | `'surface'` | (Android) Underlying native view type. `'surface'` uses a SurfaceView (better performance, no transforms/overlap), `'texture'` uses a TextureView (supports animations, transforms, overlapping UI) at a small performance cost, `'secureSurface'` uses a SurfaceView that is left out of screenshots and screen recordings. Ignored on iOS. |
+| `controlsStyles` | `ControlsStyles` | No (Android only) | - | (Android) Hides single elements of the native controls and chooses which system bars fullscreen hides. See [Android: Customizing the controls](#android-customizing-the-controls). Ignored on iOS and web. |
 
 ## Android: Choosing a surface type
 
@@ -52,3 +53,44 @@ To keep the video out of screenshots, screen recordings and non-secure external 
 ```
 
 A secure surface is a `SurfaceView`, so it has the same limits as `'surface'`. It hides only the video, not the rest of the screen.
+
+## Android: Customizing the controls
+
+:::info Android Only
+This section applies only to Android. The `controlsStyles` prop is ignored on iOS and web.
+:::
+
+`controlsStyles` hides single elements of the native controls. It needs `controls` to be enabled. Every field is optional.
+
+```tsx
+<VideoView
+  player={player}
+  controls
+  controlsStyles={{
+    hideForward: true,
+    hideRewind: true,
+    hideSettingButton: true,
+    hideNavigationBarOnFullScreenMode: false,
+  }}
+  style={{ width: '100%', aspectRatio: 16 / 9 }}
+/>
+```
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `hideSeekBar` | `false` | Hides the seek bar. |
+| `hidePosition` | `false` | Hides the current position label. |
+| `hideDuration` | `false` | Hides the duration label. |
+| `hidePlayPause` | `false` | Hides the play/pause button. |
+| `hideForward` | `false` | Hides the fast-forward button. |
+| `hideRewind` | `false` | Hides the rewind button. |
+| `hideNext` | `false` | Hides the "next" button. |
+| `hidePrevious` | `false` | Hides the "previous" button. |
+| `hideFullscreen` | `false` | Hides the button that enters fullscreen. You can still call `enterFullscreen()` on the view ref, and the button that leaves fullscreen is always shown. |
+| `hideSettingButton` | `false` | Hides the settings button (playback speed and tracks). |
+| `hideNavigationBarOnFullScreenMode` | `true` | Hides the system navigation bar in fullscreen. |
+| `hideNotificationBarOnFullScreenMode` | `true` | Hides the system status bar in fullscreen. |
+
+:::note Coming from v6
+v6 had the same prop. Two defaults differ: v6 hid the settings button unless you set `hideSettingButton: false`, and v7 shows it. `seekIncrementMS`, `liveLabel` and `hideLiveBadge` are not available: the v7 controls have no live badge, and the seek increment is not configurable yet.
+:::

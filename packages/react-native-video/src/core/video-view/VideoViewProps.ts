@@ -1,5 +1,6 @@
 import type { ViewProps, ViewStyle } from 'react-native';
 import type { SurfaceType } from '../../spec/nitro/VideoViewViewManager.nitro';
+import type { ControlsStyles } from '../types/ControlsStyles';
 import type { ListenerSubscription } from '../types/EventEmitter';
 import type { VideoViewEvents } from '../types/Events';
 import type { ResizeMode } from '../types/ResizeMode';
@@ -52,6 +53,17 @@ export interface VideoViewProps extends Partial<VideoViewEvents>, ViewProps {
    * @platform android
    */
   surfaceType?: SurfaceType;
+
+  /**
+   * Hides single elements of the native controls and chooses which system bars
+   * are hidden in fullscreen. Has an effect only when `controls` is enabled
+   * (the system bar options apply to fullscreen in general).
+   *
+   * Only applicable on Android
+   *
+   * @platform android
+   */
+  controlsStyles?: ControlsStyles;
 }
 
 export interface VideoViewRef {

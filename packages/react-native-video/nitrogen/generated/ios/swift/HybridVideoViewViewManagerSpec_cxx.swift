@@ -217,6 +217,17 @@ open class HybridVideoViewViewManagerSpec_cxx {
       self.__implementation.surfaceType = margelo.nitro.video.SurfaceType(rawValue: newValue)!
     }
   }
+  
+  public final var controlsStyles: NativeControlsStyles {
+    @inline(__always)
+    get {
+      return self.__implementation.controlsStyles
+    }
+    @inline(__always)
+    set {
+      self.__implementation.controlsStyles = newValue
+    }
+  }
 
   // Methods
   @inline(__always)
