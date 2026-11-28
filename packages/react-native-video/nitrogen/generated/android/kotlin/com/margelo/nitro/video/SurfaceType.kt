@@ -17,7 +17,8 @@ import com.facebook.proguard.annotations.DoNotStrip
 @Keep
 enum class SurfaceType(@DoNotStrip @Keep val value: Int) {
   SURFACE(0),
-  TEXTURE(1);
+  TEXTURE(1),
+  SECURESURFACE(2);
 
   companion object
 }

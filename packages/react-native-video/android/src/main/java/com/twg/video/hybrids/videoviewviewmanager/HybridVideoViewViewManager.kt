@@ -5,6 +5,7 @@ import androidx.media3.common.util.UnstableApi
 import com.facebook.proguard.annotations.DoNotStrip
 import com.twg.video.core.VideoManager
 import com.twg.video.core.VideoViewError
+import com.twg.video.core.utils.ControlsStylesUtils
 import com.twg.video.core.utils.PictureInPictureUtils
 import com.twg.video.core.utils.Threading
 import java.util.UUID
@@ -60,7 +61,7 @@ class HybridVideoViewViewManager(nitroId: Int): HybridVideoViewViewManagerSpec()
 
   override fun exitPictureInPicture() {
     Threading.runOnMainThread {
-      videoView.get()?.exitPictureInPicture()
+      videoView.get()?.requestExitPictureInPicture()
     }
   }
 
@@ -84,8 +85,8 @@ class HybridVideoViewViewManager(nitroId: Int): HybridVideoViewViewManagerSpec()
       videoView.get()?.useController = value
     }
 
-  override var resizeMode: ResizeMode
-    get() = videoView.get()?.resizeMode ?: ResizeMode.NONE
+  override var resizeMode: VideoResizeMode
+    get() = videoView.get()?.resizeMode ?: VideoResizeMode.NONE
     set(value) {
       videoView.get()?.resizeMode = value
     }
@@ -100,6 +101,24 @@ class HybridVideoViewViewManager(nitroId: Int): HybridVideoViewViewManagerSpec()
     get() = videoView.get()?.surfaceType ?: SurfaceType.SURFACE
     set(value) {
       videoView.get()?.surfaceType = value
+    }
+
+  override var controlsStyles: NativeControlsStyles
+    get() = videoView.get()?.controlsStyles ?: ControlsStylesUtils.DEFAULT
+    set(value) {
+      videoView.get()?.controlsStyles = value
+    }
+
+  override var fullscreenOrientation: FullscreenOrientation
+    get() = videoView.get()?.fullscreenOrientation ?: FullscreenOrientation.ALL
+    set(value) {
+      videoView.get()?.fullscreenOrientation = value
+    }
+
+  override var fullscreenAutorotate: Boolean
+    get() = videoView.get()?.fullscreenAutorotate ?: true
+    set(value) {
+      videoView.get()?.fullscreenAutorotate = value
     }
 
   // MARK: - Private helpers

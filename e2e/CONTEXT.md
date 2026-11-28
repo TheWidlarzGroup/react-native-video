@@ -38,6 +38,13 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
 - Standard `ubuntu-latest` runners have KVM; the udev rule step must run before the
   emulator starts (see `_e2e-android.yml`).
 - Keep clips 5–15 s — `onEnded` tests must not wait minutes.
+- **A slow source is made by the fixture server, not by the network.** `?hold=<ms>` on a
+  fixture URL keeps the request waiting that long; with `&holdId=<id>` every request
+  carrying the id waits until <ms> after the first one, because AVPlayer fetches a clip
+  in several range requests, some in parallel. `fixtures.ts` builds such a URL with a
+  fresh id per app launch (`heldFixture`); `smoke-loader.yaml` uses it so that the
+  view's loader has a load to cover. Keep a hold under ExoPlayer's 8 s read timeout
+  unless the flow wants the timeout.
 - **Zero retries.** A flow is never re-run to turn it green — a retry hides exactly the
   race conditions this suite exists to catch. A flow that proves unstable gets quarantined
   (`tags: [flaky]`) with an issue, and drops out of the gate until it is fixed. The only
@@ -51,7 +58,10 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
   other one is `e2e/shared/press.yaml`, which re-sends a tap only when the app never
   rendered the `pressed-<testID>-<n>` marker: it is set synchronously in `onPress`, so it
   proves delivery and nothing else, and a missing marker is a plain assertion failure,
-  which Maestro's `retry` does catch. What the app then shows is never retried.
+  which Maestro's `retry` does catch. What the app then shows is never retried. The
+  Android emulator's boot is the third: when it never comes up, `_e2e-android.yml` boots
+  it once more; a leg whose emulator booted keeps its flows' result, whatever it is
+  (`scripts/e2e/android-run-flows.sh` marks the boot before anything else).
 - **Android: Maestro's first driver connection can die at start-up** (nightly 2026-09-22,
   RN 0.87 / API 36: `DeviceServerDiedException ... UNAVAILABLE` on the first flow's first
   command, 3 s after the driver came up; the other nine flows passed). No mitigation yet.
@@ -167,12 +177,16 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
   markers (`evt-replacement-loaded`, `evt-reloaded-from-start`, `evt-ended-after-replace`)
   only count events after `replaceSourceAsync(source)` was requested, because Android
   re-emits `onLoad` on every re-buffer and replay.
-- **iOS sometimes never reports `readyToPlay`** while a clip plays (issue #5155): the
-  status stays `loading` from the item assignment to `onEnded`. `smoke-status-order.yaml`
-  asserts the idle → loading → readyToPlay order and is quarantined (`tags: [flaky]`) until
-  the issue is fixed; the happy path asserts only `evt-initial-idle` and the duration.
-  `smoke-preload.yaml` also waits for `evt-ready-after-loading` and has not shown this
-  (no `play()`, so the status comes through the paused path); if it does, quarantine it too.
+- **iOS sometimes never reported `readyToPlay`** while a clip played (issue #5155). On the
+  CI simulators (iOS 26.4 runtime) the library's `timeControlStatus` KVO observer never
+  fires, in passing runs too (no paused/waiting/playing callback in the event log), although
+  AVPlayer logs every change in `device.log`; on the 26.2 and 27.0 runtimes locally it always
+  fires. Why is not known. Without it, `readyToPlay` came only from the item-ready and
+  likely-to-keep-up callbacks, which skip it while AVPlayer is still waiting to play, so a
+  run whose playback started a moment after the item was ready stayed `loading` to the
+  end. The progress tick now sets `readyToPlay` when AVPlayer plays a ready item, and a
+  Debug build logs `[ReactNativeVideo] status caught up` in `device.log` when it had to.
+  `smoke-status-order.yaml` asserts the idle → loading → readyToPlay order.
 - **`replaceSourceAsync(null)` releases the native player** on iOS and Android, like
   `release()` (the docs said otherwise until #5154; web keeps the player loadable).
   `smoke-release-source.yaml` therefore asserts the promise, the idle status and the

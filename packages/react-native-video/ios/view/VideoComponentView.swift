@@ -83,11 +83,29 @@ import UIKit
     }
   }
 
-  public var resizeMode: ResizeMode = .none {
+  public var resizeMode: VideoResizeMode = .none {
     didSet {
       DispatchQueue.main.async { [weak self] in
         guard let self = self, let playerViewController = self.playerViewController else { return }
         playerViewController.videoGravity = resizeMode.toVideoGravity()
+      }
+    }
+  }
+
+  public var fullscreenOrientation: FullscreenOrientation = .all {
+    didSet {
+      DispatchQueue.main.async { [weak self] in
+        guard let self = self else { return }
+        (self.playerViewController as? VideoPlayerViewController)?.fullscreenOrientation = self.fullscreenOrientation
+      }
+    }
+  }
+
+  public var fullscreenAutorotate: Bool = true {
+    didSet {
+      DispatchQueue.main.async { [weak self] in
+        guard let self = self else { return }
+        (self.playerViewController as? VideoPlayerViewController)?.fullscreenAutorotate = self.fullscreenAutorotate
       }
     }
   }
@@ -110,6 +128,32 @@ import UIKit
 
   deinit {
     VideoManager.shared.unregister(view: self)
+    detachPlayerViewController()
+  }
+
+  /// The controller is a child of the nearest view controller. Without this, that parent keeps
+  /// it, and the `AVPlayer` it holds, for as long as the screen lives: one controller and one
+  /// player for every `VideoView` that was ever mounted there.
+  private func detachPlayerViewController() {
+    guard let controller = playerViewController else { return }
+
+    // Picture in picture and native fullscreen are run by this controller and may outlive the
+    // view. Leave it in place for them.
+    if isPictureInPictureActive || controller.presentedViewController != nil {
+      return
+    }
+
+    let detach = {
+      controller.willMove(toParent: nil)
+      controller.view.removeFromSuperview()
+      controller.removeFromParent()
+    }
+
+    if Thread.isMainThread {
+      detach()
+    } else {
+      DispatchQueue.main.async(execute: detach)
+    }
   }
 
   @objc public required init?(coder: NSCoder) {
@@ -148,11 +192,17 @@ import UIKit
       }
 
       // Remove previous controller if any
+      if self.playerViewController != nil {
+        // What was tracked described the old controller (#4774).
+        self.observer?.resetFullscreenState()
+      }
       self.playerViewController?.willMove(toParent: nil)
       self.playerViewController?.view.removeFromSuperview()
       self.playerViewController?.removeFromParent()
 
-      let controller = AVPlayerViewController()
+      let controller = VideoPlayerViewController()
+      controller.fullscreenOrientation = self.fullscreenOrientation
+      controller.fullscreenAutorotate = self.fullscreenAutorotate
       controller.player = player
       controller.showsPlaybackControls = controls
       controller.videoGravity = self.resizeMode.toVideoGravity()
@@ -162,6 +212,11 @@ import UIKit
 
       // We manage this manually in NowPlayingInfoCenterManager
       controller.updatesNowPlayingInfoCenter = false
+
+      // The PiP props usually arrive before this controller exists (it is created
+      // asynchronously), and their didSet has nothing to apply them to then.
+      controller.allowsPictureInPicturePlayback = self.allowsPictureInPicturePlayback
+      controller.canStartPictureInPictureAutomaticallyFromInline = self.autoEnterPictureInPicture
 
       if #available(iOS 16.0, *) {
         if let initialSpeed = controller.speeds.first(where: { $0.rate == player.rate }) {
@@ -201,6 +256,10 @@ import UIKit
     if newSuperview == nil {
       PluginsRegistry.shared.notifyVideoViewDestroyed(view: self)
 
+      #if os(iOS)
+      exitFullscreenBeforeUnmount()
+      #endif
+
       // We want to disable this when view is about to unmount
       if keepScreenAwake {
         keepScreenAwake = false
@@ -226,24 +285,117 @@ import UIKit
     }
   }
 
+  #if os(iOS)
+  /// The view is leaving the hierarchy while its player is fullscreen. AVKit keeps its fullscreen
+  /// presentation alive on its own, so without this it stays on top of the app (a black screen
+  /// once the item is gone) and every later `enterFullscreen()`, from any view, is ignored until
+  /// the app restarts.
+  private func exitFullscreenBeforeUnmount() {
+    guard let playerViewController, let observer,
+      observer.isFullscreen || observer.isFullscreenBusy
+    else { return }
+    let player = playerViewController.player
+    let wasPlaying = player.map { $0.timeControlStatus != .paused } ?? false
+    // AVKit pauses the player when it leaves native fullscreen. After a normal exit the observer
+    // resumes it, but this view and its observer are going away, so resume it here once the
+    // dismissal is done. In v7 the player outlives the view, and an unmount outside fullscreen
+    // does not pause it either.
+    let exitFullscreen = {
+      playerViewController.exitFullscreen(animated: false) {
+        if wasPlaying {
+          player?.play()
+        }
+      }
+    }
+
+    // Nothing queued may run after the view is gone.
+    observer.queuedFullscreenTarget = nil
+
+    if observer.isFullscreenBusy {
+      // Unmounted while entering (or right after asking to enter). AVKit ignores an exit in the
+      // middle of a transition and then finishes presenting fullscreen over an app whose view is
+      // gone, which covers the app and blocks every later enterFullscreen(). Exit once the
+      // transition is over instead.
+      observer.runAfterFullscreenTransition { observer in
+        guard observer.isFullscreen || playerViewController.presentedViewController != nil
+        else { return }
+        exitFullscreen()
+        // AVKit does not leave fullscreen for a controller whose inline view is no longer in a
+        // window, which is the case now. Dismiss what it presented if it is still up.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+          guard let presented = playerViewController.presentedViewController else { return }
+          presented.presentingViewController?.dismiss(animated: false) {
+            if wasPlaying {
+              player?.play()
+            }
+          }
+        }
+      }
+      return
+    }
+
+    observer.resetFullscreenState(keepingFullscreen: true)
+    exitFullscreen()
+  }
+  #endif
+
   public func enterFullscreen() throws {
-    guard let playerViewController else {
+    guard playerViewController != nil else {
       throw VideoViewError.viewIsDeallocated.error()
     }
 
-    DispatchQueue.main.async {
-      playerViewController.enterFullscreen(animated: true)
+    DispatchQueue.main.async { [weak self] in
+      self?.requestFullscreen(true)
     }
   }
 
   public func exitFullscreen() throws {
-    guard let playerViewController else {
+    guard playerViewController != nil else {
       throw VideoViewError.viewIsDeallocated.error()
     }
 
-    DispatchQueue.main.async {
-      playerViewController.exitFullscreen(animated: true)
+    DispatchQueue.main.async { [weak self] in
+      self?.requestFullscreen(false)
     }
+  }
+
+  /// AVKit asserts when a fullscreen transition is requested while another one is running
+  /// (#4774). A request made in that window is remembered and applied when the transition
+  /// ends, so `enterFullscreen()` followed by `exitFullscreen()` ends inline instead of being
+  /// dropped. Only the last request counts. Main thread only.
+  private func requestFullscreen(_ target: Bool) {
+    guard let playerViewController, let observer else { return }
+
+    if observer.isFullscreenBusy {
+      observer.queuedFullscreenTarget = target
+      return
+    }
+    observer.queuedFullscreenTarget = nil
+    guard observer.isFullscreen != target else { return }
+
+    observer.fullscreenRequestWillStart()
+    if target {
+      playerViewController.enterFullscreen(animated: true)
+    } else {
+      // Called through its IMP, with a real BOOL and a completion block. Through
+      // `perform(_:with:with:)` with a nil handler, AVKit on iOS 18 left fullscreen without
+      // calling the delegate: `onFullscreenChange(false)` never came, and the next
+      // `enterFullscreen()` was dropped (or, before the request queue, showed a black screen).
+      playerViewController.exitFullscreen(animated: true) { [weak observer] in
+        DispatchQueue.main.async {
+          observer?.fullscreenExitRequestDidComplete()
+        }
+      }
+    }
+  }
+
+  /// Called by the observer when a transition has ended, was cancelled, or never started.
+  func applyQueuedFullscreenRequest() {
+    guard let observer, !observer.isFullscreenBusy,
+      let target = observer.queuedFullscreenTarget
+    else { return }
+    observer.queuedFullscreenTarget = nil
+    requestFullscreen(target)
   }
 
   public func startPictureInPicture() throws {

@@ -1,0 +1,48 @@
+# onBuffer is emitted only when the buffering state changes (#5269). Before the fix, iOS
+# reported onBuffer(true) up to seven times while an HLS source started, and again after a
+# seek. evt-onBuffer-true-repeated is set by onBuffer(true) twice in a row without a false
+# between (eventLog.ts); a repeated false is not counted (Android reports the ready state and
+# the end of the clip with false).
+#
+# HLS start, then a forward seek after the clip has ended, through press.yaml on an idle
+# player as in smoke-seek.yaml.
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: hls
+- extendedWaitUntil:
+    visible:
+      id: "evt-progress-gt-2s"
+    timeout: 40000            # HLS first load is the slowest start in the suite
+- assertNotVisible:
+    id: "evt-onBuffer-true-repeated"
+- runFlow: ../shared/wait-for-end.yaml
+- runFlow:
+    file: ../shared/press.yaml
+    env:
+      BUTTON: btn-seek-5
+      NTH: 1
+- runFlow:
+    file: ../shared/press.yaml
+    env:
+      BUTTON: btn-play
+      NTH: 1
+- extendedWaitUntil:
+    visible:
+      id: "evt-seek-fwd-landed"
+    timeout: 10000
+# A pause, not an expectation: give a repeated report time to show up before asserting it
+# did not.
+- extendedWaitUntil:
+    visible:
+      id: "evt-onBuffer-true-repeated"
+    timeout: 3000
+    optional: true
+- assertNotVisible:
+    id: "evt-onBuffer-true-repeated"
+- assertNotVisible:
+    id: "evt-onError"

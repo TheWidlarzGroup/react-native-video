@@ -37,6 +37,15 @@ data class BufferConfig(
   val backBufferDurationMs: Double?,
   @DoNotStrip
   @Keep
+  val bufferingStrategy: BufferingStrategy?,
+  @DoNotStrip
+  @Keep
+  val maxHeapAllocationPercent: Double?,
+  @DoNotStrip
+  @Keep
+  val minBufferMemoryReservePercent: Double?,
+  @DoNotStrip
+  @Keep
   val preferredForwardBufferDurationMs: Double?,
   @DoNotStrip
   @Keep
@@ -49,7 +58,10 @@ data class BufferConfig(
   val preferredPeakBitRateForExpensiveNetworks: Double?,
   @DoNotStrip
   @Keep
-  val preferredMaximumResolutionForExpensiveNetworks: Resolution?
+  val preferredMaximumResolutionForExpensiveNetworks: Resolution?,
+  @DoNotStrip
+  @Keep
+  val automaticallyWaitsToMinimizeStalling: Boolean?
 ) {
   /* primary constructor */
 
@@ -61,8 +73,8 @@ data class BufferConfig(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(livePlayback: LivePlaybackParams?, minBufferMs: Double?, maxBufferMs: Double?, bufferForPlaybackMs: Double?, bufferForPlaybackAfterRebufferMs: Double?, backBufferDurationMs: Double?, preferredForwardBufferDurationMs: Double?, preferredPeakBitRate: Double?, preferredMaximumResolution: Resolution?, preferredPeakBitRateForExpensiveNetworks: Double?, preferredMaximumResolutionForExpensiveNetworks: Resolution?): BufferConfig {
-      return BufferConfig(livePlayback, minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs, backBufferDurationMs, preferredForwardBufferDurationMs, preferredPeakBitRate, preferredMaximumResolution, preferredPeakBitRateForExpensiveNetworks, preferredMaximumResolutionForExpensiveNetworks)
+    private fun fromCpp(livePlayback: LivePlaybackParams?, minBufferMs: Double?, maxBufferMs: Double?, bufferForPlaybackMs: Double?, bufferForPlaybackAfterRebufferMs: Double?, backBufferDurationMs: Double?, bufferingStrategy: BufferingStrategy?, maxHeapAllocationPercent: Double?, minBufferMemoryReservePercent: Double?, preferredForwardBufferDurationMs: Double?, preferredPeakBitRate: Double?, preferredMaximumResolution: Resolution?, preferredPeakBitRateForExpensiveNetworks: Double?, preferredMaximumResolutionForExpensiveNetworks: Resolution?, automaticallyWaitsToMinimizeStalling: Boolean?): BufferConfig {
+      return BufferConfig(livePlayback, minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs, backBufferDurationMs, bufferingStrategy, maxHeapAllocationPercent, minBufferMemoryReservePercent, preferredForwardBufferDurationMs, preferredPeakBitRate, preferredMaximumResolution, preferredPeakBitRateForExpensiveNetworks, preferredMaximumResolutionForExpensiveNetworks, automaticallyWaitsToMinimizeStalling)
     }
   }
 }
