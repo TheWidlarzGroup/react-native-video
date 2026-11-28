@@ -2,7 +2,7 @@ import { Platform } from 'react-native';
 import type { VideoConfig } from 'react-native-video';
 import {
   DEFAULT_FIXTURE_PORT,
-  rebaseFixtureUri,
+  rebaseFixtureSources,
   type ScenarioName,
 } from './deepLink';
 
@@ -18,24 +18,25 @@ const fixtureBase = (port: number): string =>
     default: `http://localhost:${port}`,
   });
 
-export const FIXTURE_BASE = fixtureBase(DEFAULT_FIXTURE_PORT);
+// Where the fixture server is for this run. A live binding: `setFixturePort` moves it, so
+// read it when the URL is built (inside a function), not into a module-level constant.
+export let FIXTURE_BASE = fixtureBase(DEFAULT_FIXTURE_PORT);
 
-// The port from the scenario link (`?fixturePort=`), set by App.tsx before the scenario
-// screen mounts.
-let fixturePort = DEFAULT_FIXTURE_PORT;
-
-export function setFixturePort(port: number) {
-  fixturePort = port;
-}
+// Every source `fixture()` has handed out, so `setFixturePort` can move them too.
+const fixtureSources: VideoConfig[] = [];
 
 // Every scenario starts its own load after attaching listeners (see ScenarioScreen).
-const fixture = (path: string): VideoConfig => ({
-  uri: `${FIXTURE_BASE}/${path}`,
-  initializeOnCreation: false,
-});
+const fixture = (path: string): VideoConfig => {
+  const source: VideoConfig = {
+    uri: `${FIXTURE_BASE}/${path}`,
+    initializeOnCreation: false,
+  };
+  fixtureSources.push(source);
+  return source;
+};
 
-// Written against the default port. Read a scenario through `scenarioSource`, which
-// follows the port of the run; a direct read only works with the server on 8090.
+// Built for the default port; `setFixturePort` moves every entry when a run uses another
+// one, so `SCENARIO_SOURCES[name]` and `scenarioSource(name)` give the same source.
 export const SCENARIO_SOURCES: Record<ScenarioName, VideoConfig> = {
   'mp4': fixture('short.mp4'), // 8 s, testsrc + sine audio
   'mp4-preload': fixture('short.mp4'),
@@ -49,14 +50,25 @@ export const SCENARIO_SOURCES: Record<ScenarioName, VideoConfig> = {
   'audio-tracks': fixture('hls-audio/index.m3u8'), // HLS, English (default) + Spanish audio
 };
 
+/**
+ * The port from the scenario link (`?fixturePort=`). App.tsx calls this before the scenario
+ * screen mounts. It points `FIXTURE_BASE`, every source made by `fixture()` and every entry
+ * of `SCENARIO_SOURCES` (an entry may be a copy with extra options) at that server, in
+ * place, so code that reads them directly follows the port as well.
+ */
+export function setFixturePort(port: number) {
+  const base = fixtureBase(port);
+  if (base === FIXTURE_BASE) return;
+
+  rebaseFixtureSources(
+    [...fixtureSources, ...Object.values(SCENARIO_SOURCES)],
+    FIXTURE_BASE,
+    base
+  );
+  FIXTURE_BASE = base;
+}
+
 /** The source of a scenario, on the fixture server this run uses. */
 export function scenarioSource(name: ScenarioName): VideoConfig {
-  const source = SCENARIO_SOURCES[name];
-  if (fixturePort === DEFAULT_FIXTURE_PORT || typeof source.uri !== 'string') {
-    return source;
-  }
-  return {
-    ...source,
-    uri: rebaseFixtureUri(source.uri, FIXTURE_BASE, fixtureBase(fixturePort)),
-  };
+  return SCENARIO_SOURCES[name];
 }

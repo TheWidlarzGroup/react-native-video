@@ -57,3 +57,19 @@ export function rebaseFixtureUri(
     ? `${toBase}${uri.slice(fromBase.length)}`
     : uri;
 }
+
+/**
+ * Points every source in the list at another fixture server, in place. A source listed
+ * twice is moved once, and a `uri` that is not a string (a bundled asset) is left alone.
+ */
+export function rebaseFixtureSources(
+  sources: { uri: unknown }[],
+  fromBase: string,
+  toBase: string
+): void {
+  for (const source of new Set(sources)) {
+    if (typeof source.uri === 'string') {
+      source.uri = rebaseFixtureUri(source.uri, fromBase, toBase);
+    }
+  }
+}

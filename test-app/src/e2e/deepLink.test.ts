@@ -3,6 +3,7 @@ import {
   DEFAULT_FIXTURE_PORT,
   parseFixturePort,
   parseScenario,
+  rebaseFixtureSources,
   rebaseFixtureUri,
   SCENARIO_NAMES,
 } from './deepLink';
@@ -92,4 +93,28 @@ test('rebases only uris of the fixture server', () => {
   expect(rebaseFixtureUri('http://localhost:80901/a.mp4', from, to)).toBe(
     'http://localhost:80901/a.mp4'
   );
+});
+
+test('moves a list of sources to another fixture server in place', () => {
+  const from = 'http://localhost:8090';
+  const to = 'http://localhost:8690';
+  const plain = { uri: `${from}/short.mp4`, initializeOnCreation: false };
+  // What a scenario table holds next to it: a copy with extra options, a source of
+  // another host and a bundled asset.
+  const copy = { ...plain, shouldCache: true };
+  const external = { uri: 'https://example.com/a.mp4' };
+  const asset = { uri: 7 };
+
+  rebaseFixtureSources([plain, copy, external, asset, plain], from, to);
+
+  expect(plain.uri).toBe(`${to}/short.mp4`);
+  expect(copy.uri).toBe(`${to}/short.mp4`);
+  expect(copy.shouldCache).toBe(true);
+  expect(external.uri).toBe('https://example.com/a.mp4');
+  expect(asset.uri).toBe(7);
+
+  // And back, as a second run on the default port would.
+  rebaseFixtureSources([plain, copy], to, from);
+  expect(plain.uri).toBe(`${from}/short.mp4`);
+  expect(copy.uri).toBe(`${from}/short.mp4`);
 });
