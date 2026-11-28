@@ -9,6 +9,7 @@ import {
   PROGRESS_SPARSE_MIN_GAP_SECONDS,
   RETRIED_ONCE_REQUESTS,
   SEEK_BACK_LANDED_SECONDS,
+  SEEK_CHECK_TOLERANCE_SECONDS,
   SEEK_FORWARD_LANDED_SECONDS,
   START_POSITION_LANDED_SECONDS,
   CROP_DURATION_SECONDS,
@@ -1073,5 +1074,66 @@ describe('request count', () => {
   test('the default retry count does not', () => {
     feed({ type: 'requestCount', count: 4 });
     expect(markers()).not.toContain('evt-retried-once');
+  });
+});
+
+describe('seek checks', () => {
+  test('steps whose event and position are near the expected time pass both markers', () => {
+    feed(
+      {
+        type: 'seekCheck',
+        label: 'a',
+        eventTime: 3,
+        position: 3.1,
+        expected: 3,
+      },
+      { type: 'seekCheck', label: 'b', eventTime: 0, position: 0, expected: 0 },
+      { type: 'seekChecksDone' }
+    );
+    expect(markers()).toContain('evt-seek-events-ok');
+    expect(markers()).toContain('evt-seek-positions-ok');
+  });
+
+  test('an event past the end or a missing event is a mismatch; the positions can still pass', () => {
+    feed(
+      {
+        type: 'seekCheck',
+        label: 'a',
+        eventTime: 100,
+        position: 8,
+        expected: 8,
+      },
+      {
+        type: 'seekCheck',
+        label: 'b',
+        eventTime: null,
+        position: 0,
+        expected: 0,
+      },
+      { type: 'seekChecksDone' }
+    );
+    expect(markers()).toContain('evt-seek-event-mismatch');
+    expect(markers()).not.toContain('evt-seek-events-ok');
+    expect(markers()).toContain('evt-seek-positions-ok');
+  });
+
+  test('a position off by more than the tolerance is a mismatch', () => {
+    feed(
+      {
+        type: 'seekCheck',
+        label: 'a',
+        eventTime: 5,
+        position: 5 + SEEK_CHECK_TOLERANCE_SECONDS + 0.05,
+        expected: 5,
+      },
+      { type: 'seekChecksDone' }
+    );
+    expect(markers()).toContain('evt-seek-position-mismatch');
+    expect(markers()).not.toContain('evt-seek-positions-ok');
+  });
+
+  test('done without any step marks nothing ok', () => {
+    feed({ type: 'seekChecksDone' });
+    expect(markers()).toEqual([]);
   });
 });

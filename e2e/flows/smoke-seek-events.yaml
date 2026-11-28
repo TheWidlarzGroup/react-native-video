@@ -1,0 +1,27 @@
+# Seeks from JS and their onSeek events (scenario mp4-seek-events). Once the clip has loaded
+# and played a second the app pauses it and seeks, one step every 1.2 s: seekTo(3),
+# seekBy(2), seekBy(-1), seekTo(100) (past the end) and seekTo(-5) (before the start).
+# Each step is judged on the onSeek it produced and on the position 0.7 s later, against
+# 3, 5, 4, the clip's duration and 0, within 0.3 s:
+# - evt-seek-positions-ok: every position landed where expected (past the end and before the
+#   start clamped to the clip);
+# - evt-seek-events-ok: every onSeek reported that same time.
+# The mismatch markers must not appear; the log lines show each step.
+#
+# Timeouts: no taps, so every timeout is the time since the scenario opened.
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4-seek-events
+- extendedWaitUntil:
+    visible:
+      id: "evt-seek-positions-ok"
+    timeout: 40000            # load, 1 s of playback, then 5 steps of 1.2 s
+- assertNotVisible:
+    id: "evt-seek-position-mismatch"
+- assertVisible:
+    id: "evt-seek-events-ok"

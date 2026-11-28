@@ -192,12 +192,65 @@ function startScenario(scenario: ScenarioName, player: VideoPlayer) {
     });
   }
 
+  if (scenario === 'mp4-seek-events') runSeekSteps(player);
+
   const load =
     scenario === 'mp4-preload'
       ? player.preload()
       : player.initialize().then(() => player.play());
   load.catch(() => {
     // Surfaced by the onError listener.
+  });
+}
+
+const SEEK_STEP_MS = 1200;
+const SEEK_READ_AFTER_MS = 700;
+
+/**
+ * mp4-seek-events: once the clip has loaded and played a second, it is paused and sought
+ * from JS, one step every SEEK_STEP_MS. Each step is judged on the onSeek it produced and on
+ * the position SEEK_READ_AFTER_MS later. Past the end and before the start the expected time
+ * is the clip's end and 0.
+ */
+function runSeekSteps(player: VideoPlayer) {
+  let lastSeek: number | null = null;
+  player.addEventListener('onSeek', (time) => {
+    lastSeek = time;
+  });
+  let started = false;
+  player.addEventListener('onLoad', () => {
+    if (started) return;
+    started = true;
+    const steps: [string, () => void, () => number][] = [
+      ['seekTo(3)', () => player.seekTo(3), () => 3],
+      ['seekBy(2)', () => player.seekBy(2), () => 5],
+      ['seekBy(-1)', () => player.seekBy(-1), () => 4],
+      ['seekTo(100)', () => player.seekTo(100), () => player.duration],
+      ['seekTo(-5)', () => player.seekTo(-5), () => 0],
+    ];
+    setTimeout(() => player.pause(), 1000);
+    steps.forEach(([label, run, expected], index) => {
+      const at = 1500 + index * SEEK_STEP_MS;
+      setTimeout(() => {
+        lastSeek = null;
+        run();
+      }, at);
+      setTimeout(
+        () =>
+          eventLog.handle({
+            type: 'seekCheck',
+            label,
+            eventTime: lastSeek,
+            position: player.currentTime,
+            expected: expected(),
+          }),
+        at + SEEK_READ_AFTER_MS
+      );
+    });
+    setTimeout(
+      () => eventLog.handle({ type: 'seekChecksDone' }),
+      1500 + steps.length * SEEK_STEP_MS
+    );
   });
 }
 
