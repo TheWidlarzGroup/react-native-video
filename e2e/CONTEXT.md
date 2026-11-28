@@ -182,14 +182,16 @@ How to run the suite and how to add a flow: [`README.md`](README.md). The CI mat
   `change.newValue`, which Swift KVO leaves nil for this enum key path, and returned. The
   callbacks did arrive. It looked like a CI-only problem (iOS 26.4) because the CI runs
   examined were built before #5252 and the local runs after it; the nightly of 2026-11-28,
-  the first built with #5252, shows the observer reporting every change that AVPlayer logs
-  in `device.log`. Without it, `readyToPlay` came only from the item-ready and
-  likely-to-keep-up callbacks, which skip it while AVPlayer is still waiting to play, so a
-  run whose playback started a moment after the item was ready stayed `loading` to the
-  end. Since #5298 the progress tick also sets `readyToPlay` when AVPlayer plays a ready
-  item, as a safety net, and a Debug build logs `[ReactNativeVideo] status caught up` in
-  `device.log` when it had to; such a line now points to a new gap. `smoke-status-order.yaml`
-  asserts the idle → loading → readyToPlay order.
+  the first built with #5252, shows the app reacting within 50 ms to each playing and
+  paused change that AVPlayer logs in `device.log` (a waiting step keeps the status at
+  `loading`, so it adds no event). Without the observer, `readyToPlay` came only from the
+  item-ready and likely-to-keep-up callbacks, which skip it while AVPlayer is still
+  waiting to play, so a run whose playback started a moment after the item was ready
+  stayed `loading` to the end. Since #5298 the progress tick also sets `readyToPlay` when
+  AVPlayer plays a ready item, as a safety net, and a Debug build logs
+  `[ReactNativeVideo] status caught up` in `device.log` when it had to; such a line now
+  points to a new gap. `smoke-status-order.yaml` asserts the idle → loading →
+  readyToPlay order.
 - **`replaceSourceAsync(null)` releases the native player** on iOS and Android, like
   `release()` (the docs said otherwise until #5154; web keeps the player loadable).
   `smoke-release-source.yaml` therefore asserts the promise, the idle status and the
