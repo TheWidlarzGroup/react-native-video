@@ -143,7 +143,11 @@ class VideoPlaybackService : MediaSessionService() {
 
   @MainThread
   private fun ensurePlayerSession(player: HybridVideoPlayer) {
-    if (mediaSessionsList.containsKey(player)) return
+    mediaSessionsList[player]?.let { session ->
+      // initialize() builds a new ExoPlayer: move the session to it
+      if (session.player !== player.player) session.player = player.player
+      return
+    }
 
     val builder = MediaSession.Builder(this, player.player)
       .setId("RNVideoPlaybackService_" + player.hashCode())

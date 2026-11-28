@@ -391,6 +391,10 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
       .setLooper(Looper.getMainLooper())
       .setRenderersFactory(renderersFactory)
       .build()
+    // loop, volume and rate set before initialize() live on the previous player
+    player.repeatMode = previousPlayer.repeatMode
+    player.volume = previousPlayer.volume
+    player.playbackParameters = previousPlayer.playbackParameters
     // Release the previous player (the placeholder, or an earlier one if initialize() runs again)
     // so it doesn't leak. Remove the listeners first, like completeRelease(), so a release timeout
     // doesn't report an error on this player.
@@ -398,6 +402,8 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
     previousPlayer.removeListener(playerListener)
     previousPlayer.removeAnalyticsListener(analyticsListener)
     previousPlayer.release()
+    // A media session created before initialize() still holds the previous player
+    VideoPlaybackService.updateService(videoPlaybackServiceConnection)
 
     loadedWithSource = true
 
