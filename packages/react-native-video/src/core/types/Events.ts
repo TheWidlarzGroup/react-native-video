@@ -69,7 +69,9 @@ export interface VideoPlayerEvents {
    */
   onProgress: (data: onProgressData) => void;
   /**
-   * Called when the video is ready to display.
+   * Called when the first frame of the video can be shown. On Android once per source, not
+   * for audio only. On iOS once per source for every `VideoView` that shows the player, not
+   * for audio only. On web on `loadeddata`, also for audio only.
    */
   onReadyToDisplay: () => void;
   /**

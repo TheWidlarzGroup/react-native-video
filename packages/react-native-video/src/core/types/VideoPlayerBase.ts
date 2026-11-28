@@ -74,7 +74,8 @@ export interface VideoPlayerSpecBase {
    * - `mixWithOthers` - Mix with other players.
    * - `doNotMix` - Do not mix with other players.
    * - `duckOthers` - Duck other players.
-   * - `auto` - uses default behavior for player.
+   * - `auto` - on iOS other audio stops (as `doNotMix`), on Android other apps lower their
+   *   volume (as `duckOthers`).
    *
    * default is `auto`.
    */
@@ -154,9 +155,12 @@ export interface VideoPlayerSpecBase {
    * - `speaker` - the loudspeaker, or the connected headphones (default).
    * - `earpiece` - the receiver at the top of the phone, as in a phone call.
    *
-   * @note On iOS `earpiece` is ignored while any player uses Picture in Picture,
-   * {@link playInBackground} or {@link showNotificationControls}, because those need the
-   * playback audio session.
+   * @note On iOS `earpiece` is ignored while any `VideoView` has `pictureInPicture` on (also
+   * before Picture in Picture starts) and while any player uses {@link playInBackground} or
+   * {@link showNotificationControls}, because those need the playback audio session.
+   * @note On Android the app's audio mode is set to communication, as in a call, as long as
+   * any player has `earpiece`, also a paused one. That needs the `MODIFY_AUDIO_SETTINGS`
+   * permission.
    *
    * @default 'speaker'
    * @platform iOS, Android

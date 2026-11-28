@@ -66,7 +66,7 @@ The `VideoPlayer` class offers a comprehensive set of methods and properties to 
 | Property | Access | Type | Description |
 |----------|--------|------|-------------|
 | `source` | Read-only | `VideoPlayerSource` | Gets the current `VideoPlayerSource` object. |
-| `status` | Read-only | `VideoPlayerStatus` | Gets the current status: `idle` (no source loaded), `loading`, `readyToPlay` or `error`. It stays `readyToPlay` after the video has played to the end, and `error` until a source is loaded again. Whether the video is playing is in `isPlaying` and the `onPlaybackStateChange` event. |
+| `status` | Read-only | `VideoPlayerStatus` | Gets the current status: `idle` (no source loaded), `loading`, `readyToPlay` or `error`. It stays `readyToPlay` after the video has played to the end, and `error` until a source is loaded again. On web `onStatusChange` reports `idle` when the video ends. Whether the video is playing is in `isPlaying` and the `onPlaybackStateChange` event. |
 | `duration` | Read-only | `number` | Gets the total duration of the video in seconds. Returns `NaN` until metadata is loaded. |
 | `volume` | Read/Write | `number` | Gets or sets the player volume (0.0 to 1.0). |
 | `currentTime` | Read/Write | `number` | Gets or sets the current playback time in seconds. |
@@ -78,7 +78,7 @@ The `VideoPlayer` class offers a comprehensive set of methods and properties to 
 | `playInBackground` | Read/Write | `boolean` | Whether playback should continue when the app goes to the background. |
 | `playWhenInactive` | Read/Write | `boolean` | Whether playback should continue when the app is inactive (e.g., during a phone call). |
 | `allowsExternalPlayback` | Read/Write | `boolean` | iOS-only. Whether the video can be sent to an AirPlay device. Defaults to `true`. With `false` the video stays on the device. |
-| `audioOutput` | Read/Write | `'speaker' \| 'earpiece'` | Where the audio plays on a phone. `'earpiece'` uses the receiver, as in a phone call. Defaults to `'speaker'`. On iOS `'earpiece'` is ignored while any player uses Picture in Picture, `playInBackground` or `showNotificationControls`. On Android, add the `MODIFY_AUDIO_SETTINGS` permission to your manifest so the player can switch the audio mode. No effect on web. |
+| `audioOutput` | Read/Write | `'speaker' \| 'earpiece'` | Where the audio plays on a phone. `'earpiece'` uses the receiver, as in a phone call. Defaults to `'speaker'`. On iOS `'earpiece'` is ignored while any `VideoView` has `pictureInPicture` on, also before Picture in Picture starts, and while any player uses `playInBackground` or `showNotificationControls`. On Android, add the `MODIFY_AUDIO_SETTINGS` permission to your manifest so the player can switch the audio mode; the app's audio mode is then set to communication, as in a call, as long as any player has `'earpiece'`, also a paused one. No effect on web. |
 | `isPlaying` | Read-only | `boolean` | Returns `true` if the video is currently playing. |
 | `selectedTrack` | Read-only | `TextTrack \| undefined` | Currently selected text track, or `undefined` when no track is selected. |
 | `selectedVideoTrackId` | Read-only | `string \| undefined` | The id passed to the last `selectVideoTrack()` call, or `undefined` while selection is automatic. |
@@ -130,10 +130,12 @@ const player = useVideoPlayer({
 
 | Value | Description |
 |-------|-------------|
-| `'auto'` | The default behavior of the player. Default. |
-| `'mixWithOthers'` | Plays together with other audio. |
+| `'auto'` | Default. On iOS other audio stops, as with `'doNotMix'`. On Android other apps lower their volume, as with `'duckOthers'`. |
+| `'mixWithOthers'` | Plays together with other audio. On Android the player takes no audio focus, so other apps do not pause it either. |
 | `'doNotMix'` | Other audio stops while this player plays. |
 | `'duckOthers'` | Other audio keeps playing at a lower volume. |
+
+On Android the player takes audio focus when playback starts and gives it up on pause, at the end and when it goes idle. A buffering player keeps it, and a muted player does not take it. When another app takes the focus, the player pauses; when the other app only asks for ducking, the player plays on at half volume, or pauses with `'doNotMix'`. [`onAudioFocusChange`](./events.md) reports the loss with `false` and, after a loss for a moment such as a ringing call, the focus coming back with `true`; the player stays paused, so call `play()` there to resume. With several players playing, `'doNotMix'` wins over `'duckOthers'` and `'duckOthers'` over `'auto'`, and a single player with `'mixWithOthers'` makes all of them play without focus.
 
 `ignoreSilentSwitchMode` (iOS only) decides what happens when the hardware silent switch is on:
 

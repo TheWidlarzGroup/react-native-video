@@ -79,7 +79,7 @@ player.muted = true;
 | Property | Access | Type | Description |
 |----------|--------|------|-------------|
 | `source` | Read-only | `VideoPlayerSource` | Gets the current `VideoPlayerSource` object. |
-| `status` | Read-only | `VideoPlayerStatus` | Gets the current status (e.g., `playing`, `paused`, `buffering`). |
+| `status` | Read-only | `VideoPlayerStatus` | Gets the current status: `idle` (no source loaded), `loading`, `readyToPlay` or `error`. It stays `readyToPlay` after the video has played to the end, and `error` until a source is loaded again. On web `onStatusChange` reports `idle` when the video ends. Whether the video is playing is in `isPlaying` and the `onPlaybackStateChange` event. |
 | `duration` | Read-only | `number` | Gets the total duration of the video in seconds. Returns `NaN` until metadata is loaded. |
 | `volume` | Read/Write | `number` | Gets or sets the player volume (0.0 to 1.0). |
 | `currentTime` | Read/Write | `number` | Gets or sets the current playback time in seconds. |
@@ -91,7 +91,7 @@ player.muted = true;
 | `playInBackground` | Read/Write | `boolean` | Whether playback should continue when the app goes to the background. |
 | `playWhenInactive` | Read/Write | `boolean` | Whether playback should continue when the app is inactive (e.g., during a phone call). |
 | `allowsExternalPlayback` | Read/Write | `boolean` | iOS-only. Whether the video can be sent to an AirPlay device. Defaults to `true`. With `false` the video stays on the device. |
-| `audioOutput` | Read/Write | `'speaker' \| 'earpiece'` | Where the audio plays on a phone. `'earpiece'` uses the receiver, as in a phone call. Defaults to `'speaker'`. On iOS `'earpiece'` is ignored while any player uses Picture in Picture, `playInBackground` or `showNotificationControls`. On Android, add the `MODIFY_AUDIO_SETTINGS` permission to your manifest so the player can switch the audio mode. No effect on web. |
+| `audioOutput` | Read/Write | `'speaker' \| 'earpiece'` | Where the audio plays on a phone. `'earpiece'` uses the receiver, as in a phone call. Defaults to `'speaker'`. On iOS `'earpiece'` is ignored while any `VideoView` has `pictureInPicture` on, also before Picture in Picture starts, and while any player uses `playInBackground` or `showNotificationControls`. On Android, add the `MODIFY_AUDIO_SETTINGS` permission to your manifest so the player can switch the audio mode; the app's audio mode is then set to communication, as in a call, as long as any player has `'earpiece'`, also a paused one. No effect on web. |
 | `progressUpdateInterval` | Read/Write | `number` | Time between two `onProgress` events in milliseconds. Defaults to `250` on Android and web and `500` on iOS. On web the browser limits it to about 250 ms at best. |
 | `isPlaying` | Read-only | `boolean` | Returns `true` if the video is currently playing. |
 | `selectedTrack` | Read-only | `TextTrack \| undefined` | Currently selected text track, or `undefined` when no track is selected. |
