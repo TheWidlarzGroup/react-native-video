@@ -1,6 +1,10 @@
 import { Platform } from 'react-native';
 import type { VideoConfig } from 'react-native-video';
 import {
+  type SourceOptions,
+  defaultSourceOptions,
+} from '../types/videoSettings';
+import {
   enable as enableDRMPlugin,
   disable as disableDRMPlugin,
   isEnabled as isDRMPluginEnabled,
@@ -75,12 +79,34 @@ const getDRMSource = (): VideoConfig => {
 
 export type VideoType = 'hls' | 'mp4' | 'drm';
 
-export const getVideoSource = (type: VideoType): VideoConfig => {
+/** The source options that are set, in the shape of the config. */
+const sourceOptionsConfig = (options: SourceOptions): Partial<VideoConfig> => {
+  const config: Partial<VideoConfig> = {};
+  if (options.shouldCache) config.shouldCache = true;
+  if (options.startPosition != null)
+    config.startPosition = options.startPosition;
+  if (options.cropStart != null) config.cropStart = options.cropStart;
+  if (options.cropEnd != null) config.cropEnd = options.cropEnd;
+  if (options.minLoadRetryCount != null)
+    config.minLoadRetryCount = options.minLoadRetryCount;
+  if (options.disableDisconnectError) config.disableDisconnectError = true;
+  if (options.type != null) config.type = options.type;
+  if (options.cmcd !== 'off') config.cmcd = { mode: options.cmcd };
+  if (options.bufferingStrategy !== 'default') {
+    config.bufferConfig = { bufferingStrategy: options.bufferingStrategy };
+  }
+  return config;
+};
+
+export const getVideoSource = (
+  type: VideoType,
+  options: SourceOptions = defaultSourceOptions
+): VideoConfig => {
   if (type === 'drm') {
     if (!isDRMPluginEnabled) {
       enableDRMPlugin();
     }
-    return getDRMSource();
+    return { ...getDRMSource(), ...sourceOptionsConfig(options) };
   }
 
   if (isDRMPluginEnabled) {
@@ -93,14 +119,17 @@ export const getVideoSource = (type: VideoType): VideoConfig => {
 
   return {
     uri: type === 'hls' ? HLS : MP4,
-    externalSubtitles: [
-      {
-        label: 'External',
-        uri: 'https://gist.githubusercontent.com/samdutton/ca37f3adaf4e23679957b8083e061177/raw/e19399fbccbc069a2af4266e5120ae6bad62699a/sample.vtt',
-        language: 'en',
-        type: 'vtt',
-      },
-    ],
+    ...(options.externalSubtitles && {
+      externalSubtitles: [
+        {
+          label: 'External',
+          uri: 'https://gist.githubusercontent.com/samdutton/ca37f3adaf4e23679957b8083e061177/raw/e19399fbccbc069a2af4266e5120ae6bad62699a/sample.vtt',
+          language: 'en',
+          type: 'vtt',
+        },
+      ],
+    }),
+    ...sourceOptionsConfig(options),
     metadata: {
       title: 'Big Buck Bunny',
       artist: 'Blender Foundation',

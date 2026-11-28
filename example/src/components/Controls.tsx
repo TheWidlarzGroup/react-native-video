@@ -78,3 +78,34 @@ export const ActionButton = ({
     <Text style={styles.actionButtonText}>{label}</Text>
   </TouchableOpacity>
 );
+
+/**
+ * A row of toggle buttons for one setting: the button of the current value is active.
+ * `options` pairs each value with its label.
+ */
+export const OptionGroup = <T,>({
+  title,
+  options,
+  value,
+  onChange,
+}: {
+  title: string;
+  // NoInfer: the type comes from `value`, so literal options are not widened to string.
+  options: ReadonlyArray<readonly [NoInfer<T>, string]>;
+  value: T;
+  onChange: (value: T) => void;
+}) => (
+  <>
+    <Text style={styles.subSectionTitle}>{title}</Text>
+    <View style={styles.buttonGroup}>
+      {options.map(([option, label]) => (
+        <ToggleButton
+          key={label}
+          label={label}
+          active={option === value}
+          onPress={() => onChange(option)}
+        />
+      ))}
+    </View>
+  </>
+);
