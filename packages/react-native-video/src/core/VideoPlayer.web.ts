@@ -247,6 +247,10 @@ class VideoPlayer extends VideoPlayerEvents implements WebVideoPlayer {
     return false;
   }
   set disableAudioSessionManagement(_: boolean) {}
+  get usesExternalPlaybackWhileExternalScreenIsActive(): boolean {
+    return false;
+  }
+  set usesExternalPlaybackWhileExternalScreenIsActive(_: boolean) {}
 
   // --- Media Session ---
 

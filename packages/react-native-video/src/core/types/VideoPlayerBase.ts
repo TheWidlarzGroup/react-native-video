@@ -115,6 +115,18 @@ export interface VideoPlayerBase {
   disableAudioSessionManagement: boolean;
 
   /**
+   * Whether the video switches to external playback while the screen is mirrored
+   * (AirPlay screen mirroring or a cable to a TV), so it plays full screen on the external
+   * display instead of inside the mirrored app. Maps to AVPlayer's
+   * `usesExternalPlaybackWhileExternalScreenIsActive`.
+   *
+   * @note Has no effect when external playback is not allowed on the player.
+   * @default false
+   * @platform iOS
+   */
+  usesExternalPlaybackWhileExternalScreenIsActive: boolean;
+
+  /**
    * Whether the player is playing.
    * @note This is a read-only property.
    * @note To pause/resume the player, you need to use {@link play} and {@link pause} methods.

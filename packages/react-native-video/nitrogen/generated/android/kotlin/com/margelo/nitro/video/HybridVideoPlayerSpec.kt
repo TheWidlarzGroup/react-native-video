@@ -111,6 +111,12 @@ abstract class HybridVideoPlayerSpec: HybridObject() {
   
   @get:DoNotStrip
   @get:Keep
+  @set:DoNotStrip
+  @set:Keep
+  abstract var usesExternalPlaybackWhileExternalScreenIsActive: Boolean
+  
+  @get:DoNotStrip
+  @get:Keep
   abstract val isPlaying: Boolean
   
   @get:DoNotStrip

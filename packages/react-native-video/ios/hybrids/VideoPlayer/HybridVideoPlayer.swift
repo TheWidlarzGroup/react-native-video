@@ -295,6 +295,22 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     }
   }
 
+  // Kept on the AVPlayer itself; AVPlayer's default is false
+  var usesExternalPlaybackWhileExternalScreenIsActive: Bool {
+    get {
+      #if os(visionOS)
+        return false
+      #else
+        return player.usesExternalPlaybackWhileExternalScreenIsActive
+      #endif
+    }
+    set {
+      #if !os(visionOS)
+        player.usesExternalPlaybackWhileExternalScreenIsActive = newValue
+      #endif
+    }
+  }
+
   var wasAutoPaused: Bool = false
 
   var wasInterruptedWhilePlaying: Bool = false

@@ -85,6 +85,7 @@ player.muted = true;
 | `ignoreSilentSwitchMode` | Read/Write | `IgnoreSilentSwitchMode` | iOS-only. Determines how audio should behave when the hardware mute (silent) switch is on. |
 | `playInBackground` | Read/Write | `boolean` | Whether playback should continue when the app goes to the background. |
 | `playWhenInactive` | Read/Write | `boolean` | Whether playback should continue when the app is inactive (e.g., during a phone call). |
+| `usesExternalPlaybackWhileExternalScreenIsActive` | Read/Write | `boolean` | iOS-only. While the screen is mirrored to a TV (AirPlay or cable), play the video full screen on the TV instead of inside the mirrored app. Defaults to `false`. |
 | `isPlaying` | Read-only | `boolean` | Returns `true` if the video is currently playing. |
 | `selectedTrack` | Read-only | `TextTrack \| undefined` | Currently selected text track, or `undefined` when no track is selected. |
 
