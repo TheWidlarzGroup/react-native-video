@@ -71,8 +71,14 @@ Extends RN `ViewProps`, plus:
 | `autoEnterPictureInPicture` | `boolean` | `false` | Auto-enter PiP on background. |
 | `keepScreenAwake` | `boolean` | `true` | Keep screen on while mounted. |
 | `surfaceType` | `'surface'\|'texture'` | `'surface'` | Android only: `texture` is animatable, `surface` is more performant. |
+| `poster` | `string \| VideoPoster` | — | Image shown from load start until the first frame. A URL, or `Image` props with a `source`. |
+| `posterResizeMode` | `'contain'\|'cover'\|'stretch'\|'center'\|'repeat'\|'none'` | `'contain'` | `poster.resizeMode` wins when both are set. |
+| `renderLoader` | `ReactNode \| (props) => ReactNode` | — | Custom view instead of the poster while loading. |
+| `shutterColor` | `ColorValue` | — | Color covering the video area until the first frame, under the poster or loader. |
+| `hideShutterView` | `boolean` | `false` | Turns `shutterColor` off. |
+| `controlsStyles` | `ControlsStyles` | - | Android only: hide single native controls (`hideSeekBar`, `hideForward`, `hideFullscreen`, ...) and pick the system bars hidden in fullscreen |
 
-For a placeholder/poster, overlay your own `<Image>` and remove it on the `onReadyToDisplay` event. See `pip-fullscreen-controls.md` for the imperative ref (`enterFullscreen`, `enterPictureInPicture`, …) and `events.md` for view events.
+For a placeholder use `poster` (or `renderLoader` for a custom view); it hides on `onReadyToDisplay` and returns when a new source starts loading. Don't overlay your own `<Image>`. For audio-only sources the poster stays visible. See `pip-fullscreen-controls.md` for the imperative ref (`enterFullscreen`, `enterPictureInPicture`, …) and `events.md` for view events.
 
 ## Audio-only (no view)
 

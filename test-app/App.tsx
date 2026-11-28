@@ -64,8 +64,33 @@ function useScenarioDeepLink(): {
   return { scenario, ready };
 }
 
+/**
+ * The scenario on screen, one step behind the deep link. A new scenario mounts only after
+ * the previous screen has been unmounted and that commit has reached the native views: one
+ * frame with nothing, then the new screen. Swapping the screens in one commit unmounted the
+ * old event log panel while the new player reset the log during its first render, and in
+ * CI Fabric on Android (React Native 0.87) at times mounted and updated text views that were
+ * already gone ("Unable to find ViewManager for tag", a red screen in smoke-broken-manifest-error).
+ */
+function useShownScenario(scenario: ScenarioName | null): ScenarioName | null {
+  const [shown, setShown] = React.useState<ScenarioName | null>(null);
+
+  React.useEffect(() => {
+    if (scenario === shown) return;
+    if (shown !== null) {
+      setShown(null);
+      return;
+    }
+    const frame = requestAnimationFrame(() => setShown(scenario));
+    return () => cancelAnimationFrame(frame);
+  }, [scenario, shown]);
+
+  return shown;
+}
+
 export default function App(): React.JSX.Element {
-  const { scenario, ready } = useScenarioDeepLink();
+  const { scenario: linked, ready } = useScenarioDeepLink();
+  const scenario = useShownScenario(linked);
 
   return (
     <SafeAreaView style={styles.app}>
@@ -73,7 +98,7 @@ export default function App(): React.JSX.Element {
         // Keyed on the scenario so switching scenarios remounts the screen: a fresh
         // player, a fresh setup callback and a fresh event log every time.
         <ScenarioScreen key={scenario} scenario={scenario} />
-      ) : ready ? (
+      ) : ready && linked === null ? (
         // Centred on purpose: React Native's dev banner ("Connect to Metro to develop
         // JavaScript") covers the top of the screen for a few seconds after a debug
         // launch, longer on a slow simulator, and Maestro treats anything under it as

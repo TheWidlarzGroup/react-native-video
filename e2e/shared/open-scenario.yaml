@@ -41,7 +41,11 @@ appId: ${APP_ID}
           optional: true
 # Android's singleApp redirect (MainActivity -> ComponentActivity) plus a fresh JS mount
 # takes a moment longer than an instant assertVisible allows; hosted simulators more.
+# 45 s, not 20: on 27-28.11 four iOS legs failed here with the scenario screen already
+# rendered, because the hosted simulator stood still for 8-22 s inside the wait (no
+# device log lines, one Maestro screenshot taking 16 s). This waits for the app to show
+# a screen, not for library behaviour, and a screen that never comes still fails.
 - extendedWaitUntil:
     visible:
       id: "scenario-${SCENARIO}"
-    timeout: 20000
+    timeout: 45000

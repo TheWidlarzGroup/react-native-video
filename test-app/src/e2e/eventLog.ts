@@ -17,6 +17,7 @@ import type { VideoPlayerStatus } from 'react-native-video';
 // Every marker, in the order EventLogPanel renders them.
 export const MARKER_IDS = [
   'evt-onLoad',
+  'evt-onLoad-repeated', // a second onLoad for the same source (#5268): one load reports once
   'evt-onProgress',
   'evt-progress-gt-2s',
   'evt-onEnded',
@@ -24,6 +25,12 @@ export const MARKER_IDS = [
   'evt-onError-repeated', // a second onError in one scenario: one failure must report once
   'evt-status-error', // onStatusChange('error')
   'evt-onPlaybackStateChanged',
+  // VideoView's renderLoader (#5264): the loader mounted, and later unmounted because the
+  // video was ready to display (smoke-loader.yaml).
+  'evt-loader-shown',
+  'evt-loader-hidden',
+  'evt-loader-before-load', // the loader was up before onLoad and before any progress
+  'evt-loader-held', // it stayed up for at least LOADER_HELD_MIN_MS of the held load
   'evt-playing', // isPlaying seen true at least once
   'evt-paused', // isPlaying seen false after having been true (real pause, not initial state)
   'evt-resumed', // isPlaying seen true again after evt-paused
@@ -40,6 +47,7 @@ export const MARKER_IDS = [
   'evt-video-track-auto', // ...then reports no pinned selection again (automatic)
   'evt-audio-alt-selected', // onAudioTrackChange reports the Spanish track selected (2 tracks listed)
   'evt-audio-default-restored', // ...then the English (default) track selected again
+  'evt-audio-tracks-after-replace', // onAudioTrackChange lists both tracks after replaceSourceAsync() was requested (#5291)
   // An unassisted loop restart: see LOOP_VERIFIED_END_COUNT and the wrap-around rule in
   // handle('onProgress') — AVPlayer reports each loop as onEnd, ExoPlayer wraps silently,
   // so both are covered (see smoke-loop.yaml).
@@ -51,6 +59,9 @@ export const MARKER_IDS = [
   'evt-duration-fixture', // onLoad duration within FIXTURE_DURATION_SECONDS +- tolerance
   'evt-replace-resolved', // replaceSourceAsync() resolved
   'evt-replace-rejected', // replaceSourceAsync() rejected
+  'evt-replacement-load-started', // onLoadStart after replaceSourceAsync(source) was requested
+  'evt-replacement-start-before-load', // ...and it came before the replacement's first onLoad
+  'evt-replacement-load-start-repeated', // a second onLoadStart for the one replacement
   'evt-replacement-loaded', // onLoad after replaceSourceAsync(source) was requested
   'evt-reloaded-from-start', // first onProgress after that onLoad is < RELOAD_START_SECONDS
   'evt-ended-after-replace', // onEnd after replaceSourceAsync(source) was requested
@@ -66,6 +77,7 @@ export type MarkerId = (typeof MARKER_IDS)[number];
 export type LogEntry = { readonly id: number; readonly text: string };
 
 export type PlayerEvent =
+  | { type: 'onLoadStart' }
   | { type: 'onLoad'; duration: number }
   | { type: 'onProgress'; currentTime: number }
   | { type: 'onEnd' }
@@ -77,6 +89,10 @@ export type PlayerEvent =
   | { type: 'onPlaybackRateChange'; rate: number }
   // VideoView's onFullscreenChange (a view event, not a player event).
   | { type: 'onFullscreenChange'; fullscreen: boolean }
+  // The renderLoader element mounted (shown) or unmounted (hidden) inside VideoView. `at`
+  // is a millisecond clock reading, so the time it stayed up is part of the event sequence
+  // and handle() stays a pure function of it.
+  | { type: 'loader'; shown: boolean; at: number }
   // A VideoView ref call that threw. Caught in the scenario, so the screen stays up and
   // the flow can assert on it instead of on a red screen.
   | {
@@ -94,7 +110,7 @@ export type PlayerEvent =
   | {
       type: 'replaceSource';
       phase: 'requested' | 'resolved' | 'rejected';
-      source: 'hls' | 'null';
+      source: 'hls' | 'null' | 'audio-tracks';
     }
   | {
       type: 'onVideoTrackChange';
@@ -124,6 +140,11 @@ export const FIXTURE_DURATION_SECONDS = 8;
 export const FIXTURE_DURATION_TOLERANCE_SECONDS = 1;
 // A replacement source must start near 0; its own rule, independent of the seek rules.
 export const RELOAD_START_SECONDS = 2;
+// mp4-loader's clip is held by the fixture server for LOADER_SOURCE_HOLD_MS (fixtures.ts).
+// A loader that covered the load stayed up for most of that time; one taken off right
+// after it mounted did not.
+export const LOADER_SOURCE_HOLD_MS = 4000;
+export const LOADER_HELD_MIN_MS = 2500;
 // Set when the player reports an error status without a code (see handle).
 export const STATUS_ERROR_CODE = 'status/error';
 
@@ -146,14 +167,22 @@ type State = {
   seekPending: boolean;
   lastProgress: number | null;
   loadCount: number;
+  // When the loader element mounted, or null while it is not up.
+  loaderShownAt: number | null;
   // Status order: only the first readyToPlay is judged against an earlier loading.
   loadingSeen: boolean;
   readySeen: boolean;
   // replaceSourceAsync(source) was requested: only an onLoad/onEnd after it counts as the
-  // replacement loading/ending (Android re-emits onLoad on every re-buffer and replay).
+  // replacement loading/ending (before #5268, Android re-emitted onLoad on every re-buffer,
+  // seek and replay).
   replaceRequested: boolean;
+  // onLoadStart events since that request.
+  replacementLoadStarts: number;
   // The next onProgress tells where the replacement source started (see onLoad).
   reloadPending: boolean;
+  // onLoad events since the current source started loading. replaceSourceAsync(source)
+  // starts a new source, so its onLoad is not a repeat.
+  loadsOfSource: number;
 };
 
 const initialState = (): State => ({
@@ -167,13 +196,20 @@ const initialState = (): State => ({
   seekPending: false,
   lastProgress: null,
   loadCount: 0,
+  loaderShownAt: null,
   loadingSeen: false,
   readySeen: false,
   replaceRequested: false,
+  replacementLoadStarts: 0,
   reloadPending: false,
+  loadsOfSource: 0,
 });
 
 let state = initialState();
+// Bumped by every reset(), i.e. once per scenario. A player keeps emitting for a moment
+// after its screen is gone (its release is asynchronous); bound to an old session, its
+// events are dropped instead of landing in the next scenario's log (see forSession).
+let session = 0;
 // Never reset, so a key stays unique even across scenarios and after old entries drop off.
 let nextEntryId = 0;
 const listeners = new Set<() => void>();
@@ -198,10 +234,32 @@ function append(line: string) {
 
 function apply(event: PlayerEvent) {
   switch (event.type) {
+    case 'onLoadStart':
+      if (state.replaceRequested) {
+        mark('evt-replacement-load-started');
+        state.replacementLoadStarts += 1;
+        // One replacement is one load: a second start means it was reported twice.
+        if (state.replacementLoadStarts > 1) {
+          mark('evt-replacement-load-start-repeated');
+        }
+      }
+      append('onLoadStart');
+      return;
     case 'onLoad':
       mark('evt-onLoad');
       state.loadCount += 1;
+      state.loadsOfSource += 1;
+      if (state.loadsOfSource > 1) mark('evt-onLoad-repeated');
       if (state.replaceRequested) {
+        // Order, judged once, on the replacement's first onLoad (Android re-emits onLoad
+        // on a re-buffer): a start reported only after it is too late for an app that
+        // shows a loader on onLoadStart and hides it on onLoad.
+        if (
+          !state.markers.has('evt-replacement-loaded') &&
+          state.replacementLoadStarts > 0
+        ) {
+          mark('evt-replacement-start-before-load');
+        }
         mark('evt-replacement-loaded');
         state.reloadPending = true;
       }
@@ -263,6 +321,33 @@ function apply(event: PlayerEvent) {
       );
       append(`fullscreen:${event.fullscreen}`);
       return;
+
+    case 'loader': {
+      if (event.shown) {
+        mark('evt-loader-shown');
+        state.loaderShownAt = event.at;
+        // Android reports progress at 0 s while the source is still loading, so only
+        // progress past the start says that playback began before the loader appeared.
+        const playbackMoved =
+          state.lastProgress !== null && state.lastProgress > 0;
+        if (state.loadCount === 0 && !playbackMoved) {
+          mark('evt-loader-before-load');
+        }
+        append('loader shown');
+        return;
+      }
+      // A removal with no mount before it says nothing about the loader.
+      if (state.loaderShownAt === null) {
+        append('loader hidden');
+        return;
+      }
+      const shownMs = event.at - state.loaderShownAt;
+      state.loaderShownAt = null;
+      mark('evt-loader-hidden');
+      if (shownMs >= LOADER_HELD_MIN_MS) mark('evt-loader-held');
+      append(`loader hidden after ${shownMs} ms`);
+      return;
+    }
 
     case 'fullscreenCallFailed':
       mark('evt-fullscreen-call-failed');
@@ -340,6 +425,7 @@ function apply(event: PlayerEvent) {
     case 'replaceSource':
       if (event.phase === 'requested' && event.source !== 'null') {
         state.replaceRequested = true;
+        state.loadsOfSource = 0;
       }
       if (event.phase === 'resolved') mark('evt-replace-resolved');
       if (event.phase === 'rejected') mark('evt-replace-rejected');
@@ -384,6 +470,11 @@ function apply(event: PlayerEvent) {
     case 'onAudioTrackChange': {
       // The fixture's two renditions are told apart by language (en default, es alternate).
       const selected = event.tracks.find((track) => track.selected)?.language;
+      // A source with the same tracks still owes its own list: iOS skipped it while the
+      // ids were unchanged (#5291). Android goes through an empty list first.
+      if (state.replaceRequested && event.tracks.length === 2) {
+        mark('evt-audio-tracks-after-replace');
+      }
       if (event.tracks.length === 2 && selected === 'es') {
         mark('evt-audio-alt-selected');
       } else if (
@@ -426,7 +517,21 @@ export const eventLog = {
   },
   reset() {
     state = initialState();
+    session += 1;
     emit();
+  },
+  /**
+   * A handle() bound to the current scenario. ScenarioScreen attaches the player's listeners
+   * through it, so a player whose scenario has been left can no longer change the log that
+   * the next scenario's screen renders.
+   */
+  forSession(): (event: PlayerEvent) => void {
+    const own = session;
+    return (event) => {
+      if (own !== session) return;
+      apply(event);
+      emit();
+    };
   },
   getMarkers: (): ReadonlySet<MarkerId> => state.markers,
   getEntries: (): readonly LogEntry[] => state.entries,
