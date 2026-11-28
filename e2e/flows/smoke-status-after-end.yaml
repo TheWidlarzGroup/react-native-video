@@ -1,0 +1,26 @@
+# Status after the natural end (#5285): player.status must stay readyToPlay once the clip
+# has ended, as on iOS. Android went to idle a few milliseconds after onEnd, although idle
+# means that no source is loaded. The app reads the status STATUS_SETTLE_MS (750 ms) after
+# onEnd and marks evt-ready-after-end only for readyToPlay (eventLog.ts, statusSettled).
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 20000            # generous: emulator software decoder cold start
+# evt-onEnded, then a settled screen: the status is read 750 ms after onEnd. Without the
+# settle wait Maestro gave up on the marker after about 1 s on the emulator, although the
+# app logged it 0.8 s after the end.
+- runFlow: ../shared/wait-for-end.yaml
+- extendedWaitUntil:
+    visible:
+      id: "evt-ready-after-end"
+    timeout: 5000
+- assertNotVisible:
+    id: "evt-onError"

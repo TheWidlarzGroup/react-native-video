@@ -1,0 +1,40 @@
+# Alternate audio track selection on a multi-audio HLS stream (English default + Spanish):
+# select the Spanish rendition, then clear the pin back to the default. Both go through
+# onAudioTrackChange (markers derived in eventLog.ts): evt-audio-alt-selected needs two
+# listed tracks with Spanish selected, and evt-audio-default-restored only fires after it,
+# so neither passes without a real selection change. The test app picks the track by
+# language, so no hard-coded id is involved.
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: audio-tracks
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 40000            # HLS: first load is the slow one
+# Interact only on an idle player (see smoke-mute-volume.yaml).
+- runFlow: ../shared/wait-for-end.yaml
+- runFlow:
+    file: ../shared/press.yaml
+    env:
+      BUTTON: btn-audio-es
+      NTH: 1
+- extendedWaitUntil:
+    visible:
+      id: "evt-audio-alt-selected"
+    timeout: 5000
+- runFlow:
+    file: ../shared/press.yaml
+    env:
+      BUTTON: btn-audio-auto
+      NTH: 1
+- extendedWaitUntil:
+    visible:
+      id: "evt-audio-default-restored"
+    timeout: 5000
+- assertNotVisible:
+    id: "evt-onError"

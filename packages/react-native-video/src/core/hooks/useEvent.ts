@@ -9,7 +9,7 @@ type UseEvent = <T extends keyof AllPlayerEvents>(
   callback: AllPlayerEvents[T]
 ) => void;
 
-// React 19.2+: one subscription per player and event, always the latest callback; older React resubscribes on callback change.
+// One subscription per player and event, always the latest callback. React 19.2+ has useEffectEvent for that.
 const useEffectEvent: (<F>(fn: F) => F) | undefined = (React as any)
   .useEffectEvent;
 
@@ -25,13 +25,23 @@ const useEventStable: UseEvent = (player, event, callback) => {
   }, [player, event]);
 };
 
+// Older React: the same single subscription, with the latest callback kept in a ref.
+// Resubscribing on every callback change would add a new listener on each render with an
+// inline callback, and a listener added while a source loads is told about that load again.
 const useEventLegacy: UseEvent = (player, event, callback) => {
+  const latest = React.useRef(callback);
   useEffect(() => {
-    const subscription = player.addEventListener(event, callback);
+    latest.current = callback;
+  });
+  useEffect(() => {
+    const subscription = player.addEventListener(event, ((...args: unknown[]) =>
+      (latest.current as (...a: unknown[]) => void)(
+        ...args
+      )) as AllPlayerEvents[typeof event]);
     return () => {
       subscription.remove();
     };
-  }, [player, event, callback]);
+  }, [player, event]);
 };
 
 /**

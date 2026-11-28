@@ -53,11 +53,11 @@ The `VideoPlayer` class, through `VideoPlayerEvents`, supports the following eve
 | `onControlsVisibleChange`  | (visible: boolean) => void                           | Fired when the visibility of native controls changes.                                       |
 | `onEnd`                    | () => void                                           | Fired when the video playback reaches the end.                                              |
 | `onExternalPlaybackChange` | (externalPlaybackActive: boolean) => void            | Fired when the external playback status changes (e.g., AirPlay).                            |
-| `onLoad`                   | (data: [onLoadData](../api-reference/interfaces/onLoadData.md)) => void                           | Fired when the video has loaded and is ready to play.                                       |
+| `onLoad`                   | (data: [onLoadData](../api-reference/interfaces/onLoadData.md)) => void                           | Fired once per source, when the video has loaded and is ready to play. A seek or a rebuffer does not fire it again; loading the source again after an error does.                                       |
 | `onLoadStart`              | (data: [onLoadStartData](../api-reference/interfaces/onLoadStartData.md)) => void                      | Fired when the video starts loading.                                                        |
 | `onPlaybackRateChange`     | (rate: number) => void                               | Fired when the playback rate changes.                                                       |
 | `onPlaybackStateChange`    | (data: [onPlaybackStateChangeData](../api-reference/interfaces/onPlaybackStateChangeData.md)) => void            | Fired when the playback state changes (e.g., playing, paused, stopped).                     |
-| `onProgress`               | (data: [onProgressData](../api-reference/interfaces/onProgressData.md)) => void                       | Fired periodically during playback with the current time.                                   |
+| `onProgress`               | (data: [onProgressData](../api-reference/interfaces/onProgressData.md)) => void                       | Fired periodically during playback with the current time. Set the interval with `player.progressUpdateInterval` (milliseconds; default `250` on Android and web, `500` on iOS). |
 | `onReadyToDisplay`         | () => void                                           | Fired when the player is ready to display the first frame of the video.                     |
 | `onSeek`                   | (seekTime: number) => void                           | Fired when a seek operation has completed.                                                  |
 | `onStatusChange`           | (status: [VideoPlayerStatus](../api-reference/type-aliases/VideoPlayerStatus.md)) => void                  | Fired when the player status changes (detailed status updates).                             |
@@ -81,6 +81,8 @@ This hook is recommended for managing event subscriptions in a declarative React
 ### Initialization Timing and Events
 
 `onLoadStart` / `onLoad` will fire automatically after construction when `initializeOnCreation` (default `true`) is enabled. If you set `initializeOnCreation: false`, these events will not fire until you call `initialize()` or `preload()`. Attach your event handlers before invoking those methods to avoid missing early events.
+
+A listener added while a source is still loading receives `onLoadStart` for that load right away. If your code removes a listener and adds it again during loading (for example in a `useEffect` whose dependencies change), it receives `onLoadStart` for the same load a second time, so deduplicate there if you count load starts. `useEvent` keeps one subscription per player and event and is not affected.
 
 ## Subscribing to Events
 

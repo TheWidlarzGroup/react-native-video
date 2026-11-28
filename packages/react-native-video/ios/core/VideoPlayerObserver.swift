@@ -62,6 +62,18 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
   var playerStatusObserver: NSKeyValueObservation?
   var playerProgressPeriodicObserver: Any?
 
+  /// The v7 default on iOS. Android uses 250 ms.
+  static let defaultProgressUpdateInterval: Double = 500
+
+  /// Time between two onProgress events, in milliseconds.
+  var progressUpdateInterval: Double = VideoPlayerObserver.defaultProgressUpdateInterval {
+    didSet {
+      guard progressUpdateInterval != oldValue, playerProgressPeriodicObserver != nil, let player else { return }
+      removeProgressObserver()
+      addProgressObserver(player: player)
+    }
+  }
+
   // Player item observers
   var playbackEndedObserver: NSObjectProtocol?
   var playbackBufferEmptyObserver: NSKeyValueObservation?
@@ -130,13 +142,24 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
       self?.delegate?.onPlayerStatusChanged(status: player.status)
     }
     
-    // 500ms interval TODO: Make this configurable
-    let interval = CMTime(seconds: 0.5, preferredTimescale: 600)
+    addProgressObserver(player: player)
+  }
+
+  private func addProgressObserver(player: AVPlayer) {
+    let interval = CMTime(seconds: progressUpdateInterval / 1000, preferredTimescale: 600)
     playerProgressPeriodicObserver = player.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] _ in
       guard let self, let player = self.player, let delegate = self.delegate else { return }
       
       delegate.onProgressUpdate(currentTime: player.currentTime().seconds, bufferDuration: player.currentItem?.getbufferDuration() ?? 0)
     }
+  }
+
+  private func removeProgressObserver() {
+    // A time observer has to be removed from the player that created it
+    if let player = player, let periodicObserver = playerProgressPeriodicObserver {
+      player.removeTimeObserver(periodicObserver)
+    }
+    playerProgressPeriodicObserver = nil
   }
   
   private func initializePlayerItemObservers(player: AVPlayer, playerItem: AVPlayerItem) {
@@ -156,15 +179,18 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
       self?.onPlayerAccessLog(playerItem: playerItem)
     }
 
+    // `selectMediaOptionAutomatically` is applied asynchronously by AVFoundation, so
+    // `currentMediaSelection` can still be stale right after the call returns. This is
+    // the signal that a media selection group actually changed its option.
     // Also posted for a selection made in the native controls.
     playerItemMediaSelectionObserver = NotificationCenter.default.addObserver(
       forName: AVPlayerItem.mediaSelectionDidChangeNotification,
       object: playerItem,
-      queue: nil
+      queue: .main
     ) { [weak self] _ in
       self?.delegate?.onMediaSelectionChanged()
     }
-    
+
     setupBufferObservers(for: playerItem)
     
     playerItemStatusObserver = playerItem.observe(\.status, options: [.new]) { [weak self] _, change in

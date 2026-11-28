@@ -1,6 +1,6 @@
 {
   "name": "react-native-video",
-  "version": "7.0.0-beta.14",
+  "version": "7.0.0-beta.15",
   "description": "<Video /> Component for React Native",
   "source": "./src/index.tsx",
   "main": "./lib/commonjs/index.js",
@@ -46,7 +46,7 @@
     "!**/.*"
   ],
   "scripts": {
-    "typecheck": "tsc && bun run typecheck:test",
+    "typecheck": "tsc && bun run typecheck:test && bun run typecheck:web",
     "typecheck:test": "tsc -p tsconfig.test.json --noEmit",
     "test": "bun test __tests__",
     "typecheck:web": "tsc -p tsconfig.web.json",
