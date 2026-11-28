@@ -280,7 +280,11 @@ function apply(event: PlayerEvent) {
       if (event.shown) {
         mark('evt-loader-shown');
         state.loaderShownAt = event.at;
-        if (state.loadCount === 0 && !state.markers.has('evt-onProgress')) {
+        // Android reports progress at 0 s while the source is still loading, so only
+        // progress past the start says that playback began before the loader appeared.
+        const playbackMoved =
+          state.lastProgress !== null && state.lastProgress > 0;
+        if (state.loadCount === 0 && !playbackMoved) {
           mark('evt-loader-before-load');
         }
         append('loader shown');

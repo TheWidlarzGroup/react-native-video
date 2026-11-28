@@ -3,7 +3,8 @@
 # (`?hold=&holdId=`, see fixtures.ts), so the loader has a load to cover. The loader is a
 # probe that logs its own mount and unmount with a clock reading (LoaderProbe in
 # ScenarioScreen.tsx), so the flow does not depend on catching it on screen:
-# - evt-loader-shown and evt-loader-before-load: it was up before onLoad and any progress;
+# - evt-loader-shown and evt-loader-before-load: it was up before onLoad and before playback
+#   moved (Android reports progress at 0 s while the source loads);
 # - evt-loader-hidden: the view took it off; evt-loader-held: not before 2.5 s of the 4 s
 #   hold had passed;
 # - at the end nothing of it (its label) is left over the playing video.

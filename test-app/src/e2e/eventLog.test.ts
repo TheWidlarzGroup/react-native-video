@@ -652,6 +652,15 @@ describe('loader', () => {
     expect(markers()).not.toContain('evt-loader-held');
   });
 
+  test('progress at 0 s while the source loads does not stop before-load (Android)', () => {
+    feed(
+      { type: 'onProgress', currentTime: 0 },
+      { type: 'onProgress', currentTime: 0 },
+      { type: 'loader', shown: true, at: 1 }
+    );
+    expect(markers()).toContain('evt-loader-before-load');
+  });
+
   test('a loader that first mounts after onLoad or progress is not before-load', () => {
     feed(
       { type: 'onLoad', duration: 8 },
