@@ -1,0 +1,34 @@
+# Native controls without controlsStyles (#5272, Android only): once the clip has ended,
+# Media3 shows its controller with the play/pause button, the seek bar, the position and
+# the duration. This flow is the check on the ids that smoke-controls-styles and
+# smoke-controls-no-play-pause expect NOT to see: a wrong id (or Media3 renaming a view)
+# fails here instead of passing there. iOS has no such views and only plays the clip.
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4-controls
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 20000            # generous: emulator software decoder cold start
+- runFlow: ../shared/wait-for-end.yaml
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: ".*exo_play_pause"
+          timeout: 10000
+      - assertVisible:
+          id: ".*exo_progress"
+      - assertVisible:
+          id: ".*exo_position"
+      - assertVisible:
+          id: ".*exo_duration"
+- assertNotVisible:
+    id: "evt-onError"

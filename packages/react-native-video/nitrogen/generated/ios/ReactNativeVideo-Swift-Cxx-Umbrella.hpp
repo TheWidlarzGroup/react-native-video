@@ -40,6 +40,8 @@ namespace margelo::nitro::video { struct ListenerSubscription; }
 namespace margelo::nitro::video { struct LivePlaybackParams; }
 // Forward declaration of `MixAudioMode` to properly resolve imports.
 namespace margelo::nitro::video { enum class MixAudioMode; }
+// Forward declaration of `NativeControlsStyles` to properly resolve imports.
+namespace margelo::nitro::video { struct NativeControlsStyles; }
 // Forward declaration of `NativeDrmParams` to properly resolve imports.
 namespace margelo::nitro::video { struct NativeDrmParams; }
 // Forward declaration of `NativeExternalSubtitle` to properly resolve imports.
@@ -102,6 +104,7 @@ namespace margelo::nitro::video { struct onVolumeChangeData; }
 #include "ListenerSubscription.hpp"
 #include "LivePlaybackParams.hpp"
 #include "MixAudioMode.hpp"
+#include "NativeControlsStyles.hpp"
 #include "NativeDrmParams.hpp"
 #include "NativeExternalSubtitle.hpp"
 #include "NativeVideoConfig.hpp"
