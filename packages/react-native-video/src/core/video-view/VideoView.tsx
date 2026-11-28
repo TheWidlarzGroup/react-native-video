@@ -5,6 +5,7 @@ import type {
   VideoViewViewManager,
   VideoViewViewManagerFactory,
 } from '../../spec/nitro/VideoViewViewManager.nitro';
+import { resolveControlsStyles } from '../types/ControlsStyles';
 import { type VideoViewEvents } from '../types/Events';
 import {
   tryParseNativeVideoError,
@@ -44,6 +45,7 @@ const updateProps = (manager: VideoViewViewManager, props: VideoViewProps) => {
   manager.resizeMode = props.resizeMode ?? 'none';
   manager.keepScreenAwake = props.keepScreenAwake ?? true;
   manager.surfaceType = props.surfaceType ?? 'surface';
+  manager.controlsStyles = resolveControlsStyles(props.controlsStyles);
 };
 
 /**

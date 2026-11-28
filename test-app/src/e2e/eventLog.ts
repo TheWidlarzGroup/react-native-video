@@ -17,6 +17,7 @@ import type { VideoPlayerStatus } from 'react-native-video';
 // Every marker, in the order EventLogPanel renders them.
 export const MARKER_IDS = [
   'evt-onLoad',
+  'evt-onLoad-repeated', // a second onLoad for the same source (#5268): one load reports once
   'evt-onProgress',
   'evt-progress-gt-2s',
   'evt-onEnded',
@@ -40,6 +41,7 @@ export const MARKER_IDS = [
   'evt-video-track-auto', // ...then reports no pinned selection again (automatic)
   'evt-audio-alt-selected', // onAudioTrackChange reports the Spanish track selected (2 tracks listed)
   'evt-audio-default-restored', // ...then the English (default) track selected again
+  'evt-audio-tracks-after-replace', // onAudioTrackChange lists both tracks after replaceSourceAsync() was requested (#5291)
   // An unassisted loop restart: see LOOP_VERIFIED_END_COUNT and the wrap-around rule in
   // handle('onProgress') — AVPlayer reports each loop as onEnd, ExoPlayer wraps silently,
   // so both are covered (see smoke-loop.yaml).
@@ -94,7 +96,7 @@ export type PlayerEvent =
   | {
       type: 'replaceSource';
       phase: 'requested' | 'resolved' | 'rejected';
-      source: 'hls' | 'null';
+      source: 'hls' | 'null' | 'audio-tracks';
     }
   | {
       type: 'onVideoTrackChange';
@@ -150,10 +152,14 @@ type State = {
   loadingSeen: boolean;
   readySeen: boolean;
   // replaceSourceAsync(source) was requested: only an onLoad/onEnd after it counts as the
-  // replacement loading/ending (Android re-emits onLoad on every re-buffer and replay).
+  // replacement loading/ending (before #5268, Android re-emitted onLoad on every re-buffer,
+  // seek and replay).
   replaceRequested: boolean;
   // The next onProgress tells where the replacement source started (see onLoad).
   reloadPending: boolean;
+  // onLoad events since the current source started loading. replaceSourceAsync(source)
+  // starts a new source, so its onLoad is not a repeat.
+  loadsOfSource: number;
 };
 
 const initialState = (): State => ({
@@ -171,9 +177,14 @@ const initialState = (): State => ({
   readySeen: false,
   replaceRequested: false,
   reloadPending: false,
+  loadsOfSource: 0,
 });
 
 let state = initialState();
+// Bumped by every reset(), i.e. once per scenario. A player keeps emitting for a moment
+// after its screen is gone (its release is asynchronous); bound to an old session, its
+// events are dropped instead of landing in the next scenario's log (see forSession).
+let session = 0;
 // Never reset, so a key stays unique even across scenarios and after old entries drop off.
 let nextEntryId = 0;
 const listeners = new Set<() => void>();
@@ -201,6 +212,8 @@ function apply(event: PlayerEvent) {
     case 'onLoad':
       mark('evt-onLoad');
       state.loadCount += 1;
+      state.loadsOfSource += 1;
+      if (state.loadsOfSource > 1) mark('evt-onLoad-repeated');
       if (state.replaceRequested) {
         mark('evt-replacement-loaded');
         state.reloadPending = true;
@@ -340,6 +353,7 @@ function apply(event: PlayerEvent) {
     case 'replaceSource':
       if (event.phase === 'requested' && event.source !== 'null') {
         state.replaceRequested = true;
+        state.loadsOfSource = 0;
       }
       if (event.phase === 'resolved') mark('evt-replace-resolved');
       if (event.phase === 'rejected') mark('evt-replace-rejected');
@@ -384,6 +398,11 @@ function apply(event: PlayerEvent) {
     case 'onAudioTrackChange': {
       // The fixture's two renditions are told apart by language (en default, es alternate).
       const selected = event.tracks.find((track) => track.selected)?.language;
+      // A source with the same tracks still owes its own list: iOS skipped it while the
+      // ids were unchanged (#5291). Android goes through an empty list first.
+      if (state.replaceRequested && event.tracks.length === 2) {
+        mark('evt-audio-tracks-after-replace');
+      }
       if (event.tracks.length === 2 && selected === 'es') {
         mark('evt-audio-alt-selected');
       } else if (
@@ -426,7 +445,21 @@ export const eventLog = {
   },
   reset() {
     state = initialState();
+    session += 1;
     emit();
+  },
+  /**
+   * A handle() bound to the current scenario. ScenarioScreen attaches the player's listeners
+   * through it, so a player whose scenario has been left can no longer change the log that
+   * the next scenario's screen renders.
+   */
+  forSession(): (event: PlayerEvent) => void {
+    const own = session;
+    return (event) => {
+      if (own !== session) return;
+      apply(event);
+      emit();
+    };
   },
   getMarkers: (): ReadonlySet<MarkerId> => state.markers,
   getEntries: (): readonly LogEntry[] => state.entries,

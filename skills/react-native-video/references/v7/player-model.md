@@ -71,6 +71,7 @@ Extends RN `ViewProps`, plus:
 | `autoEnterPictureInPicture` | `boolean` | `false` | Auto-enter PiP on background. |
 | `keepScreenAwake` | `boolean` | `true` | Keep screen on while mounted. |
 | `surfaceType` | `'surface'\|'texture'` | `'surface'` | Android only: `texture` is animatable, `surface` is more performant. |
+| `controlsStyles` | `ControlsStyles` | - | Android only: hide single native controls (`hideSeekBar`, `hideForward`, `hideFullscreen`, ...) and pick the system bars hidden in fullscreen |
 
 For a placeholder/poster, overlay your own `<Image>` and remove it on the `onReadyToDisplay` event. See `pip-fullscreen-controls.md` for the imperative ref (`enterFullscreen`, `enterPictureInPicture`, …) and `events.md` for view events.
 
