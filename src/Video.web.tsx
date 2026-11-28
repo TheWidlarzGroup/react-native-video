@@ -94,6 +94,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
     );
 
     const [src, setSource] = useState(source);
+    const srcObject = typeof src === 'number' ? undefined : src;
     const currentSourceProp = useRef(source);
     useEffect(() => {
       if (isDeepEqual(source, currentSourceProp.current)) {
@@ -326,12 +327,12 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       };
     }, [onPictureInPictureStatusChanged]);
 
-    useMediaSession(src?.metadata, nativeRef, showNotificationControls);
+    useMediaSession(srcObject?.metadata, nativeRef, showNotificationControls);
 
     return (
       <WebVideo
         ref={nativeRef}
-        src={src?.uri as string | undefined}
+        src={srcObject?.uri as string | undefined}
         muted={muted}
         autoPlay={!paused}
         controls={controls}
@@ -398,8 +399,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           });
         }}
         onLoadedMetadata={() => {
-          if (src?.startPosition) {
-            seek(src.startPosition / 1000);
+          if (srcObject?.startPosition) {
+            seek(srcObject.startPosition / 1000);
           }
         }}
         onPlay={() =>
