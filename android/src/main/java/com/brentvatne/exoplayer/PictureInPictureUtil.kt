@@ -76,12 +76,12 @@ object PictureInPictureUtil {
     }
 
     @JvmStatic
-    fun enterPictureInPictureMode(context: ThemedReactContext, pictureInPictureParams: PictureInPictureParams?) {
-        if (!isSupportPictureInPicture(context)) return
-        val activity = context.findActivity() ?: return
+    fun enterPictureInPictureMode(context: ThemedReactContext, pictureInPictureParams: PictureInPictureParams?): Boolean {
+        if (!isSupportPictureInPicture(context)) return false
+        val activity = context.findActivity() ?: return false
         if (isSupportPictureInPictureAction() && pictureInPictureParams != null) {
             try {
-                activity.enterPictureInPictureMode(pictureInPictureParams)
+                return activity.enterPictureInPictureMode(pictureInPictureParams)
             } catch (e: IllegalStateException) {
                 DebugLog.e(TAG, e.toString())
             }
@@ -89,10 +89,12 @@ object PictureInPictureUtil {
             try {
                 @Suppress("DEPRECATION")
                 activity.enterPictureInPictureMode()
+                return true
             } catch (e: IllegalStateException) {
                 DebugLog.e(TAG, e.toString())
             }
         }
+        return false
     }
 
     @JvmStatic
