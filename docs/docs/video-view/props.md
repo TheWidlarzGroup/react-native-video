@@ -17,7 +17,7 @@ keywords: [VideoView props, player, controls, resizeMode, surfaceType, picture-i
 | `autoEnterPictureInPicture` | `boolean` | No | `false` | Whether the video should automatically enter PiP mode when it starts playing and the app is backgrounded (behavior might vary by platform). |
 | `resizeMode` | `'contain' \| 'cover' \| 'stretch' \| 'none'` | No | `'none'` | How the video should be resized to fit the view. |
 | `keepScreenAwake` | `boolean` | No | `true` | Whether to keep the device screen awake while the video view is mounted. |
-| `surfaceType` | `'surface' \| 'texture'` | No (Android only) | `'surface'` | (Android) Underlying native view type. `'surface'` uses a SurfaceView (better performance, no transforms/overlap), `'texture'` uses a TextureView (supports animations, transforms, overlapping UI) at a small performance cost. Ignored on iOS. |
+| `surfaceType` | `'surface' \| 'texture' \| 'secureSurface'` | No (Android only) | `'surface'` | (Android) Underlying native view type. `'surface'` uses a SurfaceView (better performance, no transforms/overlap), `'texture'` uses a TextureView (supports animations, transforms, overlapping UI) at a small performance cost, `'secureSurface'` uses a SurfaceView that is left out of screenshots and screen recordings. Ignored on iOS. |
 | `fullscreenOrientation` | `'all' \| 'landscape' \| 'portrait'` | No (iOS, Android) | `'all'` | Orientation of native fullscreen. `'landscape'` and `'portrait'` open fullscreen in that orientation, whichever way the device is held. On iOS the app has to support the orientation, and the prop has no effect on an iPad app that supports multitasking. On Android the activity is turned while fullscreen is open. |
 | `fullscreenAutorotate` | `boolean` | No (iOS, Android) | `true` | With `true`, fullscreen opens in `fullscreenOrientation` and follows the device once the user has turned it there. With `false`, fullscreen stays locked to `fullscreenOrientation`. Ignored when `fullscreenOrientation` is `'all'`. |
 | `controlsStyles` | `ControlsStyles` | No (Android only) | - | (Android) Hides single elements of the native controls and chooses which system bars fullscreen hides. See [Android: Customizing the controls](#android-customizing-the-controls). Ignored on iOS and web. |
@@ -93,6 +93,14 @@ If you need those UI effects, switch to `TextureView`:
 ```
 
 Use `TextureView` only when required, as it can be slightly less performant and may increase power consumption on some devices.
+
+To keep the video out of screenshots, screen recordings and non-secure external displays, use a secure surface. This replaces the v6 `useSecureView` prop:
+
+```tsx
+<VideoView player={player} surfaceType="secureSurface" style={{ width: 300, height: 170 }} />
+```
+
+A secure surface is a `SurfaceView`, so it has the same limits as `'surface'`. It hides only the video, not the rest of the screen.
 
 ## Android: Customizing the controls
 

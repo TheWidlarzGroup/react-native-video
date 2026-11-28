@@ -183,6 +183,23 @@ describe('handle', () => {
     expect(markers()).not.toContain('evt-onBuffer-true-repeated');
   });
 
+  test('onReadyToDisplay marks; a second one for the same source is a repeat', () => {
+    feed({ type: 'onReadyToDisplay' });
+    expect(markers()).toEqual(['evt-onReadyToDisplay']);
+    feed({ type: 'onReadyToDisplay' });
+    expect(markers()).toContain('evt-onReadyToDisplay-repeated');
+    expect(lines()).toEqual(['onReadyToDisplay (#1)', 'onReadyToDisplay (#2)']);
+  });
+
+  test('the onReadyToDisplay of a replacement source is not a repeat', () => {
+    feed(
+      { type: 'onReadyToDisplay' },
+      { type: 'replaceSource', phase: 'requested', source: 'hls' },
+      { type: 'onReadyToDisplay' }
+    );
+    expect(markers()).not.toContain('evt-onReadyToDisplay-repeated');
+  });
+
   test('a second onLoad for the same source marks evt-onLoad-repeated', () => {
     feed({ type: 'onLoad', duration: 8 });
     expect(markers()).not.toContain('evt-onLoad-repeated');

@@ -1,5 +1,6 @@
 import type { AudioTrack } from './types/AudioTrack';
 import type { IgnoreSilentSwitchMode } from './types/IgnoreSilentSwitchMode';
+import type { AudioOutput } from './types/AudioOutput';
 import type { MixAudioMode } from './types/MixAudioMode';
 import type { TextTrack } from './types/TextTrack';
 import type { VideoTrack } from './types/VideoTrack';
@@ -264,6 +265,14 @@ class VideoPlayer extends VideoPlayerEvents implements WebVideoPlayer {
     return false;
   }
   set disableAudioSessionManagement(_: boolean) {}
+  get allowsExternalPlayback(): boolean {
+    return true;
+  }
+  set allowsExternalPlayback(_: boolean) {}
+  get audioOutput(): AudioOutput {
+    return 'speaker';
+  }
+  set audioOutput(_: AudioOutput) {}
 
   // --- Media Session ---
 

@@ -203,6 +203,13 @@ class VideoComponentViewObserver: NSObject, AVPlayerViewControllerDelegate {
     delegate?.willEnterPictureInPicture()
   }
 
+  func playerViewControllerShouldAutomaticallyDismissAtPictureInPictureStart(_: AVPlayerViewController) -> Bool {
+    // AVKit closes native fullscreen when picture in picture starts, unless told otherwise.
+    // Closing it leaves nothing to come back to: after the restore button the player lands
+    // inline or disappears (#4897). Keeping fullscreen up lets picture in picture return to it.
+    return !isFullscreen
+  }
+
   func playerViewController(_: AVPlayerViewController, failedToStartPictureInPictureWithError _: Error) {
     view?.isPictureInPictureActive = false
   }

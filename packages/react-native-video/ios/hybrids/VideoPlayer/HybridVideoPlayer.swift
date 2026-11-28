@@ -309,6 +309,21 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     }
   }
 
+  var allowsExternalPlayback: Bool {
+    get {
+      return player.allowsExternalPlayback
+    }
+    set {
+      player.allowsExternalPlayback = newValue
+    }
+  }
+
+  var audioOutput: AudioOutput = .speaker {
+    didSet {
+      VideoManager.shared.requestAudioSessionUpdate()
+    }
+  }
+
   var wasAutoPaused: Bool = false
 
   var wasInterruptedWhilePlaying: Bool = false

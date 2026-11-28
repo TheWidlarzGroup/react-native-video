@@ -399,6 +399,9 @@ function logPlayerEvents(player: VideoPlayer) {
     handle({ type: 'onEnd' });
     reportStatusSettled(player, 'end');
   });
+  player.addEventListener('onReadyToDisplay', () =>
+    handle({ type: 'onReadyToDisplay' })
+  );
   player.addEventListener('onError', (error) => {
     handle({ type: 'onError', code: error.code });
     reportStatusSettled(player, 'error');

@@ -5,7 +5,7 @@ import type { ResizeMode } from '../../core/types/ResizeMode';
 import type { VideoPlayer } from './VideoPlayer.nitro';
 import type { ListenerSubscription } from './VideoPlayerEventEmitter.nitro';
 
-export type SurfaceType = 'surface' | 'texture';
+export type SurfaceType = 'surface' | 'texture' | 'secureSurface';
 
 // @internal
 export interface VideoViewViewManager extends HybridObject<{

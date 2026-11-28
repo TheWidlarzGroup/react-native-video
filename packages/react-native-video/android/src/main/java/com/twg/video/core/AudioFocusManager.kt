@@ -1,6 +1,8 @@
 package com.twg.video.core
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.AudioFocusRequest
@@ -11,6 +13,7 @@ import androidx.annotation.RequiresApi
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import com.margelo.nitro.NitroModules
+import com.margelo.nitro.video.AudioOutput
 import com.margelo.nitro.video.HybridVideoPlayer
 import com.margelo.nitro.video.MixAudioMode
 import com.twg.video.core.utils.Threading
@@ -21,6 +24,7 @@ class AudioFocusManager() {
   private val players = mutableListOf<HybridVideoPlayer>()
   private var currentMixAudioMode: MixAudioMode? = null
   private var audioFocusRequest: AudioFocusRequest? = null
+  private var isEarpieceModeActive = false
 
   val appContext by lazy {
     NitroModules.applicationContext ?: throw UnknownError()
@@ -67,14 +71,41 @@ class AudioFocusManager() {
     if (!players.contains(player)) {
       players.add(player)
     }
+    requestAudioOutputUpdate()
   }
 
   fun unregisterPlayer(player: HybridVideoPlayer) = Threading.runOnMainThread {
     players.remove(player)
+    requestAudioOutputUpdate()
     if (players.isEmpty()) {
       abandonAudioFocus()
     } else {
       requestAudioFocusUpdate()
+    }
+  }
+
+  /**
+   * A player with audioOutput 'earpiece' uses voice-communication audio attributes, which most
+   * devices route to the earpiece. Some only do that in MODE_IN_COMMUNICATION, so the mode is set
+   * while any player needs the earpiece and put back afterwards. Changing the mode needs the
+   * MODIFY_AUDIO_SETTINGS permission; without it the system ignores the call, so it is skipped.
+   */
+  fun requestAudioOutputUpdate() = Threading.runOnMainThread {
+    val canChangeMode = appContext.checkSelfPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS) ==
+      PackageManager.PERMISSION_GRANTED
+    val needsEarpiece = canChangeMode &&
+      players.any { player -> player.audioOutput == AudioOutput.EARPIECE }
+    if (needsEarpiece == isEarpieceModeActive) {
+      return@runOnMainThread
+    }
+
+    isEarpieceModeActive = needsEarpiece
+    if (needsEarpiece) {
+      audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
+      @Suppress("DEPRECATION")
+      audioManager.isSpeakerphoneOn = false
+    } else {
+      audioManager.mode = AudioManager.MODE_NORMAL
     }
   }
 

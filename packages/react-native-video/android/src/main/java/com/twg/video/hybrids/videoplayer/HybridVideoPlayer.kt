@@ -4,6 +4,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import androidx.annotation.MainThread
+import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.Format
 import androidx.media3.common.Metadata
@@ -102,6 +103,32 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
    * it there: it is a once-per-source event, as on iOS and in v6.
    */
   private var loadReportedForSource = false
+
+  /**
+   * Whether `onReadyToDisplay` was already emitted for the current source. It describes the
+   * first frame of a source, so it comes once, and not again after a seek, a rebuffer or a new
+   * surface (fullscreen, picture-in-picture).
+   */
+  private var readyToDisplayReportedForSource = false
+
+  /**
+   * Whether the video renderer has drawn a frame of the current source. Media3 can draw it
+   * before `STATE_READY`, so it is kept until `onLoad` has gone out.
+   */
+  private var firstFrameRenderedForSource = false
+
+  /**
+   * Emits `onReadyToDisplay` once the source is loaded and its first frame is on screen. A
+   * source without video never draws a frame and never gets it, as on iOS, so a poster can
+   * stay up as artwork.
+   */
+  private fun reportReadyToDisplayIfDue() {
+    if (readyToDisplayReportedForSource || !loadReportedForSource || !firstFrameRenderedForSource) {
+      return
+    }
+    readyToDisplayReportedForSource = true
+    eventEmitter.onReadyToDisplay()
+  }
 
   // Listeners
   private val audioFocusChangedListener = OnAudioFocusChangedListener()
@@ -241,6 +268,35 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   // iOS only property - no-op on Android
   override var disableAudioSessionManagement: Boolean = false
 
+  // iOS only property - no-op on Android
+  override var allowsExternalPlayback: Boolean = true
+
+  override var audioOutput: AudioOutput = AudioOutput.SPEAKER
+    set(value) {
+      field = value
+      runOnMainThread {
+        applyAudioOutput()
+        VideoManager.audioFocusManager.requestAudioOutputUpdate()
+      }
+    }
+
+  /**
+   * Routes this player's audio like a call (earpiece) or like media (speaker). The player is
+   * rebuilt in [initializePlayer], so this runs again there.
+   */
+  @MainThread
+  private fun applyAudioOutput() {
+    val attributes = if (audioOutput == AudioOutput.EARPIECE) {
+      AudioAttributes.Builder()
+        .setUsage(C.USAGE_VOICE_COMMUNICATION)
+        .setContentType(C.AUDIO_CONTENT_TYPE_SPEECH)
+        .build()
+    } else {
+      AudioAttributes.DEFAULT
+    }
+    player.setAudioAttributes(attributes, false)
+  }
+
   override var playInBackground: Boolean = false
     get() = runOnMainThreadSync { field }
     set(value) {
@@ -317,6 +373,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
     loadedWithSource = true
 
     applyVideoQualityConstraints()
+    applyAudioOutput()
 
     player.addListener(playerListener)
     player.addAnalyticsListener(analyticsListener)
@@ -601,10 +658,19 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   }
 
   private val playerListener = object : Player.Listener {
+    override fun onRenderedFirstFrame() {
+      // Called for the first frame after the source, the surface or the renderer changes, so
+      // also after a seek or when the view moves to fullscreen; only the first one counts.
+      firstFrameRenderedForSource = true
+      reportReadyToDisplayIfDue()
+    }
+
     override fun onTimelineChanged(timeline: Timeline, reason: Int) {
       // A media source was set (first source or replaceSourceAsync()): a new load begins.
       if (reason == Player.TIMELINE_CHANGE_REASON_PLAYLIST_CHANGED) {
         loadReportedForSource = false
+        readyToDisplayReportedForSource = false
+        firstFrameRenderedForSource = false
       }
     }
 
@@ -632,6 +698,8 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
           eventEmitter.onBuffer(false)
           // Stopped or failed: the next prepare() loads the source again.
           loadReportedForSource = false
+          readyToDisplayReportedForSource = false
+          firstFrameRenderedForSource = false
         }
         Player.STATE_BUFFERING -> {
           status = VideoPlayerStatus.LOADING
@@ -672,7 +740,8 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
             startProgressUpdates()
           }
 
-          eventEmitter.onReadyToDisplay()
+          // After onLoad: the first frame may already be on screen, or comes later.
+          reportReadyToDisplayIfDue()
         }
         Player.STATE_ENDED -> {
           // The source is still loaded at the end: it can be seeked and played again.
