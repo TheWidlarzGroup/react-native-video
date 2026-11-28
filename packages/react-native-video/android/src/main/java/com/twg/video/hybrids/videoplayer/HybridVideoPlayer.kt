@@ -32,7 +32,6 @@ import com.twg.video.core.LibraryError
 import com.twg.video.core.PlayerError
 import com.twg.video.core.VideoManager
 import com.twg.video.core.extensions.updateService
-import com.twg.video.core.player.OnAudioFocusChangedListener
 import com.twg.video.core.recivers.AudioBecomingNoisyReceiver
 import com.twg.video.core.services.playback.VideoPlaybackService
 import com.twg.video.core.services.playback.VideoPlaybackServiceConnection
@@ -64,7 +63,6 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   override var eventEmitter = HybridVideoPlayerEventEmitter()
     set(value) {
       if (field != value) {
-        audioFocusChangedListener.setEventEmitter(value)
         audioBecomingNoisyReceiver.setEventEmitter(value)
       }
       field = value
@@ -131,7 +129,6 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   }
 
   // Listeners
-  private val audioFocusChangedListener = OnAudioFocusChangedListener()
   private val audioBecomingNoisyReceiver = AudioBecomingNoisyReceiver()
 
   // Service Connection
@@ -581,7 +578,6 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
       player.release() // Release player
 
       // Clean Listeners
-      audioFocusChangedListener.removeEventEmitter()
       audioBecomingNoisyReceiver.removeEventEmitter()
 
       // Update status
