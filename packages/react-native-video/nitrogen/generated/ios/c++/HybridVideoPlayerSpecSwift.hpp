@@ -22,6 +22,8 @@ namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 namespace margelo::nitro::video { enum class MixAudioMode; }
 // Forward declaration of `IgnoreSilentSwitchMode` to properly resolve imports.
 namespace margelo::nitro::video { enum class IgnoreSilentSwitchMode; }
+// Forward declaration of `AudioOutput` to properly resolve imports.
+namespace margelo::nitro::video { enum class AudioOutput; }
 // Forward declaration of `TextTrack` to properly resolve imports.
 namespace margelo::nitro::video { struct TextTrack; }
 // Forward declaration of `VideoTrack` to properly resolve imports.
@@ -35,6 +37,7 @@ namespace margelo::nitro::video { struct AudioTrack; }
 #include "VideoPlayerStatus.hpp"
 #include "MixAudioMode.hpp"
 #include "IgnoreSilentSwitchMode.hpp"
+#include "AudioOutput.hpp"
 #include "TextTrack.hpp"
 #include <optional>
 #include <string>
@@ -179,6 +182,19 @@ namespace margelo::nitro::video {
     }
     inline void setDisableAudioSessionManagement(bool disableAudioSessionManagement) noexcept override {
       _swiftPart.setDisableAudioSessionManagement(std::forward<decltype(disableAudioSessionManagement)>(disableAudioSessionManagement));
+    }
+    inline bool getAllowsExternalPlayback() noexcept override {
+      return _swiftPart.getAllowsExternalPlayback();
+    }
+    inline void setAllowsExternalPlayback(bool allowsExternalPlayback) noexcept override {
+      _swiftPart.setAllowsExternalPlayback(std::forward<decltype(allowsExternalPlayback)>(allowsExternalPlayback));
+    }
+    inline AudioOutput getAudioOutput() noexcept override {
+      auto __result = _swiftPart.getAudioOutput();
+      return static_cast<AudioOutput>(__result);
+    }
+    inline void setAudioOutput(AudioOutput audioOutput) noexcept override {
+      _swiftPart.setAudioOutput(static_cast<int>(audioOutput));
     }
     inline bool getIsPlaying() noexcept override {
       return _swiftPart.isPlaying();

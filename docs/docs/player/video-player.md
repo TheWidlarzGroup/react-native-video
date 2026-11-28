@@ -77,6 +77,8 @@ The `VideoPlayer` class offers a comprehensive set of methods and properties to 
 | `ignoreSilentSwitchMode` | Read/Write | `IgnoreSilentSwitchMode` | iOS-only. Determines how audio should behave when the hardware mute (silent) switch is on. |
 | `playInBackground` | Read/Write | `boolean` | Whether playback should continue when the app goes to the background. |
 | `playWhenInactive` | Read/Write | `boolean` | Whether playback should continue when the app is inactive (e.g., during a phone call). |
+| `allowsExternalPlayback` | Read/Write | `boolean` | iOS-only. Whether the video can be sent to an AirPlay device. Defaults to `true`. With `false` the video stays on the device. |
+| `audioOutput` | Read/Write | `'speaker' \| 'earpiece'` | Where the audio plays on a phone. `'earpiece'` uses the receiver, as in a phone call. Defaults to `'speaker'`. On iOS `'earpiece'` is ignored while any player uses Picture in Picture, `playInBackground` or `showNotificationControls`. On Android, add the `MODIFY_AUDIO_SETTINGS` permission to your manifest so the player can switch the audio mode. No effect on web. |
 | `isPlaying` | Read-only | `boolean` | Returns `true` if the video is currently playing. |
 | `selectedTrack` | Read-only | `TextTrack \| undefined` | Currently selected text track, or `undefined` when no track is selected. |
 | `selectedVideoTrackId` | Read-only | `string \| undefined` | The id passed to the last `selectVideoTrack()` call, or `undefined` while selection is automatic. |

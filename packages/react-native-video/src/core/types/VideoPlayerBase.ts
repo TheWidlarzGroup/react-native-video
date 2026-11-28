@@ -1,3 +1,4 @@
+import type { AudioOutput } from './AudioOutput';
 import type { ListenerSubscription } from './EventEmitter';
 import type { AllPlayerEvents } from './Events';
 import type { AudioTrack } from './AudioTrack';
@@ -135,6 +136,32 @@ export interface VideoPlayerSpecBase {
    * @platform iOS
    */
   disableAudioSessionManagement: boolean;
+
+  /**
+   * Whether the player may switch to external playback, such as AirPlay video.
+   *
+   * - `true` - the video can be sent to an AirPlay device (default).
+   * - `false` - the video stays on the device. AirPlay can still carry the audio.
+   *
+   * @default true
+   * @platform iOS
+   */
+  allowsExternalPlayback: boolean;
+
+  /**
+   * Where the audio plays on a phone.
+   *
+   * - `speaker` - the loudspeaker, or the connected headphones (default).
+   * - `earpiece` - the receiver at the top of the phone, as in a phone call.
+   *
+   * @note On iOS `earpiece` is ignored while any player uses Picture in Picture,
+   * {@link playInBackground} or {@link showNotificationControls}, because those need the
+   * playback audio session.
+   *
+   * @default 'speaker'
+   * @platform iOS, Android
+   */
+  audioOutput: AudioOutput;
 
   /**
    * Whether the player is playing.

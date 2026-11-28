@@ -54,7 +54,7 @@ player.release();
 
 ## `VideoPlayer` properties
 
-**Read/write:** `volume` (0–1), `currentTime` (seconds), `muted`, `loop`, `rate` (1 = normal, 0 = pause), `playInBackground`, `playWhenInactive` (iOS), `showNotificationControls`, `mixAudioMode` (`'mixWithOthers'|'doNotMix'|'duckOthers'|'auto'`), `ignoreSilentSwitchMode` (iOS: `'auto'|'ignore'|'obey'`).
+**Read/write:** `volume` (0–1), `currentTime` (seconds), `muted`, `loop`, `rate` (1 = normal, 0 = pause), `playInBackground`, `playWhenInactive` (iOS), `allowsExternalPlayback` (iOS, AirPlay video, default `true`), `audioOutput` (`'speaker'|'earpiece'`), `showNotificationControls`, `mixAudioMode` (`'mixWithOthers'|'doNotMix'|'duckOthers'|'auto'`), `ignoreSilentSwitchMode` (iOS: `'auto'|'ignore'|'obey'`).
 
 **Read-only:** `status` (`'idle'|'loading'|'readyToPlay'|'error'`), `duration` (seconds, `NaN` if unknown), `isPlaying`, `source`, `selectedTrack`.
 

@@ -4,6 +4,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import androidx.annotation.MainThread
+import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.Format
 import androidx.media3.common.Metadata
@@ -241,6 +242,35 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   // iOS only property - no-op on Android
   override var disableAudioSessionManagement: Boolean = false
 
+  // iOS only property - no-op on Android
+  override var allowsExternalPlayback: Boolean = true
+
+  override var audioOutput: AudioOutput = AudioOutput.SPEAKER
+    set(value) {
+      field = value
+      runOnMainThread {
+        applyAudioOutput()
+        VideoManager.audioFocusManager.requestAudioOutputUpdate()
+      }
+    }
+
+  /**
+   * Routes this player's audio like a call (earpiece) or like media (speaker). The player is
+   * rebuilt in [initializePlayer], so this runs again there.
+   */
+  @MainThread
+  private fun applyAudioOutput() {
+    val attributes = if (audioOutput == AudioOutput.EARPIECE) {
+      AudioAttributes.Builder()
+        .setUsage(C.USAGE_VOICE_COMMUNICATION)
+        .setContentType(C.AUDIO_CONTENT_TYPE_SPEECH)
+        .build()
+    } else {
+      AudioAttributes.DEFAULT
+    }
+    player.setAudioAttributes(attributes, false)
+  }
+
   override var playInBackground: Boolean = false
     get() = runOnMainThreadSync { field }
     set(value) {
@@ -317,6 +347,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
     loadedWithSource = true
 
     applyVideoQualityConstraints()
+    applyAudioOutput()
 
     player.addListener(playerListener)
     player.addAnalyticsListener(analyticsListener)

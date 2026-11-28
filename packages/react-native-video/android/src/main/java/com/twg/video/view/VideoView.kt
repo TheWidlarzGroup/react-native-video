@@ -10,6 +10,7 @@ import android.util.AttributeSet
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.SurfaceView
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -193,9 +194,13 @@ class VideoView @JvmOverloads constructor(
   @SuppressLint("InflateParams")
   private fun createPlayerView(): PlayerView {
     return when (surfaceType) {
-      SurfaceType.SURFACE -> LayoutInflater.from(context).inflate(player_view_surface, null) as PlayerView
+      SurfaceType.SURFACE,
+      SurfaceType.SECURESURFACE -> LayoutInflater.from(context).inflate(player_view_surface, null) as PlayerView
       SurfaceType.TEXTURE -> LayoutInflater.from(context).inflate(player_view_texture, null) as PlayerView
     }.apply {
+      // A secure surface is left out of screenshots, screen recordings and non-secure displays.
+      (videoSurfaceView as? SurfaceView)?.setSecure(surfaceType == SurfaceType.SECURESURFACE)
+
       layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
       setShutterBackgroundColor(Color.TRANSPARENT)
       setShowSubtitleButton(true)
