@@ -309,11 +309,15 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   /// The id the user pinned through `selectVideoTrack`, or nil for automatic.
   /// Deliberately outlives the `AVPlayerItem` it was applied to - it is a
   /// request about the source, and every source replacement builds a new item.
-  private var requestedVideoTrackId: String?
+  private var requestedVideoTrackId: String? {
+    didSet { publishVideoTracks() }
+  }
 
   /// The current source's rendition ladder, best first. Empty for non-HLS
   /// sources, and until the master playlist has been fetched.
-  private var cachedVideoRenditions: [VideoRendition] = []
+  private var cachedVideoRenditions: [VideoRendition] = [] {
+    didSet { publishVideoTracks() }
+  }
 
   /// Which URL `cachedVideoRenditions` describes. Fetching the master playlist
   /// is a real extra HTTP request (AVPlayer fetches it too but exposes none of
@@ -350,6 +354,55 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   /// Dedupe key for `onAudioTrackChange`. The emission points below fire more
   /// often than the track set actually changes.
   private var lastEmittedAudioTrackSignature: String?
+
+  // MARK: - Published track state
+  //
+  // The track state above lives on the main thread, and JS reads it through getters. A
+  // getter that hops to the main thread blocks the JS thread for as long as the main thread
+  // is busy (#4820). So the main thread publishes a copy here whenever the state changes,
+  // and the getters read the copy.
+
+  private struct PublishedTracks {
+    var videoRenditions: [VideoRendition] = []
+    var selectedVideoTrackId: String?
+    /// `selectVideoTrack` calls made from JS that the main thread has not applied yet.
+    /// While there are any, `selectedVideoTrackId` is what JS asked for last.
+    var pendingVideoSelections = 0
+
+    var audioTracks: [AudioTrack] = []
+    var selectedAudioTrackId: String?
+    /// Same as `pendingVideoSelections`, for `selectAudioTrack`.
+    var pendingAudioSelections = 0
+  }
+
+  private let publishedTracksLock = NSLock()
+  private var publishedTracks = PublishedTracks()
+
+  private func withPublishedTracks<T>(_ body: (inout PublishedTracks) -> T) -> T {
+    publishedTracksLock.lock()
+    defer { publishedTracksLock.unlock() }
+    return body(&publishedTracks)
+  }
+
+  /// Main thread only.
+  private func publishVideoTracks() {
+    withPublishedTracks {
+      $0.videoRenditions = cachedVideoRenditions
+      if $0.pendingVideoSelections == 0 {
+        $0.selectedVideoTrackId = requestedVideoTrackId
+      }
+    }
+  }
+
+  /// Main thread only.
+  private func publishAudioTracks(_ tracks: [AudioTrack], selectedTrackId: String?) {
+    withPublishedTracks {
+      $0.audioTracks = tracks
+      if $0.pendingAudioSelections == 0 {
+        $0.selectedAudioTrackId = selectedTrackId
+      }
+    }
+  }
 
   var isCurrentlyBuffering: Bool = false
 
@@ -427,6 +480,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
 
     requestedAudioTrackId = nil
     lastEmittedAudioTrackSignature = nil
+    publishAudioTracks([], selectedTrackId: nil)
 
     playerObserver?.invalidatePlayerItemObservers()
     playerObserver?.invalidatePlayerObservers()
@@ -452,6 +506,9 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
 
       // Off-main manifest fetch for the quality ladder.
       self.beginVideoRenditionLoad(for: loadedPlayerItem.context.source)
+      // The audio tracks of the previous source are gone; the new ones are published once
+      // the item is ready (`applyAudioTrackSelectionIfReady`).
+      self.publishAudioTracks([], selectedTrackId: self.requestedAudioTrackId)
 
       self.player.replaceCurrentItem(with: loadedPlayerItem.item)
     }
@@ -926,21 +983,32 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   // (`selectedTrackId`) from what is actually *playing* (`activeTrackId`).
 
   func getAvailableVideoTracks() throws -> [VideoTrack] {
-    runOnMainThreadSync { videoTracksSnapshot() }
+    let (renditions, selectedTrackId) = withPublishedTracks {
+      ($0.videoRenditions, $0.selectedVideoTrackId)
+    }
+    return renditions.map { $0.videoTrack(selected: $0.id == selectedTrackId) }
   }
 
   var selectedVideoTrackId: String? {
-    runOnMainThreadSync { requestedVideoTrackId }
+    withPublishedTracks { $0.selectedVideoTrackId }
   }
 
   func selectVideoTrack(trackId: String?) throws {
-    runOnMainThreadSync {
-      requestedVideoTrackId = trackId
+    // Published first, so a getter called right after this returns what was just selected.
+    withPublishedTracks {
+      $0.selectedVideoTrackId = trackId
+      $0.pendingVideoSelections += 1
+    }
+
+    runOnMainThread { [weak self] in
+      guard let self else { return }
+      self.withPublishedTracks { $0.pendingVideoSelections -= 1 }
+      self.requestedVideoTrackId = trackId
       // Applied right now if the item is already ready; otherwise the
       // `.readyToPlay` hook in HybridVideoPlayer+Events.swift picks it up, since
       // AVFoundation ignores these properties before then.
-      applyVideoQualityCaps()
-      emitVideoTrackChange()
+      self.applyVideoQualityCaps()
+      self.emitVideoTrackChange()
     }
   }
 
@@ -1150,7 +1218,22 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   // this is a real selection, not a preference the player may ignore.
 
   func getAvailableAudioTracks() throws -> [AudioTrack] {
-    runOnMainThreadSync { audioTracksSnapshot() }
+    let (tracks, selectedTrackId, pending) = withPublishedTracks {
+      ($0.audioTracks, $0.selectedAudioTrackId, $0.pendingAudioSelections)
+    }
+    // A selection JS has just made and the main thread has not applied yet is shown as
+    // selected, like `selectedAudioTrackId` reports it.
+    guard pending > 0, let selectedTrackId, tracks.contains(where: { $0.id == selectedTrackId })
+    else { return tracks }
+    return tracks.map {
+      AudioTrack(
+        id: $0.id,
+        label: $0.label,
+        language: $0.language,
+        selected: $0.id == selectedTrackId,
+        channels: $0.channels
+      )
+    }
   }
 
   var selectedAudioTrackId: String? {
@@ -1159,18 +1242,30 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     // report, and under automatic selection AVFoundation still picks a concrete
     // option (system language / accessibility settings) that callers want to
     // see reflected in their menu.
-    runOnMainThreadSync { currentAudioTrackId() ?? requestedAudioTrackId }
+    withPublishedTracks { $0.selectedAudioTrackId }
   }
 
   func selectAudioTrack(trackId: String?) throws {
-    runOnMainThreadSync {
-      requestedAudioTrackId = trackId
+    withPublishedTracks {
+      // Published first when it names a track of this source (or the list is not known
+      // yet), so a getter called right after this returns it. Automatic (nil) and an id
+      // of another source are resolved by the main thread below.
+      if let trackId, $0.audioTracks.isEmpty || $0.audioTracks.contains(where: { $0.id == trackId }) {
+        $0.selectedAudioTrackId = trackId
+      }
+      $0.pendingAudioSelections += 1
+    }
+
+    runOnMainThread { [weak self] in
+      guard let self else { return }
+      self.withPublishedTracks { $0.pendingAudioSelections -= 1 }
+      self.requestedAudioTrackId = trackId
       // Takes effect immediately when the asset's media selection groups are
       // already loaded, which is the normal case; otherwise it is replayed by
       // `applyAudioTrackSelectionIfReady()` from the `.readyToPlay` hook in
       // HybridVideoPlayer+Events.swift.
-      applyAudioTrackSelection()
-      emitAudioTrackChange(force: true)
+      self.applyAudioTrackSelection()
+      self.emitAudioTrackChange(force: true)
     }
   }
 
@@ -1309,6 +1404,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   private func emitAudioTrackChange(force: Bool = false) {
     let tracks = audioTracksSnapshot()
     let selectedTrackId = currentAudioTrackId() ?? requestedAudioTrackId
+    publishAudioTracks(tracks, selectedTrackId: selectedTrackId)
 
     let signature =
       tracks
