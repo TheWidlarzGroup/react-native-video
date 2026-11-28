@@ -7,8 +7,11 @@ export type LibraryError =
  *
  * `player/playback-failed`: the native player failed after loading started (e.g. HTTP 404,
  * network loss, decoder failure). `message` holds the platform code and description:
- * ExoPlayer `errorCodeName` on Android; `NSError` domain, code and description on iOS.
- * Delivered through `onError`.
+ * ExoPlayer `errorCodeName` on Android; `NSError` domain, code and description on iOS;
+ * the w3cmedia `MediaError` code on Vega OS. Delivered through `onError`.
+ *
+ * `player/not-initialized` on Vega OS: the w3cmedia player could not start. Sent to
+ * `onError`; `initialize()` and `preload()` reject with the same error.
  */
 export type PlayerError =
   | 'player/released'

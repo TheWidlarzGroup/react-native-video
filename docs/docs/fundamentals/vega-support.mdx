@@ -1,0 +1,129 @@
+---
+title: Vega OS Support — Play Video on Fire TV with React Native
+sidebar_position: 5
+sidebar_label: Vega OS Support
+description: Use React Native Video on Amazon Vega OS (Fire TV). Same useVideoPlayer and VideoView API as iOS and Android, on the platform's w3cmedia player, with remote and voice play/pause.
+keywords: [vega, vega os, fire tv, amazon, kepler, w3cmedia, react native video, tv]
+customProps:
+  badgeType: new
+---
+
+import PlatformsList from '@site/src/components/PlatformsList/PlatformsList';
+
+# Vega OS Support
+
+<PlatformsList types={['Vega OS']} />
+
+React Native Video runs on [Vega OS](https://developer.amazon.com/apps-and-games/vega), the React Native platform of newer Fire TV devices. It plays through the platform's own player, `VideoPlayer` from `@amazon-devices/react-native-w3cmedia`, with the same `VideoPlayer` and `VideoView` API you use on iOS and Android.
+
+## Setup
+
+1. Install the package in your Vega app. `@amazon-devices/react-native-w3cmedia` is already in apps made from the Vega templates.
+
+   ```sh
+   npm install react-native-video
+   ```
+
+2. Add the media entries to `manifest.toml`. Without the `[wants]` services the player stays black and silent:
+
+   ```toml
+   [[wants.service]]
+   id = "com.amazon.media.server"
+
+   [[wants.service]]
+   id = "com.amazon.mediametrics.service"
+
+   [[wants.service]]
+   id = "com.amazon.media.playersession.service"
+
+   [[wants.service]]
+   id = "com.amazon.mediabuffer.service"
+
+   [[wants.service]]
+   id = "com.amazon.mediatransform.service"
+
+   [[wants.service]]
+   id = "com.amazon.audio.stream"
+
+   [[wants.service]]
+   id = "com.amazon.audio.control"
+
+   [[wants.service]]
+   id = "com.amazon.audio.system"
+
+   [[wants.service]]
+   id = "com.amazon.inputd.service"
+
+   [[wants.service]]
+   id = "com.amazon.network.service"
+   ```
+
+3. For the remote's play/pause and "Alexa, pause", also add the media category to your component and declare the playback interface (replace `com.example.app.main` with your component id):
+
+   ```toml
+   [[components.interactive]]
+   id = "com.example.app.main"
+   categories = ["com.amazon.category.main", "com.amazon.category.kepler.media"]
+
+   [[extras]]
+   key = "interface.provider"
+   component-id = "com.example.app.main"
+
+   [extras.value.application]
+   [[extras.value.application.interface]]
+   interface_name = "com.amazon.kepler.media.IMediaPlaybackServer"
+   command_options = []
+   attribute_options = []
+   features = []
+   ```
+
+Nitro Modules are not used on Vega: the bundler picks the Vega files of this package (`*.kepler.ts`), which talk to w3cmedia directly.
+
+## Usage
+
+The API is identical to native:
+
+```tsx
+import { useVideoPlayer, VideoView } from 'react-native-video';
+
+function Player() {
+  const player = useVideoPlayer({ uri: 'https://example.com/video.mp4' }, (p) => {
+    p.showNotificationControls = true; // remote and voice play/pause
+    p.play();
+  });
+
+  return <VideoView player={player} style={{ flex: 1 }} resizeMode="contain" />;
+}
+```
+
+## Supported features
+
+Checked on a Fire TV Stick 4K Select (Vega OS, React Native 0.83).
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Play / Pause / Seek | ✅ | `onSeek` reports the time the seek went to |
+| Volume / Mute | ✅ | |
+| Remote play/pause | ✅ | `showNotificationControls = true`, with the manifest entries above. Voice ("Alexa, pause") goes through the same media controls; not checked with this backend yet |
+| Resize mode | ✅ | contain, cover, stretch (`none` behaves as contain) |
+| Preload / `initializeOnCreation: false` | ✅ | With `initializeOnCreation: false` the w3cmedia player is created at `initialize()`, `preload()` or `play()`. `initialize()` and `preload()` resolve when the w3cmedia player has started, not when the video has loaded: wait for `onLoad` |
+| Source change | ✅ | `replaceSourceAsync`, or a new source in `useVideoPlayer`; `replaceSourceAsync(null)` stops and unloads the video |
+| Events | ✅ | `onLoadStart`, `onLoad`, `onReadyToDisplay`, `onStatusChange`, `onBuffer`, `onPlaybackStateChange`, `onProgress`, `onSeek`, `onEnd`, `onVolumeChange`, `onPlaybackRateChange`, `onError` |
+| Background | ✅ | The player a `VideoView` shows pauses when the app goes to the background, unless `playInBackground = true` |
+| Loop | ✅ | |
+| Playback rate | ✅ | |
+| HLS / DASH | ❌ | Files the platform opens by URL (for example MP4) only; adaptive streams need w3cmedia's MSE mode |
+| Text tracks (subtitles) | ❌ | Not yet |
+| DRM | ❌ | Not yet |
+| Request headers | ✅ | Through w3cmedia's `setSrcWithCustomHeaders`. Older w3cmedia versions without it load the URL without headers and log a warning once |
+| Fullscreen / Picture-in-Picture | — | Not on a TV; the methods do nothing |
+| Ads | ❌ | Not in v7 core |
+
+## Known limitations
+
+- `onLoad` reports the size as `0x0`: w3cmedia in URL mode does not give the video size.
+- `mixAudioMode`, `ignoreSilentSwitchMode`, `playWhenInactive`, `setAudioSessionManagementDisabled`, `keepScreenAwake` and the source's `metadata` do nothing on Vega.
+- `showNotificationControls = false` does not take the remote back from a player that had it; the next player that sets it to `true` takes it over.
+- A superseded load does not reject with `player/cancelled` as on iOS and Android. `release()` never throws; after it, `initialize()`, `preload()` and `replaceSourceAsync()` reject with `player/released`, as on iOS and Android, while `play()`, `pause()` and `seekTo()` do nothing.
+- Sources must be URLs (strings): `require('./video.mp4')` is not supported on Vega.
+- A `useEvent(player, 'onLoadStart', …)` subscription can miss the first `onLoadStart` of a player that loads very fast; listen in the `useVideoPlayer` setup callback instead, as on other platforms.
