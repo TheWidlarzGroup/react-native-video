@@ -156,15 +156,18 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
       self?.onPlayerAccessLog(playerItem: playerItem)
     }
 
+    // `selectMediaOptionAutomatically` is applied asynchronously by AVFoundation, so
+    // `currentMediaSelection` can still be stale right after the call returns. This is
+    // the signal that a media selection group actually changed its option.
     // Also posted for a selection made in the native controls.
     playerItemMediaSelectionObserver = NotificationCenter.default.addObserver(
       forName: AVPlayerItem.mediaSelectionDidChangeNotification,
       object: playerItem,
-      queue: nil
+      queue: .main
     ) { [weak self] _ in
       self?.delegate?.onMediaSelectionChanged()
     }
-    
+
     setupBufferObservers(for: playerItem)
     
     playerItemStatusObserver = playerItem.observe(\.status, options: [.new]) { [weak self] _, change in
