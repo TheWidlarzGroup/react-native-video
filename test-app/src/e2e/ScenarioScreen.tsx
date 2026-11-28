@@ -283,6 +283,7 @@ const CONTROLS: Control[] = [
 function logPlayerEvents(player: VideoPlayer) {
   // Bound to this scenario: events of a player whose screen is gone are dropped.
   const handle = eventLog.forSession();
+  player.addEventListener('onLoadStart', () => handle({ type: 'onLoadStart' }));
   player.addEventListener('onLoad', ({ duration }) =>
     handle({ type: 'onLoad', duration })
   );
