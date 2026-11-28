@@ -1,10 +1,8 @@
 package com.brentvatne.exoplayer
 
-import android.net.Uri
 import androidx.media3.common.util.Util
 import androidx.media3.datasource.AssetDataSource
 import androidx.media3.datasource.DataSource
-import androidx.media3.datasource.DataSpec
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.HttpDataSource
 import androidx.media3.datasource.okhttp.OkHttpDataSource
@@ -30,10 +28,12 @@ object DataSourceUtil {
 
     @JvmStatic
     fun getDefaultDataSourceFactory(context: ReactContext, bandwidthMeter: DefaultBandwidthMeter?, requestHeaders: Map<String, String>?): DataSource.Factory {
-        if (defaultDataSourceFactory == null || !requestHeaders.isNullOrEmpty()) {
-            defaultDataSourceFactory = buildDataSourceFactory(context, bandwidthMeter, requestHeaders)
+        if (!requestHeaders.isNullOrEmpty()) {
+            return buildDataSourceFactory(context, bandwidthMeter, requestHeaders)
         }
-        return defaultDataSourceFactory as DataSource.Factory
+        return defaultDataSourceFactory ?: buildDataSourceFactory(context, bandwidthMeter, requestHeaders).also {
+            defaultDataSourceFactory = it
+        }
     }
 
     @JvmStatic
@@ -42,10 +42,12 @@ object DataSourceUtil {
         bandwidthMeter: DefaultBandwidthMeter?,
         requestHeaders: Map<String, String>?
     ): HttpDataSource.Factory {
-        if (defaultHttpDataSourceFactory == null || !requestHeaders.isNullOrEmpty()) {
-            defaultHttpDataSourceFactory = buildHttpDataSourceFactory(context, bandwidthMeter, requestHeaders)
+        if (!requestHeaders.isNullOrEmpty()) {
+            return buildHttpDataSourceFactory(context, bandwidthMeter, requestHeaders)
         }
-        return defaultHttpDataSourceFactory as HttpDataSource.Factory
+        return defaultHttpDataSourceFactory ?: buildHttpDataSourceFactory(context, bandwidthMeter, requestHeaders).also {
+            defaultHttpDataSourceFactory = it
+        }
     }
 
     private fun buildDataSourceFactory(
@@ -79,10 +81,5 @@ object DataSourceUtil {
     }
 
     @JvmStatic
-    fun buildAssetDataSourceFactory(context: ReactContext?, srcUri: Uri?): DataSource.Factory {
-        val dataSpec = DataSpec(srcUri!!)
-        val rawResourceDataSource = AssetDataSource(context!!)
-        rawResourceDataSource.open(dataSpec)
-        return DataSource.Factory { rawResourceDataSource }
-    }
+    fun buildAssetDataSourceFactory(context: ReactContext): DataSource.Factory = DataSource.Factory { AssetDataSource(context) }
 }
