@@ -67,6 +67,12 @@ does-not-exist_003.ts
 #EXT-X-ENDLIST
 EOF
 
+# The same HLS VOD behind a uri without an extension (source `type`, #5275). The server sends
+# it as a playlist because of its first bytes, as a CDN would; the player cannot tell from
+# the uri.
+mkdir -p media/hls-noext
+sed 's#^seg_#../hls/seg_#' media/hls/index.m3u8 > media/hls-noext/stream
+
 # Multi-rendition HLS VOD (video quality selection): three video renditions of the same clip
 # (640x360, 320x180, 160x90), 2 s segments, each with its own copy of the audio.
 ffmpeg -y \

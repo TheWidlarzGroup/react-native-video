@@ -9,10 +9,14 @@
 
 // Forward declaration of `HybridVideoPlayerSpec` to properly resolve imports.
 namespace margelo::nitro::video { class HybridVideoPlayerSpec; }
-// Forward declaration of `ResizeMode` to properly resolve imports.
-namespace margelo::nitro::video { enum class ResizeMode; }
+// Forward declaration of `VideoResizeMode` to properly resolve imports.
+namespace margelo::nitro::video { enum class VideoResizeMode; }
 // Forward declaration of `SurfaceType` to properly resolve imports.
 namespace margelo::nitro::video { enum class SurfaceType; }
+// Forward declaration of `NativeControlsStyles` to properly resolve imports.
+namespace margelo::nitro::video { struct NativeControlsStyles; }
+// Forward declaration of `FullscreenOrientation` to properly resolve imports.
+namespace margelo::nitro::video { enum class FullscreenOrientation; }
 // Forward declaration of `SubtitleStyle` to properly resolve imports.
 namespace margelo::nitro::video { struct SubtitleStyle; }
 // Forward declaration of `SubtitleEdgeType` to properly resolve imports.
@@ -24,10 +28,14 @@ namespace margelo::nitro::video { struct ListenerSubscription; }
 #include "HybridVideoPlayerSpec.hpp"
 #include <optional>
 #include "JHybridVideoPlayerSpec.hpp"
-#include "ResizeMode.hpp"
-#include "JResizeMode.hpp"
+#include "VideoResizeMode.hpp"
+#include "JVideoResizeMode.hpp"
 #include "SurfaceType.hpp"
 #include "JSurfaceType.hpp"
+#include "NativeControlsStyles.hpp"
+#include "JNativeControlsStyles.hpp"
+#include "FullscreenOrientation.hpp"
+#include "JFullscreenOrientation.hpp"
 #include "SubtitleStyle.hpp"
 #include "JSubtitleStyle.hpp"
 #include <string>
@@ -106,14 +114,14 @@ namespace margelo::nitro::video {
     static const auto method = _javaPart->javaClassStatic()->getMethod<void(jboolean /* autoEnterPictureInPicture */)>("setAutoEnterPictureInPicture");
     method(_javaPart, autoEnterPictureInPicture);
   }
-  ResizeMode JHybridVideoViewViewManagerSpec::getResizeMode() {
-    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JResizeMode>()>("getResizeMode");
+  VideoResizeMode JHybridVideoViewViewManagerSpec::getResizeMode() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JVideoResizeMode>()>("getResizeMode");
     auto __result = method(_javaPart);
     return __result->toCpp();
   }
-  void JHybridVideoViewViewManagerSpec::setResizeMode(ResizeMode resizeMode) {
-    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JResizeMode> /* resizeMode */)>("setResizeMode");
-    method(_javaPart, JResizeMode::fromCpp(resizeMode));
+  void JHybridVideoViewViewManagerSpec::setResizeMode(VideoResizeMode resizeMode) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JVideoResizeMode> /* resizeMode */)>("setResizeMode");
+    method(_javaPart, JVideoResizeMode::fromCpp(resizeMode));
   }
   bool JHybridVideoViewViewManagerSpec::getKeepScreenAwake() {
     static const auto method = _javaPart->javaClassStatic()->getMethod<jboolean()>("getKeepScreenAwake");
@@ -132,6 +140,33 @@ namespace margelo::nitro::video {
   void JHybridVideoViewViewManagerSpec::setSurfaceType(SurfaceType surfaceType) {
     static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JSurfaceType> /* surfaceType */)>("setSurfaceType");
     method(_javaPart, JSurfaceType::fromCpp(surfaceType));
+  }
+  NativeControlsStyles JHybridVideoViewViewManagerSpec::getControlsStyles() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JNativeControlsStyles>()>("getControlsStyles");
+    auto __result = method(_javaPart);
+    return __result->toCpp();
+  }
+  void JHybridVideoViewViewManagerSpec::setControlsStyles(const NativeControlsStyles& controlsStyles) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JNativeControlsStyles> /* controlsStyles */)>("setControlsStyles");
+    method(_javaPart, JNativeControlsStyles::fromCpp(controlsStyles));
+  }
+  FullscreenOrientation JHybridVideoViewViewManagerSpec::getFullscreenOrientation() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JFullscreenOrientation>()>("getFullscreenOrientation");
+    auto __result = method(_javaPart);
+    return __result->toCpp();
+  }
+  void JHybridVideoViewViewManagerSpec::setFullscreenOrientation(FullscreenOrientation fullscreenOrientation) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JFullscreenOrientation> /* fullscreenOrientation */)>("setFullscreenOrientation");
+    method(_javaPart, JFullscreenOrientation::fromCpp(fullscreenOrientation));
+  }
+  bool JHybridVideoViewViewManagerSpec::getFullscreenAutorotate() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jboolean()>("getFullscreenAutorotate");
+    auto __result = method(_javaPart);
+    return static_cast<bool>(__result);
+  }
+  void JHybridVideoViewViewManagerSpec::setFullscreenAutorotate(bool fullscreenAutorotate) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jboolean /* fullscreenAutorotate */)>("setFullscreenAutorotate");
+    method(_javaPart, fullscreenAutorotate);
   }
   SubtitleStyle JHybridVideoViewViewManagerSpec::getSubtitleStyle() {
     static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JSubtitleStyle>()>("getSubtitleStyle");

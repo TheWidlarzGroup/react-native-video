@@ -1,5 +1,5 @@
 //
-//  ResizeMode.swift
+//  VideoResizeMode.swift
 //  ReactNativeVideo
 //
 //  Created for resizeMode feature
@@ -8,7 +8,7 @@
 import Foundation
 import AVFoundation
 
-public extension ResizeMode {
+public extension VideoResizeMode {
   func toVideoGravity() -> AVLayerVideoGravity {
     switch self {
       case .contain:

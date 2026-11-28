@@ -1,10 +1,12 @@
 import type { HybridObject } from 'react-native-nitro-modules';
-import type { ResizeMode } from '../../core/types/ResizeMode';
+import type { NativeControlsStyles } from '../../core/types/ControlsStyles';
+import type { FullscreenOrientation } from '../../core/types/FullscreenOrientation';
+import type { VideoResizeMode } from '../../core/types/ResizeMode';
 import type { SubtitleStyle } from '../../core/types/SubtitleStyle';
 import type { VideoPlayer } from './VideoPlayer.nitro';
 import type { ListenerSubscription } from './VideoPlayerEventEmitter.nitro';
 
-export type SurfaceType = 'surface' | 'texture';
+export type SurfaceType = 'surface' | 'texture' | 'secureSurface';
 
 // @internal
 export interface VideoViewViewManager extends HybridObject<{
@@ -15,7 +17,7 @@ export interface VideoViewViewManager extends HybridObject<{
   controls: boolean;
   pictureInPicture: boolean;
   autoEnterPictureInPicture: boolean;
-  resizeMode: ResizeMode;
+  resizeMode: VideoResizeMode;
   enterFullscreen(): void;
   exitFullscreen(): void;
   enterPictureInPicture(): void;
@@ -23,6 +25,11 @@ export interface VideoViewViewManager extends HybridObject<{
   canEnterPictureInPicture(): boolean;
   keepScreenAwake: boolean;
   surfaceType: SurfaceType;
+  controlsStyles: NativeControlsStyles;
+
+  fullscreenOrientation: FullscreenOrientation;
+  fullscreenAutorotate: boolean;
+
   subtitleStyle: SubtitleStyle;
 
   // Event listeners

@@ -53,7 +53,7 @@ abstract class HybridVideoViewViewManagerSpec: HybridObject() {
   @get:Keep
   @set:DoNotStrip
   @set:Keep
-  abstract var resizeMode: ResizeMode
+  abstract var resizeMode: VideoResizeMode
   
   @get:DoNotStrip
   @get:Keep
@@ -66,6 +66,24 @@ abstract class HybridVideoViewViewManagerSpec: HybridObject() {
   @set:DoNotStrip
   @set:Keep
   abstract var surfaceType: SurfaceType
+  
+  @get:DoNotStrip
+  @get:Keep
+  @set:DoNotStrip
+  @set:Keep
+  abstract var controlsStyles: NativeControlsStyles
+  
+  @get:DoNotStrip
+  @get:Keep
+  @set:DoNotStrip
+  @set:Keep
+  abstract var fullscreenOrientation: FullscreenOrientation
+  
+  @get:DoNotStrip
+  @get:Keep
+  @set:DoNotStrip
+  @set:Keep
+  abstract var fullscreenAutorotate: Boolean
   
   @get:DoNotStrip
   @get:Keep

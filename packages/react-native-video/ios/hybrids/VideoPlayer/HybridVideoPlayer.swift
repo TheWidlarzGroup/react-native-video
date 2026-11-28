@@ -39,53 +39,56 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     let context: LoadContext
   }
 
+  // The helpers below run on the JS thread. They only touch state that `sourceLoader`
+  // guards with its lock, so they must not wait for the main thread: it is busy installing
+  // the previous item exactly when JS creates or re-sources a player (#4820). Everything
+  // that needs the main thread (`commitPlayerItem`, `releaseOnMainThread`) is dispatched.
   private func beginLoad() throws -> LoadContext {
-    try runOnMainThreadSync {
-      var source: (any HybridVideoPlayerSourceSpec)?
-      guard let token = try sourceLoader.begin(onBegin: {
-        source = storedSource
-      }), let source else { throw CancellationError() }
-      return LoadContext(source: source, token: token)
-    }
+    var source: (any HybridVideoPlayerSourceSpec)?
+    guard let token = try sourceLoader.begin(onBegin: {
+      source = storedSource
+    }), let source else { throw CancellationError() }
+    return LoadContext(source: source, token: token)
   }
 
   private func beginLoadIfPlayerItemMissing() throws -> LoadContext? {
-    try runOnMainThreadSync {
-      var source: (any HybridVideoPlayerSourceSpec)?
-      guard let token = try sourceLoader.begin(
-        if: { storedPlayerItem == nil },
-        onBegin: { source = storedSource }
-      ) else { return nil }
-      guard let source else { throw CancellationError() }
-      return LoadContext(source: source, token: token)
-    }
+    var source: (any HybridVideoPlayerSourceSpec)?
+    guard let token = try sourceLoader.begin(
+      if: { storedPlayerItem == nil },
+      onBegin: { source = storedSource }
+    ) else { return nil }
+    guard let source else { throw CancellationError() }
+    return LoadContext(source: source, token: token)
   }
 
   private func beginPreloadIfNeeded() throws -> LoadContext? {
-    try runOnMainThreadSync {
-      var source: (any HybridVideoPlayerSourceSpec)?
-      guard let token = try sourceLoader.begin(
-        if: { storedStatus == .idle },
-        onBegin: { source = storedSource }
-      ) else { return nil }
-      guard let source else { throw CancellationError() }
-      return LoadContext(source: source, token: token)
-    }
+    var source: (any HybridVideoPlayerSourceSpec)?
+    guard let token = try sourceLoader.begin(
+      if: { storedStatus == .idle },
+      onBegin: { source = storedSource }
+    ) else { return nil }
+    guard let source else { throw CancellationError() }
+    return LoadContext(source: source, token: token)
   }
 
   private func replaceSourceAndBeginLoad(
     with newSource: any HybridVideoPlayerSourceSpec
   ) throws -> LoadContext {
-    try runOnMainThreadSync {
-      var previousSource: (any HybridVideoPlayerSourceSpec)?
-      guard let token = try sourceLoader.begin(onBegin: {
-        previousSource = storedSource
-        storedSource = newSource
-      }), let previousSource else { throw CancellationError() }
-      let context = LoadContext(source: newSource, token: token)
-      releaseAssetIfNotUsedByCurrentLoad(for: previousSource)
-      return context
+    var previousSource: (any HybridVideoPlayerSourceSpec)?
+    guard let token = try sourceLoader.begin(onBegin: {
+      previousSource = storedSource
+      storedSource = newSource
+    }), let previousSource else { throw CancellationError() }
+    let context = LoadContext(source: newSource, token: token)
+    releaseAssetIfNotUsedByCurrentLoad(for: previousSource)
+    // The next onAudioTrackChange describes the new source. Without this, a source with the
+    // same audio tracks (the next episode, say) has the same signature and gets no event.
+    // The signature belongs to the main thread (emitAudioTrackChange); this runs there before
+    // the new item is committed, which is queued later.
+    DispatchQueue.main.async { [weak self] in
+      self?.lastEmittedAudioTrackSignature = nil
     }
+    return context
   }
 
   private func ensureCurrentLoad(_ context: LoadContext) throws {
@@ -105,9 +108,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   }
 
   private func close() -> (any HybridVideoPlayerSourceSpec)? {
-    runOnMainThreadSync {
-      sourceLoader.close(update: { storedSource })
-    }
+    sourceLoader.close(update: { storedSource })
   }
 
   init(source: (any HybridVideoPlayerSourceSpec)) throws {
@@ -151,12 +152,10 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   var source: any HybridVideoPlayerSourceSpec {
     get { sourceLoader.withState { storedSource } }
     set {
-      let releasedSource = runOnMainThreadSync {
-        sourceLoader.cancel {
-          let releasedSource = storedSource
-          storedSource = newValue
-          return releasedSource
-        }
+      let releasedSource = sourceLoader.cancel {
+        let releasedSource = storedSource
+        storedSource = newValue
+        return releasedSource
       }
       withExtendedLifetime(releasedSource) {}
     }
@@ -233,20 +232,30 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
 
   var currentTime: Double {
     set {
-      _eventEmitter?.onSeek(newValue)
+      // Time is counted from `cropStart` when the source is cropped, and a seek past
+      // `cropEnd` stops at `cropEnd`, as on Android.
+      var target = max(0, newValue)
+      if let item = player.currentItem, item.forwardPlaybackEndTime.isNumeric {
+        let croppedDuration = item.croppedDuration
+        if croppedDuration.isFinite {
+          target = min(target, croppedDuration)
+        }
+      }
+      _eventEmitter?.onSeek(target)
+      let cropStart = player.currentItem?.cropStartSeconds ?? 0
       player.seek(
-        to: CMTime(seconds: newValue, preferredTimescale: 1000),
+        to: CMTime(seconds: target + cropStart, preferredTimescale: 1000),
         toleranceBefore: .zero,
         toleranceAfter: .zero
       )
     }
     get {
-      player.currentTime().seconds
+      player.currentItem?.croppedCurrentTime ?? player.currentTime().seconds
     }
   }
 
   var duration: Double {
-    Double(player.currentItem?.duration.seconds ?? Double.nan)
+    player.currentItem?.croppedDuration ?? Double.nan
   }
 
   var rate: Double {
@@ -289,7 +298,33 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
 
   var playWhenInactive: Bool = false
 
+  // iOS default: 500 ms, as before this option existed. Android uses 250 ms.
+  var progressUpdateInterval: Double = VideoPlayerObserver.defaultProgressUpdateInterval {
+    didSet {
+      guard progressUpdateInterval.isFinite, progressUpdateInterval > 0 else {
+        progressUpdateInterval = oldValue
+        return
+      }
+      playerObserver?.progressUpdateInterval = progressUpdateInterval
+    }
+  }
+
   var disableAudioSessionManagement: Bool = false {
+    didSet {
+      VideoManager.shared.requestAudioSessionUpdate()
+    }
+  }
+
+  var allowsExternalPlayback: Bool {
+    get {
+      return player.allowsExternalPlayback
+    }
+    set {
+      player.allowsExternalPlayback = newValue
+    }
+  }
+
+  var audioOutput: AudioOutput = .speaker {
     didSet {
       VideoManager.shared.requestAudioSessionUpdate()
     }
@@ -317,11 +352,15 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   /// The id the user pinned through `selectVideoTrack`, or nil for automatic.
   /// Deliberately outlives the `AVPlayerItem` it was applied to - it is a
   /// request about the source, and every source replacement builds a new item.
-  private var requestedVideoTrackId: String?
+  private var requestedVideoTrackId: String? {
+    didSet { publishVideoTracks() }
+  }
 
   /// The current source's rendition ladder, best first. Empty for non-HLS
   /// sources, and until the master playlist has been fetched.
-  private var cachedVideoRenditions: [VideoRendition] = []
+  private var cachedVideoRenditions: [VideoRendition] = [] {
+    didSet { publishVideoTracks() }
+  }
 
   /// Which URL `cachedVideoRenditions` describes. Fetching the master playlist
   /// is a real extra HTTP request (AVPlayer fetches it too but exposes none of
@@ -359,7 +398,60 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   /// often than the track set actually changes.
   private var lastEmittedAudioTrackSignature: String?
 
+  // MARK: - Published track state
+  //
+  // The track state above lives on the main thread, and JS reads it through getters. A
+  // getter that hops to the main thread blocks the JS thread for as long as the main thread
+  // is busy (#4820). So the main thread publishes a copy here whenever the state changes,
+  // and the getters read the copy.
+
+  private struct PublishedTracks {
+    var videoRenditions: [VideoRendition] = []
+    var selectedVideoTrackId: String?
+    /// `selectVideoTrack` calls made from JS that the main thread has not applied yet.
+    /// While there are any, `selectedVideoTrackId` is what JS asked for last.
+    var pendingVideoSelections = 0
+
+    var audioTracks: [AudioTrack] = []
+    var selectedAudioTrackId: String?
+    /// Same as `pendingVideoSelections`, for `selectAudioTrack`.
+    var pendingAudioSelections = 0
+  }
+
+  private let publishedTracksLock = NSLock()
+  private var publishedTracks = PublishedTracks()
+
+  private func withPublishedTracks<T>(_ body: (inout PublishedTracks) -> T) -> T {
+    publishedTracksLock.lock()
+    defer { publishedTracksLock.unlock() }
+    return body(&publishedTracks)
+  }
+
+  /// Main thread only.
+  private func publishVideoTracks() {
+    withPublishedTracks {
+      $0.videoRenditions = cachedVideoRenditions
+      if $0.pendingVideoSelections == 0 {
+        $0.selectedVideoTrackId = requestedVideoTrackId
+      }
+    }
+  }
+
+  /// Main thread only.
+  private func publishAudioTracks(_ tracks: [AudioTrack], selectedTrackId: String?) {
+    withPublishedTracks {
+      $0.audioTracks = tracks
+      if $0.pendingAudioSelections == 0 {
+        $0.selectedAudioTrackId = selectedTrackId
+      }
+    }
+  }
+
   var isCurrentlyBuffering: Bool = false
+
+  /// The value the last `onBuffer` event carried, so the event is sent when buffering starts
+  /// or stops and not every time the playback state is re-evaluated.
+  var lastReportedBuffering: Bool?
 
   // Set while redrawPausedTextCue() moves the paused position, so that step is not reported as buffering
   var isRedrawingTextCue = false
@@ -453,6 +545,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
 
     requestedAudioTrackId = nil
     lastEmittedAudioTrackSignature = nil
+    publishAudioTracks([], selectedTrackId: nil)
 
     playerObserver?.invalidatePlayerItemObservers()
     playerObserver?.invalidatePlayerObservers()
@@ -472,14 +565,26 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
         self.storedPlayerItem = loadedPlayerItem.item
       }
 
-      if let bufferConfig = loadedPlayerItem.context.source.config.bufferConfig {
+      let bufferConfig = loadedPlayerItem.context.source.config.bufferConfig
+      if let bufferConfig {
         loadedPlayerItem.item.setBufferConfig(config: bufferConfig)
       }
-
       // Off-main manifest fetch for the quality ladder.
       self.beginVideoRenditionLoad(for: loadedPlayerItem.context.source)
+      // The audio tracks of the previous source are gone; the new ones are published once
+      // the item is ready (`applyAudioTrackSelectionIfReady`).
+      self.publishAudioTracks([], selectedTrackId: self.requestedAudioTrackId)
 
       self.player.replaceCurrentItem(with: loadedPlayerItem.item)
+
+      // A player property, not an item one: set for every source so a source without the
+      // option gets the AVPlayer default back. Written once the new item is in place and
+      // only when the value changes, because the setter makes AVPlayer publish
+      // `timeControlStatus` again.
+      let waitsToMinimizeStalling = bufferConfig?.automaticallyWaitsToMinimizeStalling ?? true
+      if self.player.automaticallyWaitsToMinimizeStalling != waitsToMinimizeStalling {
+        self.player.automaticallyWaitsToMinimizeStalling = waitsToMinimizeStalling
+      }
     }
   }
 
@@ -550,13 +655,11 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       throw PlayerError.notInitialized.error()
     }
 
-    let currentItemTime = currentItem.currentTime()
-
     // Duration is NaN for live streams
     let fixedDurration = duration.isNaN ? Double.infinity : duration
 
     // Clap by <0, duration>
-    let newTime = max(0, min(currentItemTime.seconds + time, fixedDurration))
+    let newTime = max(0, min(currentItem.croppedCurrentTime + time, fixedDurration))
 
     currentTime = newTime
   }
@@ -680,6 +783,20 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       playerItem = AVPlayerItem(asset: asset)
     }
     try ensureCurrentLoad(context)
+
+    playerItem.setCrop(start: source.config.cropStart, end: source.config.cropEnd)
+
+    // Seeking an item that has no player yet sets where its playback starts.
+    // `startPosition` counts from `cropStart`.
+    let startSeconds = playerItem.cropStartSeconds + max(0, source.config.startPosition ?? 0) / 1000
+    if startSeconds > 0 {
+      playerItem.seek(
+        to: CMTime(seconds: startSeconds, preferredTimescale: 1000),
+        toleranceBefore: .zero,
+        toleranceAfter: .zero,
+        completionHandler: nil
+      )
+    }
 
     if let metadata = source.config.metadata {
       let title = metadata.title
@@ -952,21 +1069,32 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   // (`selectedTrackId`) from what is actually *playing* (`activeTrackId`).
 
   func getAvailableVideoTracks() throws -> [VideoTrack] {
-    runOnMainThreadSync { videoTracksSnapshot() }
+    let (renditions, selectedTrackId) = withPublishedTracks {
+      ($0.videoRenditions, $0.selectedVideoTrackId)
+    }
+    return renditions.map { $0.videoTrack(selected: $0.id == selectedTrackId) }
   }
 
   var selectedVideoTrackId: String? {
-    runOnMainThreadSync { requestedVideoTrackId }
+    withPublishedTracks { $0.selectedVideoTrackId }
   }
 
   func selectVideoTrack(trackId: String?) throws {
-    runOnMainThreadSync {
-      requestedVideoTrackId = trackId
+    // Published first, so a getter called right after this returns what was just selected.
+    withPublishedTracks {
+      $0.selectedVideoTrackId = trackId
+      $0.pendingVideoSelections += 1
+    }
+
+    runOnMainThread { [weak self] in
+      guard let self else { return }
+      self.withPublishedTracks { $0.pendingVideoSelections -= 1 }
+      self.requestedVideoTrackId = trackId
       // Applied right now if the item is already ready; otherwise the
       // `.readyToPlay` hook in HybridVideoPlayer+Events.swift picks it up, since
       // AVFoundation ignores these properties before then.
-      applyVideoQualityCaps()
-      emitVideoTrackChange()
+      self.applyVideoQualityCaps()
+      self.emitVideoTrackChange()
     }
   }
 
@@ -1176,7 +1304,22 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   // this is a real selection, not a preference the player may ignore.
 
   func getAvailableAudioTracks() throws -> [AudioTrack] {
-    runOnMainThreadSync { audioTracksSnapshot() }
+    let (tracks, selectedTrackId, pending) = withPublishedTracks {
+      ($0.audioTracks, $0.selectedAudioTrackId, $0.pendingAudioSelections)
+    }
+    // A selection JS has just made and the main thread has not applied yet is shown as
+    // selected, like `selectedAudioTrackId` reports it.
+    guard pending > 0, let selectedTrackId, tracks.contains(where: { $0.id == selectedTrackId })
+    else { return tracks }
+    return tracks.map {
+      AudioTrack(
+        id: $0.id,
+        label: $0.label,
+        language: $0.language,
+        selected: $0.id == selectedTrackId,
+        channels: $0.channels
+      )
+    }
   }
 
   var selectedAudioTrackId: String? {
@@ -1185,18 +1328,30 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     // report, and under automatic selection AVFoundation still picks a concrete
     // option (system language / accessibility settings) that callers want to
     // see reflected in their menu.
-    runOnMainThreadSync { currentAudioTrackId() ?? requestedAudioTrackId }
+    withPublishedTracks { $0.selectedAudioTrackId }
   }
 
   func selectAudioTrack(trackId: String?) throws {
-    runOnMainThreadSync {
-      requestedAudioTrackId = trackId
+    withPublishedTracks {
+      // Published first when it names a track of this source (or the list is not known
+      // yet), so a getter called right after this returns it. Automatic (nil) and an id
+      // of another source are resolved by the main thread below.
+      if let trackId, $0.audioTracks.isEmpty || $0.audioTracks.contains(where: { $0.id == trackId }) {
+        $0.selectedAudioTrackId = trackId
+      }
+      $0.pendingAudioSelections += 1
+    }
+
+    runOnMainThread { [weak self] in
+      guard let self else { return }
+      self.withPublishedTracks { $0.pendingAudioSelections -= 1 }
+      self.requestedAudioTrackId = trackId
       // Takes effect immediately when the asset's media selection groups are
       // already loaded, which is the normal case; otherwise it is replayed by
       // `applyAudioTrackSelectionIfReady()` from the `.readyToPlay` hook in
       // HybridVideoPlayer+Events.swift.
-      applyAudioTrackSelection()
-      emitAudioTrackChange(force: true)
+      self.applyAudioTrackSelection()
+      self.emitAudioTrackChange(force: true)
     }
   }
 
@@ -1335,6 +1490,7 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
   private func emitAudioTrackChange(force: Bool = false) {
     let tracks = audioTracksSnapshot()
     let selectedTrackId = currentAudioTrackId() ?? requestedAudioTrackId
+    publishAudioTracks(tracks, selectedTrackId: selectedTrackId)
 
     let signature =
       tracks

@@ -16,11 +16,14 @@ appId: ${APP_ID}
       id: "e2e-host-ready"
     timeout: 30000
     optional: true
+# The fixture server's port, as in ../shared/open-scenario.yaml.
+- evalScript: "${output.fixturePort = typeof FIXTURE_PORT === 'undefined' ? '8090' : FIXTURE_PORT}"
 # Same transport as the real flows. SOFT: a failed open must not skip the tap below.
 - runScript:
     file: ../shared/open-link-ios.js
     env:
-      LINK: rnvtest://scenario/mp4
+      LINK: rnvtest://scenario/mp4?fixturePort=${output.fixturePort}
+      FIXTURE_PORT: ${output.fixturePort}
       SOFT: 'true'
 - extendedWaitUntil:
     visible: "Open"

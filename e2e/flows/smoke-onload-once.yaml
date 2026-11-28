@@ -1,0 +1,53 @@
+# onLoad is emitted once per source (#5268). Before the fix, Android emitted it on every
+# transition to the ready state: after each seek and each rebuffer. iOS already emitted it
+# once. Two seeks after the clip has ended (forward, then back) must not produce a second
+# onLoad; evt-onLoad-repeated is set by a second onLoad for the same source (eventLog.ts).
+#
+# The seeks follow smoke-seek.yaml: first tap on an idle (ended) player through press.yaml,
+# the second as a bare tap, deferred on iOS to the next end.
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 20000
+- runFlow: ../shared/wait-for-end.yaml
+- runFlow:
+    file: ../shared/press.yaml
+    env:
+      BUTTON: btn-seek-5
+      NTH: 1
+- runFlow:
+    file: ../shared/press.yaml
+    env:
+      BUTTON: btn-play
+      NTH: 1
+- extendedWaitUntil:
+    visible:
+      id: "evt-seek-fwd-landed"
+    timeout: 5000
+- tapOn:
+    id: "btn-seek-1"
+- tapOn:
+    id: "btn-play"
+- extendedWaitUntil:
+    visible:
+      id: "evt-seek-back-landed"
+    timeout: 15000            # iOS: the seek-1 tap is deferred until the clip ends (~3 s from 5 s)
+# A pause, not an expectation: the repeated onLoad on Android came with the ready state
+# that follows the seek's buffering, so give it time to show up before asserting it did not.
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad-repeated"
+    timeout: 3000
+    optional: true
+- assertNotVisible:
+    id: "evt-onLoad-repeated"
+- assertNotVisible:
+    id: "evt-onError"

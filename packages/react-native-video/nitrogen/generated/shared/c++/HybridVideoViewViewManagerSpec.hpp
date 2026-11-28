@@ -15,10 +15,14 @@
 
 // Forward declaration of `HybridVideoPlayerSpec` to properly resolve imports.
 namespace margelo::nitro::video { class HybridVideoPlayerSpec; }
-// Forward declaration of `ResizeMode` to properly resolve imports.
-namespace margelo::nitro::video { enum class ResizeMode; }
+// Forward declaration of `VideoResizeMode` to properly resolve imports.
+namespace margelo::nitro::video { enum class VideoResizeMode; }
 // Forward declaration of `SurfaceType` to properly resolve imports.
 namespace margelo::nitro::video { enum class SurfaceType; }
+// Forward declaration of `NativeControlsStyles` to properly resolve imports.
+namespace margelo::nitro::video { struct NativeControlsStyles; }
+// Forward declaration of `FullscreenOrientation` to properly resolve imports.
+namespace margelo::nitro::video { enum class FullscreenOrientation; }
 // Forward declaration of `SubtitleStyle` to properly resolve imports.
 namespace margelo::nitro::video { struct SubtitleStyle; }
 // Forward declaration of `ListenerSubscription` to properly resolve imports.
@@ -27,8 +31,10 @@ namespace margelo::nitro::video { struct ListenerSubscription; }
 #include <memory>
 #include "HybridVideoPlayerSpec.hpp"
 #include <optional>
-#include "ResizeMode.hpp"
+#include "VideoResizeMode.hpp"
 #include "SurfaceType.hpp"
+#include "NativeControlsStyles.hpp"
+#include "FullscreenOrientation.hpp"
 #include "SubtitleStyle.hpp"
 #include "ListenerSubscription.hpp"
 #include <functional>
@@ -68,12 +74,18 @@ namespace margelo::nitro::video {
       virtual void setPictureInPicture(bool pictureInPicture) = 0;
       virtual bool getAutoEnterPictureInPicture() = 0;
       virtual void setAutoEnterPictureInPicture(bool autoEnterPictureInPicture) = 0;
-      virtual ResizeMode getResizeMode() = 0;
-      virtual void setResizeMode(ResizeMode resizeMode) = 0;
+      virtual VideoResizeMode getResizeMode() = 0;
+      virtual void setResizeMode(VideoResizeMode resizeMode) = 0;
       virtual bool getKeepScreenAwake() = 0;
       virtual void setKeepScreenAwake(bool keepScreenAwake) = 0;
       virtual SurfaceType getSurfaceType() = 0;
       virtual void setSurfaceType(SurfaceType surfaceType) = 0;
+      virtual NativeControlsStyles getControlsStyles() = 0;
+      virtual void setControlsStyles(const NativeControlsStyles& controlsStyles) = 0;
+      virtual FullscreenOrientation getFullscreenOrientation() = 0;
+      virtual void setFullscreenOrientation(FullscreenOrientation fullscreenOrientation) = 0;
+      virtual bool getFullscreenAutorotate() = 0;
+      virtual void setFullscreenAutorotate(bool fullscreenAutorotate) = 0;
       virtual SubtitleStyle getSubtitleStyle() = 0;
       virtual void setSubtitleStyle(const SubtitleStyle& subtitleStyle) = 0;
 

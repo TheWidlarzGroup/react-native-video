@@ -74,8 +74,14 @@ namespace margelo::nitro::video {
     void setPlayInBackground(bool playInBackground) override;
     bool getPlayWhenInactive() override;
     void setPlayWhenInactive(bool playWhenInactive) override;
+    double getProgressUpdateInterval() override;
+    void setProgressUpdateInterval(double progressUpdateInterval) override;
     bool getDisableAudioSessionManagement() override;
     void setDisableAudioSessionManagement(bool disableAudioSessionManagement) override;
+    bool getAllowsExternalPlayback() override;
+    void setAllowsExternalPlayback(bool allowsExternalPlayback) override;
+    AudioOutput getAudioOutput() override;
+    void setAudioOutput(AudioOutput audioOutput) override;
     bool getIsPlaying() override;
     std::optional<TextTrack> getSelectedTrack() override;
     std::optional<std::string> getSelectedVideoTrackId() override;
