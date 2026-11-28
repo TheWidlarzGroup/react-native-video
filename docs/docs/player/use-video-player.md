@@ -109,7 +109,8 @@ Set `shouldCache` on the `VideoConfig` to keep the downloaded file on disk and p
 
 ```ts
 const player = useVideoPlayer({
-  source: { uri: 'https://example.com/video.mp4', shouldCache: true },
+  uri: 'https://example.com/video.mp4',
+  shouldCache: true,
 });
 ```
 
