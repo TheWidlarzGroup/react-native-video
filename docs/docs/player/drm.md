@@ -26,8 +26,10 @@ React Native Video uses a plugin architecture. DRM support is provided by the `@
 1) Install dependencies in your app:
 
 ```sh
-npm install @react-native-video/drm
+npm install @react-native-video/drm@beta
 ```
+
+Install it with the `@beta` tag, the same as `react-native-video@beta`. The `latest` tag of the plugin still points to an old beta (7.0.0-beta.7), which does not build with the Nitro Modules version that `react-native-video` v7 needs.
 
 2) Enable the plugin at app startup (before creating any players):
 
