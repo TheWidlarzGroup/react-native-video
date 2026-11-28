@@ -11,6 +11,7 @@ import { View } from 'react-native';
 import type { VideoPlayer } from '../VideoPlayer.web';
 import type { VideoViewEvents } from '../types/Events';
 import type { ListenerSubscription } from '../types/EventEmitter';
+import { hasVideoViewOverlay, VideoViewOverlay } from './VideoViewOverlay';
 import type { VideoViewProps, VideoViewRef } from './VideoViewProps';
 import {
   createPlayer,
@@ -81,6 +82,10 @@ function VideoElement({
   return <div ref={mountRef} style={{ width: '100%', height: '100%' }} />;
 }
 
+// HTMLMediaElement.HAVE_CURRENT_DATA: the current frame is available.
+const isReadyToDisplay = (player: VideoViewProps['player']) =>
+  (player as unknown as VideoPlayer).__getMedia().readyState >= 2;
+
 const VideoView = forwardRef<VideoViewRef, VideoViewProps>(
   (
     {
@@ -96,6 +101,11 @@ const VideoView = forwardRef<VideoViewRef, VideoViewProps>(
       pictureInPicture: _pip = false,
       autoEnterPictureInPicture: _autoPip = false,
       keepScreenAwake: _keepAwake = true,
+      poster,
+      posterResizeMode,
+      renderLoader,
+      shutterColor,
+      hideShutterView,
       controlsStyles: _controlsStyles,
       ...props
     },
@@ -141,6 +151,13 @@ const VideoView = forwardRef<VideoViewRef, VideoViewProps>(
     );
 
     const videoContent = <VideoElement player={player} objectFit={objectFit} />;
+    const overlayProps = {
+      poster,
+      posterResizeMode,
+      renderLoader,
+      shutterColor,
+      hideShutterView,
+    };
 
     return (
       <View {...props}>
@@ -161,6 +178,13 @@ const VideoView = forwardRef<VideoViewRef, VideoViewProps>(
             {controls ? <VideoSkin>{videoContent}</VideoSkin> : videoContent}
           </Player.Container>
         </Player.Provider>
+        {hasVideoViewOverlay(overlayProps) && (
+          <VideoViewOverlay
+            player={nPlayer}
+            isReadyToDisplay={isReadyToDisplay}
+            {...overlayProps}
+          />
+        )}
       </View>
     );
   }

@@ -7,6 +7,7 @@
 // Import it BEFORE importing anything from ../src that touches native, and load the
 // library module under test with a dynamic import so the mocks are in place first.
 import { mock } from 'bun:test';
+import { createElement } from 'react';
 
 export const platform = { OS: 'ios' as string };
 
@@ -112,10 +113,23 @@ mock.module('react-native', () => ({
     select: (spec: Record<string, unknown>) =>
       platform.OS in spec ? spec[platform.OS] : spec.default,
   },
-  Image: { resolveAssetSource: () => assets.resolved },
-  // Host components and the lookup NativeVideoView does, for tests that render views.
+  // Renderable host components for tests that render library views.
+  Image: Object.assign(
+    (props: Record<string, unknown>) => createElement('Image', props),
+    { resolveAssetSource: () => assets.resolved }
+  ),
   View: 'View',
+  // The lookup NativeVideoView does before it renders the native component.
   UIManager: { hasViewManagerConfig: () => true },
+  StyleSheet: {
+    absoluteFill: {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 0,
+    },
+  },
 }));
 
 // The Fabric spec file calls this at import time; render a plain host element instead.

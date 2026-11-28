@@ -279,6 +279,28 @@ const CONTROLS: Control[] = [
   },
 ];
 
+/**
+ * The renderLoader of mp4-loader. VideoView mounts it while the source loads and unmounts
+ * it once the video is ready to display; both moments go to the event log, so the flow does
+ * not depend on catching the loader on screen.
+ */
+function LoaderProbe() {
+  useEffect(() => {
+    eventLog.handle({ type: 'loader', shown: true, at: Date.now() });
+    return () =>
+      eventLog.handle({ type: 'loader', shown: false, at: Date.now() });
+  }, []);
+  // The label makes the loader an element of the view hierarchy (an empty view may be
+  // left out of it), so the flow's last check can see that nothing of it is left.
+  return (
+    <View testID="video-loader" style={styles.loader}>
+      <Text testID="video-loader-label" style={styles.loaderLabel}>
+        loading
+      </Text>
+    </View>
+  );
+}
+
 // Marker derivation lives in eventLog.handle(); this only maps payloads.
 function logPlayerEvents(player: VideoPlayer) {
   // Bound to this scenario: events of a player whose screen is gone are dropped.
@@ -360,6 +382,7 @@ export function ScenarioScreen({ scenario }: { scenario: ScenarioName }) {
         // Android only (#5272): the smoke-controls-* flows check the native controls.
         controlsStyles={CONTROLS_STYLES[scenario]}
         onFullscreenChange={onFullscreenChange}
+        renderLoader={scenario === 'mp4-loader' ? <LoaderProbe /> : undefined}
       />
       <View style={styles.controls}>
         {CONTROLS.map(({ id, title, press }) => (
@@ -384,4 +407,11 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
   video: { width: '100%', aspectRatio: 16 / 9 },
   controls: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  loader: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#202020',
+  },
+  loaderLabel: { color: '#ffffff' },
 });
