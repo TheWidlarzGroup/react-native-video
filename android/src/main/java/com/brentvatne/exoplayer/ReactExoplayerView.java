@@ -1617,24 +1617,28 @@ public class ReactExoplayerView extends FrameLayout implements
             if (source.getContentStartTime() != -1) {
                 ExecutorService es = Executors.newSingleThreadExecutor();
                 es.execute(() -> {
-                    // To prevent ANRs caused by getVideoTrackInfo we run this on a different thread and notify the player only when we're done
-                    final ArrayList<VideoTrack> manifestTracks = getVideoTrackInfoFromManifest();
-                    // The rest reads the player and updates views, so it goes back to the main thread.
-                    mainHandler.post(() -> {
-                        if (player == null) return;
-                        ArrayList<VideoTrack> videoTracks = manifestTracks;
-                        if (videoTracks != null) {
-                            isUsingContentResolution = true;
-                        } else {
-                            // No representation matches contentStartTime (a VOD manifest, for example):
-                            // report the player's own tracks, as without contentStartTime.
-                            videoTracks = getVideoTrackInfo();
-                        }
-                        eventEmitter.onVideoLoad.invoke(duration, currentPosition, width, height,
-                                audioTracks, textTracks, videoTracks, trackId);
+                    try {
+                        // To prevent ANRs caused by getVideoTrackInfo we run this on a different thread and notify the player only when we're done
+                        final ArrayList<VideoTrack> manifestTracks = getVideoTrackInfoFromManifest();
+                        // The rest reads the player and updates views, so it goes back to the main thread.
+                        mainHandler.post(() -> {
+                            if (player == null) return;
+                            ArrayList<VideoTrack> videoTracks = manifestTracks;
+                            if (videoTracks != null) {
+                                isUsingContentResolution = true;
+                            } else {
+                                // No representation matches contentStartTime (a VOD manifest, for example):
+                                // report the player's own tracks, as without contentStartTime.
+                                videoTracks = getVideoTrackInfo();
+                            }
+                            eventEmitter.onVideoLoad.invoke(duration, currentPosition, width, height,
+                                    audioTracks, textTracks, videoTracks, trackId);
 
-                        updateSubtitleButtonVisibility();
-                    });
+                            updateSubtitleButtonVisibility();
+                        });
+                    } finally {
+                        es.shutdown();
+                    }
                 });
                 return;
             }
@@ -1787,12 +1791,14 @@ public class ReactExoplayerView extends FrameLayout implements
         try {
             ArrayList<VideoTrack> results = result.get(3000, TimeUnit.MILLISECONDS);
             if (results == null && retryCount < 1) {
-                return this.getVideoTrackInfoFromManifest(++retryCount);
+                return this.getVideoTrackInfoFromManifest(retryCount + 1);
             }
-            es.shutdown();
             return results;
         } catch (Exception e) {
             DebugLog.w(TAG, "error in getVideoTrackInfoFromManifest handling request:" + e.getMessage());
+        } finally {
+            result.cancel(true);
+            es.shutdownNow();
         }
 
         return null;
