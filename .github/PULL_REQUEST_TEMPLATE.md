@@ -52,6 +52,10 @@ How did you verify the change?
 - If no automated test fits (e.g. native UI, DRM, PiP, a platform CI does not run), say why.
 -->
 
+## Suggested gotcha
+
+<!-- Optional. A fact that cost you time and is not in AGENTS.md, in one line. A maintainer decides if it goes there. Delete this section if you have none. -->
+
 ## Checklist
 
 - [ ] I read the [contributing guidelines](https://github.com/TheWidlarzGroup/react-native-video/blob/master/CONTRIBUTING.md).
