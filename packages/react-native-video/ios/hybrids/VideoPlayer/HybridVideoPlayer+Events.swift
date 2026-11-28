@@ -203,7 +203,11 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
   }
 
   func onTextTrackDataChanged(texts: [NSAttributedString]) {
-    _eventEmitter?.onTextTrackDataChanged(texts.map { $0.string })
+    // As on Android: one event per subtitle that appears, with its lines; nothing when the
+    // subtitle goes away.
+    let strings = texts.map { $0.string }.filter { !$0.isEmpty }
+    guard !strings.isEmpty else { return }
+    _eventEmitter?.onTextTrackDataChanged(strings)
   }
 
   func onMediaSelectionChanged() {

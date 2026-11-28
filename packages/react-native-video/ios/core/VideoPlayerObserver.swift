@@ -73,6 +73,9 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
   
   var metadataOutput: AVPlayerItemMetadataOutput?
   var legibleOutput: AVPlayerItemLegibleOutput?
+  // The item the outputs were added to. By the time the observers are invalidated for an
+  // item change, `player.currentItem` is already the new item.
+  private weak var outputsItem: AVPlayerItem?
   
   init(delegate: HybridVideoPlayer) {
     self.delegate = delegate
@@ -177,10 +180,16 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
     let metadataOutput = AVPlayerItemMetadataOutput()
     playerItem.add(metadataOutput)
     metadataOutput.setDelegate(self, queue: .global(qos: .userInteractive))
-    
+    self.metadataOutput = metadataOutput
+
+    // Reports the subtitle text on screen (`onTextTrackDataChanged`). It does not take over
+    // rendering: the player keeps drawing the subtitles itself.
     let legibleOutput = AVPlayerItemLegibleOutput()
     playerItem.add(legibleOutput)
-    metadataOutput.setDelegate(self, queue: .global(qos: .userInteractive))
+    legibleOutput.setDelegate(self, queue: .main)
+    self.legibleOutput = legibleOutput
+
+    outputsItem = playerItem
   }
   
   func invalidatePlayerItemObservers() {
@@ -201,18 +210,21 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
     clearBufferObservers()
     playerItemStatusObserver?.invalidate()
     playerItemStatusObserver = nil
-    // Remove outputs if needed
-    // (Assumes outputs are not shared between items)
-    if let playerItem = player?.currentItem {
-      if let metadataOutput = metadataOutput {
+    // Remove the outputs from the item they were added to, so a replaced source does not keep
+    // reporting through them.
+    metadataOutput?.setDelegate(nil, queue: nil)
+    legibleOutput?.setDelegate(nil, queue: nil)
+    if let playerItem = outputsItem {
+      if let metadataOutput, playerItem.outputs.contains(metadataOutput) {
         playerItem.remove(metadataOutput)
       }
-      if let legibleOutput = legibleOutput {
+      if let legibleOutput, playerItem.outputs.contains(legibleOutput) {
         playerItem.remove(legibleOutput)
       }
     }
     metadataOutput = nil
     legibleOutput = nil
+    outputsItem = nil
   }
   
   func invalidatePlayerObservers() {

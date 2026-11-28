@@ -61,7 +61,7 @@ The `VideoPlayer` class, through `VideoPlayerEvents`, supports the following eve
 | `onReadyToDisplay`         | () => void                                           | Fired when the player is ready to display the first frame of the video.                     |
 | `onSeek`                   | (seekTime: number) => void                           | Fired when a seek operation has completed.                                                  |
 | `onStatusChange`           | (status: [VideoPlayerStatus](../api-reference/type-aliases/VideoPlayerStatus.md)) => void                  | Fired when the player status changes (detailed status updates).                             |
-| `onTextTrackDataChanged`   | (texts: string[]) => void                            | Fired when text track data (e.g., subtitles) changes.                                       |
+| `onTextTrackDataChanged`   | (texts: string[]) => void                            | Fired when a subtitle appears, with its text. Not fired when it goes away (on the web: fired with `[]`). |
 | `onTimedMetadata`          | (metadata: [TimedMetadata](../api-reference/interfaces/TimedMetadata.md)) => void                    | Fired when timed metadata is encountered in the video stream.                               |
 | `onTrackChange`            | (track: [TextTrack](../api-reference/interfaces/TextTrack.md) \| null) => void                    | Fired when the selected text track changes.                                                 |
 | `onVolumeChange`           | (data: [onVolumeChangeData](../api-reference/interfaces/onVolumeChangeData.md)) => void     | Fired when the volume changes.                                                              |
