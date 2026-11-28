@@ -17,7 +17,7 @@ import {
 import { eventLog, PROGRESS_MARKER_SECONDS } from './eventLog';
 import { EventLogPanel } from './EventLogPanel';
 import type { ScenarioName } from './deepLink';
-import { SCENARIO_SOURCES } from './fixtures';
+import { scenarioSource } from './fixtures';
 
 /**
  * replaceSourceAsync() is awaited here and, for a new source, followed by play() from
@@ -32,7 +32,7 @@ function replaceSource(player: VideoPlayer, target: 'hls' | 'null') {
     eventLog.handle({ type: 'replaceSource', phase, source: target });
   report('requested');
   player
-    .replaceSourceAsync(target === 'null' ? null : SCENARIO_SOURCES.hls)
+    .replaceSourceAsync(target === 'null' ? null : scenarioSource('hls'))
     .then(
       () => {
         report('resolved');
@@ -283,7 +283,7 @@ function logPlayerEvents(player: VideoPlayer) {
  */
 export function ScenarioScreen({ scenario }: { scenario: ScenarioName }) {
   const viewRef = useRef<VideoViewRef>(null);
-  const player = useVideoPlayer(SCENARIO_SOURCES[scenario], (p) => {
+  const player = useVideoPlayer(scenarioSource(scenario), (p) => {
     eventLog.reset();
     eventLog.log(`scenario:${scenario}`);
     logPlayerEvents(p);

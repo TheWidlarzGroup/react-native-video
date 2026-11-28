@@ -27,3 +27,33 @@ export function parseScenario(url: string | null): ScenarioName | null {
   const name = url?.match(/^rnvtest:\/\/scenario\/([^/?#]+)\/?(?:[?#]|$)/)?.[1];
   return name !== undefined && isScenarioName(name) ? name : null;
 }
+
+/** Where the fixture server listens unless the scenario link says otherwise. */
+export const DEFAULT_FIXTURE_PORT = 8090;
+
+/**
+ * rnvtest://scenario/<name>?fixturePort=<port> -> <port>. The flows add it from Maestro's
+ * `FIXTURE_PORT` (e2e/shared/open-scenario.yaml), so two runs on one machine can each use
+ * their own fixture server. A link without it, or with something that is not a port,
+ * yields the default.
+ */
+export function parseFixturePort(url: string | null): number {
+  const raw = url?.match(
+    /^rnvtest:\/\/scenario\/[^?#]*\?(?:[^#]*&)?fixturePort=(\d{1,5})(?:[&#]|$)/
+  )?.[1];
+  const port = raw === undefined ? NaN : Number(raw);
+  return Number.isInteger(port) && port >= 1 && port <= 65535
+    ? port
+    : DEFAULT_FIXTURE_PORT;
+}
+
+/** Points a fixture uri at another fixture server; any other uri is returned as is. */
+export function rebaseFixtureUri(
+  uri: string,
+  fromBase: string,
+  toBase: string
+): string {
+  return uri.startsWith(`${fromBase}/`)
+    ? `${toBase}${uri.slice(fromBase.length)}`
+    : uri;
+}
