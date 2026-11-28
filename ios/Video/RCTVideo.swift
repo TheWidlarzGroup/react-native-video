@@ -1,10 +1,10 @@
 import AVFoundation
 import AVKit
 import Foundation
+import React
 #if USE_GOOGLE_IMA
     import GoogleInteractiveMediaAds
 #endif
-import React
 
 // MARK: - RCTVideo
 
@@ -200,7 +200,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         super.init(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
         ReactNativeVideoManager.shared.registerView(newInstance: self)
         #if USE_GOOGLE_IMA
-            _imaAdsManager = RCTIMAAdsManager(video: self, isPictureInPictureActive: isPictureInPictureActive)
+            // A method reference here would capture self strongly: RCTVideo -> RCTIMAAdsManager -> closure -> RCTVideo,
+            // so the view never deallocated and deinit never released the ads (#4866).
+            _imaAdsManager = RCTIMAAdsManager(video: self, isPictureInPictureActive: { [weak self] in
+                self?.isPictureInPictureActive() ?? false
+            })
         #endif
 
         _eventDispatcher = eventDispatcher
@@ -280,7 +284,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         #if USE_GOOGLE_IMA
-            _imaAdsManager = RCTIMAAdsManager(video: self, isPictureInPictureActive: isPictureInPictureActive)
+            // A method reference here would capture self strongly: RCTVideo -> RCTIMAAdsManager -> closure -> RCTVideo,
+            // so the view never deallocated and deinit never released the ads (#4866).
+            _imaAdsManager = RCTIMAAdsManager(video: self, isPictureInPictureActive: { [weak self] in
+                self?.isPictureInPictureActive() ?? false
+            })
         #endif
     }
 
@@ -470,6 +478,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     var isSetSourceOngoing = false
     var nextSource: NSDictionary?
+    private var sourceRequestId: UInt = 0
 
     func applyNextSource() {
         if self.nextSource != nil {
@@ -479,6 +488,17 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             self.nextSource = nil
             self.setSrc(nextSrc)
         }
+    }
+
+    private func shouldProcessSourceRequest(_ requestId: UInt) -> Bool {
+        guard requestId == sourceRequestId else {
+            if nextSource != nil {
+                isSetSourceOngoing = false
+                applyNextSource()
+            }
+            return false
+        }
+        return true
     }
 
     // MARK: - Player and source
@@ -645,6 +665,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func setSrc(_ source: NSDictionary!) {
+        sourceRequestId &+= 1
+        let requestId = sourceRequestId
+
         if self.isSetSourceOngoing || self.nextSource != nil {
             DebugLog("setSrc buffer request")
             self._player?.replaceCurrentItem(with: nil)
@@ -654,6 +677,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         self.isSetSourceOngoing = true
 
         let initializeSource = {
+            guard self.shouldProcessSourceRequest(requestId) else { return }
             self._source = VideoSource(source)
 
             #if USE_GOOGLE_IMA
@@ -687,13 +711,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             RCTVideoUtils.delay { [weak self] in
                 do {
                     guard let self else { throw NSError(domain: "", code: 0, userInfo: nil) }
+                    guard self.shouldProcessSourceRequest(requestId) else { return }
 
                     let playerItem = try await self.preparePlayerItem()
+                    guard self.shouldProcessSourceRequest(requestId) else { return }
                     try await self.setupPlayer(playerItem: playerItem)
                 } catch {
-                    DebugLog("An error occurred: \(error.localizedDescription)")
-
-                    if let self {
+                    if let self, self.shouldProcessSourceRequest(requestId) {
+                        DebugLog("An error occurred: \(error.localizedDescription)")
                         self.onVideoError?(["error": error.localizedDescription])
                         self.isSetSourceOngoing = false
                         self.applyNextSource()
@@ -874,20 +899,18 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 _player?.pause()
                 _player?.rate = 0.0
             }
+        } else if _adPlaying {
+            #if USE_GOOGLE_IMA
+                _imaAdsManager.getAdsManager()?.resume()
+            #endif
         } else {
-            if _adPlaying {
-                #if USE_GOOGLE_IMA
-                    _imaAdsManager.getAdsManager()?.resume()
-                #endif
+            if #available(iOS 10.0, *), !_automaticallyWaitsToMinimizeStalling {
+                _player?.playImmediately(atRate: _rate)
             } else {
-                if #available(iOS 10.0, *), !_automaticallyWaitsToMinimizeStalling {
-                    _player?.playImmediately(atRate: _rate)
-                } else {
-                    _player?.play()
-                    _player?.rate = _rate
-                }
+                _player?.play()
                 _player?.rate = _rate
             }
+            _player?.rate = _rate
         }
 
         _paused = paused
@@ -905,17 +928,19 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             return
         }
 
+        // The seek pauses the player itself; with controls that pause must not turn into `paused`
+        let wasPaused = _paused
         RCTPlayerOperations.seek(
             player: player,
             playerItem: item,
-            paused: _paused,
+            paused: wasPaused,
             seekTime: time.floatValue,
             seekTolerance: tolerance.floatValue
         ) { [weak self] (_: Bool) in
             guard let self else { return }
 
             self._playerObserver.addTimeObserverIfNotSet()
-            self.setPaused(self._paused)
+            self.setPaused(wasPaused)
             self.onVideoSeek?(["currentTime": NSNumber(value: Float(CMTimeGetSeconds(item.currentTime()))),
                                "seekTime": time,
                                "target": self.reactTag as Any])
@@ -1320,7 +1345,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     func videoPlayerViewControllerWillDismiss(playerViewController: AVPlayerViewController) {
         if _playerViewController == playerViewController
             && _fullscreenPlayerPresented,
-            let onVideoFullscreenPlayerWillDismiss {
+           let onVideoFullscreenPlayerWillDismiss {
             _playerObserver.removePlayerViewControllerObservers()
             onVideoFullscreenPlayerWillDismiss(["target": reactTag as Any])
         }
@@ -1443,6 +1468,17 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     // MARK: - Lifecycle
 
     override func removeFromSuperview() {
+        // Cancel a setSrc that is still in flight. Otherwise it completes after this
+        // teardown and creates a new AVPlayer for a view that is gone, and that view and
+        // player are never released (#3567). setupPlayer() already returns early when
+        // isSetSourceOngoing is false.
+        isSetSourceOngoing = false
+        nextSource = nil
+        #if USE_GOOGLE_IMA
+            // Stop ads together with the rest of playback (#3722, #4866). The manager itself is kept,
+            // because other code paths still call into it after removal (#3911).
+            _imaAdsManager.releaseAds()
+        #endif
         self._player?.replaceCurrentItem(with: nil)
         if let player = _player {
             player.pause()
@@ -1571,8 +1607,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func handleReadyToPlay() {
-        guard let _playerItem else { return }
-        guard let source = _source else { return }
+        guard let _playerItem, let source = _source else { return }
         Task {
             if self._pendingSeek {
                 self.setSeek(NSNumber(value: self._pendingSeekTime), NSNumber(value: 100))
@@ -1737,11 +1772,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         guard let bounds = RCTVideoUtils.getCurrentWindow()?.bounds else { return }
 
-        if !oldRect!.equalTo(newRect!) {
-            if let reactVC = self.reactViewController() {
-                reactVC.view.frame = bounds
-                reactVC.view.setNeedsLayout()
-            }
+        if !oldRect!.equalTo(newRect!), let reactVC = self.reactViewController() {
+            reactVC.view.frame = bounds
+            reactVC.view.setNeedsLayout()
         }
     }
 
@@ -1815,12 +1848,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func handleAVPlayerAccess(notification: NSNotification!) {
-        guard onVideoBandwidthUpdate != nil else { return }
-
-        guard let accessLog = (notification.object as? AVPlayerItem)?.accessLog() else {
-            return
-        }
-        guard let lastEvent = accessLog.events.last else { return }
+        guard onVideoBandwidthUpdate != nil, let accessLog = (notification.object as? AVPlayerItem)?.accessLog(),
+              let lastEvent = accessLog.events.last else { return }
         if lastEvent.indicatedBitrate != _lastBitrate {
             _lastBitrate = lastEvent.indicatedBitrate
             onVideoBandwidthUpdate?(["bitrate": _lastBitrate, "target": reactTag as Any])
@@ -1886,10 +1915,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 initPictureinPicture()
             }
 
-            if _pip?._pipController == nil, let playerViewController = _playerViewController, _controls {
-                if let existingPlayerLayer = findPlayerLayer(in: playerViewController.view) {
-                    _pip?.setupPipController(existingPlayerLayer)
-                }
+            if _pip?._pipController == nil, let playerViewController = _playerViewController, _controls,
+               let existingPlayerLayer = findPlayerLayer(in: playerViewController.view) {
+                _pip?.setupPipController(existingPlayerLayer)
             }
 
             _pip?.enterPictureInPicture()
