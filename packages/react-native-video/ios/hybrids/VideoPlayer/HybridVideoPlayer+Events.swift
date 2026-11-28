@@ -256,6 +256,7 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
   }
 
   func onBandwidthUpdate(bitrate: Double) {
+    updateMemoryEstimate(bitrate: bitrate)
     _eventEmitter?.onBandwidthUpdate(
       .init(bitrate: bitrate, width: nil, height: nil)
     )

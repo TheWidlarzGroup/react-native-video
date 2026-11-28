@@ -277,8 +277,9 @@ class HybridVideoPlayerSource: HybridVideoPlayerSourceSpec, NativeVideoPlayerSou
     withExtendedLifetime(releasedAsset) {}
   }
 
+  /// A source holds no media buffers; the player that plays it reports them. The same as
+  /// on Android. Reading the asset here would also run AVFoundation on the JS thread.
   var memorySize: Int {
-    let asset = sourceLoader.withState { storedAsset }
-    return asset?.estimatedMemoryUsage ?? 0
+    0
   }
 }

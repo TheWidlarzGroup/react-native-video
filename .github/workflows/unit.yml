@@ -52,12 +52,16 @@ jobs:
       # The generated Nitro files are committed. A spec change without a regeneration, or
       # a spec nitrogen cannot generate, shows up here as a failed run or a dirty tree.
       # `git status` also lists generated files that are new and were never committed.
+      # The DRM plugin has its own specs and generated files, checked the same way.
       - name: Generated Nitro specs are up to date
-        working-directory: packages/react-native-video
         run: |
-          bun run specs
-          git diff --exit-code -- nitrogen
-          test -z "$(git status --porcelain -- nitrogen)" || { git status --porcelain -- nitrogen; exit 1; }
+          for package in packages/react-native-video packages/drm-plugin; do
+            echo "::group::$package"
+            (cd "$package" && bun run specs)
+            git diff --exit-code -- "$package/nitrogen"
+            test -z "$(git status --porcelain -- "$package/nitrogen")" || { git status --porcelain -- "$package/nitrogen"; exit 1; }
+            echo "::endgroup::"
+          done
 
   react-19:
     name: library tests and typecheck (react 19)

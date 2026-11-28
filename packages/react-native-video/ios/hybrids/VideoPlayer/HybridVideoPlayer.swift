@@ -141,9 +141,28 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     guard let releasedSource = close() else { return }
     try? _eventEmitter?.clearAllListeners()
     releaseAsset(for: releasedSource)
+    videoRenditionLoadTask?.cancel()
+    videoQualityRecheckWorkItem?.cancel()
+    // Plugins are told on the main thread, as before. A weak reference formed here is already
+    // empty (Swift clears it once deinit starts), so a plugin gets no usable player, as before.
+    let destroyed = Weak<NativeVideoPlayer>(value: self)
 
-    runOnMainThreadSync {
-      releaseOnMainThread()
+    // AVFoundation objects are torn down on the main thread, but deinit can run on the JS
+    // thread after a garbage collection. Hand them over instead of waiting (#4820). The
+    // closure must not capture self, which is going away.
+    let player = self.player
+    let observer = playerObserver
+    let teardown = {
+      observer?.invalidatePlayerItemObservers(ownPlayer: player)
+      observer?.invalidatePlayerObservers(ownPlayer: player)
+      NowPlayingInfoCenterManager.shared.removePlayer(player: player)
+      player.replaceCurrentItem(with: nil)
+      PluginsRegistry.shared.notifyPlayerDestroyed(destroyed)
+    }
+    if Thread.isMainThread {
+      teardown()
+    } else {
+      DispatchQueue.main.async(execute: teardown)
     }
   }
 
@@ -551,6 +570,10 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
       if let bufferConfig {
         loadedPlayerItem.item.setBufferConfig(config: bufferConfig)
       }
+      // A new source: its bitrate is not known until the access log reports it.
+      self.updateMemoryEstimate(
+        bitrate: 0,
+        forwardBufferSeconds: loadedPlayerItem.item.preferredForwardBufferDuration)
       // Off-main manifest fetch for the quality ladder.
       self.beginVideoRenditionLoad(for: loadedPlayerItem.context.source)
       // The audio tracks of the previous source are gone; the new ones are published once
@@ -1508,7 +1531,25 @@ class HybridVideoPlayer: HybridVideoPlayerSpec, NativeVideoPlayerSpec {
     release()
   }
 
+  /// Bitrate from the access log and the forward buffer of the current item, read by
+  /// `memorySize` on the JS thread without touching AVFoundation there (#4820).
+  private let memoryEstimateLock = NSLock()
+  private var memoryEstimateBitrate: Double = 0
+  private var memoryEstimateForwardBuffer: Double = 0
+
+  func updateMemoryEstimate(bitrate: Double? = nil, forwardBufferSeconds: Double? = nil) {
+    memoryEstimateLock.lock()
+    defer { memoryEstimateLock.unlock() }
+    if let bitrate { memoryEstimateBitrate = bitrate }
+    if let forwardBufferSeconds { memoryEstimateForwardBuffer = forwardBufferSeconds }
+  }
+
   var memorySize: Int {
-    isReleased ? 0 : playerItem?.asset.estimatedMemoryUsage ?? 0
+    guard !isReleased else { return 0 }
+    memoryEstimateLock.lock()
+    let bitrate = memoryEstimateBitrate
+    let forwardBuffer = memoryEstimateForwardBuffer
+    memoryEstimateLock.unlock()
+    return VideoMemoryEstimate.bytes(bitrate: bitrate, forwardBufferSeconds: forwardBuffer)
   }
 }

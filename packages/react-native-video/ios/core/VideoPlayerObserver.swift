@@ -206,7 +206,8 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
     metadataOutput.setDelegate(self, queue: .global(qos: .userInteractive))
   }
   
-  func invalidatePlayerItemObservers() {
+  /// `ownPlayer`: the player to clean up when the delegate is already gone (its `deinit`).
+  func invalidatePlayerItemObservers(ownPlayer: AVPlayer? = nil) {
     // Remove NotificationCenter observers
     if let playbackEndedObserver = playbackEndedObserver {
       NotificationCenter.default.removeObserver(playbackEndedObserver)
@@ -226,7 +227,7 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
     playerItemStatusObserver = nil
     // Remove outputs if needed
     // (Assumes outputs are not shared between items)
-    if let playerItem = player?.currentItem {
+    if let playerItem = (ownPlayer ?? player)?.currentItem {
       if let metadataOutput = metadataOutput {
         playerItem.remove(metadataOutput)
       }
@@ -238,7 +239,7 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
     legibleOutput = nil
   }
   
-  func invalidatePlayerObservers() {
+  func invalidatePlayerObservers(ownPlayer: AVPlayer? = nil) {
     // Invalidate KVO observers
     playerCurrentItemObserver?.invalidate()
     playerCurrentItemObserver = nil
@@ -255,7 +256,7 @@ class VideoPlayerObserver: NSObject, AVPlayerItemMetadataOutputPushDelegate, AVP
     playerStatusObserver?.invalidate()
     playerStatusObserver = nil
     // Remove periodic time observer from player
-    if let player = player, let periodicObserver = playerProgressPeriodicObserver {
+    if let player = ownPlayer ?? player, let periodicObserver = playerProgressPeriodicObserver {
       player.removeTimeObserver(periodicObserver)
       playerProgressPeriodicObserver = nil
     }
