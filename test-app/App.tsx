@@ -1,0 +1,123 @@
+/**
+ * RNVideoE2E — dedicated E2E host app. Scenarios are opened via deep link
+ * (rnvtest://scenario/<name>), never via UI navigation. See e2e/CONTEXT.md.
+ */
+import React from 'react';
+import {
+  Linking,
+  Platform,
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { ScenarioScreen } from './src/e2e/ScenarioScreen';
+import {
+  parseFixturePort,
+  parseScenario,
+  type ScenarioName,
+} from './src/e2e/deepLink';
+import { setFixturePort } from './src/e2e/fixtures';
+
+/**
+ * Resolves the scenario from the launch URL and from later `url` events.
+ *
+ * `ready` flips only once the `url` listener is attached. The `e2e-host-ready` marker is
+ * rendered from it, so a flow that waits for the marker before `openLink` cannot lose the
+ * link: RCTLinkingManager's `url` notification is fire-and-forget.
+ */
+function useScenarioDeepLink(): {
+  scenario: ScenarioName | null;
+  ready: boolean;
+} {
+  const [scenario, setScenario] = React.useState<ScenarioName | null>(null);
+  const [ready, setReady] = React.useState(false);
+
+  React.useEffect(() => {
+    let cancelled = false;
+    // The port is set before the scenario, so the screen mounts with the right sources.
+    const open = (url: string | null) => {
+      setFixturePort(parseFixturePort(url));
+      return parseScenario(url);
+    };
+    const sub = Linking.addEventListener('url', ({ url }) =>
+      setScenario(open(url))
+    );
+    setReady(true);
+
+    // Set when the app was launched from a link; a `url` event that came first wins.
+    Linking.getInitialURL()
+      .then((url) => {
+        if (!cancelled) {
+          setScenario((current) => current ?? open(url));
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+      sub.remove();
+    };
+  }, []);
+
+  return { scenario, ready };
+}
+
+/**
+ * The scenario on screen, one step behind the deep link. A new scenario mounts only after
+ * the previous screen has been unmounted and that commit has reached the native views: one
+ * frame with nothing, then the new screen. Swapping the screens in one commit unmounted the
+ * old event log panel while the new player reset the log during its first render, and in
+ * CI Fabric on Android (React Native 0.87) at times mounted and updated text views that were
+ * already gone ("Unable to find ViewManager for tag", a red screen in smoke-broken-manifest-error).
+ */
+function useShownScenario(scenario: ScenarioName | null): ScenarioName | null {
+  const [shown, setShown] = React.useState<ScenarioName | null>(null);
+
+  React.useEffect(() => {
+    if (scenario === shown) return;
+    if (shown !== null) {
+      setShown(null);
+      return;
+    }
+    const frame = requestAnimationFrame(() => setShown(scenario));
+    return () => cancelAnimationFrame(frame);
+  }, [scenario, shown]);
+
+  return shown;
+}
+
+export default function App(): React.JSX.Element {
+  const { scenario: linked, ready } = useScenarioDeepLink();
+  const scenario = useShownScenario(linked);
+
+  return (
+    <SafeAreaView style={styles.app}>
+      {scenario ? (
+        // Keyed on the scenario so switching scenarios remounts the screen: a fresh
+        // player, a fresh setup callback and a fresh event log every time.
+        <ScenarioScreen key={scenario} scenario={scenario} />
+      ) : ready && linked === null ? (
+        // Centred on purpose: React Native's dev banner ("Connect to Metro to develop
+        // JavaScript") covers the top of the screen for a few seconds after a debug
+        // launch, longer on a slow simulator, and Maestro treats anything under it as
+        // invisible. LogBox notifications sit at the bottom. The middle is safe.
+        <View style={styles.centered}>
+          <Text testID="e2e-host-ready">RNVideoE2E ready</Text>
+        </View>
+      ) : null}
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  app: {
+    flex: 1,
+    // SafeAreaView only insets on iOS. On Android 15+ (API 35+) the app draws
+    // edge-to-edge, so without this the first marker sits under the status bar and
+    // Maestro drops it from the hierarchy as invisible.
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+  },
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+});

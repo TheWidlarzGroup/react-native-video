@@ -1,0 +1,14 @@
+# Third-party actions are pinned to commit SHAs (a tag can be moved to other code); this
+# keeps those pins, and the version comment next to each, up to date in one weekly PR.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directories:
+      - /
+      - /.github/actions/*
+    schedule:
+      interval: weekly
+    groups:
+      github-actions:
+        patterns:
+          - '*'

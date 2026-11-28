@@ -5,24 +5,29 @@ import NitroModules
 class HLSSubtitleInjector: NSObject {
   private let originalManifestUrl: URL
   private let externalSubtitles: [NativeExternalSubtitle]
+  // The source's headers, for every request made for it (e.g. auth cookies)
+  private let headers: [String: String]
   private var modifiedManifestContent: String?
   private static let customScheme = "rnv-hls"
   private static let subtitleScheme = "rnv-hls-subtitles"
   private static let subtitleGroupID = "rnv-subs"
+  // BANDWIDTH is required on a variant; the real bitrate of a bare media playlist is unknown.
+  private static let wrappedVariantBandwidth = 1_000_000
   private static let resourceLoaderQueue = DispatchQueue(
     label: "com.nitro.HLSSubtitleInjector.resourceLoaderQueue",
     qos: .userInitiated
   )
 
-  init(manifestUrl: URL, externalSubtitles: [NativeExternalSubtitle]) {
+  init(manifestUrl: URL, externalSubtitles: [NativeExternalSubtitle], headers: [String: String]) {
     self.originalManifestUrl = manifestUrl
     self.externalSubtitles = externalSubtitles
+    self.headers = headers
     super.init()
   }
 
   func createModifiedAsset() -> AVURLAsset {
     let customURL = createCustomURL(from: originalManifestUrl)
-    let asset = AVURLAsset(url: customURL)
+    let asset = AVURLAsset(url: customURL, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
     asset.resourceLoader.setDelegate(
       self,
       queue: Self.resourceLoaderQueue
@@ -44,7 +49,8 @@ class HLSSubtitleInjector: NSObject {
       return cached
     }
 
-    let originalContent = try await HLSManifestParser.downloadManifest(from: originalManifestUrl)
+    let originalContent = try await HLSManifestParser.downloadManifest(
+      from: originalManifestUrl, headers: headers)
     let modifiedContent = try modifyM3U8Content(
       originalContent,
       with: externalSubtitles
@@ -57,6 +63,20 @@ class HLSSubtitleInjector: NSObject {
     _ originalContent: String,
     with externalSubtitles: [NativeExternalSubtitle]
   ) throws -> String {
+    // A media playlist (segments, no variants) cannot carry subtitle renditions, so serve a
+    // one-variant master playlist that points at it.
+    if !originalContent.contains("#EXT-X-STREAM-INF") && originalContent.contains("#EXTINF") {
+      var masterLines = ["#EXTM3U"]
+      for (index, subtitle) in externalSubtitles.enumerated() {
+        masterLines.append(createSubtitleTrackEntry(for: subtitle, index: index))
+      }
+      masterLines.append(
+        "#EXT-X-STREAM-INF:BANDWIDTH=\(Self.wrappedVariantBandwidth),SUBTITLES=\"\(Self.subtitleGroupID)\""
+      )
+      masterLines.append(originalManifestUrl.absoluteString)
+      return masterLines.joined(separator: "\n")
+    }
+
     let lines = originalContent.components(separatedBy: .newlines)
     var modifiedLines: [String] = []
     var foundExtM3U = false
@@ -293,7 +313,8 @@ extension HLSSubtitleInjector: AVAssetResourceLoaderDelegate {
           throw SourceError.invalidUri(uri: "Invalid subtitle URI: \(subtitle.uri)").error()
         }
 
-        let (vttData, response) = try await URLSession.shared.data(from: subtitleURL)
+        let (vttData, response) = try await URLSession.shared.data(
+          for: URLRequest(url: subtitleURL, headers: headers))
 
         guard let httpResponse = response as? HTTPURLResponse,
           200...299 ~= httpResponse.statusCode

@@ -8,14 +8,22 @@
 import Foundation
 import NitroModules
 
-struct ListenerPair {
+private struct ListenerPair {
   let id: UUID
   let eventName: String
   let callback: Any
 }
 
 class HybridVideoPlayerEventEmitter: HybridVideoPlayerEventEmitterSpec {
-  var listeners: [ListenerPair] = []
+  private let listeners = ListenerStore<ListenerPair>()
+
+  // The load that is in progress, from onLoadStart until the status leaves "loading".
+  // A player starts loading when it is created, before JS can add a listener, so a listener
+  // added while the load is still running is told about it right away.
+  // `loadStartLock` covers this value together with adding or reading the onLoadStart
+  // listeners, so a listener gets a load either from onLoadStart() or on registration, never both.
+  private let loadStartLock = NSLock()
+  private var loadInProgress: onLoadStartData?
 
   // MARK: - Private helpers
 
@@ -28,7 +36,7 @@ class HybridVideoPlayerEventEmitter: HybridVideoPlayerEventEmitterSpec {
   }
 
   private func emitEvent<T>(eventName: String, invoke: (T) throws -> Void) {
-    for pair in listeners where pair.eventName == eventName {
+    for pair in listeners.snapshot() where pair.eventName == eventName {
       if let callback = pair.callback as? T {
         do {
           try invoke(callback)
@@ -67,6 +75,10 @@ class HybridVideoPlayerEventEmitter: HybridVideoPlayerEventEmitterSpec {
     addListener(eventName: "onEnd", listener: listener)
   }
 
+  func addOnErrorListener(listener: @escaping (String) -> Void) throws -> ListenerSubscription {
+    addListener(eventName: "onError", listener: listener)
+  }
+
   func addOnExternalPlaybackChangeListener(listener: @escaping (Bool) -> Void) throws -> ListenerSubscription {
     addListener(eventName: "onExternalPlaybackChange", listener: listener)
   }
@@ -76,7 +88,15 @@ class HybridVideoPlayerEventEmitter: HybridVideoPlayerEventEmitterSpec {
   }
 
   func addOnLoadStartListener(listener: @escaping (onLoadStartData) -> Void) throws -> ListenerSubscription {
-    addListener(eventName: "onLoadStart", listener: listener)
+    loadStartLock.lock()
+    let subscription = addListener(eventName: "onLoadStart", listener: listener)
+    let runningLoad = loadInProgress
+    loadStartLock.unlock()
+
+    if let runningLoad {
+      listener(runningLoad)
+    }
+    return subscription
   }
 
   func addOnPlaybackStateChangeListener(listener: @escaping (onPlaybackStateChangeData) -> Void) throws -> ListenerSubscription {
@@ -115,12 +135,23 @@ class HybridVideoPlayerEventEmitter: HybridVideoPlayerEventEmitterSpec {
     addListener(eventName: "onTrackChange", listener: listener)
   }
 
+  func addOnVideoTrackChangeListener(listener: @escaping (VideoTrackChangeData) -> Void) throws -> ListenerSubscription {
+    addListener(eventName: "onVideoTrackChange", listener: listener)
+  }
+
+  func addOnAudioTrackChangeListener(listener: @escaping (AudioTrackChangeData) -> Void) throws -> ListenerSubscription {
+    addListener(eventName: "onAudioTrackChange", listener: listener)
+  }
+
   func addOnVolumeChangeListener(listener: @escaping (onVolumeChangeData) -> Void) throws -> ListenerSubscription {
     addListener(eventName: "onVolumeChange", listener: listener)
   }
 
   func clearAllListeners() throws {
     listeners.removeAll()
+    loadStartLock.lock()
+    loadInProgress = nil
+    loadStartLock.unlock()
   }
 
   // MARK: - Event emission methods
@@ -149,16 +180,38 @@ class HybridVideoPlayerEventEmitter: HybridVideoPlayerEventEmitterSpec {
     emitEvent(eventName: "onEnd") { (callback: () throws -> Void) in try callback() }
   }
 
+  func onError(_ error: String) {
+    emitEvent(eventName: "onError") { (callback: (String) throws -> Void) in try callback(error) }
+  }
+
   func onExternalPlaybackChange(_ isExternalPlaybackActive: Bool) {
     emitEvent(eventName: "onExternalPlaybackChange") { (callback: (Bool) throws -> Void) in try callback(isExternalPlaybackActive) }
   }
 
   func onLoad(_ data: onLoadData) {
+    endLoadInProgress()
     emitEvent(eventName: "onLoad") { (callback: (onLoadData) throws -> Void) in try callback(data) }
   }
 
+  private func endLoadInProgress() {
+    loadStartLock.lock()
+    loadInProgress = nil
+    loadStartLock.unlock()
+  }
+
   func onLoadStart(_ data: onLoadStartData) {
-    emitEvent(eventName: "onLoadStart") { (callback: (onLoadStartData) throws -> Void) in try callback(data) }
+    loadStartLock.lock()
+    loadInProgress = data
+    let snapshot = listeners.snapshot().filter { $0.eventName == "onLoadStart" }
+    loadStartLock.unlock()
+
+    for pair in snapshot {
+      if let callback = pair.callback as? (onLoadStartData) -> Void {
+        callback(data)
+      } else {
+        print("[ReactNativeVideo] Invalid callback type for onLoadStart")
+      }
+    }
   }
 
   func onPlaybackStateChange(_ data: onPlaybackStateChangeData) {
@@ -182,6 +235,12 @@ class HybridVideoPlayerEventEmitter: HybridVideoPlayerEventEmitterSpec {
   }
 
   func onStatusChange(_ status: VideoPlayerStatus) {
+    // Failed or released: the load is over, later listeners are not told about it.
+    // Not on .readyToPlay: iOS reports it from timeControlStatus before the item has loaded,
+    // so the load ends with onLoad instead.
+    if status == .error || status == .idle {
+      endLoadInProgress()
+    }
     emitEvent(eventName: "onStatusChange") { (callback: (VideoPlayerStatus) throws -> Void) in try callback(status) }
   }
 
@@ -195,6 +254,14 @@ class HybridVideoPlayerEventEmitter: HybridVideoPlayerEventEmitterSpec {
 
   func onTrackChange(_ track: Variant_NullType_TextTrack?) {
     emitEvent(eventName: "onTrackChange") { (callback: (Variant_NullType_TextTrack?) throws -> Void) in try callback(track) }
+  }
+
+  func onVideoTrackChange(_ data: VideoTrackChangeData) {
+    emitEvent(eventName: "onVideoTrackChange") { (callback: (VideoTrackChangeData) throws -> Void) in try callback(data) }
+  }
+
+  func onAudioTrackChange(_ data: AudioTrackChangeData) {
+    emitEvent(eventName: "onAudioTrackChange") { (callback: (AudioTrackChangeData) throws -> Void) in try callback(data) }
   }
 
   func onVolumeChange(_ data: onVolumeChangeData) {

@@ -39,6 +39,7 @@ enum PlayerError: VideoError {
   case invalidSource
   case invalidTrackUrl(url: String)
   case cancelled
+  case playbackFailed(error: Error?)
   
   var code: String {
     switch self {
@@ -52,6 +53,8 @@ enum PlayerError: VideoError {
       return "player/invalid-track-url"
     case .cancelled:
       return "player/cancelled"
+    case .playbackFailed:
+      return "player/playback-failed"
     }
   }
   
@@ -67,6 +70,11 @@ enum PlayerError: VideoError {
       return "Invalid track URL: \(url)"
     case .cancelled:
       return "Operation was cancelled"
+    case let .playbackFailed(error: error):
+      guard let error = error as NSError? else {
+        return "Playback failed"
+      }
+      return "\(error.domain) \(error.code): \(error.localizedDescription)"
     }
   }
 }
@@ -74,6 +82,7 @@ enum PlayerError: VideoError {
 // MARK: - SourceError
 enum SourceError: VideoError {
   case invalidUri(uri: String)
+  case photoLibraryAssetNotFound(uri: String)
   case missingReadFilePermission(uri: String)
   case fileDoesNotExist(uri: String)
   case failedToInitializeAsset
@@ -84,6 +93,8 @@ enum SourceError: VideoError {
     switch self {
     case .invalidUri:
       return "source/invalid-uri"
+    case .photoLibraryAssetNotFound:
+      return "source/photo-library-asset-not-found"
     case .missingReadFilePermission:
       return "source/missing-read-file-permission"
     case .fileDoesNotExist:
@@ -101,6 +112,8 @@ enum SourceError: VideoError {
     switch self {
     case let .invalidUri(uri: uri):
       return "Invalid source file uri: \(uri)"
+    case let .photoLibraryAssetNotFound(uri: uri):
+      return "Photo library video was not found at URI: \(uri)"
     case let .missingReadFilePermission(uri: uri):
       return "Missing read file permission for source file at \(uri)"
     case let .fileDoesNotExist(uri: uri):
@@ -157,7 +170,7 @@ protocol VideoError {
 }
 
 extension VideoError {
-  private func getMessage() -> String {
+  func getMessage() -> String {
     return "{%@\(code)::\(message)@%}"
   }
 
@@ -165,5 +178,3 @@ extension VideoError {
     return RuntimeError.error(withMessage: getMessage())
   }
 }
-
-

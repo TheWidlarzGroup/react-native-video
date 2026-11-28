@@ -19,7 +19,9 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
 
     if loop {
       currentTime = 0
-      try? play()
+      if player.rate == 0 {
+        try? play()
+      }
     }
   }
 
@@ -33,6 +35,13 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
     // intent, so a video paused inside PiP isn't auto-resumed on return.
     if rate == 0, reason == .setRateCalled {
       wasPlayingInBackground = false
+      wasInterruptedWhilePlaying = false
+    }
+    if rate == 0, reason == .audioSessionInterrupted {
+      wasInterruptedWhilePlaying = true
+    }
+    if rate != 0 {
+      wasInterruptedWhilePlaying = false
     }
   }
 
@@ -45,24 +54,62 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
     )
   }
 
+  /// A failed item can still fire buffer callbacks. They must not move the status out of
+  /// `.error`, or the next failure callback would report the same failure again.
+  private var hasFailed: Bool {
+    player.status == .failed || playerItem?.status == .failed
+  }
+
   func onPlaybackBufferEmpty() {
+    guard !hasFailed else { return }
     isCurrentlyBuffering = true
     status = .loading
     updateAndEmitPlaybackState()
   }
 
   func onProgressUpdate(currentTime: Double, bufferDuration: Double) {
+    // Safety net for #5155: the status must not depend on one KVO callback. A player that
+    // AVFoundation reports as playing a ready item is ready to play, so catch up here.
+    if reconcileStatusWhilePlaying() {
+      updateAndEmitPlaybackState()
+    }
+
+    // The observer reports the item's own time; a cropped source counts from `cropStart`
+    let cropStart = player.currentItem?.cropStartSeconds ?? 0
     _eventEmitter?.onProgress(
-      .init(currentTime: currentTime, bufferDuration: bufferDuration)
+      .init(currentTime: max(0, currentTime - cropStart), bufferDuration: bufferDuration)
     )
   }
 
+  /// Returns true when the status or the buffering flag had to be corrected.
+  private func reconcileStatusWhilePlaying() -> Bool {
+    guard !hasFailed,
+      playerItem?.status == .readyToPlay,
+      player.timeControlStatus == .playing,
+      status != .readytoplay || isCurrentlyBuffering
+    else { return false }
+
+    #if DEBUG
+      // Means the timeControlStatus observer missed a change (#5155); shows up in e2e device.log
+      NSLog("[ReactNativeVideo] status caught up to readyToPlay from the progress tick")
+    #endif
+    isCurrentlyBuffering = false
+    status = .readytoplay
+    return true
+  }
+
   func onPlaybackLikelyToKeepUp() {
+    guard !hasFailed else { return }
     isCurrentlyBuffering = false
     if player.timeControlStatus != .waitingToPlayAtSpecifiedRate {
       status = .readytoplay
     }
     updateAndEmitPlaybackState()
+
+    // By this point `AVPlayerItem.tracks` is populated, which is the only
+    // public source of an audio channel count. Deduped, so this is a no-op
+    // unless the snapshot actually changed since `.readyToPlay`.
+    refreshAudioTracksIfChanged()
   }
 
   func onExternalPlaybackActiveChanged(isActive: Bool) {
@@ -71,7 +118,7 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
 
   func onTimeControlStatusChanged(status: AVPlayer.TimeControlStatus) {
     if player.status == .failed || playerItem?.status == .failed {
-      self.status = .error
+      reportAsyncError(playerItem?.error ?? player.error)
       isCurrentlyBuffering = false
       _eventEmitter?.onPlaybackStateChange(
         .init(isPlaying: false, isBuffering: false)
@@ -92,7 +139,10 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
 
     case .paused:
       isCurrentlyBuffering = false
-      self.status = .readytoplay
+      // AVPlayer also reports paused when an item is assigned, long before it can play
+      if playerItem?.status == .readyToPlay {
+        self.status = .readytoplay
+      }
       break
 
     @unknown default:
@@ -104,12 +154,14 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
     // Keep the audio session in sync with playback: starting/stopping changes whether we hold
     // the session and the mix mode (mix-with-others vs interrupt), which is otherwise only
     // recomputed on prop/lifecycle changes — not on play/pause.
-    VideoManager.shared.requestAudioSessionUpdate()
+    if status != .paused {
+      VideoManager.shared.requestAudioSessionUpdate()
+    }
   }
 
   func onPlayerStatusChanged(status: AVPlayer.Status) {
     if status == .failed || playerItem?.status == .failed {
-      self.status = .error
+      reportAsyncError(playerItem?.error ?? player.error)
       isCurrentlyBuffering = false
       updateAndEmitPlaybackState()
     }
@@ -117,7 +169,7 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
 
   func onPlayerItemStatusChanged(status: AVPlayerItem.Status) {
     if status == .failed {
-      self.status = .error
+      reportAsyncError(playerItem?.error ?? player.error)
       isCurrentlyBuffering = false
       updateAndEmitPlaybackState()
       return
@@ -138,6 +190,8 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
     case .readyToPlay:
       guard let playerItem else { return }
 
+      playerItem.sideloadedTextTracks?.apply(to: playerItem)
+
       let height = playerItem.presentationSize.height
       let width = playerItem.presentationSize.width
       let orientation: VideoOrientation =
@@ -148,6 +202,16 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
         .init(currentTime, duration, height, width, orientation)
       )
 
+      // AVFoundation ignores preferredPeakBitRate/preferredMaximumResolution
+      // written before the item is ready to play, so a quality pin made earlier
+      // - or carried over from the previous source - is (re)written here.
+      applyVideoQualityCapsIfReady()
+
+      // Media selection groups only exist once the asset is loaded, so this is
+      // both where an audio pick made earlier gets replayed and where the
+      // available audio renditions are first published.
+      applyAudioTrackSelectionIfReady()
+
       if playerItem.isPlaybackLikelyToKeepUp
         && !playerItem.isPlaybackBufferEmpty
       {
@@ -156,7 +220,7 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
       }
 
     case .failed:
-      self.status = .error
+      reportAsyncError(playerItem?.error ?? player.error)
       isCurrentlyBuffering = false
 
     @unknown default:
@@ -168,6 +232,13 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
 
   func onTextTrackDataChanged(texts: [NSAttributedString]) {
     _eventEmitter?.onTextTrackDataChanged(texts.map { $0.string })
+  }
+
+  func onMediaSelectionChanged() {
+    emitSelectedTextTrackIfChanged()
+    // Deduped like the other emission points, so this only fires when the snapshot
+    // really changed, e.g. once an automatic selection has actually been applied.
+    refreshAudioTracksIfChanged()
   }
 
   func onTimedMetadataChanged(timedMetadata: [AVMetadataItem]) {
@@ -188,9 +259,16 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
     _eventEmitter?.onBandwidthUpdate(
       .init(bitrate: bitrate, width: nil, height: nil)
     )
+
+    // Same access-log entry, second consumer: on iOS a quality selection is a
+    // cap rather than a hard lock, so what is actually being rendered has to be
+    // derived rather than assumed.
+    updateActiveVideoTrack(indicatedBitrate: bitrate)
   }
 
   func onPlayerItemChange(player _: AVPlayer, playerItem: AVPlayerItem?) {
+    // The new item starts with its own selection.
+    emitSelectedTextTrackIfChanged()
     guard showNotificationControls, let playerItem else { return }
     DispatchQueue.main.async {
       NowPlayingInfoCenterManager.shared.updateStaticInfo(ifCurrentItem: playerItem)
@@ -215,6 +293,9 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
     _eventEmitter?.onPlaybackStateChange(
       .init(isPlaying: isPlaying, isBuffering: isCurrentlyBuffering)
     )
-    _eventEmitter?.onBuffer(isCurrentlyBuffering)
+    if lastReportedBuffering != isCurrentlyBuffering {
+      lastReportedBuffering = isCurrentlyBuffering
+      _eventEmitter?.onBuffer(isCurrentlyBuffering)
+    }
   }
 }

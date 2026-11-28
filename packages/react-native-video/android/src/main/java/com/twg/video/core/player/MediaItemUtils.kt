@@ -9,6 +9,7 @@ import androidx.media3.common.C
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.common.util.Util
 import com.margelo.nitro.video.BufferConfig
 import com.margelo.nitro.video.CustomVideoMetadata
 import com.margelo.nitro.video.HybridVideoPlayerSource
@@ -30,6 +31,7 @@ fun createMediaItemFromVideoConfig(
   val mediaItemBuilder = MediaItem.Builder()
 
   mediaItemBuilder.setUri(source.config.uri)
+  overriddenMimeType(source.config)?.let { mediaItemBuilder.setMimeType(it) }
 
   source.config.drm?.let { drmParams ->
     val drmManager = source.drmManager ?: throw LibraryError.DRMPluginNotFound
@@ -49,6 +51,31 @@ fun createMediaItemFromVideoConfig(
     source,
     mediaItemBuilder
   ).build()
+}
+
+/**
+ * The content type the app asked for with `config.type` (a file extension such as `m3u8`),
+ * or null when it gave none and the type should be read from the uri.
+ */
+@OptIn(UnstableApi::class)
+fun contentTypeOverride(config: NativeVideoConfig): Int? {
+  val extension = config.type?.trim()?.trimStart('.')?.lowercase()
+  if (extension.isNullOrEmpty()) return null
+  return Util.inferContentTypeForExtension(extension)
+}
+
+/**
+ * The MIME type to put on the MediaItem when `config.type` names an adaptive format, so that
+ * factories that read the item (and not the uri) pick the right source. Null otherwise.
+ */
+@OptIn(UnstableApi::class)
+fun overriddenMimeType(config: NativeVideoConfig): String? {
+  return when (contentTypeOverride(config)) {
+    C.CONTENT_TYPE_HLS -> MimeTypes.APPLICATION_M3U8
+    C.CONTENT_TYPE_DASH -> MimeTypes.APPLICATION_MPD
+    C.CONTENT_TYPE_SS -> MimeTypes.APPLICATION_SS
+    else -> null
+  }
 }
 
 fun getSubtitlesConfiguration(
@@ -78,9 +105,9 @@ fun getSubtitlesConfiguration(
         val subtitleConfig = MediaItem.SubtitleConfiguration.Builder(subtitle.uri.toUri())
           .setId("external-subtitle-${subtitle.uri}")
           .setMimeType(mimeType)
-          .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
           .setRoleFlags(C.ROLE_FLAG_SUBTITLE)
           .setLabel(subtitle.label)
+          .setLanguage(subtitle.language)
           .build()
         subtitlesConfiguration.add(subtitleConfig)
       } catch (e: Exception) {

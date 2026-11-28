@@ -1,0 +1,51 @@
+# Shared by every flow (via runFlow): opens the scenario deep link and waits for its
+# screen. Lives outside e2e/flows/ so `maestro test e2e/flows/` never runs it on its own.
+#
+# Android uses Maestro's `openLink`. iOS goes through the fixture server (open-link-ios.js),
+# which retries `simctl openurl` when it times out on a hosted runner - Maestro's `retry`
+# does not catch that failure. Only the transport is retried: a marker that does not
+# appear still fails the flow (zero-retries rule, CONTEXT.md).
+#
+# The link carries the fixture server's port (`?fixturePort=`), which the app reads, so a
+# run started with `-e FIXTURE_PORT=<port>` uses its own server. Without it: 8090.
+appId: ${APP_ID}
+---
+# Quoted: the expression contains ": ", which YAML would read as a mapping.
+- evalScript: "${output.fixturePort = typeof FIXTURE_PORT === 'undefined' ? '8090' : FIXTURE_PORT}"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - openLink: rnvtest://scenario/${SCENARIO}?fixturePort=${output.fixturePort}
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - runScript:
+          file: open-link-ios.js
+          env:
+            LINK: rnvtest://scenario/${SCENARIO}?fixturePort=${output.fixturePort}
+            FIXTURE_PORT: ${output.fixturePort}
+# iOS can ask "Open in app?" for the first link; the iOS leg pre-approves it in a warm-up
+# flow, so this normally gives up after 1.5 s. Android never asks.
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - extendedWaitUntil:
+          visible: "Open"
+          timeout: 1500
+          optional: true
+      - tapOn:
+          text: "Open"
+          optional: true
+# Android's singleApp redirect (MainActivity -> ComponentActivity) plus a fresh JS mount
+# takes a moment longer than an instant assertVisible allows; hosted simulators more.
+# 45 s, not 20: on 27-28.11 four iOS legs failed here with the scenario screen already
+# rendered, because the hosted simulator stood still for 8-22 s inside the wait (no
+# device log lines, one Maestro screenshot taking 16 s). This waits for the app to show
+# a screen, not for library behaviour, and a screen that never comes still fails.
+- extendedWaitUntil:
+    visible:
+      id: "scenario-${SCENARIO}"
+    timeout: 45000

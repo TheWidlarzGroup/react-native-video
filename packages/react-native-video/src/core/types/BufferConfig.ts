@@ -31,6 +31,11 @@ interface Resolution {
   height: number;
 }
 
+export type BufferingStrategy =
+  | 'default'
+  | 'disableBuffering'
+  | 'dependingOnMemory';
+
 export interface BufferConfig {
   /**
    * Configuration for live playback.
@@ -68,6 +73,31 @@ export interface BufferConfig {
    * @platform android
    */
   backBufferDurationMs?: number;
+  /**
+   * How the player decides whether to keep loading ahead.
+   * - `default`: load until the buffer durations above are reached.
+   * - `disableBuffering`: load only what playback needs to start or resume (the
+   *   `bufferForPlayback…` durations) and nothing ahead of that. Expect more rebuffering.
+   * - `dependingOnMemory`: like `default`, but loading pauses while the app is short on
+   *   memory (see `maxHeapAllocationPercent` and `minBufferMemoryReservePercent`).
+   * @default 'default'
+   * @platform android
+   */
+  bufferingStrategy?: BufferingStrategy;
+  /**
+   * With `bufferingStrategy: 'dependingOnMemory'`: the share (0 to 1) of the app's heap
+   * the buffer may take before loading pauses.
+   * @default 1
+   * @platform android
+   */
+  maxHeapAllocationPercent?: number;
+  /**
+   * With `bufferingStrategy: 'dependingOnMemory'`: the share (0 to 1) of the app's heap
+   * to keep free. Loading pauses when less is free and more than 2 seconds are buffered.
+   * @default 0
+   * @platform android
+   */
+  minBufferMemoryReservePercent?: number;
 
   // -------- iOS specific options --------
 
@@ -80,14 +110,18 @@ export interface BufferConfig {
    * The desired limit, in bits per second, of network bandwidth used for loading the current item.
    *
    * You can use {@linkcode preferredPeakBitRateForExpensiveNetworks} to set a different bit rate when on an expensive network (e.g. cellular).
-   * @platform ios, visionOS, tvOS
+   *
+   * On Android this is applied as `TrackSelectionParameters.maxVideoBitrate`.
+   * @platform android, ios, visionOS, tvOS
    */
   preferredPeakBitRate?: number;
   /**
    * The preferred maximum resolution of the video.
    *
    * You can use {@linkcode preferredMaximumResolutionForExpensiveNetworks} to set a different resolution when on an expensive network (e.g. cellular).
-   * @platform ios, visionOS, tvOS
+   *
+   * On Android this is applied as `TrackSelectionParameters.maxVideoSize`.
+   * @platform android, ios, visionOS, tvOS
    */
   preferredMaximumResolution?: Resolution;
   /**
@@ -100,4 +134,13 @@ export interface BufferConfig {
    * @platform ios, visionOS, tvOS
    */
   preferredMaximumResolutionForExpensiveNetworks?: Resolution;
+
+  /**
+   * Whether the player may delay playback to avoid stalling. With `false`, playback starts
+   * as soon as `play()` is called and may stall while the buffer fills, which helps
+   * low-latency streams and playback kept in sync with other devices.
+   * @default true
+   * @platform ios
+   */
+  automaticallyWaitsToMinimizeStalling?: boolean;
 }

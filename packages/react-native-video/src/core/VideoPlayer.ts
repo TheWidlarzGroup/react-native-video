@@ -3,8 +3,11 @@ import { NitroModules } from 'react-native-nitro-modules';
 import type { VideoPlayer as VideoPlayerImpl } from '../spec/nitro/VideoPlayer.nitro';
 import type { VideoPlayerSource } from '../spec/nitro/VideoPlayerSource.nitro';
 import type { IgnoreSilentSwitchMode } from './types/IgnoreSilentSwitchMode';
+import type { AudioOutput } from './types/AudioOutput';
+import type { AudioTrack } from './types/AudioTrack';
 import type { MixAudioMode } from './types/MixAudioMode';
 import type { TextTrack } from './types/TextTrack';
+import type { VideoTrack } from './types/VideoTrack';
 import type { NoAutocomplete } from './types/Utils';
 import type { VideoConfig, VideoSource } from './types/VideoConfig';
 import {
@@ -17,8 +20,18 @@ import { createPlayer } from './utils/playerFactory';
 import { createSource } from './utils/sourceFactory';
 import { VideoPlayerEvents } from './events/VideoPlayerEvents';
 
+const isCancellation = (error: unknown) =>
+  error instanceof VideoRuntimeError &&
+  (error.code === 'player/cancelled' || error.code === 'source/cancelled');
+
 class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   private _player: VideoPlayerImpl | undefined;
+  private _released = false;
+  // Bumped by every load started from JS (initialize, preload, replaceSourceAsync). A load
+  // that rejects with a cancellation while a newer one exists was superseded by that newer
+  // load: not a failure. A cancellation with no newer load (e.g. the native player was
+  // released by replaceSourceAsync(null)) is reported like any other error.
+  private _loadGeneration = 0;
   private _releaseTimeout: ReturnType<typeof setTimeout> | undefined;
 
   protected get player(): VideoPlayerImpl {
@@ -46,7 +59,10 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
    * @internal
    */
   __destroy() {
-    if (this._player === undefined) return;
+    // `_player` stays set for a grace period after release (see below), so a second
+    // release inside that window must not tear the native player down again.
+    if (this._player === undefined || this._released) return;
+    this._released = true;
 
     this.clearAllEvents();
 
@@ -83,16 +99,27 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   }
 
   /**
+   * Parses a native error to VideoRuntimeError and delivers it to `onError` listeners.
+   * @returns the parsed error and whether an `onError` listener handled it
+   * @internal
+   */
+  private reportError(error: unknown): { error: unknown; handled: boolean } {
+    const parsedError = tryParseNativeVideoError(error);
+    const handled =
+      parsedError instanceof VideoRuntimeError &&
+      this.triggerJSEvent('onError', parsedError);
+
+    return { error: parsedError, handled };
+  }
+
+  /**
    * Handles parsing native errors to VideoRuntimeError and calling onError if provided
    * @internal
    */
   private throwError(error: unknown) {
-    const parsedError = tryParseNativeVideoError(error);
+    const { error: parsedError, handled } = this.reportError(error);
 
-    if (
-      parsedError instanceof VideoRuntimeError &&
-      this.triggerJSEvent('onError', parsedError as VideoRuntimeError)
-    ) {
+    if (handled) {
       // We don't throw errors if onError is provided
       return;
     }
@@ -110,15 +137,26 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   }
 
   /**
-   * Wraps a promise to try parsing native errors to VideoRuntimeError
+   * Runs a native load (initialize, preload, replaceSourceAsync). A rejection is parsed to
+   * VideoRuntimeError, delivered to `onError` listeners (like `throwError`) and re-thrown,
+   * so `await` never hangs and never rejects with `undefined`. The call runs inside the
+   * wrapper so that a synchronous throw (an invalid source, a released player) takes the
+   * same path as a native rejection. A cancellation caused by a newer load started from JS
+   * only rejects: `onError` is for failures, and a superseded load is not one.
    * @internal
    */
-  private wrapPromise<T>(promise: Promise<T>) {
-    return new Promise<T>((resolve, reject) => {
-      promise.then(resolve).catch((error) => {
-        reject(this.throwError(error));
-      });
-    });
+  private async wrapLoad<T>(run: () => Promise<T>): Promise<T> {
+    const generation = ++this._loadGeneration;
+
+    try {
+      return await run();
+    } catch (error) {
+      const parsedError = tryParseNativeVideoError(error);
+      if (isCancellation(parsedError) && generation !== this._loadGeneration) {
+        throw parsedError;
+      }
+      throw this.reportError(parsedError).error;
+    }
   }
 
   // Source
@@ -223,6 +261,18 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     this.player.playWhenInactive = value;
   }
 
+  // Progress Update Interval
+  get progressUpdateInterval(): number {
+    return this.player.progressUpdateInterval;
+  }
+
+  set progressUpdateInterval(value: number) {
+    if (!Number.isFinite(value) || value <= 0) {
+      return;
+    }
+    this.player.progressUpdateInterval = value;
+  }
+
   // Disable Audio Session Management
   get disableAudioSessionManagement(): boolean {
     return this.player.disableAudioSessionManagement;
@@ -236,6 +286,30 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
     }
 
     this.player.disableAudioSessionManagement = value;
+  }
+
+  // Allows External Playback
+  get allowsExternalPlayback(): boolean {
+    return this.player.allowsExternalPlayback;
+  }
+
+  set allowsExternalPlayback(value: boolean) {
+    if (__DEV__ && !['ios'].includes(Platform.OS)) {
+      console.warn(
+        'allowsExternalPlayback is not supported on this platform, it wont have any effect'
+      );
+    }
+
+    this.player.allowsExternalPlayback = value;
+  }
+
+  // Audio Output
+  get audioOutput(): AudioOutput {
+    return this.player.audioOutput;
+  }
+
+  set audioOutput(value: AudioOutput) {
+    this.player.audioOutput = value;
   }
 
   // Is Playing
@@ -252,13 +326,13 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   }
 
   async initialize(): Promise<void> {
-    await this.wrapPromise(this.player.initialize());
+    await this.wrapLoad(() => this.player.initialize());
 
     this.updateMemorySize();
   }
 
   async preload(): Promise<void> {
-    await this.wrapPromise(this.player.preload());
+    await this.wrapLoad(() => this.player.preload());
 
     this.updateMemorySize();
   }
@@ -267,7 +341,8 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
    * Releases the player's native resources and releases native state.
    * After calling this method, the player is no longer usable.
    * Accessing any properties or methods of the player after calling this method will throw an error.
-   * If you want to clean player resource use `replaceSourceAsync` with `null` instead.
+   * `replaceSourceAsync(null)` releases the native player the same way on iOS and Android;
+   * to play another video, call `replaceSourceAsync(newSource)` on a live player or create a new one.
    */
   release(): void {
     this.__destroy();
@@ -310,7 +385,7 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   ): Promise<void> {
     this.updateMemorySize();
 
-    await this.wrapPromise(
+    await this.wrapLoad(() =>
       this.player.replaceSourceAsync(
         source === null ? null : createSource(source)
       )
@@ -340,6 +415,52 @@ class VideoPlayer extends VideoPlayerEvents implements VideoPlayerBase {
   // Selected Text Track
   get selectedTrack(): TextTrack | undefined {
     return this.player.selectedTrack;
+  }
+
+  // Video Track (Quality) Management
+  getAvailableVideoTracks(): VideoTrack[] {
+    try {
+      return this.player.getAvailableVideoTracks();
+    } catch (error) {
+      this.throwError(error);
+      return [];
+    }
+  }
+
+  selectVideoTrack(trackId?: string): void {
+    try {
+      this.player.selectVideoTrack(trackId);
+    } catch (error) {
+      this.throwError(error);
+    }
+  }
+
+  // Selected Video Track
+  get selectedVideoTrackId(): string | undefined {
+    return this.player.selectedVideoTrackId;
+  }
+
+  // Audio Track Management
+  getAvailableAudioTracks(): AudioTrack[] {
+    try {
+      return this.player.getAvailableAudioTracks();
+    } catch (error) {
+      this.throwError(error);
+      return [];
+    }
+  }
+
+  selectAudioTrack(trackId?: string): void {
+    try {
+      this.player.selectAudioTrack(trackId);
+    } catch (error) {
+      this.throwError(error);
+    }
+  }
+
+  // Selected Audio Track
+  get selectedAudioTrackId(): string | undefined {
+    return this.player.selectedAudioTrackId;
   }
 }
 

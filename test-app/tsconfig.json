@@ -1,0 +1,9 @@
+{
+  "extends": "@react-native/typescript-config/tsconfig.json",
+  "compilerOptions": {
+    // The RN base config asks for jest types; this app has no jest tests (bun test
+    // runs its unit tests) and does not depend on @types/jest.
+    "types": ["react-native"]
+  },
+  "exclude": ["rnv-e2e-plugin.mjs", "rnv-e2e-plugin.test.mjs", "**/*.test.ts"]
+}

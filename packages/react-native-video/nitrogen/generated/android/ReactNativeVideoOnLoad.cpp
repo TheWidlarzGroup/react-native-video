@@ -21,6 +21,7 @@
 #include "JFunc_void.hpp"
 #include "JFunc_void_bool.hpp"
 #include "JFunc_void_BandwidthData.hpp"
+#include "JFunc_void_std__string.hpp"
 #include "JFunc_void_onLoadData.hpp"
 #include "JFunc_void_onLoadStartData.hpp"
 #include "JFunc_void_onPlaybackStateChangeData.hpp"
@@ -30,6 +31,8 @@
 #include "JFunc_void_TimedMetadata.hpp"
 #include "JFunc_void_std__vector_std__string_.hpp"
 #include "JFunc_void_std__optional_std__variant_nitro__NullType__TextTrack__.hpp"
+#include "JFunc_void_VideoTrackChangeData.hpp"
+#include "JFunc_void_AudioTrackChangeData.hpp"
 #include "JFunc_void_onVolumeChangeData.hpp"
 #include "JHybridVideoPlayerSourceSpec.hpp"
 #include "JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload.hpp"
@@ -82,6 +85,7 @@ void registerAllNatives() {
   margelo::nitro::video::JFunc_void_cxx::registerNatives();
   margelo::nitro::video::JFunc_void_bool_cxx::registerNatives();
   margelo::nitro::video::JFunc_void_BandwidthData_cxx::registerNatives();
+  margelo::nitro::video::JFunc_void_std__string_cxx::registerNatives();
   margelo::nitro::video::JFunc_void_onLoadData_cxx::registerNatives();
   margelo::nitro::video::JFunc_void_onLoadStartData_cxx::registerNatives();
   margelo::nitro::video::JFunc_void_onPlaybackStateChangeData_cxx::registerNatives();
@@ -91,6 +95,8 @@ void registerAllNatives() {
   margelo::nitro::video::JFunc_void_TimedMetadata_cxx::registerNatives();
   margelo::nitro::video::JFunc_void_std__vector_std__string__cxx::registerNatives();
   margelo::nitro::video::JFunc_void_std__optional_std__variant_nitro__NullType__TextTrack___cxx::registerNatives();
+  margelo::nitro::video::JFunc_void_VideoTrackChangeData_cxx::registerNatives();
+  margelo::nitro::video::JFunc_void_AudioTrackChangeData_cxx::registerNatives();
   margelo::nitro::video::JFunc_void_onVolumeChangeData_cxx::registerNatives();
   margelo::nitro::video::JHybridVideoPlayerSourceSpec::CxxPart::registerNatives();
   margelo::nitro::video::JFunc_std__shared_ptr_Promise_std__shared_ptr_Promise_std__string_____OnGetLicensePayload_cxx::registerNatives();

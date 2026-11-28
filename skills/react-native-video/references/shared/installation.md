@@ -3,9 +3,11 @@
 ## v7
 
 ```sh
-npm install react-native-video react-native-nitro-modules
+npm install react-native-video@beta react-native-nitro-modules
 cd ios && pod install
 ```
+
+- While v7 is in beta it is published under the `beta` tag; `latest` (and a plain `npm install react-native-video`) is still v6.
 
 - React Native **≥ 0.75**; `react-native-nitro-modules` is a required peer dep.
 - iOS **15.0+**, Android **minSdkVersion 24**.
@@ -24,6 +26,6 @@ cd ios && pod install
 
 ## Expo (both)
 
-Use the config plugin with `expo prebuild` (not Expo Go). v7's plugin accepts options like `enableAndroidPictureInPicture`, `enableBackgroundAudio`, and `androidExtensions` (DASH/HLS). See `platform-setup.md`.
+Use the config plugin with `expo prebuild` (not Expo Go). v7's plugin accepts options like `enableAndroidPictureInPicture`, `enableBackgroundAudio`, `androidExtensions` (DASH/HLS) and `enableAndroidPlaybackService` (default `true`). See `platform-setup.md`.
 
 > Full, version-correct install steps: v7 → https://docs.thewidlarzgroup.com/react-native-video/docs/v7/fundamentals/installation , v6 → https://docs.thewidlarzgroup.com/react-native-video/docs/v6/installation

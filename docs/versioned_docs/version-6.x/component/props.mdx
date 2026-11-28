@@ -178,7 +178,7 @@ See [Useful Side Projects](../projects.md).
 
 <PlatformsList types={["Android"]} />
 
-Adjust the control styles. This prop is needed only if `controls={true}` and is an object. See the supported properties below.
+Adjust the control styles using an object with the properties below. These properties apply when `controls={true}`, except for `hideLiveBadge`, which also applies when `controls={false}`.
 
 | Property                            | Type    | Description                                                         |
 | ----------------------------------- | ------- | ------------------------------------------------------------------- |
@@ -196,6 +196,8 @@ Adjust the control styles. This prop is needed only if `controls={true}` and is 
 | hideSettingButton                   | boolean | Hides the settings button. Default is `true`.                       |
 | seekIncrementMS                     | number  | Defines the seek increment in milliseconds. Default is `10000`.     |
 | liveLabel                           | string  | Sets a label for live video.                                        |
+| hideLiveBadge                       | boolean | Hides the LIVE badge drawn over live streams. Default is `false`.   |
+
 
 **Example with default values:**
 
@@ -214,7 +216,8 @@ controlsStyles={{
   hideNotificationBarOnFullScreenMode: true,
   hideSettingButton: true,
   seekIncrementMS: 10000,
-  liveLabel: "LIVE"
+  liveLabel: "LIVE",
+  hideLiveBadge: false
 }}
 ```
 

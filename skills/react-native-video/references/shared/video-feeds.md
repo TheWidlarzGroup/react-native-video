@@ -14,7 +14,7 @@ A smooth vertical feed is mostly **app-side architecture** — most of the patte
 v7 has the right primitives for this:
 
 - The player is **decoupled from the view** → `preload()` a windowed source **without mounting a `VideoView`**.
-- Use **`useVideoPlayer` per item** and let the list's recycling drive lifecycle: entering the window creates the player; leaving it unmounts → **auto-release**. (Don't "null the source to reuse it later" — on Android `replaceSourceAsync(null)` releases the native player for good. Recreate instead.)
+- Use **`useVideoPlayer` per item** and let the list's recycling drive lifecycle: entering the window creates the player; leaving it unmounts → **auto-release**. (Don't "null the source to reuse it later" — on iOS and Android `replaceSourceAsync(null)` releases the native player for good, like `release()`. Recreate instead.)
 - `replaceSourceAsync()` swaps the source on a live player; give neighbors a **smaller `bufferConfig`** than the active item.
 - Copy the patterns from the free starter: **react-native-video-feed** (v7 + LegendList) — https://github.com/TheWidlarzGroup/react-native-video-feed
 

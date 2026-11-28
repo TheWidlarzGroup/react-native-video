@@ -83,6 +83,15 @@ abstract class HybridVideoPlayerEventEmitterSpec: HybridObject() {
     return __result
   }
   
+  abstract fun addOnErrorListener(listener: (error: String) -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnErrorListener_cxx(listener: Func_void_std__string): ListenerSubscription {
+    val __result = addOnErrorListener(listener)
+    return __result
+  }
+  
   abstract fun addOnExternalPlaybackChangeListener(listener: (externalPlaybackActive: Boolean) -> Unit): ListenerSubscription
   
   @DoNotStrip
@@ -188,6 +197,24 @@ abstract class HybridVideoPlayerEventEmitterSpec: HybridObject() {
   @Keep
   private fun addOnTrackChangeListener_cxx(listener: Func_void_std__optional_std__variant_nitro__NullType__TextTrack__): ListenerSubscription {
     val __result = addOnTrackChangeListener(listener)
+    return __result
+  }
+  
+  abstract fun addOnVideoTrackChangeListener(listener: (data: VideoTrackChangeData) -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnVideoTrackChangeListener_cxx(listener: Func_void_VideoTrackChangeData): ListenerSubscription {
+    val __result = addOnVideoTrackChangeListener(listener)
+    return __result
+  }
+  
+  abstract fun addOnAudioTrackChangeListener(listener: (data: AudioTrackChangeData) -> Unit): ListenerSubscription
+  
+  @DoNotStrip
+  @Keep
+  private fun addOnAudioTrackChangeListener_cxx(listener: Func_void_AudioTrackChangeData): ListenerSubscription {
+    val __result = addOnAudioTrackChangeListener(listener)
     return __result
   }
   

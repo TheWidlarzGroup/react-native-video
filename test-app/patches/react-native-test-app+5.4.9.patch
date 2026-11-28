@@ -1,0 +1,22 @@
+--- a/node_modules/react-native-test-app/android/app/src/main/java/com/microsoft/reacttestapp/MainActivity.kt
++++ b/node_modules/react-native-test-app/android/app/src/main/java/com/microsoft/reacttestapp/MainActivity.kt
+@@ -112,7 +112,18 @@
+                 val component = components.find { it.slug == slug }
+                     ?: throw IllegalArgumentException("No component with slug: $slug")
+                 val intent = ComponentActivity.newIntent(this, newComponentViewModel(component))
+-                intent.flags = Intent.FLAG_ACTIVITY_TASK_ON_HOME or Intent.FLAG_ACTIVITY_NEW_TASK
++                // CLEAR_TOP | SINGLE_TOP: a deep link that arrives while a ComponentActivity
++                // is already running must be delivered to THAT activity via onNewIntent
++                // (React Native then emits Linking's 'url' event), not open a second
++                // ComponentActivity with a second React root while the first keeps
++                // running in the background. Rationale: test-app/patches/README.md
++                intent.flags = Intent.FLAG_ACTIVITY_TASK_ON_HOME or Intent.FLAG_ACTIVITY_NEW_TASK or
++                    Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
++                // Preserve the launch Intent's action/data (e.g. a rnvtest:// deep link):
++                // without this, ComponentActivity.getIntent().data is always null, so
++                // Linking.getInitialURL() on Android silently returns null too.
++                intent.action = getIntent().action
++                intent.data = getIntent().data
+                 startActivity(intent)
+                 finish()
+             }

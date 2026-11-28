@@ -1,0 +1,17 @@
+{
+  "dependencies": {
+    "react": "19.1.1",
+    "react-native": "0.82.1",
+    "react-native-nitro-modules": "0.37.1"
+  },
+  "devDependencies": {
+    "@react-native-community/cli": "20.0.0",
+    "@react-native-community/cli-platform-android": "20.0.0",
+    "@react-native-community/cli-platform-ios": "20.0.0",
+    "@react-native/babel-preset": "0.82.1",
+    "@react-native/eslint-config": "0.82.1",
+    "@react-native/metro-config": "0.82.1",
+    "@react-native/typescript-config": "0.82.1",
+    "@types/react": "^19.1.0"
+  }
+}

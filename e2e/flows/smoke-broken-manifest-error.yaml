@@ -1,0 +1,34 @@
+# Error path: a syntactically broken HLS manifest must report exactly one onError, the error
+# status, and NOT onLoad.
+# Opens the mp4 scenario first, like smoke-error-404.yaml.
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 20000
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: broken-manifest
+- extendedWaitUntil:
+    visible:
+      id: "evt-onError"
+    timeout: 20000
+- extendedWaitUntil:
+    visible:
+      id: "evt-status-error"
+    timeout: 20000
+- assertVisible:
+    id: "evt-error-code"
+    text: "error-code:player/playback-failed"   # same code on both platforms
+- assertNotVisible:
+    id: "evt-onLoad"
+- assertNotVisible:
+    id: "evt-onError-repeated"

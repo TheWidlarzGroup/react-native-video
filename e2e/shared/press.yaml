@@ -1,0 +1,18 @@
+# Shared by flows that press a control on an idle player (via runFlow, with env BUTTON =
+# the control's testID and NTH = which press of that control this is in the scenario,
+# 1 for the first). Re-sends the tap only when the app never rendered the
+# `pressed-<testID>-<n>` marker, i.e. the tap was lost in transport (CONTEXT.md,
+# "A tap can be lost between the driver and JS"). What the player does after the press
+# is asserted by the calling flow, never here. Not for taps during playback: iOS defers
+# those until the player is idle, longer than the wait below.
+appId: ${APP_ID}
+---
+- retry:
+    maxRetries: 2
+    commands:
+      - tapOn:
+          id: "${BUTTON}"
+      - extendedWaitUntil:
+          visible:
+            id: "pressed-${BUTTON}-${NTH}"
+          timeout: 3000

@@ -1,10 +1,12 @@
 import * as React from 'react';
+import { Platform } from 'react-native';
 import { NitroModules } from 'react-native-nitro-modules';
 import type { ListenerSubscription } from '../../spec/nitro/VideoPlayerEventEmitter.nitro';
 import type {
   VideoViewViewManager,
   VideoViewViewManagerFactory,
 } from '../../spec/nitro/VideoViewViewManager.nitro';
+import { resolveControlsStyles } from '../types/ControlsStyles';
 import { type VideoViewEvents } from '../types/Events';
 import {
   tryParseNativeVideoError,
@@ -13,6 +15,12 @@ import {
 } from '../types/VideoError';
 import type { VideoPlayer } from '../VideoPlayer';
 import { NativeVideoView } from './NativeVideoView';
+import { hasShownFirstFrame, trackFirstFrame } from './firstFrame';
+import {
+  hasVideoViewOverlay,
+  VideoViewOverlay,
+  VideoViewOverlayHost,
+} from './VideoViewOverlay';
 import type { VideoViewProps, VideoViewRef } from './VideoViewProps';
 
 let nitroIdCounter = 1;
@@ -44,7 +52,17 @@ const updateProps = (manager: VideoViewViewManager, props: VideoViewProps) => {
   manager.resizeMode = props.resizeMode ?? 'none';
   manager.keepScreenAwake = props.keepScreenAwake ?? true;
   manager.surfaceType = props.surfaceType ?? 'surface';
+  manager.controlsStyles = resolveControlsStyles(props.controlsStyles);
+  manager.fullscreenOrientation = props.fullscreenOrientation ?? 'all';
+  manager.fullscreenAutorotate = props.fullscreenAutorotate ?? true;
 };
+
+// Android reports "ready to display" once per source, whichever view draws the first
+// frame, so a view that mounts later gets no event: it is covered only while the source
+// has not shown a frame yet. The player's status can't tell, since a stall or the end
+// makes it "loading" or "idle" after the frame. iOS reports it for every view.
+const isReadyToDisplay = (player: VideoViewProps['player']) =>
+  Platform.OS === 'android' && hasShownFirstFrame(player);
 
 /**
  * VideoView is a component that allows you to display a video from a {@link VideoPlayer}.
@@ -71,31 +89,37 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
       willExitFullscreen,
       willEnterPictureInPicture,
       willExitPictureInPicture,
+      poster,
+      posterResizeMode,
+      renderLoader,
+      shutterColor,
+      hideShutterView,
       ...props
     },
     ref
   ) => {
+    // Before the native view exists, so the player's first frame is never missed.
+    trackFirstFrame(player);
+
     const nitroId = React.useMemo(() => nitroIdCounter++, []);
     const nitroViewManager = React.useRef<VideoViewViewManager | null>(null);
-    const [isManagerReady, setIsManagerReady] = React.useState(false);
+    const [managerGeneration, setManagerGeneration] = React.useState(0);
 
     const setupViewManager = React.useCallback(
       (id: number) => {
         try {
-          if (nitroViewManager.current === null) {
-            nitroViewManager.current =
-              VideoViewViewManagerFactory.createViewManager(id);
+          nitroViewManager.current =
+            VideoViewViewManagerFactory.createViewManager(id);
 
-            // Should never happen
-            if (!nitroViewManager.current) {
-              throw new VideoError(
-                'view/not-found',
-                'Failed to create View Manager'
-              );
-            }
+          // Should never happen
+          if (!nitroViewManager.current) {
+            throw new VideoError(
+              'view/not-found',
+              'Failed to create View Manager'
+            );
           }
 
-          setIsManagerReady(true);
+          setManagerGeneration((generation) => generation + 1);
         } catch (error) {
           const parsedError = tryParseNativeVideoError(error);
 
@@ -214,7 +238,7 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
       return () => {
         if (nitroViewManager.current) {
           nitroViewManager.current.clearAllListeners();
-          setIsManagerReady(false);
+          setManagerGeneration(0);
         }
       };
     }, []);
@@ -280,7 +304,7 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
       willExitFullscreen,
       willEnterPictureInPicture,
       willExitPictureInPicture,
-      isManagerReady,
+      managerGeneration,
     ]);
 
     // Update non-event props
@@ -305,14 +329,41 @@ const VideoView = React.forwardRef<VideoViewRef, VideoViewProps>(
       autoEnterPictureInPicture,
       resizeMode,
       props,
-      isManagerReady,
+      managerGeneration,
     ]);
 
+    const overlayProps = {
+      poster,
+      posterResizeMode,
+      renderLoader,
+      shutterColor,
+      hideShutterView,
+    };
+
     return (
-      <NativeVideoView
-        nitroId={nitroId}
-        onNitroIdChange={onNitroIdChange}
-        {...props}
+      <VideoViewOverlayHost
+        style={props.style}
+        onLayout={props.onLayout}
+        hasOverlay={hasVideoViewOverlay(overlayProps)}
+        renderVideo={(layoutProps) => (
+          <NativeVideoView
+            nitroId={nitroId}
+            onNitroIdChange={onNitroIdChange}
+            {...props}
+            {...layoutProps}
+          />
+        )}
+        renderOverlay={(addedToMountedView) => (
+          <VideoViewOverlay
+            player={player}
+            // A view that was already on screen reports nothing more for a source that
+            // has shown its first frame, on any platform.
+            isReadyToDisplay={
+              addedToMountedView ? hasShownFirstFrame : isReadyToDisplay
+            }
+            {...overlayProps}
+          />
+        )}
       />
     );
   }

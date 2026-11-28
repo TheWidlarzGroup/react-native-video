@@ -1,0 +1,5 @@
+#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-TARGETDURATION:not-a-number
+#EXTINF:2.0,
+missing-segment.ts

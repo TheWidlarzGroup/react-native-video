@@ -9,7 +9,7 @@ import Foundation
 import AVKit
 import NitroModules
 
-struct ViewListenerPair {
+private struct ViewListenerPair {
   let id: UUID
   let eventName: String
   let callback: Any
@@ -17,7 +17,7 @@ struct ViewListenerPair {
 
 class HybridVideoViewViewManager: HybridVideoViewViewManagerSpec {
   weak var view: VideoComponentView?
-  var listeners: [ViewListenerPair] = []
+  private let listeners = ListenerStore<ViewListenerPair>()
   
   let DEALOCATED_WARNING = "ReactNativeVideo: VideoComponentView is no longer available. It is likely that the view was deallocated."
   
@@ -42,7 +42,7 @@ class HybridVideoViewViewManager: HybridVideoViewViewManagerSpec {
   }
   
   private func emitEvent<T>(eventName: String, invoke: (T) throws -> Void) {
-    for pair in listeners where pair.eventName == eventName {
+    for pair in listeners.snapshot() where pair.eventName == eventName {
       if let callback = pair.callback as? T {
         do {
           try invoke(callback)
@@ -131,7 +131,45 @@ class HybridVideoViewViewManager: HybridVideoViewViewManagerSpec {
     }
   }
   
-  var resizeMode: ResizeMode {
+  var fullscreenOrientation: FullscreenOrientation {
+    get {
+      guard let view else {
+        print(DEALOCATED_WARNING)
+        return .all
+      }
+
+      return view.fullscreenOrientation
+    }
+    set {
+      guard let view else {
+        print(DEALOCATED_WARNING)
+        return
+      }
+
+      view.fullscreenOrientation = newValue
+    }
+  }
+
+  var fullscreenAutorotate: Bool {
+    get {
+      guard let view else {
+        print(DEALOCATED_WARNING)
+        return true
+      }
+
+      return view.fullscreenAutorotate
+    }
+    set {
+      guard let view else {
+        print(DEALOCATED_WARNING)
+        return
+      }
+
+      view.fullscreenAutorotate = newValue
+    }
+  }
+
+  var resizeMode: VideoResizeMode {
     get {
       guard let view else {
         print(DEALOCATED_WARNING)
@@ -171,6 +209,22 @@ class HybridVideoViewViewManager: HybridVideoViewViewManagerSpec {
   
   // Android only - no-op on iOS
   var surfaceType: SurfaceType = .surface
+
+  // Android only: AVPlayerViewController has no API to hide single controls
+  var controlsStyles: NativeControlsStyles = NativeControlsStyles(
+    hideSeekBar: false,
+    hideDuration: false,
+    hidePosition: false,
+    hidePlayPause: false,
+    hideForward: false,
+    hideRewind: false,
+    hideNext: false,
+    hidePrevious: false,
+    hideFullscreen: false,
+    hideSettingButton: false,
+    hideNavigationBarOnFullScreenMode: true,
+    hideNotificationBarOnFullScreenMode: true
+  )
   
   func enterFullscreen() throws {
     guard let view else {

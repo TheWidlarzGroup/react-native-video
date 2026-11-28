@@ -58,12 +58,18 @@ namespace margelo::nitro::video {
     void setPictureInPicture(bool pictureInPicture) override;
     bool getAutoEnterPictureInPicture() override;
     void setAutoEnterPictureInPicture(bool autoEnterPictureInPicture) override;
-    ResizeMode getResizeMode() override;
-    void setResizeMode(ResizeMode resizeMode) override;
+    VideoResizeMode getResizeMode() override;
+    void setResizeMode(VideoResizeMode resizeMode) override;
     bool getKeepScreenAwake() override;
     void setKeepScreenAwake(bool keepScreenAwake) override;
     SurfaceType getSurfaceType() override;
     void setSurfaceType(SurfaceType surfaceType) override;
+    NativeControlsStyles getControlsStyles() override;
+    void setControlsStyles(const NativeControlsStyles& controlsStyles) override;
+    FullscreenOrientation getFullscreenOrientation() override;
+    void setFullscreenOrientation(FullscreenOrientation fullscreenOrientation) override;
+    bool getFullscreenAutorotate() override;
+    void setFullscreenAutorotate(bool fullscreenAutorotate) override;
 
   public:
     // Methods

@@ -3,12 +3,14 @@ package com.twg.video.view
 import android.annotation.SuppressLint
 import android.app.PictureInPictureParams
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.util.AttributeSet
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.SurfaceView
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -21,8 +23,10 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.PlayerView
 import com.facebook.react.bridge.ReactApplicationContext
 import com.margelo.nitro.NitroModules
+import com.margelo.nitro.video.FullscreenOrientation
 import com.margelo.nitro.video.HybridVideoPlayer
-import com.margelo.nitro.video.ResizeMode
+import com.margelo.nitro.video.NativeControlsStyles
+import com.margelo.nitro.video.VideoResizeMode
 import com.margelo.nitro.video.SurfaceType
 import com.margelo.nitro.video.VideoViewEventsEmitter
 import com.twg.video.core.LibraryError
@@ -37,6 +41,7 @@ import com.twg.video.core.utils.Threading.runOnMainThread
 import com.twg.video.core.extensions.toAspectRatioFrameLayout
 import com.twg.video.core.utils.PictureInPictureUtils
 import com.twg.video.core.utils.PictureInPictureUtils.createDisabledPictureInPictureParams
+import com.twg.video.core.utils.ControlsStylesUtils
 import com.twg.video.core.utils.SmallVideoPlayerOptimizer
 import com.twg.video.R.layout.player_view_surface
 import com.twg.video.R.layout.player_view_texture
@@ -92,6 +97,15 @@ class VideoView @JvmOverloads constructor(
       }
     }
 
+  var controlsStyles: NativeControlsStyles = ControlsStylesUtils.DEFAULT
+    set(value) {
+      if (field == value) return
+      field = value
+      runOnMainThread {
+        applyControlsStyles()
+      }
+    }
+
   var pictureInPictureEnabled: Boolean = false
 
   var surfaceType: SurfaceType = SurfaceType.SURFACE
@@ -105,10 +119,16 @@ class VideoView @JvmOverloads constructor(
         playerView = createPlayerView()
         playerView.player = hybridPlayer?.player
         addView(playerView)
+        setupFullscreenButton()
+        applyControlsStyles()
       }
     }
 
-  var resizeMode: ResizeMode = ResizeMode.NONE
+  // Read when fullscreen opens; a change made while fullscreen is open applies the next time.
+  var fullscreenOrientation: FullscreenOrientation = FullscreenOrientation.ALL
+  var fullscreenAutorotate: Boolean = true
+
+  var resizeMode: VideoResizeMode = VideoResizeMode.NONE
     set(value) {
       field = value
       runOnMainThread {
@@ -174,13 +194,19 @@ class VideoView @JvmOverloads constructor(
   @SuppressLint("InflateParams")
   private fun createPlayerView(): PlayerView {
     return when (surfaceType) {
-      SurfaceType.SURFACE -> LayoutInflater.from(context).inflate(player_view_surface, null) as PlayerView
+      SurfaceType.SURFACE,
+      SurfaceType.SECURESURFACE -> LayoutInflater.from(context).inflate(player_view_surface, null) as PlayerView
       SurfaceType.TEXTURE -> LayoutInflater.from(context).inflate(player_view_texture, null) as PlayerView
     }.apply {
+      // A secure surface is left out of screenshots, screen recordings and non-secure displays.
+      (videoSurfaceView as? SurfaceView)?.setSecure(surfaceType == SurfaceType.SECURESURFACE)
+
       layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
       setShutterBackgroundColor(Color.TRANSPARENT)
       setShowSubtitleButton(true)
       useController = false
+
+      resizeMode = this@VideoView.resizeMode.toAspectRatioFrameLayout()
 
       // Apply optimizations based on video player size if needed
       configureForSmallPlayer()
@@ -193,9 +219,6 @@ class VideoView @JvmOverloads constructor(
       MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY)
     )
     layout(left, top, right, bottom)
-
-    // Additional layout fixes for small video players
-    applySmallPlayerLayoutFixes()
   }
 
   override fun requestLayout() {
@@ -204,17 +227,48 @@ class VideoView @JvmOverloads constructor(
     // https://github.com/facebook/react-native/blob/d19afc73f5048f81656d0b4424232ce6d69a6368/ReactAndroid/src/main/java/com/facebook/react/views/toolbar/ReactToolbar.java#L166
     // This fix issue where exoplayer views where wrong sizes
     // Without it, controls, PictureInPicture, content fills, etc. don't work
-    post(layoutRunnable)
+    //
+    // The pass goes to the front of the main queue and replaces a pending one. PlayerView asks
+    // for it when the video size arrives, and a plain post() ran it behind the messages already
+    // queued (first frame rendered, state changes), so the first frames were drawn with the old
+    // bounds: stretched over the whole view before snapping to the video's aspect ratio (#4925).
+    removeCallbacks(layoutRunnable)
+    val mainHandler = handler
+    if (mainHandler != null) {
+      mainHandler.postAtFrontOfQueue(layoutRunnable)
+    } else {
+      // Not attached yet: View.post keeps the runnable until the view gets a handler.
+      post(layoutRunnable)
+    }
   }
 
   @SuppressLint("PrivateResource")
   private fun setupFullscreenButton() {
+    // Setting the listener makes PlayerView show the button
     playerView.setFullscreenButtonClickListener { _ ->
       enterFullscreen()
     }
 
-    playerView.findViewById<ImageButton>(androidx.media3.ui.R.id.exo_fullscreen)
-      ?.setImageResource(androidx.media3.ui.R.drawable.exo_ic_fullscreen_enter)
+    playerView.findViewById<ImageButton>(androidx.media3.ui.R.id.exo_fullscreen)?.apply {
+      setImageResource(androidx.media3.ui.R.drawable.exo_ic_fullscreen_enter)
+      if (controlsStyles.hideFullscreen) visibility = View.GONE
+    }
+    // The same button in the compact layout that small players use
+    if (controlsStyles.hideFullscreen) {
+      playerView.findViewById<View>(androidx.media3.ui.R.id.exo_minimal_fullscreen)?.visibility = View.GONE
+    }
+  }
+
+  /**
+   * Applies [controlsStyles] to the current PlayerView. Call it again whenever the PlayerView
+   * is recreated or leaves fullscreen.
+   */
+  fun applyControlsStyles() {
+    ControlsStylesUtils.apply(playerView, controlsStyles)
+    // In fullscreen the button leaves fullscreen and stays visible; the fragment owns it there.
+    if (!isInFullscreen) {
+      setupFullscreenButton()
+    }
   }
 
   fun enterFullscreen() {
@@ -473,6 +527,25 @@ class VideoView @JvmOverloads constructor(
     }
   }
 
+  /**
+   * Leaves picture-in-picture on request from JS. Android has no call that leaves it, so while the
+   * activity is in PiP this brings it back to the front: the system then leaves PiP and
+   * [PictureInPictureHelperFragment] restores the views through [exitPictureInPicture].
+   */
+  fun requestExitPictureInPicture() {
+    if (!isInPictureInPicture) return
+
+    val currentActivity = applicationContent.currentActivity
+    if (currentActivity?.isInPictureInPictureMode == true) {
+      currentActivity.startActivity(
+        Intent(currentActivity, currentActivity.javaClass)
+          .addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+      )
+    } else {
+      exitPictureInPicture()
+    }
+  }
+
   fun exitPictureInPicture() {
     if (!isInPictureInPicture) return
 
@@ -553,13 +626,16 @@ class VideoView @JvmOverloads constructor(
   private fun PlayerView.configureForSmallPlayer() {
     SmallVideoPlayerOptimizer.applyOptimizations(this, context, isFullscreen = false)
 
-    // Also apply after any layout changes
-    viewTreeObserver.addOnGlobalLayoutListener {
-      SmallVideoPlayerOptimizer.applyOptimizations(this, context, isFullscreen = false)
+    // Re-apply when this view's own bounds change. Scoped to the PlayerView rather than the
+    // window-wide ViewTreeObserver: a global layout listener registered before attach is merged
+    // into the window's observer and never removed on detach, which retains every PlayerView for
+    // the lifetime of the Activity. A layout-change listener lives on the view itself.
+    addOnLayoutChangeListener { _, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+      val sizeChanged =
+        (right - left) != (oldRight - oldLeft) || (bottom - top) != (oldBottom - oldTop)
+      if (sizeChanged) {
+        SmallVideoPlayerOptimizer.applyOptimizations(this, context, isFullscreen = false)
+      }
     }
-  }
-
-  private fun applySmallPlayerLayoutFixes() {
-    SmallVideoPlayerOptimizer.applyOptimizations(playerView, context, isFullscreen = false)
   }
 }

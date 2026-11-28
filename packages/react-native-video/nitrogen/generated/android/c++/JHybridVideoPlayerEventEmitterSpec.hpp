@@ -60,6 +60,7 @@ namespace margelo::nitro::video {
     ListenerSubscription addOnBufferListener(const std::function<void(bool /* buffering */)>& listener) override;
     ListenerSubscription addOnControlsVisibleChangeListener(const std::function<void(bool /* visible */)>& listener) override;
     ListenerSubscription addOnEndListener(const std::function<void()>& listener) override;
+    ListenerSubscription addOnErrorListener(const std::function<void(const std::string& /* error */)>& listener) override;
     ListenerSubscription addOnExternalPlaybackChangeListener(const std::function<void(bool /* externalPlaybackActive */)>& listener) override;
     ListenerSubscription addOnLoadListener(const std::function<void(const onLoadData& /* data */)>& listener) override;
     ListenerSubscription addOnLoadStartListener(const std::function<void(const onLoadStartData& /* data */)>& listener) override;
@@ -72,6 +73,8 @@ namespace margelo::nitro::video {
     ListenerSubscription addOnTimedMetadataListener(const std::function<void(const TimedMetadata& /* data */)>& listener) override;
     ListenerSubscription addOnTextTrackDataChangedListener(const std::function<void(const std::vector<std::string>& /* data */)>& listener) override;
     ListenerSubscription addOnTrackChangeListener(const std::function<void(const std::optional<std::variant<nitro::NullType, TextTrack>>& /* track */)>& listener) override;
+    ListenerSubscription addOnVideoTrackChangeListener(const std::function<void(const VideoTrackChangeData& /* data */)>& listener) override;
+    ListenerSubscription addOnAudioTrackChangeListener(const std::function<void(const AudioTrackChangeData& /* data */)>& listener) override;
     ListenerSubscription addOnVolumeChangeListener(const std::function<void(const onVolumeChangeData& /* data */)>& listener) override;
     void clearAllListeners() override;
 

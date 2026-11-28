@@ -20,6 +20,7 @@ namespace margelo::nitro::video {
       prototype.registerHybridMethod("addOnBufferListener", &HybridVideoPlayerEventEmitterSpec::addOnBufferListener);
       prototype.registerHybridMethod("addOnControlsVisibleChangeListener", &HybridVideoPlayerEventEmitterSpec::addOnControlsVisibleChangeListener);
       prototype.registerHybridMethod("addOnEndListener", &HybridVideoPlayerEventEmitterSpec::addOnEndListener);
+      prototype.registerHybridMethod("addOnErrorListener", &HybridVideoPlayerEventEmitterSpec::addOnErrorListener);
       prototype.registerHybridMethod("addOnExternalPlaybackChangeListener", &HybridVideoPlayerEventEmitterSpec::addOnExternalPlaybackChangeListener);
       prototype.registerHybridMethod("addOnLoadListener", &HybridVideoPlayerEventEmitterSpec::addOnLoadListener);
       prototype.registerHybridMethod("addOnLoadStartListener", &HybridVideoPlayerEventEmitterSpec::addOnLoadStartListener);
@@ -32,6 +33,8 @@ namespace margelo::nitro::video {
       prototype.registerHybridMethod("addOnTimedMetadataListener", &HybridVideoPlayerEventEmitterSpec::addOnTimedMetadataListener);
       prototype.registerHybridMethod("addOnTextTrackDataChangedListener", &HybridVideoPlayerEventEmitterSpec::addOnTextTrackDataChangedListener);
       prototype.registerHybridMethod("addOnTrackChangeListener", &HybridVideoPlayerEventEmitterSpec::addOnTrackChangeListener);
+      prototype.registerHybridMethod("addOnVideoTrackChangeListener", &HybridVideoPlayerEventEmitterSpec::addOnVideoTrackChangeListener);
+      prototype.registerHybridMethod("addOnAudioTrackChangeListener", &HybridVideoPlayerEventEmitterSpec::addOnAudioTrackChangeListener);
       prototype.registerHybridMethod("addOnVolumeChangeListener", &HybridVideoPlayerEventEmitterSpec::addOnVolumeChangeListener);
       prototype.registerHybridMethod("clearAllListeners", &HybridVideoPlayerEventEmitterSpec::clearAllListeners);
     });

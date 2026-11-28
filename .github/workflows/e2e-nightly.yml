@@ -1,0 +1,264 @@
+# Nightly orchestrator: the full RN-version x device matrix, plus one quarantine leg per
+# platform for flows tagged `flaky` (only scheduled when such flows exist — Maestro
+# refuses a tag filter that matches nothing). Every leg is non-blocking; the report job
+# then records one history line per row on the `e2e-results` branch and opens/updates/
+# closes one GitHub issue per failing row. Design: e2e/CI_MATRIX_DESIGN.md.
+name: e2e-nightly
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+# Queue rather than cancel: two overlapping runs would race on the history-branch push
+# and on issue mutations, and cancelling would waste the runner minutes already spent.
+concurrency:
+  group: e2e-nightly
+  cancel-in-progress: false
+
+# Read-only by default; only the report job below writes.
+permissions:
+  contents: read
+
+jobs:
+  # Single source of truth for every row: the legs receive its `tags` and
+  # `artifact-name`, and the report job derives its expected-row list from the same
+  # objects, so they cannot drift apart.
+  # Quarantine legs are only planned when a flow is tagged `flaky`.
+  matrix-plan:
+    name: matrix plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      android-matrix: ${{ steps.plan.outputs.android-matrix }}
+      ios-matrix: ${{ steps.plan.outputs.ios-matrix }}
+      has-quarantine: ${{ steps.plan.outputs.has-quarantine }}
+      quarantine-android: ${{ steps.plan.outputs.quarantine-android }}
+      quarantine-ios: ${{ steps.plan.outputs.quarantine-ios }}
+      expected-labels: ${{ steps.plan.outputs.expected-labels }}
+      quarantine-labels: ${{ steps.plan.outputs.quarantine-labels }}
+    steps:
+      - uses: actions/checkout@v7
+
+      # Everything about the matrix (rows, artifact names, the shape guard, flaky
+      # detection) lives in scripts/e2e/matrix-plan.mjs, which has unit tests.
+      - name: Build the matrix plan
+        id: plan
+        run: node scripts/e2e/matrix-plan.mjs e2e/flows
+
+  android:
+    needs: matrix-plan
+    name: android (${{ matrix.rn }}, API ${{ matrix.api-level }})
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.matrix-plan.outputs.android-matrix) }}
+    uses: ./.github/workflows/_e2e-android.yml
+    with:
+      rn-version: ${{ matrix.rn }}
+      api-level: ${{ matrix.api-level }}
+      tags: ${{ matrix.tags }}
+      artifact-name: ${{ matrix.artifact-name }}
+      blocking: false
+
+  ios:
+    needs: matrix-plan
+    name: ios (${{ matrix.rn }}, ${{ matrix.sim-device }})
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.matrix-plan.outputs.ios-matrix) }}
+    uses: ./.github/workflows/_e2e-ios.yml
+    with:
+      rn-version: ${{ matrix.rn }}
+      runner: ${{ matrix.runner }}
+      ios-runtime: ${{ matrix.ios-runtime }}
+      sim-device: ${{ matrix.sim-device }}
+      tags: ${{ matrix.tags }}
+      artifact-name: ${{ matrix.artifact-name }}
+      blocking: false
+
+  quarantine-android:
+    needs: matrix-plan
+    if: needs.matrix-plan.outputs.has-quarantine == 'true'
+    name: quarantine android (flaky)
+    uses: ./.github/workflows/_e2e-android.yml
+    with:
+      rn-version: ${{ fromJSON(needs.matrix-plan.outputs.quarantine-android).rn-version }}
+      api-level: ${{ fromJSON(needs.matrix-plan.outputs.quarantine-android).api-level }}
+      artifact-name: ${{ fromJSON(needs.matrix-plan.outputs.quarantine-android).artifact-name }}
+      blocking: false
+      tags: ${{ fromJSON(needs.matrix-plan.outputs.quarantine-android).tags }}
+
+  quarantine-ios:
+    needs: matrix-plan
+    if: needs.matrix-plan.outputs.has-quarantine == 'true'
+    name: quarantine ios (flaky)
+    uses: ./.github/workflows/_e2e-ios.yml
+    with:
+      rn-version: ${{ fromJSON(needs.matrix-plan.outputs.quarantine-ios).rn-version }}
+      runner: ${{ fromJSON(needs.matrix-plan.outputs.quarantine-ios).runner }}
+      ios-runtime: ${{ fromJSON(needs.matrix-plan.outputs.quarantine-ios).ios-runtime }}
+      artifact-name: ${{ fromJSON(needs.matrix-plan.outputs.quarantine-ios).artifact-name }}
+      blocking: false
+      tags: ${{ fromJSON(needs.matrix-plan.outputs.quarantine-ios).tags }}
+
+  # `needs` on every leg guarantees all artifacts are uploaded before the download;
+  # `if: always()` keeps this running after skipped quarantine legs or a cancelled run.
+  report:
+    needs: [matrix-plan, android, ios, quarantine-android, quarantine-ios]
+    if: always()
+    runs-on: ubuntu-latest
+    # contents: write pushes to the orphan `e2e-results` branch; issues: write opens and
+    # closes the nightly issues.
+    permissions:
+      contents: write
+      issues: write
+    timeout-minutes: 15
+    steps:
+      # Only the history checkout below keeps credentials, for its push.
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      # The orphan `e2e-results` branch does not exist until the one-time setup in
+      # e2e/CI_MATRIX_DESIGN.md ("Manual setup"). Rows are still classified and reported
+      # without it; only the history is not persisted.
+      - name: Check out the results history
+        id: history
+        continue-on-error: true
+        uses: actions/checkout@v7
+        with:
+          ref: e2e-results
+          path: history
+
+      - uses: actions/download-artifact@v8
+        with:
+          path: reports
+
+      # A leg that died before Maestro ran uploads nothing, so download-artifact creates
+      # no directory for it. Pre-creating every expected row's directory makes the loop
+      # below visit all rows; record-result.mjs scores the empty ones as `missing-report`.
+      - name: Ensure every expected row has a reports/ directory
+        env:
+          EXPECTED_LABELS_JSON: ${{ needs.matrix-plan.outputs.expected-labels }}
+        run: |
+          set -euo pipefail
+          mkdir -p reports
+          echo "$EXPECTED_LABELS_JSON" | jq -r '.[]' | while IFS= read -r label; do
+            mkdir -p "reports/${label}"
+          done
+
+      # record-result.mjs is the one place that decides what "green" means for a row.
+      # Its verdict is read back from the history line it just appended into
+      # row-status.tsv, which the issue step below consumes. History persistence and
+      # classification are independent: a missing `e2e-results` branch (until the
+      # one-time setup in e2e/CI_MATRIX_DESIGN.md, "Manual setup") still classifies
+      # rows for issue reporting. No `set -e`: one row's crash must not skip the rest.
+      - name: Classify rows and append results to the history branch
+        env:
+          HISTORY_OUTCOME: ${{ steps.history.outcome }}
+          EXPECTED_LABELS_JSON: ${{ needs.matrix-plan.outputs.expected-labels }}
+          QUARANTINE_LABELS_JSON: ${{ needs.matrix-plan.outputs.quarantine-labels }}
+        run: |
+          set -uo pipefail
+          shopt -s nullglob
+
+          persist_history=1
+          if [ "$HISTORY_OUTCOME" != "success" ]; then
+            {
+              echo "::warning::the orphan 'e2e-results' branch does not exist (or is unreachable) — rows are still classified for issue reporting, but nothing is persisted to history."
+              echo "Create it once (empty orphan branch pushed to origin); see e2e/CI_MATRIX_DESIGN.md, \"Manual setup\"."
+            } | tee -a "$GITHUB_STEP_SUMMARY" >&2
+            rm -rf history
+            mkdir -p history
+            persist_history=0
+          fi
+
+          overall=0
+          : > row-status.tsv
+          for dir in reports/*/; do
+            label=$(basename "$dir")
+            # Quarantine-ness is exact membership in matrix-plan's list, never a pattern
+            # match on the label text.
+            row_args=("${dir}e2e-report.xml" "$label" history/history.jsonl)
+            if echo "$QUARANTINE_LABELS_JSON" | jq -e --arg l "$label" 'any(.[]; . == $l)' >/dev/null; then
+              row_args+=(quarantine)
+            fi
+            if node scripts/e2e/record-result.mjs "${row_args[@]}"; then
+              status=$(tail -n 1 history/history.jsonl \
+                | jq -r --arg l "$label" 'if .label == $l and .failures == 0 then "pass" else "fail" end')
+            else
+              echo "::error::record-result.mjs failed for ${label}"
+              overall=1
+              status=fail
+            fi
+            printf '%s\t%s\n' "$label" "$status" >> row-status.tsv
+          done
+
+          # A label matrix-plan does not expect means an artifact name diverged from the
+          # plan, or something outside this matrix uploaded into the run.
+          extra=$(LC_ALL=C comm -13 \
+            <(echo "$EXPECTED_LABELS_JSON" | jq -r '.[]' | LC_ALL=C sort -u) \
+            <(cut -f1 row-status.tsv | LC_ALL=C sort -u))
+          if [ -n "$extra" ]; then
+            echo "::error::row-status.tsv contains labels matrix-plan does not expect:"
+            while IFS= read -r label; do echo "  - ${label}" >&2; done <<< "$extra"
+            overall=1
+          fi
+
+          if [ "$persist_history" -eq 1 ]; then
+            cd history
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add history.jsonl
+            if git diff --cached --quiet; then
+              echo "no history changes to commit"
+            elif ! git commit -m "chore(ci): nightly results ${{ github.run_id }}"; then
+              echo "::error::failed to commit history.jsonl"
+              overall=1
+            elif ! git push; then
+              echo "::error::failed to push history.jsonl to e2e-results"
+              overall=1
+            fi
+            cd ..
+          fi
+
+          exit "$overall"
+
+      # nightly-issue.mjs exits non-zero when a mutating gh call fails; that fails this
+      # step loudly (nobody watches this job) but every row is still processed first.
+      # Runs even if the step above failed: classification and issue reporting are
+      # independent concerns.
+      - name: Open or close issues per matrix row
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_LABELS_JSON: ${{ needs.matrix-plan.outputs.expected-labels }}
+        run: |
+          set -uo pipefail
+          if [ ! -s row-status.tsv ]; then
+            echo "::error::row-status.tsv is missing or empty — the classification step failed before recording any rows"
+            exit 1
+          fi
+
+          # Compare the label set, not a count: a classify step interrupted mid-loop
+          # leaves a well-formed file that covers only a subset of rows.
+          expected_sorted=$(echo "$EXPECTED_LABELS_JSON" | jq -r '.[]' | LC_ALL=C sort -u)
+          actual_sorted=$(cut -f1 row-status.tsv | LC_ALL=C sort -u)
+          missing=$(LC_ALL=C comm -23 <(echo "$expected_sorted") <(echo "$actual_sorted"))
+          overall=0
+          if [ -n "$missing" ]; then
+            expected_count=$(echo "$expected_sorted" | grep -c .)
+            missing_count=$(echo "$missing" | grep -c .)
+            echo "::error::row-status.tsv has $((expected_count - missing_count)) of ${expected_count} expected rows. Missing:"
+            while IFS= read -r label; do echo "  - ${label}" >&2; done <<< "$missing"
+            overall=1
+          fi
+
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          while IFS=$'\t' read -r label status; do
+            if ! node scripts/e2e/nightly-issue.mjs "$label" "$status" "$RUN_URL"; then
+              echo "::error::nightly-issue.mjs failed for ${label} (status=${status})"
+              overall=1
+            fi
+          done < row-status.tsv
+          exit "$overall"

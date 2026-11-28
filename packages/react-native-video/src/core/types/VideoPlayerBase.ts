@@ -1,14 +1,23 @@
+import type { AudioOutput } from './AudioOutput';
 import type { ListenerSubscription } from './EventEmitter';
 import type { AllPlayerEvents } from './Events';
+import type { AudioTrack } from './AudioTrack';
 import type { IgnoreSilentSwitchMode } from './IgnoreSilentSwitchMode';
 import type { MixAudioMode } from './MixAudioMode';
 import type { TextTrack } from './TextTrack';
+import type { VideoTrack } from './VideoTrack';
 import type { VideoPlayerSourceBase } from './VideoPlayerSourceBase';
 import type { VideoPlayerStatus } from './VideoPlayerStatus';
 
 import type { VideoConfig, VideoSource } from './VideoConfig';
 
-export interface VideoPlayerBase {
+/**
+ * Every member of {@link VideoPlayerBase} that the native (Nitro) spec can express.
+ * The Nitro spec extends this interface instead of {@link VideoPlayerBase}: nitrogen cannot
+ * generate a method with a type parameter (`addEventListener<Event>`), and one such member
+ * makes it drop the whole `VideoPlayer` HybridObject.
+ */
+export interface VideoPlayerSpecBase {
   /**
    * The source of the video.
    * Source is immutable. To change the source, you need to call {@link replaceSourceAsync} method.
@@ -26,8 +35,8 @@ export interface VideoPlayerBase {
   readonly status: VideoPlayerStatus;
 
   /**
-   * The current time of the video in seconds (1.0 = 1 sec).
-   * Returns NaN if the current time is not available.
+   * The duration of the video in seconds (1.0 = 1 sec).
+   * Returns NaN if the duration is not available.
    */
   readonly duration: number;
 
@@ -38,8 +47,8 @@ export interface VideoPlayerBase {
   volume: number;
 
   /**
-   * The duration of the video in seconds (1.0 = 1 sec).
-   * Returns NaN if the duration is not available.
+   * The current time of the video in seconds (1.0 = 1 sec).
+   * Returns NaN if the current time is not available.
    */
   currentTime: number;
 
@@ -65,7 +74,8 @@ export interface VideoPlayerBase {
    * - `mixWithOthers` - Mix with other players.
    * - `doNotMix` - Do not mix with other players.
    * - `duckOthers` - Duck other players.
-   * - `auto` - uses default behavior for player.
+   * - `auto` - on iOS other audio stops (as `doNotMix`), on Android other apps lower their
+   *   volume (as `duckOthers`).
    *
    * default is `auto`.
    */
@@ -103,6 +113,22 @@ export interface VideoPlayerBase {
   playWhenInactive: boolean;
 
   /**
+   * The interval, in milliseconds, between two `onProgress` events while the
+   * video is playing.
+   *
+   * Values that are not a finite number greater than 0 are ignored.
+   *
+   * Reading it returns the interval in effect, so before anything is set it
+   * reports the platform default.
+   *
+   * @note on web the browser decides how often `timeupdate` fires (about 4
+   * times per second), so an interval below ~250 ms cannot be reached there.
+   *
+   * @default 250 on Android and web, 500 on iOS
+   */
+  progressUpdateInterval: number;
+
+  /**
    * Disables the internal audio session management for this player.
    * When disabled, react-native-video will not configure or activate the AVAudioSession,
    * allowing other libraries (like audio recording libraries) to manage it.
@@ -111,6 +137,35 @@ export interface VideoPlayerBase {
    * @platform iOS
    */
   disableAudioSessionManagement: boolean;
+
+  /**
+   * Whether the player may switch to external playback, such as AirPlay video.
+   *
+   * - `true` - the video can be sent to an AirPlay device (default).
+   * - `false` - the video stays on the device. AirPlay can still carry the audio.
+   *
+   * @default true
+   * @platform iOS
+   */
+  allowsExternalPlayback: boolean;
+
+  /**
+   * Where the audio plays on a phone.
+   *
+   * - `speaker` - the loudspeaker, or the connected headphones (default).
+   * - `earpiece` - the receiver at the top of the phone, as in a phone call.
+   *
+   * @note On iOS `earpiece` is ignored while any `VideoView` has `pictureInPicture` on (also
+   * before Picture in Picture starts) and while any player uses {@link playInBackground} or
+   * {@link showNotificationControls}, because those need the playback audio session.
+   * @note On Android the app's audio mode is set to communication, as in a call, as long as
+   * any player has `earpiece`, also a paused one. That needs the `MODIFY_AUDIO_SETTINGS`
+   * permission.
+   *
+   * @default 'speaker'
+   * @platform iOS, Android
+   */
+  audioOutput: AudioOutput;
 
   /**
    * Whether the player is playing.
@@ -160,7 +215,9 @@ export interface VideoPlayerBase {
   /**
    * Replace the current source of the player.
    * @param source - The new source of the video.
-   * @note If you want to clear the source, you can pass null.
+   * @note Passing null unloads the source. On iOS and Android this releases the native player
+   * like {@link release}: a later load rejects with `player/cancelled` (also reported to `onError`)
+   * and no native events are delivered. On web the player can load a new source afterwards.
    * see {@link VideoPlayerSourceBase}
    */
   replaceSourceAsync(
@@ -183,7 +240,69 @@ export interface VideoPlayerBase {
    * Get the currently selected text track.
    * @returns The currently selected text track, or undefined if none is selected
    */
-  readonly selectedTrack?: TextTrack;
+  readonly selectedTrack?: TextTrack | undefined;
+
+  /**
+   * All video renditions available for the current source, best first.
+   * Empty until the source's manifest has loaded - subscribe to
+   * `onVideoTrackChange` to know when this becomes populated (or changes,
+   * e.g. after a source replacement).
+   */
+  getAvailableVideoTracks(): VideoTrack[];
+
+  /**
+   * Pin playback to a specific video rendition, or pass `undefined` for
+   * automatic (adaptive) selection.
+   *
+   * @param trackId - id from {@link getAvailableVideoTracks}, or `undefined` for auto.
+   * @note Android enforces this as a hard track-selection override - the chosen
+   *       rendition plays, full stop. iOS has no rendition-selection API in
+   *       AVFoundation, so it is enforced as a resolution/peak-bitrate cap on
+   *       the player item: the chosen rendition becomes the highest eligible
+   *       one, but AVPlayer may still adapt downwards under bandwidth
+   *       pressure. Use `onVideoTrackChange`'s `activeTrackId` to see what is
+   *       actually playing, which may differ from `selectedVideoTrackId` on iOS.
+   * @note Safe to call before the source is loaded; the selection is latched
+   *       and applied once renditions are known.
+   */
+  selectVideoTrack(trackId?: string): void;
+
+  /**
+   * The id passed to the last {@link selectVideoTrack} call, or undefined
+   * when automatic (adaptive) selection is active.
+   */
+  readonly selectedVideoTrackId?: string | undefined;
+
+  /**
+   * All alternate audio tracks available for the current source (e.g.
+   * different languages or commentary tracks). Empty until the source's
+   * manifest has loaded - subscribe to `onAudioTrackChange` to know when
+   * this becomes populated.
+   */
+  getAvailableAudioTracks(): AudioTrack[];
+
+  /**
+   * Select an audio track, or pass `undefined` for the default track.
+   *
+   * @param trackId - id from {@link getAvailableAudioTracks}, or `undefined` for default.
+   * @note Unlike {@link selectVideoTrack}, this is a real, exact selection on
+   *       both platforms - not an approximation - since alternate audio tracks
+   *       have a genuine native selection API (AVFoundation media selection
+   *       groups on iOS, Media3 track overrides on Android), the same
+   *       mechanism {@link selectTextTrack} already uses.
+   * @note Safe to call before the source is loaded; the selection is latched
+   *       and applied once tracks are known.
+   */
+  selectAudioTrack(trackId?: string): void;
+
+  /**
+   * The id of the audio track that is selected right now: the one passed to
+   * the last {@link selectAudioTrack} call or, when none was picked (or after
+   * `selectAudioTrack()` with no id), the track the player chose by default.
+   * `undefined` only while no audio track is known yet, e.g. before the
+   * source has loaded.
+   */
+  readonly selectedAudioTrackId?: string;
 
   /**
    * Whether to show notification controls (lock screen / control center).
@@ -194,7 +313,9 @@ export interface VideoPlayerBase {
    * Releases the player's resources. After calling this, the player is no longer usable.
    */
   release(): void;
+}
 
+export interface VideoPlayerBase extends VideoPlayerSpecBase {
   addEventListener<Event extends keyof AllPlayerEvents>(
     event: Event,
     callback: AllPlayerEvents[Event]

@@ -23,8 +23,14 @@ namespace margelo::nitro::video { enum class VideoPlayerStatus; }
 namespace margelo::nitro::video { enum class MixAudioMode; }
 // Forward declaration of `IgnoreSilentSwitchMode` to properly resolve imports.
 namespace margelo::nitro::video { enum class IgnoreSilentSwitchMode; }
+// Forward declaration of `AudioOutput` to properly resolve imports.
+namespace margelo::nitro::video { enum class AudioOutput; }
 // Forward declaration of `TextTrack` to properly resolve imports.
 namespace margelo::nitro::video { struct TextTrack; }
+// Forward declaration of `VideoTrack` to properly resolve imports.
+namespace margelo::nitro::video { struct VideoTrack; }
+// Forward declaration of `AudioTrack` to properly resolve imports.
+namespace margelo::nitro::video { struct AudioTrack; }
 
 #include <memory>
 #include "HybridVideoPlayerSourceSpec.hpp"
@@ -32,12 +38,16 @@ namespace margelo::nitro::video { struct TextTrack; }
 #include "VideoPlayerStatus.hpp"
 #include "MixAudioMode.hpp"
 #include "IgnoreSilentSwitchMode.hpp"
+#include "AudioOutput.hpp"
 #include "TextTrack.hpp"
 #include <optional>
+#include <string>
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/Null.hpp>
 #include <variant>
 #include <vector>
+#include "VideoTrack.hpp"
+#include "AudioTrack.hpp"
 
 namespace margelo::nitro::video {
 
@@ -90,10 +100,18 @@ namespace margelo::nitro::video {
       virtual void setPlayInBackground(bool playInBackground) = 0;
       virtual bool getPlayWhenInactive() = 0;
       virtual void setPlayWhenInactive(bool playWhenInactive) = 0;
+      virtual double getProgressUpdateInterval() = 0;
+      virtual void setProgressUpdateInterval(double progressUpdateInterval) = 0;
       virtual bool getDisableAudioSessionManagement() = 0;
       virtual void setDisableAudioSessionManagement(bool disableAudioSessionManagement) = 0;
+      virtual bool getAllowsExternalPlayback() = 0;
+      virtual void setAllowsExternalPlayback(bool allowsExternalPlayback) = 0;
+      virtual AudioOutput getAudioOutput() = 0;
+      virtual void setAudioOutput(AudioOutput audioOutput) = 0;
       virtual bool getIsPlaying() = 0;
       virtual std::optional<TextTrack> getSelectedTrack() = 0;
+      virtual std::optional<std::string> getSelectedVideoTrackId() = 0;
+      virtual std::optional<std::string> getSelectedAudioTrackId() = 0;
 
     public:
       // Methods
@@ -107,6 +125,10 @@ namespace margelo::nitro::video {
       virtual void pause() = 0;
       virtual void seekBy(double time) = 0;
       virtual void seekTo(double time) = 0;
+      virtual std::vector<VideoTrack> getAvailableVideoTracks() = 0;
+      virtual void selectVideoTrack(const std::optional<std::string>& trackId) = 0;
+      virtual std::vector<AudioTrack> getAvailableAudioTracks() = 0;
+      virtual void selectAudioTrack(const std::optional<std::string>& trackId) = 0;
 
     protected:
       // Hybrid Setup

@@ -1,17 +1,25 @@
 package com.margelo.nitro.video
 
+import android.app.ActivityManager
+import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import androidx.annotation.MainThread
+import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
+import androidx.media3.common.Format
 import androidx.media3.common.Metadata
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
+import androidx.media3.common.Timeline
 import androidx.media3.common.Tracks
 import androidx.media3.common.text.CueGroup
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.DecoderReuseEvaluation
 import androidx.media3.exoplayer.DefaultLoadControl
+import androidx.media3.exoplayer.LoadControl
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.analytics.AnalyticsListener
@@ -26,20 +34,32 @@ import com.margelo.nitro.core.Promise
 import com.twg.video.core.LibraryError
 import com.twg.video.core.PlayerError
 import com.twg.video.core.VideoManager
-import com.twg.video.core.extensions.startService
-import com.twg.video.core.extensions.stopService
+import com.twg.video.core.extensions.updateService
+import com.twg.video.core.player.BufferingStrategyLoadControl
 import com.twg.video.core.player.OnAudioFocusChangedListener
 import com.twg.video.core.recivers.AudioBecomingNoisyReceiver
 import com.twg.video.core.services.playback.VideoPlaybackService
 import com.twg.video.core.services.playback.VideoPlaybackServiceConnection
+import com.twg.video.core.utils.AudioTrackUtils
 import com.twg.video.core.utils.TextTrackUtils
 import com.twg.video.core.utils.Threading.mainThreadProperty
 import com.twg.video.core.utils.Threading.runOnMainThread
 import com.twg.video.core.utils.Threading.runOnMainThreadSync
 import com.twg.video.core.utils.VideoOrientationUtils
+import com.twg.video.core.utils.VideoTrackUtils
 import com.twg.video.view.VideoView
 import java.lang.ref.WeakReference
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.max
+
+internal fun Player.setPlaybackRate(rate: Double) {
+  if (rate <= 0.0) {
+    pause()
+    return
+  }
+
+  playbackParameters = playbackParameters.withSpeed(rate.toFloat())
+}
 
 @UnstableApi
 @DoNotStrip
@@ -66,6 +86,9 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   }
 
   var loadedWithSource = false
+  private val releaseStarted = AtomicBoolean(false)
+  internal val isReleaseStarted: Boolean
+    get() = releaseStarted.get()
   private var currentPlayerView: WeakReference<PlayerView>? = null
 
   var wasAutoPaused = false
@@ -78,18 +101,79 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   private val progressHandler = Handler(Looper.getMainLooper())
   private var progressRunnable: Runnable? = null
 
+  /**
+   * Whether `onLoad` was already emitted for the source the player currently holds. The player
+   * returns to `STATE_READY` after every rebuffer and every seek, and `onLoad` must not follow
+   * it there: it is a once-per-source event, as on iOS and in v6.
+   */
+  private var loadReportedForSource = false
+
+  /**
+   * Whether `onReadyToDisplay` was already emitted for the current source. It describes the
+   * first frame of a source, so it comes once, and not again after a seek, a rebuffer or a new
+   * surface (fullscreen, picture-in-picture).
+   */
+  private var readyToDisplayReportedForSource = false
+
+  /**
+   * Whether the video renderer has drawn a frame of the current source. Media3 can draw it
+   * before `STATE_READY`, so it is kept until `onLoad` has gone out.
+   */
+  private var firstFrameRenderedForSource = false
+
+  /**
+   * Emits `onReadyToDisplay` once the source is loaded and its first frame is on screen. A
+   * source without video never draws a frame and never gets it, as on iOS, so a poster can
+   * stay up as artwork.
+   */
+  private fun reportReadyToDisplayIfDue() {
+    if (readyToDisplayReportedForSource || !loadReportedForSource || !firstFrameRenderedForSource) {
+      return
+    }
+    readyToDisplayReportedForSource = true
+    eventEmitter.onReadyToDisplay()
+  }
+
   // Listeners
   private val audioFocusChangedListener = OnAudioFocusChangedListener()
   private val audioBecomingNoisyReceiver = AudioBecomingNoisyReceiver()
 
   // Service Connection
-  private val videoPlaybackServiceConnection = VideoPlaybackServiceConnection(WeakReference(this))
+  private val videoPlaybackServiceConnection = VideoPlaybackServiceConnection(WeakReference(this), context)
 
   // Text track selection state
   private var selectedExternalTrackIndex: Int? = null
+  // The text track last reported by onTrackChange, null for none.
+  private var emittedTextTrackId: String? = null
+
+  // Video track (quality) selection state. The whole VideoTrack is kept, not just its id, so the
+  // pick can be resolved again by resolution/bitrate after the track set changes and ids shift.
+  private var requestedVideoTrack: VideoTrack? = null
+  private var lastVideoTrackChangeSignature: String? = null
+
+  // Audio track selection state. The whole AudioTrack is kept, not just its id, so the pick can be
+  // resolved again by language/label/channels after the track set changes and ids shift.
+  private var requestedAudioTrack: AudioTrack? = null
+  private var lastAudioTrackChangeSignature: String? = null
+  // A pick that switches tracks lands asynchronously: ExoPlayer re-runs selection and reports the
+  // result through onTracksChanged. While a switch is on its way, audioSwitchFromId is the track
+  // that was playing when it was asked for, so the event goes out once, with the new track.
+  private var audioSwitchPending = false
+  private var audioSwitchFromId: String? = null
+  // The track ExoPlayer picks on its own for this source, seen while no pick is in force.
+  private var defaultAudioTrackId: String? = null
+  // Fallback for a pick that is cleared while the default isn't known (see selectAudioTrack): if
+  // the selection turns out not to change, no onTracksChanged follows, so acknowledge it here.
+  private val audioSwitchAckRunnable = Runnable {
+    if (!audioSwitchPending || releaseStarted.get()) return@Runnable
+    audioSwitchPending = false
+    audioSwitchFromId = null
+    emitAudioTrackChange(force = true)
+  }
 
   private companion object {
-    const val PROGRESS_UPDATE_INTERVAL_MS = 250L
+    const val DEFAULT_PROGRESS_UPDATE_INTERVAL_MS = 250L
+    const val AUDIO_SWITCH_ACK_TIMEOUT_MS = 300L
     private const val TAG = "HybridVideoPlayer"
     private const val DEFAULT_MIN_BUFFER_DURATION_MS = 5000
     private const val DEFAULT_MAX_BUFFER_DURATION_MS = 10000
@@ -107,20 +191,12 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
     }
 
   override var showNotificationControls: Boolean = false
+    get() = runOnMainThreadSync { field }
     set(value) {
-      val wasRunning = (field || playInBackground)
-      val shouldRun = (value || playInBackground)
-
-      if (shouldRun && !wasRunning) {
-        VideoPlaybackService.startService(context, videoPlaybackServiceConnection)
+      runOnMainThreadSync {
+        field = value
+        VideoPlaybackService.updateService(videoPlaybackServiceConnection)
       }
-      if (!shouldRun && wasRunning) {
-        VideoPlaybackService.stopService(this, videoPlaybackServiceConnection)
-      }
-
-      field = value
-      // Inform service to refresh notification/session layout
-      try { videoPlaybackServiceConnection.serviceBinder?.service?.updatePlayerPreferences(this) } catch (_: Exception) {}
     }
 
   // Player Properties
@@ -162,6 +238,8 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
       return@mainThreadProperty playerVolume == 0.0
     },
     set = { value ->
+      if (value == muted) return@mainThreadProperty
+
       if (value) {
         userVolume = volume
         player.volume = 0f
@@ -178,14 +256,14 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   override var rate: Double by mainThreadProperty(
     get = { player.playbackParameters.speed.toDouble() },
     set = { value ->
-      player.playbackParameters = player.playbackParameters.withSpeed(value.toFloat())
+      player.setPlaybackRate(value)
     }
   )
 
   override var mixAudioMode: MixAudioMode = MixAudioMode.AUTO
     set(value) {
-      VideoManager.audioFocusManager.requestAudioFocusUpdate()
       field = value
+      VideoManager.audioFocusManager.requestAudioFocusUpdate()
     }
 
   // iOS only property
@@ -194,23 +272,56 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   // iOS only property - no-op on Android
   override var disableAudioSessionManagement: Boolean = false
 
-  override var playInBackground: Boolean = false
-    set(value) {
-      val shouldRun = (value || showNotificationControls)
-      val wasRunning = (field || showNotificationControls)
+  // iOS only property - no-op on Android
+  override var allowsExternalPlayback: Boolean = true
 
-      if (shouldRun && !wasRunning) {
-        VideoPlaybackService.startService(context, videoPlaybackServiceConnection)
-      }
-      if (!shouldRun && wasRunning) {
-        VideoPlaybackService.stopService(this, videoPlaybackServiceConnection)
-      }
+  override var audioOutput: AudioOutput = AudioOutput.SPEAKER
+    set(value) {
       field = value
-      // Update preferences to refresh notifications/registration
-      try { videoPlaybackServiceConnection.serviceBinder?.service?.updatePlayerPreferences(this) } catch (_: Exception) {}
+      runOnMainThread {
+        applyAudioOutput()
+        VideoManager.audioFocusManager.requestAudioOutputUpdate()
+      }
+    }
+
+  /**
+   * Routes this player's audio like a call (earpiece) or like media (speaker). The player is
+   * rebuilt in [initializePlayer], so this runs again there.
+   */
+  @MainThread
+  private fun applyAudioOutput() {
+    val attributes = if (audioOutput == AudioOutput.EARPIECE) {
+      AudioAttributes.Builder()
+        .setUsage(C.USAGE_VOICE_COMMUNICATION)
+        .setContentType(C.AUDIO_CONTENT_TYPE_SPEECH)
+        .build()
+    } else {
+      AudioAttributes.DEFAULT
+    }
+    player.setAudioAttributes(attributes, false)
+  }
+
+  override var playInBackground: Boolean = false
+    get() = runOnMainThreadSync { field }
+    set(value) {
+      runOnMainThreadSync {
+        field = value
+        VideoPlaybackService.updateService(videoPlaybackServiceConnection)
+      }
     }
 
   override var playWhenInactive: Boolean = false
+
+  // Read on the main thread by the progress runnable, written from JS.
+  @Volatile
+  private var progressUpdateIntervalMs: Long = DEFAULT_PROGRESS_UPDATE_INTERVAL_MS
+
+  override var progressUpdateInterval: Double
+    get() = progressUpdateIntervalMs.toDouble()
+    set(value) {
+      if (value.isNaN() || value.isInfinite() || value < 1.0) return
+      progressUpdateIntervalMs = value.toLong()
+    }
 
   override var isPlaying: Boolean by mainThreadProperty(
     get = { player.isPlaying == true }
@@ -227,52 +338,146 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
     allocator = DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE)
 
     // Create a LoadControl with the allocator
-    val loadControl = DefaultLoadControl.Builder()
-      .setAllocator(allocator!!)
-      .setBufferDurationsMs(
-        bufferConfig?.minBufferMs?.toInt() ?: DEFAULT_MIN_BUFFER_DURATION_MS, // minBufferMs
-        bufferConfig?.maxBufferMs?.toInt() ?: DEFAULT_MAX_BUFFER_DURATION_MS, // maxBufferMs
-        bufferConfig?.bufferForPlaybackMs?.toInt()
-          ?: DEFAULT_BUFFER_FOR_PLAYBACK_DURATION_MS, // bufferForPlaybackMs
-        bufferConfig?.bufferForPlaybackAfterRebufferMs?.toInt()
-          ?: DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_DURATION_MS // bufferForPlaybackAfterRebufferMs
+    val minBufferMs = bufferConfig?.minBufferMs?.toInt() ?: DEFAULT_MIN_BUFFER_DURATION_MS
+    val maxBufferMs = bufferConfig?.maxBufferMs?.toInt() ?: DEFAULT_MAX_BUFFER_DURATION_MS
+    val bufferForPlaybackMs = bufferConfig?.bufferForPlaybackMs?.toInt()
+      ?: DEFAULT_BUFFER_FOR_PLAYBACK_DURATION_MS
+    val bufferForPlaybackAfterRebufferMs = bufferConfig?.bufferForPlaybackAfterRebufferMs?.toInt()
+      ?: DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_DURATION_MS
+    val backBufferDurationMs = bufferConfig?.backBufferDurationMs?.toInt()
+      ?: DEFAULT_BACK_BUFFER_DURATION_MS
+    val bufferingStrategy = bufferConfig?.bufferingStrategy ?: BufferingStrategy.DEFAULT
+
+    val loadControl: LoadControl = if (bufferingStrategy == BufferingStrategy.DEFAULT) {
+      DefaultLoadControl.Builder()
+        .setAllocator(allocator!!)
+        .setBufferDurationsMs(
+          minBufferMs,
+          maxBufferMs,
+          bufferForPlaybackMs,
+          bufferForPlaybackAfterRebufferMs
+        )
+        .setBackBuffer(
+          backBufferDurationMs,
+          false // retainBackBufferFromKeyframe
+        )
+        .build()
+    } else {
+      val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+      BufferingStrategyLoadControl(
+        bufferAllocator = allocator!!,
+        minBufferMs = minBufferMs,
+        maxBufferMs = maxBufferMs,
+        bufferForPlaybackMs = bufferForPlaybackMs,
+        bufferForPlaybackAfterRebufferMs = bufferForPlaybackAfterRebufferMs,
+        backBufferDurationMs = backBufferDurationMs,
+        strategy = bufferingStrategy,
+        maxHeapAllocationPercent = bufferConfig?.maxHeapAllocationPercent
+          ?: BufferingStrategyLoadControl.DEFAULT_MAX_HEAP_ALLOCATION_PERCENT,
+        minBufferMemoryReservePercent = bufferConfig?.minBufferMemoryReservePercent
+          ?: BufferingStrategyLoadControl.DEFAULT_MIN_BUFFER_MEMORY_RESERVE_PERCENT,
+        memoryClassMb = activityManager.memoryClass
       )
-      .setBackBuffer(
-        bufferConfig?.backBufferDurationMs?.toInt()
-          ?: DEFAULT_BACK_BUFFER_DURATION_MS, // backBufferDurationMs,
-        false // retainBackBufferFromKeyframe
-      )
-      .build()
+    }
 
     val renderersFactory = DefaultRenderersFactory(context)
       .forceEnableMediaCodecAsynchronousQueueing()
       .setEnableDecoderFallback(true)
 
     // Build the player with the LoadControl
+    val previousPlayer = player
     player = ExoPlayer.Builder(context)
       .setLoadControl(loadControl)
       .setLooper(Looper.getMainLooper())
       .setRenderersFactory(renderersFactory)
       .build()
+    // Release the previous player (the placeholder, or an earlier one if initialize() runs again)
+    // so it doesn't leak. Remove the listeners first, like completeRelease(), so a release timeout
+    // doesn't report an error on this player.
+    currentPlayerView?.get()?.player = player
+    previousPlayer.removeListener(playerListener)
+    previousPlayer.removeAnalyticsListener(analyticsListener)
+    previousPlayer.release()
 
     loadedWithSource = true
 
+    applyVideoQualityConstraints()
+    applyAudioOutput()
+
     player.addListener(playerListener)
     player.addAnalyticsListener(analyticsListener)
-    player.setMediaSource(hybridSource.mediaSource)
+    setMediaSource(hybridSource)
+    ensureNotReleased()
 
-    // Emit onLoadStart
+    emitLoadStart(hybridSource)
+    ensureNotReleased()
+    startProgressUpdates()
+  }
+
+  // A new source starts loading: reported the same way for the first source and for one set
+  // by replaceSourceAsync().
+  private fun emitLoadStart(hybridSource: HybridVideoPlayerSource) {
     val sourceType = if (hybridSource.uri.startsWith("http")) SourceType.NETWORK else SourceType.LOCAL
     eventEmitter.onLoadStart(onLoadStartData(sourceType = sourceType, source = hybridSource))
+    ensureNotReleased()
     status = VideoPlayerStatus.LOADING
-    startProgressUpdates()
+  }
+
+  /**
+   * Applies `bufferConfig.preferredMaximumResolution` and
+   * `preferredPeakBitRate` to the player's track selection.
+   *
+   * Both options were previously iOS-only in practice: they are applied to the
+   * `AVPlayerItem` in `AVPlayerItem+setBufferConfig.swift`, while Android read
+   * only the buffering fields off the same config and silently ignored these
+   * two. ExoPlayer expresses the same constraints through
+   * `TrackSelectionParameters`, which this file's sibling `TextTrackUtils`
+   * already uses for text-track selection.
+   *
+   * Called from `initializePlayer`, which every caller runs inside
+   * `runOnMainThreadSync` — `trackSelectionParameters` must be set on the
+   * player's application thread.
+   */
+  private fun applyVideoQualityConstraints() {
+    val config = bufferConfig ?: return
+    val maxResolution = config.preferredMaximumResolution
+    val maxBitRate = config.preferredPeakBitRate
+
+    if (maxResolution == null && maxBitRate == null) return
+
+    player.trackSelectionParameters = player.trackSelectionParameters
+      .buildUpon()
+      .apply {
+        maxResolution?.let { setMaxVideoSize(it.width.toInt(), it.height.toInt()) }
+        maxBitRate?.let { setMaxVideoBitrate(it.toInt()) }
+      }
+      .build()
+  }
+
+  // Sets the source on the player, starting at `startPosition` (milliseconds) when it is given
+  private fun setMediaSource(hybridSource: HybridVideoPlayerSource) {
+    val startPositionMs = hybridSource.config.startPosition?.toLong() ?: 0L
+
+    if (startPositionMs > 0) {
+      player.setMediaSource(hybridSource.mediaSource, startPositionMs)
+    } else {
+      player.setMediaSource(hybridSource.mediaSource)
+    }
+  }
+
+  private fun ensureNotReleased() {
+    if (releaseStarted.get()) {
+      throw PlayerError.Cancelled
+    }
   }
 
   override fun initialize(): Promise<Unit> {
     return Promise.async {
       return@async runOnMainThreadSync {
+        ensureNotReleased()
         initializePlayer()
         player.prepare()
+        ensureNotReleased()
       }
     }
   }
@@ -280,14 +485,17 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   constructor(source: HybridVideoPlayerSource) : this() {
     this.source = source
 
-    runOnMainThread {
-      if (source.config.initializeOnCreation == true) {
-        initializePlayer()
-        player.prepare()
+    runOnMainThreadSync {
+      try {
+        if (source.config.initializeOnCreation == true) {
+          initializePlayer()
+          player.prepare()
+        }
+        VideoManager.registerPlayer(this)
+      } catch (_: PlayerError.Cancelled) {
+        // Initialization was cancelled by release.
       }
     }
-
-    VideoManager.registerPlayer(this)
   }
 
   override fun play() {
@@ -319,18 +527,31 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
         return@async
       }
 
-      val hybridSource = source as? HybridVideoPlayerSource ?: throw PlayerError.InvalidSource
-
-      val oldSource = this.source as? HybridVideoPlayerSource
-      oldSource?.sourceLoader?.cancel()
-
       runOnMainThreadSync {
-        // Update source
-        this.source = source
-        player.setMediaSource(hybridSource.mediaSource)
+        ensureNotReleased()
+        val hybridSource = source as? HybridVideoPlayerSource ?: throw PlayerError.InvalidSource
+        val oldSource = this.source as? HybridVideoPlayerSource
+        oldSource?.sourceLoader?.cancel()
 
-        // Prepare player
+        this.source = source
+        // Audio selection state describes the old source: its default track id and any switch
+        // still waiting for onTracksChanged mean nothing for the new one.
+        defaultAudioTrackId = null
+        audioSwitchPending = false
+        audioSwitchFromId = null
+        progressHandler.removeCallbacks(audioSwitchAckRunnable)
+        setMediaSource(hybridSource)
+        ensureNotReleased()
+
+        // Before initialize() the player is a placeholder without listeners, and
+        // initializePlayer() reports the load start itself.
+        if (loadedWithSource) {
+          emitLoadStart(hybridSource)
+          ensureNotReleased()
+        }
+
         player.prepare()
+        ensureNotReleased()
       }
     }
   }
@@ -338,6 +559,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
   override fun preload(): Promise<Unit> {
     return Promise.async {
       runOnMainThreadSync {
+        ensureNotReleased()
         if (!loadedWithSource) {
           initializePlayer()
         }
@@ -347,17 +569,27 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
         }
 
         player.prepare()
+        ensureNotReleased()
       }
     }
   }
 
   override fun release() {
-    if (playInBackground || showNotificationControls) {
-      VideoPlaybackService.stopService(this, videoPlaybackServiceConnection)
+    if (!releaseStarted.compareAndSet(false, true)) {
+      return
     }
 
-    runOnMainThread {
+    // Defer teardown until the current main-thread callback chain has finished.
+    progressHandler.post { completeRelease() }
+  }
+
+  @MainThread
+  private fun completeRelease() {
+    VideoPlaybackService.updateService(videoPlaybackServiceConnection)
+
+    try {
       VideoManager.unregisterPlayer(this)
+    } finally {
       stopProgressUpdates()
       loadedWithSource = false
 
@@ -365,6 +597,16 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
 
       player.removeListener(playerListener)
       player.removeAnalyticsListener(analyticsListener)
+      // Unbind the view before releasing. The released player stays in memory until JS
+      // collects this hybrid object, and its image renderer would keep the last PlayerView
+      // and with it the whole VideoView alive (about 40 views per player). A released player
+      // no longer processes the message that clears the image output, so it must go first.
+      // Only while the view still shows this player: a VideoView that has moved on to another
+      // player (a pool, a list, a swapped `player` prop) keeps that one.
+      currentPlayerView?.get()?.let { view ->
+        if (view.player === player) view.player = null
+      }
+      currentPlayerView = null
       player.release() // Release player
 
       // Clean Listeners
@@ -413,7 +655,7 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
               bufferDuration = playableDurationFromNow
             )
           )
-          progressHandler.postDelayed(this, PROGRESS_UPDATE_INTERVAL_MS)
+          progressHandler.postDelayed(this, progressUpdateIntervalMs)
         }
       }
     }
@@ -441,12 +683,44 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
         )
       )
     }
+
+    /**
+     * The renderer switching input format is the only reliable signal that the *rendition on
+     * screen* changed - onTracksChanged does not fire when adaptive selection moves within a group.
+     */
+    override fun onVideoInputFormatChanged(
+      eventTime: AnalyticsListener.EventTime,
+      format: Format,
+      decoderReuseEvaluation: DecoderReuseEvaluation?
+    ) {
+      emitVideoTrackChange()
+    }
   }
 
   private val playerListener = object : Player.Listener {
+    override fun onRenderedFirstFrame() {
+      // Called for the first frame after the source, the surface or the renderer changes, so
+      // also after a seek or when the view moves to fullscreen; only the first one counts.
+      firstFrameRenderedForSource = true
+      reportReadyToDisplayIfDue()
+    }
+
+    override fun onTimelineChanged(timeline: Timeline, reason: Int) {
+      // A media source was set (first source or replaceSourceAsync()): a new load begins.
+      if (reason == Player.TIMELINE_CHANGE_REASON_PLAYLIST_CHANGED) {
+        loadReportedForSource = false
+        readyToDisplayReportedForSource = false
+        firstFrameRenderedForSource = false
+      }
+    }
+
     override fun onPlaybackStateChanged(playbackState: Int) {
       val isPlayingUpdate = player.isPlaying
       val isBufferingUpdate = playbackState == Player.STATE_BUFFERING
+
+      // The focus follows the source too: it is taken when a playing player starts loading and
+      // given up when playback ends or the player goes idle.
+      VideoManager.audioFocusManager.requestAudioFocusUpdate()
 
       eventEmitter.onPlaybackStateChange(
         onPlaybackStateChangeData(
@@ -457,8 +731,15 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
 
       when (playbackState) {
         Player.STATE_IDLE -> {
-          status = VideoPlayerStatus.IDLE
+          // ExoPlayer goes idle right after a failure: keep `error` until a source loads again.
+          if (player.playerError == null) {
+            status = VideoPlayerStatus.IDLE
+          }
           eventEmitter.onBuffer(false)
+          // Stopped or failed: the next prepare() loads the source again.
+          loadReportedForSource = false
+          readyToDisplayReportedForSource = false
+          firstFrameRenderedForSource = false
         }
         Player.STATE_BUFFERING -> {
           status = VideoPlayerStatus.LOADING
@@ -482,24 +763,29 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
           val height = selectedVideoTrackFormat?.height ?: generalVideoFormat?.height ?: 0
           val rotationDegrees = selectedVideoTrackFormat?.rotationDegrees ?: generalVideoFormat?.rotationDegrees
 
-          eventEmitter.onLoad(
-            onLoadData(
-              currentTime = player.currentPosition / 1000.0,
-              duration = if (player.duration == C.TIME_UNSET) Double.NaN else player.duration / 1000.0,
-              width = width.toDouble(),
-              height = height.toDouble(),
-              orientation = VideoOrientationUtils.fromWHR(width, height, rotationDegrees)
+          if (!loadReportedForSource) {
+            loadReportedForSource = true
+            eventEmitter.onLoad(
+              onLoadData(
+                currentTime = player.currentPosition / 1000.0,
+                duration = if (player.duration == C.TIME_UNSET) Double.NaN else player.duration / 1000.0,
+                width = width.toDouble(),
+                height = height.toDouble(),
+                orientation = VideoOrientationUtils.fromWHR(width, height, rotationDegrees)
+              )
             )
-          )
+          }
           // If player becomes ready and is set to play, start progress updates
           if (player.playWhenReady) {
             startProgressUpdates()
           }
 
-          eventEmitter.onReadyToDisplay()
+          // After onLoad: the first frame may already be on screen, or comes later.
+          reportReadyToDisplayIfDue()
         }
         Player.STATE_ENDED -> {
-          status = VideoPlayerStatus.IDLE // Or a specific 'COMPLETED' status if you add one
+          // The source is still loaded at the end: it can be seeked and played again.
+          status = VideoPlayerStatus.READYTOPLAY
           eventEmitter.onEnd()
           eventEmitter.onBuffer(false)
           stopProgressUpdates()
@@ -537,10 +823,19 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
 
       // playWhenReady can change without isPlaying (pause while buffering), so refresh here too.
       VideoManager.refreshPictureInPictureParams()
+      // Request audio focus when the player is asked to play and release it on pause, so another
+      // app's playback pauses or ducks this player. Buffering keeps the focus.
+      VideoManager.audioFocusManager.requestAudioFocusUpdate()
     }
 
     override fun onPlayerError(error: PlaybackException) {
+      // Emit onError only on the transition into ERROR, so one failure is reported once.
+      // Load promises reject instead and never set the error status here.
+      val wasError = status == VideoPlayerStatus.ERROR
       status = VideoPlayerStatus.ERROR
+      if (!wasError) {
+        eventEmitter.onError(PlayerError.PlaybackFailed(error.errorCodeName, error.message).message!!)
+      }
       stopProgressUpdates()
     }
 
@@ -613,8 +908,19 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
       }
     }
 
+    // A selection applied here, made in the native controls or reset by a new source: reported
+    // once applied.
     override fun onTracksChanged(tracks: Tracks) {
       super.onTracksChanged(tracks)
+      val track = TextTrackUtils.getSelectedTrack(player, source)
+      if (track?.id != emittedTextTrackId) {
+        emittedTextTrackId = track?.id
+        eventEmitter.onTrackChange(track)
+      }
+      reapplyRequestedVideoTrack()
+      emitVideoTrackChange()
+      reapplyRequestedAudioTrack()
+      reportAudioTracksChanged()
     }
   }
 
@@ -628,11 +934,219 @@ class HybridVideoPlayer() : HybridVideoPlayerSpec(), AutoCloseable {
     selectedExternalTrackIndex = TextTrackUtils.selectTextTrack(
       player = player,
       textTrack = textTrack?.asSecondOrNull(),
-      source = source,
-      onTrackChange = { track -> eventEmitter.onTrackChange(track) }
+      source = source
     )
   }
 
   override val selectedTrack: TextTrack?
     get() = TextTrackUtils.getSelectedTrack(player, source)
+
+  // MARK: - Video Track (quality) Management
+
+  override fun getAvailableVideoTracks(): Array<VideoTrack> =
+    VideoTrackUtils.getAvailableVideoTracks(player)
+
+  override fun selectVideoTrack(trackId: String?) {
+    requestedVideoTrack = if (trackId == null) {
+      VideoTrackUtils.selectVideoTrack(player, null)
+      null
+    } else {
+      // Remember the request even when it doesn't resolve yet: a pick made before the tracks are
+      // known is applied by onTracksChanged as soon as they are.
+      VideoTrackUtils.selectVideoTrack(player, trackId)
+        ?: VideoTrackUtils.getAvailableVideoTracks(player).firstOrNull { it.id == trackId }
+        ?: VideoTrack(
+          id = trackId,
+          label = trackId,
+          language = null,
+          selected = false,
+          width = null,
+          height = null,
+          bitrate = null,
+        )
+    }
+    emitVideoTrackChange(force = true)
+  }
+
+  override val selectedVideoTrackId: String?
+    get() = requestedVideoTrack?.id
+
+  /**
+   * Re-asserts the user's quality pick against the current track set.
+   *
+   * ExoPlayer silently drops a [androidx.media3.common.TrackSelectionOverride] whose media track
+   * group is gone, which is exactly what a track change means (new source, or content re-attaching
+   * after an ad break) - without this the player would quietly fall back to adaptive selection.
+   */
+  private fun reapplyRequestedVideoTrack() {
+    val desired = requestedVideoTrack ?: return
+    val available = VideoTrackUtils.getAvailableVideoTracks(player)
+    val match = VideoTrackUtils.findEquivalent(available, desired) ?: return
+    requestedVideoTrack = match
+    // Cheap when it's already in force: ExoPlayer no-ops on unchanged track selection parameters.
+    VideoTrackUtils.selectVideoTrack(player, match.id)
+  }
+
+  /**
+   * Emits onVideoTrackChange. Unless [force]d (a direct selectVideoTrack call, which always wants
+   * an ack), it stays quiet while the available set, the active track and the pick are all
+   * unchanged - onTracksChanged fires for unrelated reasons too.
+   */
+  private fun emitVideoTrackChange(force: Boolean = false) {
+    val available = VideoTrackUtils.getAvailableVideoTracks(player)
+    val activeId = available.firstOrNull { it.selected }?.id
+    val signature = "${available.joinToString("|") { it.id }}#$activeId#${requestedVideoTrack?.id}"
+    if (!force && signature == lastVideoTrackChangeSignature) return
+    lastVideoTrackChangeSignature = signature
+    eventEmitter.onVideoTrackChange(
+      VideoTrackChangeData(
+        availableTracks = available,
+        selectedTrackId = requestedVideoTrack?.id,
+        activeTrackId = activeId,
+      )
+    )
+  }
+
+  // MARK: - Audio Track Management
+
+  override fun getAvailableAudioTracks(): Array<AudioTrack> =
+    AudioTrackUtils.getAvailableAudioTracks(player)
+
+  override fun selectAudioTrack(trackId: String?) {
+    val playingId = AudioTrackUtils.getSelectedAudioTrack(player)?.id
+    val hadPick = requestedAudioTrack != null
+    progressHandler.removeCallbacks(audioSwitchAckRunnable)
+    val applied = AudioTrackUtils.selectAudioTrack(player, trackId)
+    requestedAudioTrack = if (trackId == null) {
+      null
+    } else {
+      // Remember the request even when it doesn't resolve yet: a pick made before the tracks are
+      // known is applied by onTracksChanged as soon as they are.
+      applied
+        ?: AudioTrackUtils.getAvailableAudioTracks(player).firstOrNull { it.id == trackId }
+        ?: AudioTrack(
+          id = trackId,
+          label = trackId,
+          language = null,
+          selected = false,
+          channels = null,
+        )
+    }
+
+    // Where this call moves playback: the picked track, or ExoPlayer's own choice when the pick is
+    // cleared. Null when that is not known (the id doesn't resolve yet, no default seen so far).
+    val targetId = if (trackId == null) {
+      defaultAudioTrackId?.takeIf { id ->
+        AudioTrackUtils.getAvailableAudioTracks(player).any { it.id == id }
+      }
+    } else {
+      applied?.id
+    }
+
+    // Clearing a pick whose replacement isn't known (the default was never seen for this source,
+    // e.g. the pick followed a source change): it may or may not move playback.
+    val outcomeUnknown = trackId == null && targetId == null && hadPick && playingId != null
+
+    if (outcomeUnknown || (playingId != null && targetId != null && targetId != playingId)) {
+      // A switch is on its way. Reporting now would describe the outgoing track (its
+      // `selected` flag is still set), and onTracksChanged would then send a second event with
+      // the new one. Let that callback send the only event.
+      audioSwitchPending = true
+      audioSwitchFromId = playingId
+      // If it turns out nothing changes, no callback follows: acknowledge after a short delay.
+      if (outcomeUnknown) {
+        progressHandler.postDelayed(audioSwitchAckRunnable, AUDIO_SWITCH_ACK_TIMEOUT_MS)
+      }
+    } else {
+      // Nothing will change (the same track again, or a pick that can't be applied yet), so no
+      // callback follows: acknowledge the call here.
+      audioSwitchPending = false
+      audioSwitchFromId = null
+      emitAudioTrackChange(force = true)
+    }
+  }
+
+  /**
+   * The audio part of onTracksChanged: sends onAudioTrackChange when the tracks or the selection
+   * changed, and finishes a switch started by [selectAudioTrack].
+   */
+  private fun reportAudioTracksChanged() {
+    val playingId = AudioTrackUtils.getSelectedAudioTrack(player)?.id
+    if (audioSwitchPending) {
+      // onTracksChanged fires for unrelated reasons too: wait for the one that carries the switch.
+      if (playingId == audioSwitchFromId) return
+      audioSwitchPending = false
+      audioSwitchFromId = null
+      progressHandler.removeCallbacks(audioSwitchAckRunnable)
+      emitAudioTrackChange(force = true)
+    } else {
+      emitAudioTrackChange()
+    }
+    if (requestedAudioTrack == null && playingId != null) {
+      defaultAudioTrackId = playingId
+    }
+  }
+
+  /**
+   * The track the user picked, or - while they haven't picked one - the one ExoPlayer chose.
+   *
+   * There is no separate "requested" vs "active" id in the event payload, because audio
+   * selection is exact: whatever is selected *is* what's playing. So this reports the real
+   * selection rather than only an explicit request, and is never null while audio exists.
+   */
+  override val selectedAudioTrackId: String?
+    get() = requestedAudioTrack?.id ?: AudioTrackUtils.getSelectedAudioTrack(player)?.id
+
+  /**
+   * Re-asserts the user's audio pick against the current track set.
+   *
+   * ExoPlayer silently drops a [androidx.media3.common.TrackSelectionOverride] whose media track
+   * group is gone, which is exactly what a track change means (e.g. a new source). Without this
+   * hook an audio pick would quietly decay back to the default language on the next source.
+   *
+   * Reloading the *same* content doesn't need this: Media3's TrackGroup equality is id + formats,
+   * so the old override still matches the new groups. (Verified: that pick survives with this hook
+   * disabled.) The hook matters when the groups really differ, e.g. the next episode with the same
+   * language set.
+   */
+  private fun reapplyRequestedAudioTrack() {
+    val desired = requestedAudioTrack ?: return
+    val available = AudioTrackUtils.getAvailableAudioTracks(player)
+    // No tracks yet (mid source transition, or a pick made before load): keep the pick for later.
+    if (available.isEmpty()) return
+    val match = AudioTrackUtils.findEquivalent(available, desired)
+    if (match == null) {
+      // The new content has nothing equivalent. Drop the pick instead of letting
+      // selectedAudioTrackId keep reporting an id that doesn't exist in the current track list.
+      // Its stale override targets a group that's gone, so ExoPlayer ignores it anyway.
+      requestedAudioTrack = null
+      AudioTrackUtils.selectAudioTrack(player, null)
+      return
+    }
+    requestedAudioTrack = match
+    // Cheap when it's already in force: ExoPlayer no-ops on unchanged track selection parameters.
+    AudioTrackUtils.selectAudioTrack(player, match.id)
+  }
+
+  /**
+   * Emits onAudioTrackChange. Unless [force]d (the answer to a selectAudioTrack call, which is
+   * always sent), it stays quiet while the available set and the selection are both unchanged -
+   * onTracksChanged fires for unrelated reasons too.
+   */
+  private fun emitAudioTrackChange(force: Boolean = false) {
+    val available = AudioTrackUtils.getAvailableAudioTracks(player)
+    val actualId = available.firstOrNull { it.selected }?.id
+    val signature =
+      "${available.joinToString("|") { it.id }}#$actualId#${requestedAudioTrack?.id}"
+    if (!force && signature == lastAudioTrackChangeSignature) return
+    lastAudioTrackChangeSignature = signature
+    eventEmitter.onAudioTrackChange(
+      AudioTrackChangeData(
+        availableTracks = available,
+        // Deliberately the same expression as selectedAudioTrackId, so the property and the event
+        // can never disagree.
+        selectedTrackId = requestedAudioTrack?.id ?: actualId,
+      )
+    )
+  }
 }

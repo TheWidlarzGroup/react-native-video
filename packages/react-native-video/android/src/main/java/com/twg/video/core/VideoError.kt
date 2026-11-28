@@ -50,6 +50,11 @@ sealed class PlayerError(code: String, message: String) : VideoError(code, messa
     "player/cancelled",
     "Operation was cancelled"
   )
+
+  class PlaybackFailed(errorCodeName: String, message: String?) : PlayerError(
+    "player/playback-failed",
+    if (message != null) "$errorCodeName: $message" else errorCodeName
+  )
 }
 
 // Source related errors

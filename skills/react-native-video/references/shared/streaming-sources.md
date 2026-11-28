@@ -22,7 +22,7 @@ useVideoPlayer({ uri, headers: { Authorization: 'Bearer <t>' } });
 
 ## Buffer tuning (`bufferConfig`)
 
-Android field names are shared across versions (`minBufferMs`, `maxBufferMs`, `bufferForPlaybackMs`, `bufferForPlaybackAfterRebufferMs`, `backBufferDurationMs`) but **defaults differ**: v7 → 5000 / 10000 / 1000 / 2000; v6 → any unset field falls back to **Media3 `DefaultLoadControl`** (50000 / 50000 / 1000 / 2000, backBuffer 0). The iOS buffer-config fields (`preferredForwardBufferDurationMs`, `preferredPeakBitRate`, `preferredMaximumResolution`) and the `livePlayback` block are **v7-only**; in v6 the iOS forward buffer is the top-level `preferredForwardBufferDuration` prop, and `maxBitRate` caps bandwidth.
+Android field names are shared across versions (`minBufferMs`, `maxBufferMs`, `bufferForPlaybackMs`, `bufferForPlaybackAfterRebufferMs`, `backBufferDurationMs`) but **defaults differ**: v7 → 5000 / 10000 / 1000 / 2000; v6 → any unset field falls back to **Media3 `DefaultLoadControl`** (50000 / 50000 / 1000 / 2000, backBuffer 0). `preferredPeakBitRate` and `preferredMaximumResolution` apply on **both Android and iOS** in v7 — iOS sets them on the `AVPlayerItem`, Android maps them to `TrackSelectionParameters` (`maxVideoBitrate` / `maxVideoSize`). `preferredForwardBufferDurationMs` remains iOS-only. Those fields and the `livePlayback` block are **v7-only**; in v6 the iOS forward buffer is the top-level `preferredForwardBufferDuration` prop, and `maxBitRate` caps bandwidth.
 
 For a feed, lower the Android min/max buffer so offscreen players don't over-buffer and eat memory.
 

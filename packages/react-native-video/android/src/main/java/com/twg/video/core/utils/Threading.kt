@@ -2,29 +2,19 @@ package com.twg.video.core.utils
 
 import android.os.Handler
 import android.os.Looper
-import com.margelo.nitro.NitroModules
-import com.twg.video.core.LibraryError
 import java.util.concurrent.Callable
 import java.util.concurrent.FutureTask
 import kotlin.reflect.KProperty
 
 object Threading {
+  private val mainHandler = Handler(Looper.getMainLooper())
+
   @JvmStatic
   fun runOnMainThread(action: () -> Unit) {
-    // We are already on the main thread, run and return
     if (Looper.myLooper() == Looper.getMainLooper()) {
       action()
-      return
-    }
-
-    // If application context is null, throw an error
-    if (NitroModules.applicationContext == null) {
-      throw LibraryError.ApplicationContextNotFound
-    }
-
-    // Post the action to the main thread
-    Handler(NitroModules.applicationContext!!.mainLooper).post {
-      action()
+    } else {
+      mainHandler.post(action)
     }
   }
 
@@ -36,7 +26,7 @@ object Threading {
     } else {
       // Post the action to the main thread and wait for the result
       val futureTask = FutureTask(action)
-      Handler(Looper.getMainLooper()).post(futureTask)
+      mainHandler.post(futureTask)
       futureTask.get()
     }
   }
