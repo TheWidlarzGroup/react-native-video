@@ -132,15 +132,21 @@ jobs:
         working-directory: test-app/android
         run: |
           set -euo pipefail
-          for attempt in 1 2; do
+          # Maven Central answers a burst of requests with 429 and keeps doing so for
+          # longer than half a minute: on bf43ee15 two attempts 30 s apart both failed on
+          # the same gson POM, before Gradle compiled anything. Three attempts, waiting
+          # 60 s and then 180 s, only when the log shows a transport status.
+          WAITS=(60 180)
+          for attempt in 1 2 3; do
             if ./gradlew assembleDebug --build-cache --no-daemon -PreactNativeArchitectures=x86_64 2>&1 | tee "gradle-attempt-${attempt}.log"; then
               exit 0
             fi
-            if [ "$attempt" -eq 2 ] || ! grep -qE 'Received status code (403|429|5[0-9]{2}) from server' "gradle-attempt-${attempt}.log"; then
+            if [ "$attempt" -eq 3 ] || ! grep -qE 'Received status code (403|429|5[0-9]{2}) from server' "gradle-attempt-${attempt}.log"; then
               exit 1
             fi
-            echo "dependency download failed (attempt ${attempt}/2), retrying in 30 s" >&2
-            sleep 30
+            WAIT=${WAITS[$((attempt - 1))]}
+            echo "dependency download failed (attempt ${attempt}/3), retrying in ${WAIT} s" >&2
+            sleep "$WAIT"
           done
           exit 1
 
