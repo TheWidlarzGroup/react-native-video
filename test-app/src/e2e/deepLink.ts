@@ -83,17 +83,23 @@ export function rebaseFixtureUri(
 }
 
 /**
- * Points every source in the list at another fixture server, in place. A source listed
+ * Points every source in the list at another fixture server, in place, together with its
+ * external subtitles (their files are on the same server). A source or subtitle listed
  * twice is moved once, and a `uri` that is not a string (a bundled asset) is left alone.
  */
 export function rebaseFixtureSources(
-  sources: { uri: unknown }[],
+  sources: { uri: unknown; externalSubtitles?: { uri: unknown }[] }[],
   fromBase: string,
   toBase: string
 ): void {
-  for (const source of new Set(sources)) {
-    if (typeof source.uri === 'string') {
-      source.uri = rebaseFixtureUri(source.uri, fromBase, toBase);
+  const all = new Set<{ uri: unknown }>();
+  for (const source of sources) {
+    all.add(source);
+    source.externalSubtitles?.forEach((subtitle) => all.add(subtitle));
+  }
+  for (const entry of all) {
+    if (typeof entry.uri === 'string') {
+      entry.uri = rebaseFixtureUri(entry.uri, fromBase, toBase);
     }
   }
 }

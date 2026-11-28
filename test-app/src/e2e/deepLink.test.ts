@@ -95,6 +95,31 @@ test('rebases only uris of the fixture server', () => {
   );
 });
 
+test('moves the external subtitles of a source along with it', () => {
+  const from = 'http://localhost:8090';
+  const to = 'http://localhost:8690';
+  const en = { uri: `${from}/subs-en.vtt`, label: 'English', language: 'en' };
+  const es = { uri: `${from}/subs-es.vtt`, label: 'Spanish', language: 'es' };
+  // A scenario entry is a copy of the plain source with the subtitles added, so the
+  // plain source and the copy are both in the list.
+  const plain = { uri: `${from}/short.mp4` };
+  const withSubs = { ...plain, externalSubtitles: [en, es] };
+  const elsewhere = { uri: 'https://example.com/subs.vtt' };
+  const other = {
+    uri: `${from}/hls/index.m3u8`,
+    externalSubtitles: [es, elsewhere],
+  };
+
+  rebaseFixtureSources([plain, withSubs, other], from, to);
+
+  expect(withSubs.uri).toBe(`${to}/short.mp4`);
+  expect(en.uri).toBe(`${to}/subs-en.vtt`);
+  // Listed under two sources.
+  expect(es.uri).toBe(`${to}/subs-es.vtt`);
+  expect(elsewhere.uri).toBe('https://example.com/subs.vtt');
+  expect(other.uri).toBe(`${to}/hls/index.m3u8`);
+});
+
 test('moves a list of sources to another fixture server in place', () => {
   const from = 'http://localhost:8090';
   const to = 'http://localhost:8690';
