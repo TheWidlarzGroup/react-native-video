@@ -68,9 +68,32 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
   }
 
   func onProgressUpdate(currentTime: Double, bufferDuration: Double) {
+    // Safety net for #5155: the status must not depend on one KVO callback. A player that
+    // AVFoundation reports as playing a ready item is ready to play, so catch up here.
+    if reconcileStatusWhilePlaying() {
+      updateAndEmitPlaybackState()
+    }
+
     _eventEmitter?.onProgress(
       .init(currentTime: currentTime, bufferDuration: bufferDuration)
     )
+  }
+
+  /// Returns true when the status or the buffering flag had to be corrected.
+  private func reconcileStatusWhilePlaying() -> Bool {
+    guard !hasFailed,
+      playerItem?.status == .readyToPlay,
+      player.timeControlStatus == .playing,
+      status != .readytoplay || isCurrentlyBuffering
+    else { return false }
+
+    #if DEBUG
+      // Means the timeControlStatus observer missed a change (#5155); shows up in e2e device.log
+      NSLog("[ReactNativeVideo] status caught up to readyToPlay from the progress tick")
+    #endif
+    isCurrentlyBuffering = false
+    status = .readytoplay
+    return true
   }
 
   func onPlaybackLikelyToKeepUp() {
@@ -114,7 +137,10 @@ extension HybridVideoPlayer: VideoPlayerObserverDelegate {
 
     case .paused:
       isCurrentlyBuffering = false
-      self.status = .readytoplay
+      // AVPlayer also reports paused when an item is assigned, long before it can play
+      if playerItem?.status == .readyToPlay {
+        self.status = .readytoplay
+      }
       break
 
     @unknown default:
