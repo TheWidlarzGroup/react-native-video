@@ -70,7 +70,7 @@ void ReactVideoViewManager::UpdateProperties(
           } else {
             auto const &srcMap = propertyValue.AsObject();
             auto uri = srcMap.find("uri");
-            if (uri == srcMap.end() || uri->second.IsNull()) {
+            if (uri == srcMap.end() || uri->second.IsNull() || uri->second.AsString().empty()) {
               reactVideoView.Clear_Source();
             } else {
               reactVideoView.Set_UriString(to_hstring(uri->second.AsString()));
