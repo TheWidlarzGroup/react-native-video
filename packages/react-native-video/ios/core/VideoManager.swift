@@ -449,6 +449,10 @@ class VideoManager {
     let options = (userInfo[AVAudioSessionInterruptionOptionKey] as? UInt).map {
       AVAudioSession.InterruptionOptions(rawValue: $0)
     }
+    // An interruption that only tells that the app was suspended in the background
+    // (AVAudioSession.InterruptionReason.appWasSuspended, raw value 1, deprecated in iOS 16)
+    // is no loss of audio now, and no .ended follows it, so it sends no onAudioFocusChange.
+    let wasSuspended = (userInfo[AVAudioSessionInterruptionReasonKey] as? UInt) == 1
 
     runOnMainThread { [weak self] in
       guard let self else { return }
@@ -462,10 +466,15 @@ class VideoManager {
         for player in self.players.allObjects {
           player.wasPlayingInBackground = false
         }
+        // The Android counterpart is a loss of audio focus: another app or a call took the audio.
+        if !wasSuspended {
+          self.emitAudioFocusChange(false)
+        }
 
       case .ended:
         // Interruption ended, check if we should resume audio session
         self.isInterrupted = false
+        self.emitAudioFocusChange(true)
         if options?.contains(.shouldResume) == true {
           for player in self.players.allObjects {
             player.wasInterruptedWhilePlaying = false
@@ -485,6 +494,15 @@ class VideoManager {
     }
   }
   
+  /// onAudioFocusChange for every player, as on Android: false when an interruption begins
+  /// (a call, another app's audio that does not mix), true when it ends. The audio session is
+  /// shared by all players, so all of them hear about it.
+  private func emitAudioFocusChange(_ hasAudioFocus: Bool) {
+    for player in players.allObjects {
+      player._eventEmitter?.onAudioFocusChange(hasAudioFocus)
+    }
+  }
+
   @objc
   private func handleAudioRouteChange(notification: Notification) {
     guard let userInfo = notification.userInfo,
