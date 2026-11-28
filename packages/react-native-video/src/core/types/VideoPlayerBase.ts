@@ -1,5 +1,7 @@
+import type { AudioOutput } from './AudioOutput';
 import type { ListenerSubscription } from './EventEmitter';
 import type { AllPlayerEvents } from './Events';
+import type { AudioTrack } from './AudioTrack';
 import type { IgnoreSilentSwitchMode } from './IgnoreSilentSwitchMode';
 import type { MixAudioMode } from './MixAudioMode';
 import type { TextTrack } from './TextTrack';
@@ -9,7 +11,13 @@ import type { VideoPlayerStatus } from './VideoPlayerStatus';
 
 import type { VideoConfig, VideoSource } from './VideoConfig';
 
-export interface VideoPlayerBase {
+/**
+ * Every member of {@link VideoPlayerBase} that the native (Nitro) spec can express.
+ * The Nitro spec extends this interface instead of {@link VideoPlayerBase}: nitrogen cannot
+ * generate a method with a type parameter (`addEventListener<Event>`), and one such member
+ * makes it drop the whole `VideoPlayer` HybridObject.
+ */
+export interface VideoPlayerSpecBase {
   /**
    * The source of the video.
    * Source is immutable. To change the source, you need to call {@link replaceSourceAsync} method.
@@ -27,8 +35,8 @@ export interface VideoPlayerBase {
   readonly status: VideoPlayerStatus;
 
   /**
-   * The current time of the video in seconds (1.0 = 1 sec).
-   * Returns NaN if the current time is not available.
+   * The duration of the video in seconds (1.0 = 1 sec).
+   * Returns NaN if the duration is not available.
    */
   readonly duration: number;
 
@@ -39,8 +47,8 @@ export interface VideoPlayerBase {
   volume: number;
 
   /**
-   * The duration of the video in seconds (1.0 = 1 sec).
-   * Returns NaN if the duration is not available.
+   * The current time of the video in seconds (1.0 = 1 sec).
+   * Returns NaN if the current time is not available.
    */
   currentTime: number;
 
@@ -104,6 +112,22 @@ export interface VideoPlayerBase {
   playWhenInactive: boolean;
 
   /**
+   * The interval, in milliseconds, between two `onProgress` events while the
+   * video is playing.
+   *
+   * Values that are not a finite number greater than 0 are ignored.
+   *
+   * Reading it returns the interval in effect, so before anything is set it
+   * reports the platform default.
+   *
+   * @note on web the browser decides how often `timeupdate` fires (about 4
+   * times per second), so an interval below ~250 ms cannot be reached there.
+   *
+   * @default 250 on Android and web, 500 on iOS
+   */
+  progressUpdateInterval: number;
+
+  /**
    * Disables the internal audio session management for this player.
    * When disabled, react-native-video will not configure or activate the AVAudioSession,
    * allowing other libraries (like audio recording libraries) to manage it.
@@ -112,6 +136,32 @@ export interface VideoPlayerBase {
    * @platform iOS
    */
   disableAudioSessionManagement: boolean;
+
+  /**
+   * Whether the player may switch to external playback, such as AirPlay video.
+   *
+   * - `true` - the video can be sent to an AirPlay device (default).
+   * - `false` - the video stays on the device. AirPlay can still carry the audio.
+   *
+   * @default true
+   * @platform iOS
+   */
+  allowsExternalPlayback: boolean;
+
+  /**
+   * Where the audio plays on a phone.
+   *
+   * - `speaker` - the loudspeaker, or the connected headphones (default).
+   * - `earpiece` - the receiver at the top of the phone, as in a phone call.
+   *
+   * @note On iOS `earpiece` is ignored while any player uses Picture in Picture,
+   * {@link playInBackground} or {@link showNotificationControls}, because those need the
+   * playback audio session.
+   *
+   * @default 'speaker'
+   * @platform iOS, Android
+   */
+  audioOutput: AudioOutput;
 
   /**
    * Whether the player is playing.
@@ -186,7 +236,7 @@ export interface VideoPlayerBase {
    * Get the currently selected text track.
    * @returns The currently selected text track, or undefined if none is selected
    */
-  readonly selectedTrack?: TextTrack;
+  readonly selectedTrack?: TextTrack | undefined;
 
   /**
    * All video renditions available for the current source, best first.
@@ -217,7 +267,38 @@ export interface VideoPlayerBase {
    * The id passed to the last {@link selectVideoTrack} call, or undefined
    * when automatic (adaptive) selection is active.
    */
-  readonly selectedVideoTrackId?: string;
+  readonly selectedVideoTrackId?: string | undefined;
+
+  /**
+   * All alternate audio tracks available for the current source (e.g.
+   * different languages or commentary tracks). Empty until the source's
+   * manifest has loaded - subscribe to `onAudioTrackChange` to know when
+   * this becomes populated.
+   */
+  getAvailableAudioTracks(): AudioTrack[];
+
+  /**
+   * Select an audio track, or pass `undefined` for the default track.
+   *
+   * @param trackId - id from {@link getAvailableAudioTracks}, or `undefined` for default.
+   * @note Unlike {@link selectVideoTrack}, this is a real, exact selection on
+   *       both platforms - not an approximation - since alternate audio tracks
+   *       have a genuine native selection API (AVFoundation media selection
+   *       groups on iOS, Media3 track overrides on Android), the same
+   *       mechanism {@link selectTextTrack} already uses.
+   * @note Safe to call before the source is loaded; the selection is latched
+   *       and applied once tracks are known.
+   */
+  selectAudioTrack(trackId?: string): void;
+
+  /**
+   * The id of the audio track that is selected right now: the one passed to
+   * the last {@link selectAudioTrack} call or, when none was picked (or after
+   * `selectAudioTrack()` with no id), the track the player chose by default.
+   * `undefined` only while no audio track is known yet, e.g. before the
+   * source has loaded.
+   */
+  readonly selectedAudioTrackId?: string;
 
   /**
    * Whether to show notification controls (lock screen / control center).
@@ -228,7 +309,9 @@ export interface VideoPlayerBase {
    * Releases the player's resources. After calling this, the player is no longer usable.
    */
   release(): void;
+}
 
+export interface VideoPlayerBase extends VideoPlayerSpecBase {
   addEventListener<Event extends keyof AllPlayerEvents>(
     event: Event,
     callback: AllPlayerEvents[Event]

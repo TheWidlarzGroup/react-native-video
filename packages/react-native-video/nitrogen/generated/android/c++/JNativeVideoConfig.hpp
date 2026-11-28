@@ -75,8 +75,16 @@ namespace margelo::nitro::video {
       jni::local_ref<JBufferConfig> bufferConfig = this->getFieldValue(fieldBufferConfig);
       static const auto fieldMetadata = clazz->getField<JCustomVideoMetadata>("metadata");
       jni::local_ref<JCustomVideoMetadata> metadata = this->getFieldValue(fieldMetadata);
+      static const auto fieldStartPosition = clazz->getField<jni::JDouble>("startPosition");
+      jni::local_ref<jni::JDouble> startPosition = this->getFieldValue(fieldStartPosition);
+      static const auto fieldCropStart = clazz->getField<jni::JDouble>("cropStart");
+      jni::local_ref<jni::JDouble> cropStart = this->getFieldValue(fieldCropStart);
+      static const auto fieldCropEnd = clazz->getField<jni::JDouble>("cropEnd");
+      jni::local_ref<jni::JDouble> cropEnd = this->getFieldValue(fieldCropEnd);
       static const auto fieldInitializeOnCreation = clazz->getField<jni::JBoolean>("initializeOnCreation");
       jni::local_ref<jni::JBoolean> initializeOnCreation = this->getFieldValue(fieldInitializeOnCreation);
+      static const auto fieldShouldCache = clazz->getField<jni::JBoolean>("shouldCache");
+      jni::local_ref<jni::JBoolean> shouldCache = this->getFieldValue(fieldShouldCache);
       static const auto fieldMinLoadRetryCount = clazz->getField<jni::JDouble>("minLoadRetryCount");
       jni::local_ref<jni::JDouble> minLoadRetryCount = this->getFieldValue(fieldMinLoadRetryCount);
       static const auto fieldDisableDisconnectError = clazz->getField<jni::JBoolean>("disableDisconnectError");
@@ -109,7 +117,11 @@ namespace margelo::nitro::video {
         }()) : std::nullopt,
         bufferConfig != nullptr ? std::make_optional(bufferConfig->toCpp()) : std::nullopt,
         metadata != nullptr ? std::make_optional(metadata->toCpp()) : std::nullopt,
+        startPosition != nullptr ? std::make_optional(startPosition->value()) : std::nullopt,
+        cropStart != nullptr ? std::make_optional(cropStart->value()) : std::nullopt,
+        cropEnd != nullptr ? std::make_optional(cropEnd->value()) : std::nullopt,
         initializeOnCreation != nullptr ? std::make_optional(static_cast<bool>(initializeOnCreation->value())) : std::nullopt,
+        shouldCache != nullptr ? std::make_optional(static_cast<bool>(shouldCache->value())) : std::nullopt,
         minLoadRetryCount != nullptr ? std::make_optional(minLoadRetryCount->value()) : std::nullopt,
         disableDisconnectError != nullptr ? std::make_optional(static_cast<bool>(disableDisconnectError->value())) : std::nullopt,
         type != nullptr ? std::make_optional(type->toStdString()) : std::nullopt,
@@ -123,7 +135,7 @@ namespace margelo::nitro::video {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeVideoConfig::javaobject> fromCpp(const NativeVideoConfig& value) {
-      using JSignature = JNativeVideoConfig(jni::alias_ref<jni::JString>, jni::alias_ref<jni::JArrayClass<JNativeExternalSubtitle>>, jni::alias_ref<JNativeDrmParams>, jni::alias_ref<JNativeCmcdConfiguration>, jni::alias_ref<jni::JMap<jni::JString, jni::JString>>, jni::alias_ref<JBufferConfig>, jni::alias_ref<JCustomVideoMetadata>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JBoolean>);
+      using JSignature = JNativeVideoConfig(jni::alias_ref<jni::JString>, jni::alias_ref<jni::JArrayClass<JNativeExternalSubtitle>>, jni::alias_ref<JNativeDrmParams>, jni::alias_ref<JNativeCmcdConfiguration>, jni::alias_ref<jni::JMap<jni::JString, jni::JString>>, jni::alias_ref<JBufferConfig>, jni::alias_ref<JCustomVideoMetadata>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JBoolean>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
@@ -150,7 +162,11 @@ namespace margelo::nitro::video {
         }() : nullptr,
         value.bufferConfig.has_value() ? JBufferConfig::fromCpp(value.bufferConfig.value()) : nullptr,
         value.metadata.has_value() ? JCustomVideoMetadata::fromCpp(value.metadata.value()) : nullptr,
+        value.startPosition.has_value() ? jni::JDouble::valueOf(value.startPosition.value()) : nullptr,
+        value.cropStart.has_value() ? jni::JDouble::valueOf(value.cropStart.value()) : nullptr,
+        value.cropEnd.has_value() ? jni::JDouble::valueOf(value.cropEnd.value()) : nullptr,
         value.initializeOnCreation.has_value() ? jni::JBoolean::valueOf(value.initializeOnCreation.value()) : nullptr,
+        value.shouldCache.has_value() ? jni::JBoolean::valueOf(value.shouldCache.value()) : nullptr,
         value.minLoadRetryCount.has_value() ? jni::JDouble::valueOf(value.minLoadRetryCount.value()) : nullptr,
         value.disableDisconnectError.has_value() ? jni::JBoolean::valueOf(value.disableDisconnectError.value()) : nullptr,
         value.type.has_value() ? jni::make_jstring(value.type.value()) : nullptr,

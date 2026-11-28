@@ -1,0 +1,37 @@
+# shouldCache (#5267): a file played once plays again without the network. The mp4-cache
+# source carries a token per app launch; after the clip has ended, btn-cache-replay asks the
+# fixture server to cut that token off (`/__go-offline`, every later request loses its
+# connection) and loads the same source again. Only the disk cache can play it now:
+# evt-replacement-loaded and evt-ended-after-replace prove the second playback. Without the
+# cache it fails with onError.
+#
+# The app is launched with cleared data (launch-app.yaml), so the cache starts empty.
+appId: ${APP_ID}
+tags: [smoke]
+---
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4-cache
+- extendedWaitUntil:
+    visible:
+      id: "evt-onLoad"
+    timeout: 20000            # generous: emulator software decoder cold start
+# The whole file has to be on disk: play it to the end first.
+- runFlow: ../shared/wait-for-end.yaml
+- runFlow:
+    file: ../shared/press.yaml
+    env:
+      BUTTON: btn-cache-replay
+      NTH: 1
+- extendedWaitUntil:
+    visible:
+      id: "evt-replacement-loaded"
+    timeout: 15000
+- extendedWaitUntil:
+    visible:
+      id: "evt-ended-after-replace"
+    timeout: 20000            # the 8 s clip played again, from the disk
+- assertNotVisible:
+    id: "evt-onError"
