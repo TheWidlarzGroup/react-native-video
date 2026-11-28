@@ -1,0 +1,62 @@
+# onAudioFocusChange (Android): a ringing call takes the audio focus from the playing player,
+# which reports onAudioFocusChange(false) and pauses, and ending the call gives the focus
+# back, which reports onAudioFocusChange(true). The call comes from the emulator console
+# through the fixture server (e2e/fixtures/gsm.mjs); a ringing call asks for GAIN_TRANSIENT,
+# also on an emulator started with -noaudio. Before the fix the event never fired: the
+# library's focus listener did not forward it (R52, 28.11).
+#
+# The incoming call shows a heads-up notification that can cover the event log, so the
+# first wait is optional and only shortens the ring; both markers are asserted once the
+# call has ended. iOS has no way to start a call on the simulator: the flow only plays there.
+appId: ${APP_ID}
+tags: [smoke]
+# Ends the call also when the flow fails before its own cancel, so the next flow does not
+# start with a ringing phone. SOFT: the call may be over already.
+onFlowComplete:
+  - runFlow:
+      when:
+        platform: Android
+      commands:
+        - runScript:
+            file: ../shared/gsm-android.js
+            env:
+              ACTION: cancel
+              SOFT: "true"
+---
+- evalScript: "${output.gsmPort = typeof FIXTURE_PORT === 'undefined' ? '8090' : FIXTURE_PORT}"
+- runFlow: ../shared/launch-app.yaml
+- runFlow:
+    file: ../shared/open-scenario.yaml
+    env:
+      SCENARIO: mp4
+- extendedWaitUntil:
+    visible:
+      id: "evt-playing"
+    timeout: 20000            # generous: emulator software decoder cold start
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - runScript:
+          file: ../shared/gsm-android.js
+          env:
+            ACTION: call
+            FIXTURE_PORT: ${output.gsmPort}
+      - extendedWaitUntil:
+          visible:
+            id: "evt-audio-focus-lost"
+          timeout: 8000
+          optional: true
+      - runScript:
+          file: ../shared/gsm-android.js
+          env:
+            ACTION: cancel
+            FIXTURE_PORT: ${output.gsmPort}
+      - extendedWaitUntil:
+          visible:
+            id: "evt-audio-focus-regained"
+          timeout: 10000
+      - assertVisible:
+          id: "evt-audio-focus-lost"
+- assertNotVisible:
+    id: "evt-onError"

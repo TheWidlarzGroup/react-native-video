@@ -523,6 +523,9 @@ function logPlayerEvents(player: VideoPlayer) {
         selectedTrackId,
       })
   );
+  player.addEventListener('onAudioFocusChange', (hasAudioFocus) =>
+    handle({ type: 'onAudioFocusChange', hasAudioFocus })
+  );
   player.addEventListener('onAudioTrackChange', ({ availableTracks }) =>
     handle({ type: 'onAudioTrackChange', tracks: availableTracks })
   );

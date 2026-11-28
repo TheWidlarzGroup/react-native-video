@@ -13,6 +13,8 @@ class VideoManager {
   static let shared = VideoManager()
   
   private let players = NSHashTable<HybridVideoPlayer>.weakObjects()
+  // Players told onAudioFocusChange(false) for the interruption going on (see emitAudioFocusChange).
+  private let playersToldInterrupted = NSHashTable<HybridVideoPlayer>.weakObjects()
   private let videoView = NSHashTable<VideoComponentView>.weakObjects()
   
   private var isAudioSessionActive = false
@@ -449,6 +451,10 @@ class VideoManager {
     let options = (userInfo[AVAudioSessionInterruptionOptionKey] as? UInt).map {
       AVAudioSession.InterruptionOptions(rawValue: $0)
     }
+    // An interruption that only tells that the app was suspended in the background
+    // (AVAudioSession.InterruptionReason.appWasSuspended, raw value 1, deprecated in iOS 16)
+    // is no loss of audio now, and no .ended follows it, so it sends no onAudioFocusChange.
+    let wasSuspended = (userInfo[AVAudioSessionInterruptionReasonKey] as? UInt) == 1
 
     runOnMainThread { [weak self] in
       guard let self else { return }
@@ -462,10 +468,15 @@ class VideoManager {
         for player in self.players.allObjects {
           player.wasPlayingInBackground = false
         }
+        // The Android counterpart is a loss of audio focus: another app or a call took the audio.
+        if !wasSuspended {
+          self.emitAudioFocusChange(false)
+        }
 
       case .ended:
         // Interruption ended, check if we should resume audio session
         self.isInterrupted = false
+        self.emitAudioFocusChange(true)
         if options?.contains(.shouldResume) == true {
           for player in self.players.allObjects {
             player.wasInterruptedWhilePlaying = false
@@ -485,6 +496,24 @@ class VideoManager {
     }
   }
   
+  /// onAudioFocusChange, as on Android: false to every player when an interruption begins (a
+  /// call, another app's audio that does not mix), true when it ends, only to the players that
+  /// heard false. The audio session is shared by all players, so all of them hear about it, also
+  /// those with mixWithOthers: a call interrupts them too.
+  private func emitAudioFocusChange(_ hasAudioFocus: Bool) {
+    if hasAudioFocus {
+      for player in playersToldInterrupted.allObjects where players.contains(player) {
+        player._eventEmitter?.onAudioFocusChange(true)
+      }
+      playersToldInterrupted.removeAllObjects()
+    } else {
+      for player in players.allObjects where !playersToldInterrupted.contains(player) {
+        playersToldInterrupted.add(player)
+        player._eventEmitter?.onAudioFocusChange(false)
+      }
+    }
+  }
+
   @objc
   private func handleAudioRouteChange(notification: Notification) {
     guard let userInfo = notification.userInfo,
